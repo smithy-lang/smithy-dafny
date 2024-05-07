@@ -1,4 +1,4 @@
-use simple_blob::{operation::get_blob::GetBlobInput, *};
+use simple_blob::*;
 
 /*
         method{:test} GetBlob(){
@@ -64,17 +64,15 @@ async fn test_get_blob() {
 
 #[tokio::test]
 async fn test_get_known_value() {
-    // let s = vec![0x0, 0x2, 0x4];
-    // let result = client()
-    //     .get_blob_known_value()
-    //     .value(s.clone())
-    //     .send()
-    //     .await;
-    // let output = result.unwrap();
-    // let value = output.value().unwrap();
-    // assert_eq!(value, &s);
-
-    todo!()
+    let s = vec![0x0, 0x2, 0x4];
+    let result = client()
+        .get_blob_known_value()
+        .value(s.clone())
+        .send()
+        .await;
+    let output = result.unwrap();
+    let value = output.value().unwrap();
+    assert_eq!(value, &s);
 }
 
 pub fn client() -> Client {

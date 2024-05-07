@@ -61,3 +61,5 @@ impl Drop for Handle {
 }
 
 mod get_blob;
+
+mod get_blob_known_value;

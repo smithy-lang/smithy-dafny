@@ -2,3 +2,6 @@
 
 /// Types for the `GetBlob` operation.
 pub mod get_blob;
+
+/// Types for the `GetBlobKnownValue` operation.
+pub mod get_blob_known_value;
