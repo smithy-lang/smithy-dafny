@@ -20,7 +20,9 @@ structure SimpleConstraintsConfig {}
     id: "GetConstraintsSuccess"
     params: {
       OneToTen: 5,
-      GreaterThanOne: 2
+      GreaterThanOne: 2,
+      MyBlob: "0101",
+      MyList: ["1", "2", "3"]
     }
     expect: {
         success: {}

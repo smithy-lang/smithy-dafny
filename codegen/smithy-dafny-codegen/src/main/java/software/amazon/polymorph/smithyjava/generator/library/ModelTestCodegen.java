@@ -1,36 +1,20 @@
 package software.amazon.polymorph.smithyjava.generator.library;
 
-import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.modeled.ModeledNode;
-import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
-import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.smithy.model.node.Node;
-import software.amazon.smithy.model.node.NumberNode;
-import software.amazon.smithy.model.node.ObjectNode;
-import software.amazon.smithy.model.node.StringNode;
-import software.amazon.smithy.model.shapes.IntegerShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.smoketests.traits.SmokeTestCase;
 import software.amazon.smithy.smoketests.traits.SmokeTestsTrait;
 
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static javax.lang.model.element.Modifier.FINAL;
@@ -67,8 +51,6 @@ public class ModelTestCodegen extends Generator {
     }
 
     private MethodSpec smokeTest(final OperationShape operationShape, SmokeTestCase testCase) {
-
-        // TODO: escape all names properly
         final String methodName = testCase.getId();
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder(methodName)
@@ -86,16 +68,17 @@ public class ModelTestCodegen extends Generator {
         //         .SimpleConstraintsConfig(config)
         //         .build();
         method.addStatement("$T config = $T.builder().build()", configType, configType);
-        method.addStatement("$T client = $T.builder().$L(config).build()", clientType, clientType, configShapeId.getName());
+        method.addStatement("$T client = $T.builder().$N(config).build()", clientType, clientType, configShapeId.getName());
 
-        // GetConstraintsInput inputBuilder = GetConstraintsInput.builder();
+        // GetConstraintsInput input = GetConstraintsInput.builder()
         // ...
-        // (multiple calls to populate builder)
+        // (multiple .foo(...) calls to populate builder)
         // ...
-        // GetConstraintsInput input = inputBuilder.build();
-        // TODO: error handling
+        // .build();
         Shape inputShape = subject.model.expectShape(operationShape.getInput().get());
-        ModeledNode.declareModeledValue(subject, method, "input", inputShape, testCase.getParams().get());
+        final TypeName inputType = subject.nativeNameResolver.typeForShape(inputShape.getId());
+        CodeBlock inputValue = ModeledNode.modeledValue(subject, false, inputShape, testCase.getParams().get());
+        method.addStatement("$T input = $L", inputType, inputValue);
 
         // client.GetConstraints(input);
         // TODO: or assertThrows(...)
