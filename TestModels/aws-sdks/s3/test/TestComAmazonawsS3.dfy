@@ -33,8 +33,10 @@ module TestComAmazonawsS3 {
         expect(ret.Success?);
 
         // TODO: Add the 13 other formal parameters...fuckin hell
-        var PutObjectOutput(ObjectEtag) := ret.value;
+        var PutObjectOutput(MyExpiration, MyETag, MyChecksumCRC32, MyChecksumCRC32C, MyChecksumSHA1, 
+            MyChecksumSHA256, MyServerSideEncryption, MyVersionId, MySSECustomerAlgorithm, MySSECustomerKeyMD5, 
+            MySSEKMSKeyId, MySSEKMSEncryptionContext, MyBucketKeyEnabled, MyRequestCharged) := ret.value;
 
-        expect ObjectEtag.Some?;
+        expect MyETag.Some?;
     }
 }
