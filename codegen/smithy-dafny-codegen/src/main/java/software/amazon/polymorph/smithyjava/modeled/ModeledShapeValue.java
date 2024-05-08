@@ -2,11 +2,8 @@ package software.amazon.polymorph.smithyjava.modeled;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
-import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.Generator;
-import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Constants;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -18,24 +15,20 @@ import software.amazon.smithy.model.node.NullNode;
 import software.amazon.smithy.model.node.NumberNode;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
-import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.DocumentShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
 
-public class ModeledNode {
+public class ModeledShapeValue {
 
-    public static CodeBlock modeledValue(JavaLibrary subject, boolean base64BlobStrings, Shape shape, Node value) {
+    public static CodeBlock shapeValue(JavaLibrary subject, boolean base64BlobStrings, Shape shape, Node value) {
         return value.accept(new ValueNodeVisitor(subject, base64BlobStrings, shape));
     }
 
