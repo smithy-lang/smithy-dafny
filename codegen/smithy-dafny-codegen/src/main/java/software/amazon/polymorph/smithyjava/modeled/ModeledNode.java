@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
+import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Constants;
@@ -38,6 +39,12 @@ public class ModeledNode {
         return value.accept(new ValueNodeVisitor(subject, base64BlobStrings, shape));
     }
 
+    // This algorithm is fundamentally a double dispatch,
+    // and could have been a ShapeVisitor instead of a NodeVisitor.
+    // That might have been somewhat cleaner since there are more Shape cases than Node cases,
+    // and the same Node case is used across many shape cases (especially StringNode).
+    // An immutable NodeVisitor is a good sweet spot in terms of performance, however,
+    // since we can use the same visitor across all elements of a List, for example.
     private static class ValueNodeVisitor implements NodeVisitor<CodeBlock> {
         private final JavaLibrary subject;
         private final Shape shape;
@@ -68,15 +75,20 @@ public class ModeledNode {
         @Override
         public CodeBlock objectNode(ObjectNode node) {
             return switch (shape.getType()) {
-                case STRUCTURE -> structureShape((StructureShape) shape, node);
-//                case MAP -> mapShape((MapShape) inputShape, node);
-//                case UNION -> unionShape((UnionShape) inputShape, node);
-//                case DOCUMENT -> documentShape((DocumentShape) inputShape, node);
+                case STRUCTURE, UNION -> structureOrUnionShape(shape, node);
+                case MAP -> mapShape((MapShape) shape, node);
+                case DOCUMENT -> documentShape((DocumentShape) shape, node);
                 default -> throw new CodegenException("unexpected input shape: " + shape.getType());
             };
         }
 
-        private CodeBlock structureShape(StructureShape shape, ObjectNode node) {
+        private CodeBlock structureOrUnionShape(Shape shape, ObjectNode node) {
+            // The builder interfaces for structures and unions are identical,
+            // the only difference is the constraint on only setting one member.
+            if (shape instanceof UnionShape && node.getMembers().size() != 1) {
+                throw new IllegalArgumentException("Union shapes require an object node with exactly one member");
+            }
+
             final TypeName inputType = subject.nativeNameResolver.typeForShape(shape.getId());
             CodeBlock.Builder result = CodeBlock.builder().add("$T.builder()", inputType);
 
@@ -95,16 +107,32 @@ public class ModeledNode {
             return result.add("\n.build()").build();
         }
 
+        private CodeBlock mapShape(MapShape shape, ObjectNode node) {
+            final TypeName valueType = subject.nativeNameResolver.typeForShape(shape.getValue().getTarget());
+            final Shape valueShape = subject.model.expectShape(shape.getValue().getTarget());
+            final ValueNodeVisitor valueVisitor = visitorForShape(valueShape);
+
+            CodeBlock entriesBlock = node.getMembers().entrySet().stream()
+                    .map(p -> CodeBlock.of("put($S, $L);", p.getKey().getValue(), p.getValue().accept(valueVisitor)))
+                    .collect(CodeBlock.joining("\n"));
+
+            // Using the anonymous inner subclass trick
+            // (new HashMap<String, Whatever>(){{ put("a", "b"); put("c", "d"); ... }})
+            // because it's the easiest way to generate a map literal as an expression,
+            // even though it's questionable in production code in general
+            // because of the performance and garbage collection implications.
+            // If we are really concerned we can create our own MapBuilder type in the future.
+            return CodeBlock.of("new $T<String, $T>() {{\n$L\n}}", Generator.Constants.JAVA_UTIL_HASHMAP, valueType, entriesBlock);
+        }
+
+        private CodeBlock documentShape(DocumentShape shape, Node node) {
+            throw new IllegalArgumentException("document node values are not supported");
+        }
+
         @Override
         public CodeBlock arrayNode(ArrayNode node) {
-            // The target visitor won't change if the input shape is a union
-            ValueNodeVisitor targetVisitor;
-            if (shape instanceof CollectionShape) {
-                var target = subject.model.expectShape(((CollectionShape) shape).getMember().getTarget());
-                targetVisitor = visitorForShape(target);
-            } else {
-                targetVisitor = this;
-            }
+            var target = subject.model.expectShape(((CollectionShape) shape).getMember().getTarget());
+            ValueNodeVisitor targetVisitor = visitorForShape(target);
 
             CodeBlock elementsBlock = node.getElements().stream()
                     .map(n -> n.accept(targetVisitor))
@@ -126,13 +154,18 @@ public class ModeledNode {
         @Override
         public CodeBlock stringNode(StringNode node) {
             if (shape.isBlobShape()) {
-                // ByteBuffer is correct since we're only using this for local services so far.
+                // ByteBuffer is the correct type since we're only using this for local services so far.
+                // If we start supporting SDK-style services for some reason,
+                // we'd also need to handle types like SdkBytes.
                 TypeName byteBuffer = ClassName.get(ByteBuffer.class);
                 String value = node.getValue();
                 CodeBlock rawBytes;
                 if (base64BlobStrings) {
                     rawBytes = CodeBlock.of("$T.decode($S)", Constants.BASE64_DECODER_CLASS_NAME, value);
                 } else {
+                    // Be very conservative about "values that can be represented in plain text"
+                    // (as per the comment on base64BlobStrings)
+                    // since the specification is not specific.
                     if (!value.matches("[A-Za-z0-9]*")) {
                         throw new IllegalArgumentException("Blob values must only contain alphanumeric characters");
                     }
@@ -140,7 +173,7 @@ public class ModeledNode {
                 }
                 return CodeBlock.of("$T.wrap($L)", byteBuffer, rawBytes);
             } else if (shape.isFloatShape() || shape.isDoubleShape()) {
-                throw new IllegalArgumentException("floating point shapes are not supported");
+                throw new IllegalArgumentException("floating point shapes are not yet supported");
             } else {
                 return CodeBlock.of("$S", node.getValue());
             }

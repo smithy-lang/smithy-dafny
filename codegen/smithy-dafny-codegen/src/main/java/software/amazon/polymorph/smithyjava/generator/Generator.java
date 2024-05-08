@@ -97,6 +97,10 @@ public abstract class Generator {
       "java.util",
       "ArrayList"
     );
+    public static final ClassName JAVA_UTIL_HASHMAP = ClassName.get(
+            "java.util",
+            "HashMap"
+    );
     public static final ClassName JUPITER_TEST = ClassName.get("org.junit.jupiter.api", "Test");
   }
 }

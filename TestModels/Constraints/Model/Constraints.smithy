@@ -22,7 +22,11 @@ structure SimpleConstraintsConfig {}
       OneToTen: 5,
       GreaterThanOne: 2,
       MyBlob: "0101",
-      MyList: ["1", "2", "3"]
+      MyList: ["1", "2", "3"],
+      MyMap: {
+        "a": "b",
+        "c": "d"
+      }
     }
     expect: {
         success: {}
