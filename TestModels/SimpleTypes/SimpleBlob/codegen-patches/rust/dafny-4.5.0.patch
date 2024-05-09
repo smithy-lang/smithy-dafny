@@ -1,8 +1,8 @@
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index 5200278d..71d851f6 100644
+index 5200278d..8aa39b59 100644
 --- b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -1,103 +1,546 @@
+@@ -1,103 +1,549 @@
  #![allow(warnings, unconditional_panic)]
  #![allow(nonstandard_style)]
 -extern crate dafny_runtime;
@@ -126,7 +126,7 @@ index 5200278d..71d851f6 100644
 +    pub enum GetBlobInput {
 +        GetBlobInput {
 +            value: ::std::rc::Rc<
-+                super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>,
++                super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +            >,
 +        },
 +    }
@@ -138,8 +138,9 @@ index 5200278d..71d851f6 100644
 +    impl GetBlobInput {
 +        pub fn value(
 +            &self,
-+        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>>
-+        {
++        ) -> ::std::rc::Rc<
++            super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
++        > {
 +            match self {
 +                GetBlobInput::GetBlobInput { value } => value.clone(),
 +            }
@@ -180,7 +181,7 @@ index 5200278d..71d851f6 100644
 +    pub enum GetBlobOutput {
 +        GetBlobOutput {
 +            value: ::std::rc::Rc<
-+                super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>,
++                super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +            >,
          },
 -        Tuple2::_PhantomVariant(..) => {panic!()}
@@ -223,8 +224,9 @@ index 5200278d..71d851f6 100644
 +    impl GetBlobOutput {
 +        pub fn value(
 +            &self,
-+        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>>
-+        {
++        ) -> ::std::rc::Rc<
++            super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
++        > {
 +            match self {
 +                GetBlobOutput::GetBlobOutput { value } => value.clone(),
 +            }
@@ -604,20 +606,21 @@ index 5200278d..71d851f6 100644
 +            >::None {})
 +        }
 +        pub fn CreateBlobSome(
-+            b: ::std::vec::Vec<::std::primitive::u8>,
-+        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>>
-+        {
++            b: ::dafny_runtime::Sequence<::std::primitive::u8>,
++        ) -> ::std::rc::Rc<
++            super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
++        > {
 +            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<
-+                ::std::vec::Vec<::std::primitive::u8>,
++                ::dafny_runtime::Sequence<::std::primitive::u8>,
 +            >::Some {
 +                value: b,
 +            })
 +        }
-+        pub fn CreateBlobNone(
-+        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>>
-+        {
++        pub fn CreateBlobNone() -> ::std::rc::Rc<
++            super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
++        > {
 +            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<
-+                ::std::vec::Vec<::std::primitive::u8>,
++                ::dafny_runtime::Sequence<::std::primitive::u8>,
 +            >::None {})
 +        }
 +    }
@@ -722,7 +725,7 @@ index 00000000..ee9432a0
 +mod get_blob_known_value;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client/get_blob.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client/get_blob.rs
 new file mode 100644
-index 00000000..44143cd1
+index 00000000..15b51c1a
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client/get_blob.rs
 @@ -0,0 +1,13 @@
@@ -731,7 +734,7 @@ index 00000000..44143cd1
 +    /// Constructs a fluent builder for the [`GetBlob`](crate::operation::get_blob::builders::GetBlobFluentBuilder) operation.
 +    ///
 +    /// - The fluent builder is configurable:
-+    ///   - [`value(impl Into<Vec<u8>>)`](crate::operation::get_blob::builders::GetBlobFluentBuilder::value) / [`set_value(Option<Vec<u8>>)`](crate::operation::get_blob::builders::GetBlobFluentBuilder::set_value):(undocumented)<br>
++    ///   - [`value(impl Into<::dafny_runtime::Sequence<u8>>)`](crate::operation::get_blob::builders::GetBlobFluentBuilder::value) / [`set_value(Option<::dafny_runtime::Sequence<u8>>)`](crate::operation::get_blob::builders::GetBlobFluentBuilder::set_value):(undocumented)<br>
 +    /// - On success, responds with [`GetBlobOutput`](crate::operation::get_blob::GetBlobOutput) with field(s):
 +    ///   - [`value(Option<Blob>)`](crate::operation::get_blob::GetBlobOutput::value): (undocumented)
 +    /// - On failure, responds with [`SdkError<GetBlobError>`](crate::operation::get_blob::GetBlobError)
@@ -741,7 +744,7 @@ index 00000000..44143cd1
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client/get_blob_known_value.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client/get_blob_known_value.rs
 new file mode 100644
-index 00000000..130e94d9
+index 00000000..691f8219
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client/get_blob_known_value.rs
 @@ -0,0 +1,17 @@
@@ -750,7 +753,7 @@ index 00000000..130e94d9
 +    /// Constructs a fluent builder for the [`GetBlob`](crate::operation::get_blob_known_value::builders::GetBlobFluentBuilder) operation.
 +    ///
 +    /// - The fluent builder is configurable:
-+    ///   - [`value(impl Into<Vec<u8>>)`](crate::operation::get_blob_known_value::builders::GetBlobFluentBuilder::value) / [`set_value(Option<Vec<u8>>)`](crate::operation::get_blob_known_value::builders::GetBlobFluentBuilder::set_value):(undocumented)<br>
++    ///   - [`value(impl Into<::dafny_runtime::Sequence<u8>>)`](crate::operation::get_blob_known_value::builders::GetBlobFluentBuilder::value) / [`set_value(Option<::dafny_runtime::Sequence<u8>>)`](crate::operation::get_blob_known_value::builders::GetBlobFluentBuilder::set_value):(undocumented)<br>
 +    /// - On success, responds with [`GetBlobOutput`](crate::operation::get_blob_known_value::GetBlobOutput) with field(s):
 +    ///   - [`value(Option<Blob>)`](crate::operation::get_blob_known_value::GetBlobOutput::value): (undocumented)
 +    /// - On failure, responds with [`SdkError<GetBlobError>`](crate::operation::get_blob_known_value::GetBlobError)
@@ -1387,21 +1390,23 @@ index 00000000..0618c678
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_input.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_input.rs
 new file mode 100644
-index 00000000..56157239
+index 00000000..d0c5c2aa
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_input.rs
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,64 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(missing_docs)] // documentation missing in model
 +#[non_exhaustive]
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetBlobInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++    pub value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +}
 +impl GetBlobInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn message(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++    pub fn message(
++        &self,
++    ) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        self.value.as_ref()
 +    }
 +}
@@ -1418,13 +1423,13 @@ index 00000000..56157239
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetBlobInputBuilder {
-+    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++    pub(crate) value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +}
 +impl GetBlobInputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
++        input: impl ::std::convert::Into<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = ::std::option::Option::Some(input.into());
 +        self
@@ -1432,13 +1437,15 @@ index 00000000..56157239
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++        input: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = input;
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++    pub fn get_value(
++        &self,
++    ) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        self.value.as_ref()
 +    }
 +    /// Consumes the builder and constructs a [`GetBlobInput`](crate::operation::operation::GetBlobInput).
@@ -1453,22 +1460,22 @@ index 00000000..56157239
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_output.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_output.rs
 new file mode 100644
-index 00000000..b071eb83
+index 00000000..19d08cbb
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_output.rs
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,68 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(missing_docs)] // documentation missing in model
 +#[non_exhaustive]
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetBlobOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++    pub value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +}
 +
 +impl GetBlobOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++    pub fn value(&self) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        self.value.as_ref()
 +    }
 +}
@@ -1486,14 +1493,14 @@ index 00000000..b071eb83
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetBlobOutputBuilder {
-+    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++    pub(crate) value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +}
 +
 +impl GetBlobOutputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
++        input: impl ::std::convert::Into<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = ::std::option::Option::Some(input.into());
 +        self
@@ -1502,14 +1509,16 @@ index 00000000..b071eb83
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++        input: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = input;
 +        self
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++    pub fn get_value(
++        &self,
++    ) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        self.value.as_ref()
 +    }
 +
@@ -1525,10 +1534,10 @@ index 00000000..b071eb83
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/builders.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/builders.rs
 new file mode 100644
-index 00000000..2f67a4f7
+index 00000000..afbf6094
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/builders.rs
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,97 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +pub use crate::operation::get_blob::_get_blob_output::GetBlobOutputBuilder;
 +
@@ -1606,7 +1615,7 @@ index 00000000..2f67a4f7
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
++        input: impl ::std::convert::Into<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.inner = self.inner.value(input.into());
 +        self
@@ -1614,13 +1623,15 @@ index 00000000..2f67a4f7
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++        input: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.inner = self.inner.set_value(input);
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++    pub fn get_value(
++        &self,
++    ) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        self.inner.get_value()
 +    }
 +}
@@ -1778,21 +1789,21 @@ index 00000000..8da7c6b0
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/_get_blob_known_value_input.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/_get_blob_known_value_input.rs
 new file mode 100644
-index 00000000..be28c19c
+index 00000000..6c0a6409
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/_get_blob_known_value_input.rs
-@@ -0,0 +1,63 @@
+@@ -0,0 +1,65 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(missing_docs)] // documentation missing in model
 +#[non_exhaustive]
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetBlobKnownValueInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++    pub value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +}
 +impl GetBlobKnownValueInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++    pub fn value(&self) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        self.value.as_ref()
 +    }
 +}
@@ -1810,13 +1821,13 @@ index 00000000..be28c19c
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetBlobKnownValueInputBuilder {
-+    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++    pub(crate) value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +}
 +impl GetBlobKnownValueInputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
++        input: impl ::std::convert::Into<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = ::std::option::Option::Some(input.into());
 +        self
@@ -1824,13 +1835,15 @@ index 00000000..be28c19c
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++        input: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = input;
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<::std::vec::Vec<::std::primitive::u8>> {
++    pub fn get_value(
++        &self,
++    ) -> &::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        &self.value
 +    }
 +    /// Consumes the builder and constructs a [`GetBlobKnownValueInput`](crate::operation::operation::GetBlobKnownValueInput).
@@ -1847,21 +1860,21 @@ index 00000000..be28c19c
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/_get_blob_known_value_output.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/_get_blob_known_value_output.rs
 new file mode 100644
-index 00000000..794b83ce
+index 00000000..ce30bccc
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/_get_blob_known_value_output.rs
-@@ -0,0 +1,63 @@
+@@ -0,0 +1,65 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(missing_docs)] // documentation missing in model
 +#[non_exhaustive]
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetBlobKnownValueOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++    pub value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +}
 +impl GetBlobKnownValueOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++    pub fn value(&self) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        self.value.as_ref()
 +    }
 +}
@@ -1879,13 +1892,13 @@ index 00000000..794b83ce
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetBlobKnownValueOutputBuilder {
-+    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++    pub(crate) value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +}
 +impl GetBlobKnownValueOutputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
++        input: impl ::std::convert::Into<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = ::std::option::Option::Some(input.into());
 +        self
@@ -1893,13 +1906,15 @@ index 00000000..794b83ce
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++        input: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = input;
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<::std::vec::Vec<::std::primitive::u8>> {
++    pub fn get_value(
++        &self,
++    ) -> &::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        &self.value
 +    }
 +    /// Consumes the builder and constructs a [`GetBlobKnownValueOutput`](crate::operation::operation::GetBlobKnownValueOutput).
@@ -1916,10 +1931,10 @@ index 00000000..794b83ce
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/builders.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/builders.rs
 new file mode 100644
-index 00000000..33666271
+index 00000000..bc7aea4e
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value/builders.rs
-@@ -0,0 +1,97 @@
+@@ -0,0 +1,99 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +pub use crate::operation::get_blob_known_value::_get_blob_known_value_output::GetBlobKnownValueOutputBuilder;
 +
@@ -1999,7 +2014,7 @@ index 00000000..33666271
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
++        input: impl ::std::convert::Into<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.inner = self.inner.value(input.into());
 +        self
@@ -2007,13 +2022,15 @@ index 00000000..33666271
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
++        input: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.inner = self.inner.set_value(input);
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<::std::vec::Vec<::std::primitive::u8>> {
++    pub fn get_value(
++        &self,
++    ) -> &::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>> {
 +        self.inner.get_value()
 +    }
 +}
