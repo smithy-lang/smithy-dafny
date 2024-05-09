@@ -46,11 +46,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Rust code generation is under development and depends on pending changes to the 
+        # Rust code generation is under development and depends on pending changes to the
         # Dafny Rust code generation, so we only test on a relatively recent prerelease instead.
         # This can be updated as needed when new features/fixes land in Dafny master.
         dafny-version:
-          - 4.6.0-nightly-2024-05-09-8432b17
+          - nightly-2024-05-09-8432b17
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}
