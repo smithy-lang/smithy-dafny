@@ -3,7 +3,7 @@
 
 // This is a forked copy of
 // https://github.com/smithy-lang/smithy/blob/main/smithy-smoke-test-traits/src/main/java/software/amazon/smithy/smoketests/traits/SmokeTestCaseValidator.java
-// with a piece of overly-restrictive validation turned off
+// with a piece of overly-restrictive validation in createVisitor() turned off
 // so that we can use smoke tests to test input validation as well.
 // See https://github.com/smithy-lang/smithy/issues/2282
 
@@ -71,10 +71,9 @@ public class SmokeTestCaseValidator extends AbstractValidator {
                 // Validate input params
                 StructureShape input = operationIndex.expectInputShape(shape);
                 if (input != null && testCase.getParams().isPresent()) {
-                    // This is the part that rejects invalid input.
-//                    NodeValidationVisitor paramsValidator = createVisitor(testCase.getParams().get(), model, shape,
-//                            testCase.getId(), ".params");
-//                    events.addAll(input.accept(paramsValidator));
+                    NodeValidationVisitor paramsValidator = createVisitor(testCase.getParams().get(), model, shape,
+                            testCase.getId(), ".params");
+                    events.addAll(input.accept(paramsValidator));
                 } else if (testCase.getParams().isPresent()) {
                     events.add(error(shape, trait, String.format(
                             "Smoke test parameters provided for operation with no input: `%s`",
@@ -102,6 +101,8 @@ public class SmokeTestCaseValidator extends AbstractValidator {
                 .eventId(getName())
                 .timestampValidationStrategy(TimestampValidationStrategy.EPOCH_SECONDS)
                 .addFeature(NodeValidationVisitor.Feature.ALLOW_OPTIONAL_NULLS)
+                // Added: make constraint violations only WARNINGS, so we can suppress them
+                .addFeature(NodeValidationVisitor.Feature.ALLOW_CONSTRAINT_ERRORS)
                 .build();
     }
 }
