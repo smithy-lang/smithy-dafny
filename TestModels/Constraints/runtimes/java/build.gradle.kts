@@ -45,8 +45,7 @@ dependencies {
     implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.testng:testng:7.5")
 }
 
 publishing {
@@ -70,5 +69,5 @@ tasks {
 }
 
 tasks.named<Test>("test") {
-    useJUnitPlatform()
+    useTestNG()
 }

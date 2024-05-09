@@ -101,7 +101,7 @@ public abstract class Generator {
             "java.util",
             "HashMap"
     );
-    public static final ClassName JUPITER_TEST = ClassName.get("org.junit.jupiter.api", "Test");
-    public static final ClassName JUPITER_ASSERTIONS = ClassName.get("org.junit.jupiter.api", "Assertions");
+    public static final ClassName TESTNG_TEST = ClassName.get("org.testng.annotations", "Test");
+    public static final ClassName TESTNG_ASSERT = ClassName.get("org.testng", "Assert");
   }
 }
