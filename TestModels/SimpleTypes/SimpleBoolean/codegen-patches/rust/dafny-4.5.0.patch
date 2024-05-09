@@ -1,15 +1,8 @@
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-<<<<<<< HEAD
 index 5200278d..dd0ece8a 100644
 --- b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 @@ -1,103 +1,522 @@
-=======
-index 5200278d..17a9a475 100644
---- b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-+++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -1,102 +1,523 @@
->>>>>>> main-1.x
  #![allow(warnings, unconditional_panic)]
  #![allow(nonstandard_style)]
 -extern crate dafny_runtime;
@@ -627,16 +620,11 @@ index 5200278d..17a9a475 100644
 +        }
 +    }
  }
-<<<<<<< HEAD
 -mod _module {
 -  
 -}
 \ No newline at end of file
 +mod _module {}
-=======
- mod _module {
-   
->>>>>>> main-1.x
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs
 new file mode 100644
 index 00000000..7d63747e
