@@ -14,14 +14,18 @@ impl GetStringSingleValueOutput {
 }
 impl GetStringSingleValueOutput {
     /// Creates a new builder-style object to manufacture [`GetStringSingleValueOutput`](crate::operation::operation::GetStringSingleValueOutput).
-    pub fn builder() -> crate::operation::get_string_single_value::builders::GetStringSingleValueOutputBuilder {
+    pub fn builder(
+    ) -> crate::operation::get_string_single_value::builders::GetStringSingleValueOutputBuilder
+    {
         crate::operation::get_string_single_value::builders::GetStringSingleValueOutputBuilder::default()
     }
 }
 
 /// A builder for [`GetStringSingleValueOutput`](crate::operation::operation::GetStringSingleValueOutput).
 #[non_exhaustive]
-#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug)]
+#[derive(
+    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
+)]
 pub struct GetStringSingleValueOutputBuilder {
     pub(crate) value: ::std::option::Option<::std::string::String>,
 }
@@ -41,7 +45,16 @@ impl GetStringSingleValueOutputBuilder {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetStringSingleValueOutput`](crate::operation::operation::GetStringSingleValueOutput).
-    pub fn build(self) -> ::std::result::Result<crate::operation::get_string_single_value::GetStringSingleValueOutput, ::aws_smithy_types::error::operation::BuildError> {
-        ::std::result::Result::Ok(crate::operation::get_string_single_value::GetStringSingleValueOutput { value: self.value })
+    pub fn build(
+        self,
+    ) -> ::std::result::Result<
+        crate::operation::get_string_single_value::GetStringSingleValueOutput,
+        ::aws_smithy_types::error::operation::BuildError,
+    > {
+        ::std::result::Result::Ok(
+            crate::operation::get_string_single_value::GetStringSingleValueOutput {
+                value: self.value,
+            },
+        )
     }
 }
