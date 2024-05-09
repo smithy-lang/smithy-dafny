@@ -50,13 +50,8 @@ public class ReferenceTraitValidator extends AbstractValidator {
                                     "[trait|aws.polymorph#reference]\n"
                     );
                     for (Shape matchingShape : selector.select(model)) {
-                        events.add(ValidationEvent.builder()
-                                .id(getName())
-                                .severity(Severity.ERROR)
-                                .sourceLocation(testCase.getParams().get().getSourceLocation())
-                                .shapeId(matchingShape.toShapeId())
-                                .message("smokeTests.params cannot be used for input structures that use the @references trait")
-                                .build());
+                        events.add(error(matchingShape, testCase.getParams().get(),
+                                "smokeTests.params cannot be used for input structures that use the @references trait"));
                     }
                 }
             }
