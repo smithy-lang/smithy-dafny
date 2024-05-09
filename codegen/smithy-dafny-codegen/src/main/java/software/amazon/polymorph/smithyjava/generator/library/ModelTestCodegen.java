@@ -19,6 +19,7 @@ import java.util.Set;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JUPITER_ASSERTIONS;
 
 /**
  * ModelCodegen generates tests for the content of the Subject's Model package.
@@ -37,7 +38,7 @@ public class ModelTestCodegen extends Generator {
 
     @Override
     public Set<JavaFile> javaFiles() {
-        LinkedHashSet<JavaFile> rtn = new LinkedHashSet<>();
+        final LinkedHashSet<JavaFile> rtn = new LinkedHashSet<>();
         subject.model.getOperationShapesWithTrait(SmokeTestsTrait.class).stream()
                 .map(this::smokeTestsClass)
                 .forEachOrdered(rtn::add);
@@ -45,20 +46,20 @@ public class ModelTestCodegen extends Generator {
     }
 
     private JavaFile smokeTestsClass(OperationShape shape) {
-        TypeSpec.Builder spec = TypeSpec
+        final TypeSpec.Builder spec = TypeSpec
                 .classBuilder(shape.getId().getName() + "SmokeTests")
                 .addModifiers(PUBLIC, FINAL);
-        SmokeTestsTrait smokeTests = shape.expectTrait(SmokeTestsTrait.class);
+        final SmokeTestsTrait smokeTests = shape.expectTrait(SmokeTestsTrait.class);
         smokeTests.getTestCases().stream()
                 .map(testCase -> smokeTest(shape, testCase))
                 .forEachOrdered(spec::addMethod);
-        TypeSpec classType = spec.build();
+        final TypeSpec classType = spec.build();
         return JavaFile.builder(subject.modelPackageName, classType).build();
     }
 
     private MethodSpec smokeTest(final OperationShape operationShape, SmokeTestCase testCase) {
         final String methodName = testCase.getId();
-        MethodSpec.Builder method = MethodSpec
+        final MethodSpec.Builder method = MethodSpec
                 .methodBuilder(methodName)
                 .addAnnotation(Constants.JUPITER_TEST)
                 .addModifiers(PUBLIC)
@@ -81,14 +82,23 @@ public class ModelTestCodegen extends Generator {
         // (multiple .foo(...) calls to populate builder)
         // ...
         // .build();
-        Shape inputShape = subject.model.expectShape(operationShape.getInput().get());
+        final Shape inputShape = subject.model.expectShape(operationShape.getInput().get());
         final TypeName inputType = subject.nativeNameResolver.typeForShape(inputShape.getId());
-        CodeBlock inputValue = ModeledShapeValue.shapeValue(subject, false, inputShape, testCase.getParams().get());
-        method.addStatement("$T input = $L", inputType, inputValue);
+        final CodeBlock inputValue = ModeledShapeValue.shapeValue(subject, false, inputShape, testCase.getParams().get());
+        final CodeBlock inputAndClientCall = CodeBlock.builder()
+                        .addStatement("$T input = $L", inputType, inputValue)
+                        .addStatement("client.$L(input)", operationName)
+                        .build();
 
-        // client.GetConstraints(input);
-        // TODO: or assertThrows(...)
-        method.addStatement("client.$L(input)", operationName);
+        if (testCase.getExpectation().isSuccess()) {
+            method.addCode(inputAndClientCall);
+        } else {
+            // We're not specific about what kind of exception for now.
+            // If the smokeTests trait gets more specific we can be too.
+            // The inputAndClientCall.toString() is necessary because otherwise we get nested
+            // $[ ... $] statements, which JavaPoet doesn't support.
+            method.addStatement("$T.assertThrows(Exception.class, () -> {\n$L\n})", JUPITER_ASSERTIONS, inputAndClientCall.toString());
+        }
 
         return method.build();
     }
