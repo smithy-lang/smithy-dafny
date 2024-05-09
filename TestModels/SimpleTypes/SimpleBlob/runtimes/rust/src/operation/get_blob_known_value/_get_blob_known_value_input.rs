@@ -4,11 +4,11 @@
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetBlobKnownValueInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+    pub value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 }
 impl GetBlobKnownValueInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
+    pub fn value(&self) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
         self.value.as_ref()
     }
 }
@@ -26,13 +26,13 @@ impl GetBlobKnownValueInput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetBlobKnownValueInputBuilder {
-    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+    pub(crate) value: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
 }
 impl GetBlobKnownValueInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(
         mut self,
-        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
+        input: impl ::std::convert::Into<::dafny_runtime::Sequence<::std::primitive::u8>>,
     ) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
@@ -40,13 +40,15 @@ impl GetBlobKnownValueInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn set_value(
         mut self,
-        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+        input: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
     ) -> Self {
         self.value = input;
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> &::std::option::Option<::std::vec::Vec<::std::primitive::u8>> {
+    pub fn get_value(
+        &self,
+    ) -> &::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>> {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetBlobKnownValueInput`](crate::operation::operation::GetBlobKnownValueInput).

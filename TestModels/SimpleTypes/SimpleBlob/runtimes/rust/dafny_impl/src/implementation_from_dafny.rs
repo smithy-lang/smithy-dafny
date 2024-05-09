@@ -61,7 +61,7 @@ pub mod r#_simple_dtypes_dsmithyblob_dinternaldafny_dtypes {
     pub enum GetBlobInput {
         GetBlobInput {
             value: ::std::rc::Rc<
-                super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>,
+                super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
             >,
         },
     }
@@ -73,8 +73,9 @@ pub mod r#_simple_dtypes_dsmithyblob_dinternaldafny_dtypes {
     impl GetBlobInput {
         pub fn value(
             &self,
-        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>>
-        {
+        ) -> ::std::rc::Rc<
+            super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
+        > {
             match self {
                 GetBlobInput::GetBlobInput { value } => value.clone(),
             }
@@ -115,15 +116,16 @@ pub mod r#_simple_dtypes_dsmithyblob_dinternaldafny_dtypes {
     pub enum GetBlobOutput {
         GetBlobOutput {
             value: ::std::rc::Rc<
-                super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>,
+                super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
             >,
         },
     }
     impl GetBlobOutput {
         pub fn value(
             &self,
-        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>>
-        {
+        ) -> ::std::rc::Rc<
+            super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
+        > {
             match self {
                 GetBlobOutput::GetBlobOutput { value } => value.clone(),
             }
@@ -503,20 +505,21 @@ mod r#_StandardLibraryInterop_Compile {
             >::None {})
         }
         pub fn CreateBlobSome(
-            b: ::std::vec::Vec<::std::primitive::u8>,
-        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>>
-        {
+            b: ::dafny_runtime::Sequence<::std::primitive::u8>,
+        ) -> ::std::rc::Rc<
+            super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
+        > {
             ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<
-                ::std::vec::Vec<::std::primitive::u8>,
+                ::dafny_runtime::Sequence<::std::primitive::u8>,
             >::Some {
                 value: b,
             })
         }
-        pub fn CreateBlobNone(
-        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::std::vec::Vec<::std::primitive::u8>>>
-        {
+        pub fn CreateBlobNone() -> ::std::rc::Rc<
+            super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
+        > {
             ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<
-                ::std::vec::Vec<::std::primitive::u8>,
+                ::dafny_runtime::Sequence<::std::primitive::u8>,
             >::None {})
         }
     }

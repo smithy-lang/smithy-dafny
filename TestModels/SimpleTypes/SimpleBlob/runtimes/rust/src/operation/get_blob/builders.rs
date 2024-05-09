@@ -75,7 +75,7 @@ impl GetBlobFluentBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(
         mut self,
-        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
+        input: impl ::std::convert::Into<::dafny_runtime::Sequence<::std::primitive::u8>>,
     ) -> Self {
         self.inner = self.inner.value(input.into());
         self
@@ -83,13 +83,15 @@ impl GetBlobFluentBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn set_value(
         mut self,
-        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+        input: ::std::option::Option<::dafny_runtime::Sequence<::std::primitive::u8>>,
     ) -> Self {
         self.inner = self.inner.set_value(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
+    pub fn get_value(
+        &self,
+    ) -> ::std::option::Option<&::dafny_runtime::Sequence<::std::primitive::u8>> {
         self.inner.get_value()
     }
 }

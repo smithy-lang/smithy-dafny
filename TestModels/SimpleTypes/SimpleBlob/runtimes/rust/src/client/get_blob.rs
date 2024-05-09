@@ -3,7 +3,7 @@ impl super::Client {
     /// Constructs a fluent builder for the [`GetBlob`](crate::operation::get_blob::builders::GetBlobFluentBuilder) operation.
     ///
     /// - The fluent builder is configurable:
-    ///   - [`value(impl Into<Vec<u8>>)`](crate::operation::get_blob::builders::GetBlobFluentBuilder::value) / [`set_value(Option<Vec<u8>>)`](crate::operation::get_blob::builders::GetBlobFluentBuilder::set_value):(undocumented)<br>
+    ///   - [`value(impl Into<::dafny_runtime::Sequence<u8>>)`](crate::operation::get_blob::builders::GetBlobFluentBuilder::value) / [`set_value(Option<::dafny_runtime::Sequence<u8>>)`](crate::operation::get_blob::builders::GetBlobFluentBuilder::set_value):(undocumented)<br>
     /// - On success, responds with [`GetBlobOutput`](crate::operation::get_blob::GetBlobOutput) with field(s):
     ///   - [`value(Option<Blob>)`](crate::operation::get_blob::GetBlobOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetBlobError>`](crate::operation::get_blob::GetBlobError)
