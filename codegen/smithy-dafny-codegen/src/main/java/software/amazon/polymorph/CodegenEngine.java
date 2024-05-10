@@ -538,8 +538,10 @@ public class CodegenEngine {
     private Model serviceModel;
     private Path[] dependentModelPaths;
     private String namespace;
-    private Map<TargetLanguage, Path> targetLangOutputDirs = Collections.emptyMap();
-    private Map<TargetLanguage, Path> targetLangTestOutputDirs = Collections.emptyMap();
+    private Map<TargetLanguage, Path> targetLangOutputDirs =
+      Collections.emptyMap();
+    private Map<TargetLanguage, Path> targetLangTestOutputDirs =
+      Collections.emptyMap();
     private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
     private Path propertiesFile;
     private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
