@@ -114,20 +114,35 @@ transpile_dependencies:
 
 # Override SharedMakefile's transpile_implementation to not reference
 # StandardLibrary as a Library
+# transpile_implementation:
+# 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+# 		-stdin \
+# 		-noVerify \
+# 		-vcsCores:$(CORES) \
+# 		-compileTarget:$(TARGET) \
+# 		-spillTargetCode:3 \
+# 		-compile:0 \
+# 		-optimizeErasableDatatypeWrapper:0 \
+# 		-compileSuffix:0 \
+# 		$(TRANSPILE_MODULE_NAME) \
+# 		-unicodeChar:0 \
+# 		-functionSyntax:3 \
+# 		-useRuntimeLib \
+# 		-out $(OUT)
+
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:0 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT)
+	translate $(TARGET) \
+		--stdin \
+		--no-verify \
+		--cores:$(CORES) \
+		--optimize-erasable-datatype-wrapper:false \
+		--unicode-char:false \
+		--function-syntax:3 \
+		--allow-warnings \
+		--output $(OUT) \
+		$(TRANSPILE_MODULE_NAME)
 
 build_implementation:
 	dafny build \

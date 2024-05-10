@@ -86,7 +86,8 @@ public class DafnyNameResolver {
     // If this is an AWS SDK shape, rewrite its namespace to match the Dafny extern namespace
     String resolvedSmithyNamespace =
         AwsSdkNameResolver.resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
-    return resolvedSmithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny";
+    return SmithyNameResolver.getPythonModuleNameForSmithyNamespace(smithyNamespace) + ".internaldafny.generated." +
+            resolvedSmithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny";
   }
 
   /**

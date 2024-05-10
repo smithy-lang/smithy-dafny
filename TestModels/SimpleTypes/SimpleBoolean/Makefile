@@ -13,6 +13,12 @@ PYTHON_MODULE_NAME=simple_types_boolean
 PROJECT_SERVICES := \
 	SimpleBoolean
 
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+# So test/ knows how to access src/ dtr
+SOURCE_TRANSLATION_RECORD_PYTHON := \
+    --translation-record runtimes/python/src/simple_boolean/internaldafny/generated/dafny_src-py.dtr
+
 SERVICE_NAMESPACE_SimpleBoolean=simple.types.boolean
 
 SERVICE_DEPS_SimpleBoolean :=

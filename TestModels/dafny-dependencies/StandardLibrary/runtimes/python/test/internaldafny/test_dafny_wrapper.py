@@ -8,10 +8,15 @@ which will execute the `internaldafny_test_executor.py` file in the `dafny` dire
 
 import sys
 
+
 internaldafny_dir = '/'.join(__file__.split("/")[:-1])
 
 sys.path.append(internaldafny_dir + "/extern")
 sys.path.append(internaldafny_dir + "/generated")
+
+if "module_" not in sys.modules:
+  import module_
+  sys.modules["module_"] = module_
 
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.

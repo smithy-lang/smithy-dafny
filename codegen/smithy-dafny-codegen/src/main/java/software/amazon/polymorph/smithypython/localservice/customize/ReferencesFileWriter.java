@@ -318,7 +318,7 @@ protected void generateResourceImplementation(
                         SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(targetShapeOutput, codegenContext),
                         defaultWrappingError
                         );
-                        writer.addStdlibImport("Wrappers");
+                        writer.addStdlibImport("standard_library.internaldafny.generated.Wrappers", "Wrappers");
                     });
         }
     }

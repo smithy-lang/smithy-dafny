@@ -155,7 +155,7 @@ clean-dafny-report:
 # Transpile the entire project's impl
 # For each index file listed in the project Makefile's PROJECT_INDEX variable,
 #   append a `-library:TestModels/$(PROJECT_INDEX) to the transpiliation target
-_transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+_transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 _transpile_implementation_all: transpile_implementation
 
 # The `$(OUT)` and $(TARGET) variables are problematic.
@@ -182,11 +182,11 @@ _transpile_implementation_all: transpile_implementation
 #   and look for `Index.dfy` in the `src/` directory.
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
-    ifeq ($(TARGET), py)
-        COMPILE_SUFFIX_OPTION := -compileSuffix:0
-    else
-        COMPILE_SUFFIX_OPTION := -compileSuffix:1
-    endif
+	ifeq ($(TARGET), py)
+		COMPILE_SUFFIX_OPTION := -compileSuffix:0
+	else
+		COMPILE_SUFFIX_OPTION := -compileSuffix:1
+	endif
 # At this time it is *significatly* faster
 # to give Dafny a single file
 # that includes everything
@@ -194,22 +194,41 @@ transpile_implementation:
 # ~2m vs ~10s for our large projects.
 # Also the expectation is that verification happens in the `verify` target
 # `find` looks for `Index.dfy` files in either V1 or V2-styled project directories (single vs. multiple model files).
+# transpile_implementation:
+# 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+# 		-stdin \
+# 		-noVerify \
+# 		-vcsCores:$(CORES) \
+# 		-compileTarget:$(TARGET) \
+# 		-spillTargetCode:3 \
+# 		-compile:0 \
+# 		-optimizeErasableDatatypeWrapper:0 \
+# 		$(COMPILE_SUFFIX_OPTION) \
+# 		-unicodeChar:0 \
+# 		$(TRANSPILE_MODULE_NAME) \
+# 		-functionSyntax:3 \
+# 		-useRuntimeLib \
+# 		-out $(OUT) \
+# 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+# 		$(TRANSPILE_DEPENDENCIES)
+
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+	translate $(TARGET) \
+		--stdin \
+		--no-verify \
+		--cores:$(CORES) \
+		--optimize-erasable-datatype-wrapper:false \
+		--unicode-char:false \
+		--function-syntax:3 \
+		--allow-warnings \
+		--output $(OUT) \
+		$(TRANSPILE_MODULE_NAME) \
+		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(TRANSLATION_RECORD) \
 		$(TRANSPILE_DEPENDENCIES)
+
 
 # If the project under transpilation uses `replaceable` modules,
 #   it MUST define a SRC_INDEX variable per language.
@@ -228,33 +247,49 @@ _transpile_test_all: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
 #     append `-library:/path/to/Index.dfy` to the transpile target
 # Else: (i.e. single model/service in project), then:
 #   append `-library:/path/to/Index.dfy` to the transpile target
-_transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), -library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
+_transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, --library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), --library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
 # Transpile the entire project's tests
 _transpile_test_all: transpile_test
 
 # `find` looks for tests in either V1 or V2-styled project directories (single vs. multiple model files).
 transpile_test:
-    ifeq ($(TARGET), py)
-        COMPILE_SUFFIX_OPTION := -compileSuffix:0
-    else
-        COMPILE_SUFFIX_OPTION := -compileSuffix:1
-    endif
+	ifeq ($(TARGET), py)
+		COMPILE_SUFFIX_OPTION := -compileSuffix:0
+	else
+		COMPILE_SUFFIX_OPTION := -compileSuffix:1
+	endif
+# transpile_test:
+# 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+# 		-stdin \
+# 		-noVerify \
+# 		-vcsCores:$(CORES) \
+# 		-compileTarget:$(TARGET) \
+# 		-spillTargetCode:3 \
+# 		-runAllTests:1 \
+# 		-compile:0 \
+# 		-optimizeErasableDatatypeWrapper:0 \
+# 		$(COMPILE_SUFFIX_OPTION) \
+# 		-unicodeChar:0 \
+# 		-functionSyntax:3 \
+# 		-useRuntimeLib \
+# 		-out $(OUT) \
+# 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+# 		$(TRANSPILE_DEPENDENCIES)
 transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-runAllTests:1 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		translate $(TARGET) \
+		--stdin \
+		--no-verify \
+		--cores:$(CORES) \
+		--include-test-runner \
+		--optimize-erasable-datatype-wrapper:false \
+		--unicode-char:false \
+		--function-syntax:3 \
+		--allow-warnings \
+		--output $(OUT) \
+		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(TRANSLATION_RECORD) \
+		--translation-record runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/dafny_src-py.dtr \
 		$(TRANSPILE_DEPENDENCIES) \
 
 # If we are not the StandardLibrary, transpile the StandardLibrary.
@@ -341,11 +376,11 @@ polymorph_code_gen:
 	done
 
 _polymorph_code_gen: OUTPUT_DAFNY=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
+	--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_code_gen: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_code_gen: OUTPUT_DOTNET=\
-    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+	$(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_code_gen: _polymorph
 
@@ -383,7 +418,7 @@ polymorph_dotnet:
 	done
 
 _polymorph_dotnet: OUTPUT_DOTNET=\
-    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+	$(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project
@@ -612,12 +647,14 @@ transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
 transpile_implementation_python: COMPILE_SUFFIX_OPTION=
 transpile_implementation_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
+transpile_implementation_python: TRANSPILE_MODULE_NAME=--python-module-name=$(PYTHON_MODULE_NAME)
+transpile_implementation_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
 transpile_implementation_python: _transpile_implementation_all
 transpile_implementation_python: transpile_dependencies_python
 transpile_implementation_python: transpile_src_python
 transpile_implementation_python: transpile_test_python
 transpile_implementation_python: _mv_internaldafny_python
-transpile_implementation_python: _remove_src_module_python
+# transpile_implementation_python: _remove_src_module_python
 
 transpile_src_python: TARGET=py
 transpile_src_python: OUT=runtimes/python/dafny_src
@@ -630,6 +667,7 @@ transpile_test_python: OUT=runtimes/python/__main__
 transpile_test_python: COMPILE_SUFFIX_OPTION=
 transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
+transpile_implementation_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
 transpile_test_python: _transpile_test_all
 
 # Hacky workaround until Dafny supports per-language extern names.
@@ -667,12 +705,12 @@ _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
 	mkdir -p runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
-	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
+	mv runtimes/python/dafny_src-py/* runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
 	rm -rf runtimes/python/dafny_src-py
 	# Remove any previously generated Dafny code in test/, then copy in newly-generated code
 	rm -rf runtimes/python/test/internaldafny/generated
 	mkdir -p runtimes/python/test/internaldafny/generated
-	mv runtimes/python/__main__-py/*.py runtimes/python/test/internaldafny/generated
+	mv runtimes/python/__main__-py/* runtimes/python/test/internaldafny/generated
 	rm -rf runtimes/python/__main__-py
 
 # Versions of Dafny as of ~9/28 seem to ALWAYS write output to __main__.py,
@@ -698,14 +736,14 @@ _remove_src_module_python:
 	# The test/ file contains code to execute tests. The src/ file is largely empty.
 	# If the src/ file is installed most recently, tests will fail to run.
 	# By removing the src/ file, we ensure the test/ file is always the installed file.
-	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/module_.py
+# 	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/module_.py
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
 
 test_python:
 	rm -rf runtimes/python/.tox
-	tox -c runtimes/python --verbose
+	python3 -m tox -c runtimes/python --verbose
 
 ########################## local testing targets
 

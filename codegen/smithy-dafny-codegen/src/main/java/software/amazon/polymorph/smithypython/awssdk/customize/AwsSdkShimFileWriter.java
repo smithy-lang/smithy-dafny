@@ -46,7 +46,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             writer -> {
               writer.write(
                   """
-          import Wrappers
+          import standard_library.internaldafny.generated.Wrappers as Wrappers
           from botocore.exceptions import ClientError
           import $L
 

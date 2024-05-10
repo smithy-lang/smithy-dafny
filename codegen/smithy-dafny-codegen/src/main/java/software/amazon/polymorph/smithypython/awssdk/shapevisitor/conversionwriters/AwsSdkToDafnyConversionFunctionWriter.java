@@ -218,8 +218,8 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
     // If this shape is optional, write conversion logic to detect and possibly pass
     //   an empty optional at runtime
     if (memberShape.isOptional()) {
-      conversionWriter.addStdlibImport("Wrappers", "Option_Some");
-      conversionWriter.addStdlibImport("Wrappers", "Option_None");
+      conversionWriter.addStdlibImport("standard_library.internaldafny.generated.Wrappers", "Option_Some");
+      conversionWriter.addStdlibImport("standard_library.internaldafny.generated.Wrappers", "Option_None");
       conversionWriter.write(
           "Option_Some($L) if \"$L\" in $L.keys() else Option_None(),",
           targetShape.accept(

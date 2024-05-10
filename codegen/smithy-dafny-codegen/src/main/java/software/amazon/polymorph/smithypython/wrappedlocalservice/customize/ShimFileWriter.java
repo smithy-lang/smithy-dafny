@@ -51,7 +51,7 @@ public class ShimFileWriter implements CustomFileWriter {
 
               writer.write(
                   """
-          import Wrappers
+          import standard_library.internaldafny.generated.Wrappers as Wrappers
           import $L
           import $L.client as client_impl
 
