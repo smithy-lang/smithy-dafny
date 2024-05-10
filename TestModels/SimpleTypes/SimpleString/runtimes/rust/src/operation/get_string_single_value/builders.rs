@@ -10,7 +10,7 @@ impl GetStringSingleValueInputBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::get_string_single_value::GetStringSingleValueOutput,
-        crate::operation::get_string_single_value::GetStringSingleValueError
+        crate::operation::get_string_single_value::GetStringSingleValueError,
     > {
         let mut fluent_builder = client.get_string_single_value();
         fluent_builder.inner = self;
@@ -35,7 +35,10 @@ impl GetStringSingleValueFluentBuilder {
         }
     }
     /// Access the GetStringSingleValue as a reference.
-    pub fn as_input(&self) -> &crate::operation::get_string_single_value::builders::GetStringSingleValueInputBuilder {
+    pub fn as_input(
+        &self,
+    ) -> &crate::operation::get_string_single_value::builders::GetStringSingleValueInputBuilder
+    {
         &self.inner
     }
     /// Sends the request and returns the response.
@@ -43,7 +46,7 @@ impl GetStringSingleValueFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::get_string_single_value::GetStringSingleValueOutput,
-        crate::operation::get_string_single_value::GetStringSingleValueError
+        crate::operation::get_string_single_value::GetStringSingleValueError,
     > {
         let input = self
             .inner
@@ -53,16 +56,25 @@ impl GetStringSingleValueFluentBuilder {
             // (but isn't that a backwards compatibility problem for output structures?)
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
-            .map_err(crate::operation::get_string_single_value::GetStringSingleValueError::unhandled)?;
-        crate::operation::get_string_single_value::GetStringSingleValue::send(&self.handle, input).await
+            .map_err(
+                crate::operation::get_string_single_value::GetStringSingleValueError::unhandled,
+            )?;
+        crate::operation::get_string_single_value::GetStringSingleValue::send(&self.handle, input)
+            .await
     }
 
-    pub(crate) fn config_override(mut self, config_override: impl Into<crate::config::Builder>) -> Self {
+    pub(crate) fn config_override(
+        mut self,
+        config_override: impl Into<crate::config::Builder>,
+    ) -> Self {
         self.set_config_override(Some(config_override.into()));
         self
     }
 
-    pub(crate) fn set_config_override(&mut self, config_override: Option<crate::config::Builder>) -> &mut Self {
+    pub(crate) fn set_config_override(
+        &mut self,
+        config_override: Option<crate::config::Builder>,
+    ) -> &mut Self {
         self.config_override = config_override;
         self
     }

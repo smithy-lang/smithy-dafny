@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
 import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
+import java.util.EnumSet;
 import java.util.function.BiConsumer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,8 +19,10 @@ import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.SourceLocation;
 import software.amazon.smithy.model.loader.ModelAssembler;
+import software.amazon.smithy.model.shapes.EnumShape;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -28,6 +31,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 public class DotNetNameResolverTest {
 
@@ -169,6 +173,28 @@ public class DotNetNameResolverTest {
     assertEquals(
       "test.foobar.internaldafny.types._IEnumString",
       nameResolver.dafnyTypeForShape(enumStringShape.getId())
+    );
+  }
+
+  @Test
+  public void testDafnyTypeForEnumV2() {
+    final MemberShape memberShape = MemberShape
+      .builder()
+      .id(ShapeId.fromParts(SERVICE_NAMESPACE, "EnumShape", "FOO"))
+      .target(UnitTypeTrait.UNIT)
+      .build();
+    final EnumShape enumShape = EnumShape
+      .builder()
+      .id(ShapeId.fromParts(SERVICE_NAMESPACE, "EnumShape"))
+      .addMember(memberShape)
+      .build();
+    final DotNetNameResolver nameResolver = setupNameResolver(
+        (builder, modelAssembler) ->
+      modelAssembler.addShape(enumShape)
+    );
+    assertEquals(
+      "test.foobar.internaldafny.types._IEnumShape",
+      nameResolver.dafnyTypeForShape(enumShape.getId())
     );
   }
 

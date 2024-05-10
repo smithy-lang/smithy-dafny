@@ -35,7 +35,7 @@ impl Builder {
     pub fn new() -> Self {
         Self::default()
     }
-    
+
     /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
     ///
     /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
@@ -101,7 +101,10 @@ impl Builder {
     /// let client = simple_string::Client::from_conf(config);
     /// ```
 
-    pub fn set_behavior_version(&mut self, behavior_version: Option<crate::config::BehaviorVersion>) -> &mut Self {
+    pub fn set_behavior_version(
+        &mut self,
+        behavior_version: Option<crate::config::BehaviorVersion>,
+    ) -> &mut Self {
         self.behavior_version = behavior_version;
         self
     }

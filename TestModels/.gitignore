@@ -12,6 +12,8 @@
 # Dafny Generated Rust
 # (Rust code generation is incomplete so we're patching and checking in for now)
 #**/runtimes/rust
+# Cargo.lock files should only be committed for binaries, not libraries
+**/Cargo.lock
 
 # Polymorph Generated Dafny
 **/Model/*Types.dfy
