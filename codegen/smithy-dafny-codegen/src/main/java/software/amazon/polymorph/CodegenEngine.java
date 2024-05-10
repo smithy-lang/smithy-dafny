@@ -145,9 +145,10 @@ public class CodegenEngine {
         .get(lang)
         .toAbsolutePath()
         .normalize();
-      final Path testOutputDir = Optional.ofNullable(targetLangTestOutputDirs.get(lang))
-              .map(p -> p.toAbsolutePath().normalize())
-              .orElse(null);
+      final Path testOutputDir = Optional
+        .ofNullable(targetLangTestOutputDirs.get(lang))
+        .map(p -> p.toAbsolutePath().normalize())
+        .orElse(null);
       switch (lang) {
         case DAFNY -> generateDafny(outputDir);
         case JAVA -> generateJava(outputDir, testOutputDir);
@@ -249,7 +250,10 @@ public class CodegenEngine {
     handlePatching(TargetLanguage.JAVA, outputDir);
   }
 
-  private void javaLocalService(final Path outputDir, final Path testOutputDir) {
+  private void javaLocalService(
+    final Path outputDir,
+    final Path testOutputDir
+  ) {
     final JavaLibrary javaLibrary = new JavaLibrary(
       this.model,
       this.serviceShape,
@@ -260,17 +264,20 @@ public class CodegenEngine {
     LOGGER.info("Java code generated in {}", outputDir);
 
     if (testOutputDir != null) {
-      IOUtils.writeTokenTreesIntoDir(javaLibrary.generateTests(), testOutputDir);
+      IOUtils.writeTokenTreesIntoDir(
+        javaLibrary.generateTests(),
+        testOutputDir
+      );
       LOGGER.info("Java test code generated in {}", testOutputDir);
     }
   }
 
   private void javaLocalService(final Path outputDir) {
     final JavaLibrary javaLibrary = new JavaLibrary(
-            this.model,
-            this.serviceShape,
-            this.javaAwsSdkVersion,
-            this.dafnyVersion
+      this.model,
+      this.serviceShape,
+      this.javaAwsSdkVersion,
+      this.dafnyVersion
     );
     IOUtils.writeTokenTreesIntoDir(javaLibrary.generate(), outputDir);
     LOGGER.info("Java code generated in {}", outputDir);
@@ -586,7 +593,7 @@ public class CodegenEngine {
      * along with the directory(-ies) into which to output each language's generated testing code.
      */
     public Builder withTargetLangTestOutputDirs(
-            final Map<TargetLanguage, Path> targetLangTestOutputDirs
+      final Map<TargetLanguage, Path> targetLangTestOutputDirs
     ) {
       this.targetLangTestOutputDirs = targetLangTestOutputDirs;
       return this;
@@ -718,12 +725,12 @@ public class CodegenEngine {
         ImmutableMap.copyOf(targetLangOutputDirsRaw);
 
       final Map<TargetLanguage, Path> targetLangTestOutputDirsRaw =
-              Objects.requireNonNull(this.targetLangTestOutputDirs);
+        Objects.requireNonNull(this.targetLangTestOutputDirs);
       targetLangTestOutputDirsRaw.replaceAll((_lang, path) ->
-              path.toAbsolutePath().normalize()
+        path.toAbsolutePath().normalize()
       );
       final Map<TargetLanguage, Path> targetLangTestOutputDirs =
-              ImmutableMap.copyOf(targetLangTestOutputDirsRaw);
+        ImmutableMap.copyOf(targetLangTestOutputDirsRaw);
 
       final DafnyVersion dafnyVersion = Objects.requireNonNull(
         this.dafnyVersion

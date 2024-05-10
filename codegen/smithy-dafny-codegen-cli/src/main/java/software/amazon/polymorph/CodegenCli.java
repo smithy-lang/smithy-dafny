@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -65,8 +64,14 @@ public class CodegenCli {
     // Validation succeeded but there may be events like WARNINGS, output them as well
     List<ValidationEvent> events = result.getValidationEvents();
     if (!events.isEmpty()) {
-      LOGGER.warn("Validation events:\n" +
-              events.stream().map(ValidationEvent::toString).sorted().collect(Collectors.joining("\n")));
+      LOGGER.warn(
+        "Validation events:\n" +
+        events
+          .stream()
+          .map(ValidationEvent::toString)
+          .sorted()
+          .collect(Collectors.joining("\n"))
+      );
     }
 
     // If Smithy ever lets us configure this:
@@ -95,7 +100,7 @@ public class CodegenCli {
 
     final Map<TargetLanguage, Path> testOutputDirs = new HashMap<>();
     cliArguments.testOutputJavaDir.ifPresent(path ->
-            testOutputDirs.put(TargetLanguage.JAVA, path)
+      testOutputDirs.put(TargetLanguage.JAVA, path)
     );
 
     final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
@@ -336,8 +341,8 @@ public class CodegenCli {
         .ofNullable(commandLine.getOptionValue("output-java"))
         .map(Paths::get);
       final Optional<Path> testOutputJavaDir = Optional
-              .ofNullable(commandLine.getOptionValue("output-java-test"))
-              .map(Paths::get);
+        .ofNullable(commandLine.getOptionValue("output-java-test"))
+        .map(Paths::get);
       final Optional<Path> outputDotnetDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dotnet"))
         .map(Paths::get);
