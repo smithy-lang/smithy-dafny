@@ -1,7 +1,7 @@
 {
     "version": "1.0",
     "plugins": {
-        "dafny-client-codegq    en": {
+        "dafny-client-codegen": {
             "service": "simple.types.boolean#SimpleTypesBoolean",
             "module": "github.com/aws/smithy-dafny/internal/tests/service/SimpleTypesBoolean",
             "moduleVersion": "0.0.1",
