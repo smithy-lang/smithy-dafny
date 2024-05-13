@@ -60,6 +60,6 @@ impl Drop for Handle {
 
 mod get_string;
 
-mod get_string_single_value;
+mod get_string_known_value;
 
 mod get_string_utf8;

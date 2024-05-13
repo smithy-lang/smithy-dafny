@@ -12,7 +12,7 @@ module SimpleStringImpl refines AbstractSimpleTypesSmithyStringOperations  {
     predicate GetStringEnsuresPublicly(input: GetStringInput, output: Result<GetStringOutput, Error>) {
         true
     }
-    predicate GetStringSingleValueEnsuresPublicly(input: GetStringInput, output: Result<GetStringOutput, Error>) {
+    predicate GetStringKnownValueEnsuresPublicly(input: GetStringInput, output: Result<GetStringOutput, Error>) {
         true
     }
     predicate GetStringUTF8EnsuresPublicly(input: GetStringInput, output: Result<GetStringOutput, Error>) {
@@ -23,10 +23,10 @@ module SimpleStringImpl refines AbstractSimpleTypesSmithyStringOperations  {
         var res := GetStringOutput(value := input.value);
         return Success(res);
     }
-    method GetStringSingleValue ( config: InternalConfig,  input: GetStringInput )
+    method GetStringKnownValue ( config: InternalConfig,  input: GetStringInput )
     returns (output: Result<GetStringOutput, Error>) {
         expect input.value.Some?;
-        expect input.value.value == "TEST_SIMPLE_STRING_SINGLE_VALUE"; // This is done so as to assert that polymorph layer is doing one way conversion right as well.
+        expect input.value.value == "TEST_SIMPLE_STRING_KNOWN_VALUE"; // This is done so as to assert that polymorph layer is doing one way conversion right as well.
         var res := GetStringOutput(value := input.value);
         return Success(res);
     }
