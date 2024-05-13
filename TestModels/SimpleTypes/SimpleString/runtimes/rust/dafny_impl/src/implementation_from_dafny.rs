@@ -214,7 +214,7 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
                 ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
             >,
         >;
-        fn GetStringSingleValue(
+        fn GetStringKnownValue(
             self: &Self,
             input: &::std::rc::Rc<
                 super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
@@ -353,7 +353,7 @@ mod r#_SimpleStringImpl_Compile {
             return output.read();
             return output.read();
         }
-        pub fn GetStringSingleValue(
+        pub fn GetStringKnownValue(
             config: &::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>,
             input: &::std::rc::Rc<
                 super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
@@ -374,7 +374,7 @@ mod r#_SimpleStringImpl_Compile {
                 panic!("Halt")
             };
             if !(input.value().value().clone()
-                == ::dafny_runtime::string_utf16_of("TEST_SIMPLE_STRING_SINGLE_VALUE"))
+                == ::dafny_runtime::string_utf16_of("TEST_SIMPLE_STRING_KNOWN_VALUE"))
             {
                 panic!("Halt")
             };
@@ -538,7 +538,7 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny {
         > {
             super::r#_SimpleStringImpl_Compile::_default::GetString(&self.config(), input)
         }
-        fn GetStringSingleValue(
+        fn GetStringKnownValue(
             self: &Self,
             input: &::std::rc::Rc<
                 super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
@@ -551,10 +551,7 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny {
                 ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
             >,
         > {
-            super::r#_SimpleStringImpl_Compile::_default::GetStringSingleValue(
-                &self.config(),
-                input,
-            )
+            super::r#_SimpleStringImpl_Compile::_default::GetStringKnownValue(&self.config(), input)
         }
         fn GetStringUTF8(
             self: &Self,
