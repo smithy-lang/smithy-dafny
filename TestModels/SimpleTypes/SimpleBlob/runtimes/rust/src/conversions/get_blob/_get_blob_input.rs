@@ -26,9 +26,10 @@ pub fn from_dafny(
         dafny_value.value().as_ref(),
         ::simple_blob_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
-        Some(::std::rc::Rc::unwrap_or_clone(
-            dafny_value.value().Extract().to_array(),
-        ))
+        Some(
+            ::std::rc::Rc::try_unwrap(dafny_value.value().Extract().to_array())
+                .unwrap_or_else(|rc| (*rc).clone()),
+        )
     } else if matches!(
         dafny_value.value().as_ref(),
         ::simple_blob_dafny::_Wrappers_Compile::Option::None { .. }
