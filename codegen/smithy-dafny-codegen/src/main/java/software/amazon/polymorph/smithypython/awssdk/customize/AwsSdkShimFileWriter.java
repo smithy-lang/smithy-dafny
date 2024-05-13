@@ -34,7 +34,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String typesModulePrelude =
-        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
+        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext);
     String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
@@ -128,7 +128,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
           """
         return $L.Error_Opaque(obj=e)
         """,
-          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId()));
+          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
     } else {
       // If `hasOpenedIfBlock` is true, then codegen wrote at least one error,
       // and this function should only cast to Opaque error via `else`
@@ -137,7 +137,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
         else:
             return $L.Error_Opaque(obj=e)
         """,
-          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId()));
+          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
     }
   }
 

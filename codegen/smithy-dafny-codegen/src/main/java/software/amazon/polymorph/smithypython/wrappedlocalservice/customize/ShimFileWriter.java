@@ -35,7 +35,7 @@ public class ShimFileWriter implements CustomFileWriter {
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String typesModulePrelude =
-        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
+        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext);
     String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());

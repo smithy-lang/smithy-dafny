@@ -351,7 +351,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
         writer -> {
           writer.addStdlibImport("typing", "Any");
           DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(
-              writer, serviceShape.getId().getNamespace());
+              writer, serviceShape.getId().getNamespace(), context);
           writer.addImport(".errors", "ServiceError");
           writer.addImport(".errors", "OpaqueError");
           writer.addImport(".errors", "CollectionOfErrors");
@@ -421,7 +421,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       // Import Dafny-modelled error
       DafnyNameResolver.importDafnyTypeForError(writer, errorId, context);
       // Import generic Dafny error type
-      DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
+      DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace(), context);
       writer.write(
           """
             elif error.is_$L:

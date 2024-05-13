@@ -6,51 +6,19 @@ pytest will find and execute the `test_dafny` method below,
 which will execute the `internaldafny_test_executor.py` file in the `dafny` directory.
 """
 
-
-
-# # TODO-Python-PYTHONPATH: Remove all sys.path.append logic from this file
-# # import sys
-
-# # internaldafny_dir = '/'.join(__file__.split("/")[:-1])
-
-# # sys.path.append(internaldafny_dir + "/extern")
-# # sys.path.append(internaldafny_dir + "/generated")
-
-# # Import modules required for Dafny-generated tests.
-# # This is not generated; these must be manually added.
-# # These are only imported to populate the PYTHONPATH.
-# # This can be removed once PYTHONPATH workaround is removed,
-# # and all Dafny-generated imports are fully qualified.
-# # TODO-Python-PYTHONPATH: Remove imports to initialize modules' PYTHONPATHs from this file
-# # import simple_types_boolean
-
-# import sys
-# import importlib
-# if "module_" not in sys.modules:
-#   import simple_types_boolean.internaldafny.generated.module
-#   sys.modules["module_"] = simple_types_boolean.internaldafny.generated.module_
-#   from .generated import module_
-
 import sys
 
-# internaldafny_dir = '/'.join(__file__.split("/")[:-1])
+# Dafny-generated tests are not compiled as a package
+# and require adding Dafny-generated test code to PYTHONPATH.
+# These files are only on PYTHONPATH for tests executed from this file.
 
-# sys.path.append(internaldafny_dir + "/extern")
-# sys.path.append(internaldafny_dir + "/generated")
+internaldafny_dir = '/'.join(__file__.split("/")[:-1])
 
-import simple_types_boolean
+sys.path.append(internaldafny_dir + "/extern")
+sys.path.append(internaldafny_dir + "/generated")
 
-from .generated import module_
-
-# if "module_" not in sys.modules:
-#   import module_
-#   sys.modules["module_"] = module_
-
+# Initialize extern for test
 from .extern import wrapped_simple_boolean
 
-# input(sys.modules["module_"])
-
 def test_dafny():
-  # Dafny tests are executed when importing `internaldafny_test_executor`
-  # TODO-Python-PYTHONPATH: Qualify import
-  import internaldafny_test_executor
+  from .generated import __main__

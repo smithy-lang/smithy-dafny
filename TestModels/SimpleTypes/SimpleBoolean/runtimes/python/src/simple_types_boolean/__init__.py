@@ -1,7 +1,2 @@
-# Initialize generated Dafny
-from .internaldafny.generated import module_
-
-import sys
-
-if "module_" not in sys.modules:
-  sys.modules["module_"] = module_
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0

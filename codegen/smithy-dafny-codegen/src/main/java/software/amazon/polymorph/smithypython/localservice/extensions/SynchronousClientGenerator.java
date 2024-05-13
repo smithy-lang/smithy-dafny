@@ -100,7 +100,7 @@ public class SynchronousClientGenerator extends ClientGenerator {
 
           writer.addStdlibImport(
               DafnyNameResolver.getDafnyTypesModuleNameForSmithyNamespace(
-                  service.getId().getNamespace()),
+                  service.getId().getNamespace(), context),
               DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(service));
 
           writer.write(

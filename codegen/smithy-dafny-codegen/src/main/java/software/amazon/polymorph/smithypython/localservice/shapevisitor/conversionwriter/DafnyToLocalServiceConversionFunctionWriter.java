@@ -335,7 +335,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
               );
               shouldOpenNewIfBlock = false;
 
-              DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
+              DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape, context);
               SmithyNameResolver.importSmithyGeneratedTypeForShape(conversionWriter, unionShape, context);
             }
 
@@ -400,7 +400,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
                             shouldOpenNewIfBlock = false;
 
                             DafnyNameResolver.importDafnyTypeForStringShapeWithEnumTrait(
-                                    conversionWriter, stringShapeWithEnumTrait, name);
+                                    conversionWriter, stringShapeWithEnumTrait, name, context);
                         }
                         conversionWriter.openBlock("else:",
                                 "",

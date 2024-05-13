@@ -200,7 +200,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                   shouldOpenNewIfBlock = false;
 
                   DafnyNameResolver.importDafnyTypeForUnion(
-                      conversionWriter, unionShape, memberShape);
+                      conversionWriter, unionShape, memberShape, context);
                 }
 
                 // Write case to handle if union member does not match any of the above cases
@@ -279,7 +279,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                   shouldOpenNewIfBlock = false;
 
                   DafnyNameResolver.importDafnyTypeForStringShapeWithEnumTrait(
-                      conversionWriter, stringShapeWithEnumTrait, value);
+                      conversionWriter, stringShapeWithEnumTrait, value, context);
                 }
 
                 // Write case to handle if union member does not match any of the above cases

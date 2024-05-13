@@ -116,7 +116,7 @@ protected void generateResourceImplementation(
 
     String dafnyInterfaceTypeName =
         DafnyNameResolver.getDafnyInterfaceTypeForResourceShape(resourceShape);
-    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceShape));
+    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceShape, context));
 
     // Write implementation for resource shape
     writer.write(
@@ -133,7 +133,7 @@ protected void generateResourceImplementation(
             ${4C|}
         """,
         resourceShape.getId().getName(),
-        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceShape)
+        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceShape, context)
             + "."
             + dafnyInterfaceTypeName,
         writer.consumer(
@@ -258,7 +258,7 @@ protected void generateResourceImplementation(
                     : "Error";
 
             writer.addStdlibImport(
-                    DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape),
+                    DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape, codegenContext),
                     defaultWrappingError
             );
 

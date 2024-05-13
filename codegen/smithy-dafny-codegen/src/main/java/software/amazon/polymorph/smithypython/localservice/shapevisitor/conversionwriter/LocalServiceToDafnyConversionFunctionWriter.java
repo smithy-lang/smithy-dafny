@@ -286,7 +286,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 //      conversionWriter.write("return $L_client",
 //          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()));
     } else {
-      DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
+      DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape, context);
 
       conversionWriter.write("""
           import $1L
@@ -294,7 +294,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
           client.value.impl = $3L
           return client.value
           """,
-          DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
+          DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape, context),
           AwsSdkNameResolver.clientNameForService(serviceShape),
           dataSourceInsideConversionFunction
       );
@@ -382,7 +382,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
               );
               shouldOpenNewIfBlock = false;
 
-              DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
+              DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape, context);
               SmithyNameResolver.importSmithyGeneratedTypeForShape(conversionWriter, unionShape, context);
             }
 
@@ -433,7 +433,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
                                   () -> {
                                       conversionWriter.write("return $L()",
                                               DafnyNameResolver.getDafnyTypeForStringShapeWithEnumTrait(stringShapeWithEnumTrait, name));
-                                      DafnyNameResolver.importDafnyTypeForStringShapeWithEnumTrait(conversionWriter, stringShapeWithEnumTrait, name);
+                                      DafnyNameResolver.importDafnyTypeForStringShapeWithEnumTrait(conversionWriter, stringShapeWithEnumTrait, name, context);
                                   }
                           );
                           shouldOpenNewIfBlock = false;

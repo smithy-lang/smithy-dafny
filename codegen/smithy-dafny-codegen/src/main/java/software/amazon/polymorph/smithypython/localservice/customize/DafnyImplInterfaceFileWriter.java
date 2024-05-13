@@ -32,7 +32,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
             codegenContext.settings().getService().getNamespace());
     String clientName = SmithyNameResolver.clientNameForService(serviceShape);
     String implModulePrelude =
-        DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
+        DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape, codegenContext);
 
     codegenContext
         .writerDelegator()

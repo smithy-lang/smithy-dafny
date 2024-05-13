@@ -237,7 +237,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                                 .collect(Collectors.toSet()));
         for (ShapeId errorShapeId : errorShapeSet) {
             SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
-            writer.addStdlibImport(DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId));
+            writer.addStdlibImport(DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId, codegenContext));
             writer.write(
                     """
                         if isinstance(e, $L.$L):
@@ -245,7 +245,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                         """,
                     SmithyNameResolver.getSmithyGeneratedModelLocationForShape(errorShapeId, codegenContext),
                     errorShapeId.getName(),
-                    DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
+                    DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId, codegenContext),
                     DafnyNameResolver.getDafnyTypeForError(errorShapeId));
         }
 
@@ -313,7 +313,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                                     return $L.Error_$L($L(e.message))
                                 """,
                             dependencyErrorName,
-                            DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape),
+                            DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape, codegenContext),
                             dependencyErrorName,
                             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                     serviceDependencyShapeId.getNamespace())
@@ -328,14 +328,14 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     if isinstance(e, CollectionOfErrors):
                         return $L.Error_CollectionOfErrors(message=e.message, list=e.list)
                     """,
-                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId()));
+                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
         // Add service-specific OpaqueError
         writer.write(
                 """
                     if isinstance(e, OpaqueError):
                         return $L.Error_Opaque(obj=e.obj)
                     """,
-                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId()));
+                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
     }
 
 

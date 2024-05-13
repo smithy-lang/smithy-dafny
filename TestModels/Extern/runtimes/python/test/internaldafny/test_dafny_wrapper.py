@@ -20,10 +20,10 @@ sys.path.append(internaldafny_dir + "/generated")
 # This can be removed once PYTHONPATH workaround is removed,
 # and all Dafny-generated imports are fully qualified.
 # TODO-Python-PYTHONPATH: Remove imports to initialize modules' PYTHONPATHs from this file
-import simple_dafnyextern
-import wrapped_simple_extern
+# import simple_dafnyextern
+# import wrapped_simple_extern
 
 def test_dafny():
   # Dafny tests are executed when importing `internaldafny_test_executor`
   # TODO-Python-PYTHONPATH: Qualify import
-  import internaldafny_test_executor
+  import __main__
