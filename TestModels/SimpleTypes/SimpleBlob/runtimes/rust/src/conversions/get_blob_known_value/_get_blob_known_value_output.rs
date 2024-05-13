@@ -6,7 +6,9 @@ pub fn to_dafny(
     ::simple_blob_dafny::r#_simple_dtypes_dsmithyblob_dinternaldafny_dtypes::GetBlobOutput,
 > {
     let dafny_value = match value.value {
-        Some(s) => ::simple_blob_dafny::_Wrappers_Compile::Option::Some { value: s },
+        Some(v) => ::simple_blob_dafny::_Wrappers_Compile::Option::Some {
+            value: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&v, |e| *e),
+        },
         None => ::simple_blob_dafny::_Wrappers_Compile::Option::None {},
     };
     ::std::rc::Rc::new(::simple_blob_dafny::r#_simple_dtypes_dsmithyblob_dinternaldafny_dtypes::GetBlobOutput::GetBlobOutput {
@@ -24,7 +26,12 @@ pub fn from_dafny(
         dafny_value.value().as_ref(),
         ::simple_blob_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
-        Some(dafny_value.value().Extract())
+        Some(
+            dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
+                &dafny_value.value().Extract(),
+                |e| *e,
+            ),
+        )
     } else if matches!(
         dafny_value.value().as_ref(),
         ::simple_blob_dafny::_Wrappers_Compile::Option::None { .. }
