@@ -199,6 +199,7 @@ public class TypeConversionCodegen {
         resourceOperationShapes
       )
       .flatMap(Function.identity())
+      .filter(operationShape -> operationShape.getId().getName().equals("PutObject"))
       .collect(Collectors.toSet());
     // Collect inputs/output structures for collected operations
     final Set<ShapeId> operationStructures = operationShapes
@@ -225,7 +226,6 @@ public class TypeConversionCodegen {
       .map(unionShape -> unionShape.getId())
       .collect(Collectors.toSet());
 
-    // TODO add smithy v2 Enums
     // Collect enum shapes
     final Set<ShapeId> enumShapes = model
       .getShapesWithTrait(EnumTrait.class)

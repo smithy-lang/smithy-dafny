@@ -3,7 +3,12 @@
 
 package software.amazon.polymorph.smithydotnet;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
+
+import com.google.common.collect.ImmutableList;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -41,6 +46,11 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     "Com.Amazonaws.Dynamodb.AttributeValue";
   public static final String REQUEST = "Request";
   public static final String RESPONSE = "Response";
+
+  public static final String S3_SERVICE_NAME = "AmazonS3";
+  public static final String S3_PUT_OBJECT = "PutObject";
+  public static final String S3_GET_OBJECT = "GetObject";
+  public static List<String> S3_OPERATIONS = ImmutableList.of(S3_PUT_OBJECT, S3_GET_OBJECT);
 
   public AwsSdkDotNetNameResolver(
     final Model model,
@@ -131,9 +141,10 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
           "Trait definition structures have no corresponding generated type"
         );
       }
+      Optional<ShapeId> shapeId = Optional.of(structureShape.getId());
+
       // The NET SDK uses <operation name>Request/Response
       // rather than the structure name for operation input/output structures
-      Optional<ShapeId> shapeId = Optional.of(structureShape.getId());
       Optional<OperationShape> operation = getModel()
         .getOperationShapes()
         .stream()

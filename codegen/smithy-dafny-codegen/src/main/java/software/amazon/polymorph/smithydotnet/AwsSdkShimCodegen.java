@@ -73,6 +73,7 @@ public class AwsSdkShimCodegen {
         serviceShape
           .getAllOperations()
           .stream()
+          .filter(shapeId -> shapeId.getName().equals("PutObject")) // this works, but probably better done earlier
           .map(this::generateOperationShim)
       )
       .lineSeparated();
