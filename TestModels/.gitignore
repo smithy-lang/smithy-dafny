@@ -26,6 +26,7 @@
 
 # Polymorph Generated Java
 **/runtimes/java/src/main/smithy-generated/
+**/runtimes/java/src/test/smithy-generated/
 
 # .NET Artifacts
 **/bin

@@ -3,6 +3,8 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Set;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
@@ -47,5 +49,12 @@ public class Constants {
     ShapeType.LIST,
     ShapeType.SET,
     ShapeType.MAP
+  );
+
+  public static final ClassName STANDARD_CHARSETS_CLASS_NAME = ClassName.get(
+    StandardCharsets.class
+  );
+  public static final ClassName BASE64_DECODER_CLASS_NAME = ClassName.get(
+    Base64.Decoder.class
   );
 }

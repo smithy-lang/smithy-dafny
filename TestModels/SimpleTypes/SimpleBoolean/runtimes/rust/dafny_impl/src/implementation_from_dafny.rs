@@ -519,6 +519,4 @@ mod r#_StandardLibraryInterop_Compile {
         }
     }
 }
-mod _module {
-  
-}
+mod _module {}

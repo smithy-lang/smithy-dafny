@@ -2,32 +2,33 @@
 #[allow(missing_docs)] // documentation missing in model
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-pub struct GetStringUTF8Output {
+pub struct GetStringKnownValueOutput {
     #[allow(missing_docs)] // documentation missing in model
     pub value: ::std::option::Option<::std::string::String>,
 }
-impl GetStringUTF8Output {
+impl GetStringKnownValueOutput {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(&self) -> ::std::option::Option<&str> {
         self.value.as_deref()
     }
 }
-impl GetStringUTF8Output {
-    /// Creates a new builder-style object to manufacture [`GetStringUTF8Output`](crate::operation::operation::GetStringUTF8Output).
-    pub fn builder() -> crate::operation::get_string_utf8::builders::GetStringUTF8OutputBuilder {
-        crate::operation::get_string_utf8::builders::GetStringUTF8OutputBuilder::default()
+impl GetStringKnownValueOutput {
+    /// Creates a new builder-style object to manufacture [`GetStringKnownValueOutput`](crate::operation::operation::GetStringKnownValueOutput).
+    pub fn builder(
+    ) -> crate::operation::get_string_known_value::builders::GetStringKnownValueOutputBuilder {
+        crate::operation::get_string_known_value::builders::GetStringKnownValueOutputBuilder::default()
     }
 }
 
-/// A builder for [`GetStringUTF8Output`](crate::operation::operation::GetStringUTF8Output).
+/// A builder for [`GetStringKnownValueOutput`](crate::operation::operation::GetStringKnownValueOutput).
 #[non_exhaustive]
 #[derive(
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
-pub struct GetStringUTF8OutputBuilder {
+pub struct GetStringKnownValueOutputBuilder {
     pub(crate) value: ::std::option::Option<::std::string::String>,
 }
-impl GetStringUTF8OutputBuilder {
+impl GetStringKnownValueOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.value = ::std::option::Option::Some(input.into());
@@ -42,15 +43,17 @@ impl GetStringUTF8OutputBuilder {
     pub fn get_value(&self) -> &::std::option::Option<::std::string::String> {
         &self.value
     }
-    /// Consumes the builder and constructs a [`GetStringUTF8Output`](crate::operation::operation::GetStringUTF8Output).
+    /// Consumes the builder and constructs a [`GetStringKnownValueOutput`](crate::operation::operation::GetStringKnownValueOutput).
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_string_utf8::GetStringUTF8Output,
+        crate::operation::get_string_known_value::GetStringKnownValueOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_string_utf8::GetStringUTF8Output {
-            value: self.value,
-        })
+        ::std::result::Result::Ok(
+            crate::operation::get_string_known_value::GetStringKnownValueOutput {
+                value: self.value,
+            },
+        )
     }
 }
