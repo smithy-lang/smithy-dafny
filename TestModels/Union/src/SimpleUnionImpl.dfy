@@ -12,7 +12,7 @@ module SimpleUnionImpl refines AbstractSimpleUnionOperations  {
     predicate GetUnionEnsuresPublicly(input: GetUnionInput, output: Result<GetUnionOutput, Error>) {
         true
     }
-    predicate GetSingleValueUnionEnsuresPublicly(input: GetSingleValueUnionInput, output: Result<GetSingleValueUnionOutput, Error>) {
+    predicate GetKnownValueUnionEnsuresPublicly(input: GetKnownValueUnionInput, output: Result<GetKnownValueUnionOutput, Error>) {
         true
     }
 
@@ -24,10 +24,10 @@ module SimpleUnionImpl refines AbstractSimpleUnionOperations  {
         return Success(res);
     }
 
-    method GetSingleValueUnion ( config: InternalConfig,  input: GetSingleValueUnionInput )
-      returns (output: Result<GetSingleValueUnionOutput, Error>)
+    method GetKnownValueUnion ( config: InternalConfig,  input: GetKnownValueUnionInput )
+      returns (output: Result<GetKnownValueUnionOutput, Error>)
     {
-        var res := GetSingleValueUnionOutput(union := input.union);
+        var res := GetKnownValueUnionOutput(union := input.union);
 
         return Success(res);
     }
