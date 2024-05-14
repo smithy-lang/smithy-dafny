@@ -1,14 +1,16 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import simple_types_boolean_internaldafny_wrapped
+# src imports 
 from simple_types_boolean.smithygenerated.simple_types_boolean.client import SimpleTypesBoolean
 from simple_types_boolean.smithygenerated.simple_types_boolean.shim import SimpleBooleanShim
 from simple_types_boolean.smithygenerated.simple_types_boolean.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(simple_types_boolean_internaldafny_wrapped.default__):
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleTypesBooleanService
+
+class default__(WrappedSimpleTypesBooleanService.default__):
 
     @staticmethod
     def WrappedSimpleBoolean(config):
@@ -17,5 +19,4 @@ class default__(simple_types_boolean_internaldafny_wrapped.default__):
         wrapped_client = SimpleBooleanShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-simple_types_boolean_internaldafny_wrapped.default__ = default__
+WrappedSimpleTypesBooleanService.default__ = default__
