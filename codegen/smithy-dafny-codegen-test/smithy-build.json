@@ -12,5 +12,5 @@
             "includeDafnyFile":""
         }
     },
-    "imports": ["../TestModels/dafny-dependencies/Model/"]
+    "imports": ["../../TestModels/dafny-dependencies/Model/"]
 }
