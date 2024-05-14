@@ -5,8 +5,10 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=simple_errors
+
+TRANSLATION_RECORD_PYTHON := \
+	--translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
 
 PROJECT_SERVICES := \
 	SimpleErrors

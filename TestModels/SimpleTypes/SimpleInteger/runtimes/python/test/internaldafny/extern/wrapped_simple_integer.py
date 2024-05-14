@@ -6,7 +6,7 @@ import simple_types_integer_internaldafny_wrapped
 from simple_types_integer.smithygenerated.simple_types_integer.client import SimpleTypesInteger
 from simple_types_integer.smithygenerated.simple_types_integer.shim import SimpleIntegerShim
 from simple_types_integer.smithygenerated.simple_types_integer.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_types_integer_internaldafny_wrapped.default__):
 

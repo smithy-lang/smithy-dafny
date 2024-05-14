@@ -6,7 +6,7 @@ import simple_types_smithystring_internaldafny_wrapped
 from simple_types_smithystring.smithygenerated.simple_types_smithystring.client import SimpleTypesString
 from simple_types_smithystring.smithygenerated.simple_types_smithystring.shim import SimpleStringShim
 from simple_types_smithystring.smithygenerated.simple_types_smithystring.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_types_smithystring_internaldafny_wrapped.default__):
 

@@ -6,7 +6,7 @@ import simple_constructor_internaldafny_wrapped
 from simple_constructor.smithygenerated.simple_constructor.client import SimpleConstructor
 from simple_constructor.smithygenerated.simple_constructor.shim import SimpleConstructorShim
 from simple_constructor.smithygenerated.simple_constructor.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_constructor_internaldafny_wrapped.default__):
 

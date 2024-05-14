@@ -6,7 +6,7 @@ import simple_union_internaldafny_wrapped
 from simple_union.smithygenerated.simple_union.client import SimpleUnion
 from simple_union.smithygenerated.simple_union.shim import SimpleUnionShim
 from simple_union.smithygenerated.simple_union.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_union_internaldafny_wrapped.default__):
 

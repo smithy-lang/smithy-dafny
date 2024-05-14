@@ -6,7 +6,7 @@ import simple_types_smithyenum_internaldafny_wrapped
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.client import SimpleTypesEnum
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.shim import SimpleEnumShim
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_types_smithyenum_internaldafny_wrapped.default__):
 

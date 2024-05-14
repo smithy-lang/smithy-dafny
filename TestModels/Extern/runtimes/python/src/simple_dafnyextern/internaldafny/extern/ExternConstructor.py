@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from simple_dafnyextern.internaldafny.generated.ExternConstructor import *
 import simple_dafnyextern_internaldafny_types
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 import _dafny
 
 class ExternConstructorClass:

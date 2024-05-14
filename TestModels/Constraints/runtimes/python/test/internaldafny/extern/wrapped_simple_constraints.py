@@ -6,7 +6,7 @@ import simple_constraints_internaldafny_wrapped
 from simple_constraints.smithygenerated.simple_constraints.client import SimpleConstraints
 from simple_constraints.smithygenerated.simple_constraints.shim import SimpleConstraintsShim
 from simple_constraints.smithygenerated.simple_constraints.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_constraints_internaldafny_wrapped.default__):
 

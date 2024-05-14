@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import LanguageSpecificLogicImpl
 import sys
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 import _dafny
 
 class default__(LanguageSpecificLogicImpl.default__):

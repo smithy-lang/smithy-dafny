@@ -6,7 +6,7 @@ import simple_dependencies_internaldafny_wrapped
 from simple_dependencies.smithygenerated.simple_dependencies.client import SimpleDependencies
 from simple_dependencies.smithygenerated.simple_dependencies.config import dafny_config_to_smithy_config
 from simple_dependencies.smithygenerated.simple_dependencies.shim import SimpleDependenciesShim
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 @staticmethod
 def WrappedSimpleDependencies(config):

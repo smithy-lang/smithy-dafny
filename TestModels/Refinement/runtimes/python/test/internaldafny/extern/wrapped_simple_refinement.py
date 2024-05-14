@@ -6,7 +6,7 @@ import simple_refinement_internaldafny_wrapped
 from simple_refinement.smithygenerated.simple_refinement.client import SimpleRefinement
 from simple_refinement.smithygenerated.simple_refinement.shim import SimpleRefinementShim
 from simple_refinement.smithygenerated.simple_refinement.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_refinement_internaldafny_wrapped.default__):
 

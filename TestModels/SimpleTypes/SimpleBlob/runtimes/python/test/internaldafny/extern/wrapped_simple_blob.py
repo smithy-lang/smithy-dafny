@@ -6,7 +6,7 @@ import simple_types_blob_internaldafny_wrapped
 from simple_types_blob.smithygenerated.simple_types_blob.client import SimpleTypesBlob
 from simple_types_blob.smithygenerated.simple_types_blob.shim import SimpleBlobShim
 from simple_types_blob.smithygenerated.simple_types_blob.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_types_blob_internaldafny_wrapped.default__):
 

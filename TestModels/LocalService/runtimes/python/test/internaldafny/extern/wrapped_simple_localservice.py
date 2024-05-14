@@ -6,7 +6,7 @@ import simple_localservice_internaldafny_wrapped
 from simple_localservice.smithygenerated.simple_localservice.client import SimpleLocalService
 from simple_localservice.smithygenerated.simple_localservice.shim import SimpleLocalServiceShim
 from simple_localservice.smithygenerated.simple_localservice.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_localservice_internaldafny_wrapped.default__):
 

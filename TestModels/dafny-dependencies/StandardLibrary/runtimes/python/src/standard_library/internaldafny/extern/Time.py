@@ -3,7 +3,7 @@
 # import standard_library.internaldafny.generated.Time
 # import datetime
 # import pytz
-# import Wrappers
+# import standard_library.internaldafny.generated.Wrappers as Wrappers
 # import _dafny
 
 # class default__:

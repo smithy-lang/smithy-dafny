@@ -6,7 +6,7 @@ import simple_types_smithylong_internaldafny_wrapped
 from simple_types_smithylong.smithygenerated.simple_types_smithylong.client import SimpleTypesLong
 from simple_types_smithylong.smithygenerated.simple_types_smithylong.shim import SimpleLongShim
 from simple_types_smithylong.smithygenerated.simple_types_smithylong.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_types_smithylong_internaldafny_wrapped.default__):
 

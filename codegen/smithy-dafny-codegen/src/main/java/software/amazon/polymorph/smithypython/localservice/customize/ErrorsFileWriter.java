@@ -237,11 +237,12 @@ public class ErrorsFileWriter implements CustomFileWriter {
                                 .collect(Collectors.toSet()));
         for (ShapeId errorShapeId : errorShapeSet) {
             SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
+            writer.addStdlibImport("_dafny");
             writer.addStdlibImport(DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId, codegenContext));
             writer.write(
                     """
                         if isinstance(e, $L.$L):
-                            return $L.$L(message=e.message)
+                            return $L.$L(message=_dafny.Seq(e.message))
                         """,
                     SmithyNameResolver.getSmithyGeneratedModelLocationForShape(errorShapeId, codegenContext),
                     errorShapeId.getName(),
@@ -297,6 +298,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
                                     serviceDependencyShapeId.getNamespace())
                                     + nativeToDafnyErrorName);
 
+                    writer.addStdlibImport("_dafny");
+
                     // Import this service's error that wraps the dependency service's errors
                     ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
                     String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
@@ -326,9 +329,12 @@ public class ErrorsFileWriter implements CustomFileWriter {
         writer.write(
                 """
                     if isinstance(e, CollectionOfErrors):
-                        return $L.Error_CollectionOfErrors(message=e.message, list=e.list)
+                        return $L.Error_CollectionOfErrors(message=_dafny.Seq(e.message), list=_dafny.Seq(
+                            _smithy_error_to_dafny_error(native_err) for native_err in e.list
+                        ))
                     """,
                 DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
+        writer.addStdlibImport("_dafny");
         // Add service-specific OpaqueError
         writer.write(
                 """

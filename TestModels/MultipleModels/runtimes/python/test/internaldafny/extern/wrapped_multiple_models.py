@@ -12,7 +12,7 @@ from multiple_models.smithygenerated.simple_multiplemodels_primaryproject.client
 from multiple_models.smithygenerated.simple_multiplemodels_primaryproject.shim import PrimaryProjectShim
 from multiple_models.smithygenerated.simple_multiplemodels_primaryproject.config import dafny_config_to_smithy_config as primary_dafny_config_to_smithy_config
 
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class dependency_default__(simple_multiplemodels_dependencyproject_internaldafny_wrapped.default__):
 

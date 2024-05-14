@@ -13,6 +13,9 @@ PYTHON_MODULE_NAME=simple_resources
 PROJECT_SERVICES := \
 	SimpleResources
 
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+
 SERVICE_NAMESPACE_SimpleResources=simple.resources
 
 SERVICE_DEPS_SimpleResources :=

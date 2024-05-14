@@ -6,7 +6,7 @@ import simple_aggregate_internaldafny_wrapped
 from simple_aggregate.smithygenerated.simple_aggregate.client import SimpleAggregate
 from simple_aggregate.smithygenerated.simple_aggregate.shim import SimpleAggregateShim
 from simple_aggregate.smithygenerated.simple_aggregate.config import dafny_config_to_smithy_config
-import Wrappers
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(simple_aggregate_internaldafny_wrapped.default__):
 
