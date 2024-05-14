@@ -342,6 +342,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                         return $L.Error_Opaque(obj=e.obj)
                     """,
                 DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
+        writer.addStdlibImport(DafnyNameResolver.getDafnyGeneratedPathForSmithyNamespace(serviceShape.getId().getNamespace()));
     }
 
 

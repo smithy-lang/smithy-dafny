@@ -1,12 +1,12 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 from simple_dafnyextern.internaldafny.generated.SimpleExternImpl import *
-import simple_dafnyextern_internaldafny_types
+from simple_dafnyextern.internaldafny.generated import SimpleDafnyExternTypes
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 @staticmethod
 def GetExtern(config, input):
-  out = simple_dafnyextern_internaldafny_types.GetExternOutput_GetExternOutput(
+  out = SimpleDafnyExternTypes.GetExternOutput_GetExternOutput(
       blobValue = input.blobValue,
       booleanValue = input.booleanValue,
       stringValue = input.stringValue,
@@ -18,7 +18,7 @@ def GetExtern(config, input):
 @staticmethod
 def ExternMustError(config, input):
   exception = Exception(input)
-  return Wrappers.Result_Failure(simple_dafnyextern_internaldafny_types.Error_Opaque(exception))
+  return Wrappers.Result_Failure(SimpleDafnyExternTypes.Error_Opaque(exception))
 
 default__.GetExtern = GetExtern
 default__.ExternMustError = ExternMustError

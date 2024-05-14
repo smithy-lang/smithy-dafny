@@ -4,6 +4,10 @@
 # Initialize generated Dafny
 import simple_dafnyextern.internaldafny.generated.module_
 
+# Initialize externs
+from . import ExternConstructor
+from . import SimpleExternImpl
+
 # If this is the first Dafny module to load,
 # set this as the main module for the DafnyRuntime package
 try:

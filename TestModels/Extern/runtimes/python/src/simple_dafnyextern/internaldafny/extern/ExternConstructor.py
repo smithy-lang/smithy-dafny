@@ -1,7 +1,8 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
+import simple_dafnyextern.internaldafny.generated.ExternConstructor
 from simple_dafnyextern.internaldafny.generated.ExternConstructor import *
-import simple_dafnyextern_internaldafny_types
+from simple_dafnyextern.internaldafny.generated import SimpleDafnyExternTypes
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 import _dafny
 
@@ -20,4 +21,6 @@ class ExternConstructorClass:
       try:
         return Wrappers.Result_Success(ExternConstructorClass(input))
       except Exception as e:
-        return Wrappers.Result_Failure(simple_dafnyextern_internaldafny_types.Error_Opaque(e))
+        return Wrappers.Result_Failure(SimpleDafnyExternTypes.Error_Opaque(e))
+
+simple_dafnyextern.internaldafny.generated.ExternConstructor.ExternConstructorClass = ExternConstructorClass

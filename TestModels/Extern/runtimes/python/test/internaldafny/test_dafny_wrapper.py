@@ -13,6 +13,8 @@ internaldafny_dir = '/'.join(__file__.split("/")[:-1])
 sys.path.append(internaldafny_dir + "/extern")
 sys.path.append(internaldafny_dir + "/generated")
 
+from .extern import wrapped_simple_extern
+
 def test_dafny():
   # Dafny writes Dafny tests to __main__
-  import __main__
+  from .generated import __main__
