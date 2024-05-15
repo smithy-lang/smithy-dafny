@@ -109,8 +109,12 @@ public class DafnyNameResolver {
     System.out.println(trait.getSdkId());
     String resolvedSmithyNamespace =
         AwsSdkNameResolver.resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
+//    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
+//            trait.getSdkId();
     return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-            trait.getSdkId();
+            smithyNamespace.toUpperCase(Locale.ROOT).replace(".", "_");
+    // ????? i thought something was sdkId... concerned that we have unmodelled stuff  going on here...
+
   }
 
 //  public static String getDafnyIndexModuleNameForSmithyNamespace(String smithyNamespace, GenerationContext context) {
