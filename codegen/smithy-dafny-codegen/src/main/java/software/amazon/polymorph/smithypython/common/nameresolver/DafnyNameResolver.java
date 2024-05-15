@@ -113,7 +113,9 @@ public class DafnyNameResolver {
 //    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
 //            trait.getSdkId();
     return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-            CaseUtils.toCamelCase(smithyNamespace).replace(".", "_");
+            smithyNamespace + "//" +
+            CaseUtils.toPascalCase(smithyNamespace) +  "//" +
+            CaseUtils.toPascalCase(smithyNamespace).replace(".", "_");
     // ????? i thought something was sdkId... concerned that we have unmodelled stuff  going on here...
 
   }
