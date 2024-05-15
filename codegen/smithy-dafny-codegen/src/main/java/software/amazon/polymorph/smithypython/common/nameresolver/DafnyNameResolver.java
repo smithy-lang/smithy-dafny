@@ -112,7 +112,17 @@ public class DafnyNameResolver {
         AwsSdkNameResolver.resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
 //    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
 //            trait.getSdkId();
+    String[] namespaceSegments = smithyNamespace.split(".");
+    StringBuilder output = new StringBuilder();
+    output.append(getDafnyGeneratedPathForSmithyNamespace(smithyNamespace)).append(".");
+    for (String segment : namespaceSegments) {
+      output.append(CaseUtils.toPascalCase(segment));
+      if (!segment.equals(namespaceSegments[namespaceSegments.length-1])) {
+        output.append("_");
+      }
+    }
     return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
+
             smithyNamespace + "//" +
             CaseUtils.toPascalCase(smithyNamespace) +  "//" +
             CaseUtils.toPascalCase(smithyNamespace).replace(".", "_");
