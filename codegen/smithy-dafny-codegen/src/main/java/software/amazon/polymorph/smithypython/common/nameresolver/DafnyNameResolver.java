@@ -221,6 +221,11 @@ public class DafnyNameResolver {
    */
   public static void importDafnyTypeForShape(
       PythonWriter writer, ShapeId shapeId, GenerationContext context) {
+    if ("smithy.api".equals(shapeId.getNamespace())
+      && "Unit".equals(shapeId.getName())) {
+      // No corresponding Dafny type for unit
+      return;
+    }
     if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
       importDafnyTypeForError(writer, shapeId, context);
     } else if (context.model().expectShape(shapeId).hasTrait(PositionalTrait.class)) {

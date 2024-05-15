@@ -76,6 +76,10 @@ public class SmithyNameResolver {
   }
 
   public static String getPythonModuleNameForSmithyNamespace(String smithyNamespace) {
+    if ("smithy.api".equals(smithyNamespace)) {
+      pythonModuleName = settings.getModuleName();
+      namespace = settings.getService().getNamespace();
+    }
     if (!smithyNamespaceToPythonModuleNameMap.containsKey(smithyNamespace)) {
       throw new IllegalArgumentException("Python module name not found for Smithy namespace: " + smithyNamespace);
     }
