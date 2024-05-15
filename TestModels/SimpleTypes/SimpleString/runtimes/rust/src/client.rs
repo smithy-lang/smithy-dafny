@@ -5,7 +5,7 @@ use aws_smithy_types::error::operation::BuildError;
 #[derive(Debug)]
 pub(crate) struct Handle {
     pub(crate) conf: crate::Config,
-    pub(crate) inner: *mut dyn ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient
+    pub(crate) inner: ::dafny_runtime::Object<dyn ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient>
 }
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
@@ -36,7 +36,7 @@ impl Client {
         }
         let handle = Handle {
             conf: conf.clone(),
-            inner: inner.Extract(),
+            inner: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient + 'static)>>::upcast_to(inner.Extract()),
         };
         Ok(Self {
             handle: ::std::sync::Arc::new(handle),
@@ -52,9 +52,10 @@ impl Client {
 impl Drop for Handle {
     fn drop(&mut self) {
         // Ensure the Dafny values we created by calling SimpleString are deallocated.
-        unsafe {
-            drop(Box::from_raw(self.inner));
-        }
+        // Useful only for raw references
+        //unsafe {
+        //    drop(Box::from_raw(self.inner));
+        //}
     }
 }
 

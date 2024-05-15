@@ -2786,8 +2786,14 @@ pub mod array {
     pub fn placebos_usize<T>(n: usize) -> *mut [MaybeUninit<T>] {
         Box::into_raw(placebos_box_usize(n))
     }
+    pub fn placebos_usize_rcmut<T>(n: usize) -> super::Object<[MaybeUninit<T>]> {
+        super::rcmut::array_object_from_box(placebos_box_usize(n))
+    }
     // Once all the elements have been initialized, transform the signature of the pointer
     pub fn construct<T>(p: *mut [MaybeUninit<T>]) -> *mut [T] {
+        unsafe { std::mem::transmute(p) }
+    }
+    pub fn construct_rcmut<T>(p: super::Object<[MaybeUninit<T>]>) -> super::Object<[T]> {
         unsafe { std::mem::transmute(p) }
     }
 
@@ -3168,7 +3174,11 @@ pub mod rcmut {
     use std::rc::Rc;
     use std::sync::Arc;
 
-    pub fn array_from_rc<T>(data: Rc<[T]>) -> crate::Object<[T]> {
+    pub fn array_object_from_rc<T>(data: Rc<[T]>) -> crate::Object<[T]> {
+        crate::Object(Some(unsafe { crate::rcmut::from_rc(data) }))
+    }
+    pub fn array_object_from_box<T>(data: Box<[T]>) -> crate::Object<[T]> {
+        let data: Rc<[T]> = data.into();
         crate::Object(Some(unsafe { crate::rcmut::from_rc(data) }))
     }
     pub struct Array<T> {

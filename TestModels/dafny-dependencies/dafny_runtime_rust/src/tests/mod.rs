@@ -702,7 +702,7 @@ mod tests {
         assert_eq!(refcount!(x.clone()), 6);
         assert_eq!(rd!(a3.clone()).val, int!(42));
         
-        let a: Object<[i32]> = rcmut::array_from_rc(Rc::new([42, 43, 44]));
+        let a: Object<[i32]> = rcmut::array_object_from_rc(Rc::new([42, 43, 44]));
         assert_eq!(rd!(a.clone()).len(), 3);
         assert_eq!(rd!(a.clone())[0], 42);
         assert_eq!(rd!(a.clone())[1], 43);
