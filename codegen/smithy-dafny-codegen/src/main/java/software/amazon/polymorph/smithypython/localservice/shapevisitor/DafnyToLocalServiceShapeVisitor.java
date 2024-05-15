@@ -186,7 +186,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     public String stringShape(StringShape shape) {
       // If shape has @DafnyUtf8BytesTrait, use bytes converter
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-        writer.addStdlibImport("UTF8");
+        writer.addStdlibImport("standard_library.internaldafny.generated.UTF8", "UTF8");
         return "bytes(''.join(UTF8.default__.Decode(%1$s).value.Elements), encoding='utf-8')".formatted(dataSource);
 //        return "%1$s.encode('utf-8')".formatted(dataSource);
 //        return "''.join([chr(a) for a in %1$s])".formatted(dataSource);
