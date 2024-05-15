@@ -121,12 +121,7 @@ public class DafnyNameResolver {
         output.append("_");
       }
     }
-    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-
-            smithyNamespace + "//" +
-            CaseUtils.toPascalCase(smithyNamespace) +  "//" +
-            CaseUtils.toPascalCase(smithyNamespace).replace(".", "_");
-    // ????? i thought something was sdkId... concerned that we have unmodelled stuff  going on here...
+    return output.toString();
 
   }
 
