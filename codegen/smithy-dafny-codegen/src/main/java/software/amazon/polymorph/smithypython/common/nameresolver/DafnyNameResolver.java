@@ -22,6 +22,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.utils.CaseUtils;
 
 import static software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName;
 
@@ -112,7 +113,7 @@ public class DafnyNameResolver {
 //    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
 //            trait.getSdkId();
     return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-            smithyNamespace.toUpperCase(Locale.ROOT).replace(".", "_");
+            CaseUtils.toCamelCase(smithyNamespace).replace(".", "_");
     // ????? i thought something was sdkId... concerned that we have unmodelled stuff  going on here...
 
   }
