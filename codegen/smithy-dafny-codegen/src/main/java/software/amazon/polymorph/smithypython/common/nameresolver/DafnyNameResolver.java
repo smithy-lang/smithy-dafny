@@ -115,7 +115,6 @@ public class DafnyNameResolver {
     if (AwsSdkNameResolver.isAwsSdkNamespace(smithyNamespace)) {
       String[] namespaceSegments = smithyNamespace.split("\\.");
       StringBuilder output = new StringBuilder();
-      output.append(getDafnyGeneratedPathForSmithyNamespace(smithyNamespace)).append(".");
       for (String segment : namespaceSegments) {
         output.append(CaseUtils.toPascalCase(segment));
         if (!segment.equals(namespaceSegments[namespaceSegments.length - 1])) {
