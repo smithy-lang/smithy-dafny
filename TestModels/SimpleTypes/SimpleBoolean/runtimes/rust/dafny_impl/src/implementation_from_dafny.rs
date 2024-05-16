@@ -92,10 +92,8 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
         }
     }
 
-    impl<
-            I: ::dafny_runtime::DafnyType + ::std::default::Default,
-            O: ::dafny_runtime::DafnyType + ::std::default::Default,
-        > ::std::convert::AsRef<DafnyCallEvent<I, O>> for &DafnyCallEvent<I, O>
+    impl<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType>
+        ::std::convert::AsRef<DafnyCallEvent<I, O>> for &DafnyCallEvent<I, O>
     {
         fn as_ref(&self) -> Self {
             self
