@@ -113,3 +113,22 @@ build_java: transpile_java
 mvn_local_deploy:
 	@echo "${RED}Warning!!${YELLOW} Installing TestModel's STD to Maven Local replaces ESDK's STD!\n$(RESET)" >&2
 	gradle -p runtimes/java publishToMavenLocal
+
+dafny_benerate: DAFNY_RUST_OUTPUT=\
+	runtimes/rust/implementation_from_dafny
+dafny_benerate: DAFNY_RUST_OUTPUT_FOLDER=\
+	$(DAFNY_RUST_OUTPUT)-rust/src
+dafny_benerate: DAFNY_RUST_OUTPUT_RS=\
+	$(DAFNY_RUST_OUTPUT_FOLDER)/implementation_from_dafny.rs
+dafny_benerate: DAFNY_RUST_OUTPUT_RS_DTR=\
+	$(DAFNY_RUST_OUTPUT_FOLDER)/implementation_from_dafny-rs.dtr
+dafny_benerate: DAFNY_RUST_IMPL=\
+	runtimes/rust/src/implementation_from_dafny.rs
+dafny_benerate:
+	$(DAFNY) translate rs src/Index.dfy  --emit-uncompilable-code --no-verify   --optimize-erasable-datatype-wrapper false   --include-runtime   --compile-suffix true   --unicode-char false   --function-syntax 3   --allow-warnings   --output $(DAFNY_RUST_OUTPUT)
+	rustfmt $(DAFNY_RUST_OUTPUT_RS)
+	# echo "Diffs remaining till code generation works:"
+	# diff -u $(DAFNY_RUST_OUTPUT_RS) $(DAFNY_RUST_IMPL) | wc -l
+	mv $(DAFNY_RUST_OUTPUT_RS) $(DAFNY_RUST_IMPL)
+	rm $(DAFNY_RUST_OUTPUT_RS_DTR);
+	rm -r $(DAFNY_RUST_OUTPUT_FOLDER);
