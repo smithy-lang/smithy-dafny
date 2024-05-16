@@ -24,7 +24,13 @@ public class AwsSdkNameResolver {
   public static boolean isAwsSdkShape(ShapeId shapeId) {
     // If the shape namespace is not in our list of known SDK namespaces,
     // it is not a (known) SDK namespace
-    return shapeId.getNamespace().startsWith("com.amazonaws");
+    return isAwsSdkNamespace(shapeId.getNamespace());
+  }
+
+  public static boolean isAwsSdkNamespace(String namespace) {
+    // If the shape namespace is not in our list of known SDK namespaces,
+    // it is not a (known) SDK namespace
+    return namespace.startsWith("com.amazonaws");
   }
 
   /**

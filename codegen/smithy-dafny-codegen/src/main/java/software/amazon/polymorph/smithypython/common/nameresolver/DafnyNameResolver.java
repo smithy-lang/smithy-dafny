@@ -6,7 +6,9 @@ package software.amazon.polymorph.smithypython.common.nameresolver;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -103,24 +105,50 @@ public class DafnyNameResolver {
    */
   public static String getDafnyIndexModuleNameForSmithyNamespace(String smithyNamespace, GenerationContext context) {
     // If this is an AWS SDK shape, rewrite its namespace to match the Dafny extern namespace
-    LocalServiceTrait trait = context.model().expectShape(context.settings().getService()).getTrait(
-        LocalServiceTrait.class
-    ).get();
+//    LocalServiceTrait trait = context.model().expectShape(context.settings().getService()).getTrait(
+//        LocalServiceTrait.class
+//    ).get();
 //    return trait.getSdkId();
-    System.out.println(trait.getSdkId());
     String resolvedSmithyNamespace =
         AwsSdkNameResolver.resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
-    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-            trait.getSdkId();
-//    String[] namespaceSegments = smithyNamespace.split("\\.");
-//    StringBuilder output = new StringBuilder();
-//    output.append(getDafnyGeneratedPathForSmithyNamespace(smithyNamespace)).append(".");
-//    for (String segment : namespaceSegments) {
-//      output.append(CaseUtils.toPascalCase(segment));
-//      if (!segment.equals(namespaceSegments[namespaceSegments.length-1])) {
-//        output.append("_");
-//      }
+    String sdkId = "";
+    if (AwsSdkNameResolver.isAwsSdkNamespace(smithyNamespace)) {
+      String[] namespaceSegments = smithyNamespace.split("\\.");
+      StringBuilder output = new StringBuilder();
+      output.append(getDafnyGeneratedPathForSmithyNamespace(smithyNamespace)).append(".");
+      for (String segment : namespaceSegments) {
+        output.append(CaseUtils.toPascalCase(segment));
+        if (!segment.equals(namespaceSegments[namespaceSegments.length - 1])) {
+          output.append("_");
+        }
+      }
+      sdkId = output.toString();
+    } else {
+      for (ServiceShape serviceShape : context.model().getServiceShapes()) {
+        if (smithyNamespace.equals(serviceShape.getId().getNamespace())) {
+          sdkId = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+          break;
+        }
+      }
+    }
+
+    if (Strings.isNullOrEmpty(sdkId)) {
+      throw new IllegalArgumentException("No sdk id found for " + smithyNamespace);
+    }
+
+
+
+
+//    Set<LocalServiceTrait> traits = context.model().getServiceShapes().stream()
+//            .filter(serviceShape -> serviceShape.hasTrait(LocalServiceTrait.class))
+//            .map(serviceShape -> serviceShape.expectTrait(LocalServiceTrait.class))
+//            .collect(Collectors.toSet());
+//    for (LocalServiceTrait trait : traits) {
+//      if (trait.getSdkId().equals())
 //    }
+    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
+            sdkId;
+
 //
 //    // ????? i thought something was sdkId... concerned that we have unmodelled stuff  going on here...
 //    return output.toString();
