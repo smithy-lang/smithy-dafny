@@ -379,12 +379,12 @@ protected void generateResourceImplementation(
                     () -> {
                         writer.addStdlibImport("asyncio");
                         // Import inline to avoid circular dependency
-                        writer.write("import $L as $L",
+                        writer.write("from $L import $L as $L",
 //                        writer.addStdlibImport(
                                 // `from dependency.smithygenerated.deserialize`
                                 SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                                         targetShapeOutput.getId().getNamespace(), codegenContext)
-                                        + ".deserialize." +
+                                        + ".deserialize",
                                 // `import _deserialize_error`
                                 "_deserialize_error",
                                 // `as dependency_deserialize_error`

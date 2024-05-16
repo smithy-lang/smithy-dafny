@@ -110,20 +110,20 @@ public class DafnyNameResolver {
     System.out.println(trait.getSdkId());
     String resolvedSmithyNamespace =
         AwsSdkNameResolver.resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
-//    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-//            trait.getSdkId();
-    String[] namespaceSegments = smithyNamespace.split("\\.");
-    StringBuilder output = new StringBuilder();
-    output.append(getDafnyGeneratedPathForSmithyNamespace(smithyNamespace)).append(".");
-    for (String segment : namespaceSegments) {
-      output.append(CaseUtils.toPascalCase(segment));
-      if (!segment.equals(namespaceSegments[namespaceSegments.length-1])) {
-        output.append("_");
-      }
-    }
-
-    // ????? i thought something was sdkId... concerned that we have unmodelled stuff  going on here...
-    return output.toString();
+    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
+            trait.getSdkId();
+//    String[] namespaceSegments = smithyNamespace.split("\\.");
+//    StringBuilder output = new StringBuilder();
+//    output.append(getDafnyGeneratedPathForSmithyNamespace(smithyNamespace)).append(".");
+//    for (String segment : namespaceSegments) {
+//      output.append(CaseUtils.toPascalCase(segment));
+//      if (!segment.equals(namespaceSegments[namespaceSegments.length-1])) {
+//        output.append("_");
+//      }
+//    }
+//
+//    // ????? i thought something was sdkId... concerned that we have unmodelled stuff  going on here...
+//    return output.toString();
 
   }
 
