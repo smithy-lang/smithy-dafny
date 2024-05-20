@@ -264,8 +264,10 @@ public class SmithyNameResolver {
    */
   public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(
       String smithyNamespace, GenerationContext codegenContext) {
-    return getPythonModuleSmithygeneratedPathForSmithyNamespace(
+    String a = getPythonModuleSmithygeneratedPathForSmithyNamespace(
         smithyNamespace, codegenContext.settings());
+    System.out.println("a " + a);
+    return a;
   }
 
   /**
