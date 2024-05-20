@@ -643,6 +643,7 @@ transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
 transpile_test_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
 transpile_test_python: SOURCE_TRANSLATION_RECORD= --translation-record runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/dafny_src-py.dtr
+# transpile_test_python: OUTER_MODULE=--outer-module=.internaldafny.generated
 transpile_test_python: _transpile_test_all _mv_test_python
 
 # Move Dafny-generated code into its expected location in the Python module

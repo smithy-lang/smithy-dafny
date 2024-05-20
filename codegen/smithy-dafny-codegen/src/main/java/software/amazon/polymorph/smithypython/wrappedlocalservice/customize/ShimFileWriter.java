@@ -45,9 +45,12 @@ public class ShimFileWriter implements CustomFileWriter {
             moduleName + "/shim.py",
             "",
             writer -> {
-              writer.addImport(".errors", "ServiceError");
-              writer.addImport(".errors", "CollectionOfErrors");
-              writer.addImport(".errors", "OpaqueError");
+              writer.addImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                      serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "ServiceError");
+              writer.addImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                      serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "CollectionOfErrors");
+              writer.addImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                      serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "OpaqueError");
 
               writer.write(
                   """
@@ -163,7 +166,8 @@ public class ShimFileWriter implements CustomFileWriter {
                 input,
                 codegenContext.symbolProvider().toSymbol(operationShape).getName());
 
-            writer.addImport(".errors", "_smithy_error_to_dafny_error");
+            writer.addImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                    serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "_smithy_error_to_dafny_error");
 
             Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
             // Generate code that converts the output from Smithy type to the corresponding Dafny
