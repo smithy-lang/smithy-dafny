@@ -27,6 +27,17 @@ configure<software.amazon.smithy.gradle.SmithyExtension> {
 // Uncomment to disable creating a JAR.
 tasks["jar"].enabled = false
 
+// TODO: maybe model copying as a separate task,
+//       but then we have to figure out how to get it to run
+//       after the build is done, which Gradle doesn't like.
+//       It's much better to have a task depend on another,
+//       but we don't want to overwrite Build..
+//tasks.register<Copy>("copyDafnyFiles") {
+//    from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/source/dafny-client-codegen/Model/"))
+//    into("model")
+//    dependsOn(tasks.build)
+//}
+
 buildscript {
     val smithyVersion: String by project
 
@@ -35,5 +46,9 @@ buildscript {
     }
     dependencies {
         "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
+    }
+    copy {
+        from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/source/dafny-client-codegen/Model/"))
+        into("model")
     }
 }
