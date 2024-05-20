@@ -11,29 +11,28 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
-
       - name: Install Dafny dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y dotnet-sdk-6.0 mono-complete z3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dotnet-sdk-6.0 mono-complete z3
 
       - name: Build Dafny from source
-      run: |
-        git clone https://github.com/dafny-lang/dafny.git --recurse-submodules
-        cd dafny
-        make exe
+        run: |
+          git clone https://github.com/dafny-lang/dafny.git --recurse-submodules
+          cd dafny
+          make exe
       
       - name: Install Z3 version 4.12.1
-      run: |
-        cd dafny/Binaries
-        wget https://github.com/Z3Prover/z3/releases/download/Z3-4.12.1/z3-4.12.1-x64-ubuntu-16.04.zip
-        unzip z3-4.12.1-x64-ubuntu-16.04.zip
-        mv z3-4.12.1-x64-ubuntu-16.04 z3
+        run: |
+          cd dafny/Binaries
+          wget https://github.com/Z3Prover/z3/releases/download/Z3-4.12.1/z3-4.12.1-x64-ubuntu-16.04.zip
+          unzip z3-4.12.1-x64-ubuntu-16.04.zip
+          mv z3-4.12.1-x64-ubuntu-16.04 z3
 
       - name: Add Dafny to PATH
-      run: |
-        echo "$GITHUB_WORKSPACE/dafny/Scripts" >> $GITHUB_PATH
+        run: |
+          echo "$GITHUB_WORKSPACE/dafny/Scripts" >> $GITHUB_PATH
 
       - name: Check Dafny installation
-      run: |
-        dafny --version
+        run: |
+          dafny --version
