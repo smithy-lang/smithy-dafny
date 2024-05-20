@@ -199,10 +199,10 @@ transpile_implementation:
 
 transpile_implementation_new: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation_new:
-	find ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+	find ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate go \
 		--stdin \
-		--module-name $(GO_MODULE_NAME) \
+		--go-module-name $(GO_MODULE_NAME) \
 		--no-verify \
 		--cores:$(CORES) \
 		--optimize-erasable-datatype-wrapper:false \
@@ -253,11 +253,11 @@ transpile_test:
 		$(TRANSPILE_DEPENDENCIES) \
 
 transpile_test_new:
-	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate go \
 		--stdin \
 		--no-verify \
-		--module-name $(GO_MODULE_NAME) \
+		--go-module-name $(GO_MODULE_NAME) \
 		--cores:$(CORES) \
 		--include-test-runner \
 		--optimize-erasable-datatype-wrapper:false \
