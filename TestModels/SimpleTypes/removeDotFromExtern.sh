@@ -22,12 +22,6 @@ removeDotFromExtern() {
   done
 }
 
-# for item in "$directory"/*/; do
-#     if [ -d "$item" ]; then
-#         directories+=("${item%/}")
-#         echo $directory
-#     fi
-# done
 directories=$(echo */)
 
 for dir in $directories; do
