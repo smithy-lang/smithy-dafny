@@ -631,8 +631,9 @@ transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
 transpile_implementation_python: COMPILE_SUFFIX_OPTION=
 transpile_implementation_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
-transpile_implementation_python: TRANSPILE_MODULE_NAME=--python-module-name=$(PYTHON_MODULE_NAME)
+transpile_implementation_python: TRANSPILE_MODULE_NAME=--python-module-name=$(PYTHON_MODULE_NAME).internaldafny.generated.
 transpile_implementation_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
+# transpile_implementation_python: OUTER_MODULE=--outer-module=.internaldafny.generated
 transpile_implementation_python: _transpile_implementation_all _mv_implementation_python
 
 transpile_test_python: TARGET=py
@@ -642,6 +643,7 @@ transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
 transpile_test_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
 transpile_test_python: SOURCE_TRANSLATION_RECORD= --translation-record runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/dafny_src-py.dtr
+# transpile_test_python: OUTER_MODULE=--outer-module=.internaldafny.generated
 transpile_test_python: _transpile_test_all _mv_test_python
 
 # Move Dafny-generated code into its expected location in the Python module

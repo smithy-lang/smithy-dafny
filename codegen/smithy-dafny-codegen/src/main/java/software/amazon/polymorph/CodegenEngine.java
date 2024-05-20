@@ -525,8 +525,10 @@ public class CodegenEngine {
             .settings(pythonSettingsBuilder.build())
             .build();
 
-    final Map<String, String> smithyNamespaceToPythonModuleNameMap = new HashMap<>(dependencyModuleNames);
+    final Map<String, String> smithyNamespaceToPythonModuleNameMap = new HashMap<>();
     smithyNamespaceToPythonModuleNameMap.put(serviceShape.getId().getNamespace(), moduleName.get());
+    smithyNamespaceToPythonModuleNameMap.putAll(dependencyModuleNames);
+
 
     if (this.awsSdkStyle) {
       DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin
