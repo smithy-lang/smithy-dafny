@@ -24,7 +24,7 @@ jobs:
       
       - name: Install Z3 version 4.12.1
         run: |
-          $GITHUB_WORKSPACE/dafny
+          cd $GITHUB_WORKSPACE/dafny
           make z3-ubuntu
 
       - name: Add Dafny to PATH
