@@ -1,0 +1,22 @@
+repos:
+  - repo: 'https://github.com/pre-commit/pre-commit-hooks'
+    rev: v2.3.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: python-packages/aws-smithy-python/tests/unit/auth/aws4_testsuite/
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: pants-fmt
+        name: pants fmt
+        description: runs ./pants fmt
+        entry: './pants --no-dynamic-ui fmt ::'
+        language: system
+        pass_filenames: false
+      - id: pants-lint
+        name: pants lint
+        description: runs ./pants lint
+        entry: './pants --no-dynamic-ui lint ::'
+        language: system
+        pass_filenames: false
