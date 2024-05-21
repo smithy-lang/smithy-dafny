@@ -48,6 +48,7 @@ runs:
       run: |
         echo ${{ github.workspace }}/dafny/Scripts >> $GITHUB_PATH
 
+    # Hard-coding this for now since it's a pain to extract from an arbitrary branch
     - name: Export DAFNY_VERSION
       shell: bash
       run: |
