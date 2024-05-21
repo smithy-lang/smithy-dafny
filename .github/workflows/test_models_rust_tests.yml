@@ -74,6 +74,11 @@ jobs:
         with:
           dafny: ${{ inputs.dafny }}
 
+      - name: TEST
+        shell: bash
+        run: |
+          echo $PATH
+
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
