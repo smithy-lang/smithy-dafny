@@ -47,9 +47,8 @@ runs:
       shell: bash
       run: |
         echo ${{ github.workspace }}/dafny/Scripts >> $GITHUB_PATH
-    
+
     - name: Export DAFNY_VERSION
       shell: bash
       run: |
         echo "DAFNY_VERSION=4.7.0" >> $GITHUB_ENV
-
