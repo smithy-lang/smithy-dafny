@@ -1,60 +1,14 @@
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index ba5de6ff..469a527f 100644
+index 0f09275d..469a527f 100644
 --- b/TestModels/SimpleTypes/SimpleString/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -1,89 +1,637 @@
+@@ -1,5 +1,637 @@
  #![allow(warnings, unconditional_panic)]
  #![allow(nonstandard_style)]
--extern crate dafny_runtime;
--mod _System {
--  #[derive(Clone, PartialEq)]
--  #[repr(transparent)]
--  pub struct nat(pub ::dafny_runtime::DafnyInt);
--  impl ::std::default::Default for nat {
--    fn default() -> Self {
--      nat(::std::default::Default::default())
--    }
--  }
--  impl ::dafny_runtime::DafnyPrint for nat {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
--      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
--    }
--  }
--  impl ::std::ops::Deref for nat {
--    type Target = ::dafny_runtime::DafnyInt;
--    fn deref(&self) -> &Self::Target {
--      &self.0
--    }
--  }
--  #[derive(PartialEq)]
--  pub enum Tuple2<T0, T1> {
--    _T2 { _0: T0, _1: T1 },
--    _PhantomVariant(::std::marker::PhantomData::<T0>, ::std::marker::PhantomData::<T1>)
--  }
--  impl <T0: Clone + ::dafny_runtime::DafnyPrint + 'static, T1: Clone + ::dafny_runtime::DafnyPrint + 'static>Tuple2<T0, T1> {
--    pub fn _0(&self) -> &T0 {
--      match self {
--        Tuple2::_T2 { _0, _1, } => _0,
--        Tuple2::_PhantomVariant(..) => panic!()
--      }
--    }
--    pub fn _1(&self) -> &T1 {
--      match self {
--        Tuple2::_T2 { _0, _1, } => _1,
--        Tuple2::_PhantomVariant(..) => panic!()
--      }
--    }
--  }
--  impl <T0: Clone + ::dafny_runtime::DafnyPrint + 'static, T1: Clone + ::dafny_runtime::DafnyPrint + 'static>::dafny_runtime::DafnyPrint for Tuple2<T0, T1> {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
--      match self {
--        Tuple2::_T2 { _0, _1, } => {
--          write!(_formatter, "_System.Tuple2._T2(")?;
--          ::dafny_runtime::DafnyPrint::fmt_print(_0, _formatter, false)?;
--          write!(_formatter, ", ")?;
--          ::dafny_runtime::DafnyPrint::fmt_print(_1, _formatter, false)?;
--          write!(_formatter, ")")?;
--          Ok(())
+-pub mod _module {
+-  
+-}
+\ No newline at end of file
 +pub extern crate dafny_runtime;
 +pub extern crate dafny_standard_library;
 +pub use dafny_standard_library::implementation_from_dafny::*;
@@ -118,39 +72,7 @@ index ba5de6ff..469a527f 100644
 +            value: ::std::rc::Rc<
 +                super::r#_Wrappers_Compile::Option<::dafny_runtime::DafnyStringUTF16>,
 +            >,
-         },
--        Tuple2::_PhantomVariant(..) => {panic!()}
--      }
--    }
--  }
--  impl <T0: ::std::default::Default, T1: ::std::default::Default>::std::default::Default for Tuple2<T0, T1> {
--    fn default() -> Self {
--      Tuple2::_T2 {
--        _0: ::std::default::Default::default(),
--        _1: ::std::default::Default::default()
--      }
--    }
--  }
--  #[derive(PartialEq)]
--  pub enum Tuple0 {
--    _T0 {}
--  }
--  impl Tuple0 {}
--  impl ::dafny_runtime::DafnyPrint for Tuple0 {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
--      match self {
--        Tuple0::_T0 { } => {
--          write!(_formatter, "_System.Tuple0._T0")?;
--          Ok(())
--        }
--      }
--    }
--  }
--  impl ::std::default::Default for Tuple0 {
--    fn default() -> Self {
--      Tuple0::_T0 {}
--    }
--  }
++        },
 +    }
 +    impl ::std::convert::AsRef<GetStringInput> for &GetStringInput {
 +        fn as_ref(&self) -> Self {
@@ -720,11 +642,7 @@ index ba5de6ff..469a527f 100644
 +            ::std::ptr::eq(self, other)
 +        }
 +    }
- }
--mod _module {
--  
--}
-\ No newline at end of file
++}
 +mod _module {}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client.rs
 new file mode 100644
