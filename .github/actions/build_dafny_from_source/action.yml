@@ -23,6 +23,7 @@ runs:
         ref: ${{ inputs.dafny }}
 
     - name: Load Z3
+      shell: bash
       run: |
         sudo apt-get install -qq libarchive-tools
         mkdir -p dafny/Binaries/z3/bin
@@ -38,10 +39,12 @@ runs:
         dotnet-version: 6.0.x
 
     - name: Build Dafny
+      shell: bash
       run: |
         dotnet build dafny/Source/Dafny.sln
 
     - name: Add dafny to PATH
+      shell: bash
       run: |
         echo dafny/Scripts >> $GITHUB_PATH
     
