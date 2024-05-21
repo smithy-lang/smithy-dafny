@@ -1,5 +1,7 @@
 package software.amazon.polymorph.smithygo.shapevisitor;
 
+import java.math.BigDecimal;
+import java.util.Optional;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SymbolVisitor;
@@ -249,50 +251,41 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     public String integerShape(IntegerShape shape) {
         writer.addImport("dafny");
         var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
-        if ((boolean)isPointable) {
-            if (shape.hasTrait(RangeTrait.class)) {
-                RangeTrait len = shape.getMemberTrait(model, RangeTrait.class).get();
-                Optional<BigDecimal> min = len.getMin();
-                if (min.isPresent()) {
-                    // TODO: uncomment the below code and remove print statement
-                    System.out.println(min.get().toString());
-                    // result +=
-                    // """
-                    // if (%s < %s) {
-                    //     throw new System.ArgumentException(
-                    //         String.Format(\"Member %s of structure %s has type %s which has a minimum of %s but was given the value {0}.\", %s));
-                    // }
-                    // """.formatted(
-                    //     value,
-                    //     min.get().toString(),
-                    //     value,
-                    //     parentName,
-                    //     theType,
-                    //     min.get().toString(),
-                    //     value
-                    // );
-                }
-                Optional<BigDecimal> max = len.getMax();
-                if (max.isPresent()) {
-                    // TODO: uncomment the below code and remove print statement
-                    System.out.println(max.get().toString());
-                    // result +=
-                    // """
-                    // if (%s > %s) {
-                    //     throw new System.ArgumentException(
-                    //         String.Format(\"Member %s of structure %s has type %s which has a maximum of %s but was given the value {0}.\", %s));
-                    // }
-                    // """.formatted(
-                    //     value,
-                    //     max.get().toString(),
-                    //     value,
-                    //     parentName,
-                    //     theType,
-                    //     max.get().toString(),
-                    //     value
-                    // );
-                }
+
+        String constraintCheck = "";
+        if (shape.hasTrait(RangeTrait.class)) {
+            RangeTrait len = shape.getMemberTrait(context.model(), RangeTrait.class).get();
+            Optional<BigDecimal> min = len.getMin();
+            
+            if (min.isPresent()) {
+                constraintCheck += """
+                        if (b < %s) {
+                            throw new System.ArgumentException(
+                                String.Format(\"%s has a minimum of %s but was given the value {0}.\", %s)
+                            );
+                        }
+                        """.formatted(
+                        min.get().toString(),
+                        shape.getId().getName(),
+                        min.get().toString(),
+                        shape.getId().getName());
             }
+            Optional<BigDecimal> max = len.getMax();
+            if (max.isPresent()) {
+                constraintCheck += """
+                        if (b > %s) {
+                            throw new System.ArgumentException(
+                                String.Format(\"%s has a maximum of %s but was given the value {0}.\", %s)
+                            );
+                        }
+                        """.formatted(
+                        max.get().toString(),
+                        shape.getId().getName(),
+                        max.get().toString(),
+                        shape.getId().getName());
+            }
+        }
+        if ((boolean)isPointable) {
             return ("""
                     func() *int32 {
                         var b int32
@@ -300,10 +293,21 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             return nil
                         }
                         b = %s.(int32)
+                        """.formatted(dataSource, dataSource)
+                        + constraintCheck +      
+                        """
                         return &b
-                    }()""").formatted(dataSource, dataSource);
-        } else {
-            return "%s.(int32)".formatted(dataSource);
+                    }()""");
+        }else {
+            return """
+                func() int32 {
+                    var b = %s.(int32)
+                    """.formatted(dataSource)
+                    + constraintCheck + 
+                    """
+                    return b
+                }()
+                    """;
         }
     }
 
@@ -334,10 +338,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                     for i := dafny.Iterate(%s) ; ; {
                         val, ok := i()
                 	    if !ok {
-    		                return &[]float64{math.Float64frombits(binary.LittleEndian.Uint64(b))}[0]
-    	                } else {
-    		                b = append(b, val.(byte))
-    	                }
+                      return &[]float64{math.Float64frombits(binary.LittleEndian.Uint64(b))}[0]
+                     } else {
+                      b = append(b, val.(byte))
+                     }
                     }
                 }()""".formatted(dataSource, dataSource);
     }

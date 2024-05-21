@@ -31,6 +31,7 @@ public class DafnyNameResolverHelpers {
      * but NOT the Types module.
      */
     public static String packageNameForNamespace(final String namespace) {
+        System.out.println("\n\n\n\n\n 3");
         return DafnyNameResolver.dafnyExternNamespace(namespace);
     }
 

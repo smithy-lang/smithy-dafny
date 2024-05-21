@@ -30,6 +30,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.SetUtils;
 
@@ -197,7 +198,9 @@ public class GoPointableIndex implements KnowledgeIndex {
         if (INHERENTLY_VALUE.contains(shape.getType())) {
             return false;
         }
-
+        if(shape.hasTrait(RangeTrait.class)) {
+            return true;
+        }
         return nullableIndex.isNullable(shape);
     }
 

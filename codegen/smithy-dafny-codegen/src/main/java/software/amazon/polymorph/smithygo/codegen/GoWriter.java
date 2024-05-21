@@ -634,6 +634,9 @@ public class GoWriter extends SymbolWriter<GoWriter, ImportDeclarations> {
         private boolean isPointer(Object type) {
             if (type instanceof Symbol) {
                 Symbol typeSymbol = (Symbol) type;
+                // System.out.println("In isPointer");
+                // System.out.println(typeSymbol.getProperties());
+                // System.out.println(typeSymbol.getProperty(SymbolUtils.POINTABLE).orElse(false));
                 return typeSymbol.getProperty(SymbolUtils.POINTABLE, Boolean.class).orElse(false);
             } else if (type instanceof SymbolReference) {
                 SymbolReference typeSymbol = (SymbolReference) type;

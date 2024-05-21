@@ -4,7 +4,7 @@
 include "../Model/SimpleTypesSmithyDoubleTypesWrapped.dfy"
 
 module
-  {:extern "simple.types.smithydouble.internaldafny.wrapped"}
+  {:extern "simpletypessmithydoubleinternaldafnywrapped"}
   WrappedSimpleTypesDouble refines WrappedAbstractSimpleTypesSmithyDoubleService
 {
   import WrappedService = SimpleDouble

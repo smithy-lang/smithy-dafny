@@ -4,7 +4,7 @@
 include "../Model/SimpleTypesSmithyDoubleTypes.dfy"
 include "./SimpleSmithyDoubleOperations.dfy"
 
-module {:extern "simple.types.smithydouble.internaldafny" } SimpleDouble refines AbstractSimpleTypesSmithyDoubleService {
+module {:extern "simpletypessmithydoubleinternaldafny" } SimpleDouble refines AbstractSimpleTypesSmithyDoubleService {
  import Operations = SimpleSmithyDoubleOperations
 
  function method DefaultSimpleDoubleConfig(): SimpleDoubleConfig {
