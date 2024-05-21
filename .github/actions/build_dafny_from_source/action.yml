@@ -46,7 +46,7 @@ runs:
     - name: Add dafny to PATH
       shell: bash
       run: |
-        echo dafny/Scripts >> $GITHUB_PATH
+        echo ${{ github.workspace }}/dafny/Scripts >> $GITHUB_PATH
     
     - name: Export DAFNY_VERSION
       shell: bash
