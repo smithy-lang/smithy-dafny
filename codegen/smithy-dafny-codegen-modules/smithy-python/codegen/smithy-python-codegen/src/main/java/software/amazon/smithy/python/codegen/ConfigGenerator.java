@@ -31,7 +31,7 @@ import software.amazon.smithy.utils.CodeInterceptor;
 /**
  * Generates the client's config object.
  */
-final class ConfigGenerator implements Runnable {
+public class ConfigGenerator implements Runnable {
 
     // This list contains any properties that should unconditionally be added to every
     // config object. This should be as minimal as possible, and importantly should
@@ -129,10 +129,10 @@ final class ConfigGenerator implements Runnable {
             .build()
     );
 
-    private final PythonSettings settings;
-    private final GenerationContext context;
+    protected final PythonSettings settings;
+    protected final GenerationContext context;
 
-    ConfigGenerator(PythonSettings settings, GenerationContext context) {
+    protected ConfigGenerator(PythonSettings settings, GenerationContext context) {
         this.context = context;
         this.settings = settings;
     }
@@ -214,7 +214,7 @@ final class ConfigGenerator implements Runnable {
         });
     }
 
-    private void writeInterceptorsType(PythonWriter writer) {
+    protected void writeInterceptorsType(PythonWriter writer) {
         var symbolProvider = context.symbolProvider();
         var operationShapes = TopDownIndex.of(context.model())
                 .getContainedOperations(settings.getService());
@@ -224,25 +224,29 @@ final class ConfigGenerator implements Runnable {
         writer.getImportContainer().addImport("smithy_python.interfaces.interceptor", "Interceptor", "Interceptor");
 
         writer.writeInline("_ServiceInterceptor = Union[");
-        var iter = operationShapes.iterator();
-        while (iter.hasNext()) {
-            var operation = iter.next();
-            var input = symbolProvider.toSymbol(context.model().expectShape(operation.getInputShape()));
-            var output = symbolProvider.toSymbol(context.model().expectShape(operation.getOutputShape()));
+        if (operationShapes.isEmpty()) {
+            writer.writeInline("None]");
+        } else {
+            var iter = operationShapes.iterator();
+            while (iter.hasNext()) {
+                var operation = iter.next();
+                var input = symbolProvider.toSymbol(context.model().expectShape(operation.getInputShape()));
+                var output = symbolProvider.toSymbol(context.model().expectShape(operation.getOutputShape()));
 
-            // TODO: pull the transport request/response types off of the application protocol
-            writer.addStdlibImport("typing", "Any");
-            writer.writeInline("Interceptor[$T, $T, Any, Any]", input, output);
-            if (iter.hasNext()) {
-                writer.writeInline(", ");
-            } else {
-                writer.writeInline("]");
+                // TODO: pull the transport request/response types off of the application protocol
+                writer.addStdlibImport("typing", "Any");
+                writer.writeInline("Interceptor[$T, $T, Any, Any]", input, output);
+                if (iter.hasNext()) {
+                    writer.writeInline(", ");
+                } else {
+                    writer.writeInline("]");
+                }
             }
         }
         writer.write("");
     }
 
-    private void generateConfig(GenerationContext context, PythonWriter writer) {
+    protected void generateConfig(GenerationContext context, PythonWriter writer) {
         var symbol = CodegenUtils.getConfigSymbol(context.settings());
 
         // Initialize the list of config properties with our base properties. Here a new

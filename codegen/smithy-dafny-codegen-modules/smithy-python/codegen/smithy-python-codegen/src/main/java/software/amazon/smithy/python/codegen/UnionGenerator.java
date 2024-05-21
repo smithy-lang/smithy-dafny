@@ -29,7 +29,7 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Renders unions.
  */
-final class UnionGenerator implements Runnable {
+public final class UnionGenerator implements Runnable {
 
     private final Model model;
     private final SymbolProvider symbolProvider;
@@ -37,7 +37,7 @@ final class UnionGenerator implements Runnable {
     private final UnionShape shape;
     private final Set<Shape> recursiveShapes;
 
-    UnionGenerator(
+    public UnionGenerator(
             Model model,
             SymbolProvider symbolProvider,
             PythonWriter writer,
@@ -69,7 +69,7 @@ final class UnionGenerator implements Runnable {
                 member.getMemberTrait(model, DocumentationTrait.class).ifPresent(trait -> {
                     writer.writeDocs(trait.getValue());
                 });
-                writer.openBlock("def __init__(self, value: $T):", "", targetSymbol, () -> {
+                writer.openBlock("def __init__(self, value: '$T'):", "", targetSymbol, () -> {
                     writer.write("self.value = value");
                 });
 

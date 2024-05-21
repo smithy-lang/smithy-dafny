@@ -32,16 +32,17 @@ import software.amazon.smithy.python.codegen.sections.ResolveEndpointSection;
 import software.amazon.smithy.python.codegen.sections.ResolveIdentitySection;
 import software.amazon.smithy.python.codegen.sections.SendRequestSection;
 import software.amazon.smithy.python.codegen.sections.SignRequestSection;
+import software.amazon.smithy.utils.CodeSection;
 
 /**
  * Generates the actual client and implements operations.
  */
-final class ClientGenerator implements Runnable {
+public class ClientGenerator implements Runnable {
 
-    private final GenerationContext context;
-    private final ServiceShape service;
+    protected final GenerationContext context;
+    protected final ServiceShape service;
 
-    ClientGenerator(GenerationContext context, ServiceShape service) {
+    protected ClientGenerator(GenerationContext context, ServiceShape service) {
         this.context = context;
         this.service = service;
     }
@@ -51,7 +52,7 @@ final class ClientGenerator implements Runnable {
         context.writerDelegator().useShapeWriter(service, this::generateService);
     }
 
-    private void generateService(PythonWriter writer) {
+    protected void generateService(PythonWriter writer) {
         var serviceSymbol = context.symbolProvider().toSymbol(service);
         var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
         var pluginSymbol = CodegenUtils.getPluginSymbol(context.settings());
@@ -112,7 +113,7 @@ final class ClientGenerator implements Runnable {
         }
     }
 
-    private void generateOperationExecutor(PythonWriter writer) {
+    protected void generateOperationExecutor(PythonWriter writer) {
         var transportRequest = context.applicationProtocol().requestType();
         var transportResponse = context.applicationProtocol().responseType();
         var errorSymbol = CodegenUtils.getServiceError(context.settings());
@@ -557,7 +558,7 @@ final class ClientGenerator implements Runnable {
         writer.dedent();
     }
 
-    private void initializeHttpAuthParameters(PythonWriter writer) {
+    protected void initializeHttpAuthParameters(PythonWriter writer) {
         var derived = new LinkedHashSet<DerivedProperty>();
         for (PythonIntegration integration : context.integrations()) {
             for (RuntimeClientPlugin plugin : integration.getClientPlugins()) {
@@ -579,7 +580,7 @@ final class ClientGenerator implements Runnable {
         }
     }
 
-    private void writeDefaultPlugins(PythonWriter writer, Collection<SymbolReference> plugins) {
+    protected void writeDefaultPlugins(PythonWriter writer, Collection<SymbolReference> plugins) {
         for (SymbolReference plugin : plugins) {
             writer.write("$T,", plugin);
         }
@@ -588,7 +589,7 @@ final class ClientGenerator implements Runnable {
     /**
      * Generates the function for a single operation.
      */
-    private void generateOperation(PythonWriter writer, OperationShape operation) {
+    protected void generateOperation(PythonWriter writer, OperationShape operation) {
         var operationSymbol = context.symbolProvider().toSymbol(operation);
         var pluginSymbol = CodegenUtils.getPluginSymbol(context.settings());
 

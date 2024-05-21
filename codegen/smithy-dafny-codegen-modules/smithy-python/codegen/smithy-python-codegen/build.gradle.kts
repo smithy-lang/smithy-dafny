@@ -19,6 +19,15 @@ extra["moduleName"] = "software.amazon.smithy.python.codegen"
 
 val smithyVersion: String by project
 
+plugins {
+    `java-library`
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 buildscript {
     val smithyVersion: String by project
 

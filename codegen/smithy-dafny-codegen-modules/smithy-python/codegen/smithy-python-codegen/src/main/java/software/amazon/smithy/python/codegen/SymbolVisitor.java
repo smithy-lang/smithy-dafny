@@ -68,17 +68,17 @@ import software.amazon.smithy.utils.StringUtils;
  * <p>Reserved words for Python are automatically escaped so that they are
  * suffixed with "_". See "reserved-words.txt" for the list of words.
  */
-final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
+public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
 
-    private final Model model;
-    private final ReservedWordSymbolProvider.Escaper escaper;
-    private final ReservedWordSymbolProvider.Escaper errorMemberEscaper;
-    private final PythonSettings settings;
-    private final ServiceShape service;
+    protected final Model model;
+    protected final ReservedWordSymbolProvider.Escaper escaper;
+    protected final ReservedWordSymbolProvider.Escaper errorMemberEscaper;
+    protected final PythonSettings settings;
+    protected final ServiceShape service;
 
-    SymbolVisitor(Model model, PythonSettings settings) {
+    public SymbolVisitor(Model model, PythonSettings settings) {
         this.model = model;
         this.settings = settings;
         this.service = model.expectShape(settings.getService(), ServiceShape.class);
@@ -126,7 +126,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return "message";
         }
 
-        var memberName = escaper.escapeMemberName(CaseUtils.toSnakeCase(shape.getMemberName()));
+        var memberName = CaseUtils.toSnakeCase(escaper.escapeMemberName(shape.getMemberName()));
 
         // Escape words that are only reserved for error members.
         if (shape.hasTrait(ErrorTrait.class)) {
@@ -140,7 +140,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return memberName;
     }
 
-    private String getDefaultShapeName(Shape shape) {
+    protected String getDefaultShapeName(Shape shape) {
         // Use the service-aliased name
         return StringUtils.capitalize(shape.getId().getName(service));
     }
@@ -220,7 +220,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
      * collection only ever transitively reference dict compatible shapes,
      * they don't need these dict helpers.
      */
-    private boolean targetRequiresDictHelpers(Shape target) {
+    protected boolean targetRequiresDictHelpers(Shape target) {
         if (target instanceof SimpleShape) {
             return false;
         }
@@ -233,7 +233,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return true;
     }
 
-    private Symbol createAsDictFunctionSymbol(Shape shape) {
+    protected Symbol createAsDictFunctionSymbol(Shape shape) {
         return Symbol.builder()
                 .name(String.format("_%s_as_dict", CaseUtils.toSnakeCase(shape.getId().getName())))
                 .namespace(format("%s.models", settings.getModuleName()), ".")
@@ -241,7 +241,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .build();
     }
 
-    private Symbol createFromDictFunctionSymbol(Shape shape) {
+    protected Symbol createFromDictFunctionSymbol(Shape shape) {
         return Symbol.builder()
                 .name(String.format("_%s_from_dict", CaseUtils.toSnakeCase(shape.getId().getName())))
                 .namespace(format("%s.models", settings.getModuleName()), ".")
@@ -420,15 +420,15 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return createStdlibSymbol(shape, "datetime", "datetime");
     }
 
-    private Symbol.Builder createSymbolBuilder(Shape shape, String typeName) {
+    protected Symbol.Builder createSymbolBuilder(Shape shape, String typeName) {
         return Symbol.builder().putProperty("shape", shape).name(typeName);
     }
 
-    private Symbol.Builder createSymbolBuilder(Shape shape, String typeName, String namespace) {
+    protected Symbol.Builder createSymbolBuilder(Shape shape, String typeName, String namespace) {
         return createSymbolBuilder(shape, typeName).namespace(namespace, ".");
     }
 
-    private Symbol createStdlibSymbol(Shape shape, String typeName, String namespace) {
+    protected Symbol createStdlibSymbol(Shape shape, String typeName, String namespace) {
         return createSymbolBuilder(shape, typeName, namespace)
                 .putProperty("stdlib", true)
                 .build();
