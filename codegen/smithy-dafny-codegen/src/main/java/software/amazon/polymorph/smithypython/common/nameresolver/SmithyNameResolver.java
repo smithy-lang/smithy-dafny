@@ -286,7 +286,16 @@ public class SmithyNameResolver {
     // `smithy.api.Unit:`
     // Smithy-Dafny will generate a stand-in shape in the service
     if ("smithy.api".equals(smithyNamespace)) {
-      pythonModuleName = settings.getModuleName();
+      // In the case of a wrappedLocalService shim in a different namespace,
+      // the default modulename should not be used,
+      // and we need a mechanism to override the default modulename.
+      // If the smithy.api namespace has a dependency-module-name mapping, use that.
+      try {
+        pythonModuleName = getPythonModuleNameForSmithyNamespace(smithyNamespace);
+      } catch (IllegalArgumentException e) {
+        // This is OK; just use the default module name
+        pythonModuleName = settings.getModuleName();
+      }
       namespace = settings.getService().getNamespace();
     } else {
       pythonModuleName = getPythonModuleNameForSmithyNamespace(smithyNamespace);
