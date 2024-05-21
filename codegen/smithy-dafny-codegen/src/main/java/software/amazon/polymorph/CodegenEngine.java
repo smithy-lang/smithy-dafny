@@ -65,7 +65,7 @@ public class CodegenEngine {
   private final Optional<Path> includeDafnyFile;
   private final boolean awsSdkStyle;
   private final boolean localServiceTest;
-  private final boolean generateProjectFiles;
+  private final boolean generateEverything;
 
   // To be initialized in constructor
   private final Model model;
@@ -89,7 +89,7 @@ public class CodegenEngine {
     final Optional<Path> includeDafnyFile,
     final boolean awsSdkStyle,
     final boolean localServiceTest,
-    final boolean generateProjectFiles,
+    final boolean generateEverything,
     final Path libraryRoot,
     final Optional<Path> patchFilesDir,
     final boolean updatePatchFiles
@@ -106,7 +106,7 @@ public class CodegenEngine {
     this.includeDafnyFile = includeDafnyFile;
     this.awsSdkStyle = awsSdkStyle;
     this.localServiceTest = localServiceTest;
-    this.generateProjectFiles = generateProjectFiles;
+    this.generateEverything = generateEverything;
     this.libraryRoot = libraryRoot;
     this.patchFilesDir = patchFilesDir;
     this.updatePatchFiles = updatePatchFiles;
@@ -316,7 +316,7 @@ public class CodegenEngine {
   private void generateDotnet(final Path outputDir) {
     if (this.awsSdkStyle) {
       netAwsSdk(outputDir);
-      if (this.generateProjectFiles) {
+      if (this.generateEverything) {
         netAwsSdkProjectFiles(outputDir);
       }
     } else if (this.localServiceTest) {
@@ -548,7 +548,7 @@ public class CodegenEngine {
     private Path includeDafnyFile;
     private boolean awsSdkStyle = false;
     private boolean localServiceTest = false;
-    private boolean generateProjectFiles = false;
+    private boolean generateEverything = false;
     private Path libraryRoot;
     private Path patchFilesDir;
     private boolean updatePatchFiles = false;
@@ -661,12 +661,13 @@ public class CodegenEngine {
 
     /**
      * Sets whether codegen will generate project files,
-     * including a Makefile and target-language specific build configuration.
+     * including a Makefile, target-language specific build configuration,
+     * and generatable externs.
      */
-    public Builder withGenerateProjectFiles(
-      final boolean generateProjectFiles
+    public Builder withGenerateEverything(
+      final boolean generateEverything
     ) {
-      this.generateProjectFiles = generateProjectFiles;
+      this.generateEverything = generateEverything;
       return this;
     }
 
@@ -786,7 +787,7 @@ public class CodegenEngine {
         includeDafnyFile,
         this.awsSdkStyle,
         this.localServiceTest,
-        this.generateProjectFiles,
+        this.generateEverything,
         libraryRoot,
         patchFilesDir,
         updatePatchFiles
