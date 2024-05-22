@@ -69,10 +69,10 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.7.0
+      - name: Setup Dafny (build from source)
+        uses: ./.github/actions/build_dafny_from_source
         with:
-          dafny-version: ${{ inputs.dafny }}
+          dafny: ${{ inputs.dafny }}
 
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
