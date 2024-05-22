@@ -81,6 +81,7 @@ _mv_test_rust:
 	rm -rf runtimes/rust/dafny_impl/tests
 	mkdir -p runtimes/rust/dafny_impl/tests
 	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny.rs
+	rustfmt runtimes/rust/tests/tests_from_dafny.rs
 	rm -rf tests_from_dafny-rust
 
 transpile_dependencies:
