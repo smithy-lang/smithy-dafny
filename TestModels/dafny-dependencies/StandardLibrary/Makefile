@@ -71,15 +71,12 @@ RUST_TEST_INDEX=test_for_rust
 
 # Override the targets to relocate translated Rust code directly into the main crate,
 # instead of the dafny_impl sub-crate.
+# We also don't want to delete the src directory since we have an extern in there too.
 _mv_implementation_rust:
-	rm -rf runtimes/rust/src
-	mkdir -p runtimes/rust/src
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
-	rm -rf runtimes/rust/dafny_impl/tests
-	mkdir -p runtimes/rust/dafny_impl/tests
 	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny.rs
 	rustfmt runtimes/rust/tests/tests_from_dafny.rs
 	rm -rf tests_from_dafny-rust
