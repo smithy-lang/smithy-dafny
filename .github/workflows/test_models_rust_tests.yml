@@ -32,7 +32,7 @@ jobs:
             # TestModels/Resource,
             # TestModels/SimpleTypes/BigDecimal,
             # TestModels/SimpleTypes/BigInteger,
-            # TestModels/SimpleTypes/SimpleBlob,
+            TestModels/SimpleTypes/SimpleBlob,
             TestModels/SimpleTypes/SimpleBoolean,
             # TestModels/SimpleTypes/SimpleByte,
             # TestModels/SimpleTypes/SimpleDouble,
