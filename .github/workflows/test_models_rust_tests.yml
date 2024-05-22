@@ -79,6 +79,7 @@ jobs:
         with:
           toolchain: "1.74.1"
           rustflags: ""
+          components: rustfmt
 
       - name: Generate Polymorph Dafny
         working-directory: ./${{ matrix.library }}
