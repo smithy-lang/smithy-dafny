@@ -20,9 +20,9 @@ impl Client {
         // If this service had any configuration properties,
         // they would need converting here too.
         let inner_config = ::std::rc::Rc::new(
-            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny_dtypes::_default::DefaultSimpleBooleanConfig());
+            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::DefaultSimpleBooleanConfig());
         let inner =
-            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny_dtypes::_default::SimpleBoolean(&inner_config);
+            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(&inner_config);
         if matches!(
             inner.as_ref(),
             ::simple_boolean_dafny::_Wrappers_Compile::Result::Failure { .. }
@@ -36,7 +36,7 @@ impl Client {
         }
         let handle = Handle {
             conf: conf.clone(),
-            inner: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient + 'static)>>::upcast_to(inner.Extract()),
+            inner: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient + 'static)>>::upcast_to(inner.Extract()),
         };
         Ok(Self {
             handle: ::std::sync::Arc::new(handle),
