@@ -102,7 +102,6 @@ public final class StructureGenerator implements Runnable {
                     }
 
                     writer.write("$L $P", memberName, memberSymbol);
-                    // System.out.println("\n\n\n\n\n" + memberName + " " + memberSymbol);
                 });
 
 

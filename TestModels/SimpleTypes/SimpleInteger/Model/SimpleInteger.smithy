@@ -26,7 +26,6 @@ operation GetIntegerKnownValueTest {
 }
 
 structure GetIntegerInput {
-  @range(min: 1)
   value: Integer
 }
 
