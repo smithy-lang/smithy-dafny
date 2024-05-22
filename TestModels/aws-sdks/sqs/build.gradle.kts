@@ -27,16 +27,34 @@ configure<software.amazon.smithy.gradle.SmithyExtension> {
 // Uncomment to disable creating a JAR.
 tasks["jar"].enabled = false
 
-// TODO: maybe model copying as a separate task,
-//       but then we have to figure out how to get it to run
-//       after the build is done, which Gradle doesn't like.
-//       It's much better to have a task depend on another,
-//       but we don't want to overwrite Build..
-//tasks.register<Copy>("copyDafnyFiles") {
-//    from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/source/dafny-client-codegen/Model/"))
-//    into("model")
-//    dependsOn(tasks.build)
-//}
+tasks.register("polymorphDafny") {
+    dependsOn("build")
+    doLast {
+        // specify a projection to use instead
+        // val projectionName = "permissions-only"
+        // default (no projection) is "source"
+        val projectionName = "source"
+        copy {
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/Model/"))
+            into("model")
+        }
+    }
+}
+
+tasks.register("polymorphDotnet") {
+    dependsOn("build")
+    doLast {
+        // specify a projection to use instead
+        // val projectionName = "permissions-only"
+        // default (no projection) is "source"
+        val projectionName = "source"
+        copy {
+            // build plugin calls it "dotnet" and CLI calls it "net"
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/dotnet"))
+            into("runtimes/net")
+        }
+    }
+}
 
 buildscript {
     val smithyVersion: String by project
@@ -46,17 +64,5 @@ buildscript {
     }
     dependencies {
         "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
-    }
-    // default (no projection) is "source"
-    val projectionName = "permissions-only"
-    copy {
-        from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/Model/"))
-        into("model")
-    }
-    copy {
-        // ideally we would just copy runtimes itself, 
-        // but build plugin calls it "dotnet" and CLI calls it "net"
-        from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/dotnet"))
-        into("runtimes/net")
     }
 }
