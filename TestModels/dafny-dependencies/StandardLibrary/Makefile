@@ -6,7 +6,6 @@ CORES=2
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
-# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=standard_library
 LIBRARIES :=
 

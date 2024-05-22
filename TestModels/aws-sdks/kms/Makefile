@@ -5,7 +5,6 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
-# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=com_amazonaws_kms
 
 PROJECT_SERVICES := \

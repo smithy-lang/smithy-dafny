@@ -303,6 +303,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     // Import this service's error that wraps the dependency service's errors
                     ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
                     String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
+                    String serviceDependencyErrorName = AwsSdkNameResolver.dependencyErrorNameForService(
+                            serviceDependencyShape
+                    );
 //                    writer.addImport(".errors", dependencyErrorName);
                     // Generate conversion method that says:
                     // "If this is a dependency-specific error, defer to the dependency's
@@ -317,7 +320,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                                 """,
                             dependencyErrorName,
                             DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape, codegenContext),
-                            dependencyErrorName,
+                            serviceDependencyErrorName,
                             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                     serviceDependencyShapeId.getNamespace())
                                     + nativeToDafnyErrorName);

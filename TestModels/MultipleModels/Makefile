@@ -26,7 +26,6 @@ SERVICE_DEPS_PrimaryProject := \
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=multiple_models
 
 # DEPENDENT-MODELS:=

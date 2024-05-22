@@ -54,14 +54,6 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
 GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
-# On macOS, sed requires an extra parameter of ""
-OS := $(shell uname)
-ifeq ($(OS), Darwin)
-  SED_PARAMETER := ""
-else
-  SED_PARAMETER :=
-endif
-
 ########################## Dafny targets
 
 # TODO: This target will not work for projects that use `replaceable` 
@@ -194,24 +186,6 @@ transpile_implementation:
 # ~2m vs ~10s for our large projects.
 # Also the expectation is that verification happens in the `verify` target
 # `find` looks for `Index.dfy` files in either V1 or V2-styled project directories (single vs. multiple model files).
-# transpile_implementation:
-# 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-# 		-stdin \
-# 		-noVerify \
-# 		-vcsCores:$(CORES) \
-# 		-compileTarget:$(TARGET) \
-# 		-spillTargetCode:3 \
-# 		-compile:0 \
-# 		-optimizeErasableDatatypeWrapper:0 \
-# 		$(COMPILE_SUFFIX_OPTION) \
-# 		-unicodeChar:0 \
-# 		$(TRANSPILE_MODULE_NAME) \
-# 		-functionSyntax:3 \
-# 		-useRuntimeLib \
-# 		-out $(OUT) \
-# 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-# 		$(TRANSPILE_DEPENDENCIES)
-
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
@@ -258,23 +232,6 @@ transpile_test:
 	else
 		COMPILE_SUFFIX_OPTION := -compileSuffix:1
 	endif
-# transpile_test:
-# 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-# 		-stdin \
-# 		-noVerify \
-# 		-vcsCores:$(CORES) \
-# 		-compileTarget:$(TARGET) \
-# 		-spillTargetCode:3 \
-# 		-runAllTests:1 \
-# 		-compile:0 \
-# 		-optimizeErasableDatatypeWrapper:0 \
-# 		$(COMPILE_SUFFIX_OPTION) \
-# 		-unicodeChar:0 \
-# 		-functionSyntax:3 \
-# 		-useRuntimeLib \
-# 		-out $(OUT) \
-# 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-# 		$(TRANSPILE_DEPENDENCIES)
 transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate $(TARGET) \
@@ -377,11 +334,11 @@ polymorph_code_gen:
 	done
 
 _polymorph_code_gen: OUTPUT_DAFNY=\
-	--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
+    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_code_gen: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_code_gen: OUTPUT_DOTNET=\
-	$(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_code_gen: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_code_gen: _polymorph
@@ -420,7 +377,7 @@ polymorph_dotnet:
 	done
 
 _polymorph_dotnet: OUTPUT_DOTNET=\
-	$(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project

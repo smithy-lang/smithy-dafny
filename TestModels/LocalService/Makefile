@@ -7,7 +7,6 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.localService
 
-# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=simple_localservice
 
 PROJECT_SERVICES := \
