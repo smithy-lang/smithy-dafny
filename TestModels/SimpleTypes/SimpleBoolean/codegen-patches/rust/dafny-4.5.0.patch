@@ -1,6 +1,28 @@
+diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+index c2850c0e..06c0c0ea 100644
+--- b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
++++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+@@ -434,7 +434,7 @@ pub mod r#_SimpleBooleanImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            if !(input.value().value() == true || input.value().value() == false) {
++            if !(*input.value().value() == true || *input.value().value() == false) {
+                 panic!("Halt")
+             };
+             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
+@@ -443,7 +443,7 @@ pub mod r#_SimpleBooleanImpl_Compile {
+             res = ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
+             value: input.value().clone()
+           });
+-            if !(res.value().value() == true || res.value().value() == false) {
++            if !(*res.value().value() == true || *res.value().value() == false) {
+                 panic!("Halt")
+             };
+             if !(input.value().value() == res.value().value()) {
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..911cee38
+index 00000000..cc741930
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs
 @@ -0,0 +1,52 @@
@@ -26,9 +48,9 @@ index 00000000..911cee38
 +        // If this service had any configuration properties,
 +        // they would need converting here too.
 +        let inner_config = ::std::rc::Rc::new(
-+            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny_dtypes::_default::DefaultSimpleBooleanConfig());
++            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::DefaultSimpleBooleanConfig());
 +        let inner =
-+            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny_dtypes::_default::SimpleBoolean(&inner_config);
++            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(&inner_config);
 +        if matches!(
 +            inner.as_ref(),
 +            ::simple_boolean_dafny::_Wrappers_Compile::Result::Failure { .. }
@@ -42,7 +64,7 @@ index 00000000..911cee38
 +        }
 +        let handle = Handle {
 +            conf: conf.clone(),
-+            inner: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient + 'static)>>::upcast_to(inner.Extract()),
++            inner: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient + 'static)>>::upcast_to(inner.Extract()),
 +        };
 +        Ok(Self {
 +            handle: ::std::sync::Arc::new(handle),
