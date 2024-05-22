@@ -18,7 +18,7 @@ impl GetBlobKnownValue {
         let inner_input =
             crate::conversions::get_blob_known_value::_get_blob_known_value_input::to_dafny(input);
         let inner_result =
-            ::simple_blob_dafny::dafny_runtime::read!(handle.inner).GetBlob(&inner_input);
+            ::dafny_runtime::md!(handle.inner.clone()).GetBlob(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_blob_dafny::r#_Wrappers_Compile::Result::Success { .. }
