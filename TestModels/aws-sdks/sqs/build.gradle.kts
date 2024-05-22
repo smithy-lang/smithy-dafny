@@ -51,4 +51,10 @@ buildscript {
         from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/source/dafny-client-codegen/Model/"))
         into("model")
     }
+    copy {
+        // ideally we would just copy runtimes itself, 
+        // but build plugin calls it "dotnet" and CLI calls it "net"
+        from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/source/dafny-client-codegen/runtimes/dotnet"))
+        into("runtimes/net")
+    }
 }

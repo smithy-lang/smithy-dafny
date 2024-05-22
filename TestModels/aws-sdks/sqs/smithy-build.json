@@ -1,5 +1,17 @@
 {
   "version": "1.0",
+  "projections": {
+    "test-projection-permissions-exclude": {
+      "transforms": [
+        {
+          "name": "excludeShapesBySelector",
+          "args": {
+            "selector": "[id|name *= Permission]"
+          }
+        }
+      ]
+    }
+  },
   "plugins": {
     "dafny-client-codegen": {
       "edition": "2023",
