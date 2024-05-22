@@ -194,6 +194,7 @@ transpile_implementation:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
+		$(DAFNY_OPTIONS) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES)
 
@@ -505,6 +506,7 @@ transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
 transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
 transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
 
 transpile_test_rust: TARGET=rs
@@ -519,7 +521,9 @@ transpile_dependencies_rust: transpile_dependencies
 _mv_implementation_rust:
 	rm -rf runtimes/rust/dafny_impl/src
 	mkdir -p runtimes/rust/dafny_impl/src
-	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
+	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	rustfmt runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
 	rm -rf runtimes/rust/dafny_impl/tests
