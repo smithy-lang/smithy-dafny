@@ -1,12 +1,18 @@
 {
   "version": "1.0",
   "projections": {
-    "test-projection-permissions-exclude": {
+    "permissions-only": {
       "transforms": [
         {
-          "name": "excludeShapesBySelector",
+          "name": "includeServices",
           "args": {
-            "selector": "[id|name *= Permission]"
+            "services": ["com.amazonaws.sqs#AmazonSQS"]
+          }
+        },
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": "[id|name *= 'Permission', 'AmazonSQS', 'service']"
           }
         }
       ]

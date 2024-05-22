@@ -47,14 +47,16 @@ buildscript {
     dependencies {
         "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
     }
+    // default (no projection) is "source"
+    val projectionName = "permissions-only"
     copy {
-        from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/source/dafny-client-codegen/Model/"))
+        from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/Model/"))
         into("model")
     }
     copy {
         // ideally we would just copy runtimes itself, 
         // but build plugin calls it "dotnet" and CLI calls it "net"
-        from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/source/dafny-client-codegen/runtimes/dotnet"))
+        from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/dotnet"))
         into("runtimes/net")
     }
 }
