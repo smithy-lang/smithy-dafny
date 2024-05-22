@@ -8,7 +8,7 @@ namespace simple.union
 )
 service SimpleUnion {
   version: "2021-11-01",
-  operations: [ GetUnion, GetSingleValueUnion ]
+  operations: [ GetUnion, GetKnownValueUnion ]
 }
 
 structure SimpleUnionConfig {}
@@ -31,19 +31,19 @@ union MyUnion {
     StringValue: String
 }
 
-operation GetSingleValueUnion {
-  input: GetSingleValueUnionInput,
-  output: GetSingleValueUnionOutput
+operation GetKnownValueUnion {
+  input: GetKnownValueUnionInput,
+  output: GetKnownValueUnionOutput
 }
 
-structure GetSingleValueUnionInput {
-    union: SingleValueUnion
+structure GetKnownValueUnionInput {
+    union: KnownValueUnion
 }
 
-structure GetSingleValueUnionOutput {
-    union: SingleValueUnion
+structure GetKnownValueUnionOutput {
+    union: KnownValueUnion
 }
 
-union SingleValueUnion {
+union KnownValueUnion {
     Value: Integer
 }

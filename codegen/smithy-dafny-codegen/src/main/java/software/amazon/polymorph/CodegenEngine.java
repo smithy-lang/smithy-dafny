@@ -74,6 +74,7 @@ public class CodegenEngine {
   private final Path[] dependentModelPaths;
   private final String namespace;
   private final Map<TargetLanguage, Path> targetLangOutputDirs;
+  private final Map<TargetLanguage, Path> targetLangTestOutputDirs;
   private final DafnyVersion dafnyVersion;
   private final Optional<Path> propertiesFile;
   private final Optional<Path> patchFilesDir;
@@ -102,6 +103,7 @@ public class CodegenEngine {
     final Path[] dependentModelPaths,
     final String namespace,
     final Map<TargetLanguage, Path> targetLangOutputDirs,
+    final Map<TargetLanguage, Path> targetLangTestOutputDirs,
     final DafnyVersion dafnyVersion,
     final Optional<Path> propertiesFile,
     final AwsSdkVersion javaAwsSdkVersion,
@@ -121,6 +123,7 @@ public class CodegenEngine {
     this.dependentModelPaths = dependentModelPaths;
     this.namespace = namespace;
     this.targetLangOutputDirs = targetLangOutputDirs;
+    this.targetLangTestOutputDirs = targetLangTestOutputDirs;
     this.dafnyVersion = dafnyVersion;
     this.propertiesFile = propertiesFile;
     this.javaAwsSdkVersion = javaAwsSdkVersion;
@@ -155,6 +158,9 @@ public class CodegenEngine {
       for (final Path dir : this.targetLangOutputDirs.values()) {
         Files.createDirectories(dir);
       }
+      for (final Path dir : this.targetLangTestOutputDirs.values()) {
+        Files.createDirectories(dir);
+      }
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -165,9 +171,13 @@ public class CodegenEngine {
         .get(lang)
         .toAbsolutePath()
         .normalize();
+      final Path testOutputDir = Optional
+        .ofNullable(targetLangTestOutputDirs.get(lang))
+        .map(p -> p.toAbsolutePath().normalize())
+        .orElse(null);
       switch (lang) {
         case DAFNY -> generateDafny(outputDir);
-        case JAVA -> generateJava(outputDir);
+        case JAVA -> generateJava(outputDir, testOutputDir);
         case DOTNET -> generateDotnet(outputDir);
         case RUST -> generateRust(outputDir);
         case PYTHON -> generatePython();
@@ -242,7 +252,7 @@ public class CodegenEngine {
     handlePatching(TargetLanguage.DAFNY, outputDir);
   }
 
-  private void generateJava(final Path outputDir) {
+  private void generateJava(final Path outputDir, final Path testOutputDir) {
     if (this.awsSdkStyle) {
       switch (this.javaAwsSdkVersion) {
         case V1 -> javaAwsSdkV1(outputDir);
@@ -251,7 +261,7 @@ public class CodegenEngine {
     } else if (this.localServiceTest) {
       javaWrappedLocalService(outputDir);
     } else {
-      javaLocalService(outputDir);
+      javaLocalService(outputDir, testOutputDir);
     }
 
     LOGGER.info("Formatting Java code in {}", outputDir);
@@ -265,6 +275,28 @@ public class CodegenEngine {
     );
 
     handlePatching(TargetLanguage.JAVA, outputDir);
+  }
+
+  private void javaLocalService(
+    final Path outputDir,
+    final Path testOutputDir
+  ) {
+    final JavaLibrary javaLibrary = new JavaLibrary(
+      this.model,
+      this.serviceShape,
+      this.javaAwsSdkVersion,
+      this.dafnyVersion
+    );
+    IOUtils.writeTokenTreesIntoDir(javaLibrary.generate(), outputDir);
+    LOGGER.info("Java code generated in {}", outputDir);
+
+    if (testOutputDir != null) {
+      IOUtils.writeTokenTreesIntoDir(
+        javaLibrary.generateTests(),
+        testOutputDir
+      );
+      LOGGER.info("Java test code generated in {}", testOutputDir);
+    }
   }
 
   private void javaLocalService(final Path outputDir) {
@@ -573,7 +605,10 @@ public class CodegenEngine {
     private Model serviceModel;
     private Path[] dependentModelPaths;
     private String namespace;
-    private Map<TargetLanguage, Path> targetLangOutputDirs;
+    private Map<TargetLanguage, Path> targetLangOutputDirs =
+      Collections.emptyMap();
+    private Map<TargetLanguage, Path> targetLangTestOutputDirs =
+      Collections.emptyMap();
     private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
     private Path propertiesFile;
     private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
@@ -637,6 +672,17 @@ public class CodegenEngine {
       final Map<TargetLanguage, Path> targetLangOutputDirs
     ) {
       this.targetLangOutputDirs = targetLangOutputDirs;
+      return this;
+    }
+
+    /**
+     * Sets the target language(s) for which to generate testing code,
+     * along with the directory(-ies) into which to output each language's generated testing code.
+     */
+    public Builder withTargetLangTestOutputDirs(
+      final Map<TargetLanguage, Path> targetLangTestOutputDirs
+    ) {
+      this.targetLangTestOutputDirs = targetLangTestOutputDirs;
       return this;
     }
 
@@ -769,6 +815,14 @@ public class CodegenEngine {
       final Map<TargetLanguage, Path> targetLangOutputDirs =
         ImmutableMap.copyOf(targetLangOutputDirsRaw);
 
+      final Map<TargetLanguage, Path> targetLangTestOutputDirsRaw =
+        Objects.requireNonNull(this.targetLangTestOutputDirs);
+      targetLangTestOutputDirsRaw.replaceAll((_lang, path) ->
+        path.toAbsolutePath().normalize()
+      );
+      final Map<TargetLanguage, Path> targetLangTestOutputDirs =
+        ImmutableMap.copyOf(targetLangTestOutputDirsRaw);
+
       final DafnyVersion dafnyVersion = Objects.requireNonNull(
         this.dafnyVersion
       );
@@ -816,6 +870,7 @@ public class CodegenEngine {
         dependentModelPaths,
         this.namespace,
         targetLangOutputDirs,
+        targetLangTestOutputDirs,
         dafnyVersion,
         propertiesFile,
         javaAwsSdkVersion,

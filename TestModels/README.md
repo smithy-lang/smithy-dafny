@@ -2,7 +2,7 @@
 
 This package contains various groups of models which is used to form a Test Bed for Dafny-Polymorph-Native layer.
 The idea is that we want an invariant test bed with `Write Once, Test Anywhere`
-with the `Anyhwere` part targeting different runtimes that dafny supports.
+with the `Anywhere` part targeting different runtimes that dafny supports.
 This will give us confidence in our test cases across runtimes,
 without writing native tests (and bugs) for each of those runtimes.
 
@@ -24,7 +24,7 @@ Anything which is to be re-used across all projects will go inside the `TestMode
 1. `cd <YOUR_PROJECT_DIRECTORY>`
 1. Create the `README.md`, `Makefile`, and `Model` directory.
 1. Write your `*.smithy` model in the `Model` directory.
-1. Use your `Makefile` recipe to execute polymorh the generate the appropriate stubbing for the runtime target.
+1. Use your `Makefile` recipe to execute polymorph the generate the appropriate stubbing for the runtime target.
 1. Implement the `dafny` code, build, execute, and test.
 
 ## Makefile targets
@@ -75,6 +75,26 @@ As a result, this `expect` validates that the `input` referenced within this fun
 Since this requires a new implementation that always expects a particular input vector, we create a new function for this.
 This is usually called `Get[Type]KnownValueTest`.
 Other than the single new `expect` statement, this function should be the same as `Get[Type]`.
+
+### Smoke Tests
+
+Writing tests once in Dafny has many benefits, ensuring each backend behaves the same way.
+However, one thing Dafny can't do well by design is test invalid input into a service,
+because our choice of representation of Smithy shapes in Dafny is very precise and statically-checked.
+For example, an `Integer` with a `range(min: 1)` trait is mapped to a subset type such as `type T = x: int | 1 <= x`.
+This makes it not possible to validate what happens if a customer passes `0` as a Java `int` as input,
+which definitely IS possible.
+
+To fill this testing gap we reuse the `smithy.test#smokeTests` trait from the core Smithy specification.
+It specifies testing inputs as node values, which are to be compiled to target language expressions instead.
+Because it generates unit tests in the target language using the target language interface,
+including such things as builders, it is able to assert that passing invalid input correctly fails.
+
+The `Contraints` test model currently tries to force Dafny code to compile to invalid input
+by using `assume {:axiom}` statements to lie to the verifier.
+This is technically relying on undefined behavior and hence not guaranteed to keep working,
+and cannot force Dafny to not provide `@required` values to boot.
+They should be refactored to use `smokeTests` instead once language support is complete.
 
 ### Extern Testing
 

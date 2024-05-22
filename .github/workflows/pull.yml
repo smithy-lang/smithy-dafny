@@ -46,10 +46,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
-        # The Rust backend didn't exist yet in Dafny 4.2
-        exclude:
-          - dafny-version: 4.2.0
+        # Rust code generation is under development and depends on pending changes to the
+        # Dafny Rust code generation, so we only test on a relatively recent prerelease instead.
+        # This can be updated as needed when new features/fixes land in Dafny master.
+        dafny-version:
+          - nightly-2024-05-14-8da3ddd
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}

@@ -97,5 +97,17 @@ public abstract class Generator {
       "java.util",
       "ArrayList"
     );
+    public static final ClassName JAVA_UTIL_HASHMAP = ClassName.get(
+      "java.util",
+      "HashMap"
+    );
+    public static final ClassName TESTNG_TEST = ClassName.get(
+      "org.testng.annotations",
+      "Test"
+    );
+    public static final ClassName TESTNG_ASSERT = ClassName.get(
+      "org.testng",
+      "Assert"
+    );
   }
 }

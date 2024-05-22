@@ -37,6 +37,7 @@ import software.amazon.smithy.model.node.ExpectationNotMetException;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
@@ -193,6 +194,13 @@ public class JavaLibrary extends CodegenSubject {
       .map(shape -> new ResourceShim(this, shape))
       .map(Generator::generate)
       .forEachOrdered(rtn::putAll);
+    return rtn;
+  }
+
+  public Map<Path, TokenTree> generateTests() {
+    Map<Path, TokenTree> rtn = new LinkedHashMap<>();
+    ModelTestCodegen serviceTestCodegen = new ModelTestCodegen(this);
+    rtn.putAll(serviceTestCodegen.generate());
     return rtn;
   }
 

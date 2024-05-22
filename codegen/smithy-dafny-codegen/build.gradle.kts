@@ -25,6 +25,13 @@ dependencies {
     implementation("software.amazon.smithy:smithy-aws-traits:$smithyVersion")
     implementation("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
     implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
+    // Using a hard coded version here because this package didn't exist until 1.40.0,
+    // but upgrading $smithyVersion ends up breaking the sqs-via-cli test model
+    // because the SQS model isn't actually valid, and newer versions of Smithy crash on it.
+    // We also can't yet update the SQS model because newer versions use Smithy 2.0 enum shapes,
+    // which we don't yet support for .NET.
+    // See https://github.com/smithy-lang/smithy-dafny/issues/184#issuecomment-2105109715
+    implementation("software.amazon.smithy:smithy-smoke-test-traits:1.49.0")
 
     implementation("com.google.guava:guava:30.1-jre")
     implementation("org.slf4j:slf4j-api:1.7.32")

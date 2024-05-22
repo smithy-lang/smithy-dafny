@@ -320,6 +320,7 @@ _polymorph:
 	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_JAVA) \
+	$(OUTPUT_JAVA_TEST) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_PYTHON) \
 	$(MODULE_NAME) \
@@ -382,6 +383,7 @@ _polymorph_code_gen: INPUT_DAFNY=\
 _polymorph_code_gen: OUTPUT_DOTNET=\
 	$(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_code_gen: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_code_gen: _polymorph
 
 check_polymorph_diff:
@@ -434,6 +436,7 @@ polymorph_java:
 	done
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_java: _polymorph
 
 # Generates python code for all namespaces in this project
@@ -570,6 +573,7 @@ mvn_staging_deploy:
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
+	$(GRADLEW) -p runtimes/java test --info
 
 ########################## Rust targets
 

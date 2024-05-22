@@ -16,6 +16,8 @@
 # Dafny Generated Rust
 # (Rust code generation is incomplete so we're patching and checking in for now)
 #**/runtimes/rust
+# Cargo.lock files should only be committed for binaries, not libraries
+**/Cargo.lock
 
 # Polymorph Generated Dafny
 **/Model/*Types.dfy
@@ -28,6 +30,7 @@
 
 # Polymorph Generated Java
 **/runtimes/java/src/main/smithy-generated/
+**/runtimes/java/src/test/smithy-generated/
 
 # Polymorph Generated Python
 **/runtimes/python/src/**/smithygenerated/

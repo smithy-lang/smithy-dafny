@@ -9,7 +9,7 @@ namespace simple.types.smithyString
 service SimpleTypesString {
   version: "2021-11-01",
   resources: [],
-  operations: [ GetString, GetStringSingleValue, GetStringUTF8 ],
+  operations: [ GetString, GetStringKnownValue, GetStringUTF8 ],
   errors: [],
 }
 
@@ -20,7 +20,7 @@ operation GetString {
   output: GetStringOutput,
 }
 
-operation GetStringSingleValue {
+operation GetStringKnownValue {
   input: GetStringInput,
   output: GetStringOutput,
 }
