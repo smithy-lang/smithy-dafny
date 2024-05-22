@@ -22,10 +22,6 @@ removeDotFromExtern() {
   done
 }
 
-directories=$(echo */)
-
-for dir in $directories; do
-    removeDotFromExtern "$dir/Model"
-    removeDotFromExtern "$dir/src"
-done
+removeDotFromExtern "Model"
+removeDotFromExtern "src"
 
