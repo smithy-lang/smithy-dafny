@@ -1,20 +1,15 @@
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index 5200278d..8aa39b59 100644
+index ba5de6ff..8aa39b59 100644
 --- b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -1,103 +1,549 @@
+@@ -1,89 +1,549 @@
  #![allow(warnings, unconditional_panic)]
  #![allow(nonstandard_style)]
 -extern crate dafny_runtime;
 -mod _System {
 -  #[derive(Clone, PartialEq)]
 -  #[repr(transparent)]
--  pub struct nat(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for nat {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for nat {}
--  impl ::dafny_runtime::DafnyUnerasable<nat> for nat {}
+-  pub struct nat(pub ::dafny_runtime::DafnyInt);
 -  impl ::std::default::Default for nat {
 -    fn default() -> Self {
 -      nat(::std::default::Default::default())
@@ -26,18 +21,17 @@ index 5200278d..8aa39b59 100644
 -    }
 -  }
 -  impl ::std::ops::Deref for nat {
--    type Target = ::dafny_runtime::BigInt;
+-    type Target = ::dafny_runtime::DafnyInt;
 -    fn deref(&self) -> &Self::Target {
 -      &self.0
 -    }
 -  }
 -  #[derive(PartialEq)]
--  pub enum Tuple2<T0,T1> {
+-  pub enum Tuple2<T0, T1> {
 -    _T2 { _0: T0, _1: T1 },
 -    _PhantomVariant(::std::marker::PhantomData::<T0>, ::std::marker::PhantomData::<T1>)
 -  }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>Tuple2<T0,T1>
--     where <T0 as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq, <T1 as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
+-  impl <T0: Clone + ::dafny_runtime::DafnyPrint + 'static, T1: Clone + ::dafny_runtime::DafnyPrint + 'static>Tuple2<T0, T1> {
 -    pub fn _0(&self) -> &T0 {
 -      match self {
 -        Tuple2::_T2 { _0, _1, } => _0,
@@ -51,11 +45,7 @@ index 5200278d..8aa39b59 100644
 -      }
 -    }
 -  }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyErasable for Tuple2<T0,T1> {
--    type Erased = Tuple2<T0::Erased, T1::Erased, >;
--  }
--  impl <T0__Erased, T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyUnerasable<T0__Erased> + 'static,T1__Erased, T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyUnerasable<T1__Erased> + 'static>::dafny_runtime::DafnyUnerasable<Tuple2<T0__Erased, T1__Erased, >> for Tuple2<T0,T1> {}
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyPrint for Tuple2<T0,T1> {
+-  impl <T0: Clone + ::dafny_runtime::DafnyPrint + 'static, T1: Clone + ::dafny_runtime::DafnyPrint + 'static>::dafny_runtime::DafnyPrint for Tuple2<T0, T1> {
 -    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
 -      match self {
 -        Tuple2::_T2 { _0, _1, } => {
@@ -188,7 +178,7 @@ index 5200278d..8aa39b59 100644
 -      }
 -    }
 -  }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::default::Default for Tuple2<T0,T1> {
+-  impl <T0: ::std::default::Default, T1: ::std::default::Default>::std::default::Default for Tuple2<T0, T1> {
 -    fn default() -> Self {
 -      Tuple2::_T2 {
 -        _0: ::std::default::Default::default(),
@@ -201,10 +191,6 @@ index 5200278d..8aa39b59 100644
 -    _T0 {}
 -  }
 -  impl Tuple0 {}
--  impl ::dafny_runtime::DafnyErasable for Tuple0 {
--    type Erased = Tuple0;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<Tuple0> for Tuple0 {}
 -  impl ::dafny_runtime::DafnyPrint for Tuple0 {
 -    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
 -      match self {
