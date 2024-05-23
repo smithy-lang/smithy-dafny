@@ -7,7 +7,7 @@ pub use config::Config;
 
 pub mod client;
 
-/// Configuration for SimpleStub Service.
+/// Configuration for Constructor Service.
 pub mod config;
 
 /// Common errors and error handling utilities.

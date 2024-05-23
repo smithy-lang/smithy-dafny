@@ -1,5 +1,5 @@
 [package]
-name = "stub_dafny"
+name = "constructor_dafny"
 version = "0.1.0"
 edition = "2021"
 
