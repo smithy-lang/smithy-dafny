@@ -36,7 +36,7 @@ public class LocalServiceDecorator implements ClientCodegenDecorator {
     public Map<ShapeId, ProtocolGeneratorFactory<OperationGenerator, ClientCodegenContext>> protocols(ShapeId serviceId, Map<ShapeId, ? extends ProtocolGeneratorFactory<? extends OperationGenerator, ClientCodegenContext>> currentProtocols) {
         Map<ShapeId, ProtocolGeneratorFactory<OperationGenerator, ClientCodegenContext>> result = new HashMap<>();
         // TODO: generics are making it hard to putAll(currentProtocols), but we don't actually need any of those protocols anyway :)
-        result.put(ShapeId.fromParts("aws.protocol", "localService"), new LocalServiceProtocolFactory());
+        result.put(ShapeId.fromParts("aws.polymorph", "localService"), new LocalServiceProtocolFactory());
         return result;
     }
 

@@ -443,7 +443,10 @@ public class CodegenEngine {
     software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
     outputSrcDir.toFile().mkdirs();
 
-    Generator.DoIt(model, outputDir);
+    // TODO: Dumb special case
+    if (!serviceShape.getId().getName().equals("StandardLibrary")) {
+      Generator.DoIt(model, outputDir);
+    }
 
     handlePatching(TargetLanguage.RUST, outputDir);
   }
