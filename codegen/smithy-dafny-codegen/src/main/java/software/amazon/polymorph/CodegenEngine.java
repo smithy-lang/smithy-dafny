@@ -443,7 +443,7 @@ public class CodegenEngine {
     software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
     outputSrcDir.toFile().mkdirs();
 
-    Generator.DoIt();
+    Generator.DoIt(model, outputDir);
 
     handlePatching(TargetLanguage.RUST, outputDir);
   }
