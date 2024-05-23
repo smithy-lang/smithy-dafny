@@ -91,7 +91,7 @@ impl GetIntegerKnownValueFluentBuilder {
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> ::std::option::Option<i32> {
+    pub fn get_value(&self) -> &::std::option::Option<i32> {
         self.inner.get_value()
     }
 }

@@ -46,7 +46,7 @@ impl GetIntegerKnownValueInputBuilder {
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> ::std::option::Option<i32> {
+    pub fn get_value(&self) -> &::std::option::Option<i32> {
         self.value
     }
     /// Consumes the builder and constructs a [`GetIntegerKnownValueInput`](crate::operation::operation::GetIntegerKnownValueInput).
