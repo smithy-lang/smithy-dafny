@@ -40,7 +40,7 @@ jobs:
             # TestModels/SimpleTypes/SimpleEnumV2,
             # TestModels/SimpleTypes/SimpleFloat,
             TestModels/SimpleTypes/SimpleInteger,
-            # TestModels/SimpleTypes/SimpleLong,
+            TestModels/SimpleTypes/SimpleLong,
             # TestModels/SimpleTypes/SimpleShort,
             TestModels/SimpleTypes/SimpleString,
             # TestModels/SimpleTypes/SimpleTimestamp,
