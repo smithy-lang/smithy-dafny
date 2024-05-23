@@ -12,8 +12,10 @@
 # inside each project.
 
 # Variables:
-# MAX_RESOURCE_COUNT -- The Dafny report generator max resource count.
+# MAX_RESOURCE_COUNT -- The Dafny verification max resource count.
 # 	This is is per project because the verification variability can differ.
+#   Individual functions/methods/lemmas can override this limit using `{:rlimit N}`,
+#   but be aware that the attribute multiplies N by 1000!
 # VERIFY_TIMEOUT -- The Dafny verification timeout in seconds.
 # 	This is only a guard against builds taking way too long to fail.
 #   The resource count limit above is much more important for fighting brittle verification.
@@ -87,7 +89,8 @@ verify:
 		-functionSyntax:3 \
 		-verificationLogger:csv \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		-rlimit:$(MAX_RESOURCE_COUNT) \
+		$(DAFNY_OPTIONS) \
 		%
 
 # Verify single file FILE with text logger.
@@ -102,7 +105,8 @@ verify_single:
 		-functionSyntax:3 \
 		-verificationLogger:text \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		-rlimit:$(MAX_RESOURCE_COUNT) \
+		$(DAFNY_OPTIONS) \
 		$(if ${PROC},-proc:*$(PROC)*,) \
 		$(FILE)
 
@@ -117,7 +121,7 @@ verify_service:
 		-functionSyntax:3 \
 		-verificationLogger:csv \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		$(DAFNY_OPTIONS) \
 		`find ./dafny/$(SERVICE) -name '*.dfy'` \
 
 format_dafny:
@@ -133,10 +137,13 @@ format_dafny-check:
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
+# This no longer enforces the maximum resource count,
+# as we're passing /rlimit to dafny directly now.
+# But it's still useful information to see what assertion batches
+# are close to the limit.
 dafny-reportgenerator:
 	dafny-reportgenerator \
 		summarize-csv-results \
-		--max-resource-count $(MAX_RESOURCE_COUNT) \
 		TestResults/*.csv
 
 clean-dafny-report:
