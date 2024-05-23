@@ -34,6 +34,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.smithyrust.generator.Generator;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -441,6 +442,8 @@ public class CodegenEngine {
     Path outputSrcDir = outputDir.resolve("src");
     software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
     outputSrcDir.toFile().mkdirs();
+
+    Generator.DoIt();
 
     handlePatching(TargetLanguage.RUST, outputDir);
   }
