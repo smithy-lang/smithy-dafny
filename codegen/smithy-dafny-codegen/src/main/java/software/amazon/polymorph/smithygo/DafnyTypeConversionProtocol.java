@@ -45,6 +45,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
     @Override
     public void generateSerializers(GenerationContext context) {
+        TO_DAFNY = "ImplementationFromDafny-go/src/" + context.settings().getModuleName().replace(DOT, BLANK).toLowerCase() + "/" + TO_DAFNY;
         final var model = context.model();
         final var serviceShape = model.expectShape(context.settings().getService(), ServiceShape.class);
         final var symbolProvider = context.symbolProvider();
@@ -131,6 +132,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
         final var topDownIndex = TopDownIndex.of(context.model());
         final var service = context.settings().getService(context.model());
         final var delegator = context.writerDelegator();
+        FROM_DAFNY = "ImplementationFromDafny-go/src/" + context.settings().getModuleName().replace(DOT, BLANK).toLowerCase() + "/" + FROM_DAFNY;
 
         service.getOperations().forEach(eachOperation -> {
                                                  var operation = context.model().expectShape(eachOperation, OperationShape.class);

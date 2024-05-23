@@ -430,7 +430,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol serviceShape(ServiceShape shape) {
         return symbolBuilderFor(shape, "Client", rootModuleName)
-                .definitionFile("./api_client.go")
+                .definitionFile("ImplementationFromDafny-go/src/" + rootModuleName + "/api_client.go")
                 .build();
     }
 
@@ -461,9 +461,9 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         }
         Symbol.Builder builder = symbolBuilderFor(shape, name, typesPackageName);
         if (shape.hasTrait(ErrorTrait.ID)) {
-            builder.definitionFile("./types/errors.go");
+            builder.definitionFile("ImplementationFromDafny-go/src/types/errors.go");
         } else {
-            builder.definitionFile("./types/types.go");
+            builder.definitionFile("ImplementationFromDafny-go/src/types/types.go");
         }
 
         if (shape.hasTrait(ReferenceTrait.class)) {
@@ -489,7 +489,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol unionShape(UnionShape shape) {
         String name = getDefaultShapeName(shape);
         return symbolBuilderFor(shape, name, typesPackageName)
-                .definitionFile("./types/types.go")
+                .definitionFile("ImplementationFromDafny-go/src/types/types.go")
                 .build();
     }
 
