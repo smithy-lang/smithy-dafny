@@ -102,6 +102,14 @@ jobs:
         run: |
           make polymorph_rust DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
+      # Since we're checking in and patching code,
+      # make sure the patch files are up to date.
+      - name: Check regenerated code against commited code
+        working-directory: ./${{ matrix.library }}
+        shell: bash
+        run: |
+          make check_polymorph_diff
+
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}
         shell: bash
