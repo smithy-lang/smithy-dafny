@@ -761,7 +761,7 @@ index 00000000..74208599
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/_get_integer_input.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/_get_integer_input.rs
 new file mode 100644
-index 00000000..21ab7db2
+index 00000000..52a75ce0
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/_get_integer_input.rs
 @@ -0,0 +1,60 @@
@@ -812,7 +812,7 @@ index 00000000..21ab7db2
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<i32> {
++    pub fn get_value(&self) -> &::std::option::Option<i32> {
 +        self.value
 +    }
 +    /// Consumes the builder and constructs a [`GetIntegerInput`](crate::operation::operation::GetIntegerInput).
@@ -827,7 +827,7 @@ index 00000000..21ab7db2
 +}
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/_get_integer_output.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/_get_integer_output.rs
 new file mode 100644
-index 00000000..e4961944
+index 00000000..867f58d8
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/_get_integer_output.rs
 @@ -0,0 +1,66 @@
@@ -883,7 +883,7 @@ index 00000000..e4961944
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<i32> {
++    pub fn get_value(&self) -> &::std::option::Option<i32> {
 +        self.value
 +    }
 +
@@ -899,7 +899,7 @@ index 00000000..e4961944
 +}
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/builders.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/builders.rs
 new file mode 100644
-index 00000000..ce341e26
+index 00000000..ae8794a1
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer/builders.rs
 @@ -0,0 +1,95 @@
@@ -994,7 +994,7 @@ index 00000000..ce341e26
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<i32>  {
++    pub fn get_value(&self) -> &::std::option::Option<i32>  {
 +        self.inner.get_value()
 +    }
 +}
@@ -1152,7 +1152,7 @@ index 00000000..fe9bb65d
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/_get_integer_known_value_input.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/_get_integer_known_value_input.rs
 new file mode 100644
-index 00000000..5f418c60
+index 00000000..50374723
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/_get_integer_known_value_input.rs
 @@ -0,0 +1,63 @@
@@ -1204,7 +1204,7 @@ index 00000000..5f418c60
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<i32> {
++    pub fn get_value(&self) -> &::std::option::Option<i32> {
 +        self.value
 +    }
 +    /// Consumes the builder and constructs a [`GetIntegerKnownValueInput`](crate::operation::operation::GetIntegerKnownValueInput).
@@ -1221,7 +1221,7 @@ index 00000000..5f418c60
 +}
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/_get_integer_known_value_output.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/_get_integer_known_value_output.rs
 new file mode 100644
-index 00000000..13b891ff
+index 00000000..005be9a9
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/_get_integer_known_value_output.rs
 @@ -0,0 +1,63 @@
@@ -1273,7 +1273,7 @@ index 00000000..13b891ff
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<i32> {
++    pub fn get_value(&self) -> &::std::option::Option<i32> {
 +        self.value
 +    }
 +    /// Consumes the builder and constructs a [`GetIntegerKnownValueOutput`](crate::operation::operation::GetIntegerKnownValueOutput).
@@ -1290,7 +1290,7 @@ index 00000000..13b891ff
 +}
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/builders.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/builders.rs
 new file mode 100644
-index 00000000..8f3cfedc
+index 00000000..9623de0e
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value/builders.rs
 @@ -0,0 +1,97 @@
@@ -1387,7 +1387,7 @@ index 00000000..8f3cfedc
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> ::std::option::Option<i32> {
++    pub fn get_value(&self) -> &::std::option::Option<i32> {
 +        self.inner.get_value()
 +    }
 +}
