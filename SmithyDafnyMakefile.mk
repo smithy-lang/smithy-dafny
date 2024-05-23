@@ -533,12 +533,14 @@ transpile_go: clean_go transpile_implementation_go transpile_test_go transpile_d
 transpile_implementation_go: TARGET=go
 transpile_implementation_go: GO_MODULE_NAME="github.com/ShubhamChaturvedi7/SimpleBoolean"
 transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
-transpile_implementation_go: transpile_implementation_new
+# TODO: Change this to transpile_implementation_new when go mod project support is done
+transpile_implementation_go: transpile_implementation
 
 transpile_test_go: TARGET=go
 transpile_test_go: GO_MODULE_NAME="github.com/ShubhamChaturvedi7/SimpleBoolean"
 transpile_test_go: OUT=runtimes/go/TestsFromDafny
-transpile_test_go: transpile_test_new
+# TODO: Change this to transpile_implementation_new when go mod project support is done
+transpile_test_go: transpile_test
 
 transpile_dependencies_go: LANG=go
 transpile_dependencies_go: transpile_dependencies
