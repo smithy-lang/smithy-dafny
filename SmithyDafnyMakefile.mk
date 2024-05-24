@@ -284,6 +284,7 @@ _polymorph_wrapped:
 	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
+	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \

@@ -17,9 +17,9 @@ var props = Properties().apply {
 }
 var dafnyVersion = props.getProperty("dafnyVersion")
 
-group = "%GRADLE_GROUP%"
+group = "$gradleGroup:L"
 version = "1.0-SNAPSHOT"
-description = "%GRADLE_DESCRIPTION%"
+description = "$gradleDescription:L"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(8))
@@ -41,10 +41,11 @@ repositories {
 }
 
 dependencies {
-    implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
+    implementation("org.dafny:DafnyRuntime:$${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
-    testImplementation("org.testng:testng:7.5")
+    implementation(platform("software.amazon.awssdk:bom:2.19.1"))
+    implementation("software.amazon.awssdk:$serviceID:L")
 }
 
 publishing {
@@ -74,8 +75,4 @@ tasks {
         mainClass.set("TestsFromDafny")
         classpath = sourceSets["test"].runtimeClasspath
     }
-}
-
-tasks.named<Test>("test") {
-    useTestNG()
 }
