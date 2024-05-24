@@ -46,7 +46,7 @@ jobs:
           # TestModels/aws-sdks/ddb,
           # TestModels/aws-sdks/kms,
         ]
-    runs-on: "ubuntu-latest"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v2
       - name: Install Dafny dependencies
@@ -75,4 +75,3 @@ jobs:
           make polymorph_dafny
           sh ./removeDotFromExtern.sh
           make transpile_go
-          # make polymorph_go
