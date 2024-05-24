@@ -320,13 +320,13 @@ public class CodegenEngine {
   private void generateDotnet(final Path outputDir) {
     if (this.awsSdkStyle) {
       netAwsSdk(outputDir);
-      if (this.generateEverything) {
-        netProjectFiles(outputDir);
-      }
     } else if (this.localServiceTest) {
       netWrappedLocalService(outputDir);
     } else {
       netLocalService(outputDir);
+    }
+    if (this.generateEverything) {
+      netProjectFiles();
     }
 
     Path dotnetRoot = fromSmithyBuildPlugin
@@ -397,7 +397,7 @@ public class CodegenEngine {
     LOGGER.info(".NET code generated in {}", outputDir);
   }
 
-  private void netProjectFiles(final Path outputDir) {
+  private void netProjectFiles() {
     final DotNetNameResolver resolver = new DotNetNameResolver(model, serviceShape);
     final String serviceId = resolver.clientForService();
     final String serviceConfig = awsSdkStyle ?
@@ -405,6 +405,8 @@ public class CodegenEngine {
     final String service = serviceShape.getId().getName();
     final String configConversionMethod = DotNetNameResolver.typeConverterForShape(
             serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(), TypeConversionDirection.FROM_DAFNY);
+    final String namespace = serviceShape.getId().getNamespace();
+    final String namespaceDir = serviceShape.getId().getNamespace();
 
     final Path includeDafnyFile =
       this.includeDafnyFile.orElseThrow(() ->
@@ -414,35 +416,34 @@ public class CodegenEngine {
         );
     // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
     // TODO be smarter about finding the StandardLibrary path
-    final Path stdLibPath = outputDir.relativize(
+    final Path stdLibPath = libraryRoot.resolve("runtimes/net").relativize(
       includeDafnyFile.resolve("../..")
     );
 
     Map<String, String> parameters = new HashMap<>();
-    parameters.put("DAFNY_VERSION",     dafnyVersion.toString());
-    parameters.put("SDK_ID",            serviceId);
-    parameters.put("LOCAL_SERVICE_ID",  serviceId);
-    parameters.put("SERVICE_ID",        serviceId);
-    parameters.put("SERVICE",           service);
-    parameters.put("SERVICE_CONFIG",    serviceConfig);
-    parameters.put("CONFIG_CONVERSION_METHOD", configConversionMethod);
-    parameters.put("NAMESPACE",         serviceShape.getId().getNamespace());
-    parameters.put("STDLIB_PATH%",      stdLibPath.toString());
+    parameters.put("dafnyVersion",      dafnyVersion.unparse());
+    parameters.put("serviceID",         serviceId);
+    parameters.put("service",           service);
+    parameters.put("serviceConfig",     serviceConfig);
+    parameters.put("configConversionMethod", configConversionMethod);
+    parameters.put("namespace",         namespace);
+    parameters.put("namespaceDir",      namespaceDir);
+    parameters.put("stdLibPath",        stdLibPath.toString());
 
     if (awsSdkStyle) {
-      IOUtils.writeTemplatedFile(outputDir, "runtimes/net/%SDK_ID%Project.csproj", parameters);
+      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/$forSDK:L$serviceID:L.csproj", parameters);
       // TODO generate sdk constructor
     } else {
-      IOUtils.writeTemplatedFile(outputDir, "runtimes/net/%LOCAL_SERVICE_ID%Project.csproj", parameters);
+      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/$forLocalService:L$serviceID:L.csproj", parameters);
       if (localServiceTest) {
-        IOUtils.writeTemplatedFile(outputDir, "runtimes/net/Extern/Wrapped%SERVICE%Service.cs", parameters);
+        IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/Extern/Wrapped$service:LService.cs", parameters);
       }
     }
-    IOUtils.writeTemplatedFile(outputDir, "runtimes/net/tests/%SERVICE_ID%ProjectTest.csproj", parameters);
+    IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/tests/$serviceID:LTest.csproj", parameters);
 
     // TODO generate Makefile
 
-    LOGGER.info(".NET project files generated in {}", outputDir);
+    LOGGER.info(".NET project files generated in {}/runtimes/net", libraryRoot);
   }
 
   private void generateRust(final Path outputDir) {

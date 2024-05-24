@@ -12,6 +12,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.SimpleCodeWriter;
 
 public class IOUtils {
 
@@ -64,22 +65,29 @@ public class IOUtils {
     }
   }
 
-  public static void writeTemplatedFile(Path rootPath, String templatePath, Map<String, String> parameters) {
+  public static void writeTemplatedFile(Class<?> klass, Path rootPath, String templatePath, Map<String, String> parameters) {
     String content = IoUtils.readUtf8Resource(
-            IOUtils.class.getClass(),
+            klass,
             "/templates/" + templatePath
     );
 
-    for (Map.Entry<String, String> entry : parameters.entrySet()) {
-      content = content.replace(entry.getKey(), entry.getValue());
-    }
-    for (Map.Entry<String, String> entry : parameters.entrySet()) {
-      templatePath = templatePath.replace(entry.getKey(), entry.getValue());
-    }
+    content = evalTemplate(content, parameters);
+    templatePath = evalTemplate(templatePath, parameters);
 
     IOUtils.writeToFile(
             content,
             rootPath.resolve(templatePath).toFile()
     );
+  }
+
+  public static String evalTemplate(String template, Map<String, String> context) {
+    SimpleCodeWriter writer = new SimpleCodeWriter()
+      .disableNewlines()
+      .insertTrailingNewline(false);
+    for (Map.Entry<String, String> entry : context.entrySet()) {
+      writer.putContext(entry.getKey(), entry.getValue());
+    }
+    writer.write(template);
+    return writer.toString();
   }
 }

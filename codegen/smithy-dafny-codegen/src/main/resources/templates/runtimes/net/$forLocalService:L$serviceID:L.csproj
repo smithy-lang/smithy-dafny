@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-
+    <RootNamespace>$serviceID:L</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <TargetFrameworks>net6.0</TargetFrameworks>
@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DafnyRuntime" Version="%DAFNY_VERSION%"/>
+    <PackageReference Include="DafnyRuntime" Version="$dafnyVersion:L"/>
     <!--
       System.Collections.Immutable can be removed once dafny.msbuild is updated with
       https://github.com/dafny-lang/dafny.msbuild/pull/10 and versioned
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="%STDLIB_PATH%/runtimes/net/STD.csproj" />
+    <ProjectReference Include="$stdLibPath:L/runtimes/net/STD.csproj" />
   </ItemGroup>
 
 </Project>

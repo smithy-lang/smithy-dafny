@@ -123,6 +123,8 @@ public class CodegenCli {
       engineBuilder::withIncludeDafnyFile
     );
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
+    // TODO
+    engineBuilder.withGenerateEverything(true);
     final CodegenEngine engine = engineBuilder.build();
     engine.run();
   }
@@ -384,11 +386,9 @@ public class CodegenCli {
         .ofNullable(commandLine.getOptionValue("properties-file"))
         .map(Paths::get);
 
-      Optional<Path> includeDafnyFile = Optional.empty();
-      if (outputDafnyDir.isPresent()) {
-        includeDafnyFile =
-          Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
-      }
+      Optional<Path> includeDafnyFile = Optional
+              .ofNullable(commandLine.getOptionValue("include-dafny"))
+              .map(Paths::get);
 
       Optional<Path> patchFilesDir = Optional
         .ofNullable(commandLine.getOptionValue("patch-files-dir"))

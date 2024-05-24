@@ -10,9 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DafnyRuntime" Version="%DAFNY_VERSION%"/>
+    <PackageReference Include="DafnyRuntime" Version="$dafnyVersion:L"/>
     <PackageReference Include="AWSSDK.Core" Version="3.7.100" />
-    <PackageReference Include="AWSSDK.%SDK_ID%" Version="3.7.100" />
+    <PackageReference Include="AWSSDK.$sdkID:L" Version="3.7.100" />
     <!--
       System.Collections.Immutable can be removed once dafny.msbuild is updated with
       https://github.com/dafny-lang/dafny.msbuild/pull/10 and versioned
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="%STDLIB_PATH%/runtimes/net/STD.csproj" />
+    <ProjectReference Include="$stdLibPath:L/runtimes/net/STD.csproj" />
   </ItemGroup>
 
 </Project>
