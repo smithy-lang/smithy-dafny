@@ -59,9 +59,14 @@ jobs:
         with:
           dafny-version: 4.5.0
 
-      - name: Add Dafny to PATH
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.19'
+
+      - name: Install Go imports
         run: |
-          echo "$GITHUB_WORKSPACE/dafny/Scripts" >> $GITHUB_PATH
+          go get golang.org/x/tools/cmd/goimports
 
       - name: Generate Polymorph Dafny and Go code
         shell: bash
