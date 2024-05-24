@@ -1,5 +1,5 @@
 diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index ca9dc612..ec4d08d1 100644
+index ca9dc612..0d923e39 100644
 --- b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 +++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 @@ -1,7 +1,7 @@
@@ -84,69 +84,9 @@ index ca9dc612..ec4d08d1 100644
              panic!("Halt")
            }
                  } else {
-@@ -609,7 +610,7 @@ pub mod r#_SimpleLongImpl_Compile {
-         }
-     }
- }
--pub mod r#_simple_dtypes_dsmithylong_dinternaldafny {
-+pub mod r#_simple_dtypes_dlong_dinternaldafny {
-     pub struct _default {}
- 
-     impl _default {
-@@ -628,7 +629,7 @@ pub mod r#_simple_dtypes_dsmithylong_dinternaldafny {
-         ) -> ::std::rc::Rc<
-             super::r#_Wrappers_Compile::Result<
-                 ::dafny_runtime::Object<
--                    super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient,
-+                    super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient,
-                 >,
-                 ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error>,
-             >,
-@@ -637,7 +638,7 @@ pub mod r#_simple_dtypes_dsmithylong_dinternaldafny {
-                 ::std::rc::Rc<
-                     super::r#_Wrappers_Compile::Result<
-                         ::dafny_runtime::Object<
--                            super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient,
-+                            super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient,
-                         >,
-                         ::std::rc::Rc<
-                             super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error,
-@@ -647,11 +648,11 @@ pub mod r#_simple_dtypes_dsmithylong_dinternaldafny {
-             >::new();
-             let mut client = ::dafny_runtime::MaybePlacebo::<
-                 ::dafny_runtime::Object<
--                    super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient,
-+                    super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient,
-                 >,
-             >::new();
--            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient> = super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient::_allocate_rcmut();
--            super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient::_ctor(
-+            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient> = super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient::_allocate_rcmut();
-+            super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient::_ctor(
-                 &_nw0,
-                 &::std::rc::Rc::new(super::r#_SimpleLongImpl_Compile::Config::Config {}),
-             );
-@@ -659,7 +660,7 @@ pub mod r#_simple_dtypes_dsmithylong_dinternaldafny {
-             res = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
-                 super::r#_Wrappers_Compile::Result::<
-                     ::dafny_runtime::Object<
--                        super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient,
-+                        super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient,
-                     >,
-                     ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error>,
-                 >::Success {
-@@ -708,7 +709,7 @@ pub mod r#_simple_dtypes_dsmithylong_dinternaldafny {
-     }
- 
-     impl super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::ISimpleTypesLongClient
--        for super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient
-+        for super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient
-     {
-         fn GetLong(
-             &mut self,
 diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..9dce21b7
+index 00000000..99e243ed
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs
 @@ -0,0 +1,56 @@
@@ -172,9 +112,9 @@ index 00000000..9dce21b7
 +        // If this service had any configuration properties,
 +        // they would need converting here too.
 +        let inner_config = ::std::rc::Rc::new(
-+            ::simple_long_dafny::_simple_dtypes_dlong_dinternaldafny::_default::DefaultSimpleLongConfig());
++            ::simple_long_dafny::_simple_dtypes_dsmithylong_dinternaldafny::_default::DefaultSimpleLongConfig());
 +        let inner =
-+            ::simple_long_dafny::_simple_dtypes_dlong_dinternaldafny::_default::SimpleLong(
++            ::simple_long_dafny::_simple_dtypes_dsmithylong_dinternaldafny::_default::SimpleLong(
 +                &inner_config,
 +            );
 +        if matches!(
