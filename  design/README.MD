@@ -14,7 +14,7 @@ to provide interoperability for your verified code
 like Java or C#.
 These native representations are then executable.
 This means that a single Dafny program
-can be translated into multiple interoperable programs.
+can be translated into multiple equivalent programs.
 
 Dafny itself has a `string` type
 that you might assume can map
