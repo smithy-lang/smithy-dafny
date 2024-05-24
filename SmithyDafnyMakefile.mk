@@ -379,6 +379,8 @@ polymorph_java:
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
+_polymorph_java: INPUT_DAFNY=\
+	--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_java: _polymorph
 
 # Dependency for formatting generating Java code

@@ -240,6 +240,9 @@ public class CodegenEngine {
     } else {
       javaLocalService(outputDir, testOutputDir);
     }
+    if (this.generateEverything) {
+      javaProjectFiles();
+    }
 
     LOGGER.info("Formatting Java code in {}", outputDir);
     runCommand(
@@ -323,10 +326,12 @@ public class CodegenEngine {
     final String serviceConfig = awsSdkStyle ?
             null : serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
     final String service = serviceShape.getId().getName();
-    final String configConversionMethod = DotNetNameResolver.typeConverterForShape(
-            serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(), TypeConversionDirection.FROM_DAFNY);
     final String namespace = serviceShape.getId().getNamespace();
-    final String namespaceDir = serviceShape.getId().getNamespace();
+    final String namespaceDir = namespace.replace(".", "/");
+
+    final String gradleGroup = namespace;
+    // TODO: This should be @title, but we have to actually add that to all services first
+    final String gradleDescription = service;
 
     final Path includeDafnyFile =
             this.includeDafnyFile.orElseThrow(() ->
@@ -345,10 +350,11 @@ public class CodegenEngine {
     parameters.put("serviceID", serviceId);
     parameters.put("service", service);
     parameters.put("serviceConfig", serviceConfig);
-    parameters.put("configConversionMethod", configConversionMethod);
     parameters.put("namespace", namespace);
     parameters.put("namespaceDir", namespaceDir);
-    parameters.put("stdLibPath", stdLibPath.toString());
+    parameters.put("gradleGroup", gradleGroup);
+    parameters.put("gradleDescription", gradleDescription);
+
 
     if (awsSdkStyle) {
       IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/java/$forSDK:Lbuild.gradle.kts", parameters);

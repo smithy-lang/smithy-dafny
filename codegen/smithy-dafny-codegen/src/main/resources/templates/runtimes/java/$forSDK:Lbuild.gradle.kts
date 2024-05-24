@@ -5,7 +5,10 @@ import java.io.FileInputStream
 import java.util.Properties
 import java.net.URI
 import javax.annotation.Nullable
-import org.gradle.api.tasks.wrapper.Wrapper
+
+tasks.wrapper {
+    gradleVersion = "7.6"
+}
 
 plugins {
     `java-library`
@@ -64,10 +67,6 @@ publishing {
 
 tasks.withType<JavaCompile>() {
     options.encoding = "UTF-8"
-}
-
-tasks.named<Wrapper>("wrapper") {
-    gradleVersion = "7.6"
 }
 
 tasks {
