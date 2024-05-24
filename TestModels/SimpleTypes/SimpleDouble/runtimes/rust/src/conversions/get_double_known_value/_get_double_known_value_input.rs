@@ -7,7 +7,7 @@ pub fn to_dafny(
 > {
     let dafny_value = match value.value {
         Some(v) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
-            value: v,
+            value: ::dafny_runtime::Sequence::from_array(&v),
         },
         None => ::simple_double_dafny::_Wrappers_Compile::Option::None {},
     };
@@ -26,7 +26,10 @@ pub fn from_dafny(
         dafny_value.value().as_ref(),
         ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
-        Some(dafny_value.value().Extract())
+        Some(
+            ::std::rc::Rc::try_unwrap(dafny_value.value().Extract().to_array())
+                .unwrap_or_else(|rc| (*rc).clone()),
+        )
     } else if matches!(
         dafny_value.value().as_ref(),
         ::simple_double_dafny::_Wrappers_Compile::Option::None { .. }

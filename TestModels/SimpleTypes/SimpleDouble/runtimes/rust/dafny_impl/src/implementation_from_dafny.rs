@@ -103,12 +103,12 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
     #[derive(PartialEq, Clone)]
     pub enum GetDoubleInput {
         GetDoubleInput {
-            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<f64>>,
+            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
         },
     }
 
     impl GetDoubleInput {
-        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<f64>> {
+        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
             match self {
                 GetDoubleInput::GetDoubleInput { value } => value,
             }
@@ -165,12 +165,12 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
     #[derive(PartialEq, Clone)]
     pub enum GetDoubleOutput {
         GetDoubleOutput {
-            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<f64>>,
+            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
         },
     }
 
     impl GetDoubleOutput {
-        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<f64>> {
+        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
             match self {
                 GetDoubleOutput::GetDoubleOutput { value } => value,
             }
@@ -444,7 +444,7 @@ pub mod r#_SimpleDoubleImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(*input.value().value());
+            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(input.value().value());
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
             value: input.value().clone()
           });
@@ -457,7 +457,7 @@ pub mod r#_SimpleDoubleImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(*res.value().value());
+            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(res.value().value());
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
                     ::std::rc::Rc<
@@ -491,8 +491,9 @@ pub mod r#_SimpleDoubleImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(*input.value().value());
-            if !(input.value().value() == &33f64) {
+            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(input.value().value());
+	    let known_value : Vec<u8> = vec![0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7];
+            if !(input.value().value() == &::dafny_runtime::Sequence::from_array(&known_value)) {
                 panic!("Halt")
             };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
@@ -507,7 +508,7 @@ pub mod r#_SimpleDoubleImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(*res.value().value());
+            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(res.value().value());
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
                     ::std::rc::Rc<
@@ -521,7 +522,7 @@ pub mod r#_SimpleDoubleImpl_Compile {
             return output.read();
             return output.read();
         }
-        pub fn ValidateDoubleType(input: f64) -> () {
+        pub fn ValidateDoubleType(input: &::dafny_runtime::Sequence<u8>) -> () {
 	    return;
 
 	}
