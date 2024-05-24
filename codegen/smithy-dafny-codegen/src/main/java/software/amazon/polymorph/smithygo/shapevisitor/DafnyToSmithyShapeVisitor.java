@@ -24,7 +24,6 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
@@ -125,7 +124,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     // TODO: smithy-dafny-conversion library
     @Override
     public String listShape(ListShape shape) {
-        writer.addImport("dafny");
         StringBuilder builder = new StringBuilder();
 
         MemberShape memberShape = shape.getMember();
@@ -155,7 +153,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String mapShape(MapShape shape) {
-        writer.addImport("dafny");
         StringBuilder builder = new StringBuilder();
 
         MemberShape keyMemberShape = shape.getKey();
@@ -189,7 +186,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String booleanShape(BooleanShape shape) {
-        writer.addImport("dafny");
         return """
                 func() *bool {
                     var b bool
@@ -247,52 +243,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String integerShape(IntegerShape shape) {
-        writer.addImport("dafny");
         var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
         if ((boolean)isPointable) {
-            if (shape.hasTrait(RangeTrait.class)) {
-                RangeTrait len = shape.getMemberTrait(model, RangeTrait.class).get();
-                Optional<BigDecimal> min = len.getMin();
-                if (min.isPresent()) {
-                    // TODO: uncomment the below code and remove print statement
-                    System.out.println(min.get().toString());
-                    // result +=
-                    // """
-                    // if (%s < %s) {
-                    //     throw new System.ArgumentException(
-                    //         String.Format(\"Member %s of structure %s has type %s which has a minimum of %s but was given the value {0}.\", %s));
-                    // }
-                    // """.formatted(
-                    //     value,
-                    //     min.get().toString(),
-                    //     value,
-                    //     parentName,
-                    //     theType,
-                    //     min.get().toString(),
-                    //     value
-                    // );
-                }
-                Optional<BigDecimal> max = len.getMax();
-                if (max.isPresent()) {
-                    // TODO: uncomment the below code and remove print statement
-                    System.out.println(max.get().toString());
-                    // result +=
-                    // """
-                    // if (%s > %s) {
-                    //     throw new System.ArgumentException(
-                    //         String.Format(\"Member %s of structure %s has type %s which has a maximum of %s but was given the value {0}.\", %s));
-                    // }
-                    // """.formatted(
-                    //     value,
-                    //     max.get().toString(),
-                    //     value,
-                    //     parentName,
-                    //     theType,
-                    //     max.get().toString(),
-                    //     value
-                    // );
-                }
-            }
             return ("""
                     func() *int32 {
                         var b int32
@@ -309,7 +261,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String longShape(LongShape shape) {
-        writer.addImport("dafny");
         return ("""
                 func() *int64 {
                     var b int64
