@@ -112,7 +112,7 @@ subgraph Library[Native Library]
     ToNative --> Interface
 end
 
-UserCode --> Interface
+UserCode[User Code] --> Interface
 Interface --> UserCode
 ```
 
