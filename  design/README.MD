@@ -339,7 +339,7 @@ Then we don't need to write new tests for each runtime.
 This is where [wrapping a library](#wrapped-library) comes in.
 
 We want the test in Dafny and we want to test the conversions.
-by building a project we can control the Dafny implementation.
+By building a project we can control the Dafny implementation.
 By wrapping this project we can call it from Dafny
 and pass through the type conversions.
 This sandwiches the conversions between two functions we control.
