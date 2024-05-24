@@ -54,11 +54,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y dotnet-sdk-6.0 mono-complete z3
 
-      - name: Build Dafny from source
-        run: |
-          git clone https://github.com/dafny-lang/dafny.git --recurse-submodules
-          cd dafny
-          make exe
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.7.0
+        with:
+          dafny-version: 4.5.0
       
       - name: Install Z3 version 4.12.1
         run: |
