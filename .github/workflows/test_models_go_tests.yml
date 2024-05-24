@@ -75,4 +75,4 @@ jobs:
           make polymorph_dafny
           sh ./removeDotFromExtern.sh
           make transpile_go
-          make polymorph_go
+          # make polymorph_go
