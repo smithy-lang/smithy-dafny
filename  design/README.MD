@@ -83,8 +83,8 @@ in this document are to be interpreted as described in [RFC 2119](https://tools.
 ### Library
 
 `smithy-dafny` supports `@localService` development.
-This is where the implementation is locally executing code.
-Rather than a remote service like most AWS Service Smithy models.
+This is where the implementation is locally executing code,
+rather than a remote service like most AWS Service Smithy models.
 
 In this mode `smithy-dafny` will produce Dafny types and interfaces
 for a Smithy model in Dafny.
