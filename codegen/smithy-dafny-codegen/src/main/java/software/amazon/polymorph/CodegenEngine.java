@@ -21,8 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
+import software.amazon.polymorph.smithydotnet.AwsSdkDotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
+import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.ServiceCodegen;
 import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
@@ -317,7 +319,7 @@ public class CodegenEngine {
     if (this.awsSdkStyle) {
       netAwsSdk(outputDir);
       if (this.generateEverything) {
-        netAwsSdkProjectFiles(outputDir);
+        netProjectFiles(outputDir);
       }
     } else if (this.localServiceTest) {
       netWrappedLocalService(outputDir);
@@ -393,9 +395,9 @@ public class CodegenEngine {
     LOGGER.info(".NET code generated in {}", outputDir);
   }
 
-  private void netAwsSdkProjectFiles(final Path outputDir) {
-    final String sdkId =
-      this.serviceShape.expectTrait(ServiceTrait.class).getSdkId();
+  private void netProjectFiles(final Path outputDir) {
+    final DotNetNameResolver resolver = new DotNetNameResolver(model, serviceShape);
+    final String serviceId = resolver.clientForService();
 
     final Path includeDafnyFile =
       this.includeDafnyFile.orElseThrow(() ->
@@ -409,18 +411,17 @@ public class CodegenEngine {
       includeDafnyFile.resolve("../..")
     );
 
-    final String csprojTemplate = IoUtils.readUtf8Resource(
-      this.getClass(),
-      "/templates/runtimes/net/AwsSdkProject.csproj"
-    );
-    final String csprojText = csprojTemplate
-      .replace("%SDK_ID%", sdkId)
-      .replace("%STDLIB_PATH%", stdLibPath.toString());
-    IOUtils.writeToFile(
-      csprojText,
-      outputDir.resolve(sdkId + ".csproj").toFile()
+    Map<String, String> parameters = Map.of(
+            "DAFNY_VERSION", dafnyVersion.toString(),
+            "SDK_ID", serviceId,
+            "SERVICE_ID", serviceId,
+            "STDLIB_PATH%", stdLibPath.toString()
     );
 
+    IOUtils.writeTemplatedFile(outputDir, "runtimes/net/%SDK_ID%Project.csproj", parameters);
+    IOUtils.writeTemplatedFile(outputDir, "runtimes/net/tests/%SDK_ID%ProjectTest.csproj", parameters);
+
+    // TODO generate extern cs code (wrapped local service/sdk constructor)
     // TODO generate Makefile
 
     LOGGER.info(".NET project files generated in {}", outputDir);
@@ -801,4 +802,6 @@ public class CodegenEngine {
     DOTNET,
     RUST,
   }
+
+
 }
