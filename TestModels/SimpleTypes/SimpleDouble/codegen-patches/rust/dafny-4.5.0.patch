@@ -1,5 +1,5 @@
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index 0609bbe6..aa3b6dc2 100644
+index 0609bbe6..5a759dc2 100644
 --- b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 @@ -1,7 +1,7 @@
@@ -11,13 +11,7 @@ index 0609bbe6..aa3b6dc2 100644
  pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
      #[derive(PartialEq, Clone)]
      pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
-@@ -103,15 +103,12 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
-     #[derive(PartialEq, Clone)]
-     pub enum GetDoubleInput {
-         GetDoubleInput {
--            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
-+            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<f64>>,
-         },
+@@ -108,10 +108,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
      }
  
      impl GetDoubleInput {
@@ -25,7 +19,7 @@ index 0609bbe6..aa3b6dc2 100644
 -            &self,
 -        ) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>
 -        {
-+        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<f64>> {
++        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
              match self {
                  GetDoubleInput::GetDoubleInput { value } => value,
              }
@@ -47,13 +41,7 @@ index 0609bbe6..aa3b6dc2 100644
      impl ::std::default::Default for GetDoubleInput {
          fn default() -> GetDoubleInput {
              GetDoubleInput::GetDoubleInput {
-@@ -168,15 +165,12 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
-     #[derive(PartialEq, Clone)]
-     pub enum GetDoubleOutput {
-         GetDoubleOutput {
--            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
-+            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<f64>>,
-         },
+@@ -173,10 +170,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
      }
  
      impl GetDoubleOutput {
@@ -61,7 +49,7 @@ index 0609bbe6..aa3b6dc2 100644
 -            &self,
 -        ) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>
 -        {
-+        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<f64>> {
++        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
              match self {
                  GetDoubleOutput::GetDoubleOutput { value } => value,
              }
@@ -126,7 +114,7 @@ index 0609bbe6..aa3b6dc2 100644
              input: &::std::rc::Rc<
                  super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
              >,
-@@ -442,35 +444,88 @@ pub mod r#_SimpleSmithyDoubleOperations_Compile {
+@@ -442,35 +444,89 @@ pub mod r#_SimpleSmithyDoubleOperations_Compile {
              ) {
                  panic!("Halt")
              };
@@ -137,7 +125,7 @@ index 0609bbe6..aa3b6dc2 100644
 -            );
 -            check = _out0;
 -            if !check {
-+            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(*input.value().value());
++            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(input.value().value());
 +            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
 +            value: input.value().clone()
 +          });
@@ -150,7 +138,7 @@ index 0609bbe6..aa3b6dc2 100644
 +            ) {
 +                panic!("Halt")
 +            };
-+            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(*res.value().value());
++            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(res.value().value());
 +            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
 +                super::r#_Wrappers_Compile::Result::<
 +                    ::std::rc::Rc<
@@ -185,8 +173,9 @@ index 0609bbe6..aa3b6dc2 100644
                  panic!("Halt")
              };
 -            let mut result: ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
-+            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(*input.value().value());
-+            if !(input.value().value() == &33f64) {
++            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(input.value().value());
++	    let known_value : Vec<u8> = vec![0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7];
++            if !(input.value().value() == &::dafny_runtime::Sequence::from_array(&known_value)) {
 +                panic!("Halt")
 +            };
 +            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
@@ -205,7 +194,7 @@ index 0609bbe6..aa3b6dc2 100644
 +            ) {
 +                panic!("Halt")
 +            };
-+            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(*res.value().value());
++            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(res.value().value());
 +            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
 +                super::r#_Wrappers_Compile::Result::<
 +                    ::std::rc::Rc<
@@ -226,7 +215,7 @@ index 0609bbe6..aa3b6dc2 100644
 -            return output;
 -        }
 -    }
-+        pub fn ValidateDoubleType(input: f64) -> () {
++        pub fn ValidateDoubleType(input: &::dafny_runtime::Sequence<u8>) -> () {
 +	    return;
  
 +	}
@@ -234,7 +223,7 @@ index 0609bbe6..aa3b6dc2 100644
      #[derive(PartialEq, Clone)]
      pub enum Config {
          Config {},
-@@ -492,10 +547,7 @@ pub mod r#_SimpleSmithyDoubleOperations_Compile {
+@@ -492,10 +548,7 @@ pub mod r#_SimpleSmithyDoubleOperations_Compile {
          ) -> std::fmt::Result {
              match self {
                  Config::Config {} => {
@@ -246,7 +235,7 @@ index 0609bbe6..aa3b6dc2 100644
                      Ok(())
                  }
              }
-@@ -524,7 +576,7 @@ pub mod r#_SimpleSmithyDoubleOperations_Compile {
+@@ -524,7 +577,7 @@ pub mod r#_SimpleSmithyDoubleOperations_Compile {
          }
      }
  }
@@ -255,7 +244,7 @@ index 0609bbe6..aa3b6dc2 100644
      pub struct _default {}
  
      impl _default {
-@@ -543,33 +595,40 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
+@@ -543,33 +596,40 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
          ) -> ::std::rc::Rc<
              super::r#_Wrappers_Compile::Result<
                  ::dafny_runtime::Object<
@@ -308,7 +297,7 @@ index 0609bbe6..aa3b6dc2 100644
                  >::Success {
                      value: client.read(),
                  },
-@@ -590,7 +649,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
+@@ -590,7 +650,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
      }
  
      pub struct SimpleDoubleClient {
@@ -317,7 +306,7 @@ index 0609bbe6..aa3b6dc2 100644
      }
  
      impl SimpleDoubleClient {
-@@ -599,7 +658,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
+@@ -599,7 +659,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
          }
          pub fn _ctor(
              this: &::dafny_runtime::Object<Self>,
@@ -326,7 +315,7 @@ index 0609bbe6..aa3b6dc2 100644
          ) -> () {
              let mut _set__i_config: bool = false;
              ::dafny_runtime::update_field_uninit_rcmut!(
-@@ -610,15 +669,13 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
+@@ -610,15 +670,13 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
              );
              return ();
          }
@@ -344,7 +333,7 @@ index 0609bbe6..aa3b6dc2 100644
      {
          fn GetDouble(
              &mut self,
-@@ -632,11 +689,32 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
+@@ -632,11 +690,32 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
                  >,
                  ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>,
              >,
@@ -442,7 +431,7 @@ index 00000000..c0e083e7
 +mod get_double_known_value;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client/get_double.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client/get_double.rs
 new file mode 100644
-index 00000000..ca18e57f
+index 00000000..d48fd57b
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client/get_double.rs
 @@ -0,0 +1,13 @@
@@ -451,7 +440,7 @@ index 00000000..ca18e57f
 +    /// Constructs a fluent builder for the [`GetDouble`](crate::operation::get_double::builders::GetDoubleFluentBuilder) operation.
 +    ///
 +    /// - The fluent builder is configurable:
-+    ///   - [`value(f64)`](crate::operation::get_double::builders::GetDoubleFluentBuilder::value) / [`set_value(Option<f64>)`](crate::operation::get_double::builders::GetDoubleFluentBuilder::set_value):(undocumented)<br>
++    ///   - [`value(Sequence<u8>)`](crate::operation::get_double::builders::GetDoubleFluentBuilder::value) / [`set_value(Option<Sequence<u8>>)`](crate::operation::get_double::builders::GetDoubleFluentBuilder::set_value):(undocumented)<br>
 +    /// - On success, responds with [`GetDoubleOutput`](crate::operation::get_double::GetDoubleOutput) with field(s):
 +    ///   - [`value(Option<Double>)`](crate::operation::get_double::GetDoubleOutput::value): (undocumented)
 +    /// - On failure, responds with [`SdkError<GetDoubleError>`](crate::operation::get_double::GetDoubleError)
@@ -461,7 +450,7 @@ index 00000000..ca18e57f
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client/get_double_known_value.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client/get_double_known_value.rs
 new file mode 100644
-index 00000000..8eb5e7ca
+index 00000000..08ecbc81
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client/get_double_known_value.rs
 @@ -0,0 +1,17 @@
@@ -470,7 +459,7 @@ index 00000000..8eb5e7ca
 +    /// Constructs a fluent builder for the [`GetDouble`](crate::operation::get_double_known_value::builders::GetDoubleFluentBuilder) operation.
 +    ///
 +    /// - The fluent builder is configurable:
-+    ///   - [`value(f64)`](crate::operation::get_double_known_value::builders::GetDoubleFluentBuilder::value) / [`set_value(Option<f64>)`](crate::operation::get_double_known_value::builders::GetDoubleFluentBuilder::set_value):(undocumented)<br>
++    ///   - [`value(Sequence<u8>)`](crate::operation::get_double_known_value::builders::GetDoubleFluentBuilder::value) / [`set_value(Option<Sequence<u8>>)`](crate::operation::get_double_known_value::builders::GetDoubleFluentBuilder::set_value):(undocumented)<br>
 +    /// - On success, responds with [`GetDoubleOutput`](crate::operation::get_double_known_value::GetDoubleOutput) with field(s):
 +    ///   - [`value(Option<Double>)`](crate::operation::get_double_known_value::GetDoubleOutput::value): (undocumented)
 +    /// - On failure, responds with [`SdkError<GetDoubleError>`](crate::operation::get_double_known_value::GetDoubleError)
@@ -666,10 +655,10 @@ index 00000000..e5cf89a0
 +pub mod _get_double_output;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_input.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_input.rs
 new file mode 100644
-index 00000000..b446400a
+index 00000000..65c37d10
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_input.rs
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,43 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(dead_code)]
 +pub fn to_dafny(
@@ -679,7 +668,7 @@ index 00000000..b446400a
 +> {
 +    let dafny_value = match value.value {
 +        Some(v) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
-+            value: v,
++            value: ::dafny_runtime::Sequence::from_array(&v),
 +        },
 +        None => ::simple_double_dafny::_Wrappers_Compile::Option::None {},
 +    };
@@ -698,7 +687,10 @@ index 00000000..b446400a
 +        dafny_value.value().as_ref(),
 +        ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
-+        Some(dafny_value.value().Extract())
++        Some(
++            ::std::rc::Rc::try_unwrap(dafny_value.value().Extract().to_array())
++                .unwrap_or_else(|rc| (*rc).clone()),
++        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
 +        ::simple_double_dafny::_Wrappers_Compile::Option::None { .. }
@@ -707,14 +699,15 @@ index 00000000..b446400a
 +    } else {
 +        panic!("Unreachable")
 +    };
++
 +    crate::operation::get_double::GetDoubleInput { value }
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_output.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_output.rs
 new file mode 100644
-index 00000000..e67b0cdd
+index 00000000..a8b3360a
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_output.rs
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,44 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(dead_code)]
 +pub fn to_dafny(
@@ -723,7 +716,9 @@ index 00000000..e67b0cdd
 +    ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => ::simple_double_dafny::_Wrappers_Compile::Option::Some { value: b },
++        Some(b) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
++            value: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&b, |e| *e),
++        },
 +        None => ::simple_double_dafny::_Wrappers_Compile::Option::None {},
 +    };
 +    ::std::rc::Rc::new(::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
@@ -741,7 +736,12 @@ index 00000000..e67b0cdd
 +        dafny_value.value().as_ref(),
 +        ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
-+        Some(dafny_value.value().Extract())
++        Some(
++            dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
++                &dafny_value.value().Extract(),
++                |e| *e,
++            ),
++        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
 +        ::simple_double_dafny::_Wrappers_Compile::Option::None { .. }
@@ -792,10 +792,10 @@ index 00000000..17ffb274
 +pub mod _get_double_known_value_output;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double_known_value/_get_double_known_value_input.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double_known_value/_get_double_known_value_input.rs
 new file mode 100644
-index 00000000..02155270
+index 00000000..46c113af
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double_known_value/_get_double_known_value_input.rs
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,42 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(dead_code)]
 +pub fn to_dafny(
@@ -805,7 +805,7 @@ index 00000000..02155270
 +> {
 +    let dafny_value = match value.value {
 +        Some(v) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
-+            value: v,
++            value: ::dafny_runtime::Sequence::from_array(&v),
 +        },
 +        None => ::simple_double_dafny::_Wrappers_Compile::Option::None {},
 +    };
@@ -824,7 +824,10 @@ index 00000000..02155270
 +        dafny_value.value().as_ref(),
 +        ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
-+        Some(dafny_value.value().Extract())
++        Some(
++            ::std::rc::Rc::try_unwrap(dafny_value.value().Extract().to_array())
++                .unwrap_or_else(|rc| (*rc).clone()),
++        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
 +        ::simple_double_dafny::_Wrappers_Compile::Option::None { .. }
@@ -837,10 +840,10 @@ index 00000000..02155270
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double_known_value/_get_double_known_value_output.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double_known_value/_get_double_known_value_output.rs
 new file mode 100644
-index 00000000..05c8a1f1
+index 00000000..49093ae1
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double_known_value/_get_double_known_value_output.rs
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,44 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(dead_code)]
 +pub fn to_dafny(
@@ -849,7 +852,9 @@ index 00000000..05c8a1f1
 +    ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => ::simple_double_dafny::_Wrappers_Compile::Option::Some { value: b },
++        Some(b) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
++            value: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&b, |e| *e),
++        },
 +        None => ::simple_double_dafny::_Wrappers_Compile::Option::None {},
 +    };
 +    ::std::rc::Rc::new(::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
@@ -867,7 +872,12 @@ index 00000000..05c8a1f1
 +        dafny_value.value().as_ref(),
 +        ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
-+        Some(dafny_value.value().Extract())
++        Some(
++            dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
++                &dafny_value.value().Extract(),
++                |e| *e,
++            ),
++        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
 +        ::simple_double_dafny::_Wrappers_Compile::Option::None { .. }
@@ -1117,7 +1127,7 @@ index 00000000..44c24b2e
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/_get_double_input.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/_get_double_input.rs
 new file mode 100644
-index 00000000..bd6e5ec1
+index 00000000..d7d28eb5
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/_get_double_input.rs
 @@ -0,0 +1,60 @@
@@ -1127,11 +1137,11 @@ index 00000000..bd6e5ec1
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetDoubleInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub value: ::std::option::Option<f64>,
++    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +}
 +impl GetDoubleInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn message(&self) -> ::std::option::Option<&f64> {
++    pub fn message(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
 +        self.value.as_ref()
 +    }
 +}
@@ -1148,13 +1158,13 @@ index 00000000..bd6e5ec1
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetDoubleInputBuilder {
-+    pub(crate) value: ::std::option::Option<f64>,
++    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +}
 +impl GetDoubleInputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<f64>,
++        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = ::std::option::Option::Some(input.into());
 +        self
@@ -1162,14 +1172,14 @@ index 00000000..bd6e5ec1
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<f64>,
++        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = input;
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<f64> {
-+        &self.value
++    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++        self.value.as_ref()
 +    }
 +    /// Consumes the builder and constructs a [`GetDoubleInput`](crate::operation::operation::GetDoubleInput).
 +    pub fn build(
@@ -1183,7 +1193,7 @@ index 00000000..bd6e5ec1
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/_get_double_output.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/_get_double_output.rs
 new file mode 100644
-index 00000000..33d4feaf
+index 00000000..42c3c9d4
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/_get_double_output.rs
 @@ -0,0 +1,66 @@
@@ -1193,13 +1203,13 @@ index 00000000..33d4feaf
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetDoubleOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub value: ::std::option::Option<f64>,
++    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +}
 +
 +impl GetDoubleOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn value(&self) -> ::std::option::Option<f64> {
-+        self.value
++    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++        self.value.as_ref()
 +    }
 +}
 +
@@ -1216,14 +1226,14 @@ index 00000000..33d4feaf
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetDoubleOutputBuilder {
-+    pub(crate) value: ::std::option::Option<f64>,
++    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +}
 +
 +impl GetDoubleOutputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<f64>,
++        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = ::std::option::Option::Some(input.into());
 +        self
@@ -1232,15 +1242,15 @@ index 00000000..33d4feaf
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<f64>,
++        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = input;
 +        self
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<f64> {
-+        &self.value
++    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++        self.value.as_ref()
 +    }
 +
 +    /// Consumes the builder and constructs a [`GetDoubleOutput`](crate::operation::operation::GetDoubleOutput).
@@ -1255,7 +1265,7 @@ index 00000000..33d4feaf
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/builders.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/builders.rs
 new file mode 100644
-index 00000000..2b47070d
+index 00000000..bb139ddc
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double/builders.rs
 @@ -0,0 +1,95 @@
@@ -1336,21 +1346,21 @@ index 00000000..2b47070d
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: f64
++        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
-+        self.inner = self.inner.value(input);
++        self.inner = self.inner.value(input.into());
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<f64>
++        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.inner = self.inner.set_value(input);
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<f64>  {
++    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>>  {
 +        self.inner.get_value()
 +    }
 +}
@@ -1508,28 +1518,27 @@ index 00000000..e35d68f2
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/_get_double_known_value_input.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/_get_double_known_value_input.rs
 new file mode 100644
-index 00000000..e297bc90
+index 00000000..e278c9d6
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/_get_double_known_value_input.rs
-@@ -0,0 +1,63 @@
+@@ -0,0 +1,62 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(missing_docs)] // documentation missing in model
 +#[non_exhaustive]
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetDoubleKnownValueInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub value: ::std::option::Option<f64>,
++    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +}
 +impl GetDoubleKnownValueInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn value(&self) -> ::std::option::Option<f64> {
-+        self.value
++    pub fn message(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++        self.value.as_ref()
 +    }
 +}
 +impl GetDoubleKnownValueInput {
 +    /// Creates a new builder-style object to manufacture [`GetDoubleKnownValueInput`](crate::operation::operation::GetDoubleKnownValueInput).
-+    pub fn builder(
-+    ) -> crate::operation::get_double_known_value::builders::GetDoubleKnownValueInputBuilder {
++    pub fn builder() -> crate::operation::get_double_known_value::builders::GetDoubleKnownValueInputBuilder {
 +        crate::operation::get_double_known_value::builders::GetDoubleKnownValueInputBuilder::default()
 +    }
 +}
@@ -1540,13 +1549,13 @@ index 00000000..e297bc90
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetDoubleKnownValueInputBuilder {
-+    pub(crate) value: ::std::option::Option<f64>,
++    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +}
 +impl GetDoubleKnownValueInputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<f64>,
++        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = ::std::option::Option::Some(input.into());
 +        self
@@ -1554,14 +1563,14 @@ index 00000000..e297bc90
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<f64>,
++        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = input;
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<f64> {
-+        &self.value
++    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++        self.value.as_ref()
 +    }
 +    /// Consumes the builder and constructs a [`GetDoubleKnownValueInput`](crate::operation::operation::GetDoubleKnownValueInput).
 +    pub fn build(
@@ -1577,28 +1586,29 @@ index 00000000..e297bc90
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/_get_double_known_value_output.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/_get_double_known_value_output.rs
 new file mode 100644
-index 00000000..93788a4a
+index 00000000..dd8b5451
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/_get_double_known_value_output.rs
-@@ -0,0 +1,63 @@
+@@ -0,0 +1,67 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[allow(missing_docs)] // documentation missing in model
 +#[non_exhaustive]
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetDoubleKnownValueOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub value: ::std::option::Option<f64>,
++    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +}
++
 +impl GetDoubleKnownValueOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn value(&self) -> ::std::option::Option<f64> {
-+        self.value
++    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++        self.value.as_ref()
 +    }
 +}
++
 +impl GetDoubleKnownValueOutput {
 +    /// Creates a new builder-style object to manufacture [`GetDoubleKnownValueOutput`](crate::operation::operation::GetDoubleKnownValueOutput).
-+    pub fn builder(
-+    ) -> crate::operation::get_double_known_value::builders::GetDoubleKnownValueOutputBuilder {
++    pub fn builder() -> crate::operation::get_double_known_value::builders::GetDoubleKnownValueOutputBuilder {
 +        crate::operation::get_double_known_value::builders::GetDoubleKnownValueOutputBuilder::default()
 +    }
 +}
@@ -1609,29 +1619,32 @@ index 00000000..93788a4a
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetDoubleKnownValueOutputBuilder {
-+    pub(crate) value: ::std::option::Option<f64>,
++    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +}
 +impl GetDoubleKnownValueOutputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: impl ::std::convert::Into<f64>,
++        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = ::std::option::Option::Some(input.into());
 +        self
 +    }
++
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<f64>,
++        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.value = input;
 +        self
 +    }
++
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<f64> {
-+        &self.value
++    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++        self.value.as_ref()
 +    }
++
 +    /// Consumes the builder and constructs a [`GetDoubleKnownValueOutput`](crate::operation::operation::GetDoubleKnownValueOutput).
 +    pub fn build(
 +        self,
@@ -1646,7 +1659,7 @@ index 00000000..93788a4a
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/builders.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/builders.rs
 new file mode 100644
-index 00000000..0d809d3b
+index 00000000..676d3474
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double_known_value/builders.rs
 @@ -0,0 +1,97 @@
@@ -1729,21 +1742,21 @@ index 00000000..0d809d3b
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(
 +        mut self,
-+        input: f64,
++        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
-+        self.inner = self.inner.value(input);
++        self.inner = self.inner.value(input.into());
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn set_value(
 +        mut self,
-+        input: ::std::option::Option<f64>,
++        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
 +    ) -> Self {
 +        self.inner = self.inner.set_value(input);
 +        self
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_value(&self) -> &::std::option::Option<f64> {
++    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>>  {
 +        self.inner.get_value()
 +    }
 +}
