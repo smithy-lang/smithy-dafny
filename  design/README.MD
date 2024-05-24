@@ -121,8 +121,8 @@ to call Dafny libraries with idiomatic types.
 
 ### Wrapped AWS Services
 
-`smithy-dafny` also supports wrapping existing AWS Services
-with existing implementations that have a native implementation.
+`smithy-dafny` also supports creating Dafny AWS Service clients
+by wrapping existing native client implementations.
 
 The problem we are trying to solve here is:
 I am writing code in Dafny
