@@ -259,8 +259,8 @@ When developing `polymorph-X`
 the first thing to ask is:
 Does `smithy-X` exist?
 
-If it does exist then:
-`polymorph-X` SHOULD re-use as much `smithy-X` code-gen as possible.
+If it does exist, then
+`polymorph-X` SHOULD re-use as much `smithy-X` code-gen as possible, and
 `polymorph-X` MUST use the same native types as `smithy-X`.
 
 If it does not exists then look at the AWS SDK in X:
