@@ -6,28 +6,17 @@ package software.amazon.polymorph;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
-import software.amazon.polymorph.smithydotnet.AwsSdkDotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.ServiceCodegen;
 import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
+import software.amazon.polymorph.smithydotnet.TypeConversionDirection;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedConversionCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedShimCodegen;
@@ -36,13 +25,26 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.Pair;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class CodegenEngine {
 
@@ -398,6 +400,11 @@ public class CodegenEngine {
   private void netProjectFiles(final Path outputDir) {
     final DotNetNameResolver resolver = new DotNetNameResolver(model, serviceShape);
     final String serviceId = resolver.clientForService();
+    final String serviceConfig = awsSdkStyle ?
+            null : serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
+    final String service = serviceShape.getId().getName();
+    final String configConversionMethod = DotNetNameResolver.typeConverterForShape(
+            serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(), TypeConversionDirection.FROM_DAFNY);
 
     final Path includeDafnyFile =
       this.includeDafnyFile.orElseThrow(() ->
@@ -411,17 +418,28 @@ public class CodegenEngine {
       includeDafnyFile.resolve("../..")
     );
 
-    Map<String, String> parameters = Map.of(
-            "DAFNY_VERSION", dafnyVersion.toString(),
-            "SDK_ID", serviceId,
-            "SERVICE_ID", serviceId,
-            "STDLIB_PATH%", stdLibPath.toString()
-    );
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("DAFNY_VERSION",     dafnyVersion.toString());
+    parameters.put("SDK_ID",            serviceId);
+    parameters.put("LOCAL_SERVICE_ID",  serviceId);
+    parameters.put("SERVICE_ID",        serviceId);
+    parameters.put("SERVICE",           service);
+    parameters.put("SERVICE_CONFIG",    serviceConfig);
+    parameters.put("CONFIG_CONVERSION_METHOD", configConversionMethod);
+    parameters.put("NAMESPACE",         serviceShape.getId().getNamespace());
+    parameters.put("STDLIB_PATH%",      stdLibPath.toString());
 
-    IOUtils.writeTemplatedFile(outputDir, "runtimes/net/%SDK_ID%Project.csproj", parameters);
-    IOUtils.writeTemplatedFile(outputDir, "runtimes/net/tests/%SDK_ID%ProjectTest.csproj", parameters);
+    if (awsSdkStyle) {
+      IOUtils.writeTemplatedFile(outputDir, "runtimes/net/%SDK_ID%Project.csproj", parameters);
+      // TODO generate sdk constructor
+    } else {
+      IOUtils.writeTemplatedFile(outputDir, "runtimes/net/%LOCAL_SERVICE_ID%Project.csproj", parameters);
+      if (localServiceTest) {
+        IOUtils.writeTemplatedFile(outputDir, "runtimes/net/Extern/Wrapped%SERVICE%Service.cs", parameters);
+      }
+    }
+    IOUtils.writeTemplatedFile(outputDir, "runtimes/net/tests/%SERVICE_ID%ProjectTest.csproj", parameters);
 
-    // TODO generate extern cs code (wrapped local service/sdk constructor)
     // TODO generate Makefile
 
     LOGGER.info(".NET project files generated in {}", outputDir);

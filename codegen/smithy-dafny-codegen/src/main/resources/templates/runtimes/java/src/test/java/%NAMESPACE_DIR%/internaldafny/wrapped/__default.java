@@ -7,19 +7,19 @@ import %NAMESPACE%.%SERVICE%;
 import %NAMESPACE%.ToNative;
 import %NAMESPACE%.internaldafny.types.Error;
 import %NAMESPACE%.internaldafny.types.I%SERVICE%Client;
-import %NAMESPACE%.internaldafny.types%SERVICE%Config;
+import %NAMESPACE%.internaldafny.types.%SERVICE_CONFIG%;
 import %NAMESPACE%.wrapped.Test%SERVICE%;
 
 public class __default extends _ExternBase___default {
 
   public static Result<I%SERVICE%Client, Error> Wrapped%SERVICE%(
-    %SERVICE%Config config
+    %SERVICE_CONFIG% config
   ) {
-    %NAMESPACE%.model.%SERVICE%Config wrappedConfig =
-      ToNative.%SERVICE%Config(config);
+    %NAMESPACE%.model.%SERVICE_CONFIG% wrappedConfig =
+      ToNative.%SERVICE_CONFIG%(config);
     %NAMESPACE%.%SERVICE% impl = %SERVICE%
       .builder()
-      .%SERVICE%Config(wrappedConfig)
+      .%SERVICE_CONFIG%(wrappedConfig)
       .build();
     Test%SERVICE% wrappedClient = Test%SERVICE%
       .builder()
