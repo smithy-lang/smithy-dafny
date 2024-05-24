@@ -610,7 +610,7 @@ pub mod r#_SimpleLongImpl_Compile {
         }
     }
 }
-pub mod r#_simple_dtypes_dlong_dinternaldafny {
+pub mod r#_simple_dtypes_dsmithylong_dinternaldafny {
     pub struct _default {}
 
     impl _default {
@@ -629,7 +629,7 @@ pub mod r#_simple_dtypes_dlong_dinternaldafny {
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::dafny_runtime::Object<
-                    super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient,
+                    super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient,
                 >,
                 ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error>,
             >,
@@ -638,7 +638,7 @@ pub mod r#_simple_dtypes_dlong_dinternaldafny {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient,
+                            super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient,
                         >,
                         ::std::rc::Rc<
                             super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error,
@@ -648,11 +648,11 @@ pub mod r#_simple_dtypes_dlong_dinternaldafny {
             >::new();
             let mut client = ::dafny_runtime::MaybePlacebo::<
                 ::dafny_runtime::Object<
-                    super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient,
+                    super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient,
                 >,
             >::new();
-            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient> = super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient::_allocate_rcmut();
-            super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient::_ctor(
+            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient> = super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient::_allocate_rcmut();
+            super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient::_ctor(
                 &_nw0,
                 &::std::rc::Rc::new(super::r#_SimpleLongImpl_Compile::Config::Config {}),
             );
@@ -660,7 +660,7 @@ pub mod r#_simple_dtypes_dlong_dinternaldafny {
             res = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
                     ::dafny_runtime::Object<
-                        super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient,
+                        super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient,
                     >,
                     ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error>,
                 >::Success {
@@ -709,7 +709,7 @@ pub mod r#_simple_dtypes_dlong_dinternaldafny {
     }
 
     impl super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::ISimpleTypesLongClient
-        for super::r#_simple_dtypes_dlong_dinternaldafny::SimpleLongClient
+        for super::r#_simple_dtypes_dsmithylong_dinternaldafny::SimpleLongClient
     {
         fn GetLong(
             &mut self,
