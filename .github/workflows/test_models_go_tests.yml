@@ -32,6 +32,11 @@ jobs:
         run: |
           echo "$GITHUB_WORKSPACE/dafny/Scripts" >> $GITHUB_PATH
 
-      - name: Check Dafny installation
+      - name: Generate Polymorph Dafny and Go code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
         run: |
-          dafny --version
+          make polymorph_dafny
+          sh ./removeDotFromExtern.sh
+          make transpile_go
+          make polymorph_go
