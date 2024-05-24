@@ -1,30 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <RootNamespace>Test%SERVICE_ID%</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <LangVersion>10</LangVersion>
+    <OutputType>Exe</OutputType>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DafnyRuntime" Version="4.0.0.50303"/>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.100" />
-    <PackageReference Include="AWSSDK.%SDK_ID%" Version="3.7.100" />
     <!--
       System.Collections.Immutable can be removed once dafny.msbuild is updated with
       https://github.com/dafny-lang/dafny.msbuild/pull/10 and versioned
     -->
     <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
 
-    <Compile Include="Extern/**/*.cs" />
-    <Compile Include="Generated/**/*.cs" />
-    <Compile Include="ImplementationFromDafny.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="%STDLIB_PATH%/runtimes/net/STD.csproj" />
+    <ProjectReference Include="../%SERVICE_ID%.csproj" />
+    <Compile Include="TestsFromDafny.cs" />
   </ItemGroup>
 
 </Project>

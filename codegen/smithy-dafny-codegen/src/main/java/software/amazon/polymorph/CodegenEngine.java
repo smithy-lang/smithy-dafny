@@ -411,7 +411,7 @@ public class CodegenEngine {
 
     final String csprojTemplate = IoUtils.readUtf8Resource(
       this.getClass(),
-      "/templates/AwsSdkProject.csproj.template"
+      "/templates/runtimes/net/AwsSdkProject.csproj"
     );
     final String csprojText = csprojTemplate
       .replace("%SDK_ID%", sdkId)
