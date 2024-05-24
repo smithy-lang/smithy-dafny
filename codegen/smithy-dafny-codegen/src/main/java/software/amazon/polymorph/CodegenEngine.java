@@ -458,8 +458,8 @@ public class CodegenEngine {
     final String serviceConfig = awsSdkStyle ?
             null : serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
     final String service = serviceShape.getId().getName();
-    final String configConversionMethod = DotNetNameResolver.typeConverterForShape(
-            serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(), TypeConversionDirection.FROM_DAFNY);
+    final String configConversionMethod = awsSdkStyle ?
+            null : DotNetNameResolver.typeConverterForShape(serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(), TypeConversionDirection.FROM_DAFNY);
     final String namespace = serviceShape.getId().getNamespace();
     final String dotnetNamespace = resolver.namespaceForService();
     final String namespaceDir = namespace.replace(".", "/");
