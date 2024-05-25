@@ -72,4 +72,5 @@ jobs:
           sh ./removeDotFromExtern.sh
           make transpile_go
           export GOPATH=$(pwd)/runtimes/go/ImplementationFromDafny-go:$GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go:$(pwd)/runtimes/go/TestsFromDafny-go:$GITHUB_WORKSPACE/DafnyRuntimeGo/
-          echo $GOPATH
+          goimports -w runtimes/go/
+          GO111MODULE=auto go run runtimes/go/TestsFromDafny-go/src/TestsFromDafny.go
