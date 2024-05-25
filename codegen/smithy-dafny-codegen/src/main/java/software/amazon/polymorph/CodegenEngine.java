@@ -34,6 +34,7 @@ import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.Pair;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -167,7 +168,7 @@ public class CodegenEngine {
     propertiesFile.ifPresent(this::generateProjectPropertiesFile);
   }
 
-  private void generateProjectPropertiesFile(final Path outputPath) {
+  private void generateProjectPropertiesFile(final Path outputPath) throws UncheckedIOException {
     // Drop the pre-release suffix, if any.
     // This means with the current Dafny pre-release naming convention,
     // we'll grab the most recent full release of a Dafny runtime.

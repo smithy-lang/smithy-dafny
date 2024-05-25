@@ -6,6 +6,7 @@ package software.amazon.polymorph.utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -66,18 +67,19 @@ public class IOUtils {
   }
 
   public static void writeTemplatedFile(Class<?> klass, Path rootPath, String templatePath, Map<String, String> parameters) {
-    String content = IoUtils.readUtf8Resource(
-            klass,
-            "/templates/" + templatePath
-    );
+    String content = IoUtils.readUtf8Resource(klass, "/templates/" + templatePath);
 
     content = evalTemplate(content, parameters);
     templatePath = evalTemplate(templatePath, parameters);
 
-    IOUtils.writeToFile(
-            content,
-            rootPath.resolve(templatePath).toFile()
-    );
+    Path outputPath = rootPath.resolve(templatePath);
+    try {
+        Files.createDirectories(outputPath.getParent());
+    } catch (IOException e) {
+        throw new UncheckedIOException(e);
+    }
+
+    IOUtils.writeToFile(content, outputPath.toFile());
   }
 
   public static String evalTemplate(String template, Map<String, String> context) {
