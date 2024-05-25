@@ -168,10 +168,6 @@ public class CodegenEngine {
   }
 
   private void generateProjectPropertiesFile(final Path outputPath) {
-    final String propertiesTemplate = IoUtils.readUtf8Resource(
-      this.getClass(),
-      "/templates/project.properties.template"
-    );
     // Drop the pre-release suffix, if any.
     // This means with the current Dafny pre-release naming convention,
     // we'll grab the most recent full release of a Dafny runtime.
@@ -183,11 +179,11 @@ public class CodegenEngine {
       dafnyVersion.getPatch()
     )
       .unparse();
-    final String propertiesText = propertiesTemplate.replace(
-      "%DAFNY_VERSION%",
+    final Map<String, String> parameters = Map.of(
+      "dafnyVersion",
       dafnyVersionString
     );
-    IOUtils.writeToFile(propertiesText, outputPath.toFile());
+    IOUtils.writeTemplatedFile(getClass(), libraryRoot, "project.properties", parameters);
   }
 
   private void generateDafny(final Path outputDir) {
@@ -216,6 +212,10 @@ public class CodegenEngine {
       LOGGER.info("Dafny code generated in {}", outputDir);
     }
 
+    if (generateEverything) {
+      dafnyProjectFiles();
+    }
+
     LOGGER.info("Formatting Dafny code in {}", outputDir);
     runCommand(
       outputDir,
@@ -227,6 +227,45 @@ public class CodegenEngine {
     );
 
     handlePatching(TargetLanguage.DAFNY, outputDir);
+  }
+
+  private void dafnyProjectFiles() {
+    final String serviceConfig = awsSdkStyle ?
+            null : serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
+    final String service = serviceShape.getId().getName();
+    final String namespace = serviceShape.getId().getNamespace();
+
+    final Path includeDafnyFile =
+            this.includeDafnyFile.orElseThrow(() ->
+                    new IllegalStateException(
+                            "includeDafnyFile required when generating .NET project files"
+                    )
+            );
+    // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
+    // TODO be smarter about finding the StandardLibrary path
+    final Path stdLibPath = libraryRoot.resolve("runtimes/net").relativize(
+            includeDafnyFile.resolve("../..")
+    );
+
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("dafnyVersion",      dafnyVersion.unparse());
+    parameters.put("service",           service);
+    parameters.put("serviceConfig",     serviceConfig);
+    parameters.put("namespace",         namespace);
+    parameters.put("stdLibPath",        stdLibPath.toString());
+
+    if (awsSdkStyle) {
+      // TODO
+    } else {
+      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "src/Index.dfy", parameters);
+      if (localServiceTest) {
+        IOUtils.writeTemplatedFile(getClass(), libraryRoot, "src/Wrapped$service:LImpl.dfy", parameters);
+      }
+    }
+
+    // TODO generate Makefile
+
+    LOGGER.info("Dafny project files generated in {}", libraryRoot);
   }
 
   private void generateJava(final Path outputDir, final Path testOutputDir) {
@@ -367,8 +406,6 @@ public class CodegenEngine {
       }
     }
 
-    // TODO generate Makefile
-
     LOGGER.info("Java project files generated in {}/runtimes/java", libraryRoot);
   }
 
@@ -497,8 +534,6 @@ public class CodegenEngine {
       }
     }
     IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/tests/$serviceID:LTest.csproj", parameters);
-
-    // TODO generate Makefile
 
     LOGGER.info(".NET project files generated in {}/runtimes/net", libraryRoot);
   }
