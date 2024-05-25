@@ -48,12 +48,8 @@ jobs:
         ]
     runs-on: "macos-12"
     steps:
-      - name: echo GOPATH
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          export GOPATH=$(pwd)/runtimes/go/ImplementationFromDafny-go:$GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go:$(pwd)/runtimes/go/TestsFromDafny-go:$GITHUB_WORKSPACE/DafnyRuntimeGo/
-          echo $GOPATH
+      - uses: actions/checkout@v2
+
       - name: Setup Dafny 4.5.0
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
