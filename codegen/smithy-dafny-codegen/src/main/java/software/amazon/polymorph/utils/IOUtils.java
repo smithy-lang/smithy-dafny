@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.SimpleCodeWriter;
 
 public class IOUtils {
 
@@ -61,5 +63,31 @@ public class IOUtils {
         e.printStackTrace();
       }
     }
+  }
+
+  public static void writeTemplatedFile(Class<?> klass, Path rootPath, String templatePath, Map<String, String> parameters) {
+    String content = IoUtils.readUtf8Resource(
+            klass,
+            "/templates/" + templatePath
+    );
+
+    content = evalTemplate(content, parameters);
+    templatePath = evalTemplate(templatePath, parameters);
+
+    IOUtils.writeToFile(
+            content,
+            rootPath.resolve(templatePath).toFile()
+    );
+  }
+
+  public static String evalTemplate(String template, Map<String, String> context) {
+    SimpleCodeWriter writer = new SimpleCodeWriter()
+      .disableNewlines()
+      .insertTrailingNewline(false);
+    for (Map.Entry<String, String> entry : context.entrySet()) {
+      writer.putContext(entry.getKey(), entry.getValue());
+    }
+    writer.write(template);
+    return writer.toString();
   }
 }

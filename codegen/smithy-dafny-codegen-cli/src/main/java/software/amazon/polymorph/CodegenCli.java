@@ -7,8 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -22,6 +24,8 @@ import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
+import software.amazon.smithy.model.validation.ValidatedResult;
+import software.amazon.smithy.model.validation.ValidationEvent;
 
 public class CodegenCli {
 
@@ -55,7 +59,20 @@ public class CodegenCli {
       .forEach(assembler::addImport);
     // Discover models from the classpath (e.g. models of library-defined traits)
     assembler.discoverModels();
-    final Model serviceModel = assembler.assemble().unwrap();
+    ValidatedResult<Model> result = assembler.assemble();
+    final Model serviceModel = result.unwrap();
+    // Validation succeeded but there may be events like WARNINGS, output them as well
+    List<ValidationEvent> events = result.getValidationEvents();
+    if (!events.isEmpty()) {
+      LOGGER.warn(
+        "Validation events:\n" +
+        events
+          .stream()
+          .map(ValidationEvent::toString)
+          .sorted()
+          .collect(Collectors.joining("\n"))
+      );
+    }
 
     // If Smithy ever lets us configure this:
     // https://github.com/smithy-lang/smithy/blob/f598b87c51af5943686e38706847a5091fe718da/smithy-model/src/main/java/software/amazon/smithy/model/loader/ModelLoader.java#L76
@@ -81,6 +98,11 @@ public class CodegenCli {
       outputDirs.put(TargetLanguage.RUST, path)
     );
 
+    final Map<TargetLanguage, Path> testOutputDirs = new HashMap<>();
+    cliArguments.testOutputJavaDir.ifPresent(path ->
+      testOutputDirs.put(TargetLanguage.JAVA, path)
+    );
+
     final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
       .withFromSmithyBuildPlugin(false)
       .withLibraryRoot(cliArguments.libraryRoot)
@@ -88,6 +110,7 @@ public class CodegenCli {
       .withDependentModelPaths(cliArguments.dependentModelPaths)
       .withNamespace(cliArguments.namespace)
       .withTargetLangOutputDirs(outputDirs)
+      .withTargetLangTestOutputDirs(testOutputDirs)
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
       .withLocalServiceTest(cliArguments.localServiceTest)
       .withDafnyVersion(cliArguments.dafnyVersion)
@@ -100,6 +123,8 @@ public class CodegenCli {
       engineBuilder::withIncludeDafnyFile
     );
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
+    // TODO
+    engineBuilder.withGenerateEverything(true);
     final CodegenEngine engine = engineBuilder.build();
     engine.run();
   }
@@ -158,6 +183,14 @@ public class CodegenCli {
           .builder()
           .longOpt("output-java")
           .desc("<optional> output directory for generated Java files")
+          .hasArg()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("output-java-test")
+          .desc("<optional> output directory for generated Java test files")
           .hasArg()
           .build()
       )
@@ -258,6 +291,7 @@ public class CodegenCli {
     String namespace,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
+    Optional<Path> testOutputJavaDir,
     Optional<Path> outputRustDir,
     Optional<Path> outputDafnyDir,
     Optional<AwsSdkVersion> javaAwsSdkVersion,
@@ -308,6 +342,9 @@ public class CodegenCli {
       final Optional<Path> outputJavaDir = Optional
         .ofNullable(commandLine.getOptionValue("output-java"))
         .map(Paths::get);
+      final Optional<Path> testOutputJavaDir = Optional
+        .ofNullable(commandLine.getOptionValue("output-java-test"))
+        .map(Paths::get);
       final Optional<Path> outputDotnetDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dotnet"))
         .map(Paths::get);
@@ -349,11 +386,9 @@ public class CodegenCli {
         .ofNullable(commandLine.getOptionValue("properties-file"))
         .map(Paths::get);
 
-      Optional<Path> includeDafnyFile = Optional.empty();
-      if (outputDafnyDir.isPresent()) {
-        includeDafnyFile =
-          Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
-      }
+      Optional<Path> includeDafnyFile = Optional
+              .ofNullable(commandLine.getOptionValue("include-dafny"))
+              .map(Paths::get);
 
       Optional<Path> patchFilesDir = Optional
         .ofNullable(commandLine.getOptionValue("patch-files-dir"))
@@ -370,6 +405,7 @@ public class CodegenCli {
           namespace,
           outputDotnetDir,
           outputJavaDir,
+          testOutputJavaDir,
           outputRustDir,
           outputDafnyDir,
           javaAwsSdkVersion,

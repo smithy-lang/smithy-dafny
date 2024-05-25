@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -138,10 +139,12 @@ public class ServiceCodegen {
         codeByPath.put(structureClassPath, structureCode.prepend(prelude));
       });
 
-    // Enums
-    model
-      .getStringShapesWithTrait(EnumTrait.class)
-      .stream()
+    // Enums (both string shapes as in Smithy IDL 1.0, and enum shapes as in 2.0)
+    Streams
+      .concat(
+        model.getEnumShapes().stream(),
+        model.getStringShapesWithTrait(EnumTrait.class).stream()
+      )
       .map(Shape::getId)
       .filter(enumShapeId ->
         ModelUtils.isInServiceNamespace(enumShapeId, serviceShape)
@@ -935,11 +938,11 @@ public class ServiceCodegen {
       .orElse(Token.of("void"));
   }
 
-  private EnumTrait getAndValidateEnumTrait(final StringShape stringShape) {
-    final EnumTrait enumTrait = stringShape
+  private EnumTrait getAndValidateEnumTrait(final Shape shape) {
+    final EnumTrait enumTrait = shape
       .getTrait(EnumTrait.class)
       .orElseThrow(() ->
-        new IllegalStateException("EnumTrait absent on provided string shape")
+        new IllegalStateException("EnumTrait absent on provided shape")
       );
     if (enumTrait.hasNames() && hasInvalidEnumNames(enumTrait)) {
       throw new IllegalStateException(
@@ -961,14 +964,11 @@ public class ServiceCodegen {
    *
    * @return a class containing constants for the enum members
    */
-  public TokenTree generateEnumClass(final ShapeId stringShapeId) {
-    final StringShape stringShape = model.expectShape(
-      stringShapeId,
-      StringShape.class
-    );
-    final EnumTrait enumTrait = getAndValidateEnumTrait(stringShape);
+  public TokenTree generateEnumClass(final ShapeId shapeId) {
+    final Shape shape = model.expectShape(shapeId);
+    final EnumTrait enumTrait = getAndValidateEnumTrait(shape);
 
-    final String enumClassName = nameResolver.classForEnum(stringShapeId);
+    final String enumClassName = nameResolver.classForEnum(shapeId);
     final String enumValueTypeName = enumTrait.hasNames()
       ? enumClassName
       : "string";

@@ -265,6 +265,7 @@ _polymorph:
 	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_JAVA) \
+	$(OUTPUT_JAVA_TEST) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_RUST) \
 	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
@@ -283,6 +284,7 @@ _polymorph_wrapped:
 	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
+	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
@@ -321,6 +323,7 @@ _polymorph_code_gen: INPUT_DAFNY=\
 _polymorph_code_gen: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_code_gen: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_code_gen: _polymorph
 
 check_polymorph_diff:
@@ -358,6 +361,8 @@ polymorph_dotnet:
 
 _polymorph_dotnet: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+_polymorph_dotnet: INPUT_DAFNY=\
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project
@@ -373,6 +378,9 @@ polymorph_java:
 	done
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
+_polymorph_java: INPUT_DAFNY=\
+	--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_java: _polymorph
 
 # Dependency for formatting generating Java code
@@ -490,6 +498,7 @@ mvn_staging_deploy:
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
+	$(GRADLEW) -p runtimes/java test --info
 
 ########################## Rust targets
 

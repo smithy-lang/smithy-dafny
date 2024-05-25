@@ -73,6 +73,7 @@ public record DafnyNameResolver(
       case BLOB,
         BOOLEAN,
         STRING,
+        ENUM,
         // currently unused in model and unsupported in StandardLibrary.UInt
         // BYTE, SHORT
         INTEGER,

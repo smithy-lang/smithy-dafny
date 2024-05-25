@@ -23,13 +23,20 @@ impl Client {
             ::simple_string_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::DefaultSimpleStringConfig());
         let inner =
             ::simple_string_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::SimpleString(&inner_config);
-        if matches!(inner.as_ref(), ::simple_string_dafny::_Wrappers_Compile::Result::Failure { .. }) {
+        if matches!(
+            inner.as_ref(),
+            ::simple_string_dafny::_Wrappers_Compile::Result::Failure { .. }
+        ) {
             // TODO: convert error - the potential types are not modeled!
-            return Err(BuildError::other(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message("Invalid client config").build()));
+            return Err(BuildError::other(
+                ::aws_smithy_types::error::metadata::ErrorMetadata::builder()
+                    .message("Invalid client config")
+                    .build(),
+            ));
         }
         let handle = Handle {
             conf: conf.clone(),
-            inner: inner.Extract()
+            inner: inner.Extract(),
         };
         Ok(Self {
             handle: ::std::sync::Arc::new(handle),
@@ -45,13 +52,14 @@ impl Client {
 impl Drop for Handle {
     fn drop(&mut self) {
         // Ensure the Dafny values we created by calling SimpleString are deallocated.
-        unsafe { drop(Box::from_raw(self.inner)); }
+        unsafe {
+            drop(Box::from_raw(self.inner));
+        }
     }
 }
 
 mod get_string;
 
-mod get_string_single_value;
+mod get_string_known_value;
 
 mod get_string_utf8;
-

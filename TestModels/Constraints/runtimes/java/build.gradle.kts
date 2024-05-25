@@ -32,6 +32,7 @@ java {
     sourceSets["test"].java {
         srcDir("src/test/java")
         srcDir("src/test/dafny-generated")
+        srcDir("src/test/smithy-generated")
     }
 }
 
@@ -44,6 +45,7 @@ dependencies {
     implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
+    testImplementation("org.testng:testng:7.5")
 }
 
 publishing {
@@ -64,4 +66,8 @@ tasks {
         mainClass.set("TestsFromDafny")
         classpath = sourceSets["test"].runtimeClasspath
     }
+}
+
+tasks.named<Test>("test") {
+    useTestNG()
 }

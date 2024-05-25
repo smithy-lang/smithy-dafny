@@ -39,7 +39,7 @@ jobs:
             # TestModels/SimpleTypes/SimpleByte,
             TestModels/SimpleTypes/SimpleDouble,
             TestModels/SimpleTypes/SimpleEnum,
-            # TestModels/SimpleTypes/SimpleEnumV2,
+            TestModels/SimpleTypes/SimpleEnumV2,
             # TestModels/SimpleTypes/SimpleFloat,
             TestModels/SimpleTypes/SimpleInteger,
             TestModels/SimpleTypes/SimpleLong,

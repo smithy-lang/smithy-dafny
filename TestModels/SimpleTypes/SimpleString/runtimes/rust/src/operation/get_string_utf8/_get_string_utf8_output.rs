@@ -21,7 +21,9 @@ impl GetStringUTF8Output {
 
 /// A builder for [`GetStringUTF8Output`](crate::operation::operation::GetStringUTF8Output).
 #[non_exhaustive]
-#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug)]
+#[derive(
+    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
+)]
 pub struct GetStringUTF8OutputBuilder {
     pub(crate) value: ::std::option::Option<::std::string::String>,
 }
@@ -41,7 +43,14 @@ impl GetStringUTF8OutputBuilder {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetStringUTF8Output`](crate::operation::operation::GetStringUTF8Output).
-    pub fn build(self) -> ::std::result::Result<crate::operation::get_string_utf8::GetStringUTF8Output, ::aws_smithy_types::error::operation::BuildError> {
-        ::std::result::Result::Ok(crate::operation::get_string_utf8::GetStringUTF8Output { value: self.value })
+    pub fn build(
+        self,
+    ) -> ::std::result::Result<
+        crate::operation::get_string_utf8::GetStringUTF8Output,
+        ::aws_smithy_types::error::operation::BuildError,
+    > {
+        ::std::result::Result::Ok(crate::operation::get_string_utf8::GetStringUTF8Output {
+            value: self.value,
+        })
     }
 }
