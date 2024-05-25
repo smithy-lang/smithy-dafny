@@ -263,7 +263,10 @@ public class CodegenEngine {
       }
     }
 
-    // TODO generate Makefile
+    // TODO: It would be great to generate the Makefile too,
+    // but that's currently a catch 22 because we normally use the shared makefile targets
+    // to invoke polymorph in the first place.
+    // Perhaps we can make a `smithy init` template for that instead?
 
     LOGGER.info("Dafny project files generated in {}", libraryRoot);
   }
