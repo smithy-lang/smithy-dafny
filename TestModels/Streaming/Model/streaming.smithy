@@ -2,7 +2,7 @@ $version: "2"
 
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-namespace simple.dafnyExtern
+namespace simple.streaming
 
 @aws.polymorph#localService(
   sdkId: "SimpleStreaming",
@@ -50,10 +50,10 @@ operation StreamingBlobOutput {
 operation StreamingBlobInputAndOutput {
   input := {
     @required
-    in: StreamingBlob
+    bytesIn: StreamingBlob
   }
   output := {
     @required
-    out: StreamingBlob
+    bytesOut: StreamingBlob
   }
 }

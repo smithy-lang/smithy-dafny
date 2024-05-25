@@ -12,8 +12,8 @@ module StdLib {
   trait Action<T, R> {
     ghost var history: seq<(T, R)>
 
-    ghost predicate Consumes(history: seq<(T, R)>, next: T)
-    ghost predicate Produces(history: seq<(T, R)>)
+    predicate Consumes(history: seq<(T, R)>, next: T)
+    predicate Produces(history: seq<(T, R)>)
     
 
     method Call(t: T) returns (r: R)
@@ -34,12 +34,12 @@ module StdLib {
     | true 
     witness *
 
-  ghost predicate ConsumesAnything<T(!new), R(!new)>(a: Action<T, R>) {
+  predicate ConsumesAnything<T(!new), R(!new)>(a: Action<T, R>) {
     forall history, next | a.Produces(history) :: a.Consumes(history, next)
   }
 
   // TODO: consumes any None-terminated sequence of inputs
-  ghost predicate ConsumesTerminated<T(!new), R(!new)>(a: Action<Option<T>, R>)
+  predicate ConsumesTerminated<T(!new), R(!new)>(a: Action<Option<T>, R>)
 
   type byte = b: nat | b < 256
   type bytes = seq<byte>
