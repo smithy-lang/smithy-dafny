@@ -68,3 +68,5 @@ jobs:
           make polymorph_dafny
           sh ./removeDotFromExtern.sh
           make transpile_go
+          export GOPATH=$(pwd)/runtimes/go/ImplementationFromDafny-go:$GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go:$(pwd)/runtimes/go/TestsFromDafny-go:$GITHUB_WORKSPACE/DafnyRuntimeGo/
+          echo $GOPATH
