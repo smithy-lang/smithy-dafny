@@ -64,9 +64,8 @@ jobs:
 
       - name: Generate Polymorph Dafny and Go code
         shell: bash
-        # working-directory: ./${{ matrix.library }}
+        working-directory: ./${{ matrix.library }}
         run: |
-          echo $(pwd)
           make polymorph_dafny
           sh ./removeDotFromExtern.sh
           make transpile_go
