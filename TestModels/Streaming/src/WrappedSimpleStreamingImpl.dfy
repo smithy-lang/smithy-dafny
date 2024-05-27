@@ -3,8 +3,8 @@
 include "../Model/SimpleStreamingTypesWrapped.dfy"
 
 module {:extern "simple.streaming.internaldafny.wrapped"} WrappedSimpleStreamingService refines WrappedAbstractSimpleStreamingService {
-    import WrappedService = SimpleStreaming
-    function method WrappedDefaultSimpleStreamingConfig(): SimpleStreamingConfig {
-        SimpleStreamingConfig
-    }
+  import WrappedService = SimpleStreaming
+  function method WrappedDefaultSimpleStreamingConfig(): SimpleStreamingConfig {
+    SimpleStreamingConfig
+  }
 }

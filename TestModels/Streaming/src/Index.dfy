@@ -18,14 +18,14 @@ module {:extern "simple.streaming.internaldafny" } SimpleStreaming refines Abstr
 
   class SimpleStreamingClient... {
     predicate ValidState() {
-       && Operations.ValidInternalConfig?(config)
-       && Modifies == Operations.ModifiesInternalConfig(config) + {History}
+      && Operations.ValidInternalConfig?(config)
+      && Modifies == Operations.ModifiesInternalConfig(config) + {History}
     }
 
     constructor(config: Operations.InternalConfig) {
-       this.config := config;
-       History := new ISimpleStreamingClientCallHistory();
-       Modifies := Operations.ModifiesInternalConfig(config) + {History};
+      this.config := config;
+      History := new ISimpleStreamingClientCallHistory();
+      Modifies := Operations.ModifiesInternalConfig(config) + {History};
     }
   }
 }
