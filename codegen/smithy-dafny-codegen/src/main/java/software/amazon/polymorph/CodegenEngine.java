@@ -28,6 +28,7 @@ import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
@@ -214,7 +215,7 @@ public class CodegenEngine {
     }
 
     if (generateEverything) {
-      dafnyProjectFiles();
+      dafnyProjectFiles(outputDir);
     }
 
     LOGGER.info("Formatting Dafny code in {}", outputDir);
@@ -230,7 +231,7 @@ public class CodegenEngine {
     handlePatching(TargetLanguage.DAFNY, outputDir);
   }
 
-  private void dafnyProjectFiles() {
+  private void dafnyProjectFiles(final Path outputDir) {
     final String serviceConfig = awsSdkStyle ?
             null : serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
     final String service = serviceShape.getId().getName();
@@ -262,6 +263,9 @@ public class CodegenEngine {
       if (localServiceTest) {
         IOUtils.writeTemplatedFile(getClass(), libraryRoot, "src/Wrapped$service:LImpl.dfy", parameters);
       }
+
+      // TODO: This is more questionable, because it's only an initial start, not expected to be permanently generated.
+      generateDafnySkeleton(outputDir);
     }
 
     // TODO: It would be great to generate the Makefile too,
@@ -270,6 +274,31 @@ public class CodegenEngine {
     // Perhaps we can make a `smithy init` template for that instead?
 
     LOGGER.info("Dafny project files generated in {}", libraryRoot);
+
+    Path srcDir = outputDir.resolve("../src");
+    LOGGER.info("Formatting Dafny code in {}", srcDir);
+    runCommand(
+            srcDir,
+            "dafny",
+            "format",
+            "--function-syntax:3",
+            "--unicode-char:false",
+            "."
+    );
+  }
+
+  public void generateDafnySkeleton(Path outputDir) {
+    final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
+            model,
+            serviceShape,
+            outputDir,
+            this.includeDafnyFile.get(),
+            this.dependentModelPaths,
+            this.awsSdkStyle
+    );
+    Map<Path, TokenTree> skeleton = dafnyApiCodegen.generateSkeleton();
+    Path srcDir = outputDir.resolve("../src");
+    IOUtils.writeTokenTreesIntoDir(skeleton, srcDir);
   }
 
   private void generateJava(final Path outputDir, final Path testOutputDir) {
