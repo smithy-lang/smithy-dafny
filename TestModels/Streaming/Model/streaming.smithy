@@ -6,7 +6,7 @@ namespace simple.streaming
 
 // TODO: Call streaming operations on SDKs from Dafny
 //       Sync Dafny client good enough, or do we start supporting async code in Dafny?
-// TODO: model the Java ESDK EncryptingInputStream type operations
+// TODO: model the Java ESDK EncryptingInputStream/EncryptingOutputStream type operations
 // TODO: event streams (i.e. unions) as well
 // TODO: @requiresLength as well
 
