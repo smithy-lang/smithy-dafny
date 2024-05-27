@@ -62,7 +62,6 @@ module Foo {
   // TODO: Check Smithy spec about when response is received
   // TODO: Actions pretty much always have to return Results/Outcomes
 
-  // TODO: Spec on when sink will be called vs. onData
   method StreamingBlobInput(input: StreamingBlobRequest, onResult: SingleUseAction<Result<StreamingBlobResponse, Error>, ()>) 
     returns (onInputData: Action<Option<bytes>, ()>)
     ensures ConsumesTerminated(onInputData)
@@ -94,10 +93,10 @@ module DafnyStyle {
 
   // TODO: Spec on when sink will be called vs. onData
   method StreamingBlobInput(input: StreamingBlobRequest) 
-    // TODO: Return type could also be
     returns (onInputData: Action<Option<bytes>, 
                                  Option<Result<StreamingBlobResponse, Error>>>)
     ensures ConsumesTerminated(onInputData)
+    // TODO: With @requiresLength, ensures something about |flattened(produced(onInputData))|
 
   datatype StreamingBlobOutputEvent =
     | StreamingBlobOutputData(data: bytes)

@@ -4,6 +4,12 @@ $version: "2"
 // SPDX-License-Identifier: Apache-2.0
 namespace simple.streaming
 
+// TODO: Call streaming operations on SDKs from Dafny
+//       Sync Dafny client good enough, or do we start supporting async code in Dafny?
+// TODO: model the Java ESDK EncryptingInputStream type operations
+// TODO: event streams (i.e. unions) as well
+// TODO: @requiresLength as well
+
 @aws.polymorph#localService(
   sdkId: "SimpleStreaming",
   config: SimpleStreamingConfig,
@@ -11,10 +17,10 @@ namespace simple.streaming
 service SimpleStreaming {
   version: "2021-11-01",
   operations: [ 
-    StreamingBlobInput,
-    StreamingBlobOutput,
-    StreamingBlobInputAndOutput
-     ]
+    CountBits,
+    BinaryOf,
+    Chunks
+  ]
 }
 
 structure SimpleStreamingConfig {}
@@ -23,7 +29,7 @@ structure SimpleStreamingConfig {}
 blob StreamingBlob
 
 /// Calculates the sum of all bits
-operation StreamingBlobInput {
+operation CountBits {
   input := {
     @required
     bits: StreamingBlob
@@ -35,7 +41,7 @@ operation StreamingBlobInput {
 }
 
 /// Returns the binary representation of the input.
-operation StreamingBlobOutput {
+operation BinaryOf {
   input := {
     @required
     number: Integer
@@ -47,10 +53,14 @@ operation StreamingBlobOutput {
 }
 
 /// Returns input in chunks of the given size.
-operation StreamingBlobInputAndOutput {
+operation Chunks {
   input := {
     @required
     bytesIn: StreamingBlob
+
+    @required
+    @range(min: 1)
+    chunkSize: Integer
   }
   output := {
     @required
