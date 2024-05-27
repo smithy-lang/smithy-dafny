@@ -12,8 +12,10 @@
 # inside each project.
 
 # Variables:
-# MAX_RESOURCE_COUNT -- The Dafny report generator max resource count.
+# MAX_RESOURCE_COUNT -- The Dafny verification max resource count.
 # 	This is is per project because the verification variability can differ.
+#   Individual functions/methods/lemmas can override this limit using `{:rlimit N}`,
+#   but be aware that the attribute multiplies N by 1000!
 # VERIFY_TIMEOUT -- The Dafny verification timeout in seconds.
 # 	This is only a guard against builds taking way too long to fail.
 #   The resource count limit above is much more important for fighting brittle verification.
@@ -87,7 +89,8 @@ verify:
 		-functionSyntax:3 \
 		-verificationLogger:csv \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		-rlimit:$(MAX_RESOURCE_COUNT) \
+		$(DAFNY_OPTIONS) \
 		%
 
 # Verify single file FILE with text logger.
@@ -102,7 +105,8 @@ verify_single:
 		-functionSyntax:3 \
 		-verificationLogger:text \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		-rlimit:$(MAX_RESOURCE_COUNT) \
+		$(DAFNY_OPTIONS) \
 		$(if ${PROC},-proc:*$(PROC)*,) \
 		$(FILE)
 
@@ -117,7 +121,7 @@ verify_service:
 		-functionSyntax:3 \
 		-verificationLogger:csv \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		$(DAFNY_OPTIONS) \
 		`find ./dafny/$(SERVICE) -name '*.dfy'` \
 
 format_dafny:
@@ -133,10 +137,13 @@ format_dafny-check:
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
+# This no longer enforces the maximum resource count,
+# as we're passing /rlimit to dafny directly now.
+# But it's still useful information to see what assertion batches
+# are close to the limit.
 dafny-reportgenerator:
 	dafny-reportgenerator \
 		summarize-csv-results \
-		--max-resource-count $(MAX_RESOURCE_COUNT) \
 		TestResults/*.csv
 
 clean-dafny-report:
@@ -194,6 +201,7 @@ transpile_implementation:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
+		$(DAFNY_OPTIONS) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES)
 
@@ -510,12 +518,18 @@ transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
 transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+# The Dafny Rust code generator is not complete yet,
+# so we want to emit code even if there are unsupported features in the input.
+transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
 transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
 
 transpile_test_rust: TARGET=rs
 transpile_test_rust: OUT=tests_from_dafny
 transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
 transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
+# The Dafny Rust code generator is not complete yet,
+# so we want to emit code even if there are unsupported features in the input.
+transpile_test_rust: DAFNY_OPTIONS=-emitUncompilableCode
 transpile_test_rust: _transpile_test_all _mv_test_rust
 
 transpile_dependencies_rust: LANG=rust
@@ -524,12 +538,16 @@ transpile_dependencies_rust: transpile_dependencies
 _mv_implementation_rust:
 	rm -rf runtimes/rust/dafny_impl/src
 	mkdir -p runtimes/rust/dafny_impl/src
-	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+# TODO: Currently need to insert an import of the the StandardLibrary.
+	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
+	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	rustfmt runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
 	rm -rf runtimes/rust/dafny_impl/tests
 	mkdir -p runtimes/rust/dafny_impl/tests
 	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
+	rustfmt runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
 	rm -rf tests_from_dafny-rust
 
 build_rust:

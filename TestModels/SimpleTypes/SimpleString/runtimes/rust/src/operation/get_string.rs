@@ -17,7 +17,7 @@ impl GetString {
     > {
         let inner_input = crate::conversions::get_string::_get_string_input::to_dafny(input);
         let inner_result =
-            ::simple_string_dafny::dafny_runtime::read!(handle.inner).GetString(&inner_input);
+            ::dafny_runtime::md!(handle.inner.clone()).GetString(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }
