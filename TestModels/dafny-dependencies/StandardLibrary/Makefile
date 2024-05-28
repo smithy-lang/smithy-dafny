@@ -92,20 +92,18 @@ _python_revert_underscore_extern_names:
 # StandardLibrary as a dependency
 transpile_rust: | transpile_implementation_rust
 
-RUST_SRC_INDEX=src_for_rust
 RUST_TEST_INDEX=test_for_rust
 
 # Override the targets to relocate translated Rust code directly into the main crate,
 # instead of the dafny_impl sub-crate.
+# We also don't want to delete the src directory since we have an extern in there too.
 _mv_implementation_rust:
-	rm -rf runtimes/rust/src
-	mkdir -p runtimes/rust/src
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
+	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
-	rm -rf runtimes/rust/dafny_impl/tests
-	mkdir -p runtimes/rust/dafny_impl/tests
 	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny.rs
+	rustfmt runtimes/rust/tests/tests_from_dafny.rs
 	rm -rf tests_from_dafny-rust
 
 transpile_dependencies:
@@ -113,22 +111,6 @@ transpile_dependencies:
 
 # Override SharedMakefile's transpile_implementation to not reference
 # StandardLibrary as a Library
-# transpile_implementation:
-# 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-# 		-stdin \
-# 		-noVerify \
-# 		-vcsCores:$(CORES) \
-# 		-compileTarget:$(TARGET) \
-# 		-spillTargetCode:3 \
-# 		-compile:0 \
-# 		-optimizeErasableDatatypeWrapper:0 \
-# 		-compileSuffix:0 \
-# 		$(TRANSPILE_MODULE_NAME) \
-# 		-unicodeChar:0 \
-# 		-functionSyntax:3 \
-# 		-useRuntimeLib \
-# 		-out $(OUT)
-
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
@@ -143,16 +125,6 @@ transpile_implementation:
 		--output $(OUT) \
 		$(TRANSPILE_MODULE_NAME)
 
-build_implementation:
-	dafny build \
-		-t:$(TARGET) \
-		./src/Index.dfy \
-		-o $(OUT) \
-		--quantifier-syntax:3 \
-		--function-syntax:3 \
-		--optimize-erasable-datatype-wrapper:false \
-		./src/Index.dfy
-
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
 build_java: transpile_java
@@ -163,3 +135,22 @@ build_java: transpile_java
 mvn_local_deploy:
 	@echo "${RED}Warning!!${YELLOW} Installing TestModel's STD to Maven Local replaces ESDK's STD!\n$(RESET)" >&2
 	gradle -p runtimes/java publishToMavenLocal
+
+dafny_benerate: DAFNY_RUST_OUTPUT=\
+	runtimes/rust/implementation_from_dafny
+dafny_benerate: DAFNY_RUST_OUTPUT_FOLDER=\
+	$(DAFNY_RUST_OUTPUT)-rust/src
+dafny_benerate: DAFNY_RUST_OUTPUT_RS=\
+	$(DAFNY_RUST_OUTPUT_FOLDER)/implementation_from_dafny.rs
+dafny_benerate: DAFNY_RUST_OUTPUT_RS_DTR=\
+	$(DAFNY_RUST_OUTPUT_FOLDER)/implementation_from_dafny-rs.dtr
+dafny_benerate: DAFNY_RUST_IMPL=\
+	runtimes/rust/src/implementation_from_dafny.rs
+dafny_benerate:
+	$(DAFNY) translate rs src/Index.dfy  --emit-uncompilable-code --no-verify   --optimize-erasable-datatype-wrapper false   --include-runtime   --compile-suffix true   --unicode-char false   --function-syntax 3   --allow-warnings   --output $(DAFNY_RUST_OUTPUT)
+	rustfmt $(DAFNY_RUST_OUTPUT_RS)
+	# echo "Diffs remaining till code generation works:"
+	# diff -u $(DAFNY_RUST_OUTPUT_RS) $(DAFNY_RUST_IMPL) | wc -l
+	mv $(DAFNY_RUST_OUTPUT_RS) $(DAFNY_RUST_IMPL)
+	rm $(DAFNY_RUST_OUTPUT_RS_DTR);
+	rm -r $(DAFNY_RUST_OUTPUT_FOLDER);

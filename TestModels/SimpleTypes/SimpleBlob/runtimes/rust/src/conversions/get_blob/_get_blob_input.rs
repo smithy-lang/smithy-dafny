@@ -3,7 +3,7 @@
 pub fn to_dafny(
     value: crate::operation::get_blob::GetBlobInput,
 ) -> ::std::rc::Rc<
-    ::simple_blob_dafny::r#_simple_dtypes_dsmithyblob_dinternaldafny_dtypes::GetBlobInput,
+    ::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput,
 > {
     let dafny_value = match value.value {
         Some(v) => ::simple_blob_dafny::_Wrappers_Compile::Option::Some {
@@ -11,7 +11,7 @@ pub fn to_dafny(
         },
         None => ::simple_blob_dafny::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(::simple_blob_dafny::r#_simple_dtypes_dsmithyblob_dinternaldafny_dtypes::GetBlobInput::GetBlobInput {
+    ::std::rc::Rc::new(::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput::GetBlobInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -19,7 +19,7 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_blob_dafny::r#_simple_dtypes_dsmithyblob_dinternaldafny_dtypes::GetBlobInput,
+        ::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput,
     >,
 ) -> crate::operation::get_blob::GetBlobInput {
     let value = if matches!(
