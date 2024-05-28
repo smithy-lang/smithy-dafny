@@ -37,7 +37,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code from the `types`
    * module from the same Dafny project for the provided Shape. ex. example.namespace.ExampleShape
-   * -> "example_namespace_internaldafny_types"
+   * -> "ExampleNamespaceTypes"
    *
    * @param shape
    * @return
@@ -49,7 +49,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code from the `types`
    * module from the same Dafny project for the provided Shape. ex. example.namespace.ExampleShape
-   * -> "example_namespace_internaldafny_types"
+   * -> "ExampleNamespaceTypes"
    *
    * @param shapeId
    * @return
@@ -61,7 +61,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code from the `index`
    * module from the same Dafny project for the provided Shape. ex. example.namespace.ExampleShape
-   * -> "example_namespace_internaldafny"
+   * -> "ExampleNamespace"
    *
    * @param shape
    * @return
@@ -73,7 +73,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code from the `index`
    * module from the same Dafny project for the provided Shape. ex. example.namespace.ExampleShape
-   * -> "example_namespace_internaldafny"
+   * -> "ExampleNamespace"
    *
    * @param shapeId
    * @return
@@ -85,7 +85,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code from the `index`
    * module from the same Dafny project for the provided smithyNamespace. ex.
-   * example.namespace.ExampleShape -> "example_namespace_internaldafny"
+   * example.namespace -> "example_module.internaldafny.generated"
    *
    * @param smithyNamespace
    * @return
@@ -98,21 +98,17 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code from the `index`
    * module from the same Dafny project for the provided smithyNamespace. ex.
-   * example.namespace.ExampleShape -> "example_namespace_internaldafny"
+   * example.namespace.ExampleShape -> "example_module.internaldafny.generated.ExampleNamespace"
    *
    * @param smithyNamespace
    * @return
    */
   public static String getDafnyIndexModuleNameForSmithyNamespace(String smithyNamespace, GenerationContext context) {
-    // If this is an AWS SDK shape, rewrite its namespace to match the Dafny extern namespace
-//    LocalServiceTrait trait = context.model().expectShape(context.settings().getService()).getTrait(
-//        LocalServiceTrait.class
-//    ).get();
-//    return trait.getSdkId();
-    String resolvedSmithyNamespace =
-        AwsSdkNameResolver.resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
-    String sdkId = "";
+    String indexModuleName = "";
+
     if (AwsSdkNameResolver.isAwsSdkNamespace(smithyNamespace)) {
+      // If this is an AWS SDK shape, rewrite its namespace to match the Dafny extern namespace
+      // ex. Com.Amazonaws.Kms -> Com_Amazonaws_Kms
       String[] namespaceSegments = smithyNamespace.split("\\.");
       StringBuilder output = new StringBuilder();
       for (String segment : namespaceSegments) {
@@ -121,60 +117,34 @@ public class DafnyNameResolver {
           output.append("_");
         }
       }
-      sdkId = output.toString();
+      indexModuleName = output.toString();
     } else {
+      // For localService, index module name SHOULD be the defined sdkId on the localService trait
       for (ServiceShape serviceShape : context.model().getServiceShapes()) {
         if (smithyNamespace.equals(serviceShape.getId().getNamespace())) {
-          sdkId = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+          indexModuleName = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
           break;
         }
       }
     }
 
-    if (Strings.isNullOrEmpty(sdkId)) {
-      throw new IllegalArgumentException("No sdk id found for " + smithyNamespace);
+    if (Strings.isNullOrEmpty(indexModuleName)) {
+      throw new IllegalArgumentException("Could not determine index module name for " + smithyNamespace);
     }
-
-
-
-
-//    Set<LocalServiceTrait> traits = context.model().getServiceShapes().stream()
-//            .filter(serviceShape -> serviceShape.hasTrait(LocalServiceTrait.class))
-//            .map(serviceShape -> serviceShape.expectTrait(LocalServiceTrait.class))
-//            .collect(Collectors.toSet());
-//    for (LocalServiceTrait trait : traits) {
-//      if (trait.getSdkId().equals())
-//    }
     return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-            sdkId;
-
-//
-//    // ????? i thought something was sdkId... concerned that we have unmodelled stuff  going on here...
-//    return output.toString();
-
+            indexModuleName;
   }
-
-//  public static String getDafnyIndexModuleNameForSmithyNamespace(String smithyNamespace, GenerationContext context) {
-//
-//    // If this is an AWS SDK shape, rewrite its namespace to match the Dafny extern namespace
-//    String resolvedSmithyNamespace =
-//        AwsSdkNameResolver.resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
-//    return SmithyNameResolver.getPythonModuleNameForSmithyNamespace(smithyNamespace) + ".internaldafny.generated." +
-//            resolvedSmithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny";
-//  }
 
   /**
    * Returns the name of the Python module containing Dafny-generated Python code from the `types`
    * module from the same Dafny project for the provided smithyNamespace. ex.
-   * example.namespace.ExampleShape -> "example_namespace_internaldafny_types"
+   * example.namespace -> "example_module.internaldafny.generated.ExampleNamespaceTypes"
    *
    * @param smithyNamespace
    * @return
    */
   public static String getDafnyTypesModuleNameForSmithyNamespace(String smithyNamespace, GenerationContext context) {
-
-    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-            dafnyTypesModuleName(smithyNamespace);
+    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." + dafnyTypesModuleName(smithyNamespace);
   }
 
   /**
@@ -208,9 +178,10 @@ public class DafnyNameResolver {
 
   /**
    * Returns a String representing the Dafny-generated Python type corresponding to the provided
-   * Shape. ex. example.namespace.ExampleShape -> "DafnyExampleShape"
+   * EnumShape. ex. example.namespace.ExampleShape -> "DafnyExampleShape"
    *
-   * @param shape
+   * @param stringShape
+   * @param enumValue
    * @return
    */
   public static String getDafnyTypeForStringShapeWithEnumTrait(
@@ -262,26 +233,18 @@ public class DafnyNameResolver {
    */
   public static void importDafnyTypeForShape(
       PythonWriter writer, ShapeId shapeId, GenerationContext context) {
+
     if ("smithy.api".equals(shapeId.getNamespace())
       && "Unit".equals(shapeId.getName())) {
-      // No corresponding Dafny type for unit
+      // No corresponding Dafny type for unit. Dafny uses "None", which does not need to be imported
       return;
     }
-    if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
+
+    else if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
       importDafnyTypeForError(writer, shapeId, context);
-    } else if (context.model().expectShape(shapeId).hasTrait(PositionalTrait.class)) {
-      Optional<StructureShape> maybeStructureShape =
-          context.model().expectShape(shapeId).asStructureShape();
-      if (maybeStructureShape.isEmpty()) {
-        throw new IllegalArgumentException(
-            "PositionalShapes can only be applied to StructureShapes; was applied to " + shapeId);
-      }
-      final MemberShape onlyMember = PositionalTrait.onlyMember(maybeStructureShape.get());
-      //      writer.addStdlibImport(getDafnyPythonTypesModuleNameForShape(onlyMember.getId()),
-      //          onlyMember.getMemberName() + "_" + onlyMember.getMemberName(),
-      // getDafnyTypeForShape(onlyMember.getId()) );
-      // TODO Positional
-    } else {
+    }
+
+    else {
       // When generating a Dafny import, must ALWAYS first import module_ to avoid circular
       // dependencies
       writer.addStdlibImport(getDafnyGeneratedPathForSmithyNamespace(shapeId.getNamespace()) + ".module_");
