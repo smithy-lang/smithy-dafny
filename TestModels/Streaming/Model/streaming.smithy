@@ -4,9 +4,20 @@ $version: "2"
 // SPDX-License-Identifier: Apache-2.0
 namespace simple.streaming
 
+
+// QUESTIONS:
+// 1. Priority of async clients/operations? Add later?
+//    a. Java ESDK only offers InputStream/OutputStream wrappers
+// 2. Can we depend on AWS SDK core libraries for streaming types for now?
+//    a. Yes we want to break the dependency eventually, but 
+// 3. Asymmetry of input vs. output streams? Other languages are inconsistent
+//    TODO: try others to see if they actually don't handle sharing a structure as input and output
+ 
+
 // TODO: Call streaming operations on SDKs from Dafny
 //       Sync Dafny client good enough, or do we start supporting async code in Dafny?
 // TODO: model the Java ESDK EncryptingInputStream/EncryptingOutputStream type operations
+//       Definitely possible, may not be very directly supported with AsyncRequestBody/AsyncResponseTransformer
 // TODO: event streams (i.e. unions) as well
 // TODO: @requiresLength as well
 
