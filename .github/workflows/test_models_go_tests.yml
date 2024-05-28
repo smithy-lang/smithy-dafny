@@ -82,5 +82,5 @@ jobs:
           make polymorph_go
           export GOPATH=$(pwd)/runtimes/go/ImplementationFromDafny-go:$GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go:$(pwd)/runtimes/go/TestsFromDafny-go:$GITHUB_WORKSPACE/DafnyRuntimeGo/
           goimports -w runtimes/go/
-          ls $GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/Wrappers
+          ls $GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go
           GO111MODULE=auto go run runtimes/go/TestsFromDafny-go/src/TestsFromDafny.go
