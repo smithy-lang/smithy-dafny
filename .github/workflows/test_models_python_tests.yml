@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false # at least for development; see all errors
       matrix:
-        dafny-version: [ 4.4.0 ]
+        dafny-version: [ "nightly-latest" ]
         library: [
           TestModels/dafny-dependencies/StandardLibrary,
           TestModels/Aggregate,
