@@ -202,14 +202,16 @@ transpile_implementation_new:
 	find ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
 		translate go \
 		--stdin \
-		--module-name $(GO_MODULE_NAME) \
 		--no-verify \
+		--go-module-name $(GO_MODULE_NAME) \
 		--cores:$(CORES) \
 		--optimize-erasable-datatype-wrapper:false \
-		--unicode-char:true \
+		--unicode-char:false \
 		--function-syntax:3 \
 		--allow-warnings \
 		--output $(OUT) \
+		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(TRANSLATION_RECORD) \
 		$(TRANSPILE_DEPENDENCIES)
 
 # If the project under transpilation uses `replaceable` modules,
@@ -257,14 +259,16 @@ transpile_test_new:
 		translate go \
 		--stdin \
 		--no-verify \
-		--module-name $(GO_MODULE_NAME) \
+		--go-module-name $(GO_MODULE_NAME) \
 		--cores:$(CORES) \
 		--include-test-runner \
 		--optimize-erasable-datatype-wrapper:false \
-		--unicode-char:true \
+		--unicode-char:false \
 		--function-syntax:3 \
 		--allow-warnings \
 		--output $(OUT) \
+		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(TRANSLATION_RECORD) \
 		$(TRANSPILE_DEPENDENCIES) \
 
 # If we are not the StandardLibrary, transpile the StandardLibrary.
@@ -531,13 +535,15 @@ clean: _clean
 transpile_go: clean_go transpile_implementation_go transpile_test_go transpile_dependencies_go migrate_go
 
 transpile_implementation_go: TARGET=go
-transpile_implementation_go: GO_MODULE_NAME="github.com/ShubhamChaturvedi7/SimpleBoolean"
 transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
+transpile_implementation_go: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+transpile_implementation_go: TRANSLATION_RECORD=$(patsubst %, --translation-record:$(PROJECT_ROOT)/%, $(PROJECT_DTR))
 transpile_implementation_go: transpile_implementation_new
 
 transpile_test_go: TARGET=go
-transpile_test_go: GO_MODULE_NAME="github.com/ShubhamChaturvedi7/SimpleBoolean"
 transpile_test_go: OUT=runtimes/go/TestsFromDafny
+transpile_test_go: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+transpile_test_go: TRANSLATION_RECORD=$(patsubst %, --translation-record:$(PROJECT_ROOT)/%, $(PROJECT_DTR))
 transpile_test_go: transpile_test_new
 
 transpile_dependencies_go: LANG=go

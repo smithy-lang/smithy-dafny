@@ -7,6 +7,8 @@ include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
 
+GO_MODULE_NAME="github.com/dafny-lang/DafnyStandardLibGo"
+
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
 	RED          := $(shell tput -Txterm setaf 1)
@@ -115,6 +117,20 @@ transpile_implementation:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
+		./src/Index.dfy
+
+# Override SharedMakefile's transpile_implementation to not reference
+# StandardLibrary as a Library
+transpile_implementation_new:
+	/Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+		translate go \
+		--go-module-name $(GO_MODULE_NAME) \
+		--cores:$(CORES) \
+		--optimize-erasable-datatype-wrapper:false \
+		--unicode-char:false \
+		--function-syntax:3 \
+		--allow-warnings \
+		--output $(OUT) \
 		./src/Index.dfy
 
 # Override SharedMakefile's build_java to not install

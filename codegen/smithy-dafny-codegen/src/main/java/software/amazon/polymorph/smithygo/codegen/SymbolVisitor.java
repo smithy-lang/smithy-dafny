@@ -16,6 +16,7 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
+import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
@@ -430,7 +431,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol serviceShape(ServiceShape shape) {
         return symbolBuilderFor(shape, "Client", rootModuleName)
-                .definitionFile("./api_client.go")
+                .definitionFile("./%s/api_client.go".formatted(SmithyNameResolver.shapeNamespace(shape)))
                 .build();
     }
 
@@ -461,9 +462,9 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         }
         Symbol.Builder builder = symbolBuilderFor(shape, name, typesPackageName);
         if (shape.hasTrait(ErrorTrait.ID)) {
-            builder.definitionFile("./types/errors.go");
+            builder.definitionFile("./%s/errors.go".formatted(SmithyNameResolver.smithyTypesNamespace(shape)));
         } else {
-            builder.definitionFile("./types/types.go");
+            builder.definitionFile("./%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(shape)));
         }
 
         if (shape.hasTrait(ReferenceTrait.class)) {

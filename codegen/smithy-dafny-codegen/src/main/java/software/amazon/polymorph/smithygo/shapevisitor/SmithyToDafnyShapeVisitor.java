@@ -120,18 +120,18 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         }
         final var builder = new StringBuilder();
         writer.addImport("Wrappers");
-        writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+        writer.addImport(DafnyNameResolver.dafnyTypesNamespace(shape.toShapeId()));
 
         String someWrapIfRequired = "%s";
 
         String companionStruct;
         String returnType;
         if (shape.hasTrait(ErrorTrait.class)) {
-            companionStruct = DafnyNameResolver.getDafnyErrorCompanionCreate(context.settings(), context.symbolProvider().toSymbol(shape));
-            returnType = DafnyNameResolver.getDafnyBaseErrorType(context.settings());
+            companionStruct = DafnyNameResolver.getDafnyErrorCompanionCreate(shape.toShapeId(), context.symbolProvider().toSymbol(shape));
+            returnType = DafnyNameResolver.getDafnyBaseErrorType(shape.toShapeId());
         } else {
-            companionStruct = DafnyNameResolver.getDafnyCompanionTypeCreate(context.settings(), context.symbolProvider().toSymbol(shape));
-            returnType = DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape));
+            companionStruct = DafnyNameResolver.getDafnyCompanionTypeCreate(shape.toShapeId(), context.symbolProvider().toSymbol(shape));
+            returnType = DafnyNameResolver.getDafnyType(shape.toShapeId(), context.symbolProvider().toSymbol(shape));
         }
         String nilWrapIfRequired = returnType.concat("{}");
 
@@ -276,7 +276,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         if (shape.hasTrait(EnumTrait.class)) {
             String nilWrapIfRequired = "nil";
             String someWrapIfRequired = "%s";
-            String returnType = DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape));
+            String returnType = DafnyNameResolver.getDafnyType(shape.toShapeId(), context.symbolProvider().toSymbol(shape));
             if (this.isOptional) {
                 nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
                 someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
@@ -307,7 +307,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 			}
 		}
 		return %s
-	}()""".formatted(returnType, nilCheck, dataSource, dereferenceIfRequired, dataSource, DafnyNameResolver.getDafnyCompanionStructType(context.settings(), context.symbolProvider().toSymbol(shape)), someWrapIfRequired.formatted("enum"));
+	}()""".formatted(returnType, nilCheck, dataSource, dereferenceIfRequired, dataSource, DafnyNameResolver.getDafnyCompanionStructType(shape.toShapeId(), context.symbolProvider().toSymbol(shape)), someWrapIfRequired.formatted("enum"));
         } else {
             String nilWrapIfRequired = "nil";
             String someWrapIfRequired = "%s";

@@ -5,7 +5,7 @@ cd ./runtimes/go/
 dafnyGeneratedDirectories=$(find . -type d -name '*-go' | sort -nr)
 
 for directory in $dafnyGeneratedDirectories; do
-  directoriesWithDot=$(find $directory/src -type d -name '*.*.*' | sort -nr)
+  directoriesWithDot=$(find $directory -type d -name '*.*.*' | sort -nr)
   for package in $directoriesWithDot; do
     sanitizedName=$(sed -e "s,${directory}/src/,,g" -e "s,\.,,g" <<<"${package}")
     searchPattern=$(sed -e "s,${directory}/src/,,g" <<<"${package}")

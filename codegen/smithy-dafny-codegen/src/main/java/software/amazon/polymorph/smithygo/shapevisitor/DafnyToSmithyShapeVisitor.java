@@ -5,6 +5,7 @@ import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SymbolVisitor;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -97,9 +98,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             return referenceStructureShape(shape);
         }
         final var builder = new StringBuilder();
-        writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+        writer.addImport(DafnyNameResolver.dafnyTypesNamespace(shape.toShapeId()));
 
-        builder.append("%1$s{".formatted("types.".concat(shape.getId().getName())));
+        builder.append("%1$s{".formatted(SmithyNameResolver.smithyTypesNamespace(shape).concat(".").concat(shape.getId().getName())));
         String fieldSeparator = ",";
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
             final var memberName = memberShapeEntry.getKey();
@@ -108,7 +109,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
                                                                        ".Dtor_%s()".formatted(memberName),
                                                                        memberShape.isOptional() ? ".UnwrapOr(nil)" : "",
-            memberShape.isOptional() && targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(memberShape))) : "");
+            memberShape.isOptional() && targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(shape.toShapeId(), context.symbolProvider().toSymbol(memberShape))) : "");
                 builder.append("%1$s: %2$s%3$s,".formatted(
                         StringUtils.capitalize(memberName),
                         targetShape.isStructureShape() ? "&" : "",
@@ -144,7 +145,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 			""".formatted(typeName[typeName.length - 1], typeName[typeName.length - 1], dataSource, dataSource,
                 targetShape.isStructureShape() ? "" : "*",
                 targetShape.accept(
-                        new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
+                        new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape.toShapeId(), context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
                 )));
 
         // Close structure
@@ -202,8 +203,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImport("dafny");
         if (shape.hasTrait(EnumTrait.class)) {
             return """
-    func () *types.%s {
-    var u types.%s
+    func () *%s.%s {
+    var u %s.%s
                 if %s == nil {
                     return nil
                 }
@@ -220,8 +221,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 		}
 		
 		return &u.Values()[index]
-	}()""".formatted(context.symbolProvider().toSymbol(shape).getName(), context.symbolProvider().toSymbol(shape).getName(), dataSource, dataSource, DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)), DafnyNameResolver.getDafnyCompanionStructType(context.settings(), context.symbolProvider().toSymbol(shape)),
-                  DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)));
+	}()""".formatted(SmithyNameResolver.smithyTypesNamespace(shape), context.symbolProvider().toSymbol(shape).getName(), SmithyNameResolver.smithyTypesNamespace(shape), context.symbolProvider().toSymbol(shape).getName(), dataSource, dataSource, DafnyNameResolver.getDafnyType(shape.toShapeId(), context.symbolProvider().toSymbol(shape)), DafnyNameResolver.getDafnyCompanionStructType(shape.toShapeId(), context.symbolProvider().toSymbol(shape)),
+                  DafnyNameResolver.getDafnyType(shape.toShapeId(), context.symbolProvider().toSymbol(shape)));
         }
         var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? "uint8" : "dafny.Char";
         return """
