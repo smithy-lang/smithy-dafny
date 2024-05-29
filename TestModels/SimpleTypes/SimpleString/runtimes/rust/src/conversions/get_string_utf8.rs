@@ -9,7 +9,7 @@ pub fn to_dafny_error(
 {
     match value {
     crate::operation::get_string_utf8::GetStringUTF8Error::Unhandled(unhandled) =>
-      ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj: Box::into_raw(Box::new(unhandled) as Box<dyn Any>) })
+      ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
   }
 }
 
