@@ -542,6 +542,7 @@ public class CodegenEngine {
             null : DotNetNameResolver.typeConverterForShape(serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(), TypeConversionDirection.FROM_DAFNY);
     final String namespace = serviceShape.getId().getNamespace();
     final String dotnetNamespace = resolver.namespaceForService();
+    final String dafnyNamespace = DafnyNameResolverHelpers.packageNameForNamespace(namespace);
     final String namespaceDir = namespace.replace(".", "/");
 
     final Path includeDafnyFile =
@@ -562,14 +563,13 @@ public class CodegenEngine {
     parameters.put("serviceConfig",     serviceConfig);
     parameters.put("configConversionMethod", configConversionMethod);
     parameters.put("namespace",         dotnetNamespace);
-    parameters.put("dafnyNamespace",    namespace);
+    parameters.put("dafnyNamespace",    dafnyNamespace);
     parameters.put("namespaceDir",      namespaceDir);
     parameters.put("stdLibPath",        stdLibPath.toString());
 
     if (awsSdkStyle) {
       IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/$forSDK:L$service:L.csproj", parameters);
       IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/Extern/$service:LClient.cs", parameters);
-
     } else {
       IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/$forLocalService:L$service:L.csproj", parameters);
       if (localServiceTest) {
