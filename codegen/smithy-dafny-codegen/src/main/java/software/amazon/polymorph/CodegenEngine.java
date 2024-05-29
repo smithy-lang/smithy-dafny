@@ -9,6 +9,7 @@ import com.google.common.collect.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
@@ -26,6 +27,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -238,6 +240,10 @@ public class CodegenEngine {
     final String service = awsSdkStyle ?
             serviceShape.expectTrait(ServiceTrait.class).getSdkId() : serviceShape.getId().getName();
     final String namespace = serviceShape.getId().getNamespace();
+    final String dafnyNamespace = DafnyNameResolverHelpers.packageNameForNamespace(
+            serviceShape.getId().getNamespace()
+    );
+    final String dafnyTypesModuleName = DafnyNameResolver.dafnyTypesModuleName(namespace);
 
     final Path includeDafnyFile =
             this.includeDafnyFile.orElseThrow(() ->
@@ -256,6 +262,8 @@ public class CodegenEngine {
     parameters.put("service",           service);
     parameters.put("serviceConfig",     serviceConfig);
     parameters.put("namespace",         namespace);
+    parameters.put("dafnyNamespace",    dafnyNamespace);
+    parameters.put("dafnyTypesModuleName",   dafnyTypesModuleName);
     parameters.put("stdLibPath",        stdLibPath.toString());
 
     if (awsSdkStyle) {

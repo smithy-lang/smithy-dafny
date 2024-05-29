@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/ComAmazonawsLakeformationTypes.dfy"
 
-module {:options "--function-syntax:4"}{:extern ".LakeFormation"} Com.Amazonaws.LakeFormation refines AbstractComAmazonawsLakeformationService {
+module {:options "--function-syntax:4"}{:extern "software.amazon.cryptography.services.lakeformation.internaldafny"} Com.Amazonaws.LakeFormation refines AbstractComAmazonawsLakeformationService {
 
   function DefaultLakeFormationClientConfigType() : LakeFormationClientConfigType {
     LakeFormationClientConfigType
