@@ -439,7 +439,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         if (shape.hasTrait(EnumTrait.class)) {
             String name = getDefaultShapeName(shape);
             return symbolBuilderFor(shape, name, typesPackageName)
-                    .definitionFile("./types/enums.go")
+                    .definitionFile("./ImplementationFromDafny-go/src/types/enums.go")
                     .build();
         }
 
@@ -511,7 +511,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol intEnumShape(IntEnumShape shape) {
         String name = getDefaultShapeName(shape);
         return symbolBuilderFor(shape, name, typesPackageName)
-                .definitionFile("./types/enums.go")
+                .definitionFile("./ImplementationFromDafny-go/src/types/enums.go")
                 .build();
     }
 }
