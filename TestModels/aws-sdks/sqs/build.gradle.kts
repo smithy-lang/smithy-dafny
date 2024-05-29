@@ -30,13 +30,18 @@ tasks["jar"].enabled = false
 tasks.register("polymorphDafny") {
     dependsOn("build")
     doLast {
-        // specify a projection to use instead
-        // val projectionName = "permissions-only"
+        // if needed, specify a projection to use instead
         // default (no projection) is "source"
         val projectionName = "source"
         copy {
             from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/Model/"))
             into("model")
+        }
+        exec {
+            // need to adjust the relative import, since we're copying it away
+            // the commandLine method does not play nice with sed,
+            // so we have to execute it through bash :(
+            commandLine("bash", "-c", "sed '4s|../../../../../../../../dafny-dependencies/StandardLibrary/src/Index.dfy|../../../dafny-dependencies/StandardLibrary/src/Index.dfy|' model/ComAmazonawsSqsTypes.dfy > model/tmp && mv model/tmp model/ComAmazonawsSqsTypes.dfy")
         }
     }
 }
@@ -44,8 +49,7 @@ tasks.register("polymorphDafny") {
 tasks.register("polymorphDotnet") {
     dependsOn("build")
     doLast {
-        // specify a projection to use instead
-        // val projectionName = "permissions-only"
+        // if needed, specify a projection to use instead
         // default (no projection) is "source"
         val projectionName = "source"
         copy {
