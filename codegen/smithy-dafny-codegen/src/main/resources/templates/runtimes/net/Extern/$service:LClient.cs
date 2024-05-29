@@ -7,7 +7,7 @@ using Amazon.Runtime;
 using $namespace:L;
 
 // This extern is identified in Dafny code
-// that refines the AWS SDK DDB Model
+// that refines the AWS SDK Model
 namespace $dafnyNamespace:L.internaldafny
 {
   public partial class __default
