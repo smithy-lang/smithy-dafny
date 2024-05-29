@@ -513,6 +513,16 @@ public class GoWriter extends SymbolWriter<GoWriter, ImportDeclarations> {
         return this;
     }
 
+    public GoWriter addImportFromModule(String moduleName, String packageName, String as) {
+        imports.addImport(moduleName.concat("/").concat(packageName), as);
+        return this;
+    }
+
+    public GoWriter addImportFromModule(String moduleName, String packageName) {
+        imports.addImport(moduleName.concat("/").concat(packageName), "");
+        return this;
+    }
+
     public GoWriter addImport(String packageName) {
         imports.addImport(packageName, "");
         return this;

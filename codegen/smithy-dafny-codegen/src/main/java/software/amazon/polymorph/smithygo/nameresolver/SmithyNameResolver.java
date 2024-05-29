@@ -3,7 +3,6 @@ package software.amazon.polymorph.smithygo.nameresolver;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ToShapeId;
 
 import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
@@ -54,7 +53,7 @@ public class SmithyNameResolver {
         return getFromDafnyMethodName(serviceShape, shapeId, "_Input");
     }
 
-    public static String withNamespace(final Shape shape, final String shapeName) {
-        return shapeNamespace(shape).concat(DOT).concat(shapeName);
+    public static String withTypeConversionNamespace(final Shape shape, final String shapeName) {
+        return smithyTypeConversionNamespace(shape).concat(DOT).concat(shapeName);
     }
 }

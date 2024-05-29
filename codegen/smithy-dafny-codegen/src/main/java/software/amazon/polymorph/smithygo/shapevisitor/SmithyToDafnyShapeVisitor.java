@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
+import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
@@ -93,7 +94,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String blobShape(BlobShape shape) {
-        writer.addImport("dafny");
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         String nilWrapIfRequired = "nil";
         String someWrapIfRequired = "%s";
         String returnType = "dafny.Sequence";
@@ -119,19 +120,19 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             return referenceStructureShape(shape);
         }
         final var builder = new StringBuilder();
-        writer.addImport("Wrappers");
-        writer.addImport(DafnyNameResolver.dafnyTypesNamespace(shape.toShapeId()));
+        writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
+        writer.addImportFromModule(context.settings().getModuleName(), DafnyNameResolver.dafnyTypesNamespace(shape));
 
         String someWrapIfRequired = "%s";
 
         String companionStruct;
         String returnType;
         if (shape.hasTrait(ErrorTrait.class)) {
-            companionStruct = DafnyNameResolver.getDafnyErrorCompanionCreate(shape.toShapeId(), context.symbolProvider().toSymbol(shape));
-            returnType = DafnyNameResolver.getDafnyBaseErrorType(shape.toShapeId());
+            companionStruct = DafnyNameResolver.getDafnyErrorCompanionCreate(shape, context.symbolProvider().toSymbol(shape));
+            returnType = DafnyNameResolver.getDafnyBaseErrorType(shape);
         } else {
-            companionStruct = DafnyNameResolver.getDafnyCompanionTypeCreate(shape.toShapeId(), context.symbolProvider().toSymbol(shape));
-            returnType = DafnyNameResolver.getDafnyType(shape.toShapeId(), context.symbolProvider().toSymbol(shape));
+            companionStruct = DafnyNameResolver.getDafnyCompanionTypeCreate(shape, context.symbolProvider().toSymbol(shape));
+            returnType = DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape));
         }
         String nilWrapIfRequired = returnType.concat("{}");
 
@@ -174,7 +175,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     public String mapShape(MapShape shape) {
         StringBuilder builder = new StringBuilder();
 
-        writer.addImport("dafny");
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
 
         MemberShape keyMemberShape = shape.getKey();
         final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
@@ -212,7 +213,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String listShape(ListShape shape) {
-        writer.addImport("dafny");
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
 
         StringBuilder builder = new StringBuilder();
 
@@ -272,11 +273,11 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String stringShape(StringShape shape) {
-        writer.addImport("dafny");
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         if (shape.hasTrait(EnumTrait.class)) {
             String nilWrapIfRequired = "nil";
             String someWrapIfRequired = "%s";
-            String returnType = DafnyNameResolver.getDafnyType(shape.toShapeId(), context.symbolProvider().toSymbol(shape));
+            String returnType = DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape));
             if (this.isOptional) {
                 nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
                 someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
@@ -307,7 +308,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 			}
 		}
 		return %s
-	}()""".formatted(returnType, nilCheck, dataSource, dereferenceIfRequired, dataSource, DafnyNameResolver.getDafnyCompanionStructType(shape.toShapeId(), context.symbolProvider().toSymbol(shape)), someWrapIfRequired.formatted("enum"));
+	}()""".formatted(returnType, nilCheck, dataSource, dereferenceIfRequired, dataSource, DafnyNameResolver.getDafnyCompanionStructType(shape, context.symbolProvider().toSymbol(shape)), someWrapIfRequired.formatted("enum"));
         } else {
             String nilWrapIfRequired = "nil";
             String someWrapIfRequired = "%s";
@@ -324,7 +325,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
             }
 
-            if(shape.hasTrait(DafnyUtf8BytesTrait.class)) writer.addImport("unicode/utf8");
+            if(shape.hasTrait(DafnyUtf8BytesTrait.class)) writer.addUseImports(SmithyGoDependency.stdlib("unicode/utf8"));
 
             var underlyingType =  shape.hasTrait(DafnyUtf8BytesTrait.class) ? """
                 dafny.SeqOf(func () []interface{} {
@@ -335,8 +336,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                     f[i] = v
                 }
                 return f
-            }()...)
-            """.formatted(dereferenceIfRequired, dataSource, dereferenceIfRequired, dataSource) : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(dereferenceIfRequired, dataSource);
+            }()...)""".formatted(dereferenceIfRequired, dataSource, dereferenceIfRequired, dataSource) : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(dereferenceIfRequired, dataSource);
 
             return """
                     func () %s {
@@ -397,9 +397,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        writer.addImport("dafny");
-        writer.addImport("encoding/binary");
-        writer.addImport("math");
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+        writer.addUseImports(SmithyGoDependency.stdlib("encoding.binary"));
+        writer.addUseImports(SmithyGoDependency.MATH);
 
         String nilWrapIfRequired = "nil";
         String someWrapIfRequired = "%s";

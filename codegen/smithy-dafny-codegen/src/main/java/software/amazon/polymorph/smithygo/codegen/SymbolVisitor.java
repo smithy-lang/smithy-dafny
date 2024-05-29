@@ -90,8 +90,8 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public SymbolVisitor(Model model, GoSettings settings) {
         this.model = model;
         this.settings = settings;
-        this.rootModuleName = settings.getModuleName().replace(DOT, BLANK).toLowerCase();
-        this.typesPackageName = this.rootModuleName + "/types";
+        this.rootModuleName = SmithyNameResolver.shapeNamespace(settings.getService(model));
+        this.typesPackageName = this.rootModuleName + "/" + SmithyNameResolver.smithyTypesNamespace(settings.getService(model));
         this.pointableIndex = GoPointableIndex.of(model);
 
         // Reserve the generated names for union members, including the unknown case.
