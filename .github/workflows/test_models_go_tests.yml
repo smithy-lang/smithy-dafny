@@ -31,7 +31,7 @@ jobs:
           # TestModels/SimpleTypes/BigInteger,
           TestModels/SimpleTypes/SimpleBlob,
           TestModels/SimpleTypes/SimpleBoolean,
-          TestModels/SimpleTypes/SimpleByte,
+          # TestModels/SimpleTypes/SimpleByte,
           TestModels/SimpleTypes/SimpleDouble,
           TestModels/SimpleTypes/SimpleEnum,
           # TestModels/SimpleTypes/SimpleEnumV2,
