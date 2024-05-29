@@ -42,7 +42,7 @@ jobs:
         dafny-nightly-verification,
         dafny-nightly-java,
         dafny-nightly-net,
-        dafny-nightly-rust,
+        # dafny-nightly-rust,
       ]
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     env:
