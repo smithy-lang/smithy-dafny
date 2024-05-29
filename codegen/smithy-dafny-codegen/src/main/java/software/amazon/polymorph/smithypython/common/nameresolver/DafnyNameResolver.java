@@ -3,22 +3,15 @@
 
 package software.amazon.polymorph.smithypython.common.nameresolver;
 
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
@@ -234,8 +227,7 @@ public class DafnyNameResolver {
   public static void importDafnyTypeForShape(
       PythonWriter writer, ShapeId shapeId, GenerationContext context) {
 
-    if ("smithy.api".equals(shapeId.getNamespace())
-      && "Unit".equals(shapeId.getName())) {
+    if (Utils.isUnitShape(shapeId)) {
       // No corresponding Dafny type for unit. Dafny uses "None", which does not need to be imported
       return;
     }
@@ -249,12 +241,10 @@ public class DafnyNameResolver {
       // dependencies
       writer.addStdlibImport(getDafnyGeneratedPathForSmithyNamespace(shapeId.getNamespace()) + ".module_");
       String name = shapeId.getName();
-      if (!Utils.isUnitShape(shapeId)) {
-        writer.addStdlibImport(
-            getDafnyPythonTypesModuleNameForShape(shapeId, context),
-            name.replace("_", "__") + "_" + name.replace("_", "__"),
-            getDafnyTypeForShape(shapeId));
-      }
+      writer.addStdlibImport(
+          getDafnyPythonTypesModuleNameForShape(shapeId, context),
+          name.replace("_", "__") + "_" + name.replace("_", "__"),
+          getDafnyTypeForShape(shapeId));
     }
   }
 

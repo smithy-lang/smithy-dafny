@@ -8,13 +8,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import software.amazon.awssdk.utils.StringUtils;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenContext;
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -264,11 +262,8 @@ public class SmithyNameResolver {
    */
   public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(
       String smithyNamespace, GenerationContext codegenContext) {
-    System.out.println("namespace " + smithyNamespace);
-    String a = getPythonModuleSmithygeneratedPathForSmithyNamespace(
+    return getPythonModuleSmithygeneratedPathForSmithyNamespace(
         smithyNamespace, codegenContext.settings());
-    System.out.println("a " + a);
-    return a;
   }
 
   /**
