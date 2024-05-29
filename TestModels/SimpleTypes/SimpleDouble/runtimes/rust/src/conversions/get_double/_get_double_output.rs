@@ -28,8 +28,7 @@ pub fn from_dafny(
         dafny_value.value().as_ref(),
         ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
-        let my_rc_vec : ::std::rc::Rc<Vec<u8>> = dafny_value.value().Extract().to_array();
-        let my_vec : Vec<u8> = (*my_rc_vec).clone();
+        let my_vec = dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&dafny_value.value().Extract(), |x| *x);
         Some(f64::from_be_bytes(my_vec.try_into().expect("Error converting Sequence to f64")))
     } else if matches!(
         dafny_value.value().as_ref(),
