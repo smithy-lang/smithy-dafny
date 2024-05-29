@@ -114,7 +114,8 @@ public class CodegenCli {
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
       .withLocalServiceTest(cliArguments.localServiceTest)
       .withDafnyVersion(cliArguments.dafnyVersion)
-      .withUpdatePatchFiles(cliArguments.updatePatchFiles);
+      .withUpdatePatchFiles(cliArguments.updatePatchFiles)
+      .withGenerateEverything(cliArguments.generateEverything);
     cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
     cliArguments.javaAwsSdkVersion.ifPresent(
       engineBuilder::withJavaAwsSdkVersion
@@ -123,8 +124,6 @@ public class CodegenCli {
       engineBuilder::withIncludeDafnyFile
     );
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
-    // TODO
-    engineBuilder.withGenerateEverything(true);
     final CodegenEngine engine = engineBuilder.build();
     engine.run();
   }
@@ -277,6 +276,15 @@ public class CodegenCli {
             "<optional> update patch files in <patch-files-dir> instead of applying them"
           )
           .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("generate-everything")
+          .desc(
+                  "<optional> generate complete projects, include project files and other auxillary code files"
+          )
+          .build()
       );
   }
 
@@ -301,7 +309,8 @@ public class CodegenCli {
     boolean awsSdkStyle,
     boolean localServiceTest,
     Optional<Path> patchFilesDir,
-    boolean updatePatchFiles
+    boolean updatePatchFiles,
+    boolean generateEverything
   ) {
     /**
      * @param args arguments to parse
@@ -397,6 +406,10 @@ public class CodegenCli {
         "update-patch-files"
       );
 
+      final boolean generateEverything = commandLine.hasOption(
+        "generate-everything"
+      );
+
       return Optional.of(
         new CliArguments(
           libraryRoot,
@@ -415,7 +428,8 @@ public class CodegenCli {
           awsSdkStyle,
           localServiceTest,
           patchFilesDir,
-          updatePatchFiles
+          updatePatchFiles,
+          generateEverything
         )
       );
     }
