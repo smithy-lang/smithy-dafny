@@ -1,7 +1,7 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
 pub use dafny_standard_library::implementation_from_dafny::*;
-    
+
 pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
     #[derive(PartialEq, Clone)]
     pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
@@ -108,7 +108,10 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
     }
 
     impl GetDoubleInput {
-        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
+        pub fn value(
+            &self,
+        ) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>
+        {
             match self {
                 GetDoubleInput::GetDoubleInput { value } => value,
             }
@@ -139,7 +142,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
     }
 
     impl Eq for GetDoubleInput {}
-/*
+
     impl ::std::hash::Hash for GetDoubleInput {
         fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
             match self {
@@ -147,7 +150,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
             }
         }
     }
-*/
+
     impl ::std::default::Default for GetDoubleInput {
         fn default() -> GetDoubleInput {
             GetDoubleInput::GetDoubleInput {
@@ -170,7 +173,10 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
     }
 
     impl GetDoubleOutput {
-        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
+        pub fn value(
+            &self,
+        ) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>
+        {
             match self {
                 GetDoubleOutput::GetDoubleOutput { value } => value,
             }
@@ -201,7 +207,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
     }
 
     impl Eq for GetDoubleOutput {}
-/*
+
     impl ::std::hash::Hash for GetDoubleOutput {
         fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
             match self {
@@ -209,7 +215,7 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
             }
         }
     }
-*/
+
     impl ::std::default::Default for GetDoubleOutput {
         fn default() -> GetDoubleOutput {
             GetDoubleOutput::GetDoubleOutput {
@@ -284,19 +290,6 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
 
     pub trait ISimpleTypesDoubleClient {
         fn GetDouble(
-            &mut self,
-            input: &::std::rc::Rc<
-                super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
-            >,
-        ) -> ::std::rc::Rc<
-            super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<
-                    super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
-                >,
-                ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>,
-            >,
-        >;
-        fn GetDoubleKnownValueTest(
             &mut self,
             input: &::std::rc::Rc<
                 super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
@@ -417,15 +410,20 @@ pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes {
     pub type OpaqueError =
         ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>;
 }
-pub mod r#_SimpleDoubleImpl_Compile {
+pub mod r#_SimpleSmithyDoubleOperations_Compile {
     pub struct _default {}
 
     impl _default {
         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
             ::dafny_runtime::allocate_rcmut::<Self>()
         }
+        pub fn r#_ValidInternalConfig_q(
+            config: &::std::rc::Rc<super::r#_SimpleSmithyDoubleOperations_Compile::Config>,
+        ) -> bool {
+            true
+        }
         pub fn GetDouble(
-            config: &::std::rc::Rc<super::r#_SimpleDoubleImpl_Compile::Config>,
+            config: &::std::rc::Rc<super::r#_SimpleSmithyDoubleOperations_Compile::Config>,
             input: &::std::rc::Rc<
                 super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
             >,
@@ -444,89 +442,35 @@ pub mod r#_SimpleDoubleImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(input.value().value());
-            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
-            value: input.value().clone()
-          });
-            res = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
-            value: input.value().clone()
-          });
-            if !matches!(
-                res.value().as_ref(),
-                super::r#_Wrappers_Compile::Option::Some { .. }
-            ) {
+            let mut check: bool = <bool as std::default::Default>::default();
+            let mut _out0: bool = <bool as std::default::Default>::default();
+            _out0 = super::r#_SimpleSmithyDoubleOperations_Compile::_default::ValidateDoubleType(
+                input.value().value(),
+            );
+            check = _out0;
+            if !check {
                 panic!("Halt")
             };
-            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(res.value().value());
-            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
-                super::r#_Wrappers_Compile::Result::<
-                    ::std::rc::Rc<
-                        super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
-                    >,
-                    ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>,
-                >::Success {
-                    value: res.clone(),
-                },
-            ));
+            let mut result: ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
+            value: input.value().clone()
+          });
+            result = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
+            value: input.value().clone()
+          });
+            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>>::Success {
+              value: result.clone()
+            }));
             return output.read();
             return output.read();
         }
-        pub fn GetDoubleKnownValueTest(
-            config: &::std::rc::Rc<super::r#_SimpleDoubleImpl_Compile::Config>,
-            input: &::std::rc::Rc<
-                super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
-            >,
-        ) -> ::std::rc::Rc<
-            super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<
-                    super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
-                >,
-                ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>,
-            >,
-        > {
-            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>>>>::new();
-            if !matches!(
-                input.value().as_ref(),
-                super::r#_Wrappers_Compile::Option::Some { .. }
-            ) {
-                panic!("Halt")
-            };
-            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(input.value().value());
-	    let known_value : Vec<u8> = vec![0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7];
-            if !(input.value().value() == &::dafny_runtime::Sequence::from_array(&known_value)) {
-                panic!("Halt")
-            };
-            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
-            value: input.value().clone()
-          });
-            res = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
-            value: input.value().clone()
-          });
-            if !matches!(
-                res.value().as_ref(),
-                super::r#_Wrappers_Compile::Option::Some { .. }
-            ) {
-                panic!("Halt")
-            };
-            super::r#_SimpleDoubleImpl_Compile::_default::ValidateDoubleType(res.value().value());
-            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
-                super::r#_Wrappers_Compile::Result::<
-                    ::std::rc::Rc<
-                        super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
-                    >,
-                    ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>,
-                >::Success {
-                    value: res.clone(),
-                },
-            ));
-            return output.read();
-            return output.read();
+        pub fn ValidateDoubleType(input: &::dafny_runtime::Sequence<u8>) -> bool {
+            let mut output: bool = <bool as std::default::Default>::default();
+            output = input.cardinality() == ::dafny_runtime::int!(8);
+            return output;
+            return output;
         }
-        pub fn ValidateDoubleType(input: &::dafny_runtime::Sequence<u8>) -> () {
-	    return;
-
-	}
     }
+
     #[derive(PartialEq, Clone)]
     pub enum Config {
         Config {},
@@ -548,7 +492,10 @@ pub mod r#_SimpleDoubleImpl_Compile {
         ) -> std::fmt::Result {
             match self {
                 Config::Config {} => {
-                    write!(_formatter, "r#_SimpleDoubleImpl_Compile.Config.Config")?;
+                    write!(
+                        _formatter,
+                        "r#_SimpleSmithyDoubleOperations_Compile.Config.Config"
+                    )?;
                     Ok(())
                 }
             }
@@ -577,7 +524,7 @@ pub mod r#_SimpleDoubleImpl_Compile {
         }
     }
 }
-pub mod r#_simple_dtypes_ddouble_dinternaldafny {
+pub mod r#_simple_dtypes_dsmithydouble_dinternaldafny {
     pub struct _default {}
 
     impl _default {
@@ -596,40 +543,33 @@ pub mod r#_simple_dtypes_ddouble_dinternaldafny {
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::dafny_runtime::Object<
-                    super::r#_simple_dtypes_ddouble_dinternaldafny::SimpleDoubleClient,
+                    super::r#_simple_dtypes_dsmithydouble_dinternaldafny::SimpleDoubleClient,
                 >,
                 ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>,
             >,
         > {
-            let mut res = ::dafny_runtime::MaybePlacebo::<
-                ::std::rc::Rc<
-                    super::r#_Wrappers_Compile::Result<
-                        ::dafny_runtime::Object<
-                            super::r#_simple_dtypes_ddouble_dinternaldafny::SimpleDoubleClient,
-                        >,
-                        ::std::rc::Rc<
-                            super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error,
-                        >,
-                    >,
-                >,
-            >::new();
+            let mut res = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<super::r#_simple_dtypes_dsmithydouble_dinternaldafny::SimpleDoubleClient>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>>>>::new();
             let mut client = ::dafny_runtime::MaybePlacebo::<
                 ::dafny_runtime::Object<
-                    super::r#_simple_dtypes_ddouble_dinternaldafny::SimpleDoubleClient,
+                    super::r#_simple_dtypes_dsmithydouble_dinternaldafny::SimpleDoubleClient,
                 >,
             >::new();
-            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_ddouble_dinternaldafny::SimpleDoubleClient> = super::r#_simple_dtypes_ddouble_dinternaldafny::SimpleDoubleClient::_allocate_rcmut();
-            super::r#_simple_dtypes_ddouble_dinternaldafny::SimpleDoubleClient::_ctor(
+            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_dsmithydouble_dinternaldafny::SimpleDoubleClient> = super::r#_simple_dtypes_dsmithydouble_dinternaldafny::SimpleDoubleClient::_allocate_rcmut();
+            super::r#_simple_dtypes_dsmithydouble_dinternaldafny::SimpleDoubleClient::_ctor(
                 &_nw0,
-                &::std::rc::Rc::new(super::r#_SimpleDoubleImpl_Compile::Config::Config {}),
+                &::std::rc::Rc::new(
+                    super::r#_SimpleSmithyDoubleOperations_Compile::Config::Config {},
+                ),
             );
             client = ::dafny_runtime::MaybePlacebo::from(_nw0.clone());
             res = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
                     ::dafny_runtime::Object<
-                        super::r#_simple_dtypes_ddouble_dinternaldafny::SimpleDoubleClient,
+                        super::r#_simple_dtypes_dsmithydouble_dinternaldafny::SimpleDoubleClient,
                     >,
-                    ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>,
+                    ::std::rc::Rc<
+                        super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error,
+                    >,
                 >::Success {
                     value: client.read(),
                 },
@@ -650,7 +590,7 @@ pub mod r#_simple_dtypes_ddouble_dinternaldafny {
     }
 
     pub struct SimpleDoubleClient {
-        pub r#__i_config: ::std::rc::Rc<super::r#_SimpleDoubleImpl_Compile::Config>,
+        pub r#__i_config: ::std::rc::Rc<super::r#_SimpleSmithyDoubleOperations_Compile::Config>,
     }
 
     impl SimpleDoubleClient {
@@ -659,7 +599,7 @@ pub mod r#_simple_dtypes_ddouble_dinternaldafny {
         }
         pub fn _ctor(
             this: &::dafny_runtime::Object<Self>,
-            config: &::std::rc::Rc<super::r#_SimpleDoubleImpl_Compile::Config>,
+            config: &::std::rc::Rc<super::r#_SimpleSmithyDoubleOperations_Compile::Config>,
         ) -> () {
             let mut _set__i_config: bool = false;
             ::dafny_runtime::update_field_uninit_rcmut!(
@@ -670,13 +610,15 @@ pub mod r#_simple_dtypes_ddouble_dinternaldafny {
             );
             return ();
         }
-        pub fn config(&self) -> ::std::rc::Rc<super::r#_SimpleDoubleImpl_Compile::Config> {
+        pub fn config(
+            &self,
+        ) -> ::std::rc::Rc<super::r#_SimpleSmithyDoubleOperations_Compile::Config> {
             self.r#__i_config.clone()
         }
     }
 
     impl super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::ISimpleTypesDoubleClient
-        for super::r#_simple_dtypes_ddouble_dinternaldafny::SimpleDoubleClient
+        for super::r#_simple_dtypes_dsmithydouble_dinternaldafny::SimpleDoubleClient
     {
         fn GetDouble(
             &mut self,
@@ -692,30 +634,9 @@ pub mod r#_simple_dtypes_ddouble_dinternaldafny {
             >,
         > {
             let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>>>>::new();
-            let mut _out0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>>>>::new();
-            _out0 = ::dafny_runtime::MaybePlacebo::from(
-                super::r#_SimpleDoubleImpl_Compile::_default::GetDouble(&self.config(), input),
-            );
-            output = ::dafny_runtime::MaybePlacebo::from(_out0.read());
-            return output.read();
-        }
-        fn GetDoubleKnownValueTest(
-            &mut self,
-            input: &::std::rc::Rc<
-                super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
-            >,
-        ) -> ::std::rc::Rc<
-            super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<
-                    super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
-                >,
-                ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>,
-            >,
-        > {
-            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>>>>::new();
             let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>>>>::new();
             _out1 = ::dafny_runtime::MaybePlacebo::from(
-                super::r#_SimpleDoubleImpl_Compile::_default::GetDoubleKnownValueTest(
+                super::r#_SimpleSmithyDoubleOperations_Compile::_default::GetDouble(
                     &self.config(),
                     input,
                 ),

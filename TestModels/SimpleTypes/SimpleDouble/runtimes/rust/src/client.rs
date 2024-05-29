@@ -20,9 +20,9 @@ impl Client {
         // If this service had any configuration properties,
         // they would need converting here too.
         let inner_config = ::std::rc::Rc::new(
-            ::simple_double_dafny::_simple_dtypes_ddouble_dinternaldafny::_default::DefaultSimpleDoubleConfig());
+            ::simple_double_dafny::_simple_dtypes_dsmithydouble_dinternaldafny::_default::DefaultSimpleDoubleConfig());
         let inner =
-            ::simple_double_dafny::_simple_dtypes_ddouble_dinternaldafny::_default::SimpleDouble(
+            ::simple_double_dafny::_simple_dtypes_dsmithydouble_dinternaldafny::_default::SimpleDouble(
                 &inner_config,
             );
         if matches!(

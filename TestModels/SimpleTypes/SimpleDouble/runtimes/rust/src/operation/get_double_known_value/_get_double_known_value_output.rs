@@ -4,19 +4,18 @@
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetDoubleKnownValueOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+    pub value: ::std::option::Option<f64>,
 }
-
 impl GetDoubleKnownValueOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
-        self.value.as_ref()
+    pub fn value(&self) -> ::std::option::Option<f64> {
+        self.value
     }
 }
-
 impl GetDoubleKnownValueOutput {
     /// Creates a new builder-style object to manufacture [`GetDoubleKnownValueOutput`](crate::operation::operation::GetDoubleKnownValueOutput).
-    pub fn builder() -> crate::operation::get_double_known_value::builders::GetDoubleKnownValueOutputBuilder {
+    pub fn builder(
+    ) -> crate::operation::get_double_known_value::builders::GetDoubleKnownValueOutputBuilder {
         crate::operation::get_double_known_value::builders::GetDoubleKnownValueOutputBuilder::default()
     }
 }
@@ -27,32 +26,29 @@ impl GetDoubleKnownValueOutput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetDoubleKnownValueOutputBuilder {
-    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+    pub(crate) value: ::std::option::Option<f64>,
 }
 impl GetDoubleKnownValueOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(
         mut self,
-        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
+        input: impl ::std::convert::Into<f64>,
     ) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
     }
-
     #[allow(missing_docs)] // documentation missing in model
     pub fn set_value(
         mut self,
-        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+        input: ::std::option::Option<f64>,
     ) -> Self {
         self.value = input;
         self
     }
-
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
-        self.value.as_ref()
+    pub fn get_value(&self) -> &::std::option::Option<f64> {
+        &self.value
     }
-
     /// Consumes the builder and constructs a [`GetDoubleKnownValueOutput`](crate::operation::operation::GetDoubleKnownValueOutput).
     pub fn build(
         self,

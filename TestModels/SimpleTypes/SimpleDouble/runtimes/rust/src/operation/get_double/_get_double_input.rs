@@ -4,11 +4,11 @@
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetDoubleInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+    pub value: ::std::option::Option<f64>,
 }
 impl GetDoubleInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
+    pub fn message(&self) -> ::std::option::Option<&f64> {
         self.value.as_ref()
     }
 }
@@ -25,13 +25,13 @@ impl GetDoubleInput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetDoubleInputBuilder {
-    pub(crate) value: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+    pub(crate) value: ::std::option::Option<f64>,
 }
 impl GetDoubleInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(
         mut self,
-        input: impl ::std::convert::Into<::std::vec::Vec<::std::primitive::u8>>,
+        input: impl ::std::convert::Into<f64>,
     ) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
@@ -39,14 +39,14 @@ impl GetDoubleInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn set_value(
         mut self,
-        input: ::std::option::Option<::std::vec::Vec<::std::primitive::u8>>,
+        input: ::std::option::Option<f64>,
     ) -> Self {
         self.value = input;
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
-        self.value.as_ref()
+    pub fn get_value(&self) -> &::std::option::Option<f64> {
+        &self.value
     }
     /// Consumes the builder and constructs a [`GetDoubleInput`](crate::operation::operation::GetDoubleInput).
     pub fn build(

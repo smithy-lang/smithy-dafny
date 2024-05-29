@@ -6,8 +6,10 @@ pub fn to_dafny(
     ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
 > {
     let dafny_value = match value.value {
-        Some(b) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
-            value: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&b, |e| *e),
+        Some(v) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
+            value : ::dafny_runtime::Sequence::ArraySequence {
+                values: std::rc::Rc::new(f64::to_be_bytes(v).to_vec())
+            }
         },
         None => ::simple_double_dafny::_Wrappers_Compile::Option::None {},
     };
@@ -26,12 +28,9 @@ pub fn from_dafny(
         dafny_value.value().as_ref(),
         ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
-        Some(
-            dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
-                &dafny_value.value().Extract(),
-                |e| *e,
-            ),
-        )
+        let my_rc_vec : ::std::rc::Rc<Vec<u8>> = dafny_value.value().Extract().to_array();
+        let my_vec : Vec<u8> = (*my_rc_vec).clone();
+        Some(f64::from_be_bytes(my_vec.try_into().expect("foo")))
     } else if matches!(
         dafny_value.value().as_ref(),
         ::simple_double_dafny::_Wrappers_Compile::Option::None { .. }
