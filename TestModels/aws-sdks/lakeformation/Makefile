@@ -10,9 +10,9 @@ NAMESPACE=com.amazonaws.lakeformation
 PROJECT_SERVICES := \
 	ComAmazonawsLakeformation\
 
-SERVICE_NAMESPACE_ComAmazonawsKms=com.amazonaws.kms
+SERVICE_NAMESPACE_ComAmazonawsLakeformation=com.amazonaws.lakeformation
 
-SERVICE_DEPS_ComAmazonawsKms :=
+SERVICE_DEPS_ComAmazonawsLakeformation :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
