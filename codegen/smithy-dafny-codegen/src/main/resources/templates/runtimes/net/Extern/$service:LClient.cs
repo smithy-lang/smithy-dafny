@@ -8,7 +8,7 @@ using $namespace:L;
 
 // This extern is identified in Dafny code
 // that refines the AWS SDK Model
-namespace $dafnyNamespace:L.internaldafny
+namespace $dafnyNamespace:L
 {
   public partial class __default
   {

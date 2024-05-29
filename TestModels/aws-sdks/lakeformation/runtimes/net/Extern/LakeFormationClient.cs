@@ -8,7 +8,7 @@ using Com.Amazonaws.Lakeformation;
 
 // This extern is identified in Dafny code
 // that refines the AWS SDK Model
-namespace software.amazon.cryptography.services.lakeformation.internaldafny.internaldafny
+namespace software.amazon.cryptography.services.lakeformation.internaldafny
 {
     public partial class __default
     {
