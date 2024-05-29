@@ -18,6 +18,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
+
+import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
@@ -34,6 +36,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 
 /**
  * Provides a consistent mapping between names of
@@ -158,9 +161,16 @@ public class Native extends NameResolver {
         );
         yield shape.hasTrait(BoxTrait.class) ? typeName.box() : typeName;
       }
+      case BLOB -> {
+        if (shape.hasTrait(StreamingTrait.class)) {
+          // TODO: Need to know whether this is input or output somehow
+          yield ClassName.get(AsyncRequestBody.class);
+        } else {
+          yield NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
+        }
+      }
       // For supported simple shapes, just map to native types
-      case BLOB,
-        TIMESTAMP,
+      case TIMESTAMP,
         BIG_DECIMAL,
         BIG_INTEGER -> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
       case STRING, ENUM -> classForStringOrEnum(shape);
