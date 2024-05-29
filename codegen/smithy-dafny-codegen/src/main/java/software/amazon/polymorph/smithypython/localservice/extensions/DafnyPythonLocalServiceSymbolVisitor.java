@@ -152,20 +152,6 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
               + ".py")
       .putProperty("stdlib", true)
       .build();
-
-//    return createSymbolBuilder(
-//            resourceShape,
-//            name,
-//            getSymbolNamespacePathForNamespaceAndFilename(
-//                resourceShape.getId().getNamespace(), filename))
-//        .definitionFile(
-//            generationPath
-//                + "/"
-//                + DafnyLocalServiceCodegenConstants
-//                    .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
-//                + ".py")
-//        .putProperty("stdlib", true)
-//        .build();
   }
 
   /**
@@ -226,16 +212,6 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
                               + ".py")
               .putProperty("stdlib", true)
               .build();
-//      return memberShape(memberShape);
-//      Shape referentShape = model.expectShape(referentShapeId);
-//      if (referentShape.isResourceShape()) {
-//        return resourceShape(referentShape.asResourceShape().get());
-//      }
-//      if (referentShape.isServiceShape()) {
-//        return serviceShape(referentShape.asServiceShape().get());
-//      } else {
-//        throw new IllegalArgumentException("Referent shape is not of a supported type: " + shape);
-//      }
     }
 
     if (shape.hasTrait(ReferenceTrait.class)) {

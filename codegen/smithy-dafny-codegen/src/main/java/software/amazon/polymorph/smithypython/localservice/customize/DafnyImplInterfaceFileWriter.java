@@ -15,12 +15,12 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
  * Creates a dafnyImplInterface.py file containing a DafnyImplInterface class. This provides a
- * static (meaning "unchanging") interface for the Smithy-Python-generated client.py request handler
+ * static (here, "unchanging") interface for the Smithy-Python-generated client.py request handler
  * to interact with.
  *
- * <p>(We do this because we cannot extensively customize this part of client.py code generation.
- * Instead, we plug this interface into the part we can customize, and do the rest of the
- * customization in a file we control (this file).)
+ * <p>(We do this because we cannot extensively customize this part of client.py code generation via
+ * the plugin system. Instead, we plug this interface into the part we can customize, and do the
+ * rest of the customization in a file we control (this file).)
  */
 public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
 

@@ -7,8 +7,8 @@ import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
-import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -330,8 +330,6 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
                                   "dafny_to_smithy"
                           )
                   )
-//                  dataSourceInsideConversionFunction,
-//                  DafnyNameResolver.escapeShapeName(memberShape.getMemberName())
               );
               shouldOpenNewIfBlock = false;
 

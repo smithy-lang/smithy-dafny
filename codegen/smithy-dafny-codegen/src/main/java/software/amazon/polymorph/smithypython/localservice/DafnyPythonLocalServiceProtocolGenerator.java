@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -18,7 +17,6 @@ import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.WriterDelegator;
@@ -29,11 +27,9 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
-/** This will implement any handling of components outside the request body and error handling. */
 @SmithyUnstableApi
 public abstract class DafnyPythonLocalServiceProtocolGenerator implements ProtocolGenerator {
 
@@ -42,10 +38,14 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           // Dafny localService ApplicationProtocol for Smithy clients.
           DafnyLocalServiceCodegenConstants.DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL_NAME,
           SymbolReference.builder()
-              .symbol(createDafnyApplicationProtocolSymbol(DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST))
+              .symbol(
+                  createDafnyApplicationProtocolSymbol(
+                      DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST))
               .build(),
           SymbolReference.builder()
-              .symbol(createDafnyApplicationProtocolSymbol(DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE))
+              .symbol(
+                  createDafnyApplicationProtocolSymbol(
+                      DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE))
               .build());
 
   /**
@@ -115,7 +115,8 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           serFunction.getNamespace(),
           writer -> {
             writer.addImport(
-                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME, DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST);
+                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME,
+                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST);
             writer.pushState(new RequestSerializerSection(operationShape));
 
             writer.write(
@@ -171,20 +172,10 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       GenerationContext context, OperationShape operation, PythonWriter writer) {
 
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-    // Import the Dafny type being converted to
-    Shape targetShape = context.model().expectShape(operation.getInputShape());
-//    if (targetShape.isStructureShape()
-//        && targetShape
-//            .asStructureShape()
-//            .get()
-//            .hasTrait(PositionalTrait.class)) {
-//      ShapeId positionalShapeId = ModelUtils.getPositionalStructureMember(targetShape.asStructureShape().get()).orElseThrow();
-//      DafnyNameResolver.importDafnyTypeForShape(writer, positionalShapeId, context);
-//    } else {
-//      DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape(), context);
-//    }
 
     // Determine conversion code from Smithy to Dafny
+    Shape targetShape = context.model().expectShape(operation.getInputShape());
+
     String input =
         targetShape.accept(
             ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
@@ -229,14 +220,14 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       OperationShape operationShape =
           context.model().expectShape(operationShapeId).asOperationShape().get();
       Symbol deserFunction = getDeserializationFunction(context, operationShape);
-      Shape output = context.model().expectShape(operationShape.getOutputShape());
 
       delegator.useFileWriter(
           deserFunction.getDefinitionFile(),
           deserFunction.getNamespace(),
           writer -> {
             writer.addImport(
-                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME, DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE);
+                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME,
+                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE);
 
             writer.pushState(new RequestDeserializerSection(operationShape));
 
@@ -281,6 +272,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
 
           ShapeId outputShape = operation.getOutputShape();
 
+
           if (context.model().expectShape(operation.getInputShape()).isStructureShape()
               && context
                   .model()
@@ -288,15 +280,15 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                   .asStructureShape()
                   .get()
                   .hasTrait(PositionalTrait.class)) {
-            // TODO: Typing positionals, and somehow typing the base classes
-            // Blob, boolean...
+              // Shapes with positional trait do not need imports
           } else {
             DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, context);
           }
 
           // Smithy Unit shapes have no data, and do not need deserialization
           if (Utils.isUnitShape(outputShape)) {
-            writer.write("""
+            writer.write(
+                """
           return None
           """);
           } else {
@@ -337,6 +329,11 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
         .build();
   }
 
+    /**
+     * Genereal method to deserialize errors (convert from Dafny error to Smithy error
+     * in the Smithy-Python client layer)
+     * @param context
+     */
   private void generateErrorResponseDeserializerSection(GenerationContext context) {
     ShapeId serviceShapeId = context.settings().getService();
     ServiceShape serviceShape = context.model().expectShape(serviceShapeId).asServiceShape().get();
@@ -379,10 +376,10 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                 generateErrorResponseDeserializerSectionForLocalServiceDependencyErrors(
                     context, serviceShape, writer);
 
-                  // Write delegators to dependency AWS services' `_sdk_error_to_dafny_error` for dependency
-                  // services
-                  generateErrorResponseDeserializerSectionForAwsSdkDependencyErrors(
-                          context, serviceShape, writer);
+                // Write delegators to dependency AWS services' `_sdk_error_to_dafny_error` for
+                // dependency services
+                generateErrorResponseDeserializerSectionForAwsSdkDependencyErrors(
+                    context, serviceShape, writer);
 
                 // Generate handler for unmatched Dafny Error.
                 // Since we don't know anything about this Dafny Error object,
@@ -421,7 +418,8 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       // Import Dafny-modelled error
       DafnyNameResolver.importDafnyTypeForError(writer, errorId, context);
       // Import generic Dafny error type
-      DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace(), context);
+      DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(
+          writer, errorId.getNamespace(), context);
       writer.write(
           """
             elif error.is_$L:
@@ -468,102 +466,98 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                     serviceDependencyShapeId.getNamespace())
                 + "_deserialize_error");
-    // Generate deserializer for dependency that defers to its `_deserialize_error`
-          // TODO: Refactor, this is not specific to AWS SDKs
-      String serviceDependencyErrorName = AwsSdkNameResolver.dependencyErrorNameForService(
-          context.model().expectShape(serviceDependencyShapeId).asServiceShape().get()
-      );
+        // Generate deserializer for dependency that defers to its `_deserialize_error`
+        String serviceDependencyErrorDafnyName =
+            software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace());
 
-      // Import this service's Dafny error
-      ServiceShape dependencyServiceShape = context
-              .model()
-              .expectShape(serviceDependencyShapeId)
-              .asServiceShape()
-              .get();
-      List<ShapeId> serviceDependencyErrors = dependencyServiceShape.getErrors();
-      if (serviceDependencyErrors.size() > 1) {
-          throw new IllegalArgumentException("Only 1 service-modelled error per service supported at this time");
-      }
+        // Import this service's Dafny error
+        ServiceShape dependencyServiceShape =
+            context.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
+        List<ShapeId> serviceDependencyErrors = dependencyServiceShape.getErrors();
+        if (serviceDependencyErrors.size() > 1) {
+          throw new IllegalArgumentException(
+              "Only 1 service-modelled error per service supported");
+        }
 
-      ShapeId serviceDependencyError = serviceDependencyErrors.get(0);
+        ShapeId serviceDependencyError = serviceDependencyErrors.get(0);
 
-      DafnyNameResolver.importDafnyTypeForError(writer, serviceDependencyError, context);
+        DafnyNameResolver.importDafnyTypeForError(writer, serviceDependencyError, context);
 
-      writer.write(
+        writer.write(
             """
             elif error.is_$L:
                 return $L(await $L($L(message=error.$L)))""",
-                serviceDependencyErrorName,
-              serviceDependencyShapeId.getName(),
+            serviceDependencyErrorDafnyName,
+            serviceDependencyShapeId.getName(),
             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                     serviceDependencyShapeId.getNamespace())
                 + "_deserialize_error",
-                DafnyNameResolver.getDafnyTypeForError(serviceDependencyError),
-                serviceDependencyErrorName);
+            DafnyNameResolver.getDafnyTypeForError(serviceDependencyError),
+            serviceDependencyErrorDafnyName);
       }
     }
   }
 
-    private void generateErrorResponseDeserializerSectionForAwsSdkDependencyErrors(
-            GenerationContext context, ServiceShape serviceShape, PythonWriter writer) {
+  private void generateErrorResponseDeserializerSectionForAwsSdkDependencyErrors(
+      GenerationContext context, ServiceShape serviceShape, PythonWriter writer) {
 
-        // Generate converters for dependency services that defer to their `_deserialize_error`
-        Optional<LocalServiceTrait> maybeLocalServiceTrait =
-                serviceShape.getTrait(LocalServiceTrait.class);
-        if (maybeLocalServiceTrait.isPresent()) {
-            LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
-            if (localServiceTrait.getDependencies() == null
-                    || localServiceTrait.getDependencies().isEmpty()) {
-                return;
-            }
-            Set<ShapeId> serviceDependencyShapeIds =
-                    localServiceTrait.getDependencies().stream()
-                            .filter(
-                                    shapeId -> AwsSdkNameResolver.isAwsSdkShape(shapeId))
-                            .collect(Collectors.toSet());
+    // Generate converters for dependency services that defer to their `_deserialize_error`
+    Optional<LocalServiceTrait> maybeLocalServiceTrait =
+        serviceShape.getTrait(LocalServiceTrait.class);
+    if (maybeLocalServiceTrait.isPresent()) {
+      LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+      if (localServiceTrait.getDependencies() == null
+          || localServiceTrait.getDependencies().isEmpty()) {
+        return;
+      }
+      Set<ShapeId> serviceDependencyShapeIds =
+          localServiceTrait.getDependencies().stream()
+              .filter(shapeId -> AwsSdkNameResolver.isAwsSdkShape(shapeId))
+              .collect(Collectors.toSet());
 
-            for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-                String code = AwsSdkNameResolver.dependencyErrorNameForService(
-                        context.model().expectShape(serviceDependencyShapeId).asServiceShape().get()
-                );
-                writer.addImport(".errors", code);
+      for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+        String code =
+            AwsSdkNameResolver.dependencyErrorNameForService(
+                context.model().expectShape(serviceDependencyShapeId).asServiceShape().get());
+        writer.addImport(".errors", code);
 
-                // Import dependency `_deserialize_error` function so this service can defer to it:
-                // `from dependency.smithygenerated.deserialize import _deserialize_error as
-                // dependency_deserialize_error`
-                writer.addImport(
-                        // `from dependency.smithygenerated.deserialize`
-                        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                                serviceDependencyShapeId.getNamespace(), context)
-                                + ".shim",
-                        // `import _deserialize_error`
-                        "_sdk_error_to_dafny_error",
-                        // `as dependency_deserialize_error`
-                        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-                                serviceDependencyShapeId.getNamespace())
-                                + "_sdk_error_to_dafny_error");
-                // Generate deserializer for dependency that defers to its `_deserialize_error`
-//                writer.write(
-//                        """
-//                        elif error.is_$L:
-//                            return $L($L(error.$L.obj))""",
-//                        code,
-//                        code,
-//                        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-//                                serviceDependencyShapeId.getNamespace())
-//                                + "_sdk_error_to_dafny_error",
-//                        code);
-                writer.write(
-                        """
+        // Import dependency `_deserialize_error` function so this service can defer to it:
+        // `from dependency.smithygenerated.deserialize import _deserialize_error as
+        // dependency_deserialize_error`
+        writer.addImport(
+            // `from dependency.smithygenerated.deserialize`
+            SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                    serviceDependencyShapeId.getNamespace(), context)
+                + ".shim",
+            // `import _deserialize_error`
+            "_sdk_error_to_dafny_error",
+            // `as dependency_deserialize_error`
+            SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                    serviceDependencyShapeId.getNamespace())
+                + "_sdk_error_to_dafny_error");
+        // Generate deserializer for dependency that defers to its `_deserialize_error`
+        //                writer.write(
+        //                        """
+        //                        elif error.is_$L:
+        //                            return $L($L(error.$L.obj))""",
+        //                        code,
+        //                        code,
+        //
+        // SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        //                                serviceDependencyShapeId.getNamespace())
+        //                                + "_sdk_error_to_dafny_error",
+        //                        code);
+        writer.write(
+            """
                         elif error.is_$L:
                             return $L(message=_dafny.string_of(error.$L.message))""",
-                        code,
-                        code,
-                        code);
-                writer.addStdlibImport("_dafny");
-            }
-        }
+            code,
+            code,
+            code);
+        writer.addStdlibImport("_dafny");
+      }
     }
+  }
 
   /**
    * A section that controls writing out the entire serialization function.

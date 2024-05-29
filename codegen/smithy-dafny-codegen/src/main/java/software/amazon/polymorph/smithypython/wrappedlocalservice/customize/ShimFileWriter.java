@@ -20,7 +20,6 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -45,11 +44,11 @@ public class ShimFileWriter implements CustomFileWriter {
             moduleName + "/shim.py",
             "",
             writer -> {
-              writer.addImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+              writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                       serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "ServiceError");
-              writer.addImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+              writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                       serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "CollectionOfErrors");
-              writer.addImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+              writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                       serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "OpaqueError");
 
               writer.write(
@@ -107,21 +106,6 @@ public class ShimFileWriter implements CustomFileWriter {
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, inputShape, codegenContext);
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, outputShape, codegenContext);
 
-      boolean isInputPositional =
-          codegenContext
-              .model()
-              .expectShape(inputShape)
-              .asStructureShape()
-              .get()
-              .hasTrait(PositionalTrait.class);
-      boolean isOutputPoitional =
-          codegenContext
-              .model()
-              .expectShape(inputShape)
-              .asStructureShape()
-              .get()
-              .hasTrait(PositionalTrait.class);
-
       writer.addStdlibImport("typing", "Any");
 
       // Write the Shim operation block.
@@ -166,7 +150,7 @@ public class ShimFileWriter implements CustomFileWriter {
                 input,
                 codegenContext.symbolProvider().toSymbol(operationShape).getName());
 
-            writer.addImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+            writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                     serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "_smithy_error_to_dafny_error");
 
             Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());

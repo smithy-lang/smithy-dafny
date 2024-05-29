@@ -3,12 +3,12 @@
 
 package software.amazon.polymorph.smithypython.localservice.customize;
 
-import java.util.List;
+import static java.lang.String.format;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
@@ -22,8 +22,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-
-import static java.lang.String.format;
 
 /** Extends the Smithy-Python-generated errors.py file by adding Dafny plugin errors. */
 public class ErrorsFileWriter implements CustomFileWriter {
@@ -303,16 +301,14 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     // Import this service's error that wraps the dependency service's errors
                     ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
                     String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
-                    String serviceDependencyErrorName = AwsSdkNameResolver.dependencyErrorNameForService(
-                            serviceDependencyShape
-                    );
-//                    writer.addImport(".errors", dependencyErrorName);
-                    // Generate conversion method that says:
+                    String serviceDependencyErrorDafnyName =
+                        software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace());
+
+                    // Generate conversion method:
                     // "If this is a dependency-specific error, defer to the dependency's
-                    // `_smithy_error_to_dafny_error`"
+                    // `_smithy_error_to_dafny_error`" via
                     // if isinstance(e, MyDependency):
-                    //   return
-                    // MyService.Error_MyDependency(MyDependency_smithy_error_to_dafny_error(e.message))
+                    //   return MyService.Error_MyDependency(MyDependency_smithy_error_to_dafny_error(e.message))
                     writer.write(
                             """
                                 if isinstance(e, $L):
@@ -320,7 +316,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                                 """,
                             dependencyErrorName,
                             DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape, codegenContext),
-                            serviceDependencyErrorName,
+                            serviceDependencyErrorDafnyName,
                             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                     serviceDependencyShapeId.getNamespace())
                                     + nativeToDafnyErrorName);

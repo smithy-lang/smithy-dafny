@@ -3,10 +3,9 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import static java.lang.String.format;
 
 import java.util.LinkedHashSet;
-
-import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -24,10 +23,10 @@ import software.amazon.smithy.python.codegen.sections.*;
  * Custom client generator. The generated Smithy-Python client generates all of its methods as
  * `async`. To use generated clients, library consumers would need to wrap calls as async. However,
  * generated Dafny code is NOT thread safe, and MUST NOT be used in an async environment. To guard
- * users against this, make all user-exposed methods on the client synchronous.
- * This class exists to provide a synchronous client interface; however, since it exists,
- * we also remove some logic that is not used by Smithy-Dafny Python clients
- * (primarily HTTP-request-wrapping logic for Smithy-Python clients).
+ * users against this, make all user-exposed methods on the client synchronous. This class exists to
+ * provide a synchronous client interface; however, since it exists, we also remove some logic that
+ * is not used by Smithy-Dafny Python clients (primarily HTTP-request-wrapping logic for
+ * Smithy-Python clients).
  */
 public class SynchronousClientGenerator extends ClientGenerator {
 
@@ -35,10 +34,11 @@ public class SynchronousClientGenerator extends ClientGenerator {
     super(context, service);
   }
 
-    /**
-     * Override Smithy-Python's `generateService` to
-     * @param writer
-     */
+  /**
+   * Override Smithy-Python's `generateService` to
+   *
+   * @param writer
+   */
   @Override
   protected void generateService(PythonWriter writer) {
     var serviceSymbol = context.symbolProvider().toSymbol(service);
@@ -162,68 +162,50 @@ public class SynchronousClientGenerator extends ClientGenerator {
     Shape visibleOperationInputShape;
     Symbol interceptorInputSymbol;
 
-      if (operationInputShape.hasTrait(PositionalTrait.class)) {
-          final MemberShape onlyMember = PositionalTrait.onlyMember(operationInputShape);
-          visibleOperationInputShape = context.model().expectShape(onlyMember.getTarget());
-      } else {
-          visibleOperationInputShape = operationInputShape;
-      }
+    if (operationInputShape.hasTrait(PositionalTrait.class)) {
+      final MemberShape onlyMember = PositionalTrait.onlyMember(operationInputShape);
+      visibleOperationInputShape = context.model().expectShape(onlyMember.getTarget());
+    } else {
+      visibleOperationInputShape = operationInputShape;
+    }
 
+    interceptorInputSymbol = context.symbolProvider().toSymbol(visibleOperationInputShape);
 
-      interceptorInputSymbol = context.symbolProvider().toSymbol(visibleOperationInputShape);
-
-
-          var operationOutputShape =
+    var operationOutputShape =
         context.model().expectShape(operation.getOutputShape()).asStructureShape().get();
-      // "visible" in the sense that this the actual input/output shape considering the @positional trait
-      Shape visibleOperationOutputShape;
-      Symbol interceptorOutputSymbol;
+    // "visible" in the sense that this the actual input/output shape considering the @positional trait
+    Shape visibleOperationOutputShape;
+    Symbol interceptorOutputSymbol;
 
-      if (operationOutputShape.hasTrait(PositionalTrait.class)) {
-          final MemberShape onlyMember = PositionalTrait.onlyMember(operationOutputShape);
-          visibleOperationOutputShape = context.model().expectShape(onlyMember.getTarget());
-      } else {
-          visibleOperationOutputShape = operationOutputShape;
-      }
+    if (operationOutputShape.hasTrait(PositionalTrait.class)) {
+      final MemberShape onlyMember = PositionalTrait.onlyMember(operationOutputShape);
+      visibleOperationOutputShape = context.model().expectShape(onlyMember.getTarget());
+    } else {
+      visibleOperationOutputShape = operationOutputShape;
+    }
 
+    interceptorOutputSymbol = context.symbolProvider().toSymbol(visibleOperationOutputShape);
 
-      interceptorOutputSymbol = context.symbolProvider().toSymbol(visibleOperationOutputShape);
-//
-
-//    Symbol interceptorOutputSymbol;
-//    if (operationOutputShape.hasTrait(PositionalTrait.class)) {
-//      final MemberShape onlyMember = PositionalTrait.onlyMember(operationOutputShape);
-//      final Shape targetShape = context.model().expectShape(onlyMember.getTarget());
-//      interceptorOutputSymbol = context.symbolProvider().toSymbol(targetShape);
-//    } else {
-//      interceptorOutputSymbol = context.symbolProvider().toSymbol(operationOutputShape);
-//    }
-
-      if (visibleOperationInputShape.hasTrait(ReferenceTrait.class)) {
-          writer.addStdlibImport(interceptorInputSymbol.getNamespace());
-      }
-      if (visibleOperationOutputShape.hasTrait(ReferenceTrait.class)) {
-          writer.addStdlibImport(interceptorOutputSymbol.getNamespace());
-      }
+    if (visibleOperationInputShape.hasTrait(ReferenceTrait.class)) {
+      writer.addStdlibImport(interceptorInputSymbol.getNamespace());
+    }
+    if (visibleOperationOutputShape.hasTrait(ReferenceTrait.class)) {
+      writer.addStdlibImport(interceptorOutputSymbol.getNamespace());
+    }
 
     writer.openBlock(
-        "def $L(self, input: %1$s) -> %2$s:".formatted(
-                visibleOperationInputShape.hasTrait(ReferenceTrait.class)
-                    ? "'$L'"
-                    : "$T",
-                visibleOperationOutputShape.hasTrait(ReferenceTrait.class)
-                        ? "'$L'"
-                        : "$T"
-
-        ),
+        "def $L(self, input: %1$s) -> %2$s:"
+            .formatted(
+                visibleOperationInputShape.hasTrait(ReferenceTrait.class) ? "'$L'" : "$T",
+                visibleOperationOutputShape.hasTrait(ReferenceTrait.class) ? "'$L'" : "$T"),
         "",
         operationSymbol.getName(),
         visibleOperationInputShape.hasTrait(ReferenceTrait.class)
-                ? interceptorInputSymbol.getNamespace() + "." + interceptorInputSymbol.getName()
-                : interceptorInputSymbol,
+            ? interceptorInputSymbol.getNamespace() + "." + interceptorInputSymbol.getName()
+            : interceptorInputSymbol,
         visibleOperationOutputShape.hasTrait(ReferenceTrait.class)
-        ? interceptorOutputSymbol.getNamespace() + "." + interceptorOutputSymbol.getName()
-        : interceptorOutputSymbol,
+            ? interceptorOutputSymbol.getNamespace() + "." + interceptorOutputSymbol.getName()
+            : interceptorOutputSymbol,
         () -> {
           writer.writeDocs(
               () -> {
@@ -275,14 +257,14 @@ public class SynchronousClientGenerator extends ClientGenerator {
         });
   }
 
-    /**
-     * Override Smithy-Python's generateOperationExecutor.
-     * This MUST be done because Smithy-Python does not let us intercept its SymbolProvider
-     * from within this function.
-     * We also remove code that will not be used by Smithy-Dafny Python clients,
-     * around HTTP request signing and authentication.
-     * @param writer
-     */
+  /**
+   * Override Smithy-Python's generateOperationExecutor. This MUST be done because Smithy-Python
+   * does not let us intercept its SymbolProvider from within this function. We also remove code
+   * that will not be used by Smithy-Dafny Python clients, around HTTP request signing and
+   * authentication.
+   *
+   * @param writer
+   */
   protected void generateOperationExecutor(PythonWriter writer) {
     var transportRequest = context.applicationProtocol().requestType();
     var transportResponse = context.applicationProtocol().responseType();
@@ -497,21 +479,21 @@ public class SynchronousClientGenerator extends ClientGenerator {
 
     writer.pushState(new SendRequestSection());
     writer.write(
-          """
+        """
                   # Step 7m: Involve client Dafny impl
                   if config.dafnyImplInterface.impl is None:
                       raise Exception("No impl found on the operation config.")
-  
+
                   context_with_response = cast(
                       InterceptorContext[Input, None, $L, $L], context
                   )
-  
+
                   context_with_response._transport_response = config.dafnyImplInterface.handle_request(
                       input=context_with_response.transport_request
                   )
           """,
-          DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST,
-          DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE);
+        DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST,
+        DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE);
     writer.popState();
 
     writer.write(

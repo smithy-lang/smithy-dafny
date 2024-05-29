@@ -97,8 +97,6 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
               .asStructureShape()
               .get()
               .hasTrait(PositionalTrait.class)) {
-        // TODO: Typing positionals, and somehow typing the base classes
-        // Blob, boolean...
       } else {
         DafnyNameResolver.importDafnyTypeForShape(writer, inputShapeId, context);
         writer.write("$L,", DafnyNameResolver.getDafnyTypeForShape(inputShapeId));

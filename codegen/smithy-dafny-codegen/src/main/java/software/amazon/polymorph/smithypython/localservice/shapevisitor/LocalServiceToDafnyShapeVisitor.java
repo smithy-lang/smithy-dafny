@@ -191,7 +191,6 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
         writer.addStdlibImport("standard_library.internaldafny.generated", "UTF8");
         return "UTF8.default__.Encode(Seq(%1$s)).value".formatted(dataSource);
-//        return "Seq(list(ord(c) for c in %1$s))".formatted(dataSource);
         // Smithy has deprecated EnumTrait, but Polymorph still uses it to mark enums
       }
       // Smithy has deprecated EnumTrait, but Polymorph still uses it to mark enums
@@ -268,7 +267,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String enumShape(EnumShape shape) {
-// ONLY write converters if the shape under generation is in the current namespace
+      // ONLY write converters if the shape under generation is in the current namespace
       if (shape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
         LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
                 context, writer);

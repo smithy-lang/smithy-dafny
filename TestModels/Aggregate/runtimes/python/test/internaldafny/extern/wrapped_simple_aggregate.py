@@ -1,14 +1,13 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import simple_aggregate_internaldafny_wrapped
+import WrappedSimpleAggregateService
 from simple_aggregate.smithygenerated.simple_aggregate.client import SimpleAggregate
 from simple_aggregate.smithygenerated.simple_aggregate.shim import SimpleAggregateShim
 from simple_aggregate.smithygenerated.simple_aggregate.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(simple_aggregate_internaldafny_wrapped.default__):
+class default__(WrappedSimpleAggregateService.default__):
 
     @staticmethod
     def WrappedSimpleAggregate(config):
@@ -17,5 +16,4 @@ class default__(simple_aggregate_internaldafny_wrapped.default__):
         wrapped_client = SimpleAggregateShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-simple_aggregate_internaldafny_wrapped.default__ = default__
+WrappedSimpleAggregateService.default__ = default__

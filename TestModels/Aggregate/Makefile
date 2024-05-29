@@ -5,11 +5,13 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-
 PYTHON_MODULE_NAME=simple_aggregate
 
 PROJECT_SERVICES := \
 	SimpleAggregate
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
 
 SERVICE_NAMESPACE_SimpleAggregate=simple.aggregate
 
