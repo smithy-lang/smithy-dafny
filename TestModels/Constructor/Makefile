@@ -1,19 +1,37 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-CORES=2
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 
-include ../SharedMakefile.mk
+# This project has no dependencies 
+# DEPENDENT-MODELS:= 
 
-PROJECT_SERVICES := \
-	SimpleConstructor
+# TODO: to un-stub, remove these no-op overrides
 
-SERVICE_NAMESPACE_SimpleConstructor=simple.constructor
+setup_net:
+polymorph_dafny:
+polymorph_dotnet:
+verify:
+transpile_net:
+dafny-reportgenerator:
+test_net:
+transpile_rust:
+test_rust:
 
-SERVICE_DEPS_SimpleConstructor :=
+# TODO: to un-stub, uncomment everything below this like and set correct values
 
-SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+# CORES=2
 
-# This project has no dependencies
-# DEPENDENT-MODELS:=
+# include ../SharedMakefile.mk
 
+# NAMESPACE=stub
+
+# PROJECT_SERVICES := \
+# 	Stub
+
+# SERVICE_NAMESPACE_Stub=stub
+
+# SERVICE_DEPS_Stub :=
+
+# SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
