@@ -15,6 +15,42 @@ service SimpleConstraints {
 
 structure SimpleConstraintsConfig {}
 
+// This is just a sanity check on the smokeTests support.
+// We need to actually convert all the tests in test/WrappedSimpleConstraintsImplTest.dfy
+// to smoke tests once https://github.com/smithy-lang/smithy-dafny/issues/278
+// is fixed.
+@smithy.test#smokeTests([
+  {
+    id: "GetConstraintsSuccess"
+    params: {
+      OneToTen: 5,
+      GreaterThanOne: 2,
+      MyBlob: "0101",
+      MyList: ["1", "2", "3"],
+      MyMap: {
+        "a": "b",
+        "c": "d"
+      }
+    }
+    expect: {
+        success: {}
+    }
+  },
+  {
+    id: "GetConstraintsFailure"
+    params: {
+      // These two always have to be present because of https://github.com/smithy-lang/smithy-dafny/issues/278,
+      // because otherwise they are interpreted as 0.
+      OneToTen: 5,
+      GreaterThanOne: 2,
+      // This is the member that's actually invalid
+      NonEmptyBlob: ""
+    }
+    expect: {
+        failure: {}
+    }
+  }
+])
 operation GetConstraints {
   input: GetConstraintsInput,
   output: GetConstraintsOutput,

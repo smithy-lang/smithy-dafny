@@ -9,7 +9,7 @@ module  SimpleStringImplTest {
     method{:test} GetString(){
         var client :- expect SimpleString.SimpleString();
         TestGetString(client);
-        TestGetStringSingleValue(client);
+        TestGetStringKnownValue(client);
         TestGetStringUTF8(client);
     }
 
@@ -22,13 +22,13 @@ module  SimpleStringImplTest {
         expect ret.value.UnwrapOr("") == "TEST_SIMPLE_STRING_VALUE";
         print ret;
     }
-    method TestGetStringSingleValue(client: ISimpleTypesStringClient)
+    method TestGetStringKnownValue(client: ISimpleTypesStringClient)
       requires client.ValidState()
       modifies client.Modifies
       ensures client.ValidState()
     {
-        var ret :- expect client.GetStringSingleValue(SimpleString.Types.GetStringInput(value:= Some("TEST_SIMPLE_STRING_SINGLE_VALUE")));
-        expect ret.value.UnwrapOr("") == "TEST_SIMPLE_STRING_SINGLE_VALUE";
+        var ret :- expect client.GetStringKnownValue(SimpleString.Types.GetStringInput(value:= Some("TEST_SIMPLE_STRING_KNOWN_VALUE")));
+        expect ret.value.UnwrapOr("") == "TEST_SIMPLE_STRING_KNOWN_VALUE";
         print ret;
     }
     method TestGetStringUTF8(client: ISimpleTypesStringClient)

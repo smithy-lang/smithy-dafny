@@ -21,4 +21,3 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-

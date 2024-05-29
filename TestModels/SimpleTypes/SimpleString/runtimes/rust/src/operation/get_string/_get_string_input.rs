@@ -21,7 +21,9 @@ impl GetStringInput {
 
 /// A builder for [`GetStringInput`](crate::operation::operation::GetStringInput).
 #[non_exhaustive]
-#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug)]
+#[derive(
+    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
+)]
 pub struct GetStringInputBuilder {
     pub(crate) value: ::std::option::Option<::std::string::String>,
 }
@@ -41,7 +43,14 @@ impl GetStringInputBuilder {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetStringInput`](crate::operation::operation::GetStringInput).
-    pub fn build(self) -> ::std::result::Result<crate::operation::get_string::GetStringInput, ::aws_smithy_types::error::operation::BuildError> {
-        ::std::result::Result::Ok(crate::operation::get_string::GetStringInput { value: self.value })
+    pub fn build(
+        self,
+    ) -> ::std::result::Result<
+        crate::operation::get_string::GetStringInput,
+        ::aws_smithy_types::error::operation::BuildError,
+    > {
+        ::std::result::Result::Ok(crate::operation::get_string::GetStringInput {
+            value: self.value,
+        })
     }
 }

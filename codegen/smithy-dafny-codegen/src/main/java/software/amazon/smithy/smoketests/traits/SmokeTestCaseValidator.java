@@ -1,0 +1,139 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+// This is a forked copy of
+// https://github.com/smithy-lang/smithy/blob/main/smithy-smoke-test-traits/src/main/java/software/amazon/smithy/smoketests/traits/SmokeTestCaseValidator.java
+// with a piece of overly-restrictive validation in createVisitor() turned off
+// so that we can use smoke tests to test input validation as well.
+// See https://github.com/smithy-lang/smithy/issues/2282
+
+package software.amazon.smithy.smoketests.traits;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
+import software.amazon.smithy.model.node.Node;
+import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.validation.AbstractValidator;
+import software.amazon.smithy.model.validation.NodeValidationVisitor;
+import software.amazon.smithy.model.validation.ValidationEvent;
+import software.amazon.smithy.model.validation.node.TimestampValidationStrategy;
+
+/**
+ * Validates the following:
+ *
+ * <ul>
+ *     <li>vendorParamsShape is a valid shape.</li>
+ *     <li>vendorParams is compatible with vendorParamsShape.</li>
+ *     <li>input is valid for the operation under test.</li>
+ * </ul>
+ */
+public class SmokeTestCaseValidator extends AbstractValidator {
+
+  @Override
+  public List<ValidationEvent> validate(Model model) {
+    OperationIndex operationIndex = OperationIndex.of(model);
+    List<ValidationEvent> events = new ArrayList<>();
+    for (Shape shape : model.getShapesWithTrait(SmokeTestsTrait.class)) {
+      SmokeTestsTrait trait = shape.expectTrait(SmokeTestsTrait.class);
+      List<SmokeTestCase> testCases = trait.getTestCases();
+
+      for (SmokeTestCase testCase : testCases) {
+        // Validate vendor params shape
+        Optional<ShapeId> vendorParamsShapeIdOptional =
+          testCase.getVendorParamsShape();
+        Optional<ObjectNode> vendorParamsOptional = testCase.getVendorParams();
+        if (vendorParamsShapeIdOptional.isPresent()) {
+          if (!vendorParamsOptional.isPresent()) {
+            events.add(
+              warning(
+                shape,
+                trait,
+                String.format(
+                  "Smoke test case with ID `%s` defined a `vendorParamsShape` but no `vendorParams`",
+                  testCase.getId()
+                )
+              )
+            );
+          } else {
+            Optional<Shape> vendorParamsShapeOptional = model.getShape(
+              vendorParamsShapeIdOptional.get()
+            );
+            if (vendorParamsShapeOptional.isPresent()) {
+              Shape vendorParamsShape = vendorParamsShapeOptional.get();
+              NodeValidationVisitor vendorParamsValidator = createVisitor(
+                vendorParamsOptional.get(),
+                model,
+                shape,
+                testCase.getId(),
+                ".vendorParams"
+              );
+              events.addAll(vendorParamsShape.accept(vendorParamsValidator));
+            }
+          }
+        } else if (vendorParamsOptional.isPresent()) {
+          events.add(
+            warning(
+              shape,
+              trait,
+              String.format(
+                "Smoke test case with ID `%s` defined `vendorParams` but no `vendorParamsShape`",
+                testCase.getId()
+              )
+            )
+          );
+        }
+
+        // Validate input params
+        StructureShape input = operationIndex.expectInputShape(shape);
+        if (input != null && testCase.getParams().isPresent()) {
+          NodeValidationVisitor paramsValidator = createVisitor(
+            testCase.getParams().get(),
+            model,
+            shape,
+            testCase.getId(),
+            ".params"
+          );
+          events.addAll(input.accept(paramsValidator));
+        } else if (testCase.getParams().isPresent()) {
+          events.add(
+            error(
+              shape,
+              trait,
+              String.format(
+                "Smoke test parameters provided for operation with no input: `%s`",
+                Node.printJson(testCase.getParams().get())
+              )
+            )
+          );
+        }
+      }
+    }
+    return events;
+  }
+
+  private NodeValidationVisitor createVisitor(
+    ObjectNode node,
+    Model model,
+    Shape shape,
+    String caseId,
+    String contextSuffix
+  ) {
+    return NodeValidationVisitor
+      .builder()
+      .model(model)
+      .eventShapeId(shape.getId())
+      .value(node)
+      .startingContext(SmokeTestsTrait.ID + "." + caseId + contextSuffix)
+      .eventId(getName())
+      .timestampValidationStrategy(TimestampValidationStrategy.EPOCH_SECONDS)
+      // Added: make constraint violations only WARNINGS, so we can suppress them
+      .addFeature(NodeValidationVisitor.Feature.ALLOW_CONSTRAINT_ERRORS)
+      .build();
+  }
+}
