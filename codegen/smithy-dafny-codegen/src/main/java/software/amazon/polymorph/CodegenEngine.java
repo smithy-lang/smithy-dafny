@@ -243,7 +243,7 @@ public class CodegenEngine {
     final String dafnyNamespace = DafnyNameResolverHelpers.packageNameForNamespace(
             serviceShape.getId().getNamespace()
     );
-    final String dafnyTypesModuleName = DafnyNameResolver.dafnyTypesModuleName(namespace);
+    final String dafnyModuleName = DafnyNameResolver.dafnyBaseModuleName(namespace);
 
     final Path includeDafnyFile =
             this.includeDafnyFile.orElseThrow(() ->
@@ -263,7 +263,7 @@ public class CodegenEngine {
     parameters.put("serviceConfig",     serviceConfig);
     parameters.put("namespace",         namespace);
     parameters.put("dafnyNamespace",    dafnyNamespace);
-    parameters.put("dafnyTypesModuleName",   dafnyTypesModuleName);
+    parameters.put("dafnyModuleName",   dafnyModuleName);
     parameters.put("stdLibPath",        stdLibPath.toString());
 
     if (awsSdkStyle) {
