@@ -37,8 +37,7 @@ jobs:
 
   cut-issue-on-failure:
     runs-on: ubuntu-latest
-    needs:
-      [
+    needs: [
         dafny-nightly-verification,
         dafny-nightly-java,
         dafny-nightly-net,
