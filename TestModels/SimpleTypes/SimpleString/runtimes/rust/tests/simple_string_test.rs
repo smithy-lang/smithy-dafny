@@ -6,7 +6,7 @@ mod simple_string_test {
     method{:test} GetString(){
           var client :- expect SimpleString.SimpleString();
           TestGetString(client);
-          TestGetStringSingleValue(client);
+          TestGetStringKnownValue(client);
           TestGetStringUTF8(client);
       }
     */
@@ -30,15 +30,15 @@ mod simple_string_test {
     }
 
     #[tokio::test]
-    async fn test_get_string_single_value() {
+    async fn test_get_string_known_value() {
         let result = client()
-            .get_string_single_value()
-            .value("TEST_SIMPLE_STRING_SINGLE_VALUE")
+            .get_string_known_value()
+            .value("TEST_SIMPLE_STRING_KNOWN_VALUE")
             .send()
             .await;
         let output = result.unwrap();
         let value = output.value().unwrap();
-        assert_eq!(value, "TEST_SIMPLE_STRING_SINGLE_VALUE");
+        assert_eq!(value, "TEST_SIMPLE_STRING_KNOWN_VALUE");
     }
 
     /*method TestGetStringUTF8(client: ISimpleTypesStringClient)
