@@ -29,6 +29,7 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
@@ -234,7 +235,8 @@ public class CodegenEngine {
   private void dafnyProjectFiles(final Path outputDir) {
     final String serviceConfig = awsSdkStyle ?
             null : serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
-    final String service = serviceShape.getId().getName();
+    final String service = awsSdkStyle ?
+            serviceShape.expectTrait(ServiceTrait.class).getSdkId() : serviceShape.getId().getName();
     final String namespace = serviceShape.getId().getNamespace();
 
     final Path includeDafnyFile =
@@ -257,9 +259,9 @@ public class CodegenEngine {
     parameters.put("stdLibPath",        stdLibPath.toString());
 
     if (awsSdkStyle) {
-      // TODO
+      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "src/$forSDK:LIndex.dfy", parameters);
     } else {
-      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "src/Index.dfy", parameters);
+      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "src/$forLocalService:LIndex.dfy", parameters);
       if (localServiceTest) {
         IOUtils.writeTemplatedFile(getClass(), libraryRoot, "src/Wrapped$service:LImpl.dfy", parameters);
       }
@@ -524,10 +526,10 @@ public class CodegenEngine {
 
   private void netProjectFiles() {
     final DotNetNameResolver resolver = new DotNetNameResolver(model, serviceShape);
-    final String serviceId = resolver.clientForService();
+    final String service = awsSdkStyle ?
+            serviceShape.expectTrait(ServiceTrait.class).getSdkId() : resolver.clientForService();
     final String serviceConfig = awsSdkStyle ?
             null : serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
-    final String service = serviceShape.getId().getName();
     final String configConversionMethod = awsSdkStyle ?
             null : DotNetNameResolver.typeConverterForShape(serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(), TypeConversionDirection.FROM_DAFNY);
     final String namespace = serviceShape.getId().getNamespace();
@@ -548,7 +550,6 @@ public class CodegenEngine {
 
     Map<String, String> parameters = new HashMap<>();
     parameters.put("dafnyVersion",      dafnyVersion.unparse());
-    parameters.put("serviceID",         serviceId);
     parameters.put("service",           service);
     parameters.put("serviceConfig",     serviceConfig);
     parameters.put("configConversionMethod", configConversionMethod);
@@ -558,15 +559,16 @@ public class CodegenEngine {
     parameters.put("stdLibPath",        stdLibPath.toString());
 
     if (awsSdkStyle) {
-      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/$forSDK:L$serviceID:L.csproj", parameters);
-      // TODO generate sdk constructor
+      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/$forSDK:L$service:L.csproj", parameters);
+      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/Extern/$service:LClient.cs", parameters);
+
     } else {
-      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/$forLocalService:L$serviceID:L.csproj", parameters);
+      IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/$forLocalService:L$service:L.csproj", parameters);
       if (localServiceTest) {
         IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/Extern/Wrapped$service:LService.cs", parameters);
       }
     }
-    IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/tests/$serviceID:LTest.csproj", parameters);
+    IOUtils.writeTemplatedFile(getClass(), libraryRoot, "runtimes/net/tests/$service:LTest.csproj", parameters);
 
     LOGGER.info(".NET project files generated in {}/runtimes/net", libraryRoot);
   }
