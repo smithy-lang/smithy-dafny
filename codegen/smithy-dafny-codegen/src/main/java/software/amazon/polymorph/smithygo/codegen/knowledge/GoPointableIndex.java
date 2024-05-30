@@ -29,7 +29,11 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.ToShapeId;
+import software.amazon.smithy.model.traits.AddedDefaultTrait;
+import software.amazon.smithy.model.traits.ClientOptionalTrait;
+import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.SetUtils;
 
@@ -159,6 +163,10 @@ public class GoPointableIndex implements KnowledgeIndex {
             return false;
         }
 
+        if (targetShape.isIntegerShape() && !member.hasTrait(RequiredTrait.class)) {
+            return true;
+        }
+
         return nullableIndex.isMemberNullable(member, NullableIndex.CheckMode.CLIENT_ZERO_VALUE_V1_NO_INPUT);
     }
 
@@ -196,6 +204,10 @@ public class GoPointableIndex implements KnowledgeIndex {
 
         if (INHERENTLY_VALUE.contains(shape.getType())) {
             return false;
+        }
+
+        if (shape.isIntegerShape() && !shape.hasTrait(RequiredTrait.class)) {
+            return true;
         }
 
         return nullableIndex.isNullable(shape);
