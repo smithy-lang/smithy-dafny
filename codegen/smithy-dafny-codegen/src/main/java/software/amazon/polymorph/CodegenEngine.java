@@ -464,9 +464,7 @@ public class CodegenEngine {
       netProjectFiles();
     }
 
-    Path dotnetRoot = fromSmithyBuildPlugin
-      ? libraryRoot.resolve("runtimes").resolve("dotnet").resolve("Generated")
-      : libraryRoot.resolve("runtimes").resolve("net");
+    Path dotnetRoot = libraryRoot.resolve("runtimes").resolve("net");
     LOGGER.info("Formatting .NET code in {}", dotnetRoot);
     // Locate all *.csproj files in the directory
     try {

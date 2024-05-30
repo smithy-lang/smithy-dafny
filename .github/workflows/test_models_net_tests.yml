@@ -99,10 +99,6 @@ jobs:
         # https://github.com/actions/setup-dotnet/blob/main/.github/csc.json
         run: echo "::remove-matcher owner=csc::"
 
-      - name: Download Dependencies
-        working-directory: ./${{ matrix.library }}
-        run: make setup_net
-
       - name: Setup Java 17 for codegen
         uses: actions/setup-java@v3
         with:
@@ -116,6 +112,10 @@ jobs:
           make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
           make polymorph_dotnet DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
+      - name: Download Dependencies
+        working-directory: ./${{ matrix.library }}
+        run: make setup_net
+  
       - name: Compile ${{ matrix.library }} implementation
         shell: bash
         working-directory: ./${{ matrix.library }}
