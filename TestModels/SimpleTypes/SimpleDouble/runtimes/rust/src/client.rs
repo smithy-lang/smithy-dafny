@@ -52,5 +52,3 @@ impl Client {
 }
 
 mod get_double;
-
-mod get_double_known_value;

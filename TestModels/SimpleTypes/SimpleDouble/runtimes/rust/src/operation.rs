@@ -2,6 +2,3 @@
 
 /// Types for the `GetDouble` operation.
 pub mod get_double;
-
-/// Types for the `GetDoubleKnownValue` operation.
-pub mod get_double_known_value;
