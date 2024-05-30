@@ -27,6 +27,8 @@ AWS_SDK_CMD=--aws-sdk
 # DEPENDENT-MODELS:=
 
 
+SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/model
+
 # Override calling the polymorph CLI to invoke the Smithy build instead
 _polymorph_dafny:
 	./gradlew polymorphDafny
