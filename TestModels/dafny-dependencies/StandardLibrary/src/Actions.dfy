@@ -59,28 +59,13 @@ module StandardLibrary.Actions {
   }
 
 
-  // TODO: This is a finite stream really,
-  // ideally this would be a specific instance of an infinite stream
-  // of Option<T> just like Action<(), T>
-  // TODO: Do we need to signal back pressure or cancellation?
-  // Could return something from OnNext
-  trait Stream<T> {
-
-    var Repr: set<object>
-
-    method Put(t: T)
-      modifies Repr
-
-    method OnNext(a: Action<T, ()>)
-      modifies Repr, a.Repr
-
-  }
+  type Stream<T> = Action<Action<T, ()>, ()>
 
   // Similar to Result, but for delivering a sequence of values instead of just one
   type StreamEvent<T, E> = Option<Result<T, E>>
 
   // Cheating for now, since this can't block
-  class SimpleStream<T(0)> extends Stream<T> {
+  class SimpleStream<T(0)> extends Action<Action<T, ()>, ()> {
 
     var values: seq<T>
     var callbacks: seq<Action<T, ()>>
@@ -109,16 +94,17 @@ module StandardLibrary.Actions {
       }
     }
 
-    method OnNext(a: Action<T, ()>)
+    method Call(a: Action<T, ()>) returns (nothing: ())
       modifies Repr
     {
       assume Valid();
       callbacks := callbacks + [a];
+      return ();
     }
 
   }
 
-  class LazyStream<T(0)> extends Stream<Option<T>> {
+  class LazyStream<T(0)> extends Action<Action<Option<T>, ()>, ()> {
 
     const iter: Action<(), Option<T>>
     var callbacks: seq<Action<Option<T>, ()>>
@@ -141,7 +127,7 @@ module StandardLibrary.Actions {
       expect false;
     }
 
-    method {:verify false} OnNext(a: Action<Option<T>, ()>)
+    method {:verify false} Call(a: Action<Option<T>, ()>) returns (nothing: ())
       modifies Repr
     {
       // TODO: Actual Action specs to prove this terminates
@@ -153,6 +139,7 @@ module StandardLibrary.Actions {
           break;
         }
       }
+      return ();
     }
 
   }

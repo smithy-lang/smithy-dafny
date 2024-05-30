@@ -17,9 +17,9 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   class BitCounter extends Action<StreamEvent<seq<uint8>, Error>, ()> {
 
     var sumSoFar: int32
-    const outStream: Stream<StreamEvent<int32, Error>>
+    const outStream: SimpleStream<StreamEvent<int32, Error>>
 
-    constructor(outStream: Stream<StreamEvent<int32, Error>>) 
+    constructor(outStream: SimpleStream<StreamEvent<int32, Error>>) 
       ensures fresh(Repr)
     {
       sumSoFar := 0;
@@ -52,7 +52,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   {
     var outStream := new SimpleStream<StreamEvent<int32, Error>>();
     var counter := new BitCounter(outStream);
-    input.bits.OnNext(counter);
+    var _ := input.bits.Call(counter);
     return Success(CountBitsOutput(sum := outStream));
   }
 
@@ -81,9 +81,9 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   class Chunker extends Action<StreamEvent<seq<uint8>, Error>, ()> {
 
-    const outStream: Stream<StreamEvent<seq<uint8>, Error>>
+    const outStream: SimpleStream<StreamEvent<seq<uint8>, Error>>
 
-    constructor(outStream: Stream<StreamEvent<seq<uint8>, Error>>)
+    constructor(outStream: SimpleStream<StreamEvent<seq<uint8>, Error>>)
       ensures fresh(Repr) 
     {
       this.outStream := outStream;
@@ -113,7 +113,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   {
     var outStream := new SimpleStream<StreamEvent<seq<uint8>, Error>>();
     var chunker := new Chunker(outStream);
-    input.bytesIn.OnNext(chunker);
+    var _ := input.bytesIn.Call(chunker);
 
     return Success(ChunksOutput(bytesOut := outStream));
   }
