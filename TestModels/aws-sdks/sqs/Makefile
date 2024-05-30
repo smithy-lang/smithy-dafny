@@ -27,6 +27,14 @@ AWS_SDK_CMD=--aws-sdk
 # DEPENDENT-MODELS:=
 
 
+# Override calling the polymorph CLI to invoke the Smithy build instead
+_polymorph_dafny:
+	./gradlew polymorphDafny
+
+_polymorph_dotnet:
+	./gradlew polymorphDotnet
+
+
 # There is no wrapped target for aws-sdk types
 _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;

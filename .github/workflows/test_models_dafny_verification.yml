@@ -49,6 +49,7 @@ jobs:
             TestModels/Union,
             TestModels/aws-sdks/ddb,
             TestModels/aws-sdks/kms,
+            TestModels/aws-sdks/sqs,
             TestModels/aws-sdks/sqs-via-cli,
           ]
         os: [ubuntu-latest]
