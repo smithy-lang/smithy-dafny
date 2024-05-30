@@ -53,7 +53,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
             if (!input.hasTrait(UnitTypeTrait.class) && input.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
                 final var inputSymbol = symbolProvider.toSymbol(input);
-                writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), writer -> {
+                writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
                     writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(serviceShape));
                     writer.write("""
                                          func $L(nativeInput $L)($L) {
@@ -68,7 +68,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             final var output = model.expectShape(operation.getOutputShape());
             if (!output.hasTrait(UnitTypeTrait.class) && output.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
                 final var outputSymbol = symbolProvider.toSymbol(output);
-                writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), writer -> {
+                writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
                     writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(serviceShape));
                     writer.write("""
                                          func $L(nativeOutput $L)($L) {
@@ -92,7 +92,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                     final var input = model.expectShape(operation.getInputShape());
                     if (!input.hasTrait(UnitTypeTrait.class)  && input.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
                         final var inputSymbol = symbolProvider.toSymbol(input);
-                        writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), writer -> {
+                        writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
                             writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(serviceShape));
                             writer.write("""
                                                  func $L(nativeInput $L)($L) {
@@ -107,7 +107,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                     final var output = model.expectShape(operation.getOutputShape());
                     if (!output.hasTrait(UnitTypeTrait.class)  && output.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
                         final var outputSymbol = symbolProvider.toSymbol(output);
-                        writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), writer -> {
+                        writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
                             writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(serviceShape));
                             writer.write("""
                                                  func $L(nativeOutput $L)($L) {
@@ -140,7 +140,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             if (!input.hasTrait(UnitTypeTrait.class) && input.toShapeId().getNamespace().equals(service.toShapeId().getNamespace())) {
                 final var inputSymbol = context.symbolProvider().toSymbol(input);
                 System.out.println(inputSymbol);
-                delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(service), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(service), writer -> {
+                delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(service), FROM_DAFNY), SmithyNameResolver.shapeNamespace(service), writer -> {
                     writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(service));
 
                     writer.write("""
@@ -157,7 +157,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             if (!output.hasTrait(UnitTypeTrait.class) && output.toShapeId().getNamespace().equals(service.toShapeId().getNamespace())) {
                 final var outputSymbol = context.symbolProvider().toSymbol(output);
 
-                delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(service), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(service), writer -> {
+                delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(service), FROM_DAFNY), SmithyNameResolver.shapeNamespace(service), writer -> {
                     writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(service));
 
                     writer.write("""
@@ -183,7 +183,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                     if (!input.hasTrait(UnitTypeTrait.class) && input.toShapeId().getNamespace().equals(service.toShapeId().getNamespace())) {
                         final var inputSymbol = context.symbolProvider().toSymbol(input);
 
-                        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(service), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(service), writer -> {
+                        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(service), FROM_DAFNY), SmithyNameResolver.shapeNamespace(service), writer -> {
                             writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(service));
 
                             writer.write("""
@@ -200,7 +200,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                     if (!output.hasTrait(UnitTypeTrait.class) && output.toShapeId().getNamespace().equals(service.toShapeId().getNamespace())) {
                         final var outputSymbol = context.symbolProvider().toSymbol(output);
 
-                        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(service), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(service), writer -> {
+                        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(service), FROM_DAFNY), SmithyNameResolver.shapeNamespace(service), writer -> {
                             writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(service));
 
                             writer.write("""
@@ -227,7 +227,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             final GoDelegator delegator
     ) {
         final var targetShape = context.model().expectShape(operation.getInputShape());
-        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(operation), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(operation), writer -> {
+        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(operation), TO_DAFNY), SmithyNameResolver.shapeNamespace(operation), writer -> {
                                                     final var input = targetShape.accept(new SmithyToDafnyShapeVisitor(
                                                             context,
                                                             "nativeInput",
@@ -248,7 +248,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             final GoDelegator delegator
     ) {
         final var targetShape = context.model().expectShape(operation.getOutputShape());
-        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(operation), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(operation), writer -> {
+        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(operation), TO_DAFNY), SmithyNameResolver.shapeNamespace(operation), writer -> {
                                     final var input = targetShape.accept(new SmithyToDafnyShapeVisitor(
                                             context,
                                             "nativeOutput",
@@ -268,7 +268,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             final OperationShape operation,
             final GoDelegator delegator
     ) {
-        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(operation), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(operation), writer -> {
+        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(operation), FROM_DAFNY), SmithyNameResolver.shapeNamespace(operation), writer -> {
 
             final var inputShape = operation.getInputShape();
 
@@ -291,7 +291,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             final OperationShape operation,
             final GoDelegator delegator
     ) {
-        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(operation), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(operation), writer -> {
+        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(operation), FROM_DAFNY), SmithyNameResolver.shapeNamespace(operation), writer -> {
 
             final var outputShape = operation.getOutputShape();
 
@@ -314,7 +314,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
         final var localServiceTrait = service.expectTrait(LocalServiceTrait.class);
         final var configShape = context.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
-        context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(service), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(service), writer -> {
+        context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(service), TO_DAFNY), SmithyNameResolver.shapeNamespace(service), writer -> {
             writer.write("""
                                  func $L(nativeInput $L)($L) {
                                      ${C|}
@@ -344,7 +344,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                 continue;
             }
 
-            context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(errorShape), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(errorShape), writer -> {
+            context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(errorShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(errorShape), writer -> {
                 writer.write("""
                                      func $L(nativeInput $L)($L) {
                                          ${C|}
@@ -364,7 +364,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             });
         }
 
-            context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(context.settings().getService(context.model())), TO_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(context.settings().getService(context.model())), writer -> {
+            context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
                 writer.write("""
 func CollectionOfErrors_Input_ToDafny(nativeInput $L.CollectionOfErrors)($L.Error) {
 	var e []interface{}
@@ -400,7 +400,7 @@ func OpaqueError_Input_ToDafny(nativeInput $L.OpaqueError)($L.Error) {
         final var localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
         final var configShape = context.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
-        context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(serviceShape), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(configShape), writer -> {
+        context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), FROM_DAFNY), SmithyNameResolver.shapeNamespace(configShape), writer -> {
             writer.write("""
                                  func $L(dafnyOutput $L)($L) {
                                      ${C|}
@@ -428,7 +428,7 @@ func OpaqueError_Input_ToDafny(nativeInput $L.OpaqueError)($L.Error) {
             if (!errorShape.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
                 continue;
             }
-            context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(errorShape), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(errorShape), writer -> {
+            context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(errorShape), FROM_DAFNY), SmithyNameResolver.shapeNamespace(errorShape), writer -> {
                 writer.write("""
                                      func $L(dafnyOutput $L)($L) {
                                          ${C|}
@@ -448,7 +448,7 @@ func OpaqueError_Input_ToDafny(nativeInput $L.OpaqueError)($L.Error) {
             });
         }
 
-        context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.smithyTypeConversionNamespace(context.settings().getService(context.model())), FROM_DAFNY), SmithyNameResolver.smithyTypeConversionNamespace(context.settings().getService(context.model())), writer -> {
+        context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(context.settings().getService(context.model())), FROM_DAFNY), SmithyNameResolver.shapeNamespace(context.settings().getService(context.model())), writer -> {
             writer.write("""
 func CollectionOfErrors_Output_FromDafny(dafnyOutput $L.Error)($L.CollectionOfErrors) {
     listOfErrors := dafnyOutput.Dtor_list()
