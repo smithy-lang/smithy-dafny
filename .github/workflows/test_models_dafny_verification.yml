@@ -87,6 +87,12 @@ jobs:
         with:
           dafny-version: ${{ matrix.dafny-version }}
 
+      - name: Setup Java 17 for codegen
+        uses: actions/setup-java@v3
+        with:
+          distribution: "corretto"
+          java-version: "17"
+
       - name: Generate Polymorph Wrapper Dafny code
         working-directory: ./${{ matrix.library }}
         run: |
