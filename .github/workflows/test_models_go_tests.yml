@@ -16,7 +16,7 @@ jobs:
           TestModels/Aggregate,
           # TestModels/AggregateReferences,
           TestModels/CodegenPatches,
-          # TestModels/Constraints,
+          TestModels/Constraints,
           TestModels/Constructor,
           # TestModels/Dependencies,
           TestModels/Errors,
