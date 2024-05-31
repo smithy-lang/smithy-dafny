@@ -68,7 +68,6 @@ module StandardLibrary.Actions {
   // by collecting values and blocking until
   // one shows up
 
-  // Cheating for now, since this can't block
   class SimpleStream<T(0)> extends Action<Action<T, ()>, ()> {
 
     var values: seq<T>
@@ -123,12 +122,6 @@ module StandardLibrary.Actions {
       && this in Repr
       && iter in Repr && iter.Repr <= Repr
       && forall a <- callbacks :: a in Repr && a.Repr <= Repr
-    }
-
-    method Put(value: Option<T>)
-      modifies Repr
-    {
-      expect false;
     }
 
     method {:verify false} Call(a: Action<Option<T>, ()>) returns (nothing: ())
