@@ -163,7 +163,7 @@ public class GoPointableIndex implements KnowledgeIndex {
             return false;
         }
 
-        if (targetShape.isIntegerShape() && !member.hasTrait(RequiredTrait.class)) {
+        if (targetShape.isIntegerShape() && !member.hasTrait(RequiredTrait.class) && !model.expectShape(member.getContainer()).isMapShape()) {
             return true;
         }
 
@@ -207,6 +207,7 @@ public class GoPointableIndex implements KnowledgeIndex {
         }
 
         if (shape.isIntegerShape() && !shape.hasTrait(RequiredTrait.class)) {
+            System.out.println(shape);
             return true;
         }
 
