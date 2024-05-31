@@ -64,6 +64,10 @@ module StandardLibrary.Actions {
   // Similar to Result, but for delivering a sequence of values instead of just one
   type StreamEvent<T, E> = Option<Result<T, E>>
 
+  // TODO: Extern in Concurrent that turns a Stream into an Enumerator
+  // by collecting values and blocking until
+  // one shows up
+
   // Cheating for now, since this can't block
   class SimpleStream<T(0)> extends Action<Action<T, ()>, ()> {
 
