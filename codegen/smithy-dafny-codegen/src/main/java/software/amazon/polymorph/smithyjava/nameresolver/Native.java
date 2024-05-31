@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
 
+import org.reactivestreams.Publisher;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
@@ -163,8 +164,7 @@ public class Native extends NameResolver {
       }
       case BLOB -> {
         if (shape.hasTrait(StreamingTrait.class)) {
-          // TODO: Need to know whether this is input or output somehow
-          yield ClassName.get(AsyncRequestBody.class);
+          yield ParameterizedTypeName.get(Publisher.class, ByteBuffer.class);
         } else {
           yield NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
         }

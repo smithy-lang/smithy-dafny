@@ -58,9 +58,6 @@ module StandardLibrary.Actions {
 
   }
 
-
-  type Stream<T> = Action<Action<T, ()>, ()>
-
   // Similar to Result, but for delivering a sequence of values instead of just one
   type StreamEvent<T, E> = Option<Result<T, E>>
 
@@ -127,7 +124,7 @@ module StandardLibrary.Actions {
     method {:verify false} Call(a: Action<Option<T>, ()>) returns (nothing: ())
       modifies Repr
     {
-      // TODO: Actual Action specs to prove this terminates
+      // TODO: Actual Action specs to prove this terminates (iter has to be an Enumerable)
       while (true) {
         var next := iter.Call(());
         var _ := a.Call(next);
