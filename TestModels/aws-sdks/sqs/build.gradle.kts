@@ -32,7 +32,7 @@ tasks.register("polymorphDafny") {
     doLast {
         // if needed, specify a projection to use instead
         // default (no projection) is "source"
-        val projectionName = "source"
+        val projectionName = "list-queues-only"
         copy {
             from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/Model/"))
             into("model")
@@ -51,7 +51,7 @@ tasks.register("polymorphDotnet") {
     doLast {
         // if needed, specify a projection to use instead
         // default (no projection) is "source"
-        val projectionName = "source"
+        val projectionName = "list-queues-only"
         copy {
             // build plugin calls it "dotnet" and CLI calls it "net"
             from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/dotnet"))

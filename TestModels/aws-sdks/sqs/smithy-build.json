@@ -1,14 +1,21 @@
 {
   "version": "1.0",
   "projections": {
-    "permissions-only": {
+    "list-queues-only": {
       "transforms": [
         {
-          "name": "includeServices",
+          "name": "excludeShapesBySelector",
           "args": {
-            "services": ["com.amazonaws.sqs#AmazonSQS"]
+            "selector": "[id|name *= 'Change', 'Create', 'Get', 'Delete', 'Send', 'Permission', 'Tag', 'Untag', 'DeadLetter', 'Purge', 'Receive', 'Set']"
           }
         },
+        {
+          "name": "removeUnusedShapes"
+        }
+      ]
+    },
+    "permissions-only": {
+      "transforms": [
         {
           "name": "includeShapesBySelector",
           "args": {
