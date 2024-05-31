@@ -123,29 +123,27 @@ module StandardLibraryJavaConversions {
       this.subscribeAction := subscribeAction;
     }
 
-    method {:verify false} subscribe(s: Subscriber<T>) returns (f: Subscription) {
+    method {:verify false} subscribe(s: Subscriber<T>) returns (sub: Subscription) {
       var action := new SubscriberAction(s);
       var _ := subscribeAction.Call(action);
+      sub := new NoOpSubscription;
     }
   }
 
-  class SequentialSubscription<T> extends Subscription {
-    const subscriber: Subscriber<T>
-
-    constructor(s: Subscriber<T>) {
-      this.subscriber := s;
-    }
+  class NoOpSubscription<T> extends Subscription {
 
     method request(n: int64) {
 
     }
 
-    method cancel()
+    method cancel() {
+      // No-op for now - could unset subscriber to allow garbage collection later
+    }
   }
 
   method AsPublisher<T>(a: Stream<StreamEvent<T, Throwable>>) returns (s: Publisher<T>) {
-    
-  }
+    s := new ActionPublisher(a);
+  } 
 
   // ByteBuffers
 

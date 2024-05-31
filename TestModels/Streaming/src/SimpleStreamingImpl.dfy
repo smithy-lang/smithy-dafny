@@ -69,6 +69,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     // TODO: Actually compute the binary
     var fakeBinary := [Success([12]), Success([34, 56])];
     var fakeBinaryIter := new SeqEnumerator(fakeBinary);
+    
     var outStream := new LazyStream<Result<seq<uint8>, Error>>(fakeBinaryIter);
 
     return Success(BinaryOfOutput(binary := outStream));

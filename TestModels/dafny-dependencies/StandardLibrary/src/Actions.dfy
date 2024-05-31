@@ -93,37 +93,31 @@ module StandardLibrary.Actions {
 
   }
 
-  // Similar to Result, but for delivering a sequence of values instead of just one
+  // TODO: Basic spec of a Stream having a pending sequence of events,
+  // and hence each action subscribed will EVENTUALLY have Consumed that sequence.
+  // But when exactly is underspecified to allow for external concurrency.
+  // Dafny-native implementations could have a Do() method that feeds a single value into the consumer.
+  // TODO: How to expose control over when?
+  // can backpressure be a meta- stream event?
+  type Stream<T> = Action<Action<T, ()>, ()>
+
+  /// Similar to Result, but for delivering a sequence of values instead of just one.
+  // This works better (as opposed to Result<Option<T>, E>)
+  // because 
   type StreamEvent<T, E> = Option<Result<T, E>>
 
-  // TODO: can backpressure be a meta- stream event?
-  type Stream<T> = Action<Action<T, ()>, ()>
+  // TODO: How to communicate backpressure
+  // Subscription as Action<(Request(n) or Cancel), ()> ?
+  // Publisher is actually a Stream factory -> Action<Action<T, ()>, Action<SubscriptionEvent, ()>>
+
+  // TODO: Too Java specific
+  datatype SubscriptionEvent = Request(n: nat) | Cancel
     
   method {:verify false} Subscribe<T>(s: Stream<T>, a: Action<T, ()>) {
     var _ := s.Call(a);
   }
 
   type any
-
-  // // Composition of dispatch and SimpleStream
-  // // TODO: DispatchStream or something
-  // trait EventEmitter {
-  //   var handlers: map<string, Action<any, ()>>
-  //   method {:verify false} Emit(name:string, event: any) {
-  //     var _ := handlers[name].Call(event);
-  //   }
-  //   method {:verify false} Listen(name:string, a: Action<any, ()>) {
-  //     handlers := handlers[name := a];
-  //   }
-  // }
-
-  // class RyanStream extends EventEmitter {
-    
-  //   constructor(a: Action<any, ()>) {
-  //     Listen("onData", a);
-  //     Listen("onBackpressure", ...);
-  //   }
-  // }
 
   // TODO: Convenience utility for piping
 
@@ -171,6 +165,7 @@ module StandardLibrary.Actions {
 
   }
 
+  // TODO: How to add backpressure?
   class LazyStream<T(0)> extends Action<Action<Option<T>, ()>, ()> {
 
     const iter: Action<(), Option<T>>
