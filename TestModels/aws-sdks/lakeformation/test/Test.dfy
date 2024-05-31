@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 include "../src/Index.dfy"
 
 module Tester {
@@ -12,9 +15,11 @@ module Tester {
 
     var req: Types.ListResourcesRequest :=
       Types.ListResourcesRequest();
+    var resp := client.ListResources(req);
 
-    // Just expecting that the request is successful.
-    var ret :- expect client.ListResources(req);
+    // The testing role doesn't have permissions yet,
+    // so expect this to fail.
+    expect resp.Failure?;
   }
 
 

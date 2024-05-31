@@ -66,23 +66,34 @@ public class IOUtils {
     }
   }
 
-  public static void writeTemplatedFile(Class<?> klass, Path rootPath, String templatePath, Map<String, String> parameters) {
-    String content = IoUtils.readUtf8Resource(klass, "/templates/" + templatePath);
+  public static void writeTemplatedFile(
+    Class<?> klass,
+    Path rootPath,
+    String templatePath,
+    Map<String, String> parameters
+  ) {
+    String content = IoUtils.readUtf8Resource(
+      klass,
+      "/templates/" + templatePath
+    );
 
     content = evalTemplate(content, parameters);
     templatePath = evalTemplate(templatePath, parameters);
 
     Path outputPath = rootPath.resolve(templatePath);
     try {
-        Files.createDirectories(outputPath.getParent());
+      Files.createDirectories(outputPath.getParent());
     } catch (IOException e) {
-        throw new UncheckedIOException(e);
+      throw new UncheckedIOException(e);
     }
 
     IOUtils.writeToFile(content, outputPath.toFile());
   }
 
-  public static String evalTemplate(String template, Map<String, String> context) {
+  public static String evalTemplate(
+    String template,
+    Map<String, String> context
+  ) {
     SimpleCodeWriter writer = new SimpleCodeWriter()
       .disableNewlines()
       .insertTrailingNewline(false);

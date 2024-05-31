@@ -115,7 +115,7 @@ jobs:
       - name: Download Dependencies
         working-directory: ./${{ matrix.library }}
         run: make setup_net
-  
+
       - name: Compile ${{ matrix.library }} implementation
         shell: bash
         working-directory: ./${{ matrix.library }}

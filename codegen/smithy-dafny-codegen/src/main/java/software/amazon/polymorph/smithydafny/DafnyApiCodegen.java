@@ -890,9 +890,9 @@ public class DafnyApiCodegen {
           ? TokenTree.of(
             !implementationType.equals(ImplementationType.ABSTRACT)
               ? "// The public method to be called by library consumers"
-              : "// The private method to be refined by the library developer")
-          : TokenTree.empty()
-        ,
+              : "// The private method to be refined by the library developer"
+          )
+          : TokenTree.empty(),
         operationMethod
       )
       .lineSeparated();
@@ -2776,82 +2776,88 @@ public class DafnyApiCodegen {
   public Map<Path, TokenTree> generateSkeleton() {
     final String namespace = serviceShape.getId().getNamespace();
     final String baseModuleName = DafnyNameResolver.dafnyBaseModuleName(
-            namespace
+      namespace
     );
     final String typesModuleName = DafnyNameResolver.dafnyTypesModuleName(
-            namespace
+      namespace
     );
     final Path path = Path.of("%sImpl.dfy".formatted(baseModuleName));
-    TokenTree includeDirectives = TokenTree.of("include \"../Model/%s.dfy\"".formatted(typesModuleName));
-    TokenTree concreteModuleTemplate = generateTemplateOperationsModule(serviceShape);
+    TokenTree includeDirectives = TokenTree.of(
+      "include \"../Model/%s.dfy\"".formatted(typesModuleName)
+    );
+    TokenTree concreteModuleTemplate = generateTemplateOperationsModule(
+      serviceShape
+    );
     final TokenTree fullCode = TokenTree
-            .of(
-                    includeDirectives,
-                    concreteModuleTemplate
-            )
-            .lineSeparated();
+      .of(includeDirectives, concreteModuleTemplate)
+      .lineSeparated();
     return Map.of(path, fullCode);
   }
 
   private TokenTree generateTemplateOperationsModule(
-          final ServiceShape serviceShape
+    final ServiceShape serviceShape
   ) {
     final String baseModuleName = DafnyNameResolver.dafnyBaseModuleName(
-            serviceShape.getId().getNamespace()
+      serviceShape.getId().getNamespace()
     );
     final TokenTree header = TokenTree.of(
-            "module %sImpl refines Abstract%sOperations".formatted(baseModuleName, baseModuleName)
+      "module %sImpl refines Abstract%sOperations".formatted(
+          baseModuleName,
+          baseModuleName
+        )
     );
 
     final String internalConfigType = DafnyNameResolver.internalConfigType();
 
     final TokenTree body = TokenTree
-            .of(
-                    TokenTree.of("datatype Config = Config"),
-                    TokenTree.of("type %s = Config".formatted(internalConfigType)),
-                    TokenTree.of(
-                            "predicate %s(config: %s)".formatted(
-                                    DafnyNameResolver.validConfigPredicate(),
-                                    internalConfigType
-                            )
-                    ),
-                    TokenTree.of("{true}"),
-                    TokenTree.of(
-                            "function %s(config: %s): set<object>".formatted(
-                                    DafnyNameResolver.modifiesInternalConfig(),
-                                    internalConfigType
-                            )
-                    ),
-                    TokenTree.of("{{}}"),
-                    TokenTree
-                            .of(
-                                    serviceShape
-                                            .getAllOperations()
-                                            .stream()
-                                            .map(operation ->
-                                                    TokenTree
-                                                            .of(
-                                                                    generateEnsuresPubliclyPredicate(serviceShape, operation),
-                                                                    TokenTree.of("{true}"),
-                                                                    generateBodilessOperationMethodThatEnsuresCallEvents(
-                                                                            serviceShape,
-                                                                            operation,
-                                                                            ImplementationType.ABSTRACT,
-                                                                            false
-                                                                    ),
-                                                                    TokenTree.of("{"),
-                                                                    TokenTree.of("  expect false, \"...that you'll fill this in\";"),
-                                                                    TokenTree.of("}")
-                                                            )
-                                                            .flatten()
-                                                            .lineSeparated()
-                                            )
-                            )
-                            .lineSeparated()
+      .of(
+        TokenTree.of("datatype Config = Config"),
+        TokenTree.of("type %s = Config".formatted(internalConfigType)),
+        TokenTree.of(
+          "predicate %s(config: %s)".formatted(
+              DafnyNameResolver.validConfigPredicate(),
+              internalConfigType
             )
-            .flatten()
-            .lineSeparated()
-            .braced();
+        ),
+        TokenTree.of("{true}"),
+        TokenTree.of(
+          "function %s(config: %s): set<object>".formatted(
+              DafnyNameResolver.modifiesInternalConfig(),
+              internalConfigType
+            )
+        ),
+        TokenTree.of("{{}}"),
+        TokenTree
+          .of(
+            serviceShape
+              .getAllOperations()
+              .stream()
+              .map(operation ->
+                TokenTree
+                  .of(
+                    generateEnsuresPubliclyPredicate(serviceShape, operation),
+                    TokenTree.of("{true}"),
+                    generateBodilessOperationMethodThatEnsuresCallEvents(
+                      serviceShape,
+                      operation,
+                      ImplementationType.ABSTRACT,
+                      false
+                    ),
+                    TokenTree.of("{"),
+                    TokenTree.of(
+                      "  expect false, \"...that you'll fill this in\";"
+                    ),
+                    TokenTree.of("}")
+                  )
+                  .flatten()
+                  .lineSeparated()
+              )
+          )
+          .lineSeparated()
+      )
+      .flatten()
+      .lineSeparated()
+      .braced();
 
     return TokenTree.of(header, body);
   }

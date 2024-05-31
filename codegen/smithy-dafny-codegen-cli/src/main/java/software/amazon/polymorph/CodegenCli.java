@@ -282,7 +282,7 @@ public class CodegenCli {
           .builder()
           .longOpt("generate-everything")
           .desc(
-                  "<optional> generate complete projects, include project files and other auxillary code files"
+            "<optional> generate complete projects, include project files and other auxillary code files"
           )
           .build()
       );
@@ -396,8 +396,8 @@ public class CodegenCli {
         .map(Paths::get);
 
       Optional<Path> includeDafnyFile = Optional
-              .ofNullable(commandLine.getOptionValue("include-dafny"))
-              .map(Paths::get);
+        .ofNullable(commandLine.getOptionValue("include-dafny"))
+        .map(Paths::get);
 
       Optional<Path> patchFilesDir = Optional
         .ofNullable(commandLine.getOptionValue("patch-files-dir"))
