@@ -7,33 +7,33 @@ module StandardLibraryJavaConversions {
   import opened StandardLibrary.Actions
   import opened Wrappers
 
-  class {:compile false} {:extern "java.lang.Void"} Void {
+  // class {:compile false} {:extern "java.lang.Void"} Void {
 
-  }
+  // }
 
-  trait {:compile false} {:extern "java.util.function.Consumer"} Consumer<T> {
+  // trait {:compile false} {:extern "java.util.function.Consumer"} Consumer<T> {
 
-    method {:extern} accept(t: T)
-  }
+  //   method {:extern} accept(t: T)
+  // }
   
   trait {:compile false} {:extern "java.lang.Throwable"} Throwable {
 
   }
 
-  trait {:compile false} {:compile false} {:extern "java.util.concurrent.CompletableFuture"} CompletableFuture<T> {
+  trait {:compile false} {:extern "java.util.concurrent.CompletableFuture"} CompletableFuture<T> {
 
   }
 
   trait {:compile false} {:extern "org.reactivestreams.Subscription"} Subscription {
 
-    method {:extern} request(n: int64)
+    method request(n: int64)
 
-    method {:extern} cancel()
+    method cancel()
   }
 
-  trait {:compile false} {:extern "software.amazon.awssdk.core.asyn.SdkPublisher"} SdkPublisher<T> {
+  trait {:compile false} {:extern "org.reactivestreams.Publisher"} Publisher<T> {
 
-    method {:extern} subscribe(s: Subscriber<T>) returns (f: Subscription)
+    method subscribe(s: Subscriber<T>) returns (f: Subscription)
 
   }
 
@@ -52,7 +52,7 @@ module StandardLibraryJavaConversions {
     method onComplete()
   }
 
-  class SequentialSubscriber<T> extends Subscriber<T> {
+  class SequentialActionSubscriber<T> extends Subscriber<T> {
 
     var subscription: Subscription?
     var action: Action<StreamEvent<T, Throwable>, ()>
@@ -84,11 +84,73 @@ module StandardLibraryJavaConversions {
   }
 
   method AsSequentialSubscriber<T>(a: Action<StreamEvent<T, Throwable>, ()>) returns (s: Subscriber<T>) {
-    s := new SequentialSubscriber(a);
+    s := new SequentialActionSubscriber(a);
   }
 
+  class SubscriberAction<T> extends Action<StreamEvent<T, Throwable>, ()> {
+
+    const subscriber: Subscriber<T>
+
+    constructor(subscriber: Subscriber<T>) {
+      this.subscriber := subscriber;
+    }
+
+    // TODO: Need built in buffering so the subscriber isn't actually
+    // called unless the subscription requests values.
+    // OR expose an isomorphic concept and thread it through.
+    method Call(e: StreamEvent<T, Throwable>) returns (nothing: ()) {
+      match e {
+        case Some(Success(value)) => {
+          subscriber.onNext(value);
+        }
+        case Some(Failure(throwable)) => {
+          subscriber.onError(throwable);
+        }
+        case None => {
+          subscriber.onComplete();
+        }
+      }
+      return ();
+    }
+
+  }
+
+
+  class ActionPublisher<T> extends Publisher<T> {
+    const subscribeAction: Action<Action<StreamEvent<T, Throwable>, ()>, ()>
+
+    constructor(subscribeAction: Action<Action<StreamEvent<T, Throwable>, ()>, ()>) {
+      this.subscribeAction := subscribeAction;
+    }
+
+    method {:verify false} subscribe(s: Subscriber<T>) returns (f: Subscription) {
+      var action := new SubscriberAction(s);
+      var _ := subscribeAction.Call(action);
+    }
+  }
+
+  class SequentialSubscription<T> extends Subscription {
+    const subscriber: Subscriber<T>
+
+    constructor(s: Subscriber<T>) {
+      this.subscriber := s;
+    }
+
+    method request(n: int64) {
+
+    }
+
+    method cancel()
+  }
+
+  method AsPublisher<T>(a: Stream<StreamEvent<T, Throwable>>) returns (s: Publisher<T>) {
+    
+  }
+
+  // ByteBuffers
+
   // TODO: Rich specification to fill out here.
-  // This could be useful for analysize existing Java codebases to see
+  // This could be useful for analyzing existing Java codebases to see
   // if they use ByteBuffers correctly!
   trait {:compile false} {:extern "java.nio.ByteBuffer"} ByteBuffer {
     function method {:extern} remaining(): int32

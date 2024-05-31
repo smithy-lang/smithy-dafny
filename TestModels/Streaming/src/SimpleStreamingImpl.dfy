@@ -52,7 +52,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   {
     var outStream := new SimpleStream<StreamEvent<int32, Error>>();
     var counter := new BitCounter(outStream);
-    var _ := input.bits.Call(counter);
+    Subscribe(input.bits, counter);
     return Success(CountBitsOutput(sum := outStream));
   }
 
