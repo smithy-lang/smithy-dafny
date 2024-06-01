@@ -21,79 +21,84 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 /**
  * A trait representing that a structure should be "unwrapped" to its member whenever it is referenced.
  */
-public class PositionalTrait extends AbstractTrait implements ToSmithyBuilder<PositionalTrait> {
-    public static final ShapeId ID = ShapeId.from("aws.polymorph#positional");
+public class PositionalTrait
+  extends AbstractTrait
+  implements ToSmithyBuilder<PositionalTrait> {
 
-    private PositionalTrait(Builder builder) {
-        super(ID, builder.getSourceLocation());
-    }
+  public static final ShapeId ID = ShapeId.from("aws.polymorph#positional");
 
-    public static final class Provider extends AbstractTrait.Provider {
-        public Provider() {
-            super(ID);
-        }
+  private PositionalTrait(Builder builder) {
+    super(ID, builder.getSourceLocation());
+  }
 
-        @Override
-        public Trait createTrait(ShapeId target, Node value) {
-            return builder().build();
-        }
-    }
+  public static final class Provider extends AbstractTrait.Provider {
 
-    public static Builder builder() {
-        return new Builder();
+    public Provider() {
+      super(ID);
     }
 
     @Override
-    protected Node createNode() {
-        return Node.objectNodeBuilder()
-                .sourceLocation(getSourceLocation())
-                .build();
+    public Trait createTrait(ShapeId target, Node value) {
+      return builder().build();
     }
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  @Override
+  protected Node createNode() {
+    return Node.objectNodeBuilder().sourceLocation(getSourceLocation()).build();
+  }
+
+  @Override
+  public SmithyBuilder<PositionalTrait> toBuilder() {
+    return builder().sourceLocation(getSourceLocation());
+  }
+
+  /** Builder for {@link PositionalTrait}. */
+  public static final class Builder
+    extends AbstractTraitBuilder<PositionalTrait, Builder> {
+
+    private Builder() {}
 
     @Override
-    public SmithyBuilder<PositionalTrait> toBuilder() {
-        return builder()
-                .sourceLocation(getSourceLocation());
+    public PositionalTrait build() {
+      return new PositionalTrait(this);
     }
+  }
 
-    /** Builder for {@link PositionalTrait}. */
-    public static final class Builder extends AbstractTraitBuilder<PositionalTrait, Builder> {
+  public static Shape getDefinition() {
+    final Trait positionalTraitDefinition = TraitDefinition
+      .builder()
+      .selector(Selector.parse("structure"))
+      .build();
+    return StructureShape
+      .builder()
+      .id(PositionalTrait.ID)
+      .addTrait(positionalTraitDefinition)
+      .build();
+  }
 
-        private Builder() {}
-
-        @Override
-        public PositionalTrait build() {
-            return new PositionalTrait(this);
-        }
+  public static void validateUse(StructureShape shape) {
+    if (!shape.hasTrait(PositionalTrait.class)) {
+      return;
     }
-
-    public static Shape getDefinition() {
-        final Trait positionalTraitDefinition = TraitDefinition.builder()
-                .selector(Selector.parse("structure"))
-                .build();
-        return StructureShape.builder()
-                .id(PositionalTrait.ID)
-                .addTrait(positionalTraitDefinition)
-                .build();
+    if (shape.members().size() == 1) {
+      return;
     }
+    String msg =
+      "Structures with Positional Trait MUST have one and ONLY one member." +
+      " Structure: %s".formatted(shape.getId());
+    throw new IllegalArgumentException(msg);
+  }
 
-    public static void validateUse(StructureShape shape) {
-        if (!shape.hasTrait(PositionalTrait.class)) {
-            return;
-        }
-        if (shape.members().size() == 1) {
-            return;
-        }
-        String msg = "Structures with Positional Trait MUST have one and ONLY one member."
-                + " Structure: %s".formatted(shape.getId());
-        throw new IllegalArgumentException(msg);
-    }
-
-    public static MemberShape onlyMember(StructureShape shape) {
-        validateUse(shape);
-        // validateUse ensures there will be 1 member;
-        // thus we know `Optional.get()` will succeed.
-        //noinspection OptionalGetWithoutIsPresent
-        return shape.members().stream().findFirst().get();
-    }
+  public static MemberShape onlyMember(StructureShape shape) {
+    validateUse(shape);
+    // validateUse ensures there will be 1 member;
+    // thus we know `Optional.get()` will succeed.
+    //noinspection OptionalGetWithoutIsPresent
+    return shape.members().stream().findFirst().get();
+  }
 }

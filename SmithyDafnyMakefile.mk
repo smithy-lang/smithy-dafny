@@ -12,8 +12,10 @@
 # inside each project.
 
 # Variables:
-# MAX_RESOURCE_COUNT -- The Dafny report generator max resource count.
+# MAX_RESOURCE_COUNT -- The Dafny verification max resource count.
 # 	This is is per project because the verification variability can differ.
+#   Individual functions/methods/lemmas can override this limit using `{:rlimit N}`,
+#   but be aware that the attribute multiplies N by 1000!
 # VERIFY_TIMEOUT -- The Dafny verification timeout in seconds.
 # 	This is only a guard against builds taking way too long to fail.
 #   The resource count limit above is much more important for fighting brittle verification.
@@ -87,7 +89,8 @@ verify:
 		-functionSyntax:3 \
 		-verificationLogger:csv \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		-rlimit:$(MAX_RESOURCE_COUNT) \
+		$(DAFNY_OPTIONS) \
 		%
 
 # Verify single file FILE with text logger.
@@ -102,7 +105,8 @@ verify_single:
 		-functionSyntax:3 \
 		-verificationLogger:text \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		-rlimit:$(MAX_RESOURCE_COUNT) \
+		$(DAFNY_OPTIONS) \
 		$(if ${PROC},-proc:*$(PROC)*,) \
 		$(FILE)
 
@@ -117,7 +121,7 @@ verify_service:
 		-functionSyntax:3 \
 		-verificationLogger:csv \
 		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
+		$(DAFNY_OPTIONS) \
 		`find ./dafny/$(SERVICE) -name '*.dfy'` \
 
 format_dafny:
@@ -133,10 +137,13 @@ format_dafny-check:
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
+# This no longer enforces the maximum resource count,
+# as we're passing /rlimit to dafny directly now.
+# But it's still useful information to see what assertion batches
+# are close to the limit.
 dafny-reportgenerator:
 	dafny-reportgenerator \
 		summarize-csv-results \
-		--max-resource-count $(MAX_RESOURCE_COUNT) \
 		TestResults/*.csv
 
 clean-dafny-report:
@@ -194,6 +201,7 @@ transpile_implementation:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
+		$(DAFNY_OPTIONS) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES)
 
@@ -299,10 +307,11 @@ _polymorph:
 	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_JAVA) \
+	$(OUTPUT_JAVA_TEST) \
 	$(OUTPUT_DOTNET) \
-	$(OUTPUT_JAVA) \
 	$(OUTPUT_GO) \
 	$(MODULE_NAME) \
+	$(OUTPUT_RUST) \
 	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -332,12 +341,14 @@ _polymorph_wrapped:
 	$(POLYMORPH_OPTIONS)";
 
 _polymorph_dependencies:
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_$(POLYMORPH_LANGUAGE_TARGET) LIBRARY_ROOT=$(PROJECT_ROOT)/$(STD_LIBRARY), )
 	@$(foreach dependency, \
 		$(PROJECT_DEPENDENCIES), \
 		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
 	)
 
 # Generates all target runtime code for all namespaces in this project.
+# Not including Rust until is it more fully implemented.
 .PHONY: polymorph_code_gen
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
 polymorph_code_gen: _polymorph_dependencies
@@ -357,6 +368,7 @@ _polymorph_code_gen: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_code_gen: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
+_polymorph_code_gen: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_code_gen: _polymorph
 
 check_polymorph_diff:
@@ -409,11 +421,32 @@ polymorph_java:
 	done
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_java: _polymorph
 
 # Dependency for formatting generating Java code
 setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
+
+# Generates rust code for all namespaces in this project
+# Note that we rely on the patching feature of polymorph
+# to also patch the results of transpile_rust,
+# so we assume that is run first!
+.PHONY: polymorph_rust
+polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
+polymorph_rust: _polymorph_dependencies
+polymorph_rust:
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_rust ; \
+	done
+
+_polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+_polymorph_rust: _polymorph
+
+###########################
 
 .PHONY: polymorph_go
 polymorph_go: POLYMORPH_LANGUAGE_TARGET=go
@@ -425,7 +458,6 @@ polymorph_go:
 		export SERVICE=$${service} ; \
 		$(MAKE) _polymorph_go ; \
 	done
-
 
 _polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_go: MODULE_NAME=--module-name $(GO_MODULE_NAME)
@@ -525,6 +557,59 @@ mvn_staging_deploy:
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
+	$(GRADLEW) -p runtimes/java test --info
+
+########################## Rust targets
+
+# TODO: Dafny test transpilation needs manual patching to work too,
+# which isn't a high priority at this stage,
+# so don't include transpile_test_rust for now.
+transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
+
+transpile_implementation_rust: TARGET=rs
+transpile_implementation_rust: OUT=implementation_from_dafny
+transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+# The Dafny Rust code generator is not complete yet,
+# so we want to emit code even if there are unsupported features in the input.
+transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
+transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
+
+transpile_test_rust: TARGET=rs
+transpile_test_rust: OUT=tests_from_dafny
+transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
+# The Dafny Rust code generator is not complete yet,
+# so we want to emit code even if there are unsupported features in the input.
+transpile_test_rust: DAFNY_OPTIONS=-emitUncompilableCode
+transpile_test_rust: _transpile_test_all _mv_test_rust
+
+transpile_dependencies_rust: LANG=rust
+transpile_dependencies_rust: transpile_dependencies
+
+_mv_implementation_rust:
+	rm -rf runtimes/rust/dafny_impl/src
+	mkdir -p runtimes/rust/dafny_impl/src
+# TODO: Currently need to insert an import of the the StandardLibrary.
+	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
+	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	rustfmt runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	rm -rf implementation_from_dafny-rust
+_mv_test_rust:
+	rm -rf runtimes/rust/dafny_impl/tests
+	mkdir -p runtimes/rust/dafny_impl/tests
+	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
+	rustfmt runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
+	rm -rf tests_from_dafny-rust
+
+build_rust:
+	cd runtimes/rust; \
+	cargo build
+
+test_rust:
+	cd runtimes/rust; \
+	cargo test
+
+########################## Cleanup targets
 
 _clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy

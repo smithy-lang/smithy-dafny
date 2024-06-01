@@ -16,34 +16,47 @@ jobs:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_dafny_verification.yml
     with:
-      dafny: 'nightly-latest'
+      dafny: "nightly-latest"
   dafny-nightly-java:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_java_tests.yml
     with:
-      dafny: 'nightly-latest'
+      dafny: "nightly-latest"
   dafny-nightly-net:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_net_tests.yml
     with:
-      dafny: 'nightly-latest'
-  dafny-nightly-rust:
-    if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
-    uses: ./.github/workflows/test_models_rust_tests.yml
-    with:
-      dafny: 'nightly-latest'
+      dafny: "nightly-latest"
+  # This workflow is pinned to a specific commit from a feature branch
+  # that's "ahead" of master, so there's no point in testing against nightly prereleases for now.
+  # dafny-nightly-rust:
+  #   if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
+  #   uses: ./.github/workflows/test_models_rust_tests.yml
+  #   with:
+  #     dafny: "nightly-latest"
 
   cut-issue-on-failure:
     runs-on: ubuntu-latest
-    needs: [dafny-nightly-verification, dafny-nightly-java, dafny-nightly-net, dafny-nightly-rust]
+    needs: [
+        dafny-nightly-verification,
+        dafny-nightly-java,
+        dafny-nightly-net,
+        # dafny-nightly-rust,
+      ]
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     env:
       GH_TOKEN: ${{ secrets.CI_TOKEN }}
     steps:
       - name: Create release blocker on dafny-lang/dafny
         run: |
-          gh issue create \
-            --repo "dafny-lang/dafny" \
-            --title "[PRERELEASE REGRESSION] Dafny prerelease regression from ${{ github.repository }}" \
-            --body "Failure in ${{ github.workflow_ref }}. \
-            See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          id=$(gh search issues -R dafny-lang/dafny --match title "[PRERELEASE REGRESSION] Dafny prerelease regression from ${{ github.repository }}" --json number,state -q '[.[] | select( .state=="open" )][0].number')
+          if [ -n "$id" ]; then
+            gh issue comment -R dafny-lang/dafny $id \
+              -b "Another failure in ${{ github.workflow_ref }}. \
+                See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            gh issue create -R dafny-lang/dafny \
+              -t "[PRERELEASE REGRESSION] Dafny prerelease regression from ${{ github.repository }}" \
+              -b "Failure in ${{ github.workflow_ref }}. \
+                See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi

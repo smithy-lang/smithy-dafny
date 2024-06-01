@@ -31,29 +31,34 @@ import software.amazon.smithy.model.traits.TraitDefinition;
  */
 // TODO: remove this trait
 public final class DafnyUtf8BytesTrait extends AnnotationTrait {
-    public static final ShapeId ID = ShapeId.from("aws.polymorph#dafnyUtf8Bytes");
 
-    public DafnyUtf8BytesTrait(ObjectNode node) {
-        super(ID, node);
-    }
+  public static final ShapeId ID = ShapeId.from("aws.polymorph#dafnyUtf8Bytes");
 
-    public DafnyUtf8BytesTrait() {
-        this(Node.objectNode());
-    }
+  public DafnyUtf8BytesTrait(ObjectNode node) {
+    super(ID, node);
+  }
 
-    public static final class Provider extends AnnotationTrait.Provider<DafnyUtf8BytesTrait> {
-        public Provider() {
-            super(ID, DafnyUtf8BytesTrait::new);
-        }
-    }
+  public DafnyUtf8BytesTrait() {
+    this(Node.objectNode());
+  }
 
-    public static Shape getDefinition() {
-        final Trait traitDefinition = TraitDefinition.builder()
-                .selector(Selector.parse("string"))
-                .build();
-        return StructureShape.builder()
-                .id(DafnyUtf8BytesTrait.ID)
-                .addTrait(traitDefinition)
-                .build();
+  public static final class Provider
+    extends AnnotationTrait.Provider<DafnyUtf8BytesTrait> {
+
+    public Provider() {
+      super(ID, DafnyUtf8BytesTrait::new);
     }
+  }
+
+  public static Shape getDefinition() {
+    final Trait traitDefinition = TraitDefinition
+      .builder()
+      .selector(Selector.parse("string"))
+      .build();
+    return StructureShape
+      .builder()
+      .id(DafnyUtf8BytesTrait.ID)
+      .addTrait(traitDefinition)
+      .build();
+  }
 }

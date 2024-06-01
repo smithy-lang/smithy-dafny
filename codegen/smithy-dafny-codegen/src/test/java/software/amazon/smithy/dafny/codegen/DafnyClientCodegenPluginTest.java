@@ -3,14 +3,15 @@
 
 package software.amazon.smithy.dafny.codegen;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 public class DafnyClientCodegenPluginTest {
-    @Test
-    public void emptyTest() {
-        // FIXME placeholder test
-        assertTrue(true);
-    }
+
+  @Test
+  public void emptyTest() {
+    // FIXME placeholder test
+    assertTrue(true);
+  }
 }

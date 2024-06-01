@@ -1,0 +1,1455 @@
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+index ca9dc612..0d923e39 100644
+--- b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+@@ -1,7 +1,7 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ pub use dafny_standard_library::implementation_from_dafny::*;
+-
++    
+ pub mod r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes {
+     #[derive(PartialEq, Clone)]
+     pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
+@@ -444,7 +444,7 @@ pub mod r#_SimpleLongImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(input.value().value());
++            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*input.value().value());
+             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
+             value: input.value().clone()
+           });
+@@ -457,7 +457,7 @@ pub mod r#_SimpleLongImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(res.value().value());
++            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*res.value().value());
+             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
+                 super::r#_Wrappers_Compile::Result::<
+                     ::std::rc::Rc<
+@@ -491,8 +491,8 @@ pub mod r#_SimpleLongImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(input.value().value());
+-            if !(input.value().value() == 33) {
++            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*input.value().value());
++            if !(input.value().value() == &33i64) {
+                 panic!("Halt")
+             };
+             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
+@@ -507,7 +507,7 @@ pub mod r#_SimpleLongImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(res.value().value());
++            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*res.value().value());
+             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
+                 super::r#_Wrappers_Compile::Result::<
+                     ::std::rc::Rc<
+@@ -522,10 +522,11 @@ pub mod r#_SimpleLongImpl_Compile {
+             return output.read();
+         }
+         pub fn ValidateLongType(input: i64) -> () {
++	    return;
+             if input >= 0 {
+                 if input
+                     >= ::dafny_runtime::truncate!(
+-                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(
++                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(
+                         ),
+                         i64
+                     )
+@@ -534,7 +535,7 @@ pub mod r#_SimpleLongImpl_Compile {
+                 };
+                 if !(0 < input
+                     + ::dafny_runtime::truncate!(
+-                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(
++                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(
+                         ),
+                         i64
+                     ))
+@@ -543,10 +544,10 @@ pub mod r#_SimpleLongImpl_Compile {
+                 }
+             } else {
+                 if input < 0 {
+-                    if input < 0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i64) {
++                    if input < 0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(), i64) {
+             return ();
+           };
+-                    if !(input + (0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i64)) < 0) {
++                    if !(input + (0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(), i64)) < 0) {
+             panic!("Halt")
+           }
+                 } else {
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs
+new file mode 100644
+index 00000000..99e243ed
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs
+@@ -0,0 +1,56 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++use aws_smithy_types::error::operation::BuildError;
++
++#[derive(Debug)]
++pub(crate) struct Handle {
++    pub(crate) conf: crate::Config,
++    pub(crate) inner: ::dafny_runtime::Object<dyn ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::ISimpleTypesLongClient>
++}
++
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct Client {
++    handle: ::std::sync::Arc<Handle>,
++}
++
++impl Client {
++    /// Creates a new client from the service [`Config`](crate::Config).
++    #[track_caller]
++    pub fn from_conf(conf: crate::Config) -> Result<Self, BuildError> {
++        // If this service had any configuration properties,
++        // they would need converting here too.
++        let inner_config = ::std::rc::Rc::new(
++            ::simple_long_dafny::_simple_dtypes_dsmithylong_dinternaldafny::_default::DefaultSimpleLongConfig());
++        let inner =
++            ::simple_long_dafny::_simple_dtypes_dsmithylong_dinternaldafny::_default::SimpleLong(
++                &inner_config,
++            );
++        if matches!(
++            inner.as_ref(),
++            ::simple_long_dafny::_Wrappers_Compile::Result::Failure { .. }
++        ) {
++            // TODO: convert error - the potential types are not modeled!
++            return Err(BuildError::other(
++                ::aws_smithy_types::error::metadata::ErrorMetadata::builder()
++                    .message("Invalid client config")
++                    .build(),
++            ));
++        }
++        let handle = Handle {
++            conf: conf.clone(),
++            inner: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::ISimpleTypesLongClient + 'static)>>::upcast_to(inner.Extract()),
++        };
++        Ok(Self {
++            handle: ::std::sync::Arc::new(handle),
++        })
++    }
++
++    /// Returns the client's configuration.
++    pub fn config(&self) -> &crate::Config {
++        &self.handle.conf
++    }
++}
++
++mod get_long;
++
++mod get_long_known_value;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client/get_long.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client/get_long.rs
+new file mode 100644
+index 00000000..2a46c33a
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client/get_long.rs
+@@ -0,0 +1,13 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++impl super::Client {
++    /// Constructs a fluent builder for the [`GetLong`](crate::operation::get_long::builders::GetLongFluentBuilder) operation.
++    ///
++    /// - The fluent builder is configurable:
++    ///   - [`value(i64)`](crate::operation::get_long::builders::GetLongFluentBuilder::value) / [`set_value(Option<i64>)`](crate::operation::get_long::builders::GetLongFluentBuilder::set_value):(undocumented)<br>
++    /// - On success, responds with [`GetLongOutput`](crate::operation::get_long::GetLongOutput) with field(s):
++    ///   - [`value(Option<Long>)`](crate::operation::get_long::GetLongOutput::value): (undocumented)
++    /// - On failure, responds with [`SdkError<GetLongError>`](crate::operation::get_long::GetLongError)
++    pub fn get_long(&self) -> crate::operation::get_long::builders::GetLongFluentBuilder {
++        crate::operation::get_long::builders::GetLongFluentBuilder::new(self.handle.clone())
++    }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client/get_long_known_value.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client/get_long_known_value.rs
+new file mode 100644
+index 00000000..41ae9ef8
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client/get_long_known_value.rs
+@@ -0,0 +1,17 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++impl super::Client {
++    /// Constructs a fluent builder for the [`GetLong`](crate::operation::get_long_known_value::builders::GetLongFluentBuilder) operation.
++    ///
++    /// - The fluent builder is configurable:
++    ///   - [`value(i64)`](crate::operation::get_long_known_value::builders::GetLongFluentBuilder::value) / [`set_value(Option<i64>)`](crate::operation::get_long_known_value::builders::GetLongFluentBuilder::set_value):(undocumented)<br>
++    /// - On success, responds with [`GetLongOutput`](crate::operation::get_long_known_value::GetLongOutput) with field(s):
++    ///   - [`value(Option<Long>)`](crate::operation::get_long_known_value::GetLongOutput::value): (undocumented)
++    /// - On failure, responds with [`SdkError<GetLongError>`](crate::operation::get_long_known_value::GetLongError)
++    pub fn get_long_known_value(
++        &self,
++    ) -> crate::operation::get_long_known_value::builders::GetLongKnownValueFluentBuilder {
++        crate::operation::get_long_known_value::builders::GetLongKnownValueFluentBuilder::new(
++            self.handle.clone(),
++        )
++    }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/config.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/config.rs
+new file mode 100644
+index 00000000..2f9a03e1
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/config.rs
+@@ -0,0 +1,128 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++/// Configuration for a simple service client.
++///
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct Config {
++    behavior_version: ::std::option::Option<crate::config::BehaviorVersion>,
++}
++impl Config {
++    /// Constructs a config builder.
++    pub fn builder() -> Builder {
++        Builder::default()
++    }
++    /// Converts this config back into a builder so that it can be tweaked.
++    pub fn to_builder(&self) -> Builder {
++        Builder {
++            behavior_version: self.behavior_version.clone(),
++        }
++    }
++}
++/// Builder for creating a `Config`.
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct Builder {
++    pub(crate) behavior_version: ::std::option::Option<crate::config::BehaviorVersion>,
++}
++impl ::std::default::Default for Builder {
++    fn default() -> Self {
++        Self {
++            behavior_version: ::std::default::Default::default(),
++        }
++    }
++}
++impl Builder {
++    /// Constructs a config builder.
++    pub fn new() -> Self {
++        Self::default()
++    }
++
++    /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
++    ///
++    /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
++    /// compatible. For example, a change which introduces new default timeouts or a new retry-mode for
++    /// all operations might be the ideal behavior but could break existing applications.
++    ///
++    /// # Examples
++    ///
++    /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
++    /// ```no_run
++    /// use simple_long::config::BehaviorVersion;
++    ///
++    /// let config = simple_long::Config::builder()
++    ///     .behavior_version(BehaviorVersion::latest())
++    ///     // ...
++    ///     .build();
++    /// let client = simple_long::Client::from_conf(config);
++    /// ```
++    ///
++    /// Customizing behavior major version:
++    /// ```no_run
++    /// use simple_long::config::BehaviorVersion;
++    ///
++    /// let config = simple_long::Config::builder()
++    ///     .behavior_version(BehaviorVersion::v2023_11_09())
++    ///     // ...
++    ///     .build();
++    /// let client = simple_long::Client::from_conf(config);
++    /// ```
++
++    pub fn behavior_version(mut self, behavior_version: crate::config::BehaviorVersion) -> Self {
++        self.set_behavior_version(Some(behavior_version));
++        self
++    }
++
++    /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
++    ///
++    /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
++    /// compatible. For example, a change which introduces new default timeouts or a new retry-mode for
++    /// all operations might be the ideal behavior but could break existing applications.
++    ///
++    /// # Examples
++    ///
++    /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
++    /// ```no_run
++    /// use simple_long::config::BehaviorVersion;
++    ///
++    /// let config = simple_long::Config::builder()
++    ///     .behavior_version(BehaviorVersion::latest())
++    ///     // ...
++    ///     .build();
++    /// let client = simple_long::Client::from_conf(config);
++    /// ```
++    ///
++    /// Customizing behavior major version:
++    /// ```no_run
++    /// use simple_long::config::BehaviorVersion;
++    ///
++    /// let config = simple_long::Config::builder()
++    ///     .behavior_version(BehaviorVersion::v2023_11_09())
++    ///     // ...
++    ///     .build();
++    /// let client = simple_long::Client::from_conf(config);
++    /// ```
++
++    pub fn set_behavior_version(
++        &mut self,
++        behavior_version: Option<crate::config::BehaviorVersion>,
++    ) -> &mut Self {
++        self.behavior_version = behavior_version;
++        self
++    }
++
++    /// Convenience method to set the latest behavior major version
++    ///
++    /// This is equivalent to enabling the `behavior-version-latest` Cargo feature
++    pub fn behavior_version_latest(mut self) -> Self {
++        self.set_behavior_version(Some(crate::config::BehaviorVersion::latest()));
++        self
++    }
++    /// Builds a [`Config`].
++    #[allow(unused_mut)]
++    pub fn build(mut self) -> Config {
++        Config {
++            behavior_version: self.behavior_version,
++        }
++    }
++}
++
++pub use ::aws_smithy_runtime_api::client::behavior_version::BehaviorVersion;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions.rs
+new file mode 100644
+index 00000000..fd2af966
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions.rs
+@@ -0,0 +1,4 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++pub mod get_long;
++
++pub mod get_long_known_value;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long.rs
+new file mode 100644
+index 00000000..86e9ba5c
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long.rs
+@@ -0,0 +1,32 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++use std::any::Any;
++
++#[allow(dead_code)]
++pub fn to_dafny_error(
++    value: crate::operation::get_long::GetLongError,
++) -> ::std::rc::Rc<::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error> {
++    match value {
++    crate::operation::get_long::GetLongError::Unhandled(unhandled) =>
++      ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++  }
++}
++
++#[allow(dead_code)]
++pub fn from_dafny_error(
++    dafny_value: ::std::rc::Rc<
++        ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error,
++    >,
++) -> crate::operation::get_long::GetLongError {
++    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
++    if matches!(&dafny_value.as_ref(), ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    let error_message = "TODO: can't get message yet";
++    crate::operation::get_long::GetLongError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
++  } else {
++    crate::operation::get_long::GetLongError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message("Opaque error").build())
++  }
++}
++
++pub mod _get_long_input;
++
++pub mod _get_long_output;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long/_get_long_input.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long/_get_long_input.rs
+new file mode 100644
+index 00000000..dd04ee0b
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long/_get_long_input.rs
+@@ -0,0 +1,39 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: crate::operation::get_long::GetLongInput,
++) -> ::std::rc::Rc<
++    ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput,
++> {
++    let dafny_value = match value.value {
++        Some(v) => ::simple_long_dafny::_Wrappers_Compile::Option::Some {
++            value: v,
++        },
++        None => ::simple_long_dafny::_Wrappers_Compile::Option::None {},
++    };
++    ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput::GetLongInput {
++    value: ::std::rc::Rc::new(dafny_value)
++  })
++}
++
++#[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<
++        ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput,
++    >,
++) -> crate::operation::get_long::GetLongInput {
++    let value = if matches!(
++        dafny_value.value().as_ref(),
++        ::simple_long_dafny::_Wrappers_Compile::Option::Some { .. }
++    ) {
++        Some(dafny_value.value().Extract())
++    } else if matches!(
++        dafny_value.value().as_ref(),
++        ::simple_long_dafny::_Wrappers_Compile::Option::None { .. }
++    ) {
++        None
++    } else {
++        panic!("Unreachable")
++    };
++    crate::operation::get_long::GetLongInput { value }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long/_get_long_output.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long/_get_long_output.rs
+new file mode 100644
+index 00000000..17daf271
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long/_get_long_output.rs
+@@ -0,0 +1,37 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: crate::operation::get_long::GetLongOutput,
++) -> ::std::rc::Rc<
++    ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput,
++> {
++    let dafny_value = match value.value {
++        Some(b) => ::simple_long_dafny::_Wrappers_Compile::Option::Some { value: b },
++        None => ::simple_long_dafny::_Wrappers_Compile::Option::None {},
++    };
++    ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
++    value: ::std::rc::Rc::new(dafny_value)
++  })
++}
++
++#[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<
++        ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput,
++    >,
++) -> crate::operation::get_long::GetLongOutput {
++    let value = if matches!(
++        dafny_value.value().as_ref(),
++        ::simple_long_dafny::_Wrappers_Compile::Option::Some { .. }
++    ) {
++        Some(dafny_value.value().Extract())
++    } else if matches!(
++        dafny_value.value().as_ref(),
++        ::simple_long_dafny::_Wrappers_Compile::Option::None { .. }
++    ) {
++        None
++    } else {
++        panic!("Unreachable")
++    };
++    crate::operation::get_long::GetLongOutput { value }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value.rs
+new file mode 100644
+index 00000000..c34bda65
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value.rs
+@@ -0,0 +1,32 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++use std::any::Any;
++
++#[allow(dead_code)]
++pub fn to_dafny_error(
++    value: crate::operation::get_long_known_value::GetLongKnownValueError,
++) -> ::std::rc::Rc<::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error> {
++    match value {
++    crate::operation::get_long_known_value::GetLongKnownValueError::Unhandled(unhandled) =>
++      ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++  }
++}
++
++#[allow(dead_code)]
++pub fn from_dafny_error(
++    dafny_value: ::std::rc::Rc<
++        ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error,
++    >,
++) -> crate::operation::get_long_known_value::GetLongKnownValueError {
++    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
++    if matches!(&dafny_value.as_ref(), ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    let error_message = "TODO: can't get message yet";
++    crate::operation::get_long_known_value::GetLongKnownValueError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
++  } else {
++    crate::operation::get_long_known_value::GetLongKnownValueError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message("Opaque error").build())
++  }
++}
++
++pub mod _get_long_known_value_input;
++
++pub mod _get_long_known_value_output;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value/_get_long_known_value_input.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value/_get_long_known_value_input.rs
+new file mode 100644
+index 00000000..0e9b301d
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value/_get_long_known_value_input.rs
+@@ -0,0 +1,39 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: crate::operation::get_long_known_value::GetLongKnownValueInput,
++) -> ::std::rc::Rc<
++    ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput,
++> {
++    let dafny_value = match value.value {
++        Some(v) => ::simple_long_dafny::_Wrappers_Compile::Option::Some {
++            value: v,
++        },
++        None => ::simple_long_dafny::_Wrappers_Compile::Option::None {},
++    };
++    ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput::GetLongInput {
++    value: ::std::rc::Rc::new(dafny_value)
++  })
++}
++
++#[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<
++        ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput,
++    >,
++) -> crate::operation::get_long_known_value::GetLongKnownValueInput {
++    let value = if matches!(
++        dafny_value.value().as_ref(),
++        ::simple_long_dafny::_Wrappers_Compile::Option::Some { .. }
++    ) {
++        Some(dafny_value.value().Extract())
++    } else if matches!(
++        dafny_value.value().as_ref(),
++        ::simple_long_dafny::_Wrappers_Compile::Option::None { .. }
++    ) {
++        None
++    } else {
++        panic!("Unreachable")
++    };
++    crate::operation::get_long_known_value::GetLongKnownValueInput { value }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value/_get_long_known_value_output.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value/_get_long_known_value_output.rs
+new file mode 100644
+index 00000000..0caf86b2
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value/_get_long_known_value_output.rs
+@@ -0,0 +1,37 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: crate::operation::get_long_known_value::GetLongKnownValueOutput,
++) -> ::std::rc::Rc<
++    ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput,
++> {
++    let dafny_value = match value.value {
++        Some(b) => ::simple_long_dafny::_Wrappers_Compile::Option::Some { value: b },
++        None => ::simple_long_dafny::_Wrappers_Compile::Option::None {},
++    };
++    ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
++    value: ::std::rc::Rc::new(dafny_value)
++  })
++}
++
++#[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<
++        ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput,
++    >,
++) -> crate::operation::get_long_known_value::GetLongKnownValueOutput {
++    let value = if matches!(
++        dafny_value.value().as_ref(),
++        ::simple_long_dafny::_Wrappers_Compile::Option::Some { .. }
++    ) {
++        Some(dafny_value.value().Extract())
++    } else if matches!(
++        dafny_value.value().as_ref(),
++        ::simple_long_dafny::_Wrappers_Compile::Option::None { .. }
++    ) {
++        None
++    } else {
++        panic!("Unreachable")
++    };
++    crate::operation::get_long_known_value::GetLongKnownValueOutput { value }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error.rs
+new file mode 100644
+index 00000000..ec89cbec
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error.rs
+@@ -0,0 +1,14 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++pub use ::aws_smithy_runtime_api::box_error::BoxError;
++
++/// Error type returned by the client.
++pub type SdkError<E, R = ::aws_smithy_runtime_api::client::orchestrator::HttpResponse> =
++    ::aws_smithy_runtime_api::client::result::SdkError<E, R>;
++pub use ::aws_smithy_runtime_api::client::result::ConnectorError;
++pub use ::aws_smithy_types::error::operation::BuildError;
++
++pub use ::aws_smithy_types::error::display::DisplayErrorContext;
++pub use ::aws_smithy_types::error::metadata::ErrorMetadata;
++pub use ::aws_smithy_types::error::metadata::ProvideErrorMetadata;
++
++pub(crate) mod sealed_unhandled;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error/sealed_unhandled.rs
+new file mode 100644
+index 00000000..9d21fbd6
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error/sealed_unhandled.rs
+@@ -0,0 +1,22 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++/// This struct is not intended to be used.
++///
++/// This struct holds information about an unhandled error,
++/// but that information should be obtained by using the
++/// [`ProvideErrorMetadata`](::aws_smithy_types::error::metadata::ProvideErrorMetadata) trait
++/// on the error type.
++///
++/// This struct intentionally doesn't yield any useful information itself.
++#[deprecated(
++    note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
++variable wildcard pattern and check `.code()`:
++ \
++&nbsp;&nbsp;&nbsp;`err if err.code() == Some(\"SpecificExceptionCode\") => { /* handle the error */ }`
++ \
++See [`ProvideErrorMetadata`](::aws_smithy_types::error::metadata::ProvideErrorMetadata) for what information is available for the error."
++)]
++#[derive(Debug)]
++pub struct Unhandled {
++    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
++    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/lib.rs
+new file mode 100644
+index 00000000..1f95d90d
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/lib.rs
+@@ -0,0 +1,21 @@
++#![allow(deprecated)]
++
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++#[doc(inline)]
++pub use config::Config;
++
++pub mod client;
++
++/// Configuration for SimpleLong Service.
++pub mod config;
++
++/// Common errors and error handling utilities.
++pub mod error;
++
++/// All operations that this crate can perform.
++pub mod operation;
++
++mod conversions;
++
++pub use client::Client;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation.rs
+new file mode 100644
+index 00000000..93787200
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation.rs
+@@ -0,0 +1,7 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++/// Types for the `GetLong` operation.
++pub mod get_long;
++
++/// Types for the `GetLongKnownValue` operation.
++pub mod get_long_known_value;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long.rs
+new file mode 100644
+index 00000000..08c4c0cc
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long.rs
+@@ -0,0 +1,143 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++/// Orchestration and serialization glue logic for `GetLong`.
++#[derive(::std::clone::Clone, ::std::default::Default, ::std::fmt::Debug)]
++#[non_exhaustive]
++pub struct GetLong;
++impl GetLong {
++    /// Creates a new `GetLong`
++    pub fn new() -> Self {
++        Self
++    }
++    pub(crate) async fn send(
++        handle: &crate::client::Handle,
++        input: crate::operation::get_long::GetLongInput,
++    ) -> ::std::result::Result<
++        crate::operation::get_long::GetLongOutput,
++        crate::operation::get_long::GetLongError,
++    > {
++        let inner_input = crate::conversions::get_long::_get_long_input::to_dafny(input);
++        let inner_result =
++            ::dafny_runtime::md!(handle.inner.clone()).GetLong(&inner_input);
++        if matches!(
++            inner_result.as_ref(),
++            ::simple_long_dafny::r#_Wrappers_Compile::Result::Success { .. }
++        ) {
++            Ok(crate::conversions::get_long::_get_long_output::from_dafny(
++                inner_result.value().clone(),
++            ))
++        } else {
++            Err(crate::conversions::get_long::from_dafny_error(
++                inner_result.error().clone(),
++            ))
++        }
++    }
++}
++
++/// Error type for the `GetLong` operation.
++#[non_exhaustive]
++#[derive(::std::fmt::Debug)]
++pub enum GetLongError {
++    /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
++    #[deprecated(
++        note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
++    variable wildcard pattern and check `.code()`:
++     \
++    &nbsp;&nbsp;&nbsp;`err if err.code() == Some(\"SpecificExceptionCode\") => { /* handle the error */ }`
++     \
++    See [`ProvideErrorMetadata`](#impl-ProvideErrorMetadata-for-GetLongError) for what information is available for the error."
++    )]
++    Unhandled(crate::error::sealed_unhandled::Unhandled),
++}
++impl GetLongError {
++    /// Creates the `GetLongError::Unhandled` variant from any error type.
++    pub fn unhandled(
++        err: impl ::std::convert::Into<
++            ::std::boxed::Box<
++                dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
++            >,
++        >,
++    ) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source: err.into(),
++            meta: ::std::default::Default::default(),
++        })
++    }
++
++    /// Creates the `GetLongError::Unhandled` variant from an [`ErrorMetadata`](::aws_smithy_types::error::ErrorMetadata).
++    pub fn generic(err: ::aws_smithy_types::error::ErrorMetadata) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source: err.clone().into(),
++            meta: err,
++        })
++    }
++    ///
++    /// Returns error metadata, which includes the error code, message,
++    /// request ID, and potentially additional information.
++    ///
++    pub fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
++        match self {
++            Self::Unhandled(e) => &e.meta,
++        }
++    }
++}
++impl ::std::error::Error for GetLongError {
++    fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
++        match self {
++            Self::Unhandled(_inner) => ::std::option::Option::Some(&*_inner.source),
++        }
++    }
++}
++impl ::std::fmt::Display for GetLongError {
++    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
++        match self {
++            Self::Unhandled(_inner) => {
++                if let ::std::option::Option::Some(code) =
++                    ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
++                {
++                    write!(f, "unhandled error ({code})")
++                } else {
++                    f.write_str("unhandled error")
++                }
++            }
++        }
++    }
++}
++impl ::aws_smithy_types::retry::ProvideErrorKind for GetLongError {
++    fn code(&self) -> ::std::option::Option<&str> {
++        ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
++    }
++    fn retryable_error_kind(&self) -> ::std::option::Option<::aws_smithy_types::retry::ErrorKind> {
++        ::std::option::Option::None
++    }
++}
++impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for GetLongError {
++    fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
++        match self {
++            Self::Unhandled(_inner) => &_inner.meta,
++        }
++    }
++}
++impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetLongError {
++    fn create_unhandled_error(
++        source: ::std::boxed::Box<
++            dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
++        >,
++        meta: ::std::option::Option<::aws_smithy_types::error::ErrorMetadata>,
++    ) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source,
++            meta: meta.unwrap_or_default(),
++        })
++    }
++}
++
++pub use crate::operation::get_long::_get_long_output::GetLongOutput;
++
++pub use crate::operation::get_long::_get_long_input::GetLongInput;
++
++mod _get_long_input;
++
++mod _get_long_output;
++
++/// Builders
++pub mod builders;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/_get_long_input.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/_get_long_input.rs
+new file mode 100644
+index 00000000..564fc6e7
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/_get_long_input.rs
+@@ -0,0 +1,60 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(missing_docs)] // documentation missing in model
++#[non_exhaustive]
++#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
++pub struct GetLongInput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub value: ::std::option::Option<i64>,
++}
++impl GetLongInput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn message(&self) -> ::std::option::Option<&i64> {
++        self.value.as_ref()
++    }
++}
++impl GetLongInput {
++    /// Creates a new builder-style object to manufacture [`GetLongInput`](crate::operation::operation::GetLongInput).
++    pub fn builder() -> crate::operation::get_long::builders::GetLongInputBuilder {
++        crate::operation::get_long::builders::GetLongInputBuilder::default()
++    }
++}
++
++/// A builder for [`GetLongInput`](crate::operation::operation::GetLongInput).
++#[non_exhaustive]
++#[derive(
++    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
++)]
++pub struct GetLongInputBuilder {
++    pub(crate) value: ::std::option::Option<i64>,
++}
++impl GetLongInputBuilder {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(
++        mut self,
++        input: impl ::std::convert::Into<i64>,
++    ) -> Self {
++        self.value = ::std::option::Option::Some(input.into());
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(
++        mut self,
++        input: ::std::option::Option<i64>,
++    ) -> Self {
++        self.value = input;
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<i64> {
++        &self.value
++    }
++    /// Consumes the builder and constructs a [`GetLongInput`](crate::operation::operation::GetLongInput).
++    pub fn build(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_long::GetLongInput,
++        ::aws_smithy_types::error::operation::BuildError,
++    > {
++        ::std::result::Result::Ok(crate::operation::get_long::GetLongInput { value: self.value })
++    }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/_get_long_output.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/_get_long_output.rs
+new file mode 100644
+index 00000000..f5544cf3
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/_get_long_output.rs
+@@ -0,0 +1,66 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(missing_docs)] // documentation missing in model
++#[non_exhaustive]
++#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
++pub struct GetLongOutput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub value: ::std::option::Option<i64>,
++}
++
++impl GetLongOutput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(&self) -> ::std::option::Option<i64> {
++        self.value
++    }
++}
++
++impl GetLongOutput {
++    /// Creates a new builder-style object to manufacture [`GetLongOutput`](crate::operation::operation::GetLongOutput).
++    pub fn builder() -> crate::operation::get_long::builders::GetLongOutputBuilder {
++        crate::operation::get_long::builders::GetLongOutputBuilder::default()
++    }
++}
++
++/// A builder for [`GetLongOutput`](crate::operation::operation::GetLongOutput).
++#[non_exhaustive]
++#[derive(
++    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
++)]
++pub struct GetLongOutputBuilder {
++    pub(crate) value: ::std::option::Option<i64>,
++}
++
++impl GetLongOutputBuilder {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(
++        mut self,
++        input: impl ::std::convert::Into<i64>,
++    ) -> Self {
++        self.value = ::std::option::Option::Some(input.into());
++        self
++    }
++
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(
++        mut self,
++        input: ::std::option::Option<i64>,
++    ) -> Self {
++        self.value = input;
++        self
++    }
++
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<i64> {
++        &self.value
++    }
++
++    /// Consumes the builder and constructs a [`GetLongOutput`](crate::operation::operation::GetLongOutput).
++    pub fn build(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_long::GetLongOutput,
++        ::aws_smithy_types::error::operation::BuildError,
++    > {
++        ::std::result::Result::Ok(crate::operation::get_long::GetLongOutput { value: self.value })
++    }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/builders.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/builders.rs
+new file mode 100644
+index 00000000..7452b03e
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long/builders.rs
+@@ -0,0 +1,95 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++pub use crate::operation::get_long::_get_long_output::GetLongOutputBuilder;
++
++pub use crate::operation::get_long::_get_long_input::GetLongInputBuilder;
++
++impl GetLongInputBuilder {
++    /// Sends a request with this input using the given client.
++    pub async fn send_with(
++        self,
++        client: &crate::Client,
++    ) -> ::std::result::Result<
++        crate::operation::get_long::GetLongOutput,
++        crate::operation::get_long::GetLongError,
++    > {
++        let mut fluent_builder = client.get_long();
++        fluent_builder.inner = self;
++        fluent_builder.send().await
++    }
++}
++/// Fluent builder constructing a request to `GetLong`.
++///
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct GetLongFluentBuilder {
++    handle: ::std::sync::Arc<crate::client::Handle>,
++    inner: crate::operation::get_long::builders::GetLongInputBuilder,
++    config_override: ::std::option::Option<crate::config::Builder>,
++}
++impl GetLongFluentBuilder {
++    /// Creates a new `GetLong`.
++    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
++        Self {
++            handle,
++            inner: ::std::default::Default::default(),
++            config_override: ::std::option::Option::None,
++        }
++    }
++    /// Access the GetLong as a reference.
++    pub fn as_input(&self) -> &crate::operation::get_long::builders::GetLongInputBuilder {
++        &self.inner
++    }
++    /// Sends the request and returns the response.
++    pub async fn send(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_long::GetLongOutput,
++        crate::operation::get_long::GetLongError,
++    > {
++        let input = self
++            .inner
++            .build()
++            // Using unhandled since GetLong doesn't declare any validation,
++            // and smithy-rs seems to not generate a ValidationError case unless there is
++            // (but isn't that a backwards compatibility problem for output structures?)
++            // Vanilla smithy-rs uses SdkError::construction_failure,
++            // but we aren't using SdkError.
++            .map_err(crate::operation::get_long::GetLongError::unhandled)?;
++        crate::operation::get_long::GetLong::send(&self.handle, input).await
++    }
++
++    pub(crate) fn config_override(
++        mut self,
++        config_override: impl Into<crate::config::Builder>,
++    ) -> Self {
++        self.set_config_override(Some(config_override.into()));
++        self
++    }
++
++    pub(crate) fn set_config_override(
++        &mut self,
++        config_override: Option<crate::config::Builder>,
++    ) -> &mut Self {
++        self.config_override = config_override;
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(
++        mut self,
++        input: i64
++    ) -> Self {
++        self.inner = self.inner.value(input);
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(
++        mut self,
++        input: ::std::option::Option<i64>
++    ) -> Self {
++        self.inner = self.inner.set_value(input);
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<i64>  {
++        self.inner.get_value()
++    }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value.rs
+new file mode 100644
+index 00000000..844626e4
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value.rs
+@@ -0,0 +1,146 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++/// Orchestration and serialization glue logic for `GetLongKnownValue`.
++#[derive(::std::clone::Clone, ::std::default::Default, ::std::fmt::Debug)]
++#[non_exhaustive]
++pub struct GetLongKnownValue;
++impl GetLongKnownValue {
++    /// Creates a new `GetLongKnownValue`
++    pub fn new() -> Self {
++        Self
++    }
++    pub(crate) async fn send(
++        handle: &crate::client::Handle,
++        input: crate::operation::get_long_known_value::GetLongKnownValueInput,
++    ) -> ::std::result::Result<
++        crate::operation::get_long_known_value::GetLongKnownValueOutput,
++        crate::operation::get_long_known_value::GetLongKnownValueError,
++    > {
++        let inner_input =
++            crate::conversions::get_long_known_value::_get_long_known_value_input::to_dafny(input);
++        let inner_result =
++            ::dafny_runtime::md!(handle.inner.clone()).GetLong(&inner_input);
++        if matches!(
++            inner_result.as_ref(),
++            ::simple_long_dafny::r#_Wrappers_Compile::Result::Success { .. }
++        ) {
++            Ok(
++                crate::conversions::get_long_known_value::_get_long_known_value_output::from_dafny(
++                    inner_result.value().clone(),
++                ),
++            )
++        } else {
++            Err(crate::conversions::get_long_known_value::from_dafny_error(
++                inner_result.error().clone(),
++            ))
++        }
++    }
++}
++
++/// Error type for the `GetLongKnownValue` operation.
++#[non_exhaustive]
++#[derive(::std::fmt::Debug)]
++pub enum GetLongKnownValueError {
++    /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
++    #[deprecated(
++        note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
++    variable wildcard pattern and check `.code()`:
++     \
++    &nbsp;&nbsp;&nbsp;`err if err.code() == Some(\"SpecificExceptionCode\") => { /* handle the error */ }`
++     \
++    See [`ProvideErrorMetadata`](#impl-ProvideErrorMetadata-for-GetLongKnownValueError) for what information is available for the error."
++    )]
++    Unhandled(crate::error::sealed_unhandled::Unhandled),
++}
++impl GetLongKnownValueError {
++    /// Creates the `GetLongKnownValueError::Unhandled` variant from any error type.
++    pub fn unhandled(
++        err: impl ::std::convert::Into<
++            ::std::boxed::Box<
++                dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
++            >,
++        >,
++    ) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source: err.into(),
++            meta: ::std::default::Default::default(),
++        })
++    }
++
++    /// Creates the `GetLongKnownValueError::Unhandled` variant from an [`ErrorMetadata`](::aws_smithy_types::error::ErrorMetadata).
++    pub fn generic(err: ::aws_smithy_types::error::ErrorMetadata) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source: err.clone().into(),
++            meta: err,
++        })
++    }
++    ///
++    /// Returns error metadata, which includes the error code, message,
++    /// request ID, and potentially additional information.
++    ///
++    pub fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
++        match self {
++            Self::Unhandled(e) => &e.meta,
++        }
++    }
++}
++impl ::std::error::Error for GetLongKnownValueError {
++    fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
++        match self {
++            Self::Unhandled(_inner) => ::std::option::Option::Some(&*_inner.source),
++        }
++    }
++}
++impl ::std::fmt::Display for GetLongKnownValueError {
++    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
++        match self {
++            Self::Unhandled(_inner) => {
++                if let ::std::option::Option::Some(code) =
++                    ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
++                {
++                    write!(f, "unhandled error ({code})")
++                } else {
++                    f.write_str("unhandled error")
++                }
++            }
++        }
++    }
++}
++impl ::aws_smithy_types::retry::ProvideErrorKind for GetLongKnownValueError {
++    fn code(&self) -> ::std::option::Option<&str> {
++        ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
++    }
++    fn retryable_error_kind(&self) -> ::std::option::Option<::aws_smithy_types::retry::ErrorKind> {
++        ::std::option::Option::None
++    }
++}
++impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for GetLongKnownValueError {
++    fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
++        match self {
++            Self::Unhandled(_inner) => &_inner.meta,
++        }
++    }
++}
++impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetLongKnownValueError {
++    fn create_unhandled_error(
++        source: ::std::boxed::Box<
++            dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
++        >,
++        meta: ::std::option::Option<::aws_smithy_types::error::ErrorMetadata>,
++    ) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source,
++            meta: meta.unwrap_or_default(),
++        })
++    }
++}
++
++pub use crate::operation::get_long_known_value::_get_long_known_value_output::GetLongKnownValueOutput;
++
++pub use crate::operation::get_long_known_value::_get_long_known_value_input::GetLongKnownValueInput;
++
++mod _get_long_known_value_input;
++
++mod _get_long_known_value_output;
++
++/// Builders
++pub mod builders;
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/_get_long_known_value_input.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/_get_long_known_value_input.rs
+new file mode 100644
+index 00000000..4da918d5
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/_get_long_known_value_input.rs
+@@ -0,0 +1,63 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(missing_docs)] // documentation missing in model
++#[non_exhaustive]
++#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
++pub struct GetLongKnownValueInput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub value: ::std::option::Option<i64>,
++}
++impl GetLongKnownValueInput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(&self) -> ::std::option::Option<i64> {
++        self.value
++    }
++}
++impl GetLongKnownValueInput {
++    /// Creates a new builder-style object to manufacture [`GetLongKnownValueInput`](crate::operation::operation::GetLongKnownValueInput).
++    pub fn builder(
++    ) -> crate::operation::get_long_known_value::builders::GetLongKnownValueInputBuilder {
++        crate::operation::get_long_known_value::builders::GetLongKnownValueInputBuilder::default()
++    }
++}
++
++/// A builder for [`GetLongKnownValueInput`](crate::operation::operation::GetLongKnownValueInput).
++#[non_exhaustive]
++#[derive(
++    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
++)]
++pub struct GetLongKnownValueInputBuilder {
++    pub(crate) value: ::std::option::Option<i64>,
++}
++impl GetLongKnownValueInputBuilder {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(
++        mut self,
++        input: impl ::std::convert::Into<i64>,
++    ) -> Self {
++        self.value = ::std::option::Option::Some(input.into());
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(
++        mut self,
++        input: ::std::option::Option<i64>,
++    ) -> Self {
++        self.value = input;
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<i64> {
++        &self.value
++    }
++    /// Consumes the builder and constructs a [`GetLongKnownValueInput`](crate::operation::operation::GetLongKnownValueInput).
++    pub fn build(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_long_known_value::GetLongKnownValueInput,
++        ::aws_smithy_types::error::operation::BuildError,
++    > {
++        ::std::result::Result::Ok(
++            crate::operation::get_long_known_value::GetLongKnownValueInput { value: self.value },
++        )
++    }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/_get_long_known_value_output.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/_get_long_known_value_output.rs
+new file mode 100644
+index 00000000..0fc36b82
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/_get_long_known_value_output.rs
+@@ -0,0 +1,63 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(missing_docs)] // documentation missing in model
++#[non_exhaustive]
++#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
++pub struct GetLongKnownValueOutput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub value: ::std::option::Option<i64>,
++}
++impl GetLongKnownValueOutput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(&self) -> ::std::option::Option<i64> {
++        self.value
++    }
++}
++impl GetLongKnownValueOutput {
++    /// Creates a new builder-style object to manufacture [`GetLongKnownValueOutput`](crate::operation::operation::GetLongKnownValueOutput).
++    pub fn builder(
++    ) -> crate::operation::get_long_known_value::builders::GetLongKnownValueOutputBuilder {
++        crate::operation::get_long_known_value::builders::GetLongKnownValueOutputBuilder::default()
++    }
++}
++
++/// A builder for [`GetLongKnownValueOutput`](crate::operation::operation::GetLongKnownValueOutput).
++#[non_exhaustive]
++#[derive(
++    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
++)]
++pub struct GetLongKnownValueOutputBuilder {
++    pub(crate) value: ::std::option::Option<i64>,
++}
++impl GetLongKnownValueOutputBuilder {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(
++        mut self,
++        input: impl ::std::convert::Into<i64>,
++    ) -> Self {
++        self.value = ::std::option::Option::Some(input.into());
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(
++        mut self,
++        input: ::std::option::Option<i64>,
++    ) -> Self {
++        self.value = input;
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<i64> {
++        &self.value
++    }
++    /// Consumes the builder and constructs a [`GetLongKnownValueOutput`](crate::operation::operation::GetLongKnownValueOutput).
++    pub fn build(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_long_known_value::GetLongKnownValueOutput,
++        ::aws_smithy_types::error::operation::BuildError,
++    > {
++        ::std::result::Result::Ok(
++            crate::operation::get_long_known_value::GetLongKnownValueOutput { value: self.value },
++        )
++    }
++}
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/builders.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/builders.rs
+new file mode 100644
+index 00000000..4c2580d4
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/operation/get_long_known_value/builders.rs
+@@ -0,0 +1,97 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++pub use crate::operation::get_long_known_value::_get_long_known_value_output::GetLongKnownValueOutputBuilder;
++
++pub use crate::operation::get_long_known_value::_get_long_known_value_input::GetLongKnownValueInputBuilder;
++
++impl GetLongKnownValueInputBuilder {
++    /// Sends a request with this input using the given client.
++    pub async fn send_with(
++        self,
++        client: &crate::Client,
++    ) -> ::std::result::Result<
++        crate::operation::get_long_known_value::GetLongKnownValueOutput,
++        crate::operation::get_long_known_value::GetLongKnownValueError,
++    > {
++        let mut fluent_builder = client.get_long_known_value();
++        fluent_builder.inner = self;
++        fluent_builder.send().await
++    }
++}
++/// Fluent builder constructing a request to `GetLongKnownValue`.
++///
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct GetLongKnownValueFluentBuilder {
++    handle: ::std::sync::Arc<crate::client::Handle>,
++    inner: crate::operation::get_long_known_value::builders::GetLongKnownValueInputBuilder,
++    config_override: ::std::option::Option<crate::config::Builder>,
++}
++impl GetLongKnownValueFluentBuilder {
++    /// Creates a new `GetLongKnownValue`.
++    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
++        Self {
++            handle,
++            inner: ::std::default::Default::default(),
++            config_override: ::std::option::Option::None,
++        }
++    }
++    /// Access the GetLongKnownValue as a reference.
++    pub fn as_input(
++        &self,
++    ) -> &crate::operation::get_long_known_value::builders::GetLongKnownValueInputBuilder {
++        &self.inner
++    }
++    /// Sends the request and returns the response.
++    pub async fn send(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_long_known_value::GetLongKnownValueOutput,
++        crate::operation::get_long_known_value::GetLongKnownValueError,
++    > {
++        let input = self
++            .inner
++            .build()
++            // Using unhandled since GetLong doesn't declare any validation,
++            // and smithy-rs seems to not generate a ValidationError case unless there is
++            // (but isn't that a backwards compatibility problem for output structures?)
++            // Vanilla smithy-rs uses SdkError::construction_failure,
++            // but we aren't using SdkError.
++            .map_err(crate::operation::get_long_known_value::GetLongKnownValueError::unhandled)?;
++        crate::operation::get_long_known_value::GetLongKnownValue::send(&self.handle, input).await
++    }
++
++    pub(crate) fn config_override(
++        mut self,
++        config_override: impl Into<crate::config::Builder>,
++    ) -> Self {
++        self.set_config_override(Some(config_override.into()));
++        self
++    }
++
++    pub(crate) fn set_config_override(
++        &mut self,
++        config_override: Option<crate::config::Builder>,
++    ) -> &mut Self {
++        self.config_override = config_override;
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(
++        mut self,
++        input: i64,
++    ) -> Self {
++        self.inner = self.inner.value(input);
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(
++        mut self,
++        input: ::std::option::Option<i64>,
++    ) -> Self {
++        self.inner = self.inner.set_value(input);
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<i64> {
++        self.inner.get_value()
++    }
++}

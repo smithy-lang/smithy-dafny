@@ -10,7 +10,7 @@ impl GetStringInputBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::get_string::GetStringOutput,
-        crate::operation::get_string::GetStringError
+        crate::operation::get_string::GetStringError,
     > {
         let mut fluent_builder = client.get_string();
         fluent_builder.inner = self;
@@ -43,7 +43,7 @@ impl GetStringFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::get_string::GetStringOutput,
-        crate::operation::get_string::GetStringError
+        crate::operation::get_string::GetStringError,
     > {
         let input = self
             .inner
@@ -57,12 +57,18 @@ impl GetStringFluentBuilder {
         crate::operation::get_string::GetString::send(&self.handle, input).await
     }
 
-    pub(crate) fn config_override(mut self, config_override: impl Into<crate::config::Builder>) -> Self {
+    pub(crate) fn config_override(
+        mut self,
+        config_override: impl Into<crate::config::Builder>,
+    ) -> Self {
         self.set_config_override(Some(config_override.into()));
         self
     }
 
-    pub(crate) fn set_config_override(&mut self, config_override: Option<crate::config::Builder>) -> &mut Self {
+    pub(crate) fn set_config_override(
+        &mut self,
+        config_override: Option<crate::config::Builder>,
+    ) -> &mut Self {
         self.config_override = config_override;
         self
     }

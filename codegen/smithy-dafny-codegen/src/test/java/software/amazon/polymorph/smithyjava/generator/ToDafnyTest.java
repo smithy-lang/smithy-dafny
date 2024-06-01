@@ -5,9 +5,7 @@ package software.amazon.polymorph.smithyjava.generator;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
-
 import java.util.Set;
-
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -15,28 +13,38 @@ import software.amazon.smithy.utils.StringUtils;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToDafnyTest {
-    protected ToDafnyTestImpl underTest;
-    protected Model model;
 
-    static class ToDafnyTestImpl extends ToDafny {
+  protected ToDafnyTestImpl underTest;
+  protected Model model;
 
-        public ToDafnyTestImpl(CodegenSubject subject) {
-            super(subject, ClassName.get(subject.dafnyNameResolver.packageName(), TO_DAFNY));
-        }
+  static class ToDafnyTestImpl extends ToDafny {
 
-        /** For AWS SDK structure members, the getter is `get + capitalized member name`. */
-        @Override  //At least for now, we are just going to use AWS SDK V1 style getter's here
-        protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
-            return CodeBlock.of("$L.get$L()", variableName, StringUtils.capitalize(memberShape.getMemberName()));
-        }
-
-        @Override
-        public Set<JavaFile> javaFiles() {
-            return null;
-        }
+    public ToDafnyTestImpl(CodegenSubject subject) {
+      super(
+        subject,
+        ClassName.get(subject.dafnyNameResolver.packageName(), TO_DAFNY)
+      );
     }
 
-    /*@Before
+    /** For AWS SDK structure members, the getter is `get + capitalized member name`. */
+    @Override //At least for now, we are just going to use AWS SDK V1 style getter's here
+    protected CodeBlock getMember(
+      CodeBlock variableName,
+      MemberShape memberShape
+    ) {
+      return CodeBlock.of(
+        "$L.get$L()",
+        variableName,
+        StringUtils.capitalize(memberShape.getMemberName())
+      );
+    }
+
+    @Override
+    public Set<JavaFile> javaFiles() {
+      return null;
+    }
+  }
+  /*@Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest  = new ToDafnyTestImpl(TestSetupUtils.setupAwsSdkV1(model, "kms"));
