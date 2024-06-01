@@ -44,6 +44,13 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 GO_MODULE_NAME="github.com/ShubhamChaturvedi7/Dependencies"
 
+GO_DEPENDENCY_MODULE_NAMES := \
+	--dependency-module-name=simple.constraints=github.com/ShubhamChaturvedi7/SimpleConstraints \
+	--dependency-module-name=simple.errors=github.com/ShubhamChaturvedi7/SimpleErrors \
+	--dependency-module-name=simple.extendable=github.com/ShubhamChaturvedi7/SimpleExtendable \
+	--dependency-module-name=simple.resources=github.com/ShubhamChaturvedi7/SimpleResources
+
+
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated

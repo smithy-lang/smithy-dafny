@@ -4,10 +4,20 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 
+import java.util.Map;
+
 import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.nameresolver.Constants.DOT;
 
 public class SmithyNameResolver {
+
+    private static Map<String, String> smithyNamespaceToPythonModuleNameMap;
+
+    public static void setSmithyNamespaceToPythonModuleNameMap(
+            Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+        SmithyNameResolver.smithyNamespaceToPythonModuleNameMap = smithyNamespaceToPythonModuleNameMap;
+    }
+
 
     public static String shapeNamespace(final Shape shape) {
         return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase();

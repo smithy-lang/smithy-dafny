@@ -302,6 +302,7 @@ _polymorph:
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
 	$(OUTPUT_GO) \
+	$(MODULE_NAME) \
 	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -309,7 +310,7 @@ _polymorph:
 	$(OUTPUT_LOCAL_SERVICE_$(SERVICE)) \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS) \
-	--go-module-name $(GO_MODULE_NAME)";
+	$(DEPENDENCY_MODULE_NAMES)";
 
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
@@ -425,7 +426,10 @@ polymorph_go:
 		$(MAKE) _polymorph_go ; \
 	done
 
+
 _polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
+_polymorph_go: MODULE_NAME=--module-name $(GO_MODULE_NAME)
+_polymorph_go: DEPENDENCY_MODULE_NAMES = $(GO_DEPENDENCY_MODULE_NAMES)
 _polymorph_go: _polymorph
 
 ########################## .NET targets

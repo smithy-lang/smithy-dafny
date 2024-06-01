@@ -1,11 +1,19 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.codegen.integration.GoIntegration;
+import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 
+import java.util.Map;
+
 public class GoClientCodegenPlugin implements SmithyBuildPlugin {
+
+    public GoClientCodegenPlugin(final Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+        super();
+        SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
+    }
     public void run(PluginContext context) {
         CodegenDirector<GoWriter, GoIntegration, GenerationContext, GoSettings> runner
                 = new CodegenDirector<>();

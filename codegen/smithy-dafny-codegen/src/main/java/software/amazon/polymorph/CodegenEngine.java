@@ -27,7 +27,9 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.build.PluginContext;
@@ -40,6 +42,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,8 +75,8 @@ public class CodegenEngine {
     // To be initialized in constructor
     private final Model model;
     private final ServiceShape serviceShape;
-    private final PluginContext pluginContext;
-
+    private final Map<String, String> dependencyModuleNames;
+    private final Optional<String> moduleName;
     /**
      * This should only be called by {@link Builder#build()},
      * which is responsible for validating that the arguments are non-null,
@@ -92,10 +95,11 @@ public class CodegenEngine {
             final boolean awsSdkStyle,
             final boolean localServiceTest,
             final boolean generateProjectFiles,
-            final PluginContext pluginContext,
             final Path libraryRoot,
             final Optional<Path> patchFilesDir,
-            final boolean updatePatchFiles
+            final boolean updatePatchFiles,
+            final Map<String, String> dependencyModuleNames,
+            final Optional<String> moduleName
     ) {
         // To be provided to constructor
         this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
@@ -109,10 +113,11 @@ public class CodegenEngine {
         this.awsSdkStyle = awsSdkStyle;
         this.localServiceTest = localServiceTest;
         this.generateProjectFiles = generateProjectFiles;
-        this.pluginContext = pluginContext;
         this.libraryRoot = libraryRoot;
         this.patchFilesDir = patchFilesDir;
         this.updatePatchFiles = updatePatchFiles;
+        this.dependencyModuleNames = dependencyModuleNames;
+        this.moduleName = moduleName;
 
         this.model = this.awsSdkStyle
                 // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
@@ -144,7 +149,7 @@ public class CodegenEngine {
                 case DAFNY -> generateDafny(outputDir);
                 case JAVA -> generateJava(outputDir);
                 case DOTNET -> generateDotnet(outputDir);
-                case GO -> new GoClientCodegenPlugin().run(this.pluginContext);
+                case GO -> generateGo();
                 default -> throw new UnsupportedOperationException("Cannot generate code for target language %s"
                         .formatted(lang.name()));
             }
@@ -379,6 +384,28 @@ public class CodegenEngine {
         }
     }
 
+    private void generateGo() {
+        if (moduleName.isEmpty()) {
+            throw new IllegalArgumentException("Python codegen requires a module name");
+        }
+
+        ObjectNode.Builder goSettingsBuilder = ObjectNode.builder()
+                                                             .withMember("service", serviceShape.getId().toString())
+                                                             .withMember("moduleName", moduleName.get());
+
+        final PluginContext pluginContext = PluginContext.builder()
+                                                         .model(model)
+                                                         .fileManifest(FileManifest.create(targetLangOutputDirs.get(TargetLanguage.GO)))
+                                                         .settings(goSettingsBuilder.build())
+                                                         .build();
+
+        final Map<String, String> smithyNamespaceToGoModuleNameMap = new HashMap<>(dependencyModuleNames);
+        smithyNamespaceToGoModuleNameMap.put(serviceShape.getId().getNamespace(), moduleName.get());
+        new GoClientCodegenPlugin(smithyNamespaceToGoModuleNameMap).run(pluginContext);
+
+
+    }
+
     private String runCommand(Path workingDir, String ... args) {
         List<String> argsList = List.of(args);
         StringBuilder output = new StringBuilder();
@@ -408,7 +435,6 @@ public class CodegenEngine {
         private boolean fromSmithyBuildPlugin = false;
         private Model serviceModel;
         private Path[] dependentModelPaths;
-        private PluginContext pluginContext;
         private String namespace;
         private Map<TargetLanguage, Path> targetLangOutputDirs;
         private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
@@ -421,6 +447,8 @@ public class CodegenEngine {
         private Path libraryRoot;
         private Path patchFilesDir;
         private boolean updatePatchFiles = false;
+        private Map<String, String> dependencyModuleNames;
+        private String moduleName;
 
         public Builder() {}
 
@@ -429,11 +457,6 @@ public class CodegenEngine {
          */
         public Builder withServiceModel(final Model serviceModel) {
             this.serviceModel = serviceModel;
-            return this;
-        }
-
-        public Builder withPluginContext(final PluginContext serviceModel) {
-            this.pluginContext = serviceModel;
             return this;
         }
 
@@ -450,6 +473,22 @@ public class CodegenEngine {
          */
         public Builder withNamespace(final String namespace) {
             this.namespace = namespace;
+            return this;
+        }
+
+        /**
+         * Sets the directories in which to search for dependent model file(s).
+         */
+        public Builder withDependencyModuleNames(final Map<String, String> dependencyModuleNames) {
+            this.dependencyModuleNames = dependencyModuleNames;
+            return this;
+        }
+
+        /**
+         * Sets the Python module name for any generated Python code.
+         */
+        public Builder withModuleName(final String moduleName) {
+            this.moduleName = moduleName;
             return this;
         }
 
@@ -573,6 +612,10 @@ public class CodegenEngine {
                 throw new IllegalStateException("No namespace provided");
             }
 
+            final Map<String, String> dependencyModuleNames = this.dependencyModuleNames == null
+                                                              ? new HashMap<>()
+                                                              : this.dependencyModuleNames;
+
             final Map<TargetLanguage, Path> targetLangOutputDirsRaw = Objects.requireNonNull(this.targetLangOutputDirs);
             targetLangOutputDirsRaw.replaceAll((_lang, path) -> path.toAbsolutePath().normalize());
             final Map<TargetLanguage, Path> targetLangOutputDirs = ImmutableMap.copyOf(targetLangOutputDirsRaw);
@@ -593,6 +636,8 @@ public class CodegenEngine {
                 throw new IllegalStateException(
                         "Cannot generate AWS SDK style code, and test a local service, at the same time");
             }
+
+            final Optional<String> moduleName = Optional.ofNullable(this.moduleName);
 
             final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
 
@@ -616,10 +661,11 @@ public class CodegenEngine {
                     this.awsSdkStyle,
                     this.localServiceTest,
                     this.generateProjectFiles,
-                    this.pluginContext,
                     libraryRoot,
                     patchFilesDir,
-                    updatePatchFiles
+                    updatePatchFiles,
+                    dependencyModuleNames,
+                    moduleName
             );
         }
     }
