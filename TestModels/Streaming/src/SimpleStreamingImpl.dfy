@@ -112,9 +112,10 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     returns (output: Result<ChunksOutput, Error>)
 
   {
+
     var outStream := new SimpleStream<StreamEvent<seq<uint8>, Error>>();
     var chunker := new Chunker(outStream);
-    var _ := input.bytesIn.Call(chunker);
+    Subscribe(input.bytesIn, chunker);
 
     return Success(ChunksOutput(bytesOut := outStream));
   }

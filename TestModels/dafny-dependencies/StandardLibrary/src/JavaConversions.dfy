@@ -33,7 +33,7 @@ module StandardLibraryJavaConversions {
 
   trait {:compile false} {:extern "org.reactivestreams.Publisher"} Publisher<T> {
 
-    method subscribe(s: Subscriber<T>) returns (f: Subscription)
+    method subscribe(s: Subscriber<T>)
 
   }
 
@@ -51,6 +51,8 @@ module StandardLibraryJavaConversions {
 
     method onComplete()
   }
+
+  // Publisher<T> -> Action
 
   class SequentialActionSubscriber<T> extends Subscriber<T> {
 
@@ -87,6 +89,27 @@ module StandardLibraryJavaConversions {
     s := new SequentialActionSubscriber(a);
   }
 
+  class SubscribingAction<T> extends Action<Action<StreamEvent<T, Throwable>, ()>, ()> {
+
+    const publisher: Publisher<T>    
+
+    constructor(publisher: Publisher<T>) {
+      this.publisher := publisher;
+    }
+    
+    method Call(a: Action<StreamEvent<T, Throwable>, ()>) returns (nothing: ()) {
+      var subscriber := AsSequentialSubscriber(a);
+      publisher.subscribe(subscriber);
+      return ();
+    }
+  }
+
+  method AsStream<T>(p: Publisher<T>) returns (s: Stream<StreamEvent<T, Throwable>>) {
+    s := new SubscribingAction(p);
+  } 
+
+  // Stream -> Pulisher<T>
+
   class SubscriberAction<T> extends Action<StreamEvent<T, Throwable>, ()> {
 
     const subscriber: Subscriber<T>
@@ -115,7 +138,6 @@ module StandardLibraryJavaConversions {
 
   }
 
-
   class ActionPublisher<T> extends Publisher<T> {
     const subscribeAction: Action<Action<StreamEvent<T, Throwable>, ()>, ()>
 
@@ -123,21 +145,18 @@ module StandardLibraryJavaConversions {
       this.subscribeAction := subscribeAction;
     }
 
-    method {:verify false} subscribe(s: Subscriber<T>) returns (sub: Subscription) {
+    method {:verify false} subscribe(s: Subscriber<T>) {
       var action := new SubscriberAction(s);
       var _ := subscribeAction.Call(action);
-      sub := new NoOpSubscription;
     }
   }
 
-  class NoOpSubscription<T> extends Subscription {
+  class NoOpSubscription extends Subscription {
 
     method request(n: int64) {
-
     }
 
     method cancel() {
-      // No-op for now - could unset subscriber to allow garbage collection later
     }
   }
 

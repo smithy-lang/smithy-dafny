@@ -111,13 +111,11 @@ module StandardLibrary.Actions {
   // Publisher is actually a Stream factory -> Action<Action<T, ()>, Action<SubscriptionEvent, ()>>
 
   // TODO: Too Java specific
-  datatype SubscriptionEvent = Request(n: nat) | Cancel
+  // datatype SubscriptionEvent = Request(n: nat) | Cancel
     
   method {:verify false} Subscribe<T>(s: Stream<T>, a: Action<T, ()>) {
     var _ := s.Call(a);
   }
-
-  type any
 
   // TODO: Convenience utility for piping
 
@@ -148,10 +146,8 @@ module StandardLibrary.Actions {
       values := values + [value];
 
       for i := 0 to |callbacks| 
-        invariant callbacks == old(callbacks)
       {
-        var callback := callbacks[i];
-        var _ := callback.Call(value);
+        var _ := callbacks[i].Call(value);
       }
     }
 
