@@ -83,26 +83,35 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   class Chunker extends Action<StreamEvent<seq<uint8>, Error>, ()> {
 
     const outStream: SimpleStream<StreamEvent<seq<uint8>, Error>>
+    const chunkSize: int32
+    var buffer: seq<uint8>
 
-    constructor(outStream: SimpleStream<StreamEvent<seq<uint8>, Error>>)
+    constructor(chunkSize: int32, outStream: SimpleStream<StreamEvent<seq<uint8>, Error>>)
       ensures fresh(Repr) 
     {
       this.outStream := outStream;
+      this.chunkSize := chunkSize;
       Repr := {};
+      buffer := [];
     }
 
-    method Call(value: StreamEvent<seq<uint8>, Error>) returns (nothing: ()) 
+    method {:verify false} Call(value: StreamEvent<seq<uint8>, Error>) returns (nothing: ())
       modifies Repr
     {
-      assume this in Repr;
-      assume outStream.Repr <= Repr;
       match value {
-        case Some(bits) => {
-          outStream.Put(Some(bits));
+        case Some(Success(bits)) => {
+          buffer := buffer + bits;
         }
-        case None => {
-          outStream.Put(None);
+      }
+      while chunkSize as nat <= |buffer| {
+        outStream.Put(Some(Success(buffer[..chunkSize])));
+        buffer := buffer[chunkSize..];
+      }
+      if value == None || value.value.Failure? {
+        if 0 < |buffer| {
+          outStream.Put(Some(Success(buffer)));
         }
+        outStream.Put(value);
       }
       return ();
     }
@@ -110,12 +119,12 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   method Chunks ( config: InternalConfig , input: ChunksInput )
     returns (output: Result<ChunksOutput, Error>)
-
   {
-
     var outStream := new SimpleStream<StreamEvent<seq<uint8>, Error>>();
-    var chunker := new Chunker(outStream);
+    var chunker := new Chunker(input.chunkSize, outStream);
     Subscribe(input.bytesIn, chunker);
+
+    // TODO: Connect streams together
 
     return Success(ChunksOutput(bytesOut := outStream));
   }
