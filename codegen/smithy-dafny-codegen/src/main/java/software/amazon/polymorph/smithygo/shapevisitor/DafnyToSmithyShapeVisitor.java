@@ -24,10 +24,14 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
@@ -248,7 +252,37 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String integerShape(IntegerShape shape) {
         writer.addImport("dafny");
+        writer.addImport("fmt");
         var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
+
+        String constraintCheck = "";
+        if (shape.hasTrait(RangeTrait.class)) {
+            RangeTrait len = shape.getMemberTrait(context.model(), RangeTrait.class).get();
+            Optional<BigDecimal> min = len.getMin();
+            
+            if (min.isPresent()) {
+                constraintCheck += """
+                        if (b < %s) {
+                            panic(fmt.Sprintf(\"%s has a minimum of %s but was given the value %%d.\", b))
+                        }
+                        """.formatted(
+                        min.get().toString(),
+                        shape.getId().getName(),
+                        min.get().toString());
+            }
+            Optional<BigDecimal> max = len.getMax();
+            if (max.isPresent()) {
+                constraintCheck += """
+                        if (b > %s) {
+                            panic(fmt.Sprintf(\"%s has a maximum of %s but was given the value %%d.\", b))
+                        }
+                        """.formatted(
+                        max.get().toString(),
+                        shape.getId().getName(),
+                        max.get().toString(),
+                        shape.getId().getName());
+            }
+        }
         if ((boolean)isPointable) {
             return ("""
                     func() *int32 {
@@ -257,10 +291,21 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             return nil
                         }
                         b = %s.(int32)
+                        """.formatted(dataSource, dataSource)
+                        + constraintCheck +      
+                        """
                         return &b
-                    }()""").formatted(dataSource, dataSource);
-        } else {
-            return "%s.(int32)".formatted(dataSource);
+                    }()""");
+        }else {
+            return """
+                func() int32 {
+                    var b = %s.(int32)
+                    """.formatted(dataSource)
+                    + constraintCheck + 
+                    """
+                    return b
+                }()
+                    """;
         }
     }
 
