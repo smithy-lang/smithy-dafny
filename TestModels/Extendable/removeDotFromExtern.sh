@@ -8,7 +8,7 @@ removeDotFromExtern() {
       # Check if the file contains the pattern "{:extern "XYZ" }"
       if grep -q '{:extern ".*"' "$file"; then
           # Extract the "XYZ" part from the pattern
-          xyz=$(grep -o '{:extern "\([^"]*\)"' "$file" | sed 's/{:extern "\([^"]*\)"/\1/')
+          xyz=$(grep -o -m 1 '{:extern "\([^"]*\)"' "$file" | sed 's/{:extern "\([^"]*\)"/\1/')
           # Check if the "XYZ" part contains a dot
           if [[ "$xyz" == *"."* ]]; then
               # Remove the dot from "XYZ"
@@ -24,4 +24,4 @@ removeDotFromExtern() {
 
 removeDotFromExtern "Model"
 removeDotFromExtern "src"
-
+removeDotFromExtern "test"
