@@ -81,6 +81,8 @@ jobs:
           make polymorph_go
 
           if [ "${{ matrix.library }}" == "TestModels/Extern" ]; then
+            rm -rf ./runtimes/go/ImplementationFromDafny-go/src/ExternConstructor
+            rm -rf ./runtimes/go/ImplementationFromDafny-go/src/SimpleExternImpl
             mv ./runtimes/go/ManualChanges/src/ExternConstructor ./runtimes/go/ImplementationFromDafny-go/src/
             mv ./runtimes/go/ManualChanges/src/SimpleExternImpl ./runtimes/go/ImplementationFromDafny-go/src/
           fi
