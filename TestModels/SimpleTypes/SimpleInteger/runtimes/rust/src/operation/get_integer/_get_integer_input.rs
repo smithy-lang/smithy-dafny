@@ -8,7 +8,7 @@ pub struct GetIntegerInput {
 }
 impl GetIntegerInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<&i32> {
+    pub fn value(&self) -> ::std::option::Option<&i32> {
         self.value.as_ref()
     }
 }
@@ -29,18 +29,12 @@ pub struct GetIntegerInputBuilder {
 }
 impl GetIntegerInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(
-        mut self,
-        input: impl ::std::convert::Into<i32>,
-    ) -> Self {
+    pub fn value(mut self, input: impl ::std::convert::Into<i32>) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(
-        mut self,
-        input: ::std::option::Option<i32>,
-    ) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<i32>) -> Self {
         self.value = input;
         self
     }
@@ -55,6 +49,8 @@ impl GetIntegerInputBuilder {
         crate::operation::get_integer::GetIntegerInput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_integer::GetIntegerInput { value: self.value })
+        ::std::result::Result::Ok(crate::operation::get_integer::GetIntegerInput {
+            value: self.value,
+        })
     }
 }

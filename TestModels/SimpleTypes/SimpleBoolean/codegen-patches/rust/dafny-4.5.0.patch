@@ -599,7 +599,7 @@ index 00000000..b8374820
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean/_get_boolean_input.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean/_get_boolean_input.rs
 new file mode 100644
-index 00000000..740be73c
+index 00000000..d669cf35
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean/_get_boolean_input.rs
 @@ -0,0 +1,56 @@
@@ -613,7 +613,7 @@ index 00000000..740be73c
 +}
 +impl GetBooleanInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn message(&self) -> ::std::option::Option<bool> {
++    pub fn value(&self) -> ::std::option::Option<bool> {
 +        self.value
 +    }
 +}

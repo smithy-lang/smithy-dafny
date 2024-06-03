@@ -758,7 +758,7 @@ index 00000000..ec28d2be
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_input.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_input.rs
 new file mode 100644
-index 00000000..56157239
+index 00000000..6a0d554b
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob/_get_blob_input.rs
 @@ -0,0 +1,60 @@
@@ -772,7 +772,7 @@ index 00000000..56157239
 +}
 +impl GetBlobInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn message(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
++    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
 +        self.value.as_ref()
 +    }
 +}
