@@ -8,7 +8,7 @@ pub struct GetBooleanInput {
 }
 impl GetBooleanInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<bool> {
+    pub fn value(&self) -> ::std::option::Option<bool> {
         self.value
     }
 }

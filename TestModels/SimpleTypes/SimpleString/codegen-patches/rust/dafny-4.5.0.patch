@@ -953,7 +953,7 @@ index 00000000..beee8893
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/_get_string_input.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/_get_string_input.rs
 new file mode 100644
-index 00000000..66233da4
+index 00000000..9c0d47f5
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/_get_string_input.rs
 @@ -0,0 +1,56 @@
@@ -967,7 +967,7 @@ index 00000000..66233da4
 +}
 +impl GetStringInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn message(&self) -> ::std::option::Option<&str> {
++    pub fn value(&self) -> ::std::option::Option<&str> {
 +        self.value.as_deref()
 +    }
 +}
