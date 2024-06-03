@@ -79,6 +79,11 @@ jobs:
           sh ./removeDotFromExtern.sh
           make transpile_go
           make polymorph_go
+
+          if [ "${{ matrix.library }}" == "TestModels/Extern" ]; then
+            mv ./runtimes/go/ManualChanges/src/ExternConstructor ./runtimes/go/ImplementationFromDafny-go/src/
+            mv ./runtimes/go/ManualChanges/src/SimpleExternImpl ./runtimes/go/ImplementationFromDafny-go/src/
+
           export GOPATH=$(pwd)/runtimes/go/ImplementationFromDafny-go:$GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go:$(pwd)/runtimes/go/TestsFromDafny-go:$GITHUB_WORKSPACE/DafnyRuntimeGo/
           goimports -w runtimes/go/
           ls $GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go
