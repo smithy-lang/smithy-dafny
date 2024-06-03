@@ -5,14 +5,14 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
-NAMESPACE=com.amazonaws.lakeformation
+NAMESPACE=com.amazonaws.glue
 
 PROJECT_SERVICES := \
-	ComAmazonawsLakeformation\
+	ComAmazonawsGlue\
 
-SERVICE_NAMESPACE_ComAmazonawsLakeformation=com.amazonaws.lakeformation
+SERVICE_NAMESPACE_ComAmazonawsGlue=com.amazonaws.glue
 
-SERVICE_DEPS_ComAmazonawsLakeformation :=
+SERVICE_DEPS_ComAmazonawsGlue :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
