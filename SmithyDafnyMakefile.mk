@@ -189,7 +189,7 @@ transpile_implementation:
 		-spillTargetCode:3 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
+		-compileSuffix:0 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
@@ -199,10 +199,10 @@ transpile_implementation:
 
 transpile_implementation_new: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation_new:
-	find ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+	find ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate go \
 		--stdin \
-		--module-name $(GO_MODULE_NAME) \
+		--go-module-name $(GO_MODULE_NAME) \
 		--no-verify \
 		--cores:$(CORES) \
 		--optimize-erasable-datatype-wrapper:false \
@@ -244,7 +244,7 @@ transpile_test:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
+		-compileSuffix:0 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
@@ -253,11 +253,11 @@ transpile_test:
 		$(TRANSPILE_DEPENDENCIES) \
 
 transpile_test_new:
-	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate go \
 		--stdin \
 		--no-verify \
-		--module-name $(GO_MODULE_NAME) \
+		--go-module-name $(GO_MODULE_NAME) \
 		--cores:$(CORES) \
 		--include-test-runner \
 		--optimize-erasable-datatype-wrapper:false \
@@ -533,12 +533,14 @@ transpile_go: clean_go transpile_implementation_go transpile_test_go transpile_d
 transpile_implementation_go: TARGET=go
 transpile_implementation_go: GO_MODULE_NAME="github.com/ShubhamChaturvedi7/SimpleBoolean"
 transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
-transpile_implementation_go: transpile_implementation_new
+# TODO: Change this to transpile_implementation_new when go mod project support is done
+transpile_implementation_go: transpile_implementation
 
 transpile_test_go: TARGET=go
 transpile_test_go: GO_MODULE_NAME="github.com/ShubhamChaturvedi7/SimpleBoolean"
 transpile_test_go: OUT=runtimes/go/TestsFromDafny
-transpile_test_go: transpile_test_new
+# TODO: Change this to transpile_implementation_new when go mod project support is done
+transpile_test_go: transpile_test
 
 transpile_dependencies_go: LANG=go
 transpile_dependencies_go: transpile_dependencies

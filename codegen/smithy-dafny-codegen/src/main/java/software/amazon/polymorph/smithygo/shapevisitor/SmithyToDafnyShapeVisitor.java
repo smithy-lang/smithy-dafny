@@ -336,8 +336,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                     f[i] = v
                 }
                 return f
-            }()...)
-            """.formatted(dereferenceIfRequired, dataSource, dereferenceIfRequired, dataSource) : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(dereferenceIfRequired, dataSource);
+            }()...)""".formatted(dereferenceIfRequired, dataSource, dereferenceIfRequired, dataSource) : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(dereferenceIfRequired, dataSource);
 
             return """
                     func () %s {

@@ -76,7 +76,7 @@ _transpile_implementation_just_uint_rust:
 		-spillTargetCode:3 \
 		-compile:1 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
+		-compileSuffix:0 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-out ImplementationFromDafny \
@@ -110,7 +110,7 @@ transpile_implementation:
 		-spillTargetCode:3 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
+		-compileSuffix:0 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \

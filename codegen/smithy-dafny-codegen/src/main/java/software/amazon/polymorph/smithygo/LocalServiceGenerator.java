@@ -68,7 +68,7 @@ public class LocalServiceGenerator implements Runnable {
         var serviceSymbol = context.symbolProvider().toSymbol(service);
         final LocalServiceTrait serviceTrait = service.expectTrait(LocalServiceTrait.class);
         var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
-        context.writerDelegator().useFileWriter("types/types.go", writer1 -> {
+        context.writerDelegator().useFileWriter("ImplementationFromDafny-go/src/types/types.go", writer1 -> {
             new StructureGenerator(model, symbolProvider, writer1, model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
         });
 
@@ -167,7 +167,7 @@ public class LocalServiceGenerator implements Runnable {
         var symbolProvider = context.symbolProvider();
         var model = context.model();
         var namespace = "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(context.settings()));
-        context.writerDelegator().useFileWriter("shim.go", namespace, writer -> {
+        context.writerDelegator().useFileWriter("TestsFromDafny-go/src/" + namespace + "/shim.go", namespace, writer -> {
             writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
             writer.addImport("Wrappers");
             writer.addImport("context");
@@ -276,7 +276,7 @@ public class LocalServiceGenerator implements Runnable {
     }
 
     void generateUnmodelledErrors(GenerationContext context) {
-        context.writerDelegator().useFileWriter("types/unmodelled_errors.go", "types", writer -> {
+        context.writerDelegator().useFileWriter("ImplementationFromDafny-go/src/types/unmodelled_errors.go", "types", writer -> {
             writer.addUseImports(SmithyGoDependency.FMT);
             writer.write("""
                                  type CollectionOfErrors struct {
@@ -329,7 +329,7 @@ public class LocalServiceGenerator implements Runnable {
         for (var refResource : refResources) {
             if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
                 var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
-                context.writerDelegator().useFileWriter("types/types.go", writer -> {
+                context.writerDelegator().useFileWriter("ImplementationFromDafny-go/src/types/types.go", writer -> {
                     writer.write("""
                                          type I$L interface {
                                          ${C|}
@@ -347,8 +347,8 @@ public class LocalServiceGenerator implements Runnable {
                 if (model.expectShape(resource, ResourceShape.class).hasTrait(ExtendableTrait.class)) {
                     generateNativeResourceWrapper(context, model.expectShape(resource, ResourceShape.class));
                 }
-
-                context.writerDelegator().useFileWriter(resource.getName() + ".go", DafnyNameResolver.serviceNamespace(service), writer -> {
+                String filePath = "ImplementationFromDafny-go/src/" + DafnyNameResolver.serviceNamespace(service) + "/" + resource.getName() + ".go";
+                context.writerDelegator().useFileWriter(filePath, DafnyNameResolver.serviceNamespace(service), writer -> {
                     writer.addImport("types");
                     writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
                     writer.write("""
@@ -432,7 +432,8 @@ public class LocalServiceGenerator implements Runnable {
     void generateNativeResourceWrapper(GenerationContext context, ResourceShape resourceShape) {
         var model = context.model();
         var symbolProvider = context.symbolProvider();
-        context.writerDelegator().useFileWriter("NativeWrapper.go", DafnyNameResolver.serviceNamespace(service), writer -> {
+        String filePath = "ImplementationFromDafny-go/src/" + DafnyNameResolver.serviceNamespace(service) + "/NativeWrapper.go";
+        context.writerDelegator().useFileWriter(filePath, DafnyNameResolver.serviceNamespace(service), writer -> {
             writer.addImport("types");
             writer.addImport("Wrappers");
             writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
