@@ -347,8 +347,8 @@ public class LocalServiceGenerator implements Runnable {
                 if (model.expectShape(resource, ResourceShape.class).hasTrait(ExtendableTrait.class)) {
                     generateNativeResourceWrapper(context, model.expectShape(resource, ResourceShape.class));
                 }
-
-                context.writerDelegator().useFileWriter(resource.getName() + ".go", DafnyNameResolver.serviceNamespace(service), writer -> {
+                String filePath = "ImplementationFromDafny-go/src/" + DafnyNameResolver.serviceNamespace(service) + "/" + resource.getName() + ".go";
+                context.writerDelegator().useFileWriter(filePath, DafnyNameResolver.serviceNamespace(service), writer -> {
                     writer.addImport("types");
                     writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
                     writer.write("""
@@ -432,7 +432,8 @@ public class LocalServiceGenerator implements Runnable {
     void generateNativeResourceWrapper(GenerationContext context, ResourceShape resourceShape) {
         var model = context.model();
         var symbolProvider = context.symbolProvider();
-        context.writerDelegator().useFileWriter("NativeWrapper.go", DafnyNameResolver.serviceNamespace(service), writer -> {
+        String filePath = "ImplementationFromDafny-go/src/" + DafnyNameResolver.serviceNamespace(service) + "/NativeWrapper.go";
+        context.writerDelegator().useFileWriter(filePath, DafnyNameResolver.serviceNamespace(service), writer -> {
             writer.addImport("types");
             writer.addImport("Wrappers");
             writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));

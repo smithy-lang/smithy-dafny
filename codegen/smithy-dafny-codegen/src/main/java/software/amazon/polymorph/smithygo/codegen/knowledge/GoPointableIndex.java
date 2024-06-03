@@ -207,7 +207,6 @@ public class GoPointableIndex implements KnowledgeIndex {
         }
 
         if (shape.isIntegerShape() && !shape.hasTrait(RequiredTrait.class)) {
-            System.out.println(shape);
             return true;
         }
 
