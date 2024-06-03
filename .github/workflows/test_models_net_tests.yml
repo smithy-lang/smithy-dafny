@@ -48,7 +48,9 @@ jobs:
             # TestModels/SimpleTypes/SimpleTimestamp,
             TestModels/Union,
             TestModels/aws-sdks/ddb,
+            TestModels/aws-sdks/glue,
             TestModels/aws-sdks/kms,
+            TestModels/aws-sdks/lakeformation,
             TestModels/aws-sdks/sqs-via-cli,
           ]
         dotnet-version: ["6.0.x"]

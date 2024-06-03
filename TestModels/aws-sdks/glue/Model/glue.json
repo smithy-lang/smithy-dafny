@@ -1,0 +1,1516 @@
+{
+  "smithy": "1.0",
+  "metadata": {
+    "suppressions": [
+      {
+        "id": "HttpMethodSemantics",
+        "namespace": "*"
+      },
+      {
+        "id": "HttpResponseCodeSemantics",
+        "namespace": "*"
+      },
+      {
+        "id": "PaginatedTrait",
+        "namespace": "*"
+      },
+      {
+        "id": "HttpHeaderTrait",
+        "namespace": "*"
+      },
+      {
+        "id": "HttpUriConflict",
+        "namespace": "*"
+      },
+      {
+        "id": "Service",
+        "namespace": "*"
+      }
+    ]
+  },
+  "shapes": {
+    "com.amazonaws.glue#Glue": {
+      "type": "service",
+      "traits": {
+        "aws.api#service": {
+          "sdkId": "Glue",
+          "arnNamespace": "glue",
+          "cloudFormationName": "Glue",
+          "cloudTrailEventSource": "glue.amazonaws.com",
+          "endpointPrefix": "glue"
+        },
+        "aws.auth#sigv4": {
+          "name": "glue"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#documentation": "<fullname>Glue</fullname>\n         <p>Defines the public endpoint for the Glue service.</p>",
+        "smithy.api#title": "AWS Glue"
+      },
+      "version": "2017-03-31",
+      "operations": [
+        {
+          "target": "com.amazonaws.glue#GetTable"
+        },
+        {
+          "target": "com.amazonaws.glue#GetDatabase"
+        },
+        {
+          "target": "com.amazonaws.glue#CreateTable"
+        },
+        {
+          "target": "com.amazonaws.glue#DeleteTable"
+        },
+        {
+          "target": "com.amazonaws.glue#DeleteDatabase"
+        },
+        {
+          "target": "com.amazonaws.glue#CreateDatabase"
+        }
+      ]
+    },
+    "com.amazonaws.glue#GetTable": {
+      "type": "operation",
+      "input": {
+        "target": "com.amazonaws.glue#GetTableRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.glue#GetTableResponse"
+      },
+      "errors": [
+        {
+          "target": "com.amazonaws.glue#EntityNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.glue#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.glue#InvalidInputException"
+        }
+      ],
+      "traits": {
+        "smithy.api#documentation": "<p>Retrieves the <code>Table</code> definition in a Data Catalog for\n      a specified table.</p>"
+      }
+    },
+    "com.amazonaws.glue#GetTableRequest": {
+      "type": "structure",
+      "members": {
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog where the table resides. If none is provided, the Amazon Web Services account\n      ID is used by default.</p>"
+          }
+        },
+        "DatabaseName": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the database in the catalog in which the table resides.\n      For Hive compatibility, this name is entirely lowercase.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the table for which to retrieve the definition. For Hive\n      compatibility, this name is entirely lowercase.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "TransactionId": {
+          "target": "com.amazonaws.glue#TransactionIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The transaction ID at which to read the table contents. </p>"
+          }
+        },
+        "QueryAsOfTime": {
+          "target": "com.amazonaws.glue#Timestamp",
+          "traits": {
+            "smithy.api#documentation": "<p>The time as of when to read the table contents. If not set, the most recent transaction commit time will be used. Cannot be specified along with <code>TransactionId</code>.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.glue#GetTableResponse": {
+      "type": "structure",
+      "members": {
+        "Table": {
+          "target": "com.amazonaws.glue#Table",
+          "traits": {
+            "smithy.api#documentation": "<p>The <code>Table</code> object that defines the specified table.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.glue#Table": {
+      "type": "structure",
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The table name. For Hive compatibility, this must be entirely\n      lowercase.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "DatabaseName": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the database where the table metadata resides.\n      For Hive compatibility, this must be all lowercase.</p>"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.glue#DescriptionString",
+          "traits": {
+            "smithy.api#documentation": "<p>A description of the table.</p>"
+          }
+        },
+        "Owner": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The owner of the table.</p>"
+          }
+        },
+        "CreateTime": {
+          "target": "com.amazonaws.glue#Timestamp",
+          "traits": {
+            "smithy.api#documentation": "<p>The time when the table definition was created in the Data Catalog.</p>"
+          }
+        },
+        "UpdateTime": {
+          "target": "com.amazonaws.glue#Timestamp",
+          "traits": {
+            "smithy.api#documentation": "<p>The last time that the table was updated.</p>"
+          }
+        },
+        "LastAccessTime": {
+          "target": "com.amazonaws.glue#Timestamp",
+          "traits": {
+            "smithy.api#documentation": "<p>The last time that the table was accessed. This is usually taken from HDFS, and might not\n      be reliable.</p>"
+          }
+        },
+        "LastAnalyzedTime": {
+          "target": "com.amazonaws.glue#Timestamp",
+          "traits": {
+            "smithy.api#documentation": "<p>The last time that column statistics were computed for this table.</p>"
+          }
+        },
+        "Retention": {
+          "target": "com.amazonaws.glue#NonNegativeInteger",
+          "traits": {
+            "smithy.api#documentation": "<p>The retention time for this table.</p>"
+          }
+        },
+        "StorageDescriptor": {
+          "target": "com.amazonaws.glue#StorageDescriptor",
+          "traits": {
+            "smithy.api#documentation": "<p>A storage descriptor containing information about the physical storage\n      of this table.</p>"
+          }
+        },
+        "PartitionKeys": {
+          "target": "com.amazonaws.glue#ColumnList",
+          "traits": {
+            "smithy.api#documentation": "<p>A list of columns by which the table is partitioned. Only primitive\n      types are supported as partition keys.</p>\n\t        <p>When you create a table used by Amazon Athena, and you do not specify any\n        <code>partitionKeys</code>, you must at least set the value of <code>partitionKeys</code> to\n      an empty list. For example:</p>\n         <p>\n            <code>\"PartitionKeys\": []</code>\n         </p>"
+          }
+        },
+        "ViewOriginalText": {
+          "target": "com.amazonaws.glue#ViewTextString",
+          "traits": {
+            "smithy.api#documentation": "<p>If the table is a view, the original text of the view; otherwise <code>null</code>.</p>"
+          }
+        },
+        "ViewExpandedText": {
+          "target": "com.amazonaws.glue#ViewTextString",
+          "traits": {
+            "smithy.api#documentation": "<p>If the table is a view, the expanded text of the view; otherwise <code>null</code>.</p>"
+          }
+        },
+        "TableType": {
+          "target": "com.amazonaws.glue#TableTypeString",
+          "traits": {
+            "smithy.api#documentation": "<p>The type of this table (<code>EXTERNAL_TABLE</code>, <code>VIRTUAL_VIEW</code>, etc.).</p>"
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.glue#ParametersMap",
+          "traits": {
+            "smithy.api#documentation": "<p>These key-value pairs define properties associated with the table.</p>"
+          }
+        },
+        "CreatedBy": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The person or entity who created the table.</p>"
+          }
+        },
+        "IsRegisteredWithLakeFormation": {
+          "target": "com.amazonaws.glue#Boolean",
+          "traits": {
+            "smithy.api#documentation": "<p>Indicates whether the table has been registered with Lake Formation.</p>"
+          }
+        },
+        "TargetTable": {
+          "target": "com.amazonaws.glue#TableIdentifier",
+          "traits": {
+            "smithy.api#documentation": "<p>A <code>TableIdentifier</code> structure that describes a target table for resource linking.</p>"
+          }
+        },
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog in which the table resides.</p>"
+          }
+        },
+        "VersionId": {
+          "target": "com.amazonaws.glue#VersionString"
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Represents a collection of related data organized in columns and rows.</p>"
+      }
+    },
+    "com.amazonaws.glue#VersionString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 255
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#GetDatabase": {
+      "type": "operation",
+      "input": {
+        "target": "com.amazonaws.glue#GetDatabaseRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.glue#GetDatabaseResponse"
+      },
+      "errors": [
+        {
+          "target": "com.amazonaws.glue#EntityNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.glue#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.glue#InvalidInputException"
+        }
+      ],
+      "traits": {
+        "smithy.api#documentation": "<p>Retrieves the definition of a specified database.</p>"
+      }
+    },
+    "com.amazonaws.glue#GetDatabaseRequest": {
+      "type": "structure",
+      "members": {
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog in which the database resides. If none is provided, the Amazon Web Services\n      account ID is used by default.</p>"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the database to retrieve. For Hive compatibility, this \n      should be all lowercase.</p>",
+            "smithy.api#required": {}
+          }
+        }
+      }
+    },
+    "com.amazonaws.glue#GetDatabaseResponse": {
+      "type": "structure",
+      "members": {
+        "Database": {
+          "target": "com.amazonaws.glue#Database",
+          "traits": {
+            "smithy.api#documentation": "<p>The definition of the specified database in the Data Catalog.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.glue#EntityNotFoundException": {
+      "type": "structure",
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {
+            "smithy.api#documentation": "<p>A message describing the problem.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>A specified entity does not exist</p>",
+        "smithy.api#error": "client"
+      }
+    },
+    "com.amazonaws.glue#Database": {
+      "type": "structure",
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the database. For Hive compatibility, this is folded to lowercase when it is\n      stored.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.glue#DescriptionString",
+          "traits": {
+            "smithy.api#documentation": "<p>A description of the database.</p>"
+          }
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.glue#URI",
+          "traits": {
+            "smithy.api#documentation": "<p>The location of the database (for example, an HDFS path).</p>"
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.glue#ParametersMap",
+          "traits": {
+            "smithy.api#documentation": "<p>These key-value pairs define parameters and properties\n      of the database.</p>"
+          }
+        },
+        "CreateTime": {
+          "target": "com.amazonaws.glue#Timestamp",
+          "traits": {
+            "smithy.api#documentation": "<p>The time at which the metadata database was created in the catalog.</p>"
+          }
+        },
+        "CreateTableDefaultPermissions": {
+          "target": "com.amazonaws.glue#PrincipalPermissionsList",
+          "traits": {
+            "smithy.api#documentation": "<p>Creates a set of default permissions on the table for principals. </p>"
+          }
+        },
+        "TargetDatabase": {
+          "target": "com.amazonaws.glue#DatabaseIdentifier",
+          "traits": {
+            "smithy.api#documentation": "<p>A <code>DatabaseIdentifier</code> structure that describes a target database for resource linking.</p>"
+          }
+        },
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog in which the database resides.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>The <code>Database</code> object represents a logical grouping of tables that might reside\n      in a Hive metastore or an RDBMS.</p>"
+      }
+    },
+    "com.amazonaws.glue#AccessDeniedException": {
+      "type": "structure",
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {
+            "smithy.api#documentation": "<p>A message describing the problem.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Access to a resource was denied.</p>",
+        "smithy.api#error": "client"
+      }
+    },
+    "com.amazonaws.glue#MessageString": {
+      "type": "string"
+    },
+    "com.amazonaws.glue#AccountId": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 12
+        }
+      }
+    },
+    "com.amazonaws.glue#CatalogIdString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 255
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#ColumnNameString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 1024
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#CreateTable": {
+      "type": "operation",
+      "input": {
+        "target": "com.amazonaws.glue#CreateTableRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.glue#CreateTableResponse"
+      },
+      "errors": [
+        {
+          "target": "com.amazonaws.glue#AlreadyExistsException"
+        },
+        {
+          "target": "com.amazonaws.glue#EntityNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.glue#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.glue#InvalidInputException"
+        }
+      ],
+      "traits": {
+        "smithy.api#documentation": "<p>Creates a new table definition in the Data Catalog.</p>"
+      }
+    },
+    "com.amazonaws.glue#DeleteDatabase": {
+      "type": "operation",
+      "input": {
+        "target": "com.amazonaws.glue#DeleteDatabaseRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.glue#DeleteDatabaseResponse"
+      },
+      "errors": [
+        {
+          "target": "com.amazonaws.glue#EntityNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.glue#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.glue#InvalidInputException"
+        }
+      ],
+      "traits": {
+        "smithy.api#documentation": "<p>Removes a specified database from a Data Catalog.</p>\n         <note>\n            <p>After completing this operation, you no longer have access to the tables (and all table\n        versions and partitions that might belong to the tables) and the user-defined functions in\n        the deleted database. Glue deletes these \"orphaned\" resources asynchronously in a timely\n        manner, at the discretion of the service.</p>\n            <p>To ensure the immediate deletion of all related resources, before calling\n          <code>DeleteDatabase</code>, use <code>DeleteTableVersion</code> or\n          <code>BatchDeleteTableVersion</code>, <code>DeletePartition</code> or\n          <code>BatchDeletePartition</code>, <code>DeleteUserDefinedFunction</code>, and\n          <code>DeleteTable</code> or <code>BatchDeleteTable</code>, to delete any resources that\n        belong to the database.</p>\n         </note>"
+      }
+    },
+    "com.amazonaws.glue#CreateTableRequest": {
+      "type": "structure",
+      "members": {
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog in which to create the <code>Table</code>.\n      If none is supplied, the Amazon Web Services account ID is used by default.</p>"
+          }
+        },
+        "DatabaseName": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The catalog database in which to create the new table. For Hive\n      compatibility, this name is entirely lowercase.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "TableInput": {
+          "target": "com.amazonaws.glue#TableInput",
+          "traits": {
+            "smithy.api#documentation": "<p>The <code>TableInput</code> object that defines the metadata table\n      to create in the catalog.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "PartitionIndexes": {
+          "target": "com.amazonaws.glue#PartitionIndexList",
+          "traits": {
+            "smithy.api#documentation": "<p>A list of partition indexes, <code>PartitionIndex</code> structures, to create in the table.</p>"
+          }
+        },
+        "TransactionId": {
+          "target": "com.amazonaws.glue#TransactionIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the transaction.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.glue#DeleteDatabaseRequest": {
+      "type": "structure",
+      "members": {
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog in which the database resides. If none is provided, the Amazon Web Services\n      account ID is used by default.</p>"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the database to delete. For Hive compatibility, this must be all\n      lowercase.</p>",
+            "smithy.api#required": {}
+          }
+        }
+      }
+    },
+    "com.amazonaws.glue#DeleteDatabaseResponse": {
+      "type": "structure",
+      "members": {}
+    },
+    "com.amazonaws.glue#CreateDatabase": {
+      "type": "operation",
+      "input": {
+        "target": "com.amazonaws.glue#CreateDatabaseRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.glue#CreateDatabaseResponse"
+      },
+      "errors": [
+        {
+          "target": "com.amazonaws.glue#AlreadyExistsException"
+        },
+        {
+          "target": "com.amazonaws.glue#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.glue#InvalidInputException"
+        }
+      ],
+      "traits": {
+        "smithy.api#documentation": "<p>Creates a new database in a Data Catalog.</p>"
+      }
+    },
+    "com.amazonaws.glue#InternalServiceException": {
+      "type": "structure",
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {
+            "smithy.api#documentation": "<p>A message describing the problem.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>An internal service error occurred.</p>",
+        "smithy.api#error": "server"
+      }
+    },
+    "com.amazonaws.glue#InvalidInputException": {
+      "type": "structure",
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {
+            "smithy.api#documentation": "<p>A message describing the problem.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>The input provided was not valid.</p>",
+        "smithy.api#error": "client"
+      }
+    },
+    "com.amazonaws.glue#CreateDatabaseRequest": {
+      "type": "structure",
+      "members": {
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog in which to create the database. If none is provided, the Amazon Web Services\n      account ID is used by default.</p>"
+          }
+        },
+        "DatabaseInput": {
+          "target": "com.amazonaws.glue#DatabaseInput",
+          "traits": {
+            "smithy.api#documentation": "<p>The metadata for the database.</p>",
+            "smithy.api#required": {}
+          }
+        }
+      }
+    },
+    "com.amazonaws.glue#CreateDatabaseResponse": {
+      "type": "structure",
+      "members": {}
+    },
+    "com.amazonaws.glue#DatabaseInput": {
+      "type": "structure",
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the database. For Hive compatibility, this is folded to lowercase when it is\n      stored.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.glue#DescriptionString",
+          "traits": {
+            "smithy.api#documentation": "<p>A description of the database.</p>"
+          }
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.glue#URI",
+          "traits": {
+            "smithy.api#documentation": "<p>The location of the database (for example, an HDFS path). </p>"
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.glue#ParametersMap",
+          "traits": {
+            "smithy.api#documentation": "<p>These key-value pairs define parameters and properties\n      of the database.</p>\n         <p>These key-value pairs define parameters and properties of the database.</p>"
+          }
+        },
+        "CreateTableDefaultPermissions": {
+          "target": "com.amazonaws.glue#PrincipalPermissionsList",
+          "traits": {
+            "smithy.api#documentation": "<p>Creates a set of default permissions on the table for principals. </p>"
+          }
+        },
+        "TargetDatabase": {
+          "target": "com.amazonaws.glue#DatabaseIdentifier",
+          "traits": {
+            "smithy.api#documentation": "<p>A <code>DatabaseIdentifier</code> structure that describes a target database for resource linking.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>The structure used to create or update a database.</p>"
+      }
+    },
+    "com.amazonaws.glue#DescriptionString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 2048
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#URI": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 1024
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#ParametersMap": {
+      "type": "map",
+      "key": {
+        "target": "com.amazonaws.glue#KeyString"
+      },
+      "value": {
+        "target": "com.amazonaws.glue#ParametersMapValue"
+      }
+    },
+    "com.amazonaws.glue#TransactionIdString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 255
+        },
+        "smithy.api#pattern": "^[\\p{L}\\p{N}\\p{P}]*$"
+      }
+    },
+    "com.amazonaws.glue#KeyString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 255
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#ParametersMapValue": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 512000
+        }
+      }
+    },
+    "com.amazonaws.glue#PrincipalPermissionsList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#PrincipalPermissions"
+      }
+    },
+    "com.amazonaws.glue#PrincipalPermissions": {
+      "type": "structure",
+      "members": {
+        "Principal": {
+          "target": "com.amazonaws.glue#DataLakePrincipal",
+          "traits": {
+            "smithy.api#documentation": "<p>The principal who is granted permissions.</p>"
+          }
+        },
+        "Permissions": {
+          "target": "com.amazonaws.glue#PermissionList",
+          "traits": {
+            "smithy.api#documentation": "<p>The permissions that are granted to the principal.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Permissions granted to a principal.</p>"
+      }
+    },
+    "com.amazonaws.glue#CreateTableResponse": {
+      "type": "structure",
+      "members": {}
+    },
+    "com.amazonaws.glue#PartitionIndex": {
+      "type": "structure",
+      "members": {
+        "Keys": {
+          "target": "com.amazonaws.glue#KeyList",
+          "traits": {
+            "smithy.api#documentation": "<p>The keys for the partition index.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "IndexName": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the partition index.</p>",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>A structure for a partition index.</p>"
+      }
+    },
+    "com.amazonaws.glue#PartitionIndexList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#PartitionIndex"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 3
+        }
+      }
+    },
+    "com.amazonaws.glue#DeleteTable": {
+      "type": "operation",
+      "input": {
+        "target": "com.amazonaws.glue#DeleteTableRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.glue#DeleteTableResponse"
+      },
+      "errors": [
+        {
+          "target": "com.amazonaws.glue#EntityNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.glue#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.glue#InvalidInputException"
+        }
+      ],
+      "traits": {
+        "smithy.api#documentation": "<p>Removes a table definition from the Data Catalog.</p>\n         <note>\n            <p>After completing this operation, you no longer have access to the table versions and\n        partitions that belong to the deleted table. Glue deletes these \"orphaned\" resources\n        asynchronously in a timely manner, at the discretion of the service.</p>\n            <p>To ensure the immediate deletion of all related resources, before calling\n          <code>DeleteTable</code>, use <code>DeleteTableVersion</code> or\n          <code>BatchDeleteTableVersion</code>, and <code>DeletePartition</code> or\n          <code>BatchDeletePartition</code>, to delete any resources that belong to the\n        table.</p>\n         </note>"
+      }
+    },
+    "com.amazonaws.glue#DeleteTableRequest": {
+      "type": "structure",
+      "members": {
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog where the table resides. If none is provided, the Amazon Web Services account\n      ID is used by default.</p>"
+          }
+        },
+        "DatabaseName": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the catalog database in which the table resides. For Hive\n      compatibility, this name is entirely lowercase.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the table to be deleted. For Hive\n      compatibility, this name is entirely lowercase.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "TransactionId": {
+          "target": "com.amazonaws.glue#TransactionIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The transaction ID at which to delete the table contents.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.glue#DeleteTableResponse": {
+      "type": "structure",
+      "members": {}
+    },
+    "com.amazonaws.glue#KeyList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#NameString"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      }
+    },
+    "com.amazonaws.glue#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.glue#ColumnList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#Column"
+      }
+    },
+    "com.amazonaws.glue#Column": {
+      "type": "structure",
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the <code>Column</code>.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.glue#ColumnTypeString",
+          "traits": {
+            "smithy.api#documentation": "<p>The data type of the <code>Column</code>.</p>"
+          }
+        },
+        "Comment": {
+          "target": "com.amazonaws.glue#CommentString",
+          "traits": {
+            "smithy.api#documentation": "<p>A free-form text comment.</p>"
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.glue#ParametersMap",
+          "traits": {
+            "smithy.api#documentation": "<p>These key-value pairs define properties associated with the column.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>A column in a <code>Table</code>.</p>"
+      }
+    },
+    "com.amazonaws.glue#CommentString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 255
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#ColumnTypeString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 131072
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#NonNegativeInteger": {
+      "type": "integer",
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      }
+    },
+    "com.amazonaws.glue#StorageDescriptor": {
+      "type": "structure",
+      "members": {
+        "Columns": {
+          "target": "com.amazonaws.glue#ColumnList",
+          "traits": {
+            "smithy.api#documentation": "<p>A list of the <code>Columns</code> in the table.</p>"
+          }
+        },
+        "Location": {
+          "target": "com.amazonaws.glue#LocationString",
+          "traits": {
+            "smithy.api#documentation": "<p>The physical location of the table. By default, this takes the form of the warehouse\n      location, followed by the database location in the warehouse, followed by the table\n      name.</p>"
+          }
+        },
+        "AdditionalLocations": {
+          "target": "com.amazonaws.glue#LocationStringList"
+        },
+        "InputFormat": {
+          "target": "com.amazonaws.glue#FormatString",
+          "traits": {
+            "smithy.api#documentation": "<p>The input format: <code>SequenceFileInputFormat</code> (binary),\n      or <code>TextInputFormat</code>, or a custom format.</p>"
+          }
+        },
+        "OutputFormat": {
+          "target": "com.amazonaws.glue#FormatString",
+          "traits": {
+            "smithy.api#documentation": "<p>The output format: <code>SequenceFileOutputFormat</code> (binary),\n      or <code>IgnoreKeyTextOutputFormat</code>, or a custom format.</p>"
+          }
+        },
+        "Compressed": {
+          "target": "com.amazonaws.glue#Boolean",
+          "traits": {
+            "smithy.api#documentation": "<p>\n            <code>True</code> if the data in the table is compressed, or <code>False</code> if\n      not.</p>"
+          }
+        },
+        "NumberOfBuckets": {
+          "target": "com.amazonaws.glue#Integer",
+          "traits": {
+            "smithy.api#documentation": "<p>Must be specified if the table contains any dimension columns.</p>"
+          }
+        },
+        "SerdeInfo": {
+          "target": "com.amazonaws.glue#SerDeInfo",
+          "traits": {
+            "smithy.api#documentation": "<p>The serialization/deserialization (SerDe) information.</p>"
+          }
+        },
+        "BucketColumns": {
+          "target": "com.amazonaws.glue#NameStringList",
+          "traits": {
+            "smithy.api#documentation": "<p>A list of reducer grouping columns, clustering columns, and\n      bucketing columns in the table.</p>"
+          }
+        },
+        "SortColumns": {
+          "target": "com.amazonaws.glue#OrderList",
+          "traits": {
+            "smithy.api#documentation": "<p>A list specifying the sort order of each bucket in the table.</p>"
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.glue#ParametersMap",
+          "traits": {
+            "smithy.api#documentation": "<p>The user-supplied properties in key-value form.</p>"
+          }
+        },
+        "SkewedInfo": {
+          "target": "com.amazonaws.glue#SkewedInfo",
+          "traits": {
+            "smithy.api#documentation": "<p>The information about values that appear frequently in a column (skewed values).</p>"
+          }
+        },
+        "StoredAsSubDirectories": {
+          "target": "com.amazonaws.glue#Boolean",
+          "traits": {
+            "smithy.api#documentation": "<p>\n            <code>True</code> if the table data is stored in subdirectories, or <code>False</code> if\n      not.</p>"
+          }
+        },
+        "SchemaReference": {
+          "target": "com.amazonaws.glue#SchemaReference",
+          "traits": {
+            "smithy.api#documentation": "<p>An object that references a schema stored in the Glue Schema Registry.</p>\n\t\n\t        <p>When creating a table, you can pass an empty list of columns for the schema, and instead use a schema reference.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Describes the physical storage of table data.</p>"
+      }
+    },
+    "com.amazonaws.glue#LocationStringList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#LocationString"
+      }
+    },
+    "com.amazonaws.glue#LocationString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 2056
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#NameStringList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#NameString"
+      }
+    },
+    "com.amazonaws.glue#Boolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.glue#FormatString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 128
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      }
+    },
+    "com.amazonaws.glue#Integer": {
+      "type": "integer"
+    },
+    "com.amazonaws.glue#SchemaReference": {
+      "type": "structure",
+      "members": {
+        "SchemaId": {
+          "target": "com.amazonaws.glue#SchemaId",
+          "traits": {
+            "smithy.api#documentation": "<p>A structure that contains schema identity fields. Either this or the <code>SchemaVersionId</code> has to be provided.</p>"
+          }
+        },
+        "SchemaVersionId": {
+          "target": "com.amazonaws.glue#SchemaVersionIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The unique ID assigned to a version of the schema. Either this or the <code>SchemaId</code> has to be provided.</p>"
+          }
+        },
+        "SchemaVersionNumber": {
+          "target": "com.amazonaws.glue#VersionLongNumber",
+          "traits": {
+            "smithy.api#box": {},
+            "smithy.api#documentation": "<p>The version number of the schema.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>An object that references a schema stored in the Glue Schema Registry.</p>"
+      }
+    },
+    "com.amazonaws.glue#SchemaId": {
+      "type": "structure",
+      "members": {
+        "SchemaArn": {
+          "target": "com.amazonaws.glue#GlueResourceArn",
+          "traits": {
+            "smithy.api#documentation": "<p>The Amazon Resource Name (ARN) of the schema. One of <code>SchemaArn</code> or <code>SchemaName</code> has to be provided.</p>"
+          }
+        },
+        "SchemaName": {
+          "target": "com.amazonaws.glue#SchemaRegistryNameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the schema. One of <code>SchemaArn</code> or <code>SchemaName</code> has to be provided.</p>"
+          }
+        },
+        "RegistryName": {
+          "target": "com.amazonaws.glue#SchemaRegistryNameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the schema registry that contains the schema.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>The unique ID of the schema in the Glue schema registry.</p>"
+      }
+    },
+    "com.amazonaws.glue#SchemaRegistryNameString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 255
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_$#.]+$"
+      }
+    },
+    "com.amazonaws.glue#GlueResourceArn": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 10240
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov|aws-cn):glue:"
+      }
+    },
+    "com.amazonaws.glue#SchemaVersionIdString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 36,
+          "max": 36
+        },
+        "smithy.api#pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+      }
+    },
+    "com.amazonaws.glue#VersionLongNumber": {
+      "type": "long",
+      "traits": {
+        "smithy.api#range": {
+          "min": 1,
+          "max": 100000
+        }
+      }
+    },
+    "com.amazonaws.glue#SerDeInfo": {
+      "type": "structure",
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>Name of the SerDe.</p>"
+          }
+        },
+        "SerializationLibrary": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>Usually the class that implements the SerDe. An example is\n        <code>org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe</code>.</p>"
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.glue#ParametersMap",
+          "traits": {
+            "smithy.api#documentation": "<p>These key-value pairs define initialization parameters for the SerDe.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Information about a serialization/deserialization program (SerDe) that serves as an\n      extractor and loader.</p>"
+      }
+    },
+    "com.amazonaws.glue#SkewedInfo": {
+      "type": "structure",
+      "members": {
+        "SkewedColumnNames": {
+          "target": "com.amazonaws.glue#NameStringList",
+          "traits": {
+            "smithy.api#documentation": "<p>A list of names of columns that contain skewed values.</p>"
+          }
+        },
+        "SkewedColumnValues": {
+          "target": "com.amazonaws.glue#ColumnValueStringList",
+          "traits": {
+            "smithy.api#documentation": "<p>A list of values that appear so frequently as to be considered\n      skewed.</p>"
+          }
+        },
+        "SkewedColumnValueLocationMaps": {
+          "target": "com.amazonaws.glue#LocationMap",
+          "traits": {
+            "smithy.api#documentation": "<p>A mapping of skewed values to the columns that contain them.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Specifies skewed values in a table. Skewed values are those that occur with very high\n      frequency.</p>"
+      }
+    },
+    "com.amazonaws.glue#LocationMap": {
+      "type": "map",
+      "key": {
+        "target": "com.amazonaws.glue#ColumnValuesString"
+      },
+      "value": {
+        "target": "com.amazonaws.glue#ColumnValuesString"
+      }
+    },
+    "com.amazonaws.glue#ColumnValuesString": {
+      "type": "string"
+    },
+    "com.amazonaws.glue#ColumnValueStringList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#ColumnValuesString"
+      }
+    },
+    "com.amazonaws.glue#OrderList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#Order"
+      }
+    },
+    "com.amazonaws.glue#Order": {
+      "type": "structure",
+      "members": {
+        "Column": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the column.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "SortOrder": {
+          "target": "com.amazonaws.glue#IntegerFlag",
+          "traits": {
+            "smithy.api#documentation": "<p>Indicates that the column is sorted in ascending order\n      (<code>== 1</code>), or in descending order (<code>==0</code>).</p>",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Specifies the sort order of a sorted column.</p>"
+      }
+    },
+    "com.amazonaws.glue#IntegerFlag": {
+      "type": "integer",
+      "traits": {
+        "smithy.api#range": {
+          "min": 0,
+          "max": 1
+        }
+      }
+    },
+    "com.amazonaws.glue#TableTypeString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 255
+        }
+      }
+    },
+    "com.amazonaws.glue#TableIdentifier": {
+      "type": "structure",
+      "members": {
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog in which the table resides.</p>"
+          }
+        },
+        "DatabaseName": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the catalog database that contains the target table.</p>"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the target table.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>A structure that describes a target table for resource linking.</p>"
+      }
+    },
+    "com.amazonaws.glue#ViewTextString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 0,
+          "max": 409600
+        }
+      }
+    },
+    "com.amazonaws.glue#TableInput": {
+      "type": "structure",
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The table name. For Hive compatibility, this is folded to\n      lowercase when it is stored.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.glue#DescriptionString",
+          "traits": {
+            "smithy.api#documentation": "<p>A description of the table.</p>"
+          }
+        },
+        "Owner": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The table owner.</p>"
+          }
+        },
+        "LastAccessTime": {
+          "target": "com.amazonaws.glue#Timestamp",
+          "traits": {
+            "smithy.api#documentation": "<p>The last time that the table was accessed.</p>"
+          }
+        },
+        "LastAnalyzedTime": {
+          "target": "com.amazonaws.glue#Timestamp",
+          "traits": {
+            "smithy.api#documentation": "<p>The last time that column statistics were computed for this table.</p>"
+          }
+        },
+        "Retention": {
+          "target": "com.amazonaws.glue#NonNegativeInteger",
+          "traits": {
+            "smithy.api#documentation": "<p>The retention time for this table.</p>"
+          }
+        },
+        "StorageDescriptor": {
+          "target": "com.amazonaws.glue#StorageDescriptor",
+          "traits": {
+            "smithy.api#documentation": "<p>A storage descriptor containing information about the physical storage\n      of this table.</p>"
+          }
+        },
+        "PartitionKeys": {
+          "target": "com.amazonaws.glue#ColumnList",
+          "traits": {
+            "smithy.api#documentation": "<p>A list of columns by which the table is partitioned. Only primitive\n      types are supported as partition keys.</p>\n\t        <p>When you create a table used by Amazon Athena, and you do not specify any\n        <code>partitionKeys</code>, you must at least set the value of <code>partitionKeys</code> to\n      an empty list. For example:</p>\n         <p>\n            <code>\"PartitionKeys\": []</code>\n         </p>"
+          }
+        },
+        "ViewOriginalText": {
+          "target": "com.amazonaws.glue#ViewTextString",
+          "traits": {
+            "smithy.api#documentation": "<p>If the table is a view, the original text of the view; otherwise <code>null</code>.</p>"
+          }
+        },
+        "ViewExpandedText": {
+          "target": "com.amazonaws.glue#ViewTextString",
+          "traits": {
+            "smithy.api#documentation": "<p>If the table is a view, the expanded text of the view; otherwise <code>null</code>.</p>"
+          }
+        },
+        "TableType": {
+          "target": "com.amazonaws.glue#TableTypeString",
+          "traits": {
+            "smithy.api#documentation": "<p>The type of this table (<code>EXTERNAL_TABLE</code>, <code>VIRTUAL_VIEW</code>, etc.).</p>"
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.glue#ParametersMap",
+          "traits": {
+            "smithy.api#documentation": "<p>These key-value pairs define properties associated with the table.</p>"
+          }
+        },
+        "TargetTable": {
+          "target": "com.amazonaws.glue#TableIdentifier",
+          "traits": {
+            "smithy.api#documentation": "<p>A <code>TableIdentifier</code> structure that describes a target table for resource linking.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>A structure used to define a table.</p>"
+      }
+    },
+    "com.amazonaws.glue#DataLakePrincipal": {
+      "type": "structure",
+      "members": {
+        "DataLakePrincipalIdentifier": {
+          "target": "com.amazonaws.glue#DataLakePrincipalString",
+          "traits": {
+            "smithy.api#documentation": "<p>An identifier for the Lake Formation principal.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>The Lake Formation principal.</p>"
+      }
+    },
+    "com.amazonaws.glue#DataLakePrincipalString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 255
+        }
+      }
+    },
+    "com.amazonaws.glue#DatabaseIdentifier": {
+      "type": "structure",
+      "members": {
+        "CatalogId": {
+          "target": "com.amazonaws.glue#CatalogIdString",
+          "traits": {
+            "smithy.api#documentation": "<p>The ID of the Data Catalog in which the database resides.</p>"
+          }
+        },
+        "DatabaseName": {
+          "target": "com.amazonaws.glue#NameString",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the catalog database.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>A structure that describes a target database for resource linking.</p>"
+      }
+    },
+    "com.amazonaws.glue#PermissionList": {
+      "type": "list",
+      "member": {
+        "target": "com.amazonaws.glue#Permission"
+      }
+    },
+    "com.amazonaws.glue#Permission": {
+      "type": "string",
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "value": "ALL",
+            "name": "ALL"
+          },
+          {
+            "value": "SELECT",
+            "name": "SELECT"
+          },
+          {
+            "value": "ALTER",
+            "name": "ALTER"
+          },
+          {
+            "value": "DROP",
+            "name": "DROP"
+          },
+          {
+            "value": "DELETE",
+            "name": "DELETE"
+          },
+          {
+            "value": "INSERT",
+            "name": "INSERT"
+          },
+          {
+            "value": "CREATE_DATABASE",
+            "name": "CREATE_DATABASE"
+          },
+          {
+            "value": "CREATE_TABLE",
+            "name": "CREATE_TABLE"
+          },
+          {
+            "value": "DATA_LOCATION_ACCESS",
+            "name": "DATA_LOCATION_ACCESS"
+          }
+        ]
+      }
+    },
+    "com.amazonaws.glue#ErrorMessageString": {
+      "type": "string"
+    },
+    "com.amazonaws.glue#AlreadyExistsException": {
+      "type": "structure",
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {
+            "smithy.api#documentation": "<p>A message describing the problem.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>A resource to be created or added already exists.</p>",
+        "smithy.api#error": "client"
+      }
+    },
+    "com.amazonaws.glue#NameString": {
+      "type": "string",
+      "traits": {
+        "smithy.api#length": {
+          "min": 1,
+          "max": 255
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      }
+    }
+  }
+}
