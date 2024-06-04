@@ -21,6 +21,6 @@ async fn test_get_known_value() {
 }
 
 pub fn client() -> Client {
-    let config = ::simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny::_default::DefaultSimpleIntegerConfig();
+    let config = SimpleIntegerConfig::builder().build().unwrap();
     Client::from_conf(config).unwrap()
 }

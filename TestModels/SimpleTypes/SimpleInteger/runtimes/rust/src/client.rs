@@ -15,10 +15,10 @@ pub struct Client {
 impl Client {
     /// Creates a new client from the service [`Config`](crate::Config).
     #[track_caller]
-    pub fn from_conf(conf: ::std::rc::Rc<simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig>) -> Result<Self, BuildError> {
+    pub fn from_conf(conf: crate::types::SimpleIntegerConfig) -> Result<Self, BuildError> {
         let inner =
             ::simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny::_default::SimpleInteger(
-                &conf,
+                &std::rc::Rc::new(conf.to_internal())
             );
         if matches!(
             inner.as_ref(),
