@@ -16,9 +16,10 @@ impl GetIntegerKnownValue {
         crate::operation::get_integer_known_value::GetIntegerKnownValueError,
     > {
         let inner_input =
-            crate::conversions::get_integer_known_value::_get_integer_known_value_input::to_dafny(input);
-        let inner_result =
-            ::dafny_runtime::md!(handle.inner.clone()).GetInteger(&inner_input);
+            crate::conversions::get_integer_known_value::_get_integer_known_value_input::to_dafny(
+                input,
+            );
+        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetInteger(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_integer_dafny::r#_Wrappers_Compile::Result::Success { .. }
@@ -29,9 +30,11 @@ impl GetIntegerKnownValue {
                 ),
             )
         } else {
-            Err(crate::conversions::get_integer_known_value::from_dafny_error(
-                inner_result.error().clone(),
-            ))
+            Err(
+                crate::conversions::get_integer_known_value::from_dafny_error(
+                    inner_result.error().clone(),
+                ),
+            )
         }
     }
 }

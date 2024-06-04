@@ -23,7 +23,6 @@ impl GetIntegerInputBuilder {
 pub struct GetIntegerFluentBuilder {
     handle: ::std::sync::Arc<crate::client::Handle>,
     inner: crate::operation::get_integer::builders::GetIntegerInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
 impl GetIntegerFluentBuilder {
     /// Creates a new `GetInteger`.
@@ -31,7 +30,6 @@ impl GetIntegerFluentBuilder {
         Self {
             handle,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetInteger as a reference.
@@ -57,39 +55,18 @@ impl GetIntegerFluentBuilder {
         crate::operation::get_integer::GetInteger::send(&self.handle, input).await
     }
 
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(
-        mut self,
-        input: i32
-    ) -> Self {
+    pub fn value(mut self, input: i32) -> Self {
         self.inner = self.inner.value(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(
-        mut self,
-        input: ::std::option::Option<i32>
-    ) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<i32>) -> Self {
         self.inner = self.inner.set_value(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> &::std::option::Option<i32>  {
+    pub fn get_value(&self) -> &::std::option::Option<i32> {
         self.inner.get_value()
     }
 }
