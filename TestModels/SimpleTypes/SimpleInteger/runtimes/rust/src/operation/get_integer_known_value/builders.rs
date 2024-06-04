@@ -23,7 +23,6 @@ impl GetIntegerKnownValueInputBuilder {
 pub struct GetIntegerKnownValueFluentBuilder {
     handle: ::std::sync::Arc<crate::client::Handle>,
     inner: crate::operation::get_integer_known_value::builders::GetIntegerKnownValueInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
 impl GetIntegerKnownValueFluentBuilder {
     /// Creates a new `GetIntegerKnownValue`.
@@ -31,7 +30,6 @@ impl GetIntegerKnownValueFluentBuilder {
         Self {
             handle,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetIntegerKnownValue as a reference.
@@ -59,21 +57,6 @@ impl GetIntegerKnownValueFluentBuilder {
         crate::operation::get_integer_known_value::GetIntegerKnownValue::send(&self.handle, input).await
     }
 
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(
         mut self,
