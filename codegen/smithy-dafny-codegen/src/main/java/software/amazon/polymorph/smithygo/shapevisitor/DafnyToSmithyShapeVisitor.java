@@ -263,6 +263,36 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 	}()""".formatted(context.symbolProvider().toSymbol(shape).getName(), context.symbolProvider().toSymbol(shape).getName(), dataSource, dataSource, DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)), DafnyNameResolver.getDafnyCompanionStructType(context.settings(), context.symbolProvider().toSymbol(shape)),
                   DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)));
         }
+
+        String lengthCheck = "";
+        if (shape.hasTrait(LengthTrait.class)) {
+            LengthTrait lengthTrait = shape.expectTrait(LengthTrait.class);
+
+            Optional<Long> min = lengthTrait.getMin();
+            Optional<Long> max = lengthTrait.getMax();
+            
+            if (min.isPresent()) {
+                lengthCheck += """
+                        if (len(s) < %s) {
+                            panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(s)))
+                        }
+                        """.formatted(
+                        min.get().toString(),
+                        shape.getId().getName(),
+                        min.get().toString());
+            }
+            if (max.isPresent()) {
+                lengthCheck += """
+                        if (len(s) > %s) {
+                            panic(fmt.Sprintf(\"%s has a maximum length of %s but has the length of %%d.\", len(s)))
+                        }
+                        """.formatted(
+                        max.get().toString(),
+                        shape.getId().getName(),
+                        max.get().toString());
+            }
+        }
+
         var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? "uint8" : "dafny.Char";
         return """
                 func() (*string) {
@@ -273,12 +303,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                     for i := dafny.Iterate(%s) ; ; {
                         val, ok := i()
                         if !ok {
+                            %s
                             return &[]string{s}[0]
                         } else {
                             s = s + string(val.(%s))
                         }
                    }
-               }()""".formatted(dataSource, dataSource, underlyingType);
+               }()""".formatted(dataSource, dataSource, lengthCheck, underlyingType);
     }
 
     @Override
