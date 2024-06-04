@@ -88,6 +88,7 @@ jobs:
           fi
 
           if [ "${{ matrix.library }}" == "TestModels/Extendable" ]; then
+            rm -rf runtimes/go/TestsFromDafny-go/src/simpleextendableresourcesinternaldafnynativeresourcefactory
             rm -rf runtimes/go/ImplementationFromDafny-go/src/simpleextendableresourcesinternaldafnynativeresourcefactory
           fi
 
