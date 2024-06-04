@@ -83,11 +83,15 @@ jobs:
           if [ "${{ matrix.library }}" == "TestModels/Extern" ]; then
             rm -rf ./runtimes/go/ImplementationFromDafny-go/src/ExternConstructor
             rm -rf ./runtimes/go/ImplementationFromDafny-go/src/SimpleExternImpl
-            mv ./runtimes/go/ManualChanges/src/ExternConstructor ./runtimes/go/ImplementationFromDafny-go/src/
-            mv ./runtimes/go/ManualChanges/src/SimpleExternImpl ./runtimes/go/ImplementationFromDafny-go/src/
+            rm -rf ./runtimes/go/TestsFromDafny-go/src/ExternConstructor
+            rm -rf ./runtimes/go/TestsFromDafny-go/src/SimpleExternImpl
           fi
 
-          export GOPATH=$(pwd)/runtimes/go/ImplementationFromDafny-go:$GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go:$(pwd)/runtimes/go/TestsFromDafny-go:$GITHUB_WORKSPACE/DafnyRuntimeGo/
+          if [ "${{ matrix.library }}" == "TestModels/Extendable" ]; then
+            rm -rf runtimes/go/ImplementationFromDafny-go/src/simpleextendableresourcesinternaldafnynativeresourcefactory
+          fi
+
+          export GOPATH=$(pwd)/runtimes/go/ImplementationFromDafny-go:$GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go:$(pwd)/runtimes/go/TestsFromDafny-go:$GITHUB_WORKSPACE/DafnyRuntimeGo/:$(pwd)/runtimes/go/ManualChanges
           goimports -w runtimes/go/
           ls $GITHUB_WORKSPACE/TestModels/dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go
           GO111MODULE=auto go run runtimes/go/TestsFromDafny-go/src/TestsFromDafny.go
