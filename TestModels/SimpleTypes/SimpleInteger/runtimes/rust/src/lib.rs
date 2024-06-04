@@ -14,4 +14,4 @@ pub mod operation;
 mod conversions;
 
 pub use client::Client;
-pub use types::SimpleIntegerConfig;
+pub use types::simple_integer_config::SimpleIntegerConfig;
