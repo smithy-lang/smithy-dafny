@@ -447,6 +447,9 @@ pub mod r#_SimpleIntegerImpl_Compile {
             ) {
                 panic!("Halt")
             };
+            if !(::dafny_runtime::truncate!(::dafny_runtime::int!(0) - super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i32) <= ::dafny_runtime::truncate!(input.value().UnwrapOr(&(&0).into::<::dafny_runtime::DafnyInt>()/* <i>Coercion from ::dafny_runtime::DafnyInt to T</i> not yet implemented */)/* <i>Coercion from T to ::dafny_runtime::DafnyInt</i> not yet implemented */, i32) && ::dafny_runtime::truncate!(input.value().UnwrapOr(&(&0).into::<::dafny_runtime::DafnyInt>()/* <i>Coercion from ::dafny_runtime::DafnyInt to T</i> not yet implemented */)/* <i>Coercion from T to ::dafny_runtime::DafnyInt</i> not yet implemented */, i32) <= ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT() - ::dafny_runtime::int!(1), i32)) {
+        panic!("Halt")
+      };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput::GetIntegerOutput {
             value: input.value().clone()
           });
@@ -486,6 +489,9 @@ pub mod r#_SimpleIntegerImpl_Compile {
             ) {
                 panic!("Halt")
             };
+            if !(::dafny_runtime::truncate!(input.value().UnwrapOr(&(&0).into::<::dafny_runtime::DafnyInt>()/* <i>Coercion from ::dafny_runtime::DafnyInt to T</i> not yet implemented */)/* <i>Coercion from T to ::dafny_runtime::DafnyInt</i> not yet implemented */, i32) == 20) {
+        panic!("Halt")
+      };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput::GetIntegerOutput {
             value: input.value().clone()
           });

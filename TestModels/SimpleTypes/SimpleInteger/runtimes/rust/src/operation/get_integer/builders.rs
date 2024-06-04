@@ -56,23 +56,17 @@ impl GetIntegerFluentBuilder {
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(
-        mut self,
-        input: i32
-    ) -> Self {
+    pub fn value(mut self, input: i32) -> Self {
         self.inner = self.inner.value(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(
-        mut self,
-        input: ::std::option::Option<i32>
-    ) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<i32>) -> Self {
         self.inner = self.inner.set_value(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> &::std::option::Option<i32>  {
+    pub fn get_value(&self) -> &::std::option::Option<i32> {
         self.inner.get_value()
     }
 }

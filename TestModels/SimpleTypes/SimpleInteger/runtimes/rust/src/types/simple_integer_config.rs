@@ -7,7 +7,7 @@ pub struct SimpleIntegerConfig {
 
 impl SimpleIntegerConfig {
     pub fn builder() -> SimpleIntegerConfigBuilder {
-    	SimpleIntegerConfigBuilder::new()
+        SimpleIntegerConfigBuilder::new()
     }
 }
 
@@ -26,26 +26,23 @@ impl SimpleIntegerConfigBuilder {
     }
     pub fn build(
         self,
-    ) -> ::std::result::Result<
-            SimpleIntegerConfig,
-        ::aws_smithy_types::error::operation::BuildError,
-	> {
-        ::std::result::Result::Ok(SimpleIntegerConfig {
-        })
+    ) -> ::std::result::Result<SimpleIntegerConfig, ::aws_smithy_types::error::operation::BuildError>
+    {
+        ::std::result::Result::Ok(SimpleIntegerConfig {})
     }
-/*
-    pub fn XXX(mut self, input: impl ::std::convert::Into<XXXtype>) -> Self {
-        self.XXX = ::std::option::Option::Some(input.into());
-        self
-    }
-    #[allow(missing_docs)] // documentation missing in model
-    pub fn set_XXX(mut self, input: ::std::option::Option<XXXtype>) -> Self {
-        self.XXX = input;
-        self
-    }
-    #[allow(missing_docs)] // documentation missing in model
-    pub fn get_XXX(&self) -> &::std::option::Option<XXXtype> {
-        &self.XXX
-    }
-*/
+    /*
+        pub fn XXX(mut self, input: impl ::std::convert::Into<XXXtype>) -> Self {
+            self.XXX = ::std::option::Option::Some(input.into());
+            self
+        }
+        #[allow(missing_docs)] // documentation missing in model
+        pub fn set_XXX(mut self, input: ::std::option::Option<XXXtype>) -> Self {
+            self.XXX = input;
+            self
+        }
+        #[allow(missing_docs)] // documentation missing in model
+        pub fn get_XXX(&self) -> &::std::option::Option<XXXtype> {
+            &self.XXX
+        }
+    */
 }

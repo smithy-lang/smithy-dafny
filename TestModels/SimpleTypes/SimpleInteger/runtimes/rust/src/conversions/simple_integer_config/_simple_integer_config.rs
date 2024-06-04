@@ -22,7 +22,6 @@ pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig,
     >,
-) -> crate::types::simple_integer_config::SimpleIntegerConfig
-{
-  crate::types::simple_integer_config::SimpleIntegerConfig {}
+) -> crate::types::simple_integer_config::SimpleIntegerConfig {
+    crate::types::simple_integer_config::SimpleIntegerConfig {}
 }

@@ -16,15 +16,16 @@ impl GetInteger {
         crate::operation::get_integer::GetIntegerError,
     > {
         let inner_input = crate::conversions::get_integer::_get_integer_input::to_dafny(input);
-        let inner_result =
-            ::dafny_runtime::md!(handle.inner.clone()).GetInteger(&inner_input);
+        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetInteger(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_integer_dafny::r#_Wrappers_Compile::Result::Success { .. }
         ) {
-            Ok(crate::conversions::get_integer::_get_integer_output::from_dafny(
-                inner_result.value().clone(),
-            ))
+            Ok(
+                crate::conversions::get_integer::_get_integer_output::from_dafny(
+                    inner_result.value().clone(),
+                ),
+            )
         } else {
             Err(crate::conversions::get_integer::from_dafny_error(
                 inner_result.error().clone(),
