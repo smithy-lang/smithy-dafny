@@ -24,6 +24,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.StringUtils;
@@ -167,6 +168,35 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         MemberShape valueMemberShape = shape.getValue();
         final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
         final var type = context.symbolProvider().toSymbol(valueTargetShape).getName();
+
+        String lengthCheck = "";
+        if (shape.hasTrait(LengthTrait.class)) {
+            LengthTrait lengthTrait = shape.expectTrait(LengthTrait.class);
+
+            Optional<Long> min = lengthTrait.getMin();
+            Optional<Long> max = lengthTrait.getMax();
+            
+            if (min.isPresent()) {
+                lengthCheck += """
+                        if (len(m) < %s) {
+                            panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(m)))
+                        }
+                        """.formatted(
+                        min.get().toString(),
+                        shape.getId().getName(),
+                        min.get().toString());
+            }
+            if (max.isPresent()) {
+                lengthCheck += """
+                        if (len(m) > %s) {
+                            panic(fmt.Sprintf(\"%s has a maximum length of %s but has the length of %%d.\", len(m)))
+                        }
+                        """.formatted(
+                        max.get().toString(),
+                        shape.getId().getName(),
+                        max.get().toString());
+            }
+        }
         builder.append("""
                                func() map[string]%s {
                                var m map[string]%s = make(map[string]%s)
@@ -180,13 +210,15 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 		}
 		m[*%s] = *%s
 	}
+    %s
 	return m
                                }()""".formatted(type, type, type, dataSource, dataSource, keyTargetShape.accept(
                 new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
         ),
                 valueTargetShape.accept(
                         new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(1))", writer, isConfigShape)
-                )
+                ),
+                lengthCheck
         ));
         return builder.toString();
     }
