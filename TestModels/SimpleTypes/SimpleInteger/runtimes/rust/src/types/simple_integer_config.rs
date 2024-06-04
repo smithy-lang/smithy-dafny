@@ -7,14 +7,7 @@ pub struct SimpleIntegerConfig {
 
 impl SimpleIntegerConfig {
     pub fn builder() -> SimpleIntegerConfigBuilder {
-	SimpleIntegerConfigBuilder::new()
-    }
-
-    pub fn to_internal(&self) -> simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig {
-        simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig::SimpleIntegerConfig {}
-    }
-    pub fn from_internal(input : &simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig) ->  Self {
-        Self {}
+    	SimpleIntegerConfigBuilder::new()
     }
 }
 

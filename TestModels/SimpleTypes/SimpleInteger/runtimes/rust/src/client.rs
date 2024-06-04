@@ -18,7 +18,7 @@ impl Client {
     pub fn from_conf(conf: crate::types::simple_integer_config::SimpleIntegerConfig) -> Result<Self, BuildError> {
         let inner =
             ::simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny::_default::SimpleInteger(
-                &std::rc::Rc::new(conf.to_internal())
+                &crate::conversions::simple_integer_config::_simple_integer_config::to_dafny(conf)
             );
         if matches!(
             inner.as_ref(),

@@ -2,3 +2,5 @@
 pub mod get_integer;
 
 pub mod get_integer_known_value;
+
+pub mod simple_integer_config;
