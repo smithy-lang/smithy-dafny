@@ -5,18 +5,6 @@ $version: "2"
 namespace simple.streaming
 
 
-// QUESTIONS:
-// 1. Priority of async clients/operations? Add later?
-//    a. Java ESDK only offers InputStream/OutputStream wrappers
-//    J: Interfaces more important
-// 2. Can we depend on AWS SDK core libraries for streaming types for now?
-//    a. Yes we want to break the dependency eventually
-//    J: v3 S3EC Java does as well. Crypto Primitives?
-//    For now will propose reusing SDK libraries in doc/poc
-// 3. Asymmetry of input vs. output streams? Other languages are inconsistent (Java and IIRC Go uses different types)
-//    Asymmetric would definitely be easier for Dafny synchronous output
-//    TODO: try others to see if they actually don't handle sharing a structure as input and output
- 
 
 // TODO: Call streaming operations on SDKs from Dafny
 //       Sync Dafny client good enough, or do we start supporting async code in Dafny?

@@ -6,15 +6,6 @@ module StandardLibraryJavaConversions {
   import opened StandardLibrary.UInt
   import opened StandardLibrary.Actions
   import opened Wrappers
-
-  // class {:compile false} {:extern "java.lang.Void"} Void {
-
-  // }
-
-  // trait {:compile false} {:extern "java.util.function.Consumer"} Consumer<T> {
-
-  //   method {:extern} accept(t: T)
-  // }
   
   trait {:compile false} {:extern "java.lang.Throwable"} Throwable {
 
@@ -154,15 +145,6 @@ module StandardLibraryJavaConversions {
     method {:verify false} subscribe(s: Subscriber<T>) {
       var action := new SubscriberAction(s);
       subscribeAction.ForEach(action);
-    }
-  }
-
-  class NoOpSubscription extends Subscription {
-
-    method request(n: int64) {
-    }
-
-    method cancel() {
     }
   }
 
