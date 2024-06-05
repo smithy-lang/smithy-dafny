@@ -19,8 +19,7 @@ impl GetStringKnownValue {
             crate::conversions::get_string_known_value::_get_string_known_value_input::to_dafny(
                 input,
             );
-        let inner_result =
-            ::dafny_runtime::md!(handle.inner.clone()).GetStringUTF8(&inner_input);
+        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetStringUTF8(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }
