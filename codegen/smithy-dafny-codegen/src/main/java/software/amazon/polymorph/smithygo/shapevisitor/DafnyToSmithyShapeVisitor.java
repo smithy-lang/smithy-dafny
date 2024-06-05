@@ -136,6 +136,36 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         MemberShape memberShape = shape.getMember();
         final String[] typeName = context.symbolProvider().toSymbol(memberShape).getFullName().split("/");
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+        String lengthCheck = "";
+        if (shape.hasTrait(LengthTrait.class)) {
+            LengthTrait lengthTrait = shape.expectTrait(LengthTrait.class);
+
+            Optional<Long> min = lengthTrait.getMin();
+            Optional<Long> max = lengthTrait.getMax();
+            
+            if (min.isPresent()) {
+                lengthCheck += """
+                        if (len(fieldValue) < %s) {
+                            panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(fieldValue)))
+                        }
+                        """.formatted(
+                        min.get().toString(),
+                        shape.getId().getName(),
+                        min.get().toString());
+            }
+            if (max.isPresent()) {
+                lengthCheck += """
+                        if (len(fieldValue) > %s) {
+                            panic(fmt.Sprintf(\"%s has a maximum length of %s but has the length of %%d.\", len(fieldValue)))
+                        }
+                        """.formatted(
+                        max.get().toString(),
+                        shape.getId().getName(),
+                        max.get().toString());
+            }
+        }
+        
         builder.append("""
                        func() []%s{
                        var fieldValue []%s
@@ -148,11 +178,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 				break
 			}
 			fieldValue = append(fieldValue, %s%s)}
+            %s
 			""".formatted(typeName[typeName.length - 1], typeName[typeName.length - 1], dataSource, dataSource,
                 targetShape.isStructureShape() ? "" : "*",
                 targetShape.accept(
                         new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
-                )));
+                ),lengthCheck));
 
         // Close structure
         return builder.append("return fieldValue }()".formatted(dataSource)).toString();
