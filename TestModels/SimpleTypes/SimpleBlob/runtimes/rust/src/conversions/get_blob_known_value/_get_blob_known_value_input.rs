@@ -2,9 +2,8 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: crate::operation::get_blob_known_value::GetBlobKnownValueInput,
-) -> ::std::rc::Rc<
-    ::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput,
-> {
+) -> ::std::rc::Rc<::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput>
+{
     let dafny_value = match value.value {
         Some(v) => ::simple_blob_dafny::_Wrappers_Compile::Option::Some {
             value: ::dafny_runtime::Sequence::from_array(&v),
