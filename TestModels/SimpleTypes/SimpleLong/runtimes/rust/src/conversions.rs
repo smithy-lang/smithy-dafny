@@ -2,3 +2,5 @@
 pub mod get_long;
 
 pub mod get_long_known_value;
+
+pub mod simple_long_config;

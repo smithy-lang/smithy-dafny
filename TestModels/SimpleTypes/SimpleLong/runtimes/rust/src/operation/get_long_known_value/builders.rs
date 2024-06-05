@@ -21,17 +21,15 @@ impl GetLongKnownValueInputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetLongKnownValueFluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::client::Client,
     inner: crate::operation::get_long_known_value::builders::GetLongKnownValueInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
 impl GetLongKnownValueFluentBuilder {
     /// Creates a new `GetLongKnownValue`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::client::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetLongKnownValue as a reference.
@@ -56,24 +54,9 @@ impl GetLongKnownValueFluentBuilder {
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
             .map_err(crate::operation::get_long_known_value::GetLongKnownValueError::unhandled)?;
-        crate::operation::get_long_known_value::GetLongKnownValue::send(&self.handle, input).await
+        crate::operation::get_long_known_value::GetLongKnownValue::send(&self.client, input).await
     }
 
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(mut self, input: i64) -> Self {
         self.inner = self.inner.value(input);

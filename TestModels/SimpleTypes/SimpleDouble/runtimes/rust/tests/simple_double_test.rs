@@ -9,6 +9,6 @@ async fn test_get_double() {
 }
 
 pub fn client() -> Client {
-    let config = Config::builder().build();
+    let config = SimpleDoubleConfig::builder().build().unwrap();
     Client::from_conf(config).unwrap()
 }
