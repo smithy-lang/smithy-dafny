@@ -21,14 +21,14 @@ impl GetIntegerKnownValueInputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetIntegerKnownValueFluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::client::Client,
     inner: crate::operation::get_integer_known_value::builders::GetIntegerKnownValueInputBuilder,
 }
 impl GetIntegerKnownValueFluentBuilder {
     /// Creates a new `GetIntegerKnownValue`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::client::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
         }
     }
@@ -57,7 +57,7 @@ impl GetIntegerKnownValueFluentBuilder {
             .map_err(
                 crate::operation::get_integer_known_value::GetIntegerKnownValueError::unhandled,
             )?;
-        crate::operation::get_integer_known_value::GetIntegerKnownValue::send(&self.handle, input)
+        crate::operation::get_integer_known_value::GetIntegerKnownValue::send(&self.client, input)
             .await
     }
 

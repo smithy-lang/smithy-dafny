@@ -2,14 +2,9 @@
 
 use aws_smithy_types::error::operation::BuildError;
 
-#[derive(Debug)]
-pub(crate) struct Handle {
-    pub(crate) inner: ::dafny_runtime::Object<dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient>
-}
-
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    handle: ::std::sync::Arc<Handle>,
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient>
 }
 
 impl Client {
@@ -33,11 +28,8 @@ impl Client {
                     .build(),
             ));
         }
-        let handle = Handle {
-            inner: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient + 'static)>>::upcast_to(inner.Extract()),
-        };
         Ok(Self {
-            handle: ::std::sync::Arc::new(handle),
+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient + 'static)>>::upcast_to(inner.Extract()),
         })
     }
 }
