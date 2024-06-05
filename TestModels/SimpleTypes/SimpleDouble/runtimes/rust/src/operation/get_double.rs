@@ -16,7 +16,8 @@ impl GetDouble {
         crate::operation::get_double::GetDoubleError,
     > {
         let inner_input = crate::conversions::get_double::_get_double_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetDouble(&inner_input);
+        let inner_result =
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetDouble(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_double_dafny::r#_Wrappers_Compile::Result::Success { .. }
