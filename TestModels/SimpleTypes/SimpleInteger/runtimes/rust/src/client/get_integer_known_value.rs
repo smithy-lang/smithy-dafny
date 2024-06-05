@@ -12,7 +12,7 @@ impl super::Client {
     ) -> crate::operation::get_integer_known_value::builders::GetIntegerKnownValueFluentBuilder
     {
         crate::operation::get_integer_known_value::builders::GetIntegerKnownValueFluentBuilder::new(
-            self.handle.clone(),
+            self.clone(),
         )
     }
 }

@@ -21,14 +21,14 @@ impl GetIntegerInputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetIntegerFluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::Client,
     inner: crate::operation::get_integer::builders::GetIntegerInputBuilder,
 }
 impl GetIntegerFluentBuilder {
     /// Creates a new `GetInteger`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::client::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
         }
     }
@@ -52,7 +52,7 @@ impl GetIntegerFluentBuilder {
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
             .map_err(crate::operation::get_integer::GetIntegerError::unhandled)?;
-        crate::operation::get_integer::GetInteger::send(&self.handle, input).await
+        crate::operation::get_integer::GetInteger::send(&self.client, input).await
     }
 
     #[allow(missing_docs)] // documentation missing in model
