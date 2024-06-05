@@ -9,7 +9,7 @@ impl GetLongKnownValue {
         Self
     }
     pub(crate) async fn send(
-        handle: &crate::client::Handle,
+        client: &crate::client::Client,
         input: crate::operation::get_long_known_value::GetLongKnownValueInput,
     ) -> ::std::result::Result<
         crate::operation::get_long_known_value::GetLongKnownValueOutput,
@@ -17,7 +17,7 @@ impl GetLongKnownValue {
     > {
         let inner_input =
             crate::conversions::get_long_known_value::_get_long_known_value_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetLong(&inner_input);
+        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetLong(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_long_dafny::r#_Wrappers_Compile::Result::Success { .. }

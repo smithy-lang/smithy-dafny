@@ -8,6 +8,6 @@ impl super::Client {
     ///   - [`value(Option<Double>)`](crate::operation::get_double::GetDoubleOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetDoubleError>`](crate::operation::get_double::GetDoubleError)
     pub fn get_double(&self) -> crate::operation::get_double::builders::GetDoubleFluentBuilder {
-        crate::operation::get_double::builders::GetDoubleFluentBuilder::new(self.handle.clone())
+        crate::operation::get_double::builders::GetDoubleFluentBuilder::new(self.clone())
     }
 }

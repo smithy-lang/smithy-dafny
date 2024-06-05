@@ -63,7 +63,7 @@ mod simple_string_test {
     }
 
     pub fn client() -> Client {
-        let config = Config::builder().build();
+        let config = SimpleStringConfig::builder().build().unwrap();
         Client::from_conf(config).unwrap()
     }
 }

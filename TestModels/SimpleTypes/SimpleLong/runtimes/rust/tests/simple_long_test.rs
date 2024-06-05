@@ -17,6 +17,6 @@ async fn test_get_known_value() {
 }
 
 pub fn client() -> Client {
-    let config = Config::builder().build();
+    let config = SimpleLongConfig::builder().build().unwrap();
     Client::from_conf(config).unwrap()
 }

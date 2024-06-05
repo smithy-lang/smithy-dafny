@@ -11,7 +11,7 @@ impl super::Client {
         &self,
     ) -> crate::operation::get_string_utf8::builders::GetStringUTF8FluentBuilder {
         crate::operation::get_string_utf8::builders::GetStringUTF8FluentBuilder::new(
-            self.handle.clone(),
+            self.clone(),
         )
     }
 }

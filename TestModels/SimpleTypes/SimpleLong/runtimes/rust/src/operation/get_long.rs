@@ -9,14 +9,14 @@ impl GetLong {
         Self
     }
     pub(crate) async fn send(
-        handle: &crate::client::Handle,
+        client: &crate::client::Client,
         input: crate::operation::get_long::GetLongInput,
     ) -> ::std::result::Result<
         crate::operation::get_long::GetLongOutput,
         crate::operation::get_long::GetLongError,
     > {
         let inner_input = crate::conversions::get_long::_get_long_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetLong(&inner_input);
+        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetLong(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_long_dafny::r#_Wrappers_Compile::Result::Success { .. }

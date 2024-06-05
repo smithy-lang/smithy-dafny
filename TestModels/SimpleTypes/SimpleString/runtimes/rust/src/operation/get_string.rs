@@ -9,14 +9,14 @@ impl GetString {
         Self
     }
     pub(crate) async fn send(
-        handle: &crate::client::Handle,
+        client: &crate::client::Client,
         input: crate::operation::get_string::GetStringInput,
     ) -> ::std::result::Result<
         crate::operation::get_string::GetStringOutput,
         crate::operation::get_string::GetStringError,
     > {
         let inner_input = crate::conversions::get_string::_get_string_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetString(&inner_input);
+        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetString(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }
