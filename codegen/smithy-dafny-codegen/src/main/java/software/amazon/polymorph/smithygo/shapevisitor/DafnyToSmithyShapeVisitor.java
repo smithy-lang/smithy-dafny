@@ -80,6 +80,36 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String blobShape(BlobShape shape) {
         writer.addImport("dafny");
+        
+        String lengthCheck = "";
+        if (shape.hasTrait(LengthTrait.class)) {
+            LengthTrait lengthTrait = shape.expectTrait(LengthTrait.class);
+
+            Optional<Long> min = lengthTrait.getMin();
+            Optional<Long> max = lengthTrait.getMax();
+            
+            if (min.isPresent()) {
+                lengthCheck += """
+                        if (len(b) < %s) {
+                            panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(b)))
+                        }
+                        """.formatted(
+                        min.get().toString(),
+                        shape.getId().getName(),
+                        min.get().toString());
+            }
+            if (max.isPresent()) {
+                lengthCheck += """
+                        if (len(b) > %s) {
+                            panic(fmt.Sprintf(\"%s has a maximum length of %s but has the length of %%d.\", len(b)))
+                        }
+                        """.formatted(
+                        max.get().toString(),
+                        shape.getId().getName(),
+                        max.get().toString());
+            }
+        }
+
         return """
                 func () []byte {
                 var b []byte
@@ -89,12 +119,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 for i := dafny.Iterate(%s) ; ; {
                     val, ok := i()
                     if !ok {
+                        %s
                         return b
                     } else {
                         b = append(b, val.(byte))
                     }
                 }
-                }()""".formatted(dataSource, dataSource);
+                }()""".formatted(dataSource, dataSource, lengthCheck);
     }
 
     @Override
@@ -305,6 +336,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             if (min.isPresent()) {
                 lengthCheck += """
                         if (len(s) < %s) {
+                            // TODO: Should we return errors.New?
                             panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(s)))
                         }
                         """.formatted(
