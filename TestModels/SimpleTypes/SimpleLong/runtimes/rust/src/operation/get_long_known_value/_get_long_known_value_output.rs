@@ -30,18 +30,12 @@ pub struct GetLongKnownValueOutputBuilder {
 }
 impl GetLongKnownValueOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(
-        mut self,
-        input: impl ::std::convert::Into<i64>,
-    ) -> Self {
+    pub fn value(mut self, input: impl ::std::convert::Into<i64>) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(
-        mut self,
-        input: ::std::option::Option<i64>,
-    ) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<i64>) -> Self {
         self.value = input;
         self
     }

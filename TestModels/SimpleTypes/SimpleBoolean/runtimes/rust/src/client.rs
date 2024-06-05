@@ -22,7 +22,9 @@ impl Client {
         let inner_config = ::std::rc::Rc::new(
             ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::DefaultSimpleBooleanConfig());
         let inner =
-            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(&inner_config);
+            ::simple_boolean_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(
+                &inner_config,
+            );
         if matches!(
             inner.as_ref(),
             ::simple_boolean_dafny::_Wrappers_Compile::Result::Failure { .. }

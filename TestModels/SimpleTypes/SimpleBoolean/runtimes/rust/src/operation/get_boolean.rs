@@ -16,8 +16,7 @@ impl GetBoolean {
         crate::operation::get_boolean::GetBooleanError,
     > {
         let inner_input = crate::conversions::get_boolean::_get_boolean_input::to_dafny(input);
-        let inner_result =
-            ::dafny_runtime::md!(handle.inner.clone()).GetBoolean(&inner_input);
+        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetBoolean(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_boolean_dafny::r#_Wrappers_Compile::Result::Success { .. }

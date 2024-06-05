@@ -32,19 +32,13 @@ pub struct GetDoubleOutputBuilder {
 
 impl GetDoubleOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(
-        mut self,
-        input: impl ::std::convert::Into<f64>,
-    ) -> Self {
+    pub fn value(mut self, input: impl ::std::convert::Into<f64>) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(
-        mut self,
-        input: ::std::option::Option<f64>,
-    ) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<f64>) -> Self {
         self.value = input;
         self
     }
@@ -61,6 +55,8 @@ impl GetDoubleOutputBuilder {
         crate::operation::get_double::GetDoubleOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_double::GetDoubleOutput { value: self.value })
+        ::std::result::Result::Ok(crate::operation::get_double::GetDoubleOutput {
+            value: self.value,
+        })
     }
 }

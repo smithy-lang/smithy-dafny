@@ -21,10 +21,9 @@ impl Client {
         // they would need converting here too.
         let inner_config = ::std::rc::Rc::new(
             ::simple_blob_dafny::_simple_dtypes_dblob_dinternaldafny::_default::DefaultSimpleBlobConfig());
-        let inner =
-            ::simple_blob_dafny::_simple_dtypes_dblob_dinternaldafny::_default::SimpleBlob(
-                &inner_config,
-            );
+        let inner = ::simple_blob_dafny::_simple_dtypes_dblob_dinternaldafny::_default::SimpleBlob(
+            &inner_config,
+        );
         if matches!(
             inner.as_ref(),
             ::simple_blob_dafny::_Wrappers_Compile::Result::Failure { .. }
