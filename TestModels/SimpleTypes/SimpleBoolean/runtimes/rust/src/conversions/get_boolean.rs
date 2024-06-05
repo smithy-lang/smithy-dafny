@@ -5,9 +5,7 @@ use std::any::Any;
 #[allow(dead_code)]
 pub fn to_dafny_error(
     value: crate::operation::get_boolean::GetBooleanError,
-) -> ::std::rc::Rc<
-    ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
-> {
+) -> ::std::rc::Rc<::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error> {
     match value {
     crate::operation::get_boolean::GetBooleanError::Unhandled(unhandled) =>
       ::std::rc::Rc::new(::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })

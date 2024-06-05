@@ -7,9 +7,16 @@ pub fn to_dafny_error(
     value: crate::operation::get_blob_known_value::GetBlobKnownValueError,
 ) -> ::std::rc::Rc<::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error> {
     match value {
-    crate::operation::get_blob_known_value::GetBlobKnownValueError::Unhandled(unhandled) =>
-      ::std::rc::Rc::new(::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
-  }
+        crate::operation::get_blob_known_value::GetBlobKnownValueError::Unhandled(unhandled) => {
+            ::std::rc::Rc::new(
+                ::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error::Opaque {
+                    obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
+                        ::dafny_runtime::object::new(unhandled),
+                    ),
+                },
+            )
+        }
+    }
 }
 
 #[allow(dead_code)]

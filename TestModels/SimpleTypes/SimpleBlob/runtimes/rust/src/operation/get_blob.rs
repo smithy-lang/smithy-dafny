@@ -16,8 +16,7 @@ impl GetBlob {
         crate::operation::get_blob::GetBlobError,
     > {
         let inner_input = crate::conversions::get_blob::_get_blob_input::to_dafny(input);
-        let inner_result =
-            ::dafny_runtime::md!(handle.inner.clone()).GetBlob(&inner_input);
+        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetBlob(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_blob_dafny::r#_Wrappers_Compile::Result::Success { .. }
