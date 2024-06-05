@@ -4,7 +4,7 @@ use aws_smithy_types::error::operation::BuildError;
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    pub(crate) client: ::dafny_runtime::Object<dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient>
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient>
 }
 
 impl Client {
@@ -29,7 +29,7 @@ impl Client {
             ));
         }
         Ok(Self {
-            client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient + 'static)>>::upcast_to(inner.Extract()),
+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient + 'static)>>::upcast_to(inner.Extract()),
         })
     }
 }

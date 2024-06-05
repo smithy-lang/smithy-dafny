@@ -16,7 +16,8 @@ impl GetInteger {
         crate::operation::get_integer::GetIntegerError,
     > {
         let inner_input = crate::conversions::get_integer::_get_integer_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(client.client.clone()).GetInteger(&inner_input);
+        let inner_result =
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetInteger(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_integer_dafny::r#_Wrappers_Compile::Result::Success { .. }
