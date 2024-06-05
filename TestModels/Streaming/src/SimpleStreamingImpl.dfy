@@ -17,13 +17,11 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   class BitCounter extends Action<StreamEvent<seq<uint8>, Error>, ()> {
 
     var sumSoFar: int32
-    const outStream: SimpleStream<StreamEvent<int32, Error>>
 
-    constructor(outStream: SimpleStream<StreamEvent<int32, Error>>) 
+    constructor() 
       ensures fresh(Repr)
     {
       sumSoFar := 0;
-      this.outStream := outStream;
       Repr := {};
     }
 
@@ -31,16 +29,13 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
       modifies Repr
     {
       assume this in Repr;
-      assume outStream.Repr <= Repr;
       match value {
         case Some(bits) => {
           // TODO: actually count bits. Just guessing the average (like guessing all C's on a test :) 
           assume sumSoFar < 10000;
           sumSoFar := sumSoFar + 4;
         }
-        case None => {
-          outStream.Put(Some(Success(sumSoFar)));
-        }
+        case None => {}
       }
       return ();
     }
@@ -50,10 +45,11 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   method CountBits ( config: InternalConfig , input: CountBitsInput )
     returns (output: Result<CountBitsOutput, Error>)
   {
-    var outStream := new SimpleStream<StreamEvent<int32, Error>>();
-    var counter := new BitCounter(outStream);
-    Subscribe(input.bits, counter);
-    return Success(CountBitsOutput(sum := outStream));
+    var counter := new BitCounter();
+
+    input.bits.ForEach(counter);
+    
+    return Success(CountBitsOutput(sum := counter.sumSoFar));
   }
 
 
@@ -67,10 +63,10 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   {
     // TODO: Actually compute the binary
-    var fakeBinary := [Success([12]), Success([34, 56])];
+    var fakeBinary := [Some(Success([12])), Some(Success([34, 56]))];
     var fakeBinaryIter := new SeqEnumerator(fakeBinary);
     
-    var outStream := new LazyStream<Result<seq<uint8>, Error>>(fakeBinaryIter);
+    var outStream := new SimpleStream<StreamEvent<seq<uint8>, Error>>(fakeBinaryIter);
 
     return Success(BinaryOfOutput(binary := outStream));
   }
@@ -80,52 +76,67 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   {true}
 
 
-  class Chunker extends Action<StreamEvent<seq<uint8>, Error>, ()> {
+  class Chunker extends BlockingPipeline<BytesEvent, BytesEvent> {
 
-    const outStream: SimpleStream<StreamEvent<seq<uint8>, Error>>
     const chunkSize: int32
-    var buffer: seq<uint8>
+    var chunkBuffer: seq<uint8>
 
-    constructor(chunkSize: int32, outStream: SimpleStream<StreamEvent<seq<uint8>, Error>>)
-      ensures fresh(Repr) 
+    constructor(upstream: StreamingBlob, chunkSize: int32)
     {
-      this.outStream := outStream;
+      this.buffer := new CollectingAction<BytesEvent>();
+      this.upstream := upstream;
       this.chunkSize := chunkSize;
-      Repr := {};
-      buffer := [];
+      chunkBuffer := [];
     }
 
-    method {:verify false} Call(value: StreamEvent<seq<uint8>, Error>) returns (nothing: ())
-      modifies Repr
+    method {:verify false} Process(event: BytesEvent, a: Action<BytesEvent, ()>)
     {
-      match value {
+      match event {
         case Some(Success(bits)) => {
-          buffer := buffer + bits;
+          chunkBuffer := chunkBuffer + bits;
         }
       }
-      while chunkSize as nat <= |buffer| {
-        outStream.Put(Some(Success(buffer[..chunkSize])));
-        buffer := buffer[chunkSize..];
+
+      while chunkSize as nat <= |chunkBuffer| {
+        var _ := a.Call(Some(Success(chunkBuffer[..chunkSize])));
+        chunkBuffer := chunkBuffer[chunkSize..];
       }
-      if value == None || value.value.Failure? {
-        if 0 < |buffer| {
-          outStream.Put(Some(Success(buffer)));
+      if event == None || event.value.Failure? {
+        if 0 < |chunkBuffer| {
+          var _ := a.Call(Some(Success(chunkBuffer)));
         }
-        outStream.Put(value);
+        var _ := a.Call(event);
       }
-      return ();
     }
   }
 
   method Chunks ( config: InternalConfig , input: ChunksInput )
     returns (output: Result<ChunksOutput, Error>)
   {
-    var outStream := new SimpleStream<StreamEvent<seq<uint8>, Error>>();
-    var chunker := new Chunker(input.chunkSize, outStream);
-    Subscribe(input.bytesIn, chunker);
+    var chunker := new Chunker(input.bytesIn, input.chunkSize);
 
-    // TODO: Connect streams together
+    // TODO: Connect streams together for flow control.
+    // May want to wrap Chunker as a transform that offers flow control from the downstream.
+    // Can we create the right kind of output stream (e.g. InputStream vs Publisher)
+    // based on what kind of input stream we were passed?
+
+    return Success(ChunksOutput(bytesOut := chunker));
+  }
+
+
+
+
+
+  method ChunksAlt ( config: InternalConfig , input: ChunksInput )
+    returns (output: Result<ChunksOutput, Error>)
+  {
+    var outStream := SomeOtherServiceOp(input.bytesIn);
 
     return Success(ChunksOutput(bytesOut := outStream));
+  }
+
+  method SomeOtherServiceOp( input: Stream'<seq<uint8>> ) returns (r: Stream'<seq<uint8>>) {
+    // Imagine this was external
+    r := new EmptyStream();
   }
 }

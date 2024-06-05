@@ -95,104 +95,123 @@ module StandardLibrary.Actions {
 
   // TODO: Basic spec of a Stream having a pending sequence of events,
   // and hence each action subscribed will EVENTUALLY have Consumed that sequence.
-  // But when exactly is underspecified to allow for external concurrency.
-  // Dafny-native implementations could have a Do() method that feeds a single value into the consumer.
-  // TODO: How to expose control over when?
-  // can backpressure be a meta- stream event?
-  type Stream<T> = Action<Action<T, ()>, ()>
+  trait {:termination false} Stream<T> {
+    ghost var Repr: set<object>
+
+    method Next() returns (t: Option<T>)
+
+    // TODO: Would be even better if this was a static extern that defaulted
+    // to DefaultForEach(this, a)
+    method ForEach(a: Action<T, ()>)
+  }
 
   /// Similar to Result, but for delivering a sequence of values instead of just one.
   // This works better (as opposed to Result<Option<T>, E>)
-  // because 
+  // because then a stream that can error is just an Enumerable<Result<T, E>>.
   type StreamEvent<T, E> = Option<Result<T, E>>
 
-  // TODO: How to communicate backpressure
-  // Subscription as Action<(Request(n) or Cancel), ()> ?
-  // Publisher is actually a Stream factory -> Action<Action<T, ()>, Action<SubscriptionEvent, ()>>
-
-  // TODO: Too Java specific
-  // datatype SubscriptionEvent = Request(n: nat) | Cancel
-    
-  method {:verify false} Subscribe<T>(s: Stream<T>, a: Action<T, ()>) {
-    var _ := s.Call(a);
-  }
-
-  // TODO: Convenience utility for piping
-
-  // TODO: Extern in Concurrent that turns a Stream into an Enumerator
-  // by collecting values and blocking until
-  // one shows up.
-  // Might also be useful for ActionPublishers?
-
-  class SimpleStream<T(0)> extends Action<Action<T, ()>, ()> {
-
-    var values: seq<T>
-    var callbacks: seq<Action<T, ()>>
-
-    constructor() {
-      values := [];
-    }
-
-    predicate Valid() 
-      reads this, Repr
-    {
-      && this in Repr
-      && forall a <- callbacks :: a in Repr && a.Repr <= Repr
-    }
-
-    method {:verify false} Put(value: T)
-      modifies Repr
-    {
-      values := values + [value];
-
-      for i := 0 to |callbacks| 
-      {
-        var _ := callbacks[i].Call(value);
+  method {:verify false} DefaultForEach<T>(s: Stream<T>, a: Action<T, ()>) {
+    // TODO: Actual Action specs to prove this terminates (iter has to be an Enumerable)
+    while (true) {
+      var next := s.Next();
+      if next == None {
+        break;
       }
-    }
 
-    method Call(a: Action<T, ()>) returns (nothing: ())
-      modifies Repr
-    {
-      assume Valid();
-      callbacks := callbacks + [a];
-      return ();
+      var _ := a.Call(next.value);
     }
-
   }
 
-  // TODO: How to add backpressure?
-  class LazyStream<T(0)> extends Action<Action<Option<T>, ()>, ()> {
+  class SimpleStream<T(0)> extends Stream<T> {
 
     const iter: Action<(), Option<T>>
-    var callbacks: seq<Action<Option<T>, ()>>
 
     constructor(iter: Action<(), Option<T>>) {
       this.iter := iter;
     }
 
-    predicate Valid() 
-      reads this, Repr
-    {
-      && this in Repr
-      && iter in Repr && iter.Repr <= Repr
-      && forall a <- callbacks :: a in Repr && a.Repr <= Repr
+    method {:verify false} Next() returns (t: Option<T>) {
+      t := iter.Call(());
     }
 
-    method {:verify false} Call(a: Action<Option<T>, ()>) returns (nothing: ())
-      modifies Repr
+    method {:verify false} ForEach(a: Action<T, ()>)
+    {
+      DefaultForEach(this, a);
+    }
+
+  }
+
+  class EmptyStream<T> extends Stream<T> {
+
+    constructor() {}
+
+    method {:verify false} Next() returns (t: Option<T>) {
+      t := None;
+    }
+
+    method {:verify false} ForEach(a: Action<T, ()>)
+    {
+      // No-op
+    }
+
+  }
+
+  class CollectingAction<T> extends Action<T, ()> {
+
+    var values: seq<T>
+
+    constructor() {
+      values := [];
+    }
+
+    method {:verify false} Call(t: T) returns (nothing: ()) {
+      values := values + [t];
+    }
+
+    method {:verify false} Pop() returns (t: T) 
+      requires 0 < |values|
+    {
+      t := values[0];
+      values := values[1..];
+    }
+
+  }
+
+  trait {:termination false} BlockingPipeline<U, T> extends Stream<T> {
+
+    const upstream: Stream<U>
+    const buffer: CollectingAction<T>
+
+    method {:verify false} Next() returns (t: Option<T>) {
+      if 0 < |buffer.values| {
+        var next := buffer.Pop();
+        return Some(next);
+      }
+
+      while (|buffer.values| == 0) {
+        var u := upstream.Next();
+        if u.None? {
+          break;
+        }
+        Process(u.value, buffer);
+      }
+
+    }
+
+    method {:verify false} ForEach(a: Action<T, ()>)
     {
       // TODO: Actual Action specs to prove this terminates (iter has to be an Enumerable)
       while (true) {
-        var next := iter.Call(());
-        var _ := a.Call(next);
-
+        var next := upstream.Next();
         if next == None {
           break;
         }
+
+        Process(next.value, a);
       }
-      return ();
     }
+
+    method Process(u: U, a: Action<T, ()>)
 
   }
 }
