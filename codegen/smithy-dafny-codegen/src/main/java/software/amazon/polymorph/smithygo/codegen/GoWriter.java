@@ -649,6 +649,8 @@ public class GoWriter extends SymbolWriter<GoWriter, ImportDeclarations> {
                 SymbolReference typeSymbol = (SymbolReference) type;
                 return typeSymbol.getProperty(SymbolUtils.POINTABLE, Boolean.class).orElse(false)
                                || typeSymbol.getSymbol().getProperty(SymbolUtils.POINTABLE, Boolean.class).orElse(false);
+            } else if (type instanceof String) {
+                return true;
             } else {
                 throw new CodegenException(
                         "Invalid type provided to $P. Expected a Symbol, but found `" + type + "`");

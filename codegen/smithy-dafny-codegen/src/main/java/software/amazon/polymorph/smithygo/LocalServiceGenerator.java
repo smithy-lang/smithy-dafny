@@ -72,9 +72,9 @@ public class LocalServiceGenerator implements Runnable {
                                    model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
         });
 
-        writer.addImportFromModule(context.settings().getModuleName(), DafnyNameResolver.dafnyTypesNamespace(service));
-        writer.addImportFromModule(context.settings().getModuleName(), DafnyNameResolver.dafnyNamespace(service));
-        writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(service));
+        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(service));
+        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), DafnyNameResolver.dafnyNamespace(service));
+        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), SmithyNameResolver.smithyTypesNamespace(service));
         writer.addUseImports(SmithyGoDependency.CONTEXT);
 
         final var dafnyClient = DafnyNameResolver.getDafnyClient(service, serviceTrait.getSdkId());
@@ -95,7 +95,7 @@ public class LocalServiceGenerator implements Runnable {
                              }
                              """,
                      serviceSymbol, dafnyClient, SmithyNameResolver.getSmithyType(service, configSymbol), serviceSymbol,
-                     SmithyNameResolver.getInputToDafnyMethodName(service, context.model().expectShape(serviceTrait.getConfigId())),
+                     SmithyNameResolver.getToDafnyMethodName(service, context.model().expectShape(serviceTrait.getConfigId()), ""),
                      DafnyNameResolver.createDafnyClient(service, serviceTrait.getSdkId()),
                      dafnyClient, serviceSymbol);
 
@@ -116,7 +116,7 @@ public class LocalServiceGenerator implements Runnable {
                         var dafny_request %s = %s(params)
                         var dafny_response = client.dafnyClient.%s(dafny_request)
                         """.formatted(DafnyNameResolver.getDafnyType(inputShape, symbolProvider.toSymbol(inputShape)),
-                                      SmithyNameResolver.getInputToDafnyMethodName(service, operationShape), operationShape.getId().getName());
+                                      SmithyNameResolver.getToDafnyMethodName(service, inputShape, ""), operationShape.getId().getName());
             }
 
             String returnResponse, returnError;
@@ -127,7 +127,7 @@ public class LocalServiceGenerator implements Runnable {
                 returnResponse = """
                         var native_response = %s(dafny_response.Extract().(%s))
                         return &native_response, nil
-                        """.formatted(SmithyNameResolver.getOutputFromDafnyMethodName(service, operationShape),
+                        """.formatted(SmithyNameResolver.getFromDafnyMethodName(service, outputShape, ""),
                                       DafnyNameResolver.getDafnyType(outputShape, symbolProvider.toSymbol(outputShape)));
                 returnError = "return nil,";
             }
@@ -163,7 +163,7 @@ public class LocalServiceGenerator implements Runnable {
                                                                         if err.Is_$L() {
                                                                         $L $L(err)
                                                                     }
-                                                 """, error.getName(), returnError, SmithyNameResolver.getOutputFromDafnyMethodName(service, context.model().expectShape(error)));
+                                                 """, error.getName(), returnError, SmithyNameResolver.getFromDafnyMethodName(service, context.model().expectShape(error), ""));
                              }
                          }),
 //                         writer.consumer(w -> {
@@ -185,11 +185,11 @@ public class LocalServiceGenerator implements Runnable {
 
         writerDelegator.useFileWriter("%s/shim.go".formatted(namespace), namespace, writer -> {
 
-            writer.addImportFromModule(context.settings().getModuleName(), DafnyNameResolver.dafnyTypesNamespace(service));
+            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(service));
             writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
-            writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(service));
+            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), SmithyNameResolver.smithyTypesNamespace(service));
             writer.addUseImports(SmithyGoDependency.CONTEXT);
-            writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.shapeNamespace(service));
+            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), SmithyNameResolver.shapeNamespace(service));
 
             if (service.hasTrait(LocalServiceTrait.class)) {
                 final var serviceTrait = service.expectTrait(LocalServiceTrait.class);
@@ -218,7 +218,7 @@ public class LocalServiceGenerator implements Runnable {
                                      }
                                      """,
                              serviceTrait.getSdkId(), DafnyNameResolver.getDafnyType(configShape, configSymbol),
-                             SmithyNameResolver.shapeNamespace(model.expectShape(serviceTrait.getConfigId())), SmithyNameResolver.getOutputFromDafnyMethodName(service, model.expectShape(serviceTrait.getConfigId())),
+                             SmithyNameResolver.shapeNamespace(model.expectShape(serviceTrait.getConfigId())), SmithyNameResolver.getFromDafnyMethodName(service, model.expectShape(serviceTrait.getConfigId()), ""),
                              SmithyNameResolver.shapeNamespace(service), DafnyNameResolver.dafnyTypesNamespace(service)
                 );
             }
@@ -232,7 +232,7 @@ public class LocalServiceGenerator implements Runnable {
                                                                                : "input %s".formatted(DafnyNameResolver.getDafnyType(inputShape, symbolProvider.toSymbol(inputShape)));
 
                 final var typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? ""
-                                                                                    : "var native_request = %s.%s(input)".formatted(SmithyNameResolver.shapeNamespace(operationShape), SmithyNameResolver.getInputFromDafnyMethodName(service, operationShape));
+                                                                                    : "var native_request = %s.%s(input)".formatted(SmithyNameResolver.shapeNamespace(operationShape), SmithyNameResolver.getFromDafnyMethodName(service, inputShape, ""));
 
                 final var clientCall = "shim.client.%s(context.Background() %s)".formatted(operationShape.getId().getName(),
                                                                                            inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", native_request");
@@ -244,7 +244,7 @@ public class LocalServiceGenerator implements Runnable {
                     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
                 } else {
                     clientResponse = "var native_response, native_error";
-                    returnResponse = "%s.%s(*native_response)".formatted(SmithyNameResolver.shapeNamespace(operationShape), SmithyNameResolver.getOutputToDafnyMethodName(service, operationShape));
+                    returnResponse = "%s.%s(*native_response)".formatted(SmithyNameResolver.shapeNamespace(operationShape), SmithyNameResolver.getToDafnyMethodName(service, outputShape, ""));
                 }
 
                 writer.write("""
@@ -281,13 +281,13 @@ public class LocalServiceGenerator implements Runnable {
         for (final var error : model.getShapesWithTrait(ErrorTrait.class)) {
             writer.write("""
                                  case $L.$L:
-                                      return Wrappers.Companion_Result_.Create_Failure_($L.$L_Input_ToDafny(native_error.($L.$L)))
+                                      return Wrappers.Companion_Result_.Create_Failure_($L.$L(native_error.($L.$L)))
                                            
                                                 
                                  """,
                          SmithyNameResolver.smithyTypesNamespace(error),
                          symbolProvider.toSymbol(error).getName(), SmithyNameResolver.shapeNamespace(error),
-                         symbolProvider.toSymbol(error).getName(), SmithyNameResolver.smithyTypesNamespace(error),
+                         SmithyNameResolver.getToDafnyMethodName(service, error, ""), SmithyNameResolver.smithyTypesNamespace(error),
                          symbolProvider.toSymbol(error).getName());
         }
     }
@@ -296,11 +296,11 @@ public class LocalServiceGenerator implements Runnable {
         for (final var error : model.getShapesWithTrait(ErrorTrait.class)) {
             writer.write("""
                                  case $L:
-                                      return Wrappers.Companion_Result_.Create_Failure_($L_Input_ToDafny(native_error.($L)))
+                                      return Wrappers.Companion_Result_.Create_Failure_($L(native_error.($L)))
                                            
                                                 
                                  """,
-                         SmithyNameResolver.getSmithyType(error, symbolProvider.toSymbol(error)), symbolProvider.toSymbol(error).getName(),
+                         SmithyNameResolver.getSmithyType(error, symbolProvider.toSymbol(error)), SmithyNameResolver.getToDafnyMethodName(service, error, ""),
                          SmithyNameResolver.getSmithyType(error, symbolProvider.toSymbol(error)));
         }
     }
@@ -359,6 +359,7 @@ public class LocalServiceGenerator implements Runnable {
                 final var resourceShape = model.expectShape(resource);
 
                 if (!service.toShapeId().getNamespace().equals(resource.getNamespace())) {
+
                     continue;
                 }
                 writerDelegator.useFileWriter("%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer -> {
@@ -381,8 +382,8 @@ public class LocalServiceGenerator implements Runnable {
                 }
 
                 writerDelegator.useFileWriter("%s/%s.go".formatted(SmithyNameResolver.shapeNamespace(service), resource.getName()), SmithyNameResolver.shapeNamespace(service), writer -> {
-                    writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(service));
-                    writer.addImportFromModule(context.settings().getModuleName(), DafnyNameResolver.dafnyTypesNamespace(resourceShape));
+                    writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), SmithyNameResolver.smithyTypesNamespace(service));
+                    writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(resource.getNamespace()), DafnyNameResolver.dafnyTypesNamespace(resourceShape));
                     writer.write("""
                                          type %s struct {
                                              impl %s.I%s
@@ -406,7 +407,7 @@ public class LocalServiceGenerator implements Runnable {
                                     var dafny_request %s = %s(params)
                                     var dafny_response = this.impl.%s(dafny_request)
                                     """.formatted(DafnyNameResolver.getDafnyType(inputShape, symbolProvider.toSymbol(inputShape)),
-                                                  SmithyNameResolver.getInputToDafnyMethodName(service, operationShape), operationShape.getId().getName());
+                                                  SmithyNameResolver.getToDafnyMethodName(service, inputShape, ""), operationShape.getId().getName());
                         }
 
                         String returnResponse, returnError;
@@ -417,7 +418,7 @@ public class LocalServiceGenerator implements Runnable {
                             returnResponse = """
                                     var native_response = %s(dafny_response.Extract().(%s))
                                     return &native_response, nil
-                                    """.formatted(SmithyNameResolver.getOutputFromDafnyMethodName(service, operationShape),
+                                    """.formatted(SmithyNameResolver.getFromDafnyMethodName(service, outputShape, ""),
                                                   DafnyNameResolver.getDafnyType(inputShape, symbolProvider.toSymbol(outputShape)));
                             returnError = "return nil,";
                         }
@@ -449,9 +450,9 @@ public class LocalServiceGenerator implements Runnable {
                                                  model.getShapesWithTrait(ErrorTrait.class)) {
                                              w.write("""
                                                                                     if err.Is_$L() {
-                                                                                    $L $L_Output_FromDafny(err)
+                                                                                    $L $L(err)
                                                                                 }
-                                                             """, errorShape.toShapeId().getName(), returnError, errorShape.toShapeId().getName());
+                                                             """, errorShape.toShapeId().getName(), returnError, SmithyNameResolver.getFromDafnyMethodName(service, errorShape, ""));
                                          }
                                      }), returnError, returnError, returnResponse
                         );
@@ -467,7 +468,7 @@ public class LocalServiceGenerator implements Runnable {
         writerDelegator.useFileWriter("%s/NativeWrapper.go".formatted(SmithyNameResolver.shapeNamespace(service)), SmithyNameResolver.shapeNamespace(service), writer -> {
             writer.addImportFromModule(context.settings().getModuleName(), SmithyNameResolver.smithyTypesNamespace(service));
             writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
-            writer.addImportFromModule(context.settings().getModuleName(), DafnyNameResolver.dafnyTypesNamespace(resourceShape));
+            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(resourceShape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(resourceShape));
 
             writer.write("""
                                  type NativeWrapper struct {
@@ -499,7 +500,7 @@ public class LocalServiceGenerator implements Runnable {
                 final var inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "input %s".formatted(DafnyNameResolver.getDafnyType(resourceShape, symbolProvider.toSymbol(inputShape)));
                 final var outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*%s,".formatted(SmithyNameResolver.getSmithyType(outputShape, symbolProvider.toSymbol(outputShape)));
 
-                final var typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "var native_request = %s(input)".formatted(SmithyNameResolver.getInputFromDafnyMethodName(service, operationShape));
+                final var typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "var native_request = %s(input)".formatted(SmithyNameResolver.getFromDafnyMethodName(service, inputShape, ""));
                 final var clientCall = "this.Impl.%s(%s)".formatted(operationShape.getId().getName(), inputShape.hasTrait(UnitTypeTrait.class) ? "" : "native_request");
                 String clientResponse, returnResponse;
                 if (outputShape.hasTrait(UnitTypeTrait.class)) {
@@ -509,7 +510,7 @@ public class LocalServiceGenerator implements Runnable {
                 } else {
                     clientResponse = "var native_response, native_error";
                     returnResponse = "%s(*native_response)".formatted(
-                                                                         SmithyNameResolver.getOutputToDafnyMethodName(service, operationShape));
+                                                                         SmithyNameResolver.getToDafnyMethodName(service, outputShape, ""));
                 }
                 writer.write("""
                                        func (this *NativeWrapper) $L($L) Wrappers.Result {

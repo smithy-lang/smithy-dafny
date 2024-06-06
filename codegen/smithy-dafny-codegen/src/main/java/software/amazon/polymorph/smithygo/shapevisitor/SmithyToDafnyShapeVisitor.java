@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -121,7 +122,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         }
         final var builder = new StringBuilder();
         writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
-        writer.addImportFromModule(context.settings().getModuleName(), DafnyNameResolver.dafnyTypesNamespace(shape));
+        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(shape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(shape));
 
         String someWrapIfRequired = "%s";
 

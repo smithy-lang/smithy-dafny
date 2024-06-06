@@ -12,7 +12,7 @@ public class GoClientCodegenPlugin implements SmithyBuildPlugin {
 
     public GoClientCodegenPlugin(final Map<String, String> smithyNamespaceToPythonModuleNameMap) {
         super();
-        SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
+        SmithyNameResolver.setSmithyNamespaceToGoModuleNameMap(smithyNamespaceToPythonModuleNameMap);
     }
     public void run(PluginContext context) {
         CodegenDirector<GoWriter, GoIntegration, GenerationContext, GoSettings> runner

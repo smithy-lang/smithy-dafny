@@ -99,7 +99,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             return referenceStructureShape(shape);
         }
         final var builder = new StringBuilder();
-        writer.addImportFromModule(context.settings().getModuleName(), DafnyNameResolver.dafnyTypesNamespace(shape));
+        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(shape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(shape));
 
         builder.append("%1$s{".formatted(SmithyNameResolver.smithyTypesNamespace(shape).concat(".").concat(shape.getId().getName())));
         String fieldSeparator = ",";
@@ -129,7 +129,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         StringBuilder builder = new StringBuilder();
 
         MemberShape memberShape = shape.getMember();
-        final String[] typeName = context.symbolProvider().toSymbol(memberShape).getFullName().split("/");
+        final String typeName = context.symbolProvider().toSymbol(memberShape).getName();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
         builder.append("""
                        func() []%s{
@@ -143,7 +143,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 				break
 			}
 			fieldValue = append(fieldValue, %s%s)}
-			""".formatted(typeName[typeName.length - 1], typeName[typeName.length - 1], dataSource, dataSource,
+			""".formatted(typeName, typeName, dataSource, dataSource,
                 targetShape.isStructureShape() ? "" : "*",
                 targetShape.accept(
                         new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
@@ -196,7 +196,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                     }
                     b = %s.(%s)
                     return &b
-                }()""".formatted(dataSource, dataSource, context.symbolProvider().toSymbol(shape));
+                }()""".formatted(dataSource, dataSource, context.symbolProvider().toSymbol(shape).getName());
     }
 
     @Override

@@ -621,7 +621,7 @@ _clean:
 
 clean: _clean
 
-transpile_go: clean_go transpile_implementation_go transpile_test_go transpile_dependencies_go migrate_go
+transpile_go: transpile_implementation_go transpile_test_go transpile_dependencies_go migrate_go
 
 transpile_implementation_go: TARGET=go
 transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny

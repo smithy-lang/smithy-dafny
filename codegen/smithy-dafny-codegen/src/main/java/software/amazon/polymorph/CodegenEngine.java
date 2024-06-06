@@ -165,6 +165,7 @@ public class CodegenEngine {
         case DAFNY -> generateDafny(outputDir);
         case JAVA -> generateJava(outputDir, testOutputDir);
         case DOTNET -> generateDotnet(outputDir);
+        case GO -> generateGo();
         case RUST -> generateRust(outputDir);
         default -> throw new UnsupportedOperationException(
           "Cannot generate code for target language %s".formatted(lang.name())

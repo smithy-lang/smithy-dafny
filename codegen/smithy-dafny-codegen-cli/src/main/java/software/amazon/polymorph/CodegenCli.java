@@ -96,6 +96,9 @@ public class CodegenCli {
     cliArguments.outputDotnetDir.ifPresent(path ->
       outputDirs.put(TargetLanguage.DOTNET, path)
     );
+    cliArguments.outputGoDir.ifPresent(path ->
+      outputDirs.put(TargetLanguage.GO, path)
+    );
     cliArguments.outputRustDir.ifPresent(path ->
       outputDirs.put(TargetLanguage.RUST, path)
     );
@@ -320,6 +323,7 @@ public class CodegenCli {
     Optional<String> moduleName,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
+    Optional<Path> outputGoDir,
     Optional<Path> testOutputJavaDir,
     Optional<Path> outputRustDir,
     Optional<Path> outputDafnyDir,
@@ -390,6 +394,9 @@ public class CodegenCli {
       final Optional<Path> outputDotnetDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dotnet"))
         .map(Paths::get);
+      final Optional<Path> outputGoDir = Optional
+         .ofNullable(commandLine.getOptionValue("output-go"))
+         .map(Paths::get);
       final Optional<Path> outputRustDir = Optional
         .ofNullable(commandLine.getOptionValue("output-rust"))
         .map(Paths::get);
@@ -451,6 +458,7 @@ public class CodegenCli {
           moduleName,
           outputDotnetDir,
           outputJavaDir,
+          outputGoDir,
           testOutputJavaDir,
           outputRustDir,
           outputDafnyDir,
