@@ -20,9 +20,13 @@ buildscript {
 }
 
 plugins {
-    val smithyGradleVersion: String by project
+    java
+    "java-library"
+}
 
-    id("software.amazon.smithy").version(smithyGradleVersion)
+tasks.named<Test>("test") {
+    // Use JUnit Jupiter for unit tests.
+    useJUnitPlatform()
 }
 
 repositories {
@@ -32,6 +36,7 @@ repositories {
 
 dependencies {
     implementation(project(":smithy-dafny-codegen"))
-    implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
-    implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
+    testImplementation(platform("org.junit:junit-bom:5.9.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.hamcrest:hamcrest:2.1")
 }
