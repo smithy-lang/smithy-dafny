@@ -2775,13 +2775,11 @@ public class DafnyApiCodegen {
 
   public Map<Path, TokenTree> generateSkeleton() {
     final String namespace = serviceShape.getId().getNamespace();
-    final String baseModuleName = DafnyNameResolver.dafnyBaseModuleName(
-      namespace
-    );
+    final String sdkID = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
     final String typesModuleName = DafnyNameResolver.dafnyTypesModuleName(
       namespace
     );
-    final Path path = Path.of("%sImpl.dfy".formatted(baseModuleName));
+    final Path path = Path.of("%sImpl.dfy".formatted(sdkID));
     TokenTree includeDirectives = TokenTree.of(
       "include \"../Model/%s.dfy\"".formatted(typesModuleName)
     );
