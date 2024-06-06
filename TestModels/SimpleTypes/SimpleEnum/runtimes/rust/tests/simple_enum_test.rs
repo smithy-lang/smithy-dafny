@@ -12,7 +12,7 @@ async fn test_get_enum() {
 #[tokio::test]
 async fn test_get_first_known_value() {
     let result = client()
-        .get_enum_first_known_value()
+        .get_enum_first_known_value_test()
         .value(FIRST)
         .send()
         .await;
@@ -24,7 +24,7 @@ async fn test_get_first_known_value() {
 #[tokio::test]
 async fn test_get_second_known_value() {
     let result = client()
-        .get_enum_second_known_value()
+        .get_enum_second_known_value_test()
         .value(SECOND)
         .send()
         .await;
@@ -36,7 +36,7 @@ async fn test_get_second_known_value() {
 #[tokio::test]
 async fn test_get_third_known_value() {
     let result = client()
-        .get_enum_third_known_value()
+        .get_enum_third_known_value_test()
         .value(THIRD)
         .send()
         .await;

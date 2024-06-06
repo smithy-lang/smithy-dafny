@@ -7,11 +7,11 @@ impl super::Client {
     /// - On success, responds with [`GetEnumOutput`](crate::operation::get_enum_first_known_value::GetEnumOutput) with field(s):
     ///   - [`value(Option<Enum>)`](crate::operation::get_enum_first_known_value::GetEnumOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetEnumError>`](crate::operation::get_enum_first_known_value::GetEnumError)
-    pub fn get_enum_first_known_value(
+    pub fn get_enum_first_known_value_test(
         &self,
-    ) -> crate::operation::get_enum_first_known_value::builders::GetEnumFirstKnownValueFluentBuilder
+    ) -> crate::operation::get_enum_first_known_value_test::builders::GetEnumFirstKnownValueTestFluentBuilder
     {
-        crate::operation::get_enum_first_known_value::builders::GetEnumFirstKnownValueFluentBuilder::new(
+        crate::operation::get_enum_first_known_value_test::builders::GetEnumFirstKnownValueTestFluentBuilder::new(
             self.clone(),
         )
     }

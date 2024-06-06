@@ -4,6 +4,6 @@
 pub mod get_enum;
 
 /// Types for the `GetEnumKnownValue` operation.
-pub mod get_enum_first_known_value;
-pub mod get_enum_second_known_value;
-pub mod get_enum_third_known_value;
+pub mod get_enum_first_known_value_test;
+pub mod get_enum_second_known_value_test;
+pub mod get_enum_third_known_value_test;

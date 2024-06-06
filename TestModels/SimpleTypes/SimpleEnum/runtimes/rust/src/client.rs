@@ -36,6 +36,6 @@ impl Client {
 
 mod get_enum;
 
-mod get_enum_first_known_value;
-mod get_enum_second_known_value;
-mod get_enum_third_known_value;
+mod get_enum_first_known_value_test;
+mod get_enum_second_known_value_test;
+mod get_enum_third_known_value_test;

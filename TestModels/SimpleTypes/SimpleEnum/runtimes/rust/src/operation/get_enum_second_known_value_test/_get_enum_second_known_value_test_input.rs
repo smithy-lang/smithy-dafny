@@ -3,34 +3,34 @@
 #[allow(missing_docs)] // documentation missing in model
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-pub struct GetEnumThirdKnownValueOutput {
+pub struct GetEnumSecondKnownValueTestInput {
     #[allow(missing_docs)] // documentation missing in model
     pub value: ::std::option::Option<crate::types::simple_enum_shape::SimpleEnumShape>,
 }
-impl GetEnumThirdKnownValueOutput {
+impl GetEnumSecondKnownValueTestInput {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(&self) -> ::std::option::Option<crate::types::simple_enum_shape::SimpleEnumShape> {
         self.value
     }
 }
-impl GetEnumThirdKnownValueOutput {
-    /// Creates a new builder-style object to manufacture [`GetEnumThirdKnownValueOutput`](crate::operation::operation::GetEnumThirdKnownValueOutput).
+impl GetEnumSecondKnownValueTestInput {
+    /// Creates a new builder-style object to manufacture [`GetEnumSecondKnownValueTestInput`](crate::operation::operation::GetEnumSecondKnownValueTestInput).
     pub fn builder(
-    ) -> crate::operation::get_enum_third_known_value::builders::GetEnumThirdKnownValueOutputBuilder
+    ) -> crate::operation::get_enum_second_known_value_test::builders::GetEnumSecondKnownValueTestInputBuilder
     {
-        crate::operation::get_enum_third_known_value::builders::GetEnumThirdKnownValueOutputBuilder::default()
+        crate::operation::get_enum_second_known_value_test::builders::GetEnumSecondKnownValueTestInputBuilder::default()
     }
 }
 
-/// A builder for [`GetEnumThirdKnownValueOutput`](crate::operation::operation::GetEnumThirdKnownValueOutput).
+/// A builder for [`GetEnumSecondKnownValueTestInput`](crate::operation::operation::GetEnumSecondKnownValueTestInput).
 #[non_exhaustive]
 #[derive(
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
-pub struct GetEnumThirdKnownValueOutputBuilder {
+pub struct GetEnumSecondKnownValueTestInputBuilder {
     pub(crate) value: ::std::option::Option<crate::types::simple_enum_shape::SimpleEnumShape>,
 }
-impl GetEnumThirdKnownValueOutputBuilder {
+impl GetEnumSecondKnownValueTestInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(
         mut self,
@@ -53,15 +53,15 @@ impl GetEnumThirdKnownValueOutputBuilder {
     ) -> &::std::option::Option<crate::types::simple_enum_shape::SimpleEnumShape> {
         &self.value
     }
-    /// Consumes the builder and constructs a [`GetEnumThirdKnownValueOutput`](crate::operation::operation::GetEnumThirdKnownValueOutput).
+    /// Consumes the builder and constructs a [`GetEnumSecondKnownValueTestInput`](crate::operation::operation::GetEnumSecondKnownValueTestInput).
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_enum_third_known_value::GetEnumThirdKnownValueOutput,
+        crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestInput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
         ::std::result::Result::Ok(
-            crate::operation::get_enum_third_known_value::GetEnumThirdKnownValueOutput {
+            crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestInput {
                 value: self.value,
             },
         )
