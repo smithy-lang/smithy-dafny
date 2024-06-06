@@ -1,5 +1,5 @@
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index d0133896..03d5c0e9 100644
+index d0133896..57be08b1 100644
 --- b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 @@ -103,26 +103,12 @@ pub mod r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes {
@@ -60,25 +60,12 @@ index d0133896..03d5c0e9 100644
              match self {
                  GetEnumOutput::GetEnumOutput { value } => value,
              }
-@@ -304,9 +276,9 @@ pub mod r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes {
- 
-     #[derive(PartialEq, Clone)]
-     pub enum SimpleEnumShape {
--        FIRST {},
--        SECOND {},
--        THIRD {},
-+        FIRST,
-+        SECOND,
-+        THIRD,
-     }
- 
-     impl SimpleEnumShape {}
 @@ -602,7 +574,7 @@ pub mod r#_SimpleEnumImpl_Compile {
              ) {
                  panic!("Halt")
              };
 -            if !(input.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {})) {
-+            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST) {
++            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {}) {
          panic!("Halt")
        };
              let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
@@ -87,7 +74,7 @@ index d0133896..03d5c0e9 100644
                  panic!("Halt")
              };
 -            if !(res.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {})) {
-+            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST) {
++            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {}) {
          panic!("Halt")
        };
              output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
@@ -96,7 +83,7 @@ index d0133896..03d5c0e9 100644
                  panic!("Halt")
              };
 -            if !(input.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {})) {
-+            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND) {
++            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {}) {
          panic!("Halt")
        };
              let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
@@ -105,7 +92,7 @@ index d0133896..03d5c0e9 100644
                  panic!("Halt")
              };
 -            if !(res.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {})) {
-+            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND) {
++            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {}) {
          panic!("Halt")
        };
              output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
@@ -114,7 +101,7 @@ index d0133896..03d5c0e9 100644
                  panic!("Halt")
              };
 -            if !(input.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {})) {
-+            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD) {
++            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {}) {
          panic!("Halt")
        };
              let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
@@ -123,7 +110,7 @@ index d0133896..03d5c0e9 100644
                  panic!("Halt")
              };
 -            if !(res.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {})) {
-+            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD) {
++            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {}) {
          panic!("Halt")
        };
              output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
@@ -869,7 +856,7 @@ index 00000000..f531b553
 +pub mod _simple_enum_shape;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_shape/_simple_enum_shape.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_shape/_simple_enum_shape.rs
 new file mode 100644
-index 00000000..01219f48
+index 00000000..2b821ae2
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_shape/_simple_enum_shape.rs
 @@ -0,0 +1,23 @@
@@ -880,9 +867,9 @@ index 00000000..01219f48
 +    value: crate::types::simple_enum_shape::SimpleEnumShape,
 +) -> ::simple_enum_dafny::_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape {
 +    match value {
-+      crate::types::simple_enum_shape::SimpleEnumShape::FIRST => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST,
-+      crate::types::simple_enum_shape::SimpleEnumShape::SECOND => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND,
-+      crate::types::simple_enum_shape::SimpleEnumShape::THIRD => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD,
++      crate::types::simple_enum_shape::SimpleEnumShape::FIRST => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {},
++      crate::types::simple_enum_shape::SimpleEnumShape::SECOND => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {},
++      crate::types::simple_enum_shape::SimpleEnumShape::THIRD => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {},
 +    }
 +}
 +
@@ -891,9 +878,9 @@ index 00000000..01219f48
 +    dafny_value: ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape,
 +) -> crate::types::simple_enum_shape::SimpleEnumShape {
 +    match dafny_value {
-+    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST => crate::types::simple_enum_shape::SimpleEnumShape::FIRST,
-+    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND => crate::types::simple_enum_shape::SimpleEnumShape::SECOND,
-+    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD => crate::types::simple_enum_shape::SimpleEnumShape::THIRD,
++    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {} => crate::types::simple_enum_shape::SimpleEnumShape::FIRST,
++    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {} => crate::types::simple_enum_shape::SimpleEnumShape::SECOND,
++    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {} => crate::types::simple_enum_shape::SimpleEnumShape::THIRD,
 +  }
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/error.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/error.rs
