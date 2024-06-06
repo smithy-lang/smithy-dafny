@@ -313,9 +313,17 @@ public class CodegenEngine {
         IOUtils.writeTemplatedFile(
                 getClass(),
                 libraryRoot,
-                "test/$sdkID:LTest.dfy",
+                "test/$sdkID:LImplTest.dfy",
                 parameters
         );
+        if (localServiceTest) {
+          IOUtils.writeTemplatedFile(
+                  getClass(),
+                  libraryRoot,
+                  "test/Wrapped$sdkID:LTest.dfy",
+                  parameters
+          );
+        }
       }
     }
 
