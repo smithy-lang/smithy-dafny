@@ -242,16 +242,17 @@ public class CodegenEngine {
   }
 
   private void dafnyProjectFiles(final Path outputDir) {
-    final String serviceConfig = awsSdkStyle
-      ? null
-      : serviceShape
-        .expectTrait(LocalServiceTrait.class)
-        .getConfigId()
-        .getName();
-    final String service = awsSdkStyle
-      ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
-      : serviceShape.getId().getName();
+    final String service = serviceShape.getId().getName();
     final String namespace = serviceShape.getId().getNamespace();
+    final String sdkID = awsSdkStyle
+      ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
+      : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+    final String serviceConfig = awsSdkStyle
+            ? null
+            : serviceShape
+            .expectTrait(LocalServiceTrait.class)
+            .getConfigId()
+            .getName();
     final String dafnyNamespace =
       DafnyNameResolverHelpers.packageNameForNamespace(
         serviceShape.getId().getNamespace()
@@ -275,6 +276,7 @@ public class CodegenEngine {
     Map<String, String> parameters = new HashMap<>();
     parameters.put("dafnyVersion", dafnyVersion.unparse());
     parameters.put("service", service);
+    parameters.put("sdkID", sdkID);
     parameters.put("serviceConfig", serviceConfig);
     parameters.put("namespace", namespace);
     parameters.put("dafnyNamespace", dafnyNamespace);
@@ -306,6 +308,12 @@ public class CodegenEngine {
 
       if (generationAspects.contains(GenerationAspect.IMPL_STUB)) {
         generateDafnySkeleton(outputDir);
+        IOUtils.writeTemplatedFile(
+                getClass(),
+                libraryRoot,
+                "test/$sdkID:LTest.dfy",
+                parameters
+        );
       }
     }
 

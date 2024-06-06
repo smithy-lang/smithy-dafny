@@ -3,7 +3,7 @@
 include "../Model/$service:LTypesWrapped.dfy"
 
 module {:extern "$namespace:L.internaldafny.wrapped"} Wrapped$service:LService refines WrappedAbstract$service:LService {
-    import WrappedService = $service:L
+    import WrappedService = $sdkID:L
     function method WrappedDefault$serviceConfig:L(): $serviceConfig:L {
         $serviceConfig:L
     }

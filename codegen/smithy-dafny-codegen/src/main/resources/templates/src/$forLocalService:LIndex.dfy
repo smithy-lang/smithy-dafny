@@ -1,22 +1,22 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-include "$service:LImpl.dfy"
+include "$sdkID:LImpl.dfy"
 
-module {:extern "$namespace:L.internaldafny" } $service:L refines Abstract$service:LService {
+module {:extern "$namespace:L.internaldafny" } $sdkID:L refines Abstract$service:LService {
   import Operations = $service:LImpl
 
   function method Default$serviceConfig:L(): $serviceConfig:L {
     $serviceConfig:L
   }
 
-  method $service:L(config: $serviceConfig:L)
-    returns (res: Result<$service:LClient, Error>)
+  method $sdkID:L(config: $serviceConfig:L)
+    returns (res: Result<$sdkID:LClient, Error>)
   {
-    var client := new $service:LClient(Operations.Config);
+    var client := new $sdkID:LClient(Operations.Config);
     return Success(client);
   }
 
-  class $service:LClient... {
+  class $sdkID:LClient... {
     predicate ValidState() {
        && Operations.ValidInternalConfig?(config)
        && Modifies == Operations.ModifiesInternalConfig(config) + {History}
