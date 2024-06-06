@@ -8,10 +8,10 @@ namespace $dafnyNamespace:L.internaldafny.wrapped
 {
     public partial class __default 
     {
-        public static _IResult<types.I$service:LClient, types._IError> Wrapped$service:L(types._I$serviceConfig:L config) 
+        public static _IResult<types.I$service:LClient, types._IError> Wrapped$sdkID:L(types._I$serviceConfig:L config) 
         {
             var wrappedConfig = TypeConversion.$configConversionMethod:L(config);
-            var impl = new $service:L(wrappedConfig);
+            var impl = new $sdkID:L(wrappedConfig);
             var wrappedClient = new $service:LShim(impl);
             return Result<types.I$service:LClient, types._IError>.create_Success(wrappedClient);
         }

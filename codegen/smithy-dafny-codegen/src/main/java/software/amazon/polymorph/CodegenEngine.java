@@ -20,6 +20,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -603,9 +605,10 @@ public class CodegenEngine {
       model,
       serviceShape
     );
-    final String service = awsSdkStyle
+    final String service = serviceShape.getId().getName();
+    final String sdkID = awsSdkStyle
       ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
-      : resolver.clientForService();
+      : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
     final String serviceConfig = awsSdkStyle
       ? null
       : serviceShape
@@ -639,6 +642,7 @@ public class CodegenEngine {
     Map<String, String> parameters = new HashMap<>();
     parameters.put("dafnyVersion", dafnyVersion.unparse());
     parameters.put("service", service);
+    parameters.put("sdkID", sdkID);
     parameters.put("serviceConfig", serviceConfig);
     parameters.put("configConversionMethod", configConversionMethod);
     parameters.put("namespace", dotnetNamespace);
@@ -650,27 +654,27 @@ public class CodegenEngine {
       IOUtils.writeTemplatedFile(
         getClass(),
         libraryRoot,
-        "runtimes/net/$forSDK:L$service:L.csproj",
+        "runtimes/net/$forSDK:L$sdkID:L.csproj",
         parameters
       );
       IOUtils.writeTemplatedFile(
         getClass(),
         libraryRoot,
-        "runtimes/net/Extern/$service:LClient.cs",
+        "runtimes/net/Extern/$sdkID:LClient.cs",
         parameters
       );
     } else {
       IOUtils.writeTemplatedFile(
         getClass(),
         libraryRoot,
-        "runtimes/net/$forLocalService:L$service:L.csproj",
+        "runtimes/net/$forLocalService:L$sdkID:L.csproj",
         parameters
       );
       if (localServiceTest) {
         IOUtils.writeTemplatedFile(
           getClass(),
           libraryRoot,
-          "runtimes/net/Extern/Wrapped$service:LService.cs",
+          "runtimes/net/Extern/Wrapped$sdkID:LService.cs",
           parameters
         );
       }
@@ -678,7 +682,7 @@ public class CodegenEngine {
     IOUtils.writeTemplatedFile(
       getClass(),
       libraryRoot,
-      "runtimes/net/tests/$service:LTest.csproj",
+      "runtimes/net/tests/$sdkID:LTest.csproj",
       parameters
     );
 

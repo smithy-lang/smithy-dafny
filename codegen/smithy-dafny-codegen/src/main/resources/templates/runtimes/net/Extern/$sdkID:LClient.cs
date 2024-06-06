@@ -17,15 +17,15 @@ namespace $dafnyNamespace:L
             types.I$service:LClient,
             types._IError
         >
-        $service:LClient()
+        $sdkID:LClient()
     {
-      var client = new Amazon$service:LClient();
+      var client = new Amazon$sdkID:LClient();
 
       return Result<
-              types.I$service:LClient,
+              types.I$sdkID:LClient,
               types._IError
           >
-          .create_Success(new $service:LShim(client));
+          .create_Success(new $sdkID:LShim(client));
     }
   }
 }

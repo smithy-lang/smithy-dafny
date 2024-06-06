@@ -45,7 +45,7 @@ jobs:
             TestModels/SimpleTypes/SimpleLong,
             # TestModels/SimpleTypes/SimpleShort,
             TestModels/SimpleTypes/SimpleString,
-            # TestModels/SimpleTypes/SimpleTimestamp,
+            TestModels/SimpleTypes/SimpleTimestamp,
             TestModels/Union,
             TestModels/aws-sdks/ddb,
             TestModels/aws-sdks/glue,
