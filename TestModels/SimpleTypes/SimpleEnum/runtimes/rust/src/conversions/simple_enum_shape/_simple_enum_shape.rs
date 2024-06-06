@@ -5,9 +5,9 @@ pub fn to_dafny(
     value: crate::types::simple_enum_shape::SimpleEnumShape,
 ) -> ::simple_enum_dafny::_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape {
     match value {
-      crate::types::simple_enum_shape::SimpleEnumShape::FIRST => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST,
-      crate::types::simple_enum_shape::SimpleEnumShape::SECOND => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND,
-      crate::types::simple_enum_shape::SimpleEnumShape::THIRD => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD,
+      crate::types::simple_enum_shape::SimpleEnumShape::FIRST => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {},
+      crate::types::simple_enum_shape::SimpleEnumShape::SECOND => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {},
+      crate::types::simple_enum_shape::SimpleEnumShape::THIRD => ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {},
     }
 }
 
@@ -16,8 +16,8 @@ pub fn from_dafny(
     dafny_value: ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape,
 ) -> crate::types::simple_enum_shape::SimpleEnumShape {
     match dafny_value {
-    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST => crate::types::simple_enum_shape::SimpleEnumShape::FIRST,
-    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND => crate::types::simple_enum_shape::SimpleEnumShape::SECOND,
-    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD => crate::types::simple_enum_shape::SimpleEnumShape::THIRD,
+    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {} => crate::types::simple_enum_shape::SimpleEnumShape::FIRST,
+    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {} => crate::types::simple_enum_shape::SimpleEnumShape::SECOND,
+    ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {} => crate::types::simple_enum_shape::SimpleEnumShape::THIRD,
   }
 }
