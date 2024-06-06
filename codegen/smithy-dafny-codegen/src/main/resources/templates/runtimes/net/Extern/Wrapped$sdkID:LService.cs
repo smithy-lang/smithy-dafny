@@ -4,7 +4,7 @@ using Wrappers_Compile;
 using $namespace:L;
 using $namespace:L.Wrapped;
 using TypeConversion = $namespace:L.TypeConversion;
-namespace $dafnyNamespace:L.internaldafny.wrapped
+namespace $dafnyNamespace:L.wrapped
 {
     public partial class __default 
     {
