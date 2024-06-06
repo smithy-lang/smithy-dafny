@@ -1,0 +1,1872 @@
+diff --git b/TestModels/Union/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/Union/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+index 931a24b5..9ccca021 100644
+--- b/TestModels/Union/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
++++ a/TestModels/Union/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+@@ -2,7 +2,10 @@
+ #![allow(nonstandard_style)]
+ pub use dafny_standard_library::implementation_from_dafny::*;
+ 
+-pub mod r#_simple_dunion_dinternaldafny_dtypes {
++#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug, Copy)]
++pub struct Stub;
++
++pub mod r#_stub_dinternaldafny_dtypes {
+     #[derive(PartialEq, Clone)]
+     pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
+         DafnyCallEvent { input: I, output: O },
+@@ -44,7 +47,7 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
+                 DafnyCallEvent::DafnyCallEvent { input, output } => {
+                     write!(
+                         _formatter,
+-                        "r#_simple_dunion_dinternaldafny_dtypes.DafnyCallEvent.DafnyCallEvent("
++                        "r#_stub_dinternaldafny_dtypes.DafnyCallEvent.DafnyCallEvent("
+                     )?;
+                     ::dafny_runtime::DafnyPrint::fmt_print(input, _formatter, false)?;
+                     write!(_formatter, ", ")?;
+@@ -104,197 +107,39 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
+     }
+ 
+     #[derive(PartialEq, Clone)]
+-    pub enum GetKnownValueUnionInput {
+-        GetKnownValueUnionInput {
+-            r#union: ::std::rc::Rc<
+-                super::r#_Wrappers_Compile::Option<
+-                    ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::KnownValueUnion>,
+-                >,
+-            >,
+-        },
+-    }
+-
+-    impl GetKnownValueUnionInput {
+-        pub fn r#union(
+-            &self,
+-        ) -> &::std::rc::Rc<
+-            super::r#_Wrappers_Compile::Option<
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::KnownValueUnion>,
+-            >,
+-        > {
+-            match self {
+-                GetKnownValueUnionInput::GetKnownValueUnionInput { r#union } => r#union,
+-            }
+-        }
+-    }
+-
+-    impl ::std::fmt::Debug for GetKnownValueUnionInput {
+-        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+-            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+-        }
+-    }
+-
+-    impl ::dafny_runtime::DafnyPrint for GetKnownValueUnionInput {
+-        fn fmt_print(
+-            &self,
+-            _formatter: &mut ::std::fmt::Formatter,
+-            _in_seq: bool,
+-        ) -> std::fmt::Result {
+-            match self {
+-                GetKnownValueUnionInput::GetKnownValueUnionInput { r#union } => {
+-                    write!(_formatter, "r#_simple_dunion_dinternaldafny_dtypes.GetKnownValueUnionInput.GetKnownValueUnionInput(")?;
+-                    ::dafny_runtime::DafnyPrint::fmt_print(r#union, _formatter, false)?;
+-                    write!(_formatter, ")")?;
+-                    Ok(())
+-                }
+-            }
+-        }
+-    }
+-
+-    impl Eq for GetKnownValueUnionInput {}
+-
+-    impl ::std::hash::Hash for GetKnownValueUnionInput {
+-        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+-            match self {
+-                GetKnownValueUnionInput::GetKnownValueUnionInput { r#union } => {
+-                    r#union.hash(_state)
+-                }
+-            }
+-        }
+-    }
+-
+-    impl ::std::default::Default for GetKnownValueUnionInput {
+-        fn default() -> GetKnownValueUnionInput {
+-            GetKnownValueUnionInput::GetKnownValueUnionInput {
+-                r#union: ::std::default::Default::default(),
+-            }
+-        }
+-    }
+-
+-    impl ::std::convert::AsRef<GetKnownValueUnionInput> for &GetKnownValueUnionInput {
+-        fn as_ref(&self) -> Self {
+-            self
+-        }
+-    }
+-
+-    #[derive(PartialEq, Clone)]
+-    pub enum GetKnownValueUnionOutput {
+-        GetKnownValueUnionOutput {
+-            r#union: ::std::rc::Rc<
+-                super::r#_Wrappers_Compile::Option<
+-                    ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::KnownValueUnion>,
+-                >,
+-            >,
++    pub enum GetStubInput {
++        GetStubInput {
++            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<crate::Stub>>,
+         },
+     }
+ 
+-    impl GetKnownValueUnionOutput {
+-        pub fn r#union(
+-            &self,
+-        ) -> &::std::rc::Rc<
+-            super::r#_Wrappers_Compile::Option<
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::KnownValueUnion>,
+-            >,
+-        > {
++    impl GetStubInput {
++        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<crate::Stub>> {
+             match self {
+-                GetKnownValueUnionOutput::GetKnownValueUnionOutput { r#union } => r#union,
++                GetStubInput::GetStubInput { value } => value,
+             }
+         }
+     }
+ 
+-    impl ::std::fmt::Debug for GetKnownValueUnionOutput {
++    impl ::std::fmt::Debug for GetStubInput {
+         fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+             ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+         }
+     }
+ 
+-    impl ::dafny_runtime::DafnyPrint for GetKnownValueUnionOutput {
++    impl ::dafny_runtime::DafnyPrint for GetStubInput {
+         fn fmt_print(
+             &self,
+             _formatter: &mut ::std::fmt::Formatter,
+             _in_seq: bool,
+         ) -> std::fmt::Result {
+             match self {
+-                GetKnownValueUnionOutput::GetKnownValueUnionOutput { r#union } => {
+-                    write!(_formatter, "r#_simple_dunion_dinternaldafny_dtypes.GetKnownValueUnionOutput.GetKnownValueUnionOutput(")?;
+-                    ::dafny_runtime::DafnyPrint::fmt_print(r#union, _formatter, false)?;
+-                    write!(_formatter, ")")?;
+-                    Ok(())
+-                }
+-            }
+-        }
+-    }
+-
+-    impl Eq for GetKnownValueUnionOutput {}
+-
+-    impl ::std::hash::Hash for GetKnownValueUnionOutput {
+-        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+-            match self {
+-                GetKnownValueUnionOutput::GetKnownValueUnionOutput { r#union } => {
+-                    r#union.hash(_state)
+-                }
+-            }
+-        }
+-    }
+-
+-    impl ::std::default::Default for GetKnownValueUnionOutput {
+-        fn default() -> GetKnownValueUnionOutput {
+-            GetKnownValueUnionOutput::GetKnownValueUnionOutput {
+-                r#union: ::std::default::Default::default(),
+-            }
+-        }
+-    }
+-
+-    impl ::std::convert::AsRef<GetKnownValueUnionOutput> for &GetKnownValueUnionOutput {
+-        fn as_ref(&self) -> Self {
+-            self
+-        }
+-    }
+-
+-    #[derive(PartialEq, Clone)]
+-    pub enum GetUnionInput {
+-        GetUnionInput {
+-            r#union: ::std::rc::Rc<
+-                super::r#_Wrappers_Compile::Option<
+-                    ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::MyUnion>,
+-                >,
+-            >,
+-        },
+-    }
+-
+-    impl GetUnionInput {
+-        pub fn r#union(
+-            &self,
+-        ) -> &::std::rc::Rc<
+-            super::r#_Wrappers_Compile::Option<
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::MyUnion>,
+-            >,
+-        > {
+-            match self {
+-                GetUnionInput::GetUnionInput { r#union } => r#union,
+-            }
+-        }
+-    }
+-
+-    impl ::std::fmt::Debug for GetUnionInput {
+-        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+-            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+-        }
+-    }
+-
+-    impl ::dafny_runtime::DafnyPrint for GetUnionInput {
+-        fn fmt_print(
+-            &self,
+-            _formatter: &mut ::std::fmt::Formatter,
+-            _in_seq: bool,
+-        ) -> std::fmt::Result {
+-            match self {
+-                GetUnionInput::GetUnionInput { r#union } => {
++                GetStubInput::GetStubInput { value } => {
+                     write!(
+                         _formatter,
+-                        "r#_simple_dunion_dinternaldafny_dtypes.GetUnionInput.GetUnionInput("
++                        "r#_stub_dinternaldafny_dtypes.GetStubInput.GetStubInput("
+                     )?;
+-                    ::dafny_runtime::DafnyPrint::fmt_print(r#union, _formatter, false)?;
++                    ::dafny_runtime::DafnyPrint::fmt_print(value, _formatter, false)?;
+                     write!(_formatter, ")")?;
+                     Ok(())
+                 }
+@@ -302,137 +147,64 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
+         }
+     }
+ 
+-    impl Eq for GetUnionInput {}
++    impl Eq for GetStubInput {}
+ 
+-    impl ::std::hash::Hash for GetUnionInput {
++    impl ::std::hash::Hash for GetStubInput {
+         fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+             match self {
+-                GetUnionInput::GetUnionInput { r#union } => r#union.hash(_state),
++                GetStubInput::GetStubInput { value } => value.hash(_state),
+             }
+         }
+     }
+ 
+-    impl ::std::default::Default for GetUnionInput {
+-        fn default() -> GetUnionInput {
+-            GetUnionInput::GetUnionInput {
+-                r#union: ::std::default::Default::default(),
++    impl ::std::default::Default for GetStubInput {
++        fn default() -> GetStubInput {
++            GetStubInput::GetStubInput {
++                value: ::std::default::Default::default(),
+             }
+         }
+     }
+ 
+-    impl ::std::convert::AsRef<GetUnionInput> for &GetUnionInput {
++    impl ::std::convert::AsRef<GetStubInput> for &GetStubInput {
+         fn as_ref(&self) -> Self {
+             self
+         }
+     }
+ 
+     #[derive(PartialEq, Clone)]
+-    pub enum GetUnionOutput {
+-        GetUnionOutput {
+-            r#union: ::std::rc::Rc<
+-                super::r#_Wrappers_Compile::Option<
+-                    ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::MyUnion>,
+-                >,
+-            >,
++    pub enum GetStubOutput {
++        GetStubOutput {
++            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<crate::Stub>>,
+         },
+     }
+ 
+-    impl GetUnionOutput {
+-        pub fn r#union(
+-            &self,
+-        ) -> &::std::rc::Rc<
+-            super::r#_Wrappers_Compile::Option<
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::MyUnion>,
+-            >,
+-        > {
+-            match self {
+-                GetUnionOutput::GetUnionOutput { r#union } => r#union,
+-            }
+-        }
+-    }
+-
+-    impl ::std::fmt::Debug for GetUnionOutput {
+-        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+-            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+-        }
+-    }
+-
+-    impl ::dafny_runtime::DafnyPrint for GetUnionOutput {
+-        fn fmt_print(
+-            &self,
+-            _formatter: &mut ::std::fmt::Formatter,
+-            _in_seq: bool,
+-        ) -> std::fmt::Result {
+-            match self {
+-                GetUnionOutput::GetUnionOutput { r#union } => {
+-                    write!(
+-                        _formatter,
+-                        "r#_simple_dunion_dinternaldafny_dtypes.GetUnionOutput.GetUnionOutput("
+-                    )?;
+-                    ::dafny_runtime::DafnyPrint::fmt_print(r#union, _formatter, false)?;
+-                    write!(_formatter, ")")?;
+-                    Ok(())
+-                }
+-            }
+-        }
+-    }
+-
+-    impl Eq for GetUnionOutput {}
+-
+-    impl ::std::hash::Hash for GetUnionOutput {
+-        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+-            match self {
+-                GetUnionOutput::GetUnionOutput { r#union } => r#union.hash(_state),
+-            }
+-        }
+-    }
+-
+-    impl ::std::default::Default for GetUnionOutput {
+-        fn default() -> GetUnionOutput {
+-            GetUnionOutput::GetUnionOutput {
+-                r#union: ::std::default::Default::default(),
+-            }
+-        }
+-    }
+-
+-    impl ::std::convert::AsRef<GetUnionOutput> for &GetUnionOutput {
+-        fn as_ref(&self) -> Self {
+-            self
+-        }
+-    }
+-
+-    #[derive(PartialEq, Clone)]
+-    pub enum KnownValueUnion {
+-        Value { Value: i32 },
+-    }
+-
+-    impl KnownValueUnion {
+-        pub fn Value(&self) -> &i32 {
++    impl GetStubOutput {
++        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<crate::Stub>> {
+             match self {
+-                KnownValueUnion::Value { Value } => Value,
++                GetStubOutput::GetStubOutput { value } => value,
+             }
+         }
+     }
+ 
+-    impl ::std::fmt::Debug for KnownValueUnion {
++    impl ::std::fmt::Debug for GetStubOutput {
+         fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+             ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+         }
+     }
+ 
+-    impl ::dafny_runtime::DafnyPrint for KnownValueUnion {
++    impl ::dafny_runtime::DafnyPrint for GetStubOutput {
+         fn fmt_print(
+             &self,
+             _formatter: &mut ::std::fmt::Formatter,
+             _in_seq: bool,
+         ) -> std::fmt::Result {
+             match self {
+-                KnownValueUnion::Value { Value } => {
++                GetStubOutput::GetStubOutput { value } => {
+                     write!(
+                         _formatter,
+-                        "r#_simple_dunion_dinternaldafny_dtypes.KnownValueUnion.Value("
++                        "r#_stub_dinternaldafny_dtypes.GetStubOutput.GetStubOutput("
+                     )?;
+-                    ::dafny_runtime::DafnyPrint::fmt_print(Value, _formatter, false)?;
++                    ::dafny_runtime::DafnyPrint::fmt_print(value, _formatter, false)?;
+                     write!(_formatter, ")")?;
+                     Ok(())
+                 }
+@@ -440,221 +212,121 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
+         }
+     }
+ 
+-    impl Eq for KnownValueUnion {}
++    impl Eq for GetStubOutput {}
+ 
+-    impl ::std::hash::Hash for KnownValueUnion {
++    impl ::std::hash::Hash for GetStubOutput {
+         fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+             match self {
+-                KnownValueUnion::Value { Value } => Value.hash(_state),
++                GetStubOutput::GetStubOutput { value } => value.hash(_state),
+             }
+         }
+     }
+ 
+-    impl ::std::default::Default for KnownValueUnion {
+-        fn default() -> KnownValueUnion {
+-            KnownValueUnion::Value {
+-                Value: ::std::default::Default::default(),
++    impl ::std::default::Default for GetStubOutput {
++        fn default() -> GetStubOutput {
++            GetStubOutput::GetStubOutput {
++                value: ::std::default::Default::default(),
+             }
+         }
+     }
+ 
+-    impl ::std::convert::AsRef<KnownValueUnion> for &KnownValueUnion {
++    impl ::std::convert::AsRef<GetStubOutput> for &GetStubOutput {
+         fn as_ref(&self) -> Self {
+             self
+         }
+     }
+ 
+     #[derive(PartialEq, Clone)]
+-    pub enum MyUnion {
+-        IntegerValue {
+-            IntegerValue: i32,
+-        },
+-        StringValue {
+-            StringValue: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+-        },
++    pub enum StubConfig {
++        StubConfig {},
+     }
+ 
+-    impl MyUnion {
+-        pub fn IntegerValue(&self) -> &i32 {
+-            match self {
+-                MyUnion::IntegerValue { IntegerValue } => IntegerValue,
+-                MyUnion::StringValue { StringValue } => {
+-                    panic!("field does not exist on this variant")
+-                }
+-            }
+-        }
+-        pub fn StringValue(&self) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
+-            match self {
+-                MyUnion::IntegerValue { IntegerValue } => {
+-                    panic!("field does not exist on this variant")
+-                }
+-                MyUnion::StringValue { StringValue } => StringValue,
+-            }
+-        }
+-    }
++    impl StubConfig {}
+ 
+-    impl ::std::fmt::Debug for MyUnion {
++    impl ::std::fmt::Debug for StubConfig {
+         fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+             ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+         }
+     }
+ 
+-    impl ::dafny_runtime::DafnyPrint for MyUnion {
++    impl ::dafny_runtime::DafnyPrint for StubConfig {
+         fn fmt_print(
+             &self,
+             _formatter: &mut ::std::fmt::Formatter,
+             _in_seq: bool,
+         ) -> std::fmt::Result {
+             match self {
+-                MyUnion::IntegerValue { IntegerValue } => {
+-                    write!(
+-                        _formatter,
+-                        "r#_simple_dunion_dinternaldafny_dtypes.MyUnion.IntegerValue("
+-                    )?;
+-                    ::dafny_runtime::DafnyPrint::fmt_print(IntegerValue, _formatter, false)?;
+-                    write!(_formatter, ")")?;
+-                    Ok(())
+-                }
+-                MyUnion::StringValue { StringValue } => {
++                StubConfig::StubConfig {} => {
+                     write!(
+                         _formatter,
+-                        "r#_simple_dunion_dinternaldafny_dtypes.MyUnion.StringValue("
++                        "r#_stub_dinternaldafny_dtypes.StubConfig.StubConfig"
+                     )?;
+-                    ::dafny_runtime::DafnyPrint::fmt_print(StringValue, _formatter, false)?;
+-                    write!(_formatter, ")")?;
+                     Ok(())
+                 }
+             }
+         }
+     }
+ 
+-    impl Eq for MyUnion {}
++    impl Eq for StubConfig {}
+ 
+-    impl ::std::hash::Hash for MyUnion {
++    impl ::std::hash::Hash for StubConfig {
+         fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+             match self {
+-                MyUnion::IntegerValue { IntegerValue } => IntegerValue.hash(_state),
+-                MyUnion::StringValue { StringValue } => StringValue.hash(_state),
++                StubConfig::StubConfig {} => {}
+             }
+         }
+     }
+ 
+-    impl ::std::default::Default for MyUnion {
+-        fn default() -> MyUnion {
+-            MyUnion::IntegerValue {
+-                IntegerValue: ::std::default::Default::default(),
+-            }
++    impl ::std::default::Default for StubConfig {
++        fn default() -> StubConfig {
++            StubConfig::StubConfig {}
+         }
+     }
+ 
+-    impl ::std::convert::AsRef<MyUnion> for &MyUnion {
++    impl ::std::convert::AsRef<StubConfig> for &StubConfig {
+         fn as_ref(&self) -> Self {
+             self
+         }
+     }
+ 
+-    pub struct ISimpleUnionClientCallHistory {}
++    pub struct IStubClientCallHistory {}
+ 
+-    impl ISimpleUnionClientCallHistory {
++    impl IStubClientCallHistory {
+         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
+             ::dafny_runtime::allocate_rcmut::<Self>()
+         }
+     }
+ 
+-    pub trait ISimpleUnionClient {
+-        fn GetUnion(
++    pub trait IStubClient {
++        fn GetStub(
+             &mut self,
+-            input: &::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput>,
++            input: &::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubInput>,
+         ) -> ::std::rc::Rc<
+             super::r#_Wrappers_Compile::Result<
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput>,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+-            >,
+-        >;
+-        fn GetKnownValueUnion(
+-            &mut self,
+-            input: &::std::rc::Rc<
+-                super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput,
+-            >,
+-        ) -> ::std::rc::Rc<
+-            super::r#_Wrappers_Compile::Result<
+-                ::std::rc::Rc<
+-                    super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
+-                >,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubOutput>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >,
+         >;
+     }
+ 
+-    #[derive(PartialEq, Clone)]
+-    pub enum SimpleUnionConfig {
+-        SimpleUnionConfig {},
+-    }
+-
+-    impl SimpleUnionConfig {}
+-
+-    impl ::std::fmt::Debug for SimpleUnionConfig {
+-        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+-            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+-        }
+-    }
+-
+-    impl ::dafny_runtime::DafnyPrint for SimpleUnionConfig {
+-        fn fmt_print(
+-            &self,
+-            _formatter: &mut ::std::fmt::Formatter,
+-            _in_seq: bool,
+-        ) -> std::fmt::Result {
+-            match self {
+-                SimpleUnionConfig::SimpleUnionConfig {} => {
+-                    write!(_formatter, "r#_simple_dunion_dinternaldafny_dtypes.SimpleUnionConfig.SimpleUnionConfig")?;
+-                    Ok(())
+-                }
+-            }
+-        }
+-    }
+-
+-    impl Eq for SimpleUnionConfig {}
+-
+-    impl ::std::hash::Hash for SimpleUnionConfig {
+-        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+-            match self {
+-                SimpleUnionConfig::SimpleUnionConfig {} => {}
+-            }
+-        }
+-    }
+-
+-    impl ::std::default::Default for SimpleUnionConfig {
+-        fn default() -> SimpleUnionConfig {
+-            SimpleUnionConfig::SimpleUnionConfig {}
+-        }
+-    }
+-
+-    impl ::std::convert::AsRef<SimpleUnionConfig> for &SimpleUnionConfig {
+-        fn as_ref(&self) -> Self {
+-            self
+-        }
+-    }
+-
+     #[derive(PartialEq, Clone)]
+     pub enum Error {
+         CollectionOfErrors {
+             list: ::dafny_runtime::Sequence<
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >,
+             message: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+         },
+         Opaque {
+-            obj: ::dafny_runtime::Object<dyn::std::any::Any>,
++            obj: ::dafny_runtime::Object<dyn ::std::any::Any>,
+         },
+     }
+ 
+     impl Error {
+         pub fn list(
+             &self,
+-        ) -> &::dafny_runtime::Sequence<
+-            ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+-        > {
++        ) -> &::dafny_runtime::Sequence<::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>>
++        {
+             match self {
+                 Error::CollectionOfErrors { list, message } => list,
+                 Error::Opaque { obj } => panic!("field does not exist on this variant"),
+@@ -666,7 +338,7 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
+                 Error::Opaque { obj } => panic!("field does not exist on this variant"),
+             }
+         }
+-        pub fn obj(&self) -> &::dafny_runtime::Object<dyn::std::any::Any> {
++        pub fn obj(&self) -> &::dafny_runtime::Object<dyn ::std::any::Any> {
+             match self {
+                 Error::CollectionOfErrors { list, message } => {
+                     panic!("field does not exist on this variant")
+@@ -692,7 +364,7 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
+                 Error::CollectionOfErrors { list, message } => {
+                     write!(
+                         _formatter,
+-                        "r#_simple_dunion_dinternaldafny_dtypes.Error.CollectionOfErrors("
++                        "r#_stub_dinternaldafny_dtypes.Error.CollectionOfErrors("
+                     )?;
+                     ::dafny_runtime::DafnyPrint::fmt_print(list, _formatter, false)?;
+                     write!(_formatter, ", ")?;
+@@ -701,10 +373,7 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
+                     Ok(())
+                 }
+                 Error::Opaque { obj } => {
+-                    write!(
+-                        _formatter,
+-                        "r#_simple_dunion_dinternaldafny_dtypes.Error.Opaque("
+-                    )?;
++                    write!(_formatter, "r#_stub_dinternaldafny_dtypes.Error.Opaque(")?;
+                     ::dafny_runtime::DafnyPrint::fmt_print(obj, _formatter, false)?;
+                     write!(_formatter, ")")?;
+                     Ok(())
+@@ -742,92 +411,62 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
+         }
+     }
+ 
+-    pub type OpaqueError = ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>;
++    pub type OpaqueError = ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>;
+ }
+-pub mod r#_SimpleUnionImpl_Compile {
++pub mod r#_StubImpl_Compile {
+     pub struct _default {}
+ 
+     impl _default {
+         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
+             ::dafny_runtime::allocate_rcmut::<Self>()
+         }
+-        pub fn GetUnion(
+-            config: &::std::rc::Rc<super::r#_SimpleUnionImpl_Compile::Config>,
+-            input: &::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput>,
++        pub fn GetStub(
++            config: &::std::rc::Rc<super::r#_StubImpl_Compile::Config>,
++            input: &::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubInput>,
+         ) -> ::std::rc::Rc<
+             super::r#_Wrappers_Compile::Result<
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput>,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubOutput>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >,
+         > {
+             let mut output = ::dafny_runtime::MaybePlacebo::<
+                 ::std::rc::Rc<
+                     super::r#_Wrappers_Compile::Result<
+-                        ::std::rc::Rc<
+-                            super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput,
+-                        >,
+-                        ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                        ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubOutput>,
++                        ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+                     >,
+                 >,
+             >::new();
+-            let mut res: ::std::rc::Rc<
+-                super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput,
+-            > = ::std::rc::Rc::new(
+-                super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput::GetUnionOutput {
+-                    union: input.r#union().clone(),
+-                },
+-            );
++            if !matches!(
++                input.value().as_ref(),
++                super::r#_Wrappers_Compile::Option::Some { .. }
++            ) {
++                panic!("Halt")
++            };
++            if !(*input.value().value() == true || *input.value().value() == false) {
++                panic!("Halt")
++            };
++            let mut res: ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubOutput> =
++                ::std::rc::Rc::new(
++                    super::r#_stub_dinternaldafny_dtypes::GetStubOutput::GetStubOutput {
++                        value: input.value().clone(),
++                    },
++                );
+             res = ::std::rc::Rc::new(
+-                super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput::GetUnionOutput {
+-                    union: input.r#union().clone(),
++                super::r#_stub_dinternaldafny_dtypes::GetStubOutput::GetStubOutput {
++                    value: input.value().clone(),
+                 },
+             );
++            if !(*res.value().value() == true || *res.value().value() == false) {
++                panic!("Halt")
++            };
++            if !(input.value().value() == res.value().value()) {
++                panic!("Halt")
++            };
+             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
+                 super::r#_Wrappers_Compile::Result::<
+-                    ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput>,
+-                    ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+-                >::Success {
+-                    value: res.clone(),
+-                },
+-            ));
+-            return output.read();
+-            return output.read();
+-        }
+-        pub fn GetKnownValueUnion(
+-            config: &::std::rc::Rc<super::r#_SimpleUnionImpl_Compile::Config>,
+-            input: &::std::rc::Rc<
+-                super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput,
+-            >,
+-        ) -> ::std::rc::Rc<
+-            super::r#_Wrappers_Compile::Result<
+-                ::std::rc::Rc<
+-                    super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
+-                >,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+-            >,
+-        > {
+-            let mut output = ::dafny_runtime::MaybePlacebo::<
+-                ::std::rc::Rc<
+-                    super::r#_Wrappers_Compile::Result<
+-                        ::std::rc::Rc<
+-                            super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
+-                        >,
+-                        ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+-                    >,
+-                >,
+-            >::new();
+-            let mut res: ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput> = ::std::rc::Rc::new(super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput::GetKnownValueUnionOutput {
+-            union: input.r#union().clone()
+-          });
+-            res = ::std::rc::Rc::new(super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput::GetKnownValueUnionOutput {
+-            union: input.r#union().clone()
+-          });
+-            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
+-                super::r#_Wrappers_Compile::Result::<
+-                    ::std::rc::Rc<
+-                        super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
+-                    >,
+-                    ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                    ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubOutput>,
++                    ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+                 >::Success {
+                     value: res.clone(),
+                 },
+@@ -858,7 +497,7 @@ pub mod r#_SimpleUnionImpl_Compile {
+         ) -> std::fmt::Result {
+             match self {
+                 Config::Config {} => {
+-                    write!(_formatter, "r#_SimpleUnionImpl_Compile.Config.Config")?;
++                    write!(_formatter, "r#_StubImpl_Compile.Config.Config")?;
+                     Ok(())
+                 }
+             }
+@@ -887,55 +526,47 @@ pub mod r#_SimpleUnionImpl_Compile {
+         }
+     }
+ }
+-pub mod r#_simple_dunion_dinternaldafny {
++pub mod r#_stub_dinternaldafny {
+     pub struct _default {}
+ 
+     impl _default {
+         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
+             ::dafny_runtime::allocate_rcmut::<Self>()
+         }
+-        pub fn DefaultSimpleUnionConfig(
+-        ) -> ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig>
++        pub fn DefaultStubConfig() -> ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::StubConfig>
+         {
+-            ::std::rc::Rc::new(super::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig::SimpleUnionConfig {})
++            ::std::rc::Rc::new(super::r#_stub_dinternaldafny_dtypes::StubConfig::StubConfig {})
+         }
+-        pub fn SimpleUnion(
+-            config: &::std::rc::Rc<
+-                super::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig,
+-            >,
++        pub fn Stub(
++            config: &::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::StubConfig>,
+         ) -> ::std::rc::Rc<
+             super::r#_Wrappers_Compile::Result<
+-                ::dafny_runtime::Object<super::r#_simple_dunion_dinternaldafny::SimpleUnionClient>,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::dafny_runtime::Object<super::r#_stub_dinternaldafny::StubClient>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >,
+         > {
+             let mut res = ::dafny_runtime::MaybePlacebo::<
+                 ::std::rc::Rc<
+                     super::r#_Wrappers_Compile::Result<
+-                        ::dafny_runtime::Object<
+-                            super::r#_simple_dunion_dinternaldafny::SimpleUnionClient,
+-                        >,
+-                        ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                        ::dafny_runtime::Object<super::r#_stub_dinternaldafny::StubClient>,
++                        ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+                     >,
+                 >,
+             >::new();
+             let mut client = ::dafny_runtime::MaybePlacebo::<
+-                ::dafny_runtime::Object<super::r#_simple_dunion_dinternaldafny::SimpleUnionClient>,
++                ::dafny_runtime::Object<super::r#_stub_dinternaldafny::StubClient>,
+             >::new();
+-            let mut _nw0: ::dafny_runtime::Object<
+-                super::r#_simple_dunion_dinternaldafny::SimpleUnionClient,
+-            > = super::r#_simple_dunion_dinternaldafny::SimpleUnionClient::_allocate_rcmut();
+-            super::r#_simple_dunion_dinternaldafny::SimpleUnionClient::_ctor(
++            let mut _nw0: ::dafny_runtime::Object<super::r#_stub_dinternaldafny::StubClient> =
++                super::r#_stub_dinternaldafny::StubClient::_allocate_rcmut();
++            super::r#_stub_dinternaldafny::StubClient::_ctor(
+                 &_nw0,
+-                &::std::rc::Rc::new(super::r#_SimpleUnionImpl_Compile::Config::Config {}),
++                &::std::rc::Rc::new(super::r#_StubImpl_Compile::Config::Config {}),
+             );
+             client = ::dafny_runtime::MaybePlacebo::from(_nw0.clone());
+             res = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
+                 super::r#_Wrappers_Compile::Result::<
+-                    ::dafny_runtime::Object<
+-                        super::r#_simple_dunion_dinternaldafny::SimpleUnionClient,
+-                    >,
+-                    ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                    ::dafny_runtime::Object<super::r#_stub_dinternaldafny::StubClient>,
++                    ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+                 >::Success {
+                     value: client.read(),
+                 },
+@@ -944,58 +575,48 @@ pub mod r#_simple_dunion_dinternaldafny {
+             return res.read();
+         }
+         pub fn CreateSuccessOfClient(
+-            client: &::dafny_runtime::Object<
+-                dyn super::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient,
+-            >,
++            client: &::dafny_runtime::Object<dyn super::r#_stub_dinternaldafny_dtypes::IStubClient>,
+         ) -> ::std::rc::Rc<
+             super::r#_Wrappers_Compile::Result<
+-                ::dafny_runtime::Object<
+-                    dyn super::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient,
+-                >,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::dafny_runtime::Object<dyn super::r#_stub_dinternaldafny_dtypes::IStubClient>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >,
+         > {
+             ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<
+-                ::dafny_runtime::Object<
+-                    dyn super::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient,
+-                >,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::dafny_runtime::Object<dyn super::r#_stub_dinternaldafny_dtypes::IStubClient>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >::Success {
+                 value: client.clone(),
+             })
+         }
+         pub fn CreateFailureOfError(
+-            error: &::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++            error: &::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+         ) -> ::std::rc::Rc<
+             super::r#_Wrappers_Compile::Result<
+-                ::dafny_runtime::Object<
+-                    dyn super::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient,
+-                >,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::dafny_runtime::Object<dyn super::r#_stub_dinternaldafny_dtypes::IStubClient>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >,
+         > {
+             ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<
+-                ::dafny_runtime::Object<
+-                    dyn super::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient,
+-                >,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::dafny_runtime::Object<dyn super::r#_stub_dinternaldafny_dtypes::IStubClient>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >::Failure {
+                 error: error.clone(),
+             })
+         }
+     }
+ 
+-    pub struct SimpleUnionClient {
+-        pub r#__i_config: ::std::rc::Rc<super::r#_SimpleUnionImpl_Compile::Config>,
++    pub struct StubClient {
++        pub r#__i_config: ::std::rc::Rc<super::r#_StubImpl_Compile::Config>,
+     }
+ 
+-    impl SimpleUnionClient {
++    impl StubClient {
+         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
+             ::dafny_runtime::allocate_rcmut::<Self>()
+         }
+         pub fn _ctor(
+             this: &::dafny_runtime::Object<Self>,
+-            config: &::std::rc::Rc<super::r#_SimpleUnionImpl_Compile::Config>,
++            config: &::std::rc::Rc<super::r#_StubImpl_Compile::Config>,
+         ) -> () {
+             let mut _set__i_config: bool = false;
+             ::dafny_runtime::update_field_uninit_rcmut!(
+@@ -1006,91 +627,45 @@ pub mod r#_simple_dunion_dinternaldafny {
+             );
+             return ();
+         }
+-        pub fn config(&self) -> ::std::rc::Rc<super::r#_SimpleUnionImpl_Compile::Config> {
++        pub fn config(&self) -> ::std::rc::Rc<super::r#_StubImpl_Compile::Config> {
+             self.r#__i_config.clone()
+         }
+     }
+ 
+-    impl super::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient
+-        for super::r#_simple_dunion_dinternaldafny::SimpleUnionClient
++    impl super::r#_stub_dinternaldafny_dtypes::IStubClient
++        for super::r#_stub_dinternaldafny::StubClient
+     {
+-        fn GetUnion(
++        fn GetStub(
+             &mut self,
+-            input: &::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput>,
++            input: &::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubInput>,
+         ) -> ::std::rc::Rc<
+             super::r#_Wrappers_Compile::Result<
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput>,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubOutput>,
++                ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+             >,
+         > {
+             let mut output = ::dafny_runtime::MaybePlacebo::<
+                 ::std::rc::Rc<
+                     super::r#_Wrappers_Compile::Result<
+-                        ::std::rc::Rc<
+-                            super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput,
+-                        >,
+-                        ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                        ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubOutput>,
++                        ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+                     >,
+                 >,
+             >::new();
+             let mut _out0 = ::dafny_runtime::MaybePlacebo::<
+                 ::std::rc::Rc<
+                     super::r#_Wrappers_Compile::Result<
+-                        ::std::rc::Rc<
+-                            super::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput,
+-                        >,
+-                        ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++                        ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::GetStubOutput>,
++                        ::std::rc::Rc<super::r#_stub_dinternaldafny_dtypes::Error>,
+                     >,
+                 >,
+             >::new();
+             _out0 = ::dafny_runtime::MaybePlacebo::from(
+-                super::r#_SimpleUnionImpl_Compile::_default::GetUnion(&self.config(), input),
++                super::r#_StubImpl_Compile::_default::GetStub(&self.config(), input),
+             );
+             output = ::dafny_runtime::MaybePlacebo::from(_out0.read());
+             return output.read();
+         }
+-        fn GetKnownValueUnion(
+-            &mut self,
+-            input: &::std::rc::Rc<
+-                super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput,
+-            >,
+-        ) -> ::std::rc::Rc<
+-            super::r#_Wrappers_Compile::Result<
+-                ::std::rc::Rc<
+-                    super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
+-                >,
+-                ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+-            >,
+-        > {
+-            let mut output = ::dafny_runtime::MaybePlacebo::<
+-                ::std::rc::Rc<
+-                    super::r#_Wrappers_Compile::Result<
+-                        ::std::rc::Rc<
+-                            super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
+-                        >,
+-                        ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+-                    >,
+-                >,
+-            >::new();
+-            let mut _out1 = ::dafny_runtime::MaybePlacebo::<
+-                ::std::rc::Rc<
+-                    super::r#_Wrappers_Compile::Result<
+-                        ::std::rc::Rc<
+-                            super::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
+-                        >,
+-                        ::std::rc::Rc<super::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+-                    >,
+-                >,
+-            >::new();
+-            _out1 = ::dafny_runtime::MaybePlacebo::from(
+-                super::r#_SimpleUnionImpl_Compile::_default::GetKnownValueUnion(
+-                    &self.config(),
+-                    input,
+-                ),
+-            );
+-            output = ::dafny_runtime::MaybePlacebo::from(_out1.read());
+-            return output.read();
+-        }
+     }
+ }
+ pub mod _module {}
+diff --git b/TestModels/Union/runtimes/rust/src/client.rs a/TestModels/Union/runtimes/rust/src/client.rs
+new file mode 100644
+index 00000000..8e935d34
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/client.rs
+@@ -0,0 +1,56 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++use aws_smithy_types::error::operation::BuildError;
++
++#[derive(Debug)]
++pub(crate) struct Handle {
++    pub(crate) conf: crate::Config,
++    pub(crate) inner:
++        ::dafny_runtime::Object<dyn ::stub_dafny::r#_stub_dinternaldafny_dtypes::IStubClient>,
++}
++
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct Client {
++    handle: ::std::sync::Arc<Handle>,
++}
++
++impl Client {
++    /// Creates a new client from the service [`Config`](crate::Config).
++    #[track_caller]
++    pub fn from_conf(conf: crate::Config) -> Result<Self, BuildError> {
++        // If this service had any configuration properties,
++        // they would need converting here too.
++        let inner_config =
++            ::std::rc::Rc::new(::stub_dafny::_stub_dinternaldafny::_default::DefaultStubConfig());
++        let inner = ::stub_dafny::_stub_dinternaldafny::_default::Stub(&inner_config);
++        if matches!(
++            inner.as_ref(),
++            ::stub_dafny::_Wrappers_Compile::Result::Failure { .. }
++        ) {
++            // TODO: convert error - the potential types are not modeled!
++            return Err(BuildError::other(
++                ::aws_smithy_types::error::metadata::ErrorMetadata::builder()
++                    .message("Invalid client config")
++                    .build(),
++            ));
++        }
++        let handle = Handle {
++            conf: conf.clone(),
++            inner: ::dafny_runtime::UpcastTo::<
++                dafny_runtime::Object<
++                    (dyn ::stub_dafny::r#_stub_dinternaldafny_dtypes::IStubClient + 'static),
++                >,
++            >::upcast_to(inner.Extract()),
++        };
++        Ok(Self {
++            handle: ::std::sync::Arc::new(handle),
++        })
++    }
++
++    /// Returns the client's configuration.
++    pub fn config(&self) -> &crate::Config {
++        &self.handle.conf
++    }
++}
++
++mod get_stub;
+diff --git b/TestModels/Union/runtimes/rust/src/client/get_stub.rs a/TestModels/Union/runtimes/rust/src/client/get_stub.rs
+new file mode 100644
+index 00000000..10d2df01
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/client/get_stub.rs
+@@ -0,0 +1,13 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++impl super::Client {
++    /// Constructs a fluent builder for the [`GetStub`](crate::operation::get_stub::builders::GetStubFluentBuilder) operation.
++    ///
++    /// - The fluent builder is configurable:
++    ///   - [`value(impl Into<Option<Stub>>)`](crate::operation::get_stub::builders::GetStubFluentBuilder::name) / [`set_name(Option<Stub>)`](crate::operation::get_stub::builders::GetStubFluentBuilder::set_name):(undocumented)<br>
++    /// - On success, responds with [`GetStubOutput`](crate::operation::get_stub::GetStubOutput) with field(s):
++    ///   - [`value(Option<Stub>)`](crate::operation::get_stub::GetStubOutput::value): (undocumented)
++    /// - On failure, responds with [`SdkError<GetStubError>`](crate::operation::get_stub::GetStubError)
++    pub fn get_stub(&self) -> crate::operation::get_stub::builders::GetStubFluentBuilder {
++        crate::operation::get_stub::builders::GetStubFluentBuilder::new(self.handle.clone())
++    }
++}
+diff --git b/TestModels/Union/runtimes/rust/src/config.rs a/TestModels/Union/runtimes/rust/src/config.rs
+new file mode 100644
+index 00000000..9a185d85
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/config.rs
+@@ -0,0 +1,128 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++/// Configuration for a simple service client.
++///
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct Config {
++    behavior_version: ::std::option::Option<crate::config::BehaviorVersion>,
++}
++impl Config {
++    /// Constructs a config builder.
++    pub fn builder() -> Builder {
++        Builder::default()
++    }
++    /// Converts this config back into a builder so that it can be tweaked.
++    pub fn to_builder(&self) -> Builder {
++        Builder {
++            behavior_version: self.behavior_version.clone(),
++        }
++    }
++}
++/// Builder for creating a `Config`.
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct Builder {
++    pub(crate) behavior_version: ::std::option::Option<crate::config::BehaviorVersion>,
++}
++impl ::std::default::Default for Builder {
++    fn default() -> Self {
++        Self {
++            behavior_version: ::std::default::Default::default(),
++        }
++    }
++}
++impl Builder {
++    /// Constructs a config builder.
++    pub fn new() -> Self {
++        Self::default()
++    }
++
++    /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
++    ///
++    /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
++    /// compatible. For example, a change which introduces new default timeouts or a new retry-mode for
++    /// all operations might be the ideal behavior but could break existing applications.
++    ///
++    /// # Examples
++    ///
++    /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
++    /// ```no_run
++    /// use stub::config::BehaviorVersion;
++    ///
++    /// let config = stub::Config::builder()
++    ///     .behavior_version(BehaviorVersion::latest())
++    ///     // ...
++    ///     .build();
++    /// let client = stub::Client::from_conf(config);
++    /// ```
++    ///
++    /// Customizing behavior major version:
++    /// ```no_run
++    /// use stub::config::BehaviorVersion;
++    ///
++    /// let config = stub::Config::builder()
++    ///     .behavior_version(BehaviorVersion::v2023_11_09())
++    ///     // ...
++    ///     .build();
++    /// let client = stub::Client::from_conf(config);
++    /// ```
++
++    pub fn behavior_version(mut self, behavior_version: crate::config::BehaviorVersion) -> Self {
++        self.set_behavior_version(Some(behavior_version));
++        self
++    }
++
++    /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
++    ///
++    /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
++    /// compatible. For example, a change which introduces new default timeouts or a new retry-mode for
++    /// all operations might be the ideal behavior but could break existing applications.
++    ///
++    /// # Examples
++    ///
++    /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
++    /// ```no_run
++    /// use stub::config::BehaviorVersion;
++    ///
++    /// let config = stub::Config::builder()
++    ///     .behavior_version(BehaviorVersion::latest())
++    ///     // ...
++    ///     .build();
++    /// let client = stub::Client::from_conf(config);
++    /// ```
++    ///
++    /// Customizing behavior major version:
++    /// ```no_run
++    /// use stub::config::BehaviorVersion;
++    ///
++    /// let config = stub::Config::builder()
++    ///     .behavior_version(BehaviorVersion::v2023_11_09())
++    ///     // ...
++    ///     .build();
++    /// let client = stub::Client::from_conf(config);
++    /// ```
++
++    pub fn set_behavior_version(
++        &mut self,
++        behavior_version: Option<crate::config::BehaviorVersion>,
++    ) -> &mut Self {
++        self.behavior_version = behavior_version;
++        self
++    }
++
++    /// Convenience method to set the latest behavior major version
++    ///
++    /// This is equivalent to enabling the `behavior-version-latest` Cargo feature
++    pub fn behavior_version_latest(mut self) -> Self {
++        self.set_behavior_version(Some(crate::config::BehaviorVersion::latest()));
++        self
++    }
++    /// Builds a [`Config`].
++    #[allow(unused_mut)]
++    pub fn build(mut self) -> Config {
++        Config {
++            behavior_version: self.behavior_version,
++        }
++    }
++}
++
++pub use ::aws_smithy_runtime_api::client::behavior_version::BehaviorVersion;
+diff --git b/TestModels/Union/runtimes/rust/src/conversions.rs a/TestModels/Union/runtimes/rust/src/conversions.rs
+new file mode 100644
+index 00000000..14f738db
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/conversions.rs
+@@ -0,0 +1,2 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++pub mod get_stub;
+diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_stub.rs a/TestModels/Union/runtimes/rust/src/conversions/get_stub.rs
+new file mode 100644
+index 00000000..acbb9a2c
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/conversions/get_stub.rs
+@@ -0,0 +1,46 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++use std::any::Any;
++
++#[allow(dead_code)]
++pub fn to_dafny_error(
++    value: crate::operation::get_stub::GetStubError,
++) -> ::std::rc::Rc<::stub_dafny::r#_stub_dinternaldafny_dtypes::Error> {
++    match value {
++        crate::operation::get_stub::GetStubError::Unhandled(unhandled) => {
++            ::std::rc::Rc::new(::stub_dafny::r#_stub_dinternaldafny_dtypes::Error::Opaque {
++                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
++                    ::dafny_runtime::object::new(unhandled),
++                ),
++            })
++        }
++    }
++}
++
++#[allow(dead_code)]
++pub fn from_dafny_error(
++    dafny_value: ::std::rc::Rc<::stub_dafny::r#_stub_dinternaldafny_dtypes::Error>,
++) -> crate::operation::get_stub::GetStubError {
++    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
++    if matches!(
++        &dafny_value.as_ref(),
++        ::stub_dafny::r#_stub_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }
++    ) {
++        let error_message = "TODO: can't get message yet";
++        crate::operation::get_stub::GetStubError::generic(
++            ::aws_smithy_types::error::metadata::ErrorMetadata::builder()
++                .message(error_message)
++                .build(),
++        )
++    } else {
++        crate::operation::get_stub::GetStubError::generic(
++            ::aws_smithy_types::error::metadata::ErrorMetadata::builder()
++                .message("Opaque error")
++                .build(),
++        )
++    }
++}
++
++pub mod _get_stub_input;
++
++pub mod _get_stub_output;
+diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_stub/_get_stub_input.rs a/TestModels/Union/runtimes/rust/src/conversions/get_stub/_get_stub_input.rs
+new file mode 100644
+index 00000000..0a547ac5
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/conversions/get_stub/_get_stub_input.rs
+@@ -0,0 +1,35 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: crate::operation::get_stub::GetStubInput,
++) -> ::std::rc::Rc<::stub_dafny::r#_stub_dinternaldafny_dtypes::GetStubInput> {
++    let dafny_value = match value.value {
++        Some(b) => ::stub_dafny::_Wrappers_Compile::Option::Some { value: b },
++        None => ::stub_dafny::_Wrappers_Compile::Option::None {},
++    };
++    ::std::rc::Rc::new(
++        ::stub_dafny::r#_stub_dinternaldafny_dtypes::GetStubInput::GetStubInput {
++            value: ::std::rc::Rc::new(dafny_value),
++        },
++    )
++}
++
++#[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<::stub_dafny::r#_stub_dinternaldafny_dtypes::GetStubInput>,
++) -> crate::operation::get_stub::GetStubInput {
++    let value = if matches!(
++        dafny_value.value().as_ref(),
++        ::stub_dafny::_Wrappers_Compile::Option::Some { .. }
++    ) {
++        Some(dafny_value.value().Extract())
++    } else if matches!(
++        dafny_value.value().as_ref(),
++        ::stub_dafny::_Wrappers_Compile::Option::None { .. }
++    ) {
++        None
++    } else {
++        panic!("Unreachable")
++    };
++    crate::operation::get_stub::GetStubInput { value }
++}
+diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_stub/_get_stub_output.rs a/TestModels/Union/runtimes/rust/src/conversions/get_stub/_get_stub_output.rs
+new file mode 100644
+index 00000000..f9b97a89
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/conversions/get_stub/_get_stub_output.rs
+@@ -0,0 +1,35 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: crate::operation::get_stub::GetStubOutput,
++) -> ::std::rc::Rc<::stub_dafny::r#_stub_dinternaldafny_dtypes::GetStubOutput> {
++    let dafny_value = match value.value {
++        Some(b) => ::stub_dafny::_Wrappers_Compile::Option::Some { value: b },
++        None => ::stub_dafny::_Wrappers_Compile::Option::None {},
++    };
++    ::std::rc::Rc::new(
++        ::stub_dafny::r#_stub_dinternaldafny_dtypes::GetStubOutput::GetStubOutput {
++            value: ::std::rc::Rc::new(dafny_value),
++        },
++    )
++}
++
++#[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<::stub_dafny::r#_stub_dinternaldafny_dtypes::GetStubOutput>,
++) -> crate::operation::get_stub::GetStubOutput {
++    let value = if matches!(
++        dafny_value.value().as_ref(),
++        ::stub_dafny::_Wrappers_Compile::Option::Some { .. }
++    ) {
++        Some(dafny_value.value().Extract())
++    } else if matches!(
++        dafny_value.value().as_ref(),
++        ::stub_dafny::_Wrappers_Compile::Option::None { .. }
++    ) {
++        None
++    } else {
++        panic!("Unreachable")
++    };
++    crate::operation::get_stub::GetStubOutput { value }
++}
+diff --git b/TestModels/Union/runtimes/rust/src/error.rs a/TestModels/Union/runtimes/rust/src/error.rs
+new file mode 100644
+index 00000000..ec89cbec
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/error.rs
+@@ -0,0 +1,14 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++pub use ::aws_smithy_runtime_api::box_error::BoxError;
++
++/// Error type returned by the client.
++pub type SdkError<E, R = ::aws_smithy_runtime_api::client::orchestrator::HttpResponse> =
++    ::aws_smithy_runtime_api::client::result::SdkError<E, R>;
++pub use ::aws_smithy_runtime_api::client::result::ConnectorError;
++pub use ::aws_smithy_types::error::operation::BuildError;
++
++pub use ::aws_smithy_types::error::display::DisplayErrorContext;
++pub use ::aws_smithy_types::error::metadata::ErrorMetadata;
++pub use ::aws_smithy_types::error::metadata::ProvideErrorMetadata;
++
++pub(crate) mod sealed_unhandled;
+diff --git b/TestModels/Union/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/Union/runtimes/rust/src/error/sealed_unhandled.rs
+new file mode 100644
+index 00000000..9d21fbd6
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/error/sealed_unhandled.rs
+@@ -0,0 +1,22 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++/// This struct is not intended to be used.
++///
++/// This struct holds information about an unhandled error,
++/// but that information should be obtained by using the
++/// [`ProvideErrorMetadata`](::aws_smithy_types::error::metadata::ProvideErrorMetadata) trait
++/// on the error type.
++///
++/// This struct intentionally doesn't yield any useful information itself.
++#[deprecated(
++    note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
++variable wildcard pattern and check `.code()`:
++ \
++&nbsp;&nbsp;&nbsp;`err if err.code() == Some(\"SpecificExceptionCode\") => { /* handle the error */ }`
++ \
++See [`ProvideErrorMetadata`](::aws_smithy_types::error::metadata::ProvideErrorMetadata) for what information is available for the error."
++)]
++#[derive(Debug)]
++pub struct Unhandled {
++    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
++    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
++}
+diff --git b/TestModels/Union/runtimes/rust/src/lib.rs a/TestModels/Union/runtimes/rust/src/lib.rs
+new file mode 100644
+index 00000000..220812c1
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/lib.rs
+@@ -0,0 +1,21 @@
++#![allow(deprecated)]
++
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++#[doc(inline)]
++pub use config::Config;
++
++pub mod client;
++
++/// Configuration for SimpleStub Service.
++pub mod config;
++
++/// Common errors and error handling utilities.
++pub mod error;
++
++/// All operations that this crate can perform.
++pub mod operation;
++
++mod conversions;
++
++pub use client::Client;
+diff --git b/TestModels/Union/runtimes/rust/src/operation.rs a/TestModels/Union/runtimes/rust/src/operation.rs
+new file mode 100644
+index 00000000..1157a9b9
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/operation.rs
+@@ -0,0 +1,4 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++/// Types for the `GetStub` operation.
++pub mod get_stub;
+diff --git b/TestModels/Union/runtimes/rust/src/operation/get_stub.rs a/TestModels/Union/runtimes/rust/src/operation/get_stub.rs
+new file mode 100644
+index 00000000..99e79719
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/operation/get_stub.rs
+@@ -0,0 +1,142 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++/// Orchestration and serialization glue logic for `GetStub`.
++#[derive(::std::clone::Clone, ::std::default::Default, ::std::fmt::Debug)]
++#[non_exhaustive]
++pub struct GetStub;
++impl GetStub {
++    /// Creates a new `GetStub`
++    pub fn new() -> Self {
++        Self
++    }
++    pub(crate) async fn send(
++        handle: &crate::client::Handle,
++        input: crate::operation::get_stub::GetStubInput,
++    ) -> ::std::result::Result<
++        crate::operation::get_stub::GetStubOutput,
++        crate::operation::get_stub::GetStubError,
++    > {
++        let inner_input = crate::conversions::get_stub::_get_stub_input::to_dafny(input);
++        let inner_result = ::dafny_runtime::md!(handle.inner.clone()).GetStub(&inner_input);
++        if matches!(
++            inner_result.as_ref(),
++            ::stub_dafny::r#_Wrappers_Compile::Result::Success { .. }
++        ) {
++            Ok(crate::conversions::get_stub::_get_stub_output::from_dafny(
++                inner_result.value().clone(),
++            ))
++        } else {
++            Err(crate::conversions::get_stub::from_dafny_error(
++                inner_result.error().clone(),
++            ))
++        }
++    }
++}
++
++/// Error type for the `GetStub` operation.
++#[non_exhaustive]
++#[derive(::std::fmt::Debug)]
++pub enum GetStubError {
++    /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
++    #[deprecated(
++        note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
++    variable wildcard pattern and check `.code()`:
++     \
++    &nbsp;&nbsp;&nbsp;`err if err.code() == Some(\"SpecificExceptionCode\") => { /* handle the error */ }`
++     \
++    See [`ProvideErrorMetadata`](#impl-ProvideErrorMetadata-for-GetStubError) for what information is available for the error."
++    )]
++    Unhandled(crate::error::sealed_unhandled::Unhandled),
++}
++impl GetStubError {
++    /// Creates the `GetStubError::Unhandled` variant from any error type.
++    pub fn unhandled(
++        err: impl ::std::convert::Into<
++            ::std::boxed::Box<
++                dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
++            >,
++        >,
++    ) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source: err.into(),
++            meta: ::std::default::Default::default(),
++        })
++    }
++
++    /// Creates the `GetStubError::Unhandled` variant from an [`ErrorMetadata`](::aws_smithy_types::error::ErrorMetadata).
++    pub fn generic(err: ::aws_smithy_types::error::ErrorMetadata) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source: err.clone().into(),
++            meta: err,
++        })
++    }
++    ///
++    /// Returns error metadata, which includes the error code, message,
++    /// request ID, and potentially additional information.
++    ///
++    pub fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
++        match self {
++            Self::Unhandled(e) => &e.meta,
++        }
++    }
++}
++impl ::std::error::Error for GetStubError {
++    fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
++        match self {
++            Self::Unhandled(_inner) => ::std::option::Option::Some(&*_inner.source),
++        }
++    }
++}
++impl ::std::fmt::Display for GetStubError {
++    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
++        match self {
++            Self::Unhandled(_inner) => {
++                if let ::std::option::Option::Some(code) =
++                    ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
++                {
++                    write!(f, "unhandled error ({code})")
++                } else {
++                    f.write_str("unhandled error")
++                }
++            }
++        }
++    }
++}
++impl ::aws_smithy_types::retry::ProvideErrorKind for GetStubError {
++    fn code(&self) -> ::std::option::Option<&str> {
++        ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
++    }
++    fn retryable_error_kind(&self) -> ::std::option::Option<::aws_smithy_types::retry::ErrorKind> {
++        ::std::option::Option::None
++    }
++}
++impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for GetStubError {
++    fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
++        match self {
++            Self::Unhandled(_inner) => &_inner.meta,
++        }
++    }
++}
++impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetStubError {
++    fn create_unhandled_error(
++        source: ::std::boxed::Box<
++            dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
++        >,
++        meta: ::std::option::Option<::aws_smithy_types::error::ErrorMetadata>,
++    ) -> Self {
++        Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
++            source,
++            meta: meta.unwrap_or_default(),
++        })
++    }
++}
++
++pub use crate::operation::get_stub::_get_stub_output::GetStubOutput;
++
++pub use crate::operation::get_stub::_get_stub_input::GetStubInput;
++
++mod _get_stub_input;
++
++mod _get_stub_output;
++
++/// Builders
++pub mod builders;
+diff --git b/TestModels/Union/runtimes/rust/src/operation/get_stub/_get_stub_input.rs a/TestModels/Union/runtimes/rust/src/operation/get_stub/_get_stub_input.rs
+new file mode 100644
+index 00000000..8f37fcc8
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/operation/get_stub/_get_stub_input.rs
+@@ -0,0 +1,54 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(missing_docs)] // documentation missing in model
++#[non_exhaustive]
++#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
++pub struct GetStubInput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub value: ::std::option::Option<crate::Stub>,
++}
++impl GetStubInput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn message(&self) -> ::std::option::Option<crate::Stub> {
++        self.value
++    }
++}
++impl GetStubInput {
++    /// Creates a new builder-style object to manufacture [`GetStubInput`](crate::operation::operation::GetStubInput).
++    pub fn builder() -> crate::operation::get_stub::builders::GetStubInputBuilder {
++        crate::operation::get_stub::builders::GetStubInputBuilder::default()
++    }
++}
++
++/// A builder for [`GetStubInput`](crate::operation::operation::GetStubInput).
++#[non_exhaustive]
++#[derive(
++    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
++)]
++pub struct GetStubInputBuilder {
++    pub(crate) value: ::std::option::Option<crate::Stub>,
++}
++impl GetStubInputBuilder {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(mut self, input: impl ::std::convert::Into<crate::Stub>) -> Self {
++        self.value = ::std::option::Option::Some(input.into());
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(mut self, input: ::std::option::Option<crate::Stub>) -> Self {
++        self.value = input;
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<crate::Stub> {
++        &self.value
++    }
++    /// Consumes the builder and constructs a [`GetStubInput`](crate::operation::operation::GetStubInput).
++    pub fn build(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_stub::GetStubInput,
++        ::aws_smithy_types::error::operation::BuildError,
++    > {
++        ::std::result::Result::Ok(crate::operation::get_stub::GetStubInput { value: self.value })
++    }
++}
+diff --git b/TestModels/Union/runtimes/rust/src/operation/get_stub/_get_stub_output.rs a/TestModels/Union/runtimes/rust/src/operation/get_stub/_get_stub_output.rs
+new file mode 100644
+index 00000000..9324808a
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/operation/get_stub/_get_stub_output.rs
+@@ -0,0 +1,60 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(missing_docs)] // documentation missing in model
++#[non_exhaustive]
++#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
++pub struct GetStubOutput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub value: ::std::option::Option<crate::Stub>,
++}
++
++impl GetStubOutput {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(&self) -> ::std::option::Option<crate::Stub> {
++        self.value
++    }
++}
++
++impl GetStubOutput {
++    /// Creates a new builder-style object to manufacture [`GetStubOutput`](crate::operation::operation::GetStubOutput).
++    pub fn builder() -> crate::operation::get_stub::builders::GetStubOutputBuilder {
++        crate::operation::get_stub::builders::GetStubOutputBuilder::default()
++    }
++}
++
++/// A builder for [`GetStubOutput`](crate::operation::operation::GetStubOutput).
++#[non_exhaustive]
++#[derive(
++    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
++)]
++pub struct GetStubOutputBuilder {
++    pub(crate) value: ::std::option::Option<crate::Stub>,
++}
++
++impl GetStubOutputBuilder {
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(mut self, input: impl ::std::convert::Into<stub_dafny::Stub>) -> Self {
++        self.value = ::std::option::Option::Some(input.into());
++        self
++    }
++
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(mut self, input: ::std::option::Option<stub_dafny::Stub>) -> Self {
++        self.value = input;
++        self
++    }
++
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<stub_dafny::Stub> {
++        &self.value
++    }
++
++    /// Consumes the builder and constructs a [`GetStubOutput`](crate::operation::operation::GetStubOutput).
++    pub fn build(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_stub::GetStubOutput,
++        ::aws_smithy_types::error::operation::BuildError,
++    > {
++        ::std::result::Result::Ok(crate::operation::get_stub::GetStubOutput { value: self.value })
++    }
++}
+diff --git b/TestModels/Union/runtimes/rust/src/operation/get_stub/builders.rs a/TestModels/Union/runtimes/rust/src/operation/get_stub/builders.rs
+new file mode 100644
+index 00000000..06452060
+--- /dev/null
++++ a/TestModels/Union/runtimes/rust/src/operation/get_stub/builders.rs
+@@ -0,0 +1,89 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++pub use crate::operation::get_stub::_get_stub_output::GetStubOutputBuilder;
++
++pub use crate::operation::get_stub::_get_stub_input::GetStubInputBuilder;
++
++impl GetStubInputBuilder {
++    /// Sends a request with this input using the given client.
++    pub async fn send_with(
++        self,
++        client: &crate::Client,
++    ) -> ::std::result::Result<
++        crate::operation::get_stub::GetStubOutput,
++        crate::operation::get_stub::GetStubError,
++    > {
++        let mut fluent_builder = client.get_stub();
++        fluent_builder.inner = self;
++        fluent_builder.send().await
++    }
++}
++/// Fluent builder constructing a request to `GetStub`.
++///
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct GetStubFluentBuilder {
++    handle: ::std::sync::Arc<crate::client::Handle>,
++    inner: crate::operation::get_stub::builders::GetStubInputBuilder,
++    config_override: ::std::option::Option<crate::config::Builder>,
++}
++impl GetStubFluentBuilder {
++    /// Creates a new `GetStub`.
++    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
++        Self {
++            handle,
++            inner: ::std::default::Default::default(),
++            config_override: ::std::option::Option::None,
++        }
++    }
++    /// Access the GetStub as a reference.
++    pub fn as_input(&self) -> &crate::operation::get_stub::builders::GetStubInputBuilder {
++        &self.inner
++    }
++    /// Sends the request and returns the response.
++    pub async fn send(
++        self,
++    ) -> ::std::result::Result<
++        crate::operation::get_stub::GetStubOutput,
++        crate::operation::get_stub::GetStubError,
++    > {
++        let input = self
++            .inner
++            .build()
++            // Using unhandled since GetStub doesn't declare any validation,
++            // and smithy-rs seems to not generate a ValidationError case unless there is
++            // (but isn't that a backwards compatibility problem for output structures?)
++            // Vanilla smithy-rs uses SdkError::construction_failure,
++            // but we aren't using SdkError.
++            .map_err(crate::operation::get_stub::GetStubError::unhandled)?;
++        crate::operation::get_stub::GetStub::send(&self.handle, input).await
++    }
++
++    pub(crate) fn config_override(
++        mut self,
++        config_override: impl Into<crate::config::Builder>,
++    ) -> Self {
++        self.set_config_override(Some(config_override.into()));
++        self
++    }
++
++    pub(crate) fn set_config_override(
++        &mut self,
++        config_override: Option<crate::config::Builder>,
++    ) -> &mut Self {
++        self.config_override = config_override;
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn value(mut self, input: impl ::std::convert::Into<crate::Stub>) -> Self {
++        self.inner = self.inner.value(input.into());
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn set_value(mut self, input: ::std::option::Option<crate::Stub>) -> Self {
++        self.inner = self.inner.set_value(input);
++        self
++    }
++    #[allow(missing_docs)] // documentation missing in model
++    pub fn get_value(&self) -> &::std::option::Option<crate::Stub> {
++        self.inner.get_value()
++    }
++}
