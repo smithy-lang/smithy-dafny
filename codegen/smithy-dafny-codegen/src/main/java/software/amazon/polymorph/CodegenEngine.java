@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -73,7 +74,7 @@ public class CodegenEngine {
   private final Optional<Path> includeDafnyFile;
   private final boolean awsSdkStyle;
   private final boolean localServiceTest;
-  private final boolean generateEverything;
+  private final Set<GenerationAspect> generationAspects;
 
   // To be initialized in constructor
   private final Model model;
@@ -97,7 +98,7 @@ public class CodegenEngine {
     final Optional<Path> includeDafnyFile,
     final boolean awsSdkStyle,
     final boolean localServiceTest,
-    final boolean generateEverything,
+    final Set<GenerationAspect> generationAspects,
     final Path libraryRoot,
     final Optional<Path> patchFilesDir,
     final boolean updatePatchFiles
@@ -114,7 +115,7 @@ public class CodegenEngine {
     this.includeDafnyFile = includeDafnyFile;
     this.awsSdkStyle = awsSdkStyle;
     this.localServiceTest = localServiceTest;
-    this.generateEverything = generateEverything;
+    this.generationAspects = generationAspects;
     this.libraryRoot = libraryRoot;
     this.patchFilesDir = patchFilesDir;
     this.updatePatchFiles = updatePatchFiles;
@@ -135,6 +136,7 @@ public class CodegenEngine {
    * and idempotent with respect to the file system.
    */
   public void run() {
+    System.out.println(generationAspects);
     try {
       LOGGER.debug("Ensuring target-language output directories exist");
       for (final Path dir : this.targetLangOutputDirs.values()) {
@@ -222,7 +224,7 @@ public class CodegenEngine {
       LOGGER.info("Dafny code generated in {}", outputDir);
     }
 
-    if (generateEverything) {
+    if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
       dafnyProjectFiles(outputDir);
     }
 
@@ -288,22 +290,23 @@ public class CodegenEngine {
       );
     } else {
       IOUtils.writeTemplatedFile(
-        getClass(),
-        libraryRoot,
-        "src/$forLocalService:LIndex.dfy",
-        parameters
+              getClass(),
+              libraryRoot,
+              "src/$forLocalService:LIndex.dfy",
+              parameters
       );
       if (localServiceTest) {
         IOUtils.writeTemplatedFile(
-          getClass(),
-          libraryRoot,
-          "src/Wrapped$service:LImpl.dfy",
-          parameters
+                getClass(),
+                libraryRoot,
+                "src/Wrapped$service:LImpl.dfy",
+                parameters
         );
       }
 
-      // TODO: This is more questionable, because it's only an initial start, not expected to be permanently generated.
-      generateDafnySkeleton(outputDir);
+      if (generationAspects.contains(GenerationAspect.IMPL_STUB)) {
+        generateDafnySkeleton(outputDir);
+      }
     }
 
     // TODO: It would be great to generate the Makefile too,
@@ -350,7 +353,7 @@ public class CodegenEngine {
     } else {
       javaLocalService(outputDir, testOutputDir);
     }
-    if (this.generateEverything) {
+    if (this.generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
       javaProjectFiles();
     }
 
@@ -517,7 +520,7 @@ public class CodegenEngine {
     } else {
       netLocalService(outputDir);
     }
-    if (this.generateEverything) {
+    if (this.generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
       netProjectFiles();
     }
 
@@ -796,7 +799,7 @@ public class CodegenEngine {
     private Path includeDafnyFile;
     private boolean awsSdkStyle = false;
     private boolean localServiceTest = false;
-    private boolean generateEverything = false;
+    private Set<GenerationAspect> generationAspects = Collections.emptySet();
     private Path libraryRoot;
     private Path patchFilesDir;
     private boolean updatePatchFiles = false;
@@ -908,12 +911,11 @@ public class CodegenEngine {
     }
 
     /**
-     * Sets whether codegen will generate project files,
-     * including a Makefile, target-language specific build configuration,
-     * and generatable externs.
+     * Sets which aspects will be generated, such as project files.
+     * See also {@link GenerationAspect}.
      */
-    public Builder withGenerateEverything(final boolean generateEverything) {
-      this.generateEverything = generateEverything;
+    public Builder withGenerationAspects(final Set<GenerationAspect> generationAspects) {
+      this.generationAspects = generationAspects;
       return this;
     }
 
@@ -1033,7 +1035,7 @@ public class CodegenEngine {
         includeDafnyFile,
         this.awsSdkStyle,
         this.localServiceTest,
-        this.generateEverything,
+        this.generationAspects,
         libraryRoot,
         patchFilesDir,
         updatePatchFiles
@@ -1046,5 +1048,15 @@ public class CodegenEngine {
     JAVA,
     DOTNET,
     RUST,
+  }
+
+  public enum GenerationAspect {
+    PROJECT_FILES,
+    CLIENT_EXTERNS,
+    IMPL_STUB;
+
+    public static GenerationAspect FromOption(String option) {
+      return GenerationAspect.valueOf(option.replace("-", "_").toUpperCase());
+    }
   }
 }

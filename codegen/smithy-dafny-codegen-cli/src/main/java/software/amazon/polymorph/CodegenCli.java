@@ -6,10 +6,12 @@ package software.amazon.polymorph;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -115,7 +117,7 @@ public class CodegenCli {
       .withLocalServiceTest(cliArguments.localServiceTest)
       .withDafnyVersion(cliArguments.dafnyVersion)
       .withUpdatePatchFiles(cliArguments.updatePatchFiles)
-      .withGenerateEverything(cliArguments.generateEverything);
+      .withGenerationAspects(cliArguments.generationAspects);
     cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
     cliArguments.javaAwsSdkVersion.ifPresent(
       engineBuilder::withJavaAwsSdkVersion
@@ -280,10 +282,11 @@ public class CodegenCli {
       .addOption(
         Option
           .builder()
-          .longOpt("generate-everything")
+          .longOpt("generate")
           .desc(
-            "<optional> generate complete projects, include project files and other auxillary code files"
+            "<optional> optional aspects to generate"
           )
+          .hasArgs()
           .build()
       );
   }
@@ -310,7 +313,7 @@ public class CodegenCli {
     boolean localServiceTest,
     Optional<Path> patchFilesDir,
     boolean updatePatchFiles,
-    boolean generateEverything
+    Set<CodegenEngine.GenerationAspect> generationAspects
   ) {
     /**
      * @param args arguments to parse
@@ -406,9 +409,13 @@ public class CodegenCli {
         "update-patch-files"
       );
 
-      final boolean generateEverything = commandLine.hasOption(
-        "generate-everything"
-      );
+      final String[] generationAspectOptions =
+              Optional.ofNullable(commandLine.getOptionValues("generate"))
+                      .orElse(new String[0]);
+      final Set<CodegenEngine.GenerationAspect> generationAspects =
+              Arrays.stream(generationAspectOptions)
+                    .map(CodegenEngine.GenerationAspect::FromOption)
+                    .collect(Collectors.toSet());
 
       return Optional.of(
         new CliArguments(
@@ -429,7 +436,7 @@ public class CodegenCli {
           localServiceTest,
           patchFilesDir,
           updatePatchFiles,
-          generateEverything
+          generationAspects
         )
       );
     }
