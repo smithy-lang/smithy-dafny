@@ -114,7 +114,9 @@ impl ::aws_smithy_types::retry::ProvideErrorKind for GetEnumSecondKnownValueTest
         ::std::option::Option::None
     }
 }
-impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for GetEnumSecondKnownValueTestError {
+impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata
+    for GetEnumSecondKnownValueTestError
+{
     fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
         match self {
             Self::Unhandled(_inner) => &_inner.meta,
