@@ -20,4 +20,4 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # DEPENDENT-MODELS:= 
 
 
-POLYMORPH_OPTIONS=--generate client-externs --generate project-files --generate impl-stub
+POLYMORPH_OPTIONS=--generate client-externs --generate project-files
