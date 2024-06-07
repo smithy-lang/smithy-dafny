@@ -52,8 +52,6 @@ jobs:
             TestModels/aws-sdks/kms,
             TestModels/aws-sdks/lakeformation,
             TestModels/aws-sdks/sqs-via-cli,
-            TestModels/aws-sdks/lakeformation,
-            TestModels/aws-sdks/glue,
           ]
         dotnet-version: ["6.0.x"]
         os: [ubuntu-latest]

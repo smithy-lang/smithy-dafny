@@ -1,7 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 using Amazon;
-using Amazon.$service:L;
+using Amazon.$sdkID:L;
 using Wrappers_Compile;
 using Amazon.Runtime;
 using $namespace:L;
@@ -14,7 +14,7 @@ namespace $dafnyNamespace:L
   {
     public static
         _IResult<
-            types.I$service:LClient,
+            types.I$sdkID:LClient,
             types._IError
         >
         $sdkID:LClient()
