@@ -138,7 +138,6 @@ public class CodegenEngine {
    * and idempotent with respect to the file system.
    */
   public void run() {
-    System.out.println(generationAspects);
     try {
       LOGGER.debug("Ensuring target-language output directories exist");
       for (final Path dir : this.targetLangOutputDirs.values()) {
@@ -476,9 +475,7 @@ public class CodegenEngine {
     } else {
       netLocalService(outputDir);
     }
-    if (this.generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
-      netOtherGeneratedAspects();
-    }
+    netOtherGeneratedAspects();
 
     Path dotnetRoot = libraryRoot.resolve("runtimes").resolve("net");
     LOGGER.info("Formatting .NET code in {}", dotnetRoot);
@@ -582,9 +579,7 @@ public class CodegenEngine {
         .expectTrait(LocalServiceTrait.class)
         .getConfigId()
         .getName();
-      final String configConversionMethod = awsSdkStyle
-        ? null
-        : DotNetNameResolver.typeConverterForShape(
+      final String configConversionMethod = DotNetNameResolver.typeConverterForShape(
           serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(),
           TypeConversionDirection.FROM_DAFNY
         );
