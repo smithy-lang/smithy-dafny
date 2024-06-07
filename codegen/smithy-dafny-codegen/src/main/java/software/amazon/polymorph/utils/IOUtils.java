@@ -100,8 +100,8 @@ public class IOUtils {
     }
 
     IOUtils.writeToFile(content, outputPath.toFile());
-    LOGGER.info(
-            "Additional templated content written to {}", outputPath
+    System.out.println(
+            "Additional templated content written to " + outputPath
             );
   }
 
