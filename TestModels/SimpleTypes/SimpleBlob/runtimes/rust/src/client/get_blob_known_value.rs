@@ -11,7 +11,7 @@ impl super::Client {
         &self,
     ) -> crate::operation::get_blob_known_value::builders::GetBlobKnownValueFluentBuilder {
         crate::operation::get_blob_known_value::builders::GetBlobKnownValueFluentBuilder::new(
-            self.handle.clone(),
+            self.clone(),
         )
     }
 }

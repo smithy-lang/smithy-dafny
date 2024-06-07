@@ -21,17 +21,15 @@ impl GetStringKnownValueInputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetStringKnownValueFluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::Client,
     inner: crate::operation::get_string_known_value::builders::GetStringKnownValueInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
 impl GetStringKnownValueFluentBuilder {
     /// Creates a new `GetStringKnownValue`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetStringKnownValue as a reference.
@@ -58,25 +56,10 @@ impl GetStringKnownValueFluentBuilder {
             .map_err(
                 crate::operation::get_string_known_value::GetStringKnownValueError::unhandled,
             )?;
-        crate::operation::get_string_known_value::GetStringKnownValue::send(&self.handle, input)
+        crate::operation::get_string_known_value::GetStringKnownValue::send(&self.client, input)
             .await
     }
 
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.inner = self.inner.value(input.into());
