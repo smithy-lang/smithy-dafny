@@ -1,0 +1,5 @@
+# Codegen templates (often not parsable)
+codegen/smithy-dafny-codegen/src/main/resources/templates/**/*.*
+
+# Build folders (faster to ignore tons of irrelevant files)
+**/runtimes/rust/target/debug/**/*.*
