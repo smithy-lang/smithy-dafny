@@ -290,16 +290,18 @@ public class CodegenEngine {
     // to invoke polymorph in the first place.
     // Perhaps we can make a `smithy init` template for that instead?
 
-    Path srcDir = outputDir.resolve("../src");
-    LOGGER.info("Formatting Dafny code in {}", srcDir);
-    runCommand(
-      srcDir,
-      "dafny",
-      "format",
-      "--function-syntax:3",
-      "--unicode-char:false",
-      "."
-    );
+    if (!generationAspects.isEmpty()) {
+      Path srcDir = outputDir.resolve("../src");
+      LOGGER.info("Formatting Dafny code in {}", srcDir);
+      runCommand(
+              srcDir,
+              "dafny",
+              "format",
+              "--function-syntax:3",
+              "--unicode-char:false",
+              "."
+      );
+    }
   }
 
   /**
