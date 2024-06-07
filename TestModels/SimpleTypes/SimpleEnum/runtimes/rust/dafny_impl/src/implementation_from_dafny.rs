@@ -103,12 +103,26 @@ pub mod r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes {
     #[derive(PartialEq, Clone)]
     pub enum GetEnumInput {
         GetEnumInput {
-            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape>>,
+            value: ::std::rc::Rc<
+                super::r#_Wrappers_Compile::Option<
+                    ::std::rc::Rc<
+                        super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape,
+                    >,
+                >,
+            >,
         },
     }
 
     impl GetEnumInput {
-        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape>> {
+        pub fn value(
+            &self,
+        ) -> &::std::rc::Rc<
+            super::r#_Wrappers_Compile::Option<
+                ::std::rc::Rc<
+                    super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape,
+                >,
+            >,
+        > {
             match self {
                 GetEnumInput::GetEnumInput { value } => value,
             }
@@ -165,12 +179,26 @@ pub mod r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes {
     #[derive(PartialEq, Clone)]
     pub enum GetEnumOutput {
         GetEnumOutput {
-            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape>>,
+            value: ::std::rc::Rc<
+                super::r#_Wrappers_Compile::Option<
+                    ::std::rc::Rc<
+                        super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape,
+                    >,
+                >,
+            >,
         },
     }
 
     impl GetEnumOutput {
-        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape>> {
+        pub fn value(
+            &self,
+        ) -> &::std::rc::Rc<
+            super::r#_Wrappers_Compile::Option<
+                ::std::rc::Rc<
+                    super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape,
+                >,
+            >,
+        > {
             match self {
                 GetEnumOutput::GetEnumOutput { value } => value,
             }
@@ -574,7 +602,7 @@ pub mod r#_SimpleEnumImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {}) {
+            if !(input.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {})) {
         panic!("Halt")
       };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
@@ -589,7 +617,7 @@ pub mod r#_SimpleEnumImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {}) {
+            if !(res.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {})) {
         panic!("Halt")
       };
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
@@ -625,7 +653,7 @@ pub mod r#_SimpleEnumImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {}) {
+            if !(input.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {})) {
         panic!("Halt")
       };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
@@ -640,7 +668,7 @@ pub mod r#_SimpleEnumImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {}) {
+            if !(res.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {})) {
         panic!("Halt")
       };
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
@@ -676,7 +704,7 @@ pub mod r#_SimpleEnumImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            if !(input.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {}) {
+            if !(input.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {})) {
         panic!("Halt")
       };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
@@ -691,7 +719,7 @@ pub mod r#_SimpleEnumImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            if !(res.value().value().clone() == super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {}) {
+            if !(res.value().value().clone() == ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {})) {
         panic!("Halt")
       };
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(

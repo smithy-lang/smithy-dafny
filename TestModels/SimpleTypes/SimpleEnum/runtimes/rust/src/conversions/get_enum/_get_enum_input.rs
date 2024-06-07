@@ -7,7 +7,9 @@ pub fn to_dafny(
 > {
     let dafny_value = match value.value {
         Some(v) => ::simple_enum_dafny::_Wrappers_Compile::Option::Some {
-            value: crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(v),
+            value: ::std::rc::Rc::new(
+                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&v),
+            ),
         },
         None => ::simple_enum_dafny::_Wrappers_Compile::Option::None {},
     };
@@ -28,7 +30,7 @@ pub fn from_dafny(
     ) {
         Some(
             crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
-                dafny_value.value().Extract(),
+                &*dafny_value.value().Extract(),
             ),
         )
     } else if matches!(
