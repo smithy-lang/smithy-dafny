@@ -17,7 +17,8 @@ impl GetEnumV2FirstKnownValueTest {
     > {
         let inner_input =
             crate::conversions::get_enum_v2_first_known_value_test::_get_enum_v2_first_known_value_test_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetEnumV2(&inner_input);
+        let inner_result =
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetEnumV2(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_enum_v2_dafny::r#_Wrappers_Compile::Result::Success { .. }
@@ -114,7 +115,9 @@ impl ::aws_smithy_types::retry::ProvideErrorKind for GetEnumV2FirstKnownValueTes
         ::std::option::Option::None
     }
 }
-impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for GetEnumV2FirstKnownValueTestError {
+impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata
+    for GetEnumV2FirstKnownValueTestError
+{
     fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
         match self {
             Self::Unhandled(_inner) => &_inner.meta,

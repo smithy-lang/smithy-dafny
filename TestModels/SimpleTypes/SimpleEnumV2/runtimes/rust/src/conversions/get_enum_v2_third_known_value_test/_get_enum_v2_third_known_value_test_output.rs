@@ -41,5 +41,7 @@ pub fn from_dafny(
     } else {
         panic!("Unreachable")
     };
-    crate::operation::get_enum_v2_third_known_value_test::GetEnumV2ThirdKnownValueTestOutput { value }
+    crate::operation::get_enum_v2_third_known_value_test::GetEnumV2ThirdKnownValueTestOutput {
+        value,
+    }
 }

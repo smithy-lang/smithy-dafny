@@ -7,9 +7,14 @@ pub fn to_dafny_error(
     value: crate::operation::get_enum_v2::GetEnumV2Error,
 ) -> ::std::rc::Rc<::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error> {
     match value {
-    crate::operation::get_enum_v2::GetEnumV2Error::Unhandled(unhandled) =>
-      ::std::rc::Rc::new(::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
-  }
+        crate::operation::get_enum_v2::GetEnumV2Error::Unhandled(unhandled) => ::std::rc::Rc::new(
+            ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque {
+                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
+                    ::dafny_runtime::object::new(unhandled),
+                ),
+            },
+        ),
+    }
 }
 
 #[allow(dead_code)]

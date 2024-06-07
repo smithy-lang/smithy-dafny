@@ -60,6 +60,8 @@ impl GetEnumV2InputBuilder {
         crate::operation::get_enum_v2::GetEnumV2Input,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_enum_v2::GetEnumV2Input { value: self.value })
+        ::std::result::Result::Ok(crate::operation::get_enum_v2::GetEnumV2Input {
+            value: self.value,
+        })
     }
 }

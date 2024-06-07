@@ -10,7 +10,9 @@ pub struct GetEnumV2Output {
 
 impl GetEnumV2Output {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(&self) -> ::std::option::Option<crate::types::simple_enum_v2_shape::SimpleEnumV2Shape> {
+    pub fn value(
+        &self,
+    ) -> ::std::option::Option<crate::types::simple_enum_v2_shape::SimpleEnumV2Shape> {
         self.value
     }
 }
@@ -64,6 +66,8 @@ impl GetEnumV2OutputBuilder {
         crate::operation::get_enum_v2::GetEnumV2Output,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_enum_v2::GetEnumV2Output { value: self.value })
+        ::std::result::Result::Ok(crate::operation::get_enum_v2::GetEnumV2Output {
+            value: self.value,
+        })
     }
 }

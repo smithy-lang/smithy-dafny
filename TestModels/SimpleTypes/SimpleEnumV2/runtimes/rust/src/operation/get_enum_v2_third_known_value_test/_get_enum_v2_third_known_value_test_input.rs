@@ -8,7 +8,9 @@ pub struct GetEnumV2ThirdKnownValueTestInput {
 }
 impl GetEnumV2ThirdKnownValueTestInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(&self) -> ::std::option::Option<crate::types::simple_enum_v2_shape::SimpleEnumV2Shape> {
+    pub fn value(
+        &self,
+    ) -> ::std::option::Option<crate::types::simple_enum_v2_shape::SimpleEnumV2Shape> {
         self.value
     }
 }

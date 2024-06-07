@@ -16,14 +16,17 @@ impl GetEnumV2 {
         crate::operation::get_enum_v2::GetEnumV2Error,
     > {
         let inner_input = crate::conversions::get_enum_v2::_get_enum_v2_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetEnumV2(&inner_input);
+        let inner_result =
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetEnumV2(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_enum_v2_dafny::r#_Wrappers_Compile::Result::Success { .. }
         ) {
-            Ok(crate::conversions::get_enum_v2::_get_enum_v2_output::from_dafny(
-                inner_result.value().clone(),
-            ))
+            Ok(
+                crate::conversions::get_enum_v2::_get_enum_v2_output::from_dafny(
+                    inner_result.value().clone(),
+                ),
+            )
         } else {
             Err(crate::conversions::get_enum_v2::from_dafny_error(
                 inner_result.error().clone(),

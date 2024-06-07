@@ -17,7 +17,8 @@ impl GetEnumV2SecondKnownValueTest {
     > {
         let inner_input =
             crate::conversions::get_enum_v2_second_known_value_test::_get_enum_v2_second_known_value_test_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetEnumV2(&inner_input);
+        let inner_result =
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetEnumV2(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_enum_v2_dafny::r#_Wrappers_Compile::Result::Success { .. }
