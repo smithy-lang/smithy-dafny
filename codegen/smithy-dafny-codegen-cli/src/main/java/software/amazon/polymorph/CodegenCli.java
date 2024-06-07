@@ -285,7 +285,7 @@ public class CodegenCli {
           .longOpt("generate")
           .desc(
             "<optional> optional aspects to generate. Available aspects:\n" +
-                    CodegenEngine.GenerationAspect.helpText()
+            CodegenEngine.GenerationAspect.helpText()
           )
           .hasArgs()
           .build()
@@ -410,13 +410,13 @@ public class CodegenCli {
         "update-patch-files"
       );
 
-      final String[] generationAspectOptions =
-              Optional.ofNullable(commandLine.getOptionValues("generate"))
-                      .orElse(new String[0]);
-      final Set<CodegenEngine.GenerationAspect> generationAspects =
-              Arrays.stream(generationAspectOptions)
-                    .map(CodegenEngine.GenerationAspect::fromOption)
-                    .collect(Collectors.toSet());
+      final String[] generationAspectOptions = Optional
+        .ofNullable(commandLine.getOptionValues("generate"))
+        .orElse(new String[0]);
+      final Set<CodegenEngine.GenerationAspect> generationAspects = Arrays
+        .stream(generationAspectOptions)
+        .map(CodegenEngine.GenerationAspect::fromOption)
+        .collect(Collectors.toSet());
 
       return Optional.of(
         new CliArguments(

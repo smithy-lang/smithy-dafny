@@ -75,9 +75,12 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
       .withTargetLangOutputDirs(outputDirs)
       .withAwsSdkStyle(true) // this plugin only generates AWS SDK-style code
       .withIncludeDafnyFile(settings.includeDafnyFile)
-      .withGenerationAspects(EnumSet.of(
-              CodegenEngine.GenerationAspect.PROJECT_FILES,
-              CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS))
+      .withGenerationAspects(
+        EnumSet.of(
+          CodegenEngine.GenerationAspect.PROJECT_FILES,
+          CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS
+        )
+      )
       .build();
     codegenEngine.run();
   }

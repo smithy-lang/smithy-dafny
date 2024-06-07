@@ -22,8 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -194,12 +192,7 @@ public class CodegenEngine {
       "dafnyVersion",
       dafnyVersionString
     );
-    IOUtils.writeTemplatedFile(
-      getClass(),
-      libraryRoot,
-      "project.properties",
-      parameters
-    );
+    writeTemplatedFile("project.properties", parameters);
   }
 
   private void generateDafny(final Path outputDir) {
@@ -228,9 +221,7 @@ public class CodegenEngine {
       LOGGER.info("Dafny code generated in {}", outputDir);
     }
 
-    if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
-      dafnyProjectFiles(outputDir);
-    }
+    dafnyOtherGeneratedAspects(outputDir);
 
     LOGGER.info("Formatting Dafny code in {}", outputDir);
     runCommand(
@@ -245,18 +236,12 @@ public class CodegenEngine {
     handlePatching(TargetLanguage.DAFNY, outputDir);
   }
 
-  private void dafnyProjectFiles(final Path outputDir) {
+  private void dafnyOtherGeneratedAspects(final Path outputDir) {
     final String service = serviceShape.getId().getName();
     final String namespace = serviceShape.getId().getNamespace();
     final String sdkID = awsSdkStyle
       ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
       : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
-    final String serviceConfig = awsSdkStyle
-            ? null
-            : serviceShape
-            .expectTrait(LocalServiceTrait.class)
-            .getConfigId()
-            .getName();
     final String dafnyNamespace =
       DafnyNameResolverHelpers.packageNameForNamespace(
         serviceShape.getId().getNamespace()
@@ -265,66 +250,38 @@ public class CodegenEngine {
       namespace
     );
 
-    final Path includeDafnyFile =
-      this.includeDafnyFile.orElseThrow(() ->
-          new IllegalStateException(
-            "includeDafnyFile required when generating .NET project files"
-          )
-        );
-    // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
-    // TODO be smarter about finding the StandardLibrary path
-    final Path stdLibPath = libraryRoot
-      .resolve("runtimes/net")
-      .relativize(includeDafnyFile.resolve("../.."));
-
     Map<String, String> parameters = new HashMap<>();
     parameters.put("dafnyVersion", dafnyVersion.unparse());
     parameters.put("service", service);
     parameters.put("sdkID", sdkID);
-    parameters.put("serviceConfig", serviceConfig);
     parameters.put("namespace", namespace);
     parameters.put("dafnyNamespace", dafnyNamespace);
     parameters.put("dafnyModuleName", dafnyModuleName);
-    parameters.put("stdLibPath", stdLibPath.toString());
+    parameters.put("stdLibPath", standardLibraryPath().toString());
 
     if (awsSdkStyle) {
-      IOUtils.writeTemplatedFile(
-        getClass(),
-        libraryRoot,
-        "src/$forSDK:LIndex.dfy",
-        parameters
-      );
+      if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
+        writeTemplatedFile("src/$forSDK:LIndex.dfy", parameters);
+      }
     } else {
-      IOUtils.writeTemplatedFile(
-              getClass(),
-              libraryRoot,
-              "src/$forLocalService:LIndex.dfy",
-              parameters
-      );
-      if (localServiceTest) {
-        IOUtils.writeTemplatedFile(
-                getClass(),
-                libraryRoot,
-                "src/Wrapped$service:LImpl.dfy",
-                parameters
-        );
+      final String serviceConfig = serviceShape
+        .expectTrait(LocalServiceTrait.class)
+        .getConfigId()
+        .getName();
+      parameters.put("serviceConfig", serviceConfig);
+
+      if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
+        writeTemplatedFile("src/$forLocalService:LIndex.dfy", parameters);
+        if (localServiceTest) {
+          writeTemplatedFile("src/Wrapped$service:LImpl.dfy", parameters);
+        }
       }
 
       if (generationAspects.contains(GenerationAspect.IMPL_STUB)) {
         generateDafnySkeleton(outputDir);
-        IOUtils.writeTemplatedFile(
-                getClass(),
-                libraryRoot,
-                "test/$sdkID:LImplTest.dfy",
-                parameters
-        );
+        writeTemplatedFile("test/$sdkID:LImplTest.dfy", parameters);
         if (localServiceTest) {
-          IOUtils.writeTemplatedFile(
-                  getClass(),
-                  libraryRoot,
-                  "test/Wrapped$sdkID:LTest.dfy",
-                  parameters
-          );
+          writeTemplatedFile("test/Wrapped$sdkID:LTest.dfy", parameters);
         }
       }
     }
@@ -333,8 +290,6 @@ public class CodegenEngine {
     // but that's currently a catch 22 because we normally use the shared makefile targets
     // to invoke polymorph in the first place.
     // Perhaps we can make a `smithy init` template for that instead?
-
-    LOGGER.info("Dafny project files generated in {}", libraryRoot);
 
     Path srcDir = outputDir.resolve("../src");
     LOGGER.info("Formatting Dafny code in {}", srcDir);
@@ -348,6 +303,10 @@ public class CodegenEngine {
     );
   }
 
+  /**
+   * Generate a skeletal implementation of the local service operations,
+   * with `expect false` statements to ensure tests will initially fail.
+   */
   public void generateDafnySkeleton(Path outputDir) {
     final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
       model,
@@ -373,9 +332,7 @@ public class CodegenEngine {
     } else {
       javaLocalService(outputDir, testOutputDir);
     }
-    if (this.generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
-      javaProjectFiles();
-    }
+    javaOtherGeneratedAspects();
 
     LOGGER.info("Formatting Java code in {}", outputDir);
     runCommand(
@@ -453,19 +410,11 @@ public class CodegenEngine {
     LOGGER.info("Java V2 code generated in {}", outputDir);
   }
 
-  private void javaProjectFiles() {
-    final DotNetNameResolver resolver = new DotNetNameResolver(
-      model,
-      serviceShape
-    );
-    final String serviceId = resolver.clientForService();
-    final String serviceConfig = awsSdkStyle
-      ? null
-      : serviceShape
-        .expectTrait(LocalServiceTrait.class)
-        .getConfigId()
-        .getName();
+  private void javaOtherGeneratedAspects() {
     final String service = serviceShape.getId().getName();
+    final String sdkID = awsSdkStyle
+      ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
+      : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
     final String namespace = serviceShape.getId().getNamespace();
     final String namespaceDir = namespace.replace(".", "/");
 
@@ -473,63 +422,50 @@ public class CodegenEngine {
     // TODO: This should be @title, but we have to actually add that to all services first
     final String gradleDescription = service;
 
-    final Path includeDafnyFile =
-      this.includeDafnyFile.orElseThrow(() ->
-          new IllegalStateException(
-            "includeDafnyFile required when generating .NET project files"
-          )
-        );
-    // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
-    // TODO be smarter about finding the StandardLibrary path
-    final Path stdLibPath = libraryRoot
-      .resolve("runtimes/net")
-      .relativize(includeDafnyFile.resolve("../.."));
-
     Map<String, String> parameters = new HashMap<>();
     parameters.put("dafnyVersion", dafnyVersion.unparse());
-    parameters.put("serviceID", serviceId);
     parameters.put("service", service);
-    parameters.put("serviceConfig", serviceConfig);
+    parameters.put("sdkID", sdkID);
     parameters.put("namespace", namespace);
     parameters.put("namespaceDir", namespaceDir);
     parameters.put("gradleGroup", gradleGroup);
     parameters.put("gradleDescription", gradleDescription);
 
     if (awsSdkStyle) {
-      IOUtils.writeTemplatedFile(
-        getClass(),
-        libraryRoot,
-        "runtimes/java/$forSDK:Lbuild.gradle.kts",
-        parameters
-      );
-      // TODO generate sdk constructor
-    } else {
-      IOUtils.writeTemplatedFile(
-        getClass(),
-        libraryRoot,
-        "runtimes/java/$forLocalService:Lbuild.gradle.kts",
-        parameters
-      );
-      IOUtils.writeTemplatedFile(
-        getClass(),
-        libraryRoot,
-        "runtimes/java/src/main/java/Dafny/$namespaceDir:L/__default.java",
-        parameters
-      );
-      if (localServiceTest) {
-        IOUtils.writeTemplatedFile(
-          getClass(),
-          libraryRoot,
-          "runtimes/java/src/test/java/$namespaceDir:L/internaldafny/wrapped/__default.java",
+      if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
+        writeTemplatedFile(
+          "runtimes/java/$forSDK:Lbuild.gradle.kts",
           parameters
         );
       }
-    }
+      // TODO generate sdk constructor
+    } else {
+      final String serviceConfig = serviceShape
+        .expectTrait(LocalServiceTrait.class)
+        .getConfigId()
+        .getName();
+      parameters.put("serviceConfig", serviceConfig);
 
-    LOGGER.info(
-      "Java project files generated in {}/runtimes/java",
-      libraryRoot
-    );
+      if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
+        writeTemplatedFile(
+          "runtimes/java/$forLocalService:Lbuild.gradle.kts",
+          parameters
+        );
+      }
+
+      if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
+        writeTemplatedFile(
+          "runtimes/java/src/main/java/Dafny/$namespaceDir:L/__default.java",
+          parameters
+        );
+        if (localServiceTest) {
+          writeTemplatedFile(
+            "runtimes/java/src/test/java/$namespaceDir:L/internaldafny/wrapped/__default.java",
+            parameters
+          );
+        }
+      }
+    }
   }
 
   private void generateDotnet(final Path outputDir) {
@@ -541,7 +477,7 @@ public class CodegenEngine {
       netLocalService(outputDir);
     }
     if (this.generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
-      netProjectFiles();
+      netOtherGeneratedAspects();
     }
 
     Path dotnetRoot = libraryRoot.resolve("runtimes").resolve("net");
@@ -610,7 +546,7 @@ public class CodegenEngine {
     LOGGER.info(".NET code generated in {}", outputDir);
   }
 
-  private void netProjectFiles() {
+  private void netOtherGeneratedAspects() {
     final DotNetNameResolver resolver = new DotNetNameResolver(
       model,
       serviceShape
@@ -619,84 +555,61 @@ public class CodegenEngine {
     final String sdkID = awsSdkStyle
       ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
       : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
-    final String serviceConfig = awsSdkStyle
-      ? null
-      : serviceShape
-        .expectTrait(LocalServiceTrait.class)
-        .getConfigId()
-        .getName();
-    final String configConversionMethod = awsSdkStyle
-      ? null
-      : DotNetNameResolver.typeConverterForShape(
-        serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(),
-        TypeConversionDirection.FROM_DAFNY
-      );
     final String namespace = serviceShape.getId().getNamespace();
     final String dotnetNamespace = resolver.namespaceForService();
     final String dafnyNamespace =
       DafnyNameResolverHelpers.packageNameForNamespace(namespace);
     final String namespaceDir = namespace.replace(".", "/");
 
-    final Path includeDafnyFile =
-      this.includeDafnyFile.orElseThrow(() ->
-          new IllegalStateException(
-            "includeDafnyFile required when generating .NET project files"
-          )
-        );
-    // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
-    // TODO be smarter about finding the StandardLibrary path
-    final Path stdLibPath = libraryRoot
-      .resolve("runtimes/net")
-      .relativize(includeDafnyFile.resolve("../.."));
-
     Map<String, String> parameters = new HashMap<>();
     parameters.put("dafnyVersion", dafnyVersion.unparse());
     parameters.put("service", service);
     parameters.put("sdkID", sdkID);
-    parameters.put("serviceConfig", serviceConfig);
-    parameters.put("configConversionMethod", configConversionMethod);
     parameters.put("namespace", dotnetNamespace);
     parameters.put("dafnyNamespace", dafnyNamespace);
     parameters.put("namespaceDir", namespaceDir);
-    parameters.put("stdLibPath", stdLibPath.toString());
+    parameters.put("stdLibPath", standardLibraryPath().toString());
 
     if (awsSdkStyle) {
-      IOUtils.writeTemplatedFile(
-        getClass(),
-        libraryRoot,
-        "runtimes/net/$forSDK:L$sdkID:L.csproj",
-        parameters
-      );
-      IOUtils.writeTemplatedFile(
-        getClass(),
-        libraryRoot,
-        "runtimes/net/Extern/$sdkID:LClient.cs",
-        parameters
-      );
+      if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
+        writeTemplatedFile("runtimes/net/$forSDK:L$sdkID:L.csproj", parameters);
+      }
+      if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
+        writeTemplatedFile("runtimes/net/Extern/$sdkID:LClient.cs", parameters);
+      }
     } else {
-      IOUtils.writeTemplatedFile(
-        getClass(),
-        libraryRoot,
-        "runtimes/net/$forLocalService:L$sdkID:L.csproj",
-        parameters
-      );
-      if (localServiceTest) {
-        IOUtils.writeTemplatedFile(
-          getClass(),
-          libraryRoot,
-          "runtimes/net/Extern/Wrapped$sdkID:LService.cs",
+      final String serviceConfig = serviceShape
+        .expectTrait(LocalServiceTrait.class)
+        .getConfigId()
+        .getName();
+      final String configConversionMethod = awsSdkStyle
+        ? null
+        : DotNetNameResolver.typeConverterForShape(
+          serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(),
+          TypeConversionDirection.FROM_DAFNY
+        );
+      parameters.put("serviceConfig", serviceConfig);
+      parameters.put("configConversionMethod", configConversionMethod);
+
+      if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
+        writeTemplatedFile(
+          "runtimes/net/$forLocalService:L$sdkID:L.csproj",
           parameters
         );
       }
+      if (localServiceTest) {
+        if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
+          writeTemplatedFile(
+            "runtimes/net/Extern/Wrapped$sdkID:LService.cs",
+            parameters
+          );
+        }
+      }
     }
-    IOUtils.writeTemplatedFile(
-      getClass(),
-      libraryRoot,
-      "runtimes/net/tests/$sdkID:LTest.csproj",
-      parameters
-    );
 
-    LOGGER.info(".NET project files generated in {}/runtimes/net", libraryRoot);
+    if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
+      writeTemplatedFile("runtimes/net/tests/$sdkID:LTest.csproj", parameters);
+    }
   }
 
   private void generateRust(final Path outputDir) {
@@ -803,6 +716,33 @@ public class CodegenEngine {
     StringBuilder output = new StringBuilder();
     IoUtils.runCommand(argsList, workingDir, output, Collections.emptyMap());
     return output.toString();
+  }
+
+  private Path standardLibraryPath() {
+    final Path includeDafnyFile =
+      this.includeDafnyFile.orElseThrow(() ->
+          new IllegalStateException(
+            "includeDafnyFile required when generating additional aspects (--generate)"
+          )
+        );
+
+    // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
+    // TODO be smarter about finding the StandardLibrary path
+    return libraryRoot
+      .resolve("runtimes/net")
+      .relativize(includeDafnyFile.resolve("../.."));
+  }
+
+  private void writeTemplatedFile(
+    String templatePath,
+    Map<String, String> parameters
+  ) {
+    IOUtils.writeTemplatedFile(
+      getClass(),
+      libraryRoot,
+      templatePath,
+      parameters
+    );
   }
 
   public static class Builder {
@@ -936,7 +876,9 @@ public class CodegenEngine {
      * Sets which aspects will be generated, such as project files.
      * See also {@link GenerationAspect}.
      */
-    public Builder withGenerationAspects(final Set<GenerationAspect> generationAspects) {
+    public Builder withGenerationAspects(
+      final Set<GenerationAspect> generationAspects
+    ) {
       this.generationAspects = generationAspects;
       return this;
     }
@@ -1105,9 +1047,10 @@ public class CodegenEngine {
     public abstract String description();
 
     public static String helpText() {
-      return Arrays.stream(values())
-              .map(aspect -> aspect.toOption() + " - " + aspect.description())
-              .collect(Collectors.joining("\n"));
+      return Arrays
+        .stream(values())
+        .map(aspect -> aspect.toOption() + " - " + aspect.description())
+        .collect(Collectors.joining("\n"));
     }
   }
 }

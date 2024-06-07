@@ -2775,7 +2775,9 @@ public class DafnyApiCodegen {
 
   public Map<Path, TokenTree> generateSkeleton() {
     final String namespace = serviceShape.getId().getNamespace();
-    final String sdkID = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+    final String sdkID = serviceShape
+      .expectTrait(LocalServiceTrait.class)
+      .getSdkId();
     final String typesModuleName = DafnyNameResolver.dafnyTypesModuleName(
       namespace
     );
