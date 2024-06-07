@@ -27,20 +27,21 @@ jobs:
     uses: ./.github/workflows/test_models_net_tests.yml
     with:
       dafny: "nightly-latest"
-  dafny-nightly-rust:
-    if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
-    uses: ./.github/workflows/test_models_rust_tests.yml
-    with:
-      dafny: "nightly-latest"
+  # This workflow is pinned to a specific commit from a feature branch
+  # that's "ahead" of master, so there's no point in testing against nightly prereleases for now.
+  # dafny-nightly-rust:
+  #   if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
+  #   uses: ./.github/workflows/test_models_rust_tests.yml
+  #   with:
+  #     dafny: "nightly-latest"
 
   cut-issue-on-failure:
     runs-on: ubuntu-latest
-    needs:
-      [
+    needs: [
         dafny-nightly-verification,
         dafny-nightly-java,
         dafny-nightly-net,
-        dafny-nightly-rust,
+        # dafny-nightly-rust,
       ]
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     env:

@@ -5,6 +5,7 @@ package software.amazon.smithy.dafny.codegen;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -74,7 +75,12 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
       .withTargetLangOutputDirs(outputDirs)
       .withAwsSdkStyle(true) // this plugin only generates AWS SDK-style code
       .withIncludeDafnyFile(settings.includeDafnyFile)
-      .withGenerateEverything(true)
+      .withGenerationAspects(
+        EnumSet.of(
+          CodegenEngine.GenerationAspect.PROJECT_FILES,
+          CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS
+        )
+      )
       .build();
     codegenEngine.run();
   }

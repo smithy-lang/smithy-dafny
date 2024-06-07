@@ -66,23 +66,52 @@ public class IOUtils {
     }
   }
 
-  public static void writeTemplatedFile(Class<?> klass, Path rootPath, String templatePath, Map<String, String> parameters) {
-    String content = IoUtils.readUtf8Resource(klass, "/templates/" + templatePath);
+  /**
+   * Evaluate a simple template as a resource under "/templates/<templatePath>"
+   * and then write it to "<rootPath>/<templatePath>".
+   * The template path is also evaluated as a template,
+   * so the path can be customized by parameter values as well.
+   *
+   * Template parameters with no value bound become "",
+   * so they can also be used to provide more than one template
+   * for the same file.
+   *
+   * See also {@link #evalTemplate(String, Map)}.
+   */
+  public static void writeTemplatedFile(
+    Class<?> klass,
+    Path rootPath,
+    String templatePath,
+    Map<String, String> parameters
+  ) {
+    String content = IoUtils.readUtf8Resource(
+      klass,
+      "/templates/" + templatePath
+    );
 
     content = evalTemplate(content, parameters);
     templatePath = evalTemplate(templatePath, parameters);
 
     Path outputPath = rootPath.resolve(templatePath);
     try {
-        Files.createDirectories(outputPath.getParent());
+      Files.createDirectories(outputPath.getParent());
     } catch (IOException e) {
-        throw new UncheckedIOException(e);
+      throw new UncheckedIOException(e);
     }
 
     IOUtils.writeToFile(content, outputPath.toFile());
+    LOGGER.info("Additional templated content written to {}", outputPath);
   }
 
-  public static String evalTemplate(String template, Map<String, String> context) {
+  /**
+   * Evaluate a simple template using a {@link SimpleCodeWriter}.
+   * See {@link software.amazon.smithy.utils.AbstractCodeWriter} for documentation
+   * on the templating syntax.
+   */
+  public static String evalTemplate(
+    String template,
+    Map<String, String> context
+  ) {
     SimpleCodeWriter writer = new SimpleCodeWriter()
       .disableNewlines()
       .insertTrailingNewline(false);

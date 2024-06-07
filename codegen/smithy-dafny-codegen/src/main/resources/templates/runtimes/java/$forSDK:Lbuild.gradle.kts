@@ -48,7 +48,7 @@ dependencies {
     implementation("software.amazon.smithy.dafny:conversion:0.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     implementation(platform("software.amazon.awssdk:bom:2.19.1"))
-    implementation("software.amazon.awssdk:$serviceID:L")
+    implementation("software.amazon.awssdk:$sdkID:L")
 }
 
 publishing {

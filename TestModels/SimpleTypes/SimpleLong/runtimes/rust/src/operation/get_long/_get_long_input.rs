@@ -8,7 +8,7 @@ pub struct GetLongInput {
 }
 impl GetLongInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<&i64> {
+    pub fn value(&self) -> ::std::option::Option<&i64> {
         self.value.as_ref()
     }
 }
@@ -29,18 +29,12 @@ pub struct GetLongInputBuilder {
 }
 impl GetLongInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(
-        mut self,
-        input: impl ::std::convert::Into<i64>,
-    ) -> Self {
+    pub fn value(mut self, input: impl ::std::convert::Into<i64>) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(
-        mut self,
-        input: ::std::option::Option<i64>,
-    ) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<i64>) -> Self {
         self.value = input;
         self
     }

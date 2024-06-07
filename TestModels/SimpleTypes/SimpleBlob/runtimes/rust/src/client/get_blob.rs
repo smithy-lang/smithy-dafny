@@ -8,6 +8,6 @@ impl super::Client {
     ///   - [`value(Option<Blob>)`](crate::operation::get_blob::GetBlobOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetBlobError>`](crate::operation::get_blob::GetBlobError)
     pub fn get_blob(&self) -> crate::operation::get_blob::builders::GetBlobFluentBuilder {
-        crate::operation::get_blob::builders::GetBlobFluentBuilder::new(self.handle.clone())
+        crate::operation::get_blob::builders::GetBlobFluentBuilder::new(self.clone())
     }
 }
