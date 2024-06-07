@@ -510,8 +510,7 @@ public class DafnyApiCodegen {
               generateBodilessOperationMethodThatEnsuresCallEvents(
                 serviceShape,
                 operation,
-                ImplementationType.CODEGEN,
-                true
+                ImplementationType.CODEGEN
               ),
               TokenTree.empty()
             )
@@ -823,8 +822,7 @@ public class DafnyApiCodegen {
   private TokenTree generateBodilessOperationMethodThatEnsuresCallEvents(
     final ServiceShape serviceShape,
     final ShapeId operationShapeId,
-    final ImplementationType implementationType,
-    final boolean includeSpecifications
+    final ImplementationType implementationType
   ) {
     final OperationShape operationShape = model.expectShape(
       operationShapeId,
@@ -858,8 +856,9 @@ public class DafnyApiCodegen {
               .parenthesized()
           ),
         generateOperationReturnsClause(serviceShape, operationShape),
-        includeSpecifications
-          ? isFunction
+        implementationType.equals(ImplementationType.DEVELOPER)
+          ? TokenTree.empty()
+          : isFunction
             ? TokenTree.of(
               "// Functions that are transparent do not need ensures"
             )
@@ -877,7 +876,6 @@ public class DafnyApiCodegen {
               )
               .dropEmpty()
               .lineSeparated()
-          : TokenTree.empty()
       )
       .lineSeparated();
     return TokenTree
@@ -886,13 +884,17 @@ public class DafnyApiCodegen {
         // at the end of the TokenTree
         // so that other callers can compose
         // and add bodies.
-        includeSpecifications
-          ? TokenTree.of(
-            !implementationType.equals(ImplementationType.ABSTRACT)
-              ? "// The public method to be called by library consumers"
-              : "// The private method to be refined by the library developer"
-          )
-          : TokenTree.empty(),
+        TokenTree.of(
+          switch (implementationType) {
+            case CODEGEN -> TokenTree.of(
+              "// The public method to be called by library consumers"
+            );
+            case ABSTRACT -> TokenTree.of(
+              "// The private method to be refined by the library developer"
+            );
+            case DEVELOPER -> TokenTree.empty();
+          }
+        ),
         operationMethod
       )
       .lineSeparated();
@@ -913,8 +915,7 @@ public class DafnyApiCodegen {
         generateBodilessOperationMethodThatEnsuresCallEvents(
           serviceShape,
           operationShapeId,
-          ImplementationType.CODEGEN,
-          true
+          ImplementationType.CODEGEN
         ),
         // Implement this for library developer
         // This implementation will record the call outcome
@@ -1759,8 +1760,7 @@ public class DafnyApiCodegen {
                 generateBodilessOperationMethodThatEnsuresCallEvents(
                   serviceShape,
                   operation,
-                  ImplementationType.CODEGEN,
-                  true
+                  ImplementationType.CODEGEN
                 ),
                 TokenTree
                   .of(
@@ -2756,8 +2756,7 @@ public class DafnyApiCodegen {
                     generateBodilessOperationMethodThatEnsuresCallEvents(
                       serviceShape,
                       operation,
-                      ImplementationType.ABSTRACT,
-                      true
+                      ImplementationType.ABSTRACT
                     )
                   )
                   .flatten()
@@ -2840,8 +2839,7 @@ public class DafnyApiCodegen {
                     generateBodilessOperationMethodThatEnsuresCallEvents(
                       serviceShape,
                       operation,
-                      ImplementationType.ABSTRACT,
-                      false
+                      ImplementationType.DEVELOPER
                     ),
                     TokenTree.of("{"),
                     TokenTree.of(

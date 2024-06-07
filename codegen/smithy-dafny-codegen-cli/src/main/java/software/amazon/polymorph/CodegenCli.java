@@ -288,6 +288,7 @@ public class CodegenCli {
             CodegenEngine.GenerationAspect.helpText()
           )
           .hasArgs()
+          .valueSeparator(',')
           .build()
       );
   }
