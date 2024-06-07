@@ -8,6 +8,6 @@ impl super::Client {
     ///   - [`value(Option<Boolean>)`](crate::operation::get_boolean::GetBooleanOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetBooleanError>`](crate::operation::get_boolean::GetBooleanError)
     pub fn get_boolean(&self) -> crate::operation::get_boolean::builders::GetBooleanFluentBuilder {
-        crate::operation::get_boolean::builders::GetBooleanFluentBuilder::new(self.handle.clone())
+        crate::operation::get_boolean::builders::GetBooleanFluentBuilder::new(self.clone())
     }
 }

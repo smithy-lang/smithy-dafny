@@ -47,6 +47,6 @@ async fn test_get_boolean_false() {
 }
 
 pub fn client() -> Client {
-    let config = Config::builder().build();
+    let config = SimpleBooleanConfig::builder().build().unwrap();
     Client::from_conf(config).unwrap()
 }
