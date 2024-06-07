@@ -106,6 +106,20 @@ public final class StructureGenerator implements Runnable {
 
 
         writer.closeBlock("}").write("");
+
+        writer.openBlock("func (input $L) Validate() (error) {", symbol.getName());
+        shape.getAllMembers().values().stream()
+                .filter(memberShape -> !StreamingTrait.isEventStream(model, memberShape))
+                .sorted(sortedMembers)
+                .forEach((member) -> {
+                    String memberName = symbolProvider.toMemberName(member);
+
+                    Symbol memberSymbol = symbolProvider.toSymbol(member);
+
+                    
+                    writer.write("$L $P", memberName, memberSymbol);
+                });
+        writer.closeBlock("}").write("");
     }
 
     /**
