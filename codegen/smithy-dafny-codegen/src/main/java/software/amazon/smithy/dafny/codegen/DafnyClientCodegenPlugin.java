@@ -77,7 +77,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
       .withIncludeDafnyFile(settings.includeDafnyFile)
       .withGenerationAspects(EnumSet.of(
               CodegenEngine.GenerationAspect.PROJECT_FILES,
-              CodegenEngine.GenerationAspect.CLIENT_EXTERNS))
+              CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS))
       .build();
     codegenEngine.run();
   }

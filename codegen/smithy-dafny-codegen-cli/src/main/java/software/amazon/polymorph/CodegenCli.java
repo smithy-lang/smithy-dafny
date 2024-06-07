@@ -284,7 +284,8 @@ public class CodegenCli {
           .builder()
           .longOpt("generate")
           .desc(
-            "<optional> optional aspects to generate"
+            "<optional> optional aspects to generate. Available aspects:\n" +
+                    CodegenEngine.GenerationAspect.helpText()
           )
           .hasArgs()
           .build()
@@ -414,7 +415,7 @@ public class CodegenCli {
                       .orElse(new String[0]);
       final Set<CodegenEngine.GenerationAspect> generationAspects =
               Arrays.stream(generationAspectOptions)
-                    .map(CodegenEngine.GenerationAspect::FromOption)
+                    .map(CodegenEngine.GenerationAspect::fromOption)
                     .collect(Collectors.toSet());
 
       return Optional.of(

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import net.bytebuddy.asm.Advice;
@@ -1071,12 +1073,41 @@ public class CodegenEngine {
   }
 
   public enum GenerationAspect {
-    PROJECT_FILES,
-    CLIENT_EXTERNS,
-    IMPL_STUB;
+    PROJECT_FILES {
+      @Override
+      public String description() {
+        return "Project configuration files";
+      }
+    },
 
-    public static GenerationAspect FromOption(String option) {
+    CLIENT_CONSTRUCTORS {
+      @Override
+      public String description() {
+        return "Top-level client constructor code";
+      }
+    },
+
+    IMPL_STUB {
+      @Override
+      public String description() {
+        return "Local service implementation/testing stubs";
+      }
+    };
+
+    public static GenerationAspect fromOption(String option) {
       return GenerationAspect.valueOf(option.replace("-", "_").toUpperCase());
+    }
+
+    public String toOption() {
+      return toString().replace("_", "-").toLowerCase();
+    }
+
+    public abstract String description();
+
+    public static String helpText() {
+      return Arrays.stream(values())
+              .map(aspect -> aspect.toOption() + " - " + aspect.description())
+              .collect(Collectors.joining("\n"));
     }
   }
 }
