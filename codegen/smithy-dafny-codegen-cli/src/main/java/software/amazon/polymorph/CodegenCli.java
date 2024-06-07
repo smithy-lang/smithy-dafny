@@ -6,10 +6,12 @@ package software.amazon.polymorph;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -114,7 +116,8 @@ public class CodegenCli {
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
       .withLocalServiceTest(cliArguments.localServiceTest)
       .withDafnyVersion(cliArguments.dafnyVersion)
-      .withUpdatePatchFiles(cliArguments.updatePatchFiles);
+      .withUpdatePatchFiles(cliArguments.updatePatchFiles)
+      .withGenerationAspects(cliArguments.generationAspects);
     cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
     cliArguments.javaAwsSdkVersion.ifPresent(
       engineBuilder::withJavaAwsSdkVersion
@@ -275,6 +278,18 @@ public class CodegenCli {
             "<optional> update patch files in <patch-files-dir> instead of applying them"
           )
           .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("generate")
+          .desc(
+            "<optional> optional aspects to generate. Available aspects:\n" +
+            CodegenEngine.GenerationAspect.helpText()
+          )
+          .hasArgs()
+          .valueSeparator(',')
+          .build()
       );
   }
 
@@ -299,7 +314,8 @@ public class CodegenCli {
     boolean awsSdkStyle,
     boolean localServiceTest,
     Optional<Path> patchFilesDir,
-    boolean updatePatchFiles
+    boolean updatePatchFiles,
+    Set<CodegenEngine.GenerationAspect> generationAspects
   ) {
     /**
      * @param args arguments to parse
@@ -384,11 +400,9 @@ public class CodegenCli {
         .ofNullable(commandLine.getOptionValue("properties-file"))
         .map(Paths::get);
 
-      Optional<Path> includeDafnyFile = Optional.empty();
-      if (outputDafnyDir.isPresent()) {
-        includeDafnyFile =
-          Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
-      }
+      Optional<Path> includeDafnyFile = Optional
+        .ofNullable(commandLine.getOptionValue("include-dafny"))
+        .map(Paths::get);
 
       Optional<Path> patchFilesDir = Optional
         .ofNullable(commandLine.getOptionValue("patch-files-dir"))
@@ -396,6 +410,14 @@ public class CodegenCli {
       final boolean updatePatchFiles = commandLine.hasOption(
         "update-patch-files"
       );
+
+      final String[] generationAspectOptions = Optional
+        .ofNullable(commandLine.getOptionValues("generate"))
+        .orElse(new String[0]);
+      final Set<CodegenEngine.GenerationAspect> generationAspects = Arrays
+        .stream(generationAspectOptions)
+        .map(CodegenEngine.GenerationAspect::fromOption)
+        .collect(Collectors.toSet());
 
       return Optional.of(
         new CliArguments(
@@ -415,7 +437,8 @@ public class CodegenCli {
           awsSdkStyle,
           localServiceTest,
           patchFilesDir,
-          updatePatchFiles
+          updatePatchFiles,
+          generationAspects
         )
       );
     }
