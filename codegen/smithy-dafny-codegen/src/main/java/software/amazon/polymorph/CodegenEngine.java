@@ -294,12 +294,12 @@ public class CodegenEngine {
       Path srcDir = outputDir.resolve("../src");
       LOGGER.info("Formatting Dafny code in {}", srcDir);
       runCommand(
-              srcDir,
-              "dafny",
-              "format",
-              "--function-syntax:3",
-              "--unicode-char:false",
-              "."
+        srcDir,
+        "dafny",
+        "format",
+        "--function-syntax:3",
+        "--unicode-char:false",
+        "."
       );
     }
   }
@@ -581,7 +581,8 @@ public class CodegenEngine {
         .expectTrait(LocalServiceTrait.class)
         .getConfigId()
         .getName();
-      final String configConversionMethod = DotNetNameResolver.typeConverterForShape(
+      final String configConversionMethod =
+        DotNetNameResolver.typeConverterForShape(
           serviceShape.expectTrait(LocalServiceTrait.class).getConfigId(),
           TypeConversionDirection.FROM_DAFNY
         );
