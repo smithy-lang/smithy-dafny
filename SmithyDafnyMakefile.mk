@@ -551,7 +551,7 @@ build_rust:
 
 test_rust:
 	cd runtimes/rust; \
-	cargo test
+	cargo test -- --nocapture
 
 ########################## Cleanup targets
 
