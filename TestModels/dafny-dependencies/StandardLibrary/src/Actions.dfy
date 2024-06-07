@@ -24,11 +24,6 @@ module StandardLibrary.Actions {
 
   }
 
-  // TODO: could use different words for calling when there is no input/no output
-  method Call<T>(a: Action<T, ()>, t: T) modifies a.Repr {
-    var _ := a.Call(t);
-  }
-
   type SingleUseAction<T, R> = a: Action<T, R>
     // TODO: Needs indirection or (!new)
     // TODO: Not quite right, SingleUseAction should be a way of saying
@@ -93,8 +88,6 @@ module StandardLibrary.Actions {
 
   }
 
-  // TODO: Basic spec of a Stream having a pending sequence of events,
-  // and hence each action subscribed will EVENTUALLY have Consumed that sequence.
   trait {:termination false} Stream<T> {
     ghost var Repr: set<object>
 
@@ -102,7 +95,7 @@ module StandardLibrary.Actions {
 
     // TODO: Would be even better if this was a static extern that defaulted
     // to DefaultForEach(this, a)
-    method ForEach(a: Action<T, ()>)
+    method ForEach(a: Accumulator<T>)
   }
 
   /// Similar to Result, but for delivering a sequence of values instead of just one.
@@ -110,7 +103,34 @@ module StandardLibrary.Actions {
   // because then a stream that can error is just an Enumerable<Result<T, E>>.
   type StreamEvent<T, E> = Option<Result<T, E>>
 
-  method {:verify false} DefaultForEach<T>(s: Stream<T>, a: Action<T, ()>) {
+
+  type Accumulator<T> = Action<T, bool>
+
+  method {:verify false} Accept<T>(a: Accumulator<T>, t: T) 
+    // requires ConsumesAnything(a)
+  {
+    var success := a.Call(t);
+    // assert success;
+  }
+
+  class Folder<T, R> extends Action<T, bool> {
+
+    const f: (R, T) -> R
+    var value: R
+
+    constructor(init: R, f: (R, T) -> R) {
+      this.f := f;
+      this.value := init;
+    }
+
+    method {:verify false} Call(t: T) returns (success: bool) {
+      value := f(value, t);
+      return success;
+    }
+
+  }
+
+  method {:verify false} DefaultForEach<T>(s: Stream<T>, a: Accumulator<T>) {
     // TODO: Actual Action specs to prove this terminates (iter has to be an Enumerable)
     while (true) {
       var next := s.Next();
@@ -118,7 +138,8 @@ module StandardLibrary.Actions {
         break;
       }
 
-      var _ := a.Call(next.value);
+      var success := a.Call(next.value);
+      assert success;
     }
   }
 
@@ -134,7 +155,7 @@ module StandardLibrary.Actions {
       t := iter.Call(());
     }
 
-    method {:verify false} ForEach(a: Action<T, ()>)
+    method {:verify false} ForEach(a: Accumulator<T>)
     {
       DefaultForEach(this, a);
     }
@@ -149,14 +170,15 @@ module StandardLibrary.Actions {
       t := None;
     }
 
-    method {:verify false} ForEach(a: Action<T, ()>)
+    method {:verify false} ForEach(a: Accumulator<T>)
     {
       // No-op
     }
 
   }
 
-  class CollectingAction<T> extends Action<T, ()> {
+  // TODO: This is also a Folder([], (x, y) => x + [y])
+  class Collector<T> extends Action<T, bool> {
 
     var values: seq<T>
 
@@ -164,7 +186,7 @@ module StandardLibrary.Actions {
       values := [];
     }
 
-    method {:verify false} Call(t: T) returns (nothing: ()) {
+    method {:verify false} Call(t: T) returns (success: bool) {
       values := values + [t];
     }
 
@@ -180,7 +202,7 @@ module StandardLibrary.Actions {
   trait {:termination false} BlockingPipeline<U, T> extends Stream<T> {
 
     const upstream: Stream<U>
-    const buffer: CollectingAction<T>
+    const buffer: Collector<T>
 
     method {:verify false} Next() returns (t: Option<T>) {
       if 0 < |buffer.values| {
@@ -190,28 +212,34 @@ module StandardLibrary.Actions {
 
       while (|buffer.values| == 0) {
         var u := upstream.Next();
+        Process(u, buffer);
+
         if u.None? {
           break;
         }
-        Process(u.value, buffer);
       }
 
+      // TODO: redundant and off still
+      if 0 < |buffer.values| {
+        var next := buffer.Pop();
+        return Some(next);
+      }
     }
 
-    method {:verify false} ForEach(a: Action<T, ()>)
+    method {:verify false} ForEach(a: Accumulator<T>)
     {
       // TODO: Actual Action specs to prove this terminates (iter has to be an Enumerable)
       while (true) {
         var next := upstream.Next();
+        Process(next, a);
+
         if next == None {
           break;
         }
-
-        Process(next.value, a);
       }
     }
 
-    method Process(u: U, a: Action<T, ()>)
+    method Process(u: Option<U>, a: Accumulator<T>)
 
   }
 }

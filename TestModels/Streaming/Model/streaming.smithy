@@ -22,7 +22,8 @@ service SimpleStreaming {
   operations: [ 
     CountBits,
     BinaryOf,
-    Chunks
+    Chunks,
+    WrapService
   ]
 }
 
@@ -64,6 +65,33 @@ operation Chunks {
     @required
     @range(min: 1)
     chunkSize: Integer
+  }
+  output := {
+    @required
+    bytesOut: StreamingBlob
+  }
+}
+
+/// Returns input in chunks of the given size.
+operation Chunks {
+  input := {
+    @required
+    bytesIn: StreamingBlob
+
+    @required
+    @range(min: 1)
+    chunkSize: Integer
+  }
+  output := {
+    @required
+    bytesOut: StreamingBlob
+  }
+}
+
+operation WrapService {
+  input := {
+    @required
+    bytesIn: StreamingBlob
   }
   output := {
     @required

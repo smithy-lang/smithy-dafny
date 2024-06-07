@@ -48,9 +48,9 @@ module StandardLibraryJavaConversions {
   class SequentialActionSubscriber<T> extends Subscriber<T> {
 
     var subscription: Subscription?
-    var action: Action<StreamEvent<T, Throwable>, ()>
+    var action: Action<Result<T, Throwable>, ()>
 
-    constructor(a: Action<StreamEvent<T, Throwable>, ()>) {
+    constructor(a: Action<Result<T, Throwable>, ()>) {
       this.action := a;
     }
 
@@ -76,11 +76,11 @@ module StandardLibraryJavaConversions {
 
   }
 
-  method AsSequentialSubscriber<T>(a: Action<StreamEvent<T, Throwable>, ()>) returns (s: Subscriber<T>) {
+  method AsSequentialSubscriber<T>(a: Action<Result<T, Throwable>, ()>) returns (s: Subscriber<T>) {
     s := new SequentialActionSubscriber(a);
   }
 
-  class SubscribingAction<T> extends Stream<StreamEvent<T, Throwable>> {
+  class SubscribingAction<T> extends Stream<Result<T, Throwable>> {
 
     const publisher: Publisher<T>    
 
@@ -88,12 +88,12 @@ module StandardLibraryJavaConversions {
       this.publisher := publisher;
     }
     
-    method Next() returns (r: Option<StreamEvent<T, Throwable>>) {
+    method Next() returns (r: Option<Result<T, Throwable>>) {
       // TODO: Connect to PublisherInputStream
       r := None;
     }
 
-    method ForEach(a: Action<StreamEvent<T, Throwable>, ()>) {
+    method ForEach(a: Accumulator<Result<T, Throwable>>) {
       var subscriber := AsSequentialSubscriber(a);
       publisher.subscribe(subscriber);
 

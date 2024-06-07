@@ -309,7 +309,13 @@ public class DafnyApiCodegen {
     final Optional<TokenTree> lengthConstraint = blobShape
       .getTrait(LengthTrait.class)
       .map(DafnyApiCodegen::generateLengthConstraint);
-    return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);
+    if (blobShape.hasTrait(StreamingTrait.class)) {
+      // TODO: need to handle @length too,
+      // something like `forall produced | a.CanProduce(produced) :: min <= |produced| <= max
+      return generateTypeSynonym(blobShapeId, "Stream<bytes>");
+    } else {
+      return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);
+    }
   }
 
   public TokenTree generateBoolTypeDefinition(final ShapeId boolShapeId) {

@@ -3,7 +3,6 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 include "../Model/SimpleStreamingTypes.dfy"
 module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
-  import opened StandardLibrary.Actions
 
   datatype Config = Config
   type InternalConfig = Config
@@ -14,42 +13,15 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   predicate CountBitsEnsuresPublicly(input: CountBitsInput , output: Result<CountBitsOutput, Error>)
   {true}
 
-  class BitCounter extends Action<StreamEvent<seq<uint8>, Error>, ()> {
-
-    var sumSoFar: int32
-
-    constructor() 
-      ensures fresh(Repr)
-    {
-      sumSoFar := 0;
-      Repr := {};
-    }
-
-    method Call(value: StreamEvent<seq<uint8>, Error>) returns (nothing: ()) 
-      modifies Repr
-    {
-      assume this in Repr;
-      match value {
-        case Some(bits) => {
-          // TODO: actually count bits. Just guessing the average (like guessing all C's on a test :) 
-          assume sumSoFar < 10000;
-          sumSoFar := sumSoFar + 4;
-        }
-        case None => {}
-      }
-      return ();
-    }
-  }
-
-
   method CountBits ( config: InternalConfig , input: CountBitsInput )
     returns (output: Result<CountBitsOutput, Error>)
   {
-    var counter := new BitCounter();
+    // TODO: actually count bits. Just guessing the average (like guessing all C's on a test :) 
+    var counter := new Folder(0, (x, y) => x + 4);
 
     input.bits.ForEach(counter);
     
-    return Success(CountBitsOutput(sum := counter.sumSoFar));
+    return Success(CountBitsOutput(sum := counter.value));
   }
 
 
@@ -63,10 +35,10 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   {
     // TODO: Actually compute the binary
-    var fakeBinary := [Some(Success([12])), Some(Success([34, 56]))];
+    var fakeBinary := [[12], [34, 56]];
     var fakeBinaryIter := new SeqEnumerator(fakeBinary);
     
-    var outStream := new SimpleStream<StreamEvent<seq<uint8>, Error>>(fakeBinaryIter);
+    var outStream := new SimpleStream<bytes>(fakeBinaryIter);
 
     return Success(BinaryOfOutput(binary := outStream));
   }
@@ -76,36 +48,36 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   {true}
 
 
-  class Chunker extends BlockingPipeline<BytesEvent, BytesEvent> {
+  class Chunker extends BlockingPipeline<bytes, bytes> {
 
     const chunkSize: int32
-    var chunkBuffer: seq<uint8>
+    var chunkBuffer: bytes
 
-    constructor(upstream: StreamingBlob, chunkSize: int32)
+    constructor(upstream: Stream<bytes>, chunkSize: int32)
     {
-      this.buffer := new CollectingAction<BytesEvent>();
+      this.buffer := new Collector<bytes>();
       this.upstream := upstream;
+
       this.chunkSize := chunkSize;
       chunkBuffer := [];
     }
 
-    method {:verify false} Process(event: BytesEvent, a: Action<BytesEvent, ()>)
+    method {:verify false} Process(event: Option<bytes>, a: Accumulator<bytes>)
     {
       match event {
-        case Some(Success(bits)) => {
+        case Some(bits) => {
           chunkBuffer := chunkBuffer + bits;
         }
       }
 
       while chunkSize as nat <= |chunkBuffer| {
-        var _ := a.Call(Some(Success(chunkBuffer[..chunkSize])));
+        var _ := a.Call(chunkBuffer[..chunkSize]);
         chunkBuffer := chunkBuffer[chunkSize..];
       }
-      if event == None || event.value.Failure? {
+      if event == None {
         if 0 < |chunkBuffer| {
-          var _ := a.Call(Some(Success(chunkBuffer)));
+          var _ := a.Call(chunkBuffer);
         }
-        var _ := a.Call(event);
       }
     }
   }
@@ -135,7 +107,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     return Success(ChunksOutput(bytesOut := outStream));
   }
 
-  method SomeOtherServiceOp( input: Stream'<seq<uint8>> ) returns (r: Stream'<seq<uint8>>) {
+  method SomeOtherServiceOp( input: StreamingBlob ) returns (r: StreamingBlob) {
     // Imagine this was external
     r := new EmptyStream();
   }
