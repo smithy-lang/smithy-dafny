@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../src/Index.dfy"
 
-module $sdkID:LImplTest {
+module {:options "--function-syntax:4"} $sdkID:LImplTest {
 
     import $sdkID:L
     import opened $dafnyModuleName:LTypes
