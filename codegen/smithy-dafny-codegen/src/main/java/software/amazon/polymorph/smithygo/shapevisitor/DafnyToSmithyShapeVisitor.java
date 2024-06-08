@@ -256,7 +256,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String integerShape(IntegerShape shape) {
         writer.addImport("dafny");
-        writer.addImport("fmt");
         var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
 
         if ((boolean)isPointable) {
