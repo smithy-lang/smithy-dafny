@@ -80,36 +80,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String blobShape(BlobShape shape) {
         writer.addImport("dafny");
-        
-        String lengthCheck = "";
-        if (shape.hasTrait(LengthTrait.class)) {
-            LengthTrait lengthTrait = shape.expectTrait(LengthTrait.class);
-
-            Optional<Long> min = lengthTrait.getMin();
-            Optional<Long> max = lengthTrait.getMax();
-            
-            if (min.isPresent()) {
-                lengthCheck += """
-                        if (len(b) < %s) {
-                            panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(b)))
-                        }
-                        """.formatted(
-                        min.get().toString(),
-                        shape.getId().getName(),
-                        min.get().toString());
-            }
-            if (max.isPresent()) {
-                lengthCheck += """
-                        if (len(b) > %s) {
-                            panic(fmt.Sprintf(\"%s has a maximum length of %s but has the length of %%d.\", len(b)))
-                        }
-                        """.formatted(
-                        max.get().toString(),
-                        shape.getId().getName(),
-                        max.get().toString());
-            }
-        }
-
         return """
                 func () []byte {
                 var b []byte
@@ -119,13 +89,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 for i := dafny.Iterate(%s) ; ; {
                     val, ok := i()
                     if !ok {
-                        %s
                         return b
                     } else {
                         b = append(b, val.(byte))
                     }
                 }
-                }()""".formatted(dataSource, dataSource, lengthCheck);
+                }()""".formatted(dataSource, dataSource);
     }
 
     @Override
@@ -167,35 +136,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         MemberShape memberShape = shape.getMember();
         final String[] typeName = context.symbolProvider().toSymbol(memberShape).getFullName().split("/");
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-        String lengthCheck = "";
-        if (shape.hasTrait(LengthTrait.class)) {
-            LengthTrait lengthTrait = shape.expectTrait(LengthTrait.class);
-
-            Optional<Long> min = lengthTrait.getMin();
-            Optional<Long> max = lengthTrait.getMax();
-            
-            if (min.isPresent()) {
-                lengthCheck += """
-                        if (len(fieldValue) < %s) {
-                            panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(fieldValue)))
-                        }
-                        """.formatted(
-                        min.get().toString(),
-                        shape.getId().getName(),
-                        min.get().toString());
-            }
-            if (max.isPresent()) {
-                lengthCheck += """
-                        if (len(fieldValue) > %s) {
-                            panic(fmt.Sprintf(\"%s has a maximum length of %s but has the length of %%d.\", len(fieldValue)))
-                        }
-                        """.formatted(
-                        max.get().toString(),
-                        shape.getId().getName(),
-                        max.get().toString());
-            }
-        }
         
         builder.append("""
                        func() []%s{
@@ -209,12 +149,11 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 				break
 			}
 			fieldValue = append(fieldValue, %s%s)}
-            %s
 			""".formatted(typeName[typeName.length - 1], typeName[typeName.length - 1], dataSource, dataSource,
                 targetShape.isStructureShape() ? "" : "*",
                 targetShape.accept(
                         new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
-                ),lengthCheck));
+                )));
 
         // Close structure
         return builder.append("return fieldValue }()".formatted(dataSource)).toString();
@@ -231,34 +170,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
         final var type = context.symbolProvider().toSymbol(valueTargetShape).getName();
 
-        String lengthCheck = "";
-        if (shape.hasTrait(LengthTrait.class)) {
-            LengthTrait lengthTrait = shape.expectTrait(LengthTrait.class);
-
-            Optional<Long> min = lengthTrait.getMin();
-            Optional<Long> max = lengthTrait.getMax();
-            
-            if (min.isPresent()) {
-                lengthCheck += """
-                        if (len(m) < %s) {
-                            panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(m)))
-                        }
-                        """.formatted(
-                        min.get().toString(),
-                        shape.getId().getName(),
-                        min.get().toString());
-            }
-            if (max.isPresent()) {
-                lengthCheck += """
-                        if (len(m) > %s) {
-                            panic(fmt.Sprintf(\"%s has a maximum length of %s but has the length of %%d.\", len(m)))
-                        }
-                        """.formatted(
-                        max.get().toString(),
-                        shape.getId().getName(),
-                        max.get().toString());
-            }
-        }
         builder.append("""
                                func() map[string]%s {
                                var m map[string]%s = make(map[string]%s)
@@ -272,15 +183,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 		}
 		m[*%s] = *%s
 	}
-    %s
 	return m
                                }()""".formatted(type, type, type, dataSource, dataSource, keyTargetShape.accept(
                 new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
         ),
                 valueTargetShape.accept(
                         new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(1))", writer, isConfigShape)
-                ),
-                lengthCheck
+                )
         ));
         return builder.toString();
     }
@@ -326,36 +235,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                   DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)));
         }
 
-        String lengthCheck = "";
-        if (shape.hasTrait(LengthTrait.class)) {
-            LengthTrait lengthTrait = shape.expectTrait(LengthTrait.class);
-
-            Optional<Long> min = lengthTrait.getMin();
-            Optional<Long> max = lengthTrait.getMax();
-            
-            if (min.isPresent()) {
-                lengthCheck += """
-                        if (len(s) < %s) {
-                            // TODO: Should we return errors.New?
-                            panic(fmt.Sprintf(\"%s has a minimum length of %s but has the length of %%d.\", len(s)))
-                        }
-                        """.formatted(
-                        min.get().toString(),
-                        shape.getId().getName(),
-                        min.get().toString());
-            }
-            if (max.isPresent()) {
-                lengthCheck += """
-                        if (len(s) > %s) {
-                            panic(fmt.Sprintf(\"%s has a maximum length of %s but has the length of %%d.\", len(s)))
-                        }
-                        """.formatted(
-                        max.get().toString(),
-                        shape.getId().getName(),
-                        max.get().toString());
-            }
-        }
-
         var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? "uint8" : "dafny.Char";
         return """
                 func() (*string) {
@@ -366,13 +245,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                     for i := dafny.Iterate(%s) ; ; {
                         val, ok := i()
                         if !ok {
-                            %s
                             return &[]string{s}[0]
                         } else {
                             s = s + string(val.(%s))
                         }
                    }
-               }()""".formatted(dataSource, dataSource, lengthCheck, underlyingType);
+               }()""".formatted(dataSource, dataSource, underlyingType);
     }
 
     @Override
@@ -381,34 +259,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImport("fmt");
         var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
 
-        String constraintCheck = "";
-        if (shape.hasTrait(RangeTrait.class)) {
-            RangeTrait len = shape.getMemberTrait(context.model(), RangeTrait.class).get();
-            Optional<BigDecimal> min = len.getMin();
-            
-            if (min.isPresent()) {
-                constraintCheck += """
-                        if (b < %s) {
-                            panic(fmt.Sprintf(\"%s has a minimum of %s but was given the value %%d.\", b))
-                        }
-                        """.formatted(
-                        min.get().toString(),
-                        shape.getId().getName(),
-                        min.get().toString());
-            }
-            Optional<BigDecimal> max = len.getMax();
-            if (max.isPresent()) {
-                constraintCheck += """
-                        if (b > %s) {
-                            panic(fmt.Sprintf(\"%s has a maximum of %s but was given the value %%d.\", b))
-                        }
-                        """.formatted(
-                        max.get().toString(),
-                        shape.getId().getName(),
-                        max.get().toString(),
-                        shape.getId().getName());
-            }
-        }
         if ((boolean)isPointable) {
             return ("""
                     func() *int32 {
@@ -416,22 +266,16 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                         if %s == nil {
                             return nil
                         }
-                        b = %s.(int32)
-                        """.formatted(dataSource, dataSource)
-                        + constraintCheck +      
-                        """
+                        b = %s.(int32)   
                         return &b
-                    }()""");
+                    }()""".formatted(dataSource, dataSource));
         }else {
             return """
                 func() int32 {
                     var b = %s.(int32)
-                    """.formatted(dataSource)
-                    + constraintCheck + 
-                    """
                     return b
                 }()
-                    """;
+                    """.formatted(dataSource);
         }
     }
 
