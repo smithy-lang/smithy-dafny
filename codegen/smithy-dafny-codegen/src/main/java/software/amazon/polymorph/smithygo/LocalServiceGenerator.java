@@ -101,7 +101,19 @@ public class LocalServiceGenerator implements Runnable {
             final Shape outputShape = model.expectShape(operationShape.getOutputShape());
             final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", params types.%s".formatted(inputShape.toShapeId().getName());
             final String outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s,".formatted(outputShape.toShapeId().getName());
-
+            String validationCheck = "";
+            if(!inputType.equals("")) {
+                validationCheck = """
+                    err := params.Validate()
+                    if err != nil {
+                """;
+                if(outputType.equals("")) {
+                    validationCheck += "return err }";
+                }
+                else{
+                    validationCheck += "return nil, err }";
+                }
+            }
             String baseClientCall;
             if (inputShape.hasTrait(UnitTypeTrait.class)) {
                 baseClientCall = "var dafny_response = client.dafnyClient.%s()".formatted(operationShape.getId().getName());
@@ -128,10 +140,7 @@ public class LocalServiceGenerator implements Runnable {
 
             writer.write("""
                                    func (client *$T) $L(ctx context.Context $L) ($L error) {
-                                        err := params.Validate()
-                                        if err != nil {
-                                            return nil, err
-                                        }
+                                       $L
                                        $L
                                        if (dafny_response.Is_Failure()) {
                                            err := dafny_response.Dtor_error().($L.Error);
@@ -149,6 +158,7 @@ public class LocalServiceGenerator implements Runnable {
                          serviceSymbol,
                          operationShape.getId().getName(),
                          inputType, outputType,
+                         validationCheck,
                          baseClientCall,
                          DafnyNameResolver.dafnyTypesNamespace(context.settings()),
                          writer.consumer(w -> {
