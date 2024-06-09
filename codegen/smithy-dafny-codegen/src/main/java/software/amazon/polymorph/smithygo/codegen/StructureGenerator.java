@@ -27,6 +27,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.SetUtils;
 
@@ -112,10 +113,10 @@ public final class StructureGenerator implements Runnable {
                     writer.write("$L $P", memberName, memberSymbol);
                 });
         writer.closeBlock("}").write("");
-        renderValidator(symbol, sortedMembers);
+        renderValidator(symbol, sortedMembers, isInputStructure);
     }
 
-    private void renderValidator(Symbol symbol, CodegenUtils.SortedMembers sortedMembers){
+    private void renderValidator(Symbol symbol, CodegenUtils.SortedMembers sortedMembers, boolean isInputStructure){
         writer.openBlock("func (input $L) Validate() (error) {", symbol.getName());
         shape.getAllMembers().values().stream()
                 .filter(memberShape -> !StreamingTrait.isEventStream(model, memberShape))
@@ -123,6 +124,13 @@ public final class StructureGenerator implements Runnable {
                 .forEach((member) -> {
                     String memberName = symbolProvider.toMemberName(member);
                     Symbol memberSymbol = symbolProvider.toSymbol(member);
+                    if (isInputStructure) {
+                        memberSymbol = memberSymbol.getProperty(SymbolUtils.INPUT_VARIANT, Symbol.class)
+                                .orElse(memberSymbol);
+                    }
+                    if (model.expectShape(member.getTarget()).hasTrait(ReferenceTrait.class)) {
+                        memberSymbol = memberSymbol.getProperty("Referred", Symbol.class).get();
+                    }
                     Shape currentShape = model.expectShape(member.getTarget());             
                     if (currentShape.hasTrait(RangeTrait.class)) {
                         addRangeCheck(memberSymbol, currentShape, memberName);
@@ -130,7 +138,9 @@ public final class StructureGenerator implements Runnable {
                     if (currentShape.hasTrait(LengthTrait.class)) {
                         addLengthCheck(memberSymbol, currentShape, memberName);
                     }
-                    
+                    if (member.hasTrait(RequiredTrait.class)) {
+                        addRequiredCheck(memberSymbol, currentShape, memberName);
+                    }
                 });
         writer.write("return nil");
         writer.closeBlock("}").write("");
@@ -238,6 +248,19 @@ public final class StructureGenerator implements Runnable {
                 """;
         }
         writer.write(lengthCheck);
+    }
+
+    void addRequiredCheck(Symbol memberSymbol, Shape currentShape, String memberName) {
+        String RequiredCheck = "";
+        if( memberSymbol.getProperty(POINTABLE).isPresent() && (boolean) memberSymbol.getProperty(POINTABLE).get()) 
+            RequiredCheck += """
+                    if (input.%s == nil) {
+                        return fmt.Errorf(\"%s is required but has a nil value.\")
+                    }
+                    """.formatted(
+                    memberName,
+                    memberName);
+        writer.write(RequiredCheck);
     }
 
     /**
