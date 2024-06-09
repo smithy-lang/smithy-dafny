@@ -126,9 +126,12 @@ public class LocalServiceGenerator implements Runnable {
                 returnError = "return nil,";
             }
 
-
             writer.write("""
                                    func (client *$T) $L(ctx context.Context $L) ($L error) {
+                                        err := params.Validate()
+                                        if err != nil {
+                                            return nil, err
+                                        }
                                        $L
                                        if (dafny_response.Is_Failure()) {
                                            err := dafny_response.Dtor_error().($L.Error);
@@ -233,8 +236,10 @@ public class LocalServiceGenerator implements Runnable {
                                                 ${C|}
                                                 case types.CollectionOfErrors:
                                                     return Wrappers.Companion_Result_.Create_Failure_($L.CollectionOfErrors_Input_ToDafny(native_error.(types.CollectionOfErrors)))
-                                                default:
+                                                case types.OpaqueError:
                                                     return Wrappers.Companion_Result_.Create_Failure_($L.OpaqueError_Input_ToDafny(native_error.(types.OpaqueError)))
+                                                default:
+                                                    return Wrappers.Companion_Result_.Create_Failure_(native_error)
                                                 }
                                            }
                                            return Wrappers.Companion_Result_.Create_Success_($L)
