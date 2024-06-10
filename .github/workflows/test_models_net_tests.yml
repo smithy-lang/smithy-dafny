@@ -113,12 +113,6 @@ jobs:
           make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
           make polymorph_dotnet DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
-      - name: Check Generated Dafny Code
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          cat model/*.dfy 2>/dev/null
-
       - name: Download Dependencies
         working-directory: ./${{ matrix.library }}
         run: make setup_net
@@ -130,12 +124,6 @@ jobs:
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make transpile_net CORES=$CORES
-
-      - name: Check Transpiled NET Code
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          cat runtimes/net/ImplementationFromDafny.cs 2>/dev/null
 
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}
