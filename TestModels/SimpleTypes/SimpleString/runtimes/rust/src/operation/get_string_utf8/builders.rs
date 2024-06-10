@@ -10,7 +10,7 @@ impl GetStringUTF8InputBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::get_string_utf8::GetStringUTF8Output,
-        crate::operation::get_string_utf8::GetStringUTF8Error
+        crate::operation::get_string_utf8::GetStringUTF8Error,
     > {
         let mut fluent_builder = client.get_string_utf8();
         fluent_builder.inner = self;
@@ -35,7 +35,9 @@ impl GetStringUTF8FluentBuilder {
         }
     }
     /// Access the GetStringUTF8 as a reference.
-    pub fn as_input(&self) -> &crate::operation::get_string_utf8::builders::GetStringUTF8InputBuilder {
+    pub fn as_input(
+        &self,
+    ) -> &crate::operation::get_string_utf8::builders::GetStringUTF8InputBuilder {
         &self.inner
     }
     /// Sends the request and returns the response.
@@ -43,7 +45,7 @@ impl GetStringUTF8FluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::get_string_utf8::GetStringUTF8Output,
-        crate::operation::get_string_utf8::GetStringUTF8Error
+        crate::operation::get_string_utf8::GetStringUTF8Error,
     > {
         let input = self
             .inner
@@ -57,12 +59,18 @@ impl GetStringUTF8FluentBuilder {
         crate::operation::get_string_utf8::GetStringUTF8::send(&self.handle, input).await
     }
 
-    pub(crate) fn config_override(mut self, config_override: impl Into<crate::config::Builder>) -> Self {
+    pub(crate) fn config_override(
+        mut self,
+        config_override: impl Into<crate::config::Builder>,
+    ) -> Self {
         self.set_config_override(Some(config_override.into()));
         self
     }
 
-    pub(crate) fn set_config_override(&mut self, config_override: Option<crate::config::Builder>) -> &mut Self {
+    pub(crate) fn set_config_override(
+        &mut self,
+        config_override: Option<crate::config::Builder>,
+    ) -> &mut Self {
         self.config_override = config_override;
         self
     }

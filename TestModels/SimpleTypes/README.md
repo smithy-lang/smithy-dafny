@@ -1,6 +1,7 @@
 # SimpleTypes
- This package contains testbed code for Smithy [simple types](https://smithy.io/2.0/spec/simple-types.html).
- Each Smithy simple type will be modelled as a directory in this package. This will provide an invariant test bed for Smithy simple types.
+
+This package contains testbed code for Smithy [simple types](https://smithy.io/2.0/spec/simple-types.html).
+Each Smithy simple type will be modelled as a directory in this package. This will provide an invariant test bed for Smithy simple types.
 
 ## Structure
 

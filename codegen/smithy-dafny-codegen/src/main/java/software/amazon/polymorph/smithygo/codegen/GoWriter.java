@@ -513,6 +513,16 @@ public class GoWriter extends SymbolWriter<GoWriter, ImportDeclarations> {
         return this;
     }
 
+    public GoWriter addImportFromModule(String moduleName, String packageName, String as) {
+        imports.addImport(moduleName.concat("/").concat(packageName), as);
+        return this;
+    }
+
+    public GoWriter addImportFromModule(String moduleName, String packageName) {
+        imports.addImport(moduleName.concat("/").concat(packageName), "");
+        return this;
+    }
+
     public GoWriter addImport(String packageName) {
         imports.addImport(packageName, "");
         return this;
@@ -639,6 +649,8 @@ public class GoWriter extends SymbolWriter<GoWriter, ImportDeclarations> {
                 SymbolReference typeSymbol = (SymbolReference) type;
                 return typeSymbol.getProperty(SymbolUtils.POINTABLE, Boolean.class).orElse(false)
                                || typeSymbol.getSymbol().getProperty(SymbolUtils.POINTABLE, Boolean.class).orElse(false);
+            } else if (type instanceof String) {
+                return true;
             } else {
                 throw new CodegenException(
                         "Invalid type provided to $P. Expected a Symbol, but found `" + type + "`");

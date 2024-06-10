@@ -38,6 +38,10 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
 
     @Override
     public void generateService(GenerateServiceDirective<GenerationContext, GoSettings> directive) {
+        if(!directive.shape().getId().getNamespace().equals(directive.context().settings().getService().getNamespace()))
+        {
+            return;
+        }
         new ClientGenerator(directive.context(), directive.service()).run();
 
         var protocolGenerator = directive.context().protocolGenerator();
@@ -53,6 +57,10 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
 
     @Override
     public void generateStructure(GenerateStructureDirective<GenerationContext, GoSettings> directive) {
+        if(!directive.shape().getId().getNamespace().equals(directive.context().settings().getService().getNamespace()))
+        {
+            return;
+        }
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             StructureGenerator generator = new StructureGenerator(
                     directive.model(),
@@ -66,6 +74,10 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
 
     @Override
     public void generateError(GenerateErrorDirective<GenerationContext, GoSettings> directive) {
+        if(!directive.shape().getId().getNamespace().equals(directive.context().settings().getService().getNamespace()))
+        {
+            return;
+        }
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             StructureGenerator generator = new StructureGenerator(
                     directive.model(),
@@ -84,6 +96,10 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
 
     @Override
     public void generateEnumShape(GenerateEnumDirective<GenerationContext, GoSettings> directive) {
+        if(!directive.shape().getId().getNamespace().equals(directive.context().settings().getService().getNamespace()))
+        {
+            return;
+        }
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             EnumGenerator enumGenerator = new EnumGenerator(directive.symbolProvider(), writer, directive.shape());
             enumGenerator.run();
@@ -92,6 +108,10 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
 
     @Override
     public void generateIntEnumShape(GenerateIntEnumDirective<GenerationContext, GoSettings> directive) {
+        if(!directive.shape().getId().getNamespace().equals(directive.context().settings().getService().getNamespace()))
+        {
+            return;
+        }
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             IntEnumGenerator intEnumGenerator = new IntEnumGenerator(directive.symbolProvider(), writer, directive.shape().asIntEnumShape().get());
             intEnumGenerator.run();

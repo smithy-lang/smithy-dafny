@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       dafny:
-        description: 'The Dafny version to run'
+        description: "The Dafny version to run"
         required: true
         type: string
 
@@ -15,39 +15,39 @@ jobs:
       fail-fast: false
       matrix:
         library: [
-          TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
-          # TestModels/Aggregate,
-          # TestModels/AggregateReferences,
-          # TestModels/CodegenPatches,
-          # TestModels/Constraints,
-          # TestModels/Constructor,
-          # TestModels/Dependencies,
-          # TestModels/Errors,
-          # TestModels/Extendable,
-          # TestModels/Extern,
-          # TestModels/LanguageSpecificLogic,
-          # TestModels/LocalService,
-          # TestModels/MultipleModels,
-          # TestModels/Refinement,
-          # TestModels/Resource,
-          # TestModels/SimpleTypes/BigDecimal,
-          # TestModels/SimpleTypes/BigInteger,
-          # TestModels/SimpleTypes/SimpleBlob,
-          # TestModels/SimpleTypes/SimpleBoolean,
-          # TestModels/SimpleTypes/SimpleByte,
-          # TestModels/SimpleTypes/SimpleDouble,
-          # TestModels/SimpleTypes/SimpleEnum,
-          # TestModels/SimpleTypes/SimpleEnumV2,
-          # TestModels/SimpleTypes/SimpleFloat,
-          # TestModels/SimpleTypes/SimpleInteger,
-          # TestModels/SimpleTypes/SimpleLong,
-          # TestModels/SimpleTypes/SimpleShort,
-          TestModels/SimpleTypes/SimpleString,
-          # TestModels/SimpleTypes/SimpleTimestamp,
-          # TestModels/Union,
-          # TestModels/aws-sdks/ddb,
-          # TestModels/aws-sdks/kms,
-        ]
+            TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+            # TestModels/Aggregate,
+            # TestModels/AggregateReferences,
+            # TestModels/CodegenPatches,
+            # TestModels/Constraints,
+            # TestModels/Constructor,
+            # TestModels/Dependencies,
+            # TestModels/Errors,
+            # TestModels/Extendable,
+            # TestModels/Extern,
+            # TestModels/LanguageSpecificLogic,
+            # TestModels/LocalService,
+            # TestModels/MultipleModels,
+            # TestModels/Refinement,
+            # TestModels/Resource,
+            # TestModels/SimpleTypes/BigDecimal,
+            # TestModels/SimpleTypes/BigInteger,
+            TestModels/SimpleTypes/SimpleBlob,
+            TestModels/SimpleTypes/SimpleBoolean,
+            # TestModels/SimpleTypes/SimpleByte,
+            TestModels/SimpleTypes/SimpleDouble,
+            # TestModels/SimpleTypes/SimpleEnum,
+            # TestModels/SimpleTypes/SimpleEnumV2,
+            # TestModels/SimpleTypes/SimpleFloat,
+            TestModels/SimpleTypes/SimpleInteger,
+            TestModels/SimpleTypes/SimpleLong,
+            # TestModels/SimpleTypes/SimpleShort,
+            TestModels/SimpleTypes/SimpleString,
+            # TestModels/SimpleTypes/SimpleTimestamp,
+            # TestModels/Union,
+            # TestModels/aws-sdks/ddb,
+            # TestModels/aws-sdks/kms,
+          ]
     runs-on: "ubuntu-latest"
     permissions:
       id-token: write
@@ -69,33 +69,47 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.7.0
+      - name: Setup Dafny (build from source)
+        uses: ./.github/actions/build_dafny_from_source
         with:
-          dafny-version: ${{ inputs.dafny }}
+          dafny: ${{ inputs.dafny }}
 
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: '1.74.1'
-          rustflags: ''
+          toolchain: "1.74.1"
+          rustflags: ""
+          components: rustfmt
 
-      # TODO - not implemented yet
-      # - name: Generate Polymorph Dafny and Rust code
-      #   shell: bash
-      #   working-directory: ./${{ matrix.library }}
-      #   # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
-      #   run: |
-      #     make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-      #     make polymorph_rust DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+      - name: Generate Polymorph Dafny
+        working-directory: ./${{ matrix.library }}
+        # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
+        run: |
+          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
-      - name: Compile ${{ matrix.library }} implementation
+      - name: Transpile ${{ matrix.library }} implementation
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
-          make build_rust CORES=$CORES
+          make transpile_rust CORES=$CORES
+
+      # Doing polymorph_rust after transpile_rust
+      # so that the former can patch the output of the latter as well.
+      - name: Generate Polymorph Rust code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          make polymorph_rust DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+
+      # Since we're checking in and patching code,
+      # make sure the patch files are up to date.
+      - name: Check regenerated code against commited code
+        working-directory: ./${{ matrix.library }}
+        shell: bash
+        run: |
+          make check_polymorph_diff
 
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}

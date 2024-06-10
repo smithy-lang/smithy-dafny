@@ -16,6 +16,7 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
+import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
@@ -79,7 +80,6 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private final Model model;
     private final String rootModuleName;
-    private final String typesPackageName;
     private final ReservedWordSymbolProvider.Escaper escaper;
     private final ReservedWordSymbolProvider.Escaper errorMemberEscaper;
     private final Map<ShapeId, ReservedWordSymbolProvider.Escaper> structureSpecificMemberEscapers = new HashMap<>();
@@ -89,8 +89,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public SymbolVisitor(Model model, GoSettings settings) {
         this.model = model;
         this.settings = settings;
-        this.rootModuleName = settings.getModuleName().replace(DOT, BLANK).toLowerCase();
-        this.typesPackageName = this.rootModuleName + "/types";
+        this.rootModuleName = SmithyNameResolver.shapeNamespace(settings.getService(model));
         this.pointableIndex = GoPointableIndex.of(model);
 
         // Reserve the generated names for union members, including the unknown case.
@@ -327,10 +326,10 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private Symbol.Builder symbolBuilderFor(Shape shape, String typeName) {
         if (pointableIndex.isPointable(shape)) {
-            return SymbolUtils.createPointableSymbolBuilder(shape, typeName);
+            return SymbolUtils.createPointableSymbolBuilder(shape, typeName, SmithyNameResolver.smithyTypesNamespace(shape));
         }
 
-        return SymbolUtils.createValueSymbolBuilder(shape, typeName);
+        return SymbolUtils.createValueSymbolBuilder(shape, typeName, SmithyNameResolver.smithyTypesNamespace(shape));
     }
 
     private Symbol.Builder symbolBuilderFor(Shape shape, String typeName, GoDependency namespace) {
@@ -430,7 +429,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol serviceShape(ServiceShape shape) {
         return symbolBuilderFor(shape, "Client", rootModuleName)
-                .definitionFile("ImplementationFromDafny-go/src/" + rootModuleName + "/api_client.go")
+                .definitionFile("./%s/api_client.go".formatted(SmithyNameResolver.shapeNamespace(shape)))
                 .build();
     }
 
@@ -438,8 +437,8 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol stringShape(StringShape shape) {
         if (shape.hasTrait(EnumTrait.class)) {
             String name = getDefaultShapeName(shape);
-            return symbolBuilderFor(shape, name, typesPackageName)
-                    .definitionFile("./ImplementationFromDafny-go/src/types/enums.go")
+            return symbolBuilderFor(shape, name, SmithyNameResolver.smithyTypesNamespace(settings.getService(model)))
+                    .definitionFile("./types/enums.go")
                     .build();
         }
 
@@ -459,16 +458,24 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                         .build();
             }
         }
-        Symbol.Builder builder = symbolBuilderFor(shape, name, typesPackageName);
+        Symbol.Builder builder = symbolBuilderFor(shape, name, SmithyNameResolver.smithyTypesNamespace(settings.getService(model)));
         if (shape.hasTrait(ErrorTrait.ID)) {
-            builder.definitionFile("ImplementationFromDafny-go/src/types/errors.go");
+            builder.definitionFile("./%s/errors.go".formatted(SmithyNameResolver.smithyTypesNamespace(shape)));
         } else {
-            builder.definitionFile("ImplementationFromDafny-go/src/types/types.go");
+            builder.definitionFile("./%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(shape)));
         }
 
         if (shape.hasTrait(ReferenceTrait.class)) {
-            builder.putProperty("Referred", symbolBuilderFor(model.expectShape(shape.expectTrait(ReferenceTrait.class).getReferentId()), "I" + getDefaultShapeName(model.expectShape(shape.expectTrait(ReferenceTrait.class).getReferentId())))
-                                                    .putProperty(SymbolUtils.POINTABLE, false).build());
+            var referredShape = model.expectShape(shape.expectTrait(ReferenceTrait.class).getReferentId());
+            var isService = shape.expectTrait(ReferenceTrait.class).isService();
+            if (isService) {
+                builder.putProperty("Referred", symbolBuilderFor(referredShape, "Client", SmithyNameResolver.shapeNamespace(referredShape))
+                                                        .putProperty(SymbolUtils.POINTABLE, true).build());
+            } else {
+                builder.putProperty("Referred", symbolBuilderFor(referredShape, "I".concat(getDefaultShapeName(referredShape)))
+                                                        .putProperty(SymbolUtils.POINTABLE, false).build());
+            }
+
         }
 
         return builder.build();
@@ -488,8 +495,8 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol unionShape(UnionShape shape) {
         String name = getDefaultShapeName(shape);
-        return symbolBuilderFor(shape, name, typesPackageName)
-                .definitionFile("ImplementationFromDafny-go/src/types/types.go")
+        return symbolBuilderFor(shape, name, SmithyNameResolver.smithyTypesNamespace(settings.getService(model)))
+                .definitionFile("./types/types.go")
                 .build();
     }
 
@@ -510,8 +517,8 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol intEnumShape(IntEnumShape shape) {
         String name = getDefaultShapeName(shape);
-        return symbolBuilderFor(shape, name, typesPackageName)
-                .definitionFile("./ImplementationFromDafny-go/src/types/enums.go")
+        return symbolBuilderFor(shape, name, SmithyNameResolver.smithyTypesNamespace(settings.getService(model)))
+                .definitionFile("./types/enums.go")
                 .build();
     }
 }

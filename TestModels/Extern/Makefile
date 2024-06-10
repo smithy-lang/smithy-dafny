@@ -14,6 +14,10 @@ SERVICE_DEPS_SimpleExtern :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+
+PROJECT_DTR := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 

@@ -1,16 +1,6 @@
 {
-    "version": "1.0",
-    "plugins": {
-        "dafny-client-codegen": {
-            "service": "simple.types.boolean#SimpleTypesBoolean",
-            "module": "github.com/aws/smithy-dafny/internal/tests/service/SimpleTypesBoolean",
-            "moduleVersion": "0.0.1",
-            "generateGoMod": true,
-            "goDirective": "1.18",
-            "edition":"2023",
-            "targetLanguages":["GO"],
-            "includeDafnyFile":""
-        }
-    },
-    "imports": ["../../TestModels/dafny-dependencies/Model/"]
+  "version": "1.0",
+  "plugins": {
+    "_comment": "TODO"
+  }
 }

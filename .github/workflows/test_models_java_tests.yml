@@ -5,7 +5,7 @@ name: Library Java tests
   workflow_call:
     inputs:
       dafny:
-        description: The Dafny version to run
+        description: "The Dafny version to run"
         required: true
         type: string
 
@@ -14,40 +14,41 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        library:
-          - TestModels/dafny-dependencies/StandardLibrary # This stores current Polymorph dependencies that all TestModels depend on
-          # TestModels/Aggregate,
-          # TestModels/AggregateReferences,
-          - TestModels/CodegenPatches
-          - TestModels/Constraints
-          # TestModels/Constructor,
-          # TestModels/Dependencies,
-          - TestModels/Errors
-          - TestModels/Extendable
-          # TestModels/Extern,
-          # TestModels/LanguageSpecificLogic,
-          - TestModels/LocalService
-          - TestModels/MultipleModels
-          # TestModels/Refinement,
-          - TestModels/Resource
-          # TestModels/SimpleTypes/BigDecimal,
-          # TestModels/SimpleTypes/BigInteger,
-          # TestModels/SimpleTypes/SimpleBlob,
-          # TestModels/SimpleTypes/SimpleBoolean,
-          # TestModels/SimpleTypes/SimpleByte,
-          # TestModels/SimpleTypes/SimpleDouble,
-          # TestModels/SimpleTypes/SimpleEnum,
-          # TestModels/SimpleTypes/SimpleEnumV2,
-          # TestModels/SimpleTypes/SimpleFloat,
-          # TestModels/SimpleTypes/SimpleInteger,
-          # TestModels/SimpleTypes/SimpleLong,
-          # TestModels/SimpleTypes/SimpleShort,
-          # TestModels/SimpleTypes/SimpleString,
-          # TestModels/SimpleTypes/SimpleTimestamp,
-          # TestModels/Union,
-          - TestModels/aws-sdks/ddb
-          - TestModels/aws-sdks/kms
-    runs-on: ubuntu-latest
+        library: [
+            TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+            # TestModels/Aggregate,
+            # TestModels/AggregateReferences,
+            TestModels/CodegenPatches,
+            TestModels/Constraints,
+            # TestModels/Constructor,
+            # TestModels/Dependencies,
+            TestModels/Errors,
+            TestModels/Extendable,
+            # TestModels/Extern,
+            # TestModels/LanguageSpecificLogic,
+            TestModels/LocalService,
+            TestModels/MultipleModels,
+            # TestModels/Refinement,
+            TestModels/Resource,
+            # TestModels/SimpleTypes/BigDecimal,
+            # TestModels/SimpleTypes/BigInteger,
+            # TestModels/SimpleTypes/SimpleBlob,
+            # TestModels/SimpleTypes/SimpleBoolean,
+            # TestModels/SimpleTypes/SimpleByte,
+            # TestModels/SimpleTypes/SimpleDouble,
+            # TestModels/SimpleTypes/SimpleEnum,
+            # TestModels/SimpleTypes/SimpleEnumV2,
+            # TestModels/SimpleTypes/SimpleFloat,
+            # TestModels/SimpleTypes/SimpleInteger,
+            # TestModels/SimpleTypes/SimpleLong,
+            # TestModels/SimpleTypes/SimpleShort,
+            # TestModels/SimpleTypes/SimpleString,
+            # TestModels/SimpleTypes/SimpleTimestamp,
+            # TestModels/Union,
+            TestModels/aws-sdks/ddb,
+            TestModels/aws-sdks/kms,
+          ]
+    runs-on: "ubuntu-latest"
     permissions:
       id-token: write
       contents: read
@@ -76,7 +77,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: corretto
+          distribution: "corretto"
           java-version: 17
 
       - name: Setup smithy-dafny-conversion
@@ -88,8 +89,8 @@ jobs:
       - name: Setup Java 17 for codegen
         uses: actions/setup-java@v3
         with:
-          distribution: corretto
-          java-version: '17'
+          distribution: "corretto"
+          java-version: "17"
 
       - name: Setup dependencies
         working-directory: ./${{ matrix.library }}
@@ -107,8 +108,8 @@ jobs:
       - name: Setup Java 8 for running tests
         uses: actions/setup-java@v3
         with:
-          distribution: corretto
-          java-version: '8'
+          distribution: "corretto"
+          java-version: "8"
 
       - name: Compile ${{ matrix.library }} implementation
         shell: bash

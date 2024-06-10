@@ -10,6 +10,7 @@ These dependencies are sourced from other repositories.
 Each dependency should have an update script.
 
 To update a dependency, execute:
+
 ```
 ./update.sh <Path-to-Local-Clone-Of-Repo> <Branch-In-Local-Clone>
 ```
@@ -26,6 +27,7 @@ Example:
 To update the `StandardLibrary`,
 which is developed in the ESDK-Dafny repo,
 in the `v4-seperate-modules` branch:
+
 ```
 ./update.sh /Users/tonyknap/workplace/ryan-new-world/private-aws-encryption-sdk-dafny-staging v4-seperate-modules
 ```

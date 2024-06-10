@@ -15,6 +15,42 @@ service SimpleConstraints {
 
 structure SimpleConstraintsConfig {}
 
+// This is just a sanity check on the smokeTests support.
+// We need to actually convert all the tests in test/WrappedSimpleConstraintsImplTest.dfy
+// to smoke tests once https://github.com/smithy-lang/smithy-dafny/issues/278
+// is fixed.
+@smithy.test#smokeTests([
+  {
+    id: "GetConstraintsSuccess"
+    params: {
+      OneToTen: 5,
+      GreaterThanOne: 2,
+      MyBlob: "0101",
+      MyList: ["1", "2", "3"],
+      MyMap: {
+        "a": "b",
+        "c": "d"
+      }
+    }
+    expect: {
+        success: {}
+    }
+  },
+  {
+    id: "GetConstraintsFailure"
+    params: {
+      // These two always have to be present because of https://github.com/smithy-lang/smithy-dafny/issues/278,
+      // because otherwise they are interpreted as 0.
+      OneToTen: 5,
+      GreaterThanOne: 2,
+      // This is the member that's actually invalid
+      NonEmptyBlob: ""
+    }
+    expect: {
+        failure: {}
+    }
+  }
+])
 operation GetConstraints {
   input: GetConstraintsInput,
   output: GetConstraintsOutput,
@@ -24,7 +60,7 @@ operation GetConstraints {
 
 // These constraints will result
 // a predicate that will define
-// validitaty for a sub set type.
+// validity for a sub set type.
 // The predicate can be tested.
 
 @length(min: 1, max: 10)
@@ -78,11 +114,15 @@ map MapLessThanOrEqualToTen {
   value: String,
 }
 
-@pattern("^[A-Za-z]+$")
-string Alphabetic
+// we don't do patterns yet
+// @pattern("^[A-Za-z]+$")
+// string Alphabetic
 
 @range(min: 1, max: 10)
 integer OneToTen
+
+@range(min: -10, max: 10)
+long TenToTen
 
 @range(min: 1)
 integer GreaterThanOne
@@ -90,20 +130,21 @@ integer GreaterThanOne
 @range(max: 10)
 integer LessThanTen
 
-@uniqueItems
-list MyUniqueList {
-  member: String
-}
+// we don't do uniqueItems yet
+// @uniqueItems
+// list MyUniqueList {
+//   member: String
+// }
 
-@uniqueItems
-list MyComplexUniqueList {
-  member: ComplexListElement
-}
+// @uniqueItems
+// list MyComplexUniqueList {
+//   member: ComplexListElement
+// }
 
-structure ComplexListElement {
-  value: String,
-  blob: Blob,
-}
+// structure ComplexListElement {
+//   value: String,
+//   blob: Blob,
+// }
 
 structure GetConstraintsInput {
   MyString: MyString,
@@ -118,12 +159,13 @@ structure GetConstraintsInput {
   MyMap: MyMap,
   NonEmptyMap: NonEmptyMap,
   MapLessThanOrEqualToTen: MapLessThanOrEqualToTen,
-  Alphabetic: Alphabetic,
+  // Alphabetic: Alphabetic,
   OneToTen: OneToTen,
+  myTenToTen: TenToTen,
   GreaterThanOne: GreaterThanOne,
   LessThanTen: LessThanTen,
-  MyUniqueList: MyUniqueList,
-  MyComplexUniqueList: MyComplexUniqueList,
+  // MyUniqueList: MyUniqueList,
+  // MyComplexUniqueList: MyComplexUniqueList,
   MyUtf8Bytes: Utf8Bytes,
   MyListOfUtf8Bytes: ListOfUtf8Bytes,
 }
@@ -141,20 +183,23 @@ structure GetConstraintsOutput {
   MyMap: MyMap,
   NonEmptyMap: NonEmptyMap,
   MapLessThanOrEqualToTen: MapLessThanOrEqualToTen,
-  Alphabetic: Alphabetic,
+  // Alphabetic: Alphabetic,
   OneToTen: OneToTen,
+  thatTenToTen: TenToTen,
   GreaterThanOne: GreaterThanOne,
   LessThanTen: LessThanTen,
-  MyUniqueList: MyUniqueList,
-  MyComplexUniqueList: MyComplexUniqueList,
+  // MyUniqueList: MyUniqueList,
+  // MyComplexUniqueList: MyComplexUniqueList,
   MyUtf8Bytes: Utf8Bytes,
   MyListOfUtf8Bytes: ListOfUtf8Bytes,
 }
 
 // See Comment in traits.smithy
 @aws.polymorph#dafnyUtf8Bytes
+@length(min: 1, max: 10)
 string Utf8Bytes
 
+@length(min: 1, max: 2)
 list ListOfUtf8Bytes {
   member: Utf8Bytes
 }

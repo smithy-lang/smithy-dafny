@@ -3,7 +3,6 @@
 package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.MethodSpec;
-
 import software.amazon.polymorph.utils.ModelUtils;
 
 /**
@@ -13,8 +12,7 @@ import software.amazon.polymorph.utils.ModelUtils;
  * @param resolvedOutput A ResolvedShapeId representing the output
  */
 public record MethodSignature(
-        MethodSpec.Builder method,
-        ModelUtils.ResolvedShapeId resolvedInput,
-        ModelUtils.ResolvedShapeId resolvedOutput
-) {
-}
+  MethodSpec.Builder method,
+  ModelUtils.ResolvedShapeId resolvedInput,
+  ModelUtils.ResolvedShapeId resolvedOutput
+) {}

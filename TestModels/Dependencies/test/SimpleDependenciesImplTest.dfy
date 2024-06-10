@@ -93,7 +93,7 @@ module SimpleDependenciesImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-      var resourceDataInput := SimpleConstraintsTestHelpers.GetConstraintsInputTemplate();
+      var resourceDataInput := SimpleConstraintsTestHelpers.GetValidInput();
       var res :- expect client.UseLocalConstraintsService(resourceDataInput);
       expect res.MyString.Some?;
       expect res.MyString.value == "bw1and10";

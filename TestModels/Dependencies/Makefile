@@ -24,6 +24,13 @@ PROJECT_INDEX := \
 	Extendable/src/Index.dfy \
 	Constraints/src/Index.dfy
 
+PROJECT_DTR := \
+	Resource/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	Errors/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	Extendable/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	Constraints/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+
 SERVICE_NAMESPACE_SimpleDependencies=simple.dependencies
 
 # Dependencies for each local service
@@ -34,6 +41,15 @@ SERVICE_DEPS_SimpleDependencies := \
 	Constraints
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
+GO_MODULE_NAME="github.com/ShubhamChaturvedi7/Dependencies"
+
+GO_DEPENDENCY_MODULE_NAMES := \
+	--dependency-module-name=simple.constraints=github.com/ShubhamChaturvedi7/Constraints \
+	--dependency-module-name=simple.errors=github.com/ShubhamChaturvedi7/Errors \
+	--dependency-module-name=simple.extendable.resources=github.com/ShubhamChaturvedi7/Extendable \
+	--dependency-module-name=simple.resources=github.com/ShubhamChaturvedi7/Resource
+
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated

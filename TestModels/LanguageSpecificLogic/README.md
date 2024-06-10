@@ -1,8 +1,8 @@
 # LanguageSpecificLogic
 
 This project demonstrates generating target-language-specific code from Dafny.
-This allows developers to write and **verify** Dafny code 
-that is only generated and run 
+This allows developers to write and **verify** Dafny code
+that is only generated and run
 for a particular target language.
 
 This directory contains a basic project demonstrating how to do this.
@@ -13,7 +13,7 @@ The output of this operation has two components: `language` and `runtime`.
 This code is only generated and run for a particular target language.
 This allows us to use Dafny verification (`requires`/`ensures` clauses)
 to validate that the `language` attribute contains some expected value.
-`language` *could* also be set from `extern` code.
+`language` _could_ also be set from `extern` code.
 However, this would prevent us from verifying its value with Dafny.
 
 `runtime` is a string set from `extern` code.
@@ -34,27 +34,33 @@ and again inside the context of the module that `replaces` it.
 Developers can also add language-specific tests inside the replacing module.
 
 ## Build
+
 ### .NET
+
 1. Generate the Wrappers using `polymorph`
+
 ```
 make polymorph_dafny polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.
+
 ```
 make transpile_net
 ```
 
 3. Generate the executable in the .NET and execute the tests
+
 ```
 make test_net
 ```
 
 ## Development
+
 1. To add another target runtime support, edit the `Makefile` and add the appropriate recipe to generate the `polymorph` wrappers, and dafny transpilation.
 2. Provide any glue code between dafny and target runtime if required.
 3. Build, execute, and test in the target runtime.
 
-*Example*
+_Example_
 
 `--output-dotnet <PATH>` in the `gradlew run` is used to generate the polymorph wrappers. Similarly `--compileTarget:<RUNTIME>` flags is used in dafny recipe to transpile to C#.

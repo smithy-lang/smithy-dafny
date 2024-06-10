@@ -1,4 +1,3 @@
-
 This directory is the code generation target for the SimpleString model when targetting Rust.
 
 Like the other targets, the crate is a combination of the output of three different components:
@@ -7,7 +6,7 @@ Like the other targets, the crate is a combination of the output of three differ
 2. The output of `smithy-dafny` shim/conversion generation for Rust (the `conversions` module)
 3. The output of `smithy-rs` (all other files)
 
-Most of the `smithy-rs` output is not modified, 
+Most of the `smithy-rs` output is not modified,
 only trimmed down to cut out components that aren't relevant for Polymorph libraries.
 The main exception is `client.rs` and the operation builders such as `operation/get_string.rs`,
 which instantiate the underlying Dafny client implementation and invoke operations on it, respectively,

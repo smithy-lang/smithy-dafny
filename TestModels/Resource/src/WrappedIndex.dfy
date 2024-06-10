@@ -4,7 +4,7 @@
 include "../Model/SimpleResourcesTypesWrapped.dfy"
 
 module
-  {:extern "simple.resources.internaldafny.wrapped"}
+  {:extern "simpleresourcesinternaldafnywrapped"}
   WrappedSimpleResources refines WrappedAbstractSimpleResourcesService
 {
   import WrappedService = SimpleResources

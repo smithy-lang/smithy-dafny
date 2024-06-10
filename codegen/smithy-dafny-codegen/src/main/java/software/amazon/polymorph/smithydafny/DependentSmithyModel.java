@@ -3,25 +3,24 @@
 
 package software.amazon.polymorph.smithydafny;
 
-
-import software.amazon.smithy.model.shapes.Shape;
-
 import java.nio.file.Path;
 import java.util.stream.Stream;
+import software.amazon.smithy.model.shapes.Shape;
 
-public record DependentSmithyModel(
-  Path modelPath,
-  String namespace
-) implements Comparable<DependentSmithyModel>
-{
+public record DependentSmithyModel(Path modelPath, String namespace)
+  implements Comparable<DependentSmithyModel> {
   public static DependentSmithyModel of(final Shape shape, Path[] modelPaths) {
     final String namespace = shape.getId().getNamespace();
-    final Path sourceLocation = Path.of(shape.getSourceLocation().getFilename());
+    final Path sourceLocation = Path.of(
+      shape.getSourceLocation().getFilename()
+    );
     final Path modelPath = Stream
       .of(modelPaths)
       .filter(sourceLocation::startsWith)
-      .reduce((a,b) -> {
-        throw new IllegalStateException("A dependent model can not be a sub directory of another dependent model");
+      .reduce((a, b) -> {
+        throw new IllegalStateException(
+          "A dependent model can not be a sub directory of another dependent model"
+        );
       })
       .get();
 
