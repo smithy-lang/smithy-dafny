@@ -311,7 +311,8 @@ public class DafnyApiCodegen {
       .map(DafnyApiCodegen::generateLengthConstraint);
     if (blobShape.hasTrait(StreamingTrait.class)) {
       // TODO: need to handle @length too,
-      // something like `forall produced | a.CanProduce(produced) :: min <= |produced| <= max
+      // something like `forall produced | a.CanProduce(produced) :: min <= |Enumerated(produced)| <= max
+      // (which should have a simpler helper predicate version, especially when allowing for reference types)
       return generateTypeSynonym(blobShapeId, "Stream<bytes>");
     } else {
       return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);

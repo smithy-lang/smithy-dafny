@@ -1,10 +1,10 @@
-include "Actions.dfy"
+include "../../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Actions.dfy"
 include "UInt.dfy"
 
 module StandardLibraryJavaConversions {
 
   import opened StandardLibrary.UInt
-  import opened StandardLibrary.Actions
+  import opened Std.Actions
   import opened Wrappers
   
   trait {:compile false} {:extern "java.lang.Throwable"} Throwable {

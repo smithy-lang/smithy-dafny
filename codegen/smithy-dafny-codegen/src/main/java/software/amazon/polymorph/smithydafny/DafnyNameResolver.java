@@ -365,7 +365,7 @@ public record DafnyNameResolver(
       "import opened Wrappers",
       "import opened StandardLibrary.UInt",
       "import opened UTF8",
-      "import opened StandardLibrary.Actions"
+      "import opened Std.Actions"
     );
   }
 
