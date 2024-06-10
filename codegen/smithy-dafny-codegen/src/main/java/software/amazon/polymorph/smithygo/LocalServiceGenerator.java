@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.ImportDeclarations;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.StructureGenerator;
+import software.amazon.polymorph.smithygo.codegen.UnionGenerator;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.shapevisitor.SmithyToDafnyShapeVisitor;
@@ -68,10 +69,18 @@ public class LocalServiceGenerator implements Runnable {
         var serviceSymbol = context.symbolProvider().toSymbol(service);
         final LocalServiceTrait serviceTrait = service.expectTrait(LocalServiceTrait.class);
         var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
+        // var serviceNamespace = service.getId().getNamespace();
+        // UnionGenerator u = new UnionGenerator(model, symbolProvider, model.expectShape(serviceTrait.getConfigId()));
+        // System.out.println("u:" + u);
         context.writerDelegator().useFileWriter("ImplementationFromDafny-go/src/types/types.go", writer1 -> {
             new StructureGenerator(model, symbolProvider, writer1, model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
+            model.getUnionShapes().stream()
+            .filter(unionShape -> unionShape.getId().getNamespace().equals(service.getId().getNamespace()))
+            .forEach(unionShape -> {
+                new UnionGenerator(model, symbolProvider, unionShape).generateUnion(writer1);
+            });
         });
-
+        
         writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
         writer.addImport(DafnyNameResolver.dafnyNamespace(context.settings()));
         writer.addImport("types");
