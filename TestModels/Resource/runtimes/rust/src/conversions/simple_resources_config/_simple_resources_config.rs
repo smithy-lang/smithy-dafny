@@ -5,7 +5,7 @@ pub fn to_dafny(
     value: crate::types::simple_resources_config::SimpleResourcesConfig,
 ) -> ::std::rc::Rc<
     ::simple_resources_dafny::_simple_dtypes_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
-> {
+>{
     ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::SimpleResourcesConfig::SimpleResourcesConfig {})
 }
 

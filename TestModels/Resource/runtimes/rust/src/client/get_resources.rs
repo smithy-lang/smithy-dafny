@@ -7,7 +7,9 @@ impl super::Client {
     /// - On success, responds with [`GetResourcesOutput`](crate::operation::get_resources::GetResourcesOutput) with field(s):
     ///   - [`value(Option<Resources>)`](crate::operation::get_resources::GetResourcesOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetResourcesError>`](crate::operation::get_resources::GetResourcesError)
-    pub fn get_resources(&self) -> crate::operation::get_resources::builders::GetResourcesFluentBuilder {
+    pub fn get_resources(
+        &self,
+    ) -> crate::operation::get_resources::builders::GetResourcesFluentBuilder {
         crate::operation::get_resources::builders::GetResourcesFluentBuilder::new(self.clone())
     }
 }

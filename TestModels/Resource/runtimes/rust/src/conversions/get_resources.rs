@@ -5,7 +5,8 @@ use std::any::Any;
 #[allow(dead_code)]
 pub fn to_dafny_error(
     value: crate::operation::get_resources::GetResourcesError,
-) -> ::std::rc::Rc<::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::Error> {
+) -> ::std::rc::Rc<::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::Error>
+{
     match value {
     crate::operation::get_resources::GetResourcesError::Unhandled(unhandled) =>
       ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })

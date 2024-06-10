@@ -19,8 +19,10 @@ impl SimpleResourcesConfigBuilder {
     }
     pub fn build(
         self,
-    ) -> ::std::result::Result<SimpleResourcesConfig, ::aws_smithy_types::error::operation::BuildError>
-    {
+    ) -> ::std::result::Result<
+        SimpleResourcesConfig,
+        ::aws_smithy_types::error::operation::BuildError,
+    > {
         ::std::result::Result::Ok(SimpleResourcesConfig {})
     }
 }
