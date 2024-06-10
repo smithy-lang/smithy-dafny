@@ -315,7 +315,18 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String unionShape(UnionShape shape) {
-        return "Unionnnnnn";
+        writer.addImport("dafny");
+        return """
+            func () types.%s {
+                var union types.%s
+                union = &types.MyUnionMemberIntegerValue{
+                    Value: %s.(int32),
+                }
+                return union
+            }()""".formatted(
+                shape.toShapeId().getName(),
+                shape.toShapeId().getName(),
+                dataSource);
     }
 
     @Override
