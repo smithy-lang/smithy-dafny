@@ -6,7 +6,7 @@
         {
           "name": "excludeShapesBySelector",
           "args": {
-            "selector": "[id|name *= 'Change', 'Create', 'Get', 'Delete', 'Send', 'Permission', 'Tag', 'Untag', 'DeadLetter', 'Purge', 'Receive', 'Set']"
+            "selector": "[id|name *= 'Change', 'Create', 'Get', 'Delete', 'Send', 'RemovePermission', 'Tag', 'Untag', 'DeadLetter', 'Purge', 'Receive', 'Set']"
           }
         },
         {
