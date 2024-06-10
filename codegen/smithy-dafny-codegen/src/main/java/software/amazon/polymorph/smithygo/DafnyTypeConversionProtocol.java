@@ -143,7 +143,6 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
         final Set<ShapeId> alreadyVisited = new HashSet<>();
         final var serviceShape = context.settings().getService(context.model());
         final var delegator = context.writerDelegator();
-        FROM_DAFNY = "ImplementationFromDafny-go/src/" + context.settings().getModuleName().replace(DOT, BLANK).toLowerCase() + "/" + FROM_DAFNY;
 
         serviceShape.getOperations().forEach(eachOperation -> {
                                                  var operation = context.model().expectShape(eachOperation, OperationShape.class);
