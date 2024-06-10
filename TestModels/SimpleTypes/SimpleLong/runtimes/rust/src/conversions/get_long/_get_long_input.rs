@@ -6,9 +6,7 @@ pub fn to_dafny(
     ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput,
 > {
     let dafny_value = match value.value {
-        Some(v) => ::simple_long_dafny::_Wrappers_Compile::Option::Some {
-            value: v,
-        },
+        Some(v) => ::simple_long_dafny::_Wrappers_Compile::Option::Some { value: v },
         None => ::simple_long_dafny::_Wrappers_Compile::Option::None {},
     };
     ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput::GetLongInput {

@@ -21,23 +21,22 @@ impl GetIntegerKnownValueInputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetIntegerKnownValueFluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::client::Client,
     inner: crate::operation::get_integer_known_value::builders::GetIntegerKnownValueInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
 impl GetIntegerKnownValueFluentBuilder {
     /// Creates a new `GetIntegerKnownValue`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::client::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetIntegerKnownValue as a reference.
     pub fn as_input(
         &self,
-    ) -> &crate::operation::get_integer_known_value::builders::GetIntegerKnownValueInputBuilder {
+    ) -> &crate::operation::get_integer_known_value::builders::GetIntegerKnownValueInputBuilder
+    {
         &self.inner
     }
     /// Sends the request and returns the response.
@@ -55,38 +54,20 @@ impl GetIntegerKnownValueFluentBuilder {
             // (but isn't that a backwards compatibility problem for output structures?)
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
-            .map_err(crate::operation::get_integer_known_value::GetIntegerKnownValueError::unhandled)?;
-        crate::operation::get_integer_known_value::GetIntegerKnownValue::send(&self.handle, input).await
+            .map_err(
+                crate::operation::get_integer_known_value::GetIntegerKnownValueError::unhandled,
+            )?;
+        crate::operation::get_integer_known_value::GetIntegerKnownValue::send(&self.client, input)
+            .await
     }
 
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(
-        mut self,
-        input: i32,
-    ) -> Self {
+    pub fn value(mut self, input: i32) -> Self {
         self.inner = self.inner.value(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(
-        mut self,
-        input: ::std::option::Option<i32>,
-    ) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<i32>) -> Self {
         self.inner = self.inner.set_value(input);
         self
     }

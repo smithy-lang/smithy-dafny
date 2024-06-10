@@ -30,18 +30,12 @@ pub struct GetIntegerKnownValueInputBuilder {
 }
 impl GetIntegerKnownValueInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(
-        mut self,
-        input: impl ::std::convert::Into<i32>,
-    ) -> Self {
+    pub fn value(mut self, input: impl ::std::convert::Into<i32>) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(
-        mut self,
-        input: ::std::option::Option<i32>,
-    ) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<i32>) -> Self {
         self.value = input;
         self
     }
@@ -57,7 +51,9 @@ impl GetIntegerKnownValueInputBuilder {
         ::aws_smithy_types::error::operation::BuildError,
     > {
         ::std::result::Result::Ok(
-            crate::operation::get_integer_known_value::GetIntegerKnownValueInput { value: self.value },
+            crate::operation::get_integer_known_value::GetIntegerKnownValueInput {
+                value: self.value,
+            },
         )
     }
 }

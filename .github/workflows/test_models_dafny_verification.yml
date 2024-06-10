@@ -48,8 +48,10 @@ jobs:
             # TestModels/SimpleTypes/SimpleTimestamp,
             TestModels/Union,
             TestModels/aws-sdks/ddb,
+            TestModels/aws-sdks/glue,
             TestModels/aws-sdks/kms,
             TestModels/aws-sdks/sqs,
+            TestModels/aws-sdks/lakeformation,
             TestModels/aws-sdks/sqs-via-cli,
           ]
         os: [ubuntu-latest]
