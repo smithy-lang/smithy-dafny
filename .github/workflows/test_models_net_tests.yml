@@ -113,6 +113,12 @@ jobs:
           make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
           make polymorph_dotnet DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
+      - name: Check Generated Dafny Code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          cat model/*.dfy
+
       - name: Download Dependencies
         working-directory: ./${{ matrix.library }}
         run: make setup_net
