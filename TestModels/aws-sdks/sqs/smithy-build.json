@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "projections": {
-    "list-queues-only": {
+    "list-queues-and-add-permission-only": {
       "transforms": [
         {
           "name": "excludeShapesBySelector",
