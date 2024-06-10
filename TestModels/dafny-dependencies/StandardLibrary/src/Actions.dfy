@@ -167,10 +167,33 @@ module {:options "--function-syntax:4"} Std.Actions {
       :: a.CanConsume(history, next) <==> p(next)
   }
 
+  // Enumerators
+
+  type IEnumerator<T> = Action<(), T>
+  type Enumerator<T(!new)> = a: Action<(), Option<T>> | exists limit :: ProducesTerminatedBy(a, None, limit) witness *
+  
+
   // Aggregators
 
   type IAggregator<T> = Action<T, ()>
   type Aggregator<T(!new)> = a: Action<T, bool> | exists limit :: ProducesTerminatedBy(a, false, limit) witness *
+
+  // Utilities
+
+  method {:extern} ForEach<T(!new)>(s: Enumerator<T>, a: Aggregator<T>)
+
+  method {:verify false} DefaultForEach<T(!new)>(s: Enumerator<T>, a: Aggregator<T>) {
+    // TODO: Actual specs to prove this terminates
+    while (true) {
+      var next := s.Invoke(());
+      if next == None {
+        break;
+      }
+
+      var success := a.Invoke(next.value);
+      assert success;
+    }
+  }
 
   class ArrayAggregator<T> extends Action<T, ()> {
 
@@ -304,21 +327,6 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   }
 
-  // Similar to Result, but for delivering a sequence of values instead of just one.
-  // This works better (as opposed to Result<Option<T>, E>)
-  // because then a stream that can error is just an Enumerable<Result<T, E>>.
-  type StreamEvent<T, E> = Option<Result<T, E>>
-
-  type Enumerator<T> = Action<(), Option<T>>
-  type Accumulator<T> = Action<T, bool>
-
-  method {:verify false} Accept<T>(a: Accumulator<T>, t: T) 
-    // requires ConsumesAnything(a)
-  {
-    var success := a.Invoke(t);
-    // assert success;
-  }
-
   // TODO
   // class Folder<T, R> extends Action<T, bool> {
 
@@ -336,19 +344,6 @@ module {:options "--function-syntax:4"} Std.Actions {
   //   }
 
   // }
-
-  method {:verify false} DefaultForEach<T>(s: Enumerator<T>, a: Accumulator<T>) {
-    // TODO: Actual Action specs to prove this terminates (iter has to be an Enumerable)
-    while (true) {
-      var next := s.Invoke(());
-      if next == None {
-        break;
-      }
-
-      var success := a.Invoke(next.value);
-      assert success;
-    }
-  }
 
   // TODO: This is also a Folder([], (x, y) => x + [y])
   class Collector<T> extends Action<T, bool> {
@@ -394,12 +389,12 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   }
 
-  trait {:termination false} Pipeline<U, T> extends Action<(), Option<T>> {
+  trait {:termination false} Pipeline<U, T(!new)> extends Action<(), Option<T>> {
 
     const upstream: Action<(), Option<U>>
     const buffer: Collector<T>
 
-    method {:verify false} Next() returns (t: Option<T>) {
+    method {:verify false} Invoke(nothing: ()) returns (t: Option<T>) {
       if 0 < |buffer.values| {
         var next := buffer.Pop();
         return Some(next);
@@ -421,7 +416,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
 
-    method {:verify false} ForEach(a: Accumulator<T>)
+    method {:verify false} ForEach(a: Aggregator<T>)
     {
       // TODO: Actual Action specs to prove this terminates (iter has to be an Enumerable)
       while (true) {
@@ -434,7 +429,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
 
-    method Process(u: Option<U>, a: Accumulator<T>)
+    method Process(u: Option<U>, a: Aggregator<T>)
 
   }
 }

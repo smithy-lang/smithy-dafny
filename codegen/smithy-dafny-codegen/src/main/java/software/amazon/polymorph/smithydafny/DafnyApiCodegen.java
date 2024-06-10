@@ -313,7 +313,7 @@ public class DafnyApiCodegen {
       // TODO: need to handle @length too,
       // something like `forall produced | a.CanProduce(produced) :: min <= |Enumerated(produced)| <= max
       // (which should have a simpler helper predicate version, especially when allowing for reference types)
-      return generateTypeSynonym(blobShapeId, "Stream<bytes>");
+      return generateTypeSynonym(blobShapeId, "Enumerator<bytes>");
     } else {
       return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);
     }

@@ -2,10 +2,10 @@ include "UInt.dfy"
 include "StandardLibrary.dfy"
 include "Actions.dfy"
 
-module StandardLibraryJavaConversions {
+module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
 
   import opened StandardLibrary.UInt
-  import opened StandardLibrary.Actions
+  import opened Std.Actions
   import opened Wrappers
   
   trait {:compile false} {:extern "java.lang.Throwable"} Throwable {
@@ -44,14 +44,16 @@ module StandardLibraryJavaConversions {
     method onComplete()
   }
 
+  type SubscriptionEvent<T> = SubscriptionEvent<T>
+
   // Publisher<T> -> Action
 
   class SequentialActionSubscriber<T> extends Subscriber<T> {
 
     var subscription: Subscription?
-    var action: Action<Result<T, Throwable>, ()>
+    var action: Action<SubscriptionEvent<T>, ()>
 
-    constructor(a: Action<Result<T, Throwable>, ()>) {
+    constructor(a: Action<SubscriptionEvent<T>, ()>) {
       this.action := a;
     }
 
@@ -63,38 +65,60 @@ module StandardLibraryJavaConversions {
     }
 
     method {:verify false} onNext(t: T) {
-      var _ := action.Call(Some(Success(t)));
+      var _ := action.Invoke(Some(Success(t)));
       subscription.request(1);
     }
 
     method {:verify false} onError(t: Throwable) {
-      var _ := action.Call(Some(Failure(t)));
+      var _ := action.Invoke(Some(Failure(t)));
     }
 
     method {:verify false} onComplete() {
-      var _ := action.Call(None);
+      var _ := action.Invoke(None);
     }
 
   }
 
-  method AsSequentialSubscriber<T>(a: Action<Result<T, Throwable>, ()>) returns (s: Subscriber<T>) {
+  method AsSequentialSubscriber<T>(a: Action<SubscriptionEvent<T>, ()>) returns (s: Subscriber<T>) {
     s := new SequentialActionSubscriber(a);
   }
 
-  class SubscribingAction<T> extends Stream<Result<T, Throwable>> {
+  class SubscribingAction<T> extends Action<(), SubscriptionEvent<T>> {
 
-    const publisher: Publisher<T>    
+    const publisher: Publisher<T>
 
     constructor(publisher: Publisher<T>) {
       this.publisher := publisher;
     }
     
-    method Next() returns (r: Option<Result<T, Throwable>>) {
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> CanProduce(history)
+      decreases height, 0
+    {
+      this in Repr
+    }
+    
+    ghost predicate CanConsume(history: seq<((), SubscriptionEvent<T>)>, next: ())
+      requires CanProduce(history)
+      decreases height
+    {
+      true
+    }
+
+    ghost predicate CanProduce(history: seq<((), SubscriptionEvent<T>)>)
+      decreases height
+    {
+      true
+    }
+
+    method Invoke(nothing: ()) returns (r: SubscriptionEvent<T>) {
       // TODO: Connect to PublisherInputStream
       r := None;
     }
 
-    method ForEach(a: Accumulator<Result<T, Throwable>>) {
+    method ForEach(a: Aggregator<Result<T, Throwable>>) {
       var subscriber := AsSequentialSubscriber(a);
       publisher.subscribe(subscriber);
 
@@ -102,13 +126,13 @@ module StandardLibraryJavaConversions {
     }
   }
 
-  method AsStream<T>(p: Publisher<T>) returns (s: Stream<StreamEvent<T, Throwable>>) {
+  method AsStream<T>(p: Publisher<T>) returns (s: Enumerator<Result<T, Throwable>>) {
     s := new SubscribingAction(p);
   } 
 
   // Stream -> Pulisher<T>
 
-  class SubscriberAction<T> extends Action<StreamEvent<T, Throwable>, ()> {
+  class SubscriberAction<T> extends Action<SubscriptionEvent<T>, ()> {
 
     const subscriber: Subscriber<T>
 
@@ -116,10 +140,32 @@ module StandardLibraryJavaConversions {
       this.subscriber := subscriber;
     }
 
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> CanProduce(history)
+      decreases height, 0
+    {
+      this in Repr
+    }
+    
+    ghost predicate CanConsume(history: seq<(SubscriptionEvent<T>, ())>, next: SubscriptionEvent<T>)
+      requires CanProduce(history)
+      decreases height
+    {
+      true
+    }
+
+    ghost predicate CanProduce(history: seq<(SubscriptionEvent<T>, ())>)
+      decreases height
+    {
+      true
+    }
+
     // TODO: Need built in buffering so the subscriber isn't actually
     // called unless the subscription requests values.
     // OR expose an isomorphic concept and thread it through.
-    method Call(e: StreamEvent<T, Throwable>) returns (nothing: ()) {
+    method Invoke(e: SubscriptionEvent<T>) returns (nothing: ()) {
       match e {
         case Some(Success(value)) => {
           subscriber.onNext(value);
@@ -137,9 +183,9 @@ module StandardLibraryJavaConversions {
   }
 
   class ActionPublisher<T> extends Publisher<T> {
-    const subscribeAction: Stream<StreamEvent<T, Throwable>>
+    const subscribeAction: Enumerator<Result<T, Throwable>>
 
-    constructor(subscribeAction: Stream<StreamEvent<T, Throwable>>) {
+    constructor(subscribeAction: Enumerator<Result<T, Throwable>>) {
       this.subscribeAction := subscribeAction;
     }
 
@@ -149,7 +195,7 @@ module StandardLibraryJavaConversions {
     }
   }
 
-  method AsPublisher<T>(a: Stream<StreamEvent<T, Throwable>>) returns (s: Publisher<T>) {
+  method AsPublisher<T>(a: Enumerator<Result<T, Throwable>>) returns (s: Publisher<T>) {
     s := new ActionPublisher(a);
   } 
 
@@ -159,11 +205,11 @@ module StandardLibraryJavaConversions {
   // This could be useful for analyzing existing Java codebases to see
   // if they use ByteBuffers correctly!
   trait {:compile false} {:extern "java.nio.ByteBuffer"} ByteBuffer {
-    function method {:extern} remaining(): int32
+    function {:extern} remaining(): int32
       ensures remaining() >= 0
-    function method {:extern} position(): int32
+    function {:extern} position(): int32
       ensures position() as int + remaining() as int < INT32_MAX_LIMIT
-    function method {:extern} get(i: int32): uint8
+    function {:extern} get(i: int32): uint8
     method {:extern} put(b: uint8)
 
     static method allocate(capacity: int32) returns (bb: ByteBuffer)
