@@ -176,14 +176,6 @@ index 00000000..a88ee78b
 +pub mod _get_known_value_union_input;
 +
 +pub mod _get_known_value_union_output;
-diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/.#_get_union_known_value_input.rs a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/.#_get_union_known_value_input.rs
-new file mode 120000
-index 00000000..d09a6e30
---- /dev/null
-+++ a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/.#_get_union_known_value_input.rs
-@@ -0,0 +1 @@
-+banchich@88665a545ea9.20093:1717417509
-\ No newline at end of file
 diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/_get_known_value_union_input.rs a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/_get_known_value_union_input.rs
 new file mode 100644
 index 00000000..3d8cc1e5
