@@ -462,8 +462,31 @@ polymorph_go:
 _polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_go: MODULE_NAME=--module-name $(GO_MODULE_NAME)
 _polymorph_go: DEPENDENCY_MODULE_NAMES = $(GO_DEPENDENCY_MODULE_NAMES)
-_polymorph_go: _polymorph
+_polymorph_go: _polymorph _mv_polymorph_go _gomod_init
 
+_gomod_init:
+	@(cd $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go && \
+		[ -f go.mod ] && rm -f go.mod && \
+		go mod init $(GO_MODULE_NAME) && \
+		echo "require github.com/dafny-lang/DafnyStandardLibGo v0.0.0" >> go.mod && \
+		echo "require github.com/dafny-lang/DafnyRuntimeGo v0.0.0" >> go.mod && \
+		if [ $$(basename $$(dirname $(LIBRARY_ROOT))) == "SimpleTypes" ]; then \
+			echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../../DafnyRuntimeGo/" >> go.mod; \
+			echo "replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/" >> go.mod; \
+		else \
+			echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod; \
+			echo "replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/" >> go.mod; \
+		fi && \
+		go mod tidy)
+
+_mv_polymorph_go:
+	@for dir in $(LIBRARY_ROOT)/runtimes/go/* ; do \
+        if [ "$$(basename $$dir)" != "ImplementationFromDafny-go" ] && [ "$$(basename $$dir)" != "TestsFromDafny-go" ]; then \
+			cp -Rf $$dir runtimes/go/ImplementationFromDafny-go/; \
+			cp -Rf $$dir runtimes/go/TestsFromDafny-go; \
+			rm -r $$dir; \
+		fi \
+    done
 ########################## .NET targets
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
