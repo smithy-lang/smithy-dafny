@@ -1,42 +1,41 @@
 diff --git b/TestModels/Resource/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/Resource/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index 4aadfc53..f20e4319 100644
+index 4aadfc53..8b0cf633 100644
 --- b/TestModels/Resource/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 +++ a/TestModels/Resource/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -548,7 +548,7 @@ pub mod r#_simple_dresources_dinternaldafny_dtypes {
-             }
+@@ -549,13 +549,14 @@ pub mod r#_simple_dresources_dinternaldafny_dtypes {
          }
      }
--
-+/*
-     impl ::std::default::Default for GetResourcesOutput {
-         fn default() -> GetResourcesOutput {
-             GetResourcesOutput::GetResourcesOutput {
-@@ -556,7 +556,7 @@ pub mod r#_simple_dresources_dinternaldafny_dtypes {
-             }
-         }
-     }
--
-+*/
+ 
+-    impl ::std::default::Default for GetResourcesOutput {
+-        fn default() -> GetResourcesOutput {
+-            GetResourcesOutput::GetResourcesOutput {
+-                output: ::std::default::Default::default(),
+-            }
+-        }
+-    }
++    // the trait `Default` is not implemented for `Object<(dyn ISimpleResource + 'static)>`
++    // impl ::std::default::Default for GetResourcesOutput {
++    //     fn default() -> GetResourcesOutput {
++    //         GetResourcesOutput::GetResourcesOutput {
++    //             output: ::std::default::Default::default(),
++    //         }
++    //     }
++    // }
+ 
      impl ::std::convert::AsRef<GetResourcesOutput> for &GetResourcesOutput {
          fn as_ref(&self) -> Self {
-             self
-@@ -588,7 +588,7 @@ pub mod r#_simple_dresources_dinternaldafny_dtypes {
+@@ -588,7 +589,7 @@ pub mod r#_simple_dresources_dinternaldafny_dtypes {
              let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
              let mut _out0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
              _out0 = ::dafny_runtime::MaybePlacebo::from(
 -                ::dafny_runtime::md!(self).r#_GetResourceData_k(input),
-+                self.r#_GetResourceData_k(input)
++                self.r#_GetResourceData_k(input),
              );
              output = ::dafny_runtime::MaybePlacebo::from(_out0.read());
              return output.read();
-@@ -845,13 +845,14 @@ pub mod r#_SimpleResource_Compile {
-                 ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>,
-             >,
-         > {
--            let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
--            _out1 = ::dafny_runtime::MaybePlacebo::from(
-+            // let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
-+            let _out1 = ::dafny_runtime::MaybePlacebo::from(
+@@ -848,10 +849,11 @@ pub mod r#_SimpleResource_Compile {
+             let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
+             _out1 = ::dafny_runtime::MaybePlacebo::from(
                  super::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResource::GetResourceData(
 -                    self.unwrap(),
 +                    self,
@@ -47,35 +46,19 @@ index 4aadfc53..f20e4319 100644
          }
          pub fn _ctor(
              this: &::dafny_runtime::Object<Self>,
-@@ -958,7 +959,6 @@ pub mod r#_SimpleResource_Compile {
-                 },
-             ));
-             return output.read();
--            return output.read();
-         }
-     }
- }
-@@ -1026,7 +1026,6 @@ pub mod r#_SimpleResourcesOperations_Compile {
-                 },
-             ));
-             return output.read();
--            return output.read();
-         }
-     }
- 
 diff --git b/TestModels/Resource/runtimes/rust/src/client.rs a/TestModels/Resource/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..cea36096
+index 00000000..a6d9e55b
 --- /dev/null
 +++ a/TestModels/Resource/runtimes/rust/src/client.rs
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,39 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +use aws_smithy_types::error::operation::BuildError;
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::ISimpleTypesResourcesClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResourcesClient>
 +}
 +
 +impl Client {
@@ -85,8 +68,10 @@ index 00000000..cea36096
 +        conf: crate::types::simple_resources_config::SimpleResourcesConfig,
 +    ) -> Result<Self, BuildError> {
 +        let inner =
-+            ::simple_resources_dafny::_simple_dtypes_dresources_dinternaldafny::_default::SimpleResources(
-+                &crate::conversions::simple_resources_config::_simple_resources_config::to_dafny(conf),
++            ::simple_resources_dafny::_simple_dresources_dinternaldafny::_default::SimpleResources(
++                &crate::conversions::simple_resources_config::_simple_resources_config::to_dafny(
++                    conf,
++                ),
 +            );
 +        if matches!(
 +            inner.as_ref(),
@@ -100,7 +85,7 @@ index 00000000..cea36096
 +            ));
 +        }
 +        Ok(Self {
-+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::ISimpleTypesResourcesClient + 'static)>>::upcast_to(inner.Extract()),
++            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResourcesClient + 'static)>>::upcast_to(inner.Extract()),
 +        })
 +    }
 +}
@@ -139,10 +124,10 @@ index 00000000..57c6591f
 +pub mod simple_resources_config;
 diff --git b/TestModels/Resource/runtimes/rust/src/conversions/get_resources.rs a/TestModels/Resource/runtimes/rust/src/conversions/get_resources.rs
 new file mode 100644
-index 00000000..82aca1a6
+index 00000000..b0b6bd95
 --- /dev/null
 +++ a/TestModels/Resource/runtimes/rust/src/conversions/get_resources.rs
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,32 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +use std::any::Any;
@@ -150,22 +135,21 @@ index 00000000..82aca1a6
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_resources::GetResourcesError,
-+) -> ::std::rc::Rc<::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::Error>
-+{
++) -> ::std::rc::Rc<::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::get_resources::GetResourcesError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::Error,
++        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::get_resources::GetResourcesError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_resources::GetResourcesError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -178,7 +162,7 @@ index 00000000..82aca1a6
 +pub mod _get_resources_output;
 diff --git b/TestModels/Resource/runtimes/rust/src/conversions/get_resources/_get_resources_input.rs a/TestModels/Resource/runtimes/rust/src/conversions/get_resources/_get_resources_input.rs
 new file mode 100644
-index 00000000..54fb0f63
+index 00000000..015ec5dc
 --- /dev/null
 +++ a/TestModels/Resource/runtimes/rust/src/conversions/get_resources/_get_resources_input.rs
 @@ -0,0 +1,37 @@
@@ -187,13 +171,13 @@ index 00000000..54fb0f63
 +pub fn to_dafny(
 +    value: crate::operation::get_resources::GetResourcesInput,
 +) -> ::std::rc::Rc<
-+    ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesInput,
++    ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
 +> {
 +    let dafny_value = match value.value {
 +        Some(b) => ::simple_resources_dafny::_Wrappers_Compile::Option::Some { value: b },
 +        None => ::simple_resources_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesInput::GetResourcesInput {
++    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput::GetResourcesInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -201,7 +185,7 @@ index 00000000..54fb0f63
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesInput,
++        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
 +    >,
 +) -> crate::operation::get_resources::GetResourcesInput {
 +    let value = if matches!(
@@ -221,7 +205,7 @@ index 00000000..54fb0f63
 +}
 diff --git b/TestModels/Resource/runtimes/rust/src/conversions/get_resources/_get_resources_output.rs a/TestModels/Resource/runtimes/rust/src/conversions/get_resources/_get_resources_output.rs
 new file mode 100644
-index 00000000..31abbfc2
+index 00000000..c947a770
 --- /dev/null
 +++ a/TestModels/Resource/runtimes/rust/src/conversions/get_resources/_get_resources_output.rs
 @@ -0,0 +1,37 @@
@@ -230,13 +214,13 @@ index 00000000..31abbfc2
 +pub fn to_dafny(
 +    value: crate::operation::get_resources::GetResourcesOutput,
 +) -> ::std::rc::Rc<
-+    ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesOutput,
++    ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesOutput,
 +> {
 +    let dafny_value = match value.value {
 +        Some(b) => ::simple_resources_dafny::_Wrappers_Compile::Option::Some { value: b },
 +        None => ::simple_resources_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesOutput::GetResourcesOutput {
++    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesOutput::GetResourcesOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -244,7 +228,7 @@ index 00000000..31abbfc2
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesOutput,
++        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesOutput,
 +    >,
 +) -> crate::operation::get_resources::GetResourcesOutput {
 +    let value = if matches!(
@@ -273,7 +257,7 @@ index 00000000..5121f1c0
 +pub mod _simple_resources_config;
 diff --git b/TestModels/Resource/runtimes/rust/src/conversions/simple_resources_config/_simple_resources_config.rs a/TestModels/Resource/runtimes/rust/src/conversions/simple_resources_config/_simple_resources_config.rs
 new file mode 100644
-index 00000000..2a389a54
+index 00000000..458fe14d
 --- /dev/null
 +++ a/TestModels/Resource/runtimes/rust/src/conversions/simple_resources_config/_simple_resources_config.rs
 @@ -0,0 +1,19 @@
@@ -283,15 +267,15 @@ index 00000000..2a389a54
 +pub fn to_dafny(
 +    value: crate::types::simple_resources_config::SimpleResourcesConfig,
 +) -> ::std::rc::Rc<
-+    ::simple_resources_dafny::_simple_dtypes_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
-+>{
-+    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::SimpleResourcesConfig::SimpleResourcesConfig {})
++    ::simple_resources_dafny::_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
++> {
++    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig::SimpleResourcesConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
++        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
 +    >,
 +) -> crate::types::simple_resources_config::SimpleResourcesConfig {
 +    crate::types::simple_resources_config::SimpleResourcesConfig {}
