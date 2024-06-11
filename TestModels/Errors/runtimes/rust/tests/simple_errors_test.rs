@@ -1,22 +1,9 @@
 extern crate simple_errors;
 
 mod simple_errors_test {
+    use simple_errors::types::error::Error::*;
     use simple_errors::*;
-    /*
-    method{:test} GetString(){
-          var client :- expect SimpleString.SimpleString();
-          TestGetString(client);
-          TestGetStringKnownValue(client);
-          TestGetStringUTF8(client);
-      }
-    */
 
-    /*method TestGetString(client: ISimpleTypesStringClient)
-    {
-        var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some("TEST_SIMPLE_STRING_VALUE")));
-        expect ret.value.UnwrapOr("") == "TEST_SIMPLE_STRING_VALUE";
-        print ret;
-    } */
     #[tokio::test]
     async fn test_always_error() {
         let result = client()
@@ -26,10 +13,10 @@ mod simple_errors_test {
             .await;
         match result {
             Ok(_x) => assert!(false),
-            Err(e) => {
-                assert!(true);
-                eprintln!("HERE IS THE ALWAYS ERROR  - {} - END OF ERROR\n", e);
-            }
+            Err(e) => match e {
+                SimpleErrorsException { message } => assert!(message == "TEST_ERROR_VALUE"),
+                _ => assert!(false, "always_error did not return SimpleErrorsException"),
+            },
         }
     }
 
@@ -42,10 +29,10 @@ mod simple_errors_test {
             .await;
         match result {
             Ok(_x) => assert!(false),
-            Err(e) => {
-                assert!(true);
-                eprintln!("HERE IS THE NATIVE ERROR  - {} - END OF ERROR\n", e);
-            }
+            Err(e) => match e {
+                Opaque { obj } => assert!(true),
+                _ => assert!(false, "always_native_error did not return Opaque"),
+            },
         }
     }
 
@@ -56,13 +43,23 @@ mod simple_errors_test {
             .value("TEST_MULTIPLE_STRING")
             .send()
             .await;
-            match result {
-                Ok(_x) => assert!(false),
-                Err(e) => {
-                    assert!(true);
-                    eprintln!("HERE IS THE MULTIPLE ERROR  - {} - END OF ERROR\n", e);
+        match result {
+            Ok(_x) => assert!(false),
+            Err(e) => match e {
+                CollectionOfErrors { list, message } => {
+                    assert!(message == "Something");
+                    assert!(
+                        list == vec![SimpleErrorsException {
+                            message: "TEST_MULTIPLE_STRING".to_string()
+                        }]
+                    );
                 }
-            }
+                _ => assert!(
+                    false,
+                    "always_multiple_errors did not return CollectionOfErrors"
+                ),
+            },
+        }
     }
 
     pub fn client() -> Client {

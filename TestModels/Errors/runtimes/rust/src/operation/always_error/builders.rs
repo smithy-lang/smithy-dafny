@@ -10,7 +10,7 @@ impl AlwaysErrorInputBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::always_error::AlwaysErrorOutput,
-        crate::operation::always_error::AlwaysErrorError,
+        crate::types::error::Error,
     > {
         let mut fluent_builder = client.always_error();
         fluent_builder.inner = self;
@@ -41,17 +41,9 @@ impl AlwaysErrorFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::always_error::AlwaysErrorOutput,
-        crate::operation::always_error::AlwaysErrorError,
+        crate::types::error::Error,
     > {
-        let input = self
-            .inner
-            .build()
-            // Using unhandled since AlwaysError doesn't declare any validation,
-            // and smithy-rs seems to not generate a ValidationError case unless there is
-            // (but isn't that a backwards compatibility problem for output structures?)
-            // Vanilla smithy-rs uses SdkError::construction_failure,
-            // but we aren't using SdkError.
-            .map_err(crate::operation::always_error::AlwaysErrorError::unhandled)?;
+        let input = self.inner.build()?;
         crate::operation::always_error::AlwaysError::send(&self.client, input).await
     }
 

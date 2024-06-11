@@ -10,7 +10,7 @@ impl AlwaysMultipleErrorsInputBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::always_multiple_errors::AlwaysMultipleErrorsOutput,
-        crate::operation::always_multiple_errors::AlwaysMultipleErrorsError,
+        crate::types::error::Error,
     > {
         let mut fluent_builder = client.always_multiple_errors();
         fluent_builder.inner = self;
@@ -43,19 +43,9 @@ impl AlwaysMultipleErrorsFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::always_multiple_errors::AlwaysMultipleErrorsOutput,
-        crate::operation::always_multiple_errors::AlwaysMultipleErrorsError,
+        crate::types::error::Error,
     > {
-        let input = self
-            .inner
-            .build()
-            // Using unhandled since AlwaysNativeError doesn't declare any validation,
-            // and smithy-rs seems to not generate a ValidationError case unless there is
-            // (but isn't that a backwards compatibility problem for output structures?)
-            // Vanilla smithy-rs uses SdkError::construction_failure,
-            // but we aren't using SdkError.
-            .map_err(
-                crate::operation::always_multiple_errors::AlwaysMultipleErrorsError::unhandled,
-            )?;
+        let input = self.inner.build()?;
         crate::operation::always_multiple_errors::AlwaysMultipleErrors::send(&self.client, input)
             .await
     }

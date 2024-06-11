@@ -49,7 +49,7 @@ impl AlwaysMultipleErrorsInputBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::always_multiple_errors::AlwaysMultipleErrorsInput,
-        ::aws_smithy_types::error::operation::BuildError,
+        crate::types::error::Error,
     > {
         ::std::result::Result::Ok(
             crate::operation::always_multiple_errors::AlwaysMultipleErrorsInput {

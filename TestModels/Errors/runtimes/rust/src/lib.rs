@@ -5,9 +5,6 @@
 pub mod client;
 pub mod types;
 
-/// Common errors and error handling utilities.
-pub mod error;
-
 /// All operations that this crate can perform.
 pub mod operation;
 

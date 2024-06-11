@@ -48,7 +48,7 @@ impl AlwaysNativeErrorInputBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::always_native_error::AlwaysNativeErrorInput,
-        ::aws_smithy_types::error::operation::BuildError,
+        crate::types::error::Error,
     > {
         ::std::result::Result::Ok(
             crate::operation::always_native_error::AlwaysNativeErrorInput { value: self.value },
