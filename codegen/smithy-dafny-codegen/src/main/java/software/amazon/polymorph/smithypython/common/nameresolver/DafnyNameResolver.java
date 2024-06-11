@@ -149,7 +149,7 @@ public class DafnyNameResolver {
    * @return
    */
   public static String getDafnyTypeForShape(ShapeId shapeId) {
-    if (Utils.isUnitShape(shapeId)) {
+    if (SmithyNameResolver.isUnitShape(shapeId)) {
       // Dafny models Unit shapes as the Python `None` type
       return "None";
     } else {
@@ -189,7 +189,7 @@ public class DafnyNameResolver {
 
   public static void importDafnyTypeForStringShapeWithEnumTrait(
       PythonWriter writer, StringShape stringShape, String enumValue, GenerationContext context) {
-    if (!stringShape.hasTrait(EnumTrait.class) || !stringShape.isStringShape()) {
+    if (!stringShape.hasTrait(EnumTrait.class)) {
       throw new IllegalArgumentException(
           "Argument is not a StringShape with EnumTrait: " + stringShape.getId());
     }
@@ -217,8 +217,6 @@ public class DafnyNameResolver {
 
   /**
    * Calls writer.addImport to import the corresponding Dafny type for the provided Smithy ShapeId.
-   * This MUST NOT be used to import errors; use `importDafnyTypeForError`. ex.
-   * example.namespace.ExampleShape -> "from example_namespace_internaldafny_types import
    * DafnyExampleShape"
    *
    * @param writer
@@ -227,7 +225,7 @@ public class DafnyNameResolver {
   public static void importDafnyTypeForShape(
       PythonWriter writer, ShapeId shapeId, GenerationContext context) {
 
-    if (Utils.isUnitShape(shapeId)) {
+    if (SmithyNameResolver.isUnitShape(shapeId)) {
       // No corresponding Dafny type for unit. Dafny uses "None", which does not need to be imported
       return;
     }

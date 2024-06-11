@@ -3,19 +3,10 @@
 
 package software.amazon.polymorph.smithypython.wrappedlocalservice.customize;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
-import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -119,7 +110,7 @@ public class ShimFileWriter implements CustomFileWriter {
           "",
           operationShape.getId().getName(),
           // Do not generate an `input` parameter if the operation does not take in an input
-          Utils.isUnitShape(inputShape) ? "" : "input",
+          SmithyNameResolver.isUnitShape(inputShape) ? "" : "input",
           () -> {
             Shape targetShapeInput =
                 codegenContext.model().expectShape(operationShape.getInputShape());
@@ -168,7 +159,7 @@ public class ShimFileWriter implements CustomFileWriter {
                 """
                 return Wrappers.Result_Success($L)
                 """,
-                Utils.isUnitShape(outputShape) ? "None" : output);
+                SmithyNameResolver.isUnitShape(outputShape) ? "None" : output);
           });
     }
   }

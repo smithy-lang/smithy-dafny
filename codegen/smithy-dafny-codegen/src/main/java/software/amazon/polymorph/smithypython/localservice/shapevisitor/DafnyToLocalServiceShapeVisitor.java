@@ -4,7 +4,6 @@
 package software.amazon.polymorph.smithypython.localservice.shapevisitor;
 
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.DafnyToLocalServiceConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceToDafnyConversionFunctionWriter;
@@ -89,7 +88,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     // ONLY write converters if the shape under generation is in the current namespace (or Unit
     // shape)
     if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())
-        || Utils.isUnitShape(structureShape.getId())) {
+        || SmithyNameResolver.isUnitShape(structureShape.getId())) {
       LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
           structureShape, context, writer);
       DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
@@ -110,7 +109,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
         .formatted(
             pythonModuleSmithygeneratedPath,
             SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape, context),
-            Utils.isUnitShape(structureShape.getId()) ? "" : dataSource);
+            SmithyNameResolver.isUnitShape(structureShape.getId()) ? "" : dataSource);
   }
 
   @Override

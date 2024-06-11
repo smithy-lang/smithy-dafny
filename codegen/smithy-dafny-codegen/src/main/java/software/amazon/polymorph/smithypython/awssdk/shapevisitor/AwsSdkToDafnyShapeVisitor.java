@@ -7,7 +7,6 @@ import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameReso
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.DafnyToAwsSdkConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -74,7 +73,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String structureShape(StructureShape structureShape) {
     // Dafny does not generate a type for Unit shape
-    if (Utils.isUnitShape(structureShape.getId())) {
+    if (SmithyNameResolver.isUnitShape(structureShape.getId())) {
       return "None";
     }
 

@@ -4,7 +4,6 @@
 package software.amazon.polymorph.smithypython.localservice.shapevisitor;
 
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.DafnyToLocalServiceConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceToDafnyConversionFunctionWriter;
@@ -96,7 +95,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
     public String structureShape(StructureShape structureShape) {
       // ONLY write converters if the shape under generation is in the current namespace (or Unit shape)
       if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())
-          || Utils.isUnitShape(structureShape.getId())) {
+          || SmithyNameResolver.isUnitShape(structureShape.getId())) {
         LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
             context, writer);
         DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,

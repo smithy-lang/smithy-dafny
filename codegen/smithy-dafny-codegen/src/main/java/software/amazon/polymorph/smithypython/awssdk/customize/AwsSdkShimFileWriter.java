@@ -11,7 +11,6 @@ import software.amazon.polymorph.smithypython.awssdk.shapevisitor.DafnyToAwsSdkS
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -178,11 +177,11 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
           "",
           operationShape.getId().getName(),
           // Do not generate an `input` parameter if the operation does not take in an input
-          Utils.isUnitShape(inputShape)
+          SmithyNameResolver.isUnitShape(inputShape)
               ? ""
               : "input: " + DafnyNameResolver.getDafnyTypeForShape(inputShape),
           // Return `None` type if the operation does not return an output
-          Utils.isUnitShape(outputShape)
+          SmithyNameResolver.isUnitShape(outputShape)
               ? "None"
               : DafnyNameResolver.getDafnyTypeForShape(outputShape),
           () -> {
@@ -226,7 +225,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
                 """
                 return Wrappers.Result_Success($L)
                 """,
-                Utils.isUnitShape(outputShape) ? "None" : output);
+                SmithyNameResolver.isUnitShape(outputShape) ? "None" : output);
           });
     }
   }
