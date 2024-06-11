@@ -68,7 +68,7 @@ public class LocalServiceGenerator implements Runnable {
         final var serviceTrait = service.expectTrait(LocalServiceTrait.class);
         final var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
 
-        writerDelegator.useFileWriter("ImplementationFromDafny-go/src/%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer1 -> {
+        writerDelegator.useFileWriter("%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer1 -> {
             new StructureGenerator(model, symbolProvider, writer1,
                                    model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
             model.getUnionShapes().stream()
@@ -202,7 +202,7 @@ public class LocalServiceGenerator implements Runnable {
     void generateShim() {
         final var namespace = "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(service));
 
-        writerDelegator.useFileWriter("%s/TestsFromDafny-go/src/" + namespace + "/shim.go".formatted(namespace), namespace, writer -> {
+        writerDelegator.useFileWriter("%s/shim.go".formatted(namespace), namespace, writer -> {
 
             writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(service));
             writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
