@@ -67,9 +67,6 @@ public class LocalServiceGenerator implements Runnable {
         final var serviceSymbol = symbolProvider.toSymbol(service);
         final var serviceTrait = service.expectTrait(LocalServiceTrait.class);
         final var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
-        // var serviceNamespace = service.getId().getNamespace();
-        // UnionGenerator u = new UnionGenerator(model, symbolProvider, model.expectShape(serviceTrait.getConfigId()));
-        // System.out.println("u:" + u);
 
         writerDelegator.useFileWriter("ImplementationFromDafny-go/src/%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer1 -> {
             new StructureGenerator(model, symbolProvider, writer1,
@@ -278,7 +275,7 @@ public class LocalServiceGenerator implements Runnable {
                                                 ${C|}
                                                 case $L.CollectionOfErrors:
                                                     return Wrappers.Companion_Result_.Create_Failure_($L.CollectionOfErrors_Input_ToDafny(native_error.($L.CollectionOfErrors)))
-                                                case types.OpaqueError:
+                                                case $L.OpaqueError:
                                                     return Wrappers.Companion_Result_.Create_Failure_($L.OpaqueError_Input_ToDafny(native_error.($L.OpaqueError)))
                                                 default:
                                                     return Wrappers.Companion_Result_.Create_Failure_(native_error)
@@ -290,6 +287,7 @@ public class LocalServiceGenerator implements Runnable {
                              operationShape.getId().getName(),
                              inputType, typeConversion, clientResponse, clientCall,
                              writer.consumer(this::shimErrors),
+                             SmithyNameResolver.smithyTypesNamespace(service),
                              SmithyNameResolver.smithyTypesNamespace(service),
                              SmithyNameResolver.shapeNamespace(service),
                              SmithyNameResolver.smithyTypesNamespace(service),
@@ -330,7 +328,7 @@ public class LocalServiceGenerator implements Runnable {
     }
 
     void generateUnmodelledErrors(GenerationContext context) {
-        writerDelegator.useFileWriter("ImplementationFromDafny-go/src/%s/unmodelled_errors.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer -> {
+        writerDelegator.useFileWriter("%s/unmodelled_errors.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer -> {
             writer.addUseImports(SmithyGoDependency.FMT);
             writer.write("""
                                  type CollectionOfErrors struct {
