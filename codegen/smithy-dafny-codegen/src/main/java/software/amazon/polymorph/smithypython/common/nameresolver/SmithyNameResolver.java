@@ -312,10 +312,8 @@ public class SmithyNameResolver {
    */
   public static String getDafnyToSmithyFunctionNameForShape(
       Shape shape, GenerationContext context) {
-    return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            shape.getId().getNamespace())
-        + "_"
-        + shape.getId().getName();
+    return getConversionFunctionNameForShape(shape, context);
+
   }
 
   /**
@@ -331,9 +329,27 @@ public class SmithyNameResolver {
    */
   public static String getSmithyToDafnyFunctionNameForShape(
       Shape shape, GenerationContext context) {
+    return getConversionFunctionNameForShape(shape, context);
+  }
+
+  public static String getConversionFunctionNameForShape(Shape shape, GenerationContext context) {
     return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             shape.getId().getNamespace())
-        + "_"
-        + shape.getId().getName();
+            + "_"
+            + shape.getId().getName();
   }
+
+    /**
+     * Returns true if `shapeId` is a Smithy Unit shape.
+     *
+     * @param shapeId
+     * @return
+     */
+    public static boolean isUnitShape(ShapeId shapeId) {
+      return shapeId.getNamespace().equals("smithy.api") && shapeId.getName().equals("Unit");
+    }
+
+    private static boolean isUnitShape(Shape shape) {
+      return isUnitShape(shape.getId());
+    }
 }
