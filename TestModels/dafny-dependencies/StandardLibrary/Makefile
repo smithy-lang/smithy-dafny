@@ -107,7 +107,7 @@ transpile_implementation:
 # Override SharedMakefile's transpile_implementation to not reference
 # StandardLibrary as a Library
 transpile_implementation_new:
-	/Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+	dafny \
 		translate go \
 		--go-module-name $(GO_MODULE_NAME) \
 		--cores:$(CORES) \
