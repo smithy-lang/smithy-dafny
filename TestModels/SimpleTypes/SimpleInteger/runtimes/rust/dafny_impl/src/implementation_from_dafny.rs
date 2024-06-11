@@ -447,6 +447,7 @@ pub mod r#_SimpleIntegerImpl_Compile {
             ) {
                 panic!("Halt")
             };
+
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput::GetIntegerOutput {
             value: input.value().clone()
           });

@@ -16,7 +16,9 @@ pub fn to_dafny(
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::std::rc::Rc<::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>,
+    dafny_value: ::std::rc::Rc<
+        ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
+    >,
 ) -> crate::operation::get_boolean::GetBooleanOutput {
     let value = if matches!(
         dafny_value.value().as_ref(),
