@@ -30,7 +30,7 @@ mod simple_errors_test {
         match result {
             Ok(_x) => assert!(false),
             Err(e) => match e {
-                Opaque { obj } => assert!(true),
+                Opaque { obj } => assert!(obj.0.is_some()),
                 _ => assert!(false, "always_native_error did not return Opaque"),
             },
         }

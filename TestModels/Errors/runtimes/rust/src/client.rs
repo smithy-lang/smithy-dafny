@@ -18,7 +18,7 @@ impl Client {
         // If this service had any configuration properties,
         // they would need converting here too.
         let inner = ::simple_errors_dafny::_simple_derrors_dinternaldafny::_default::SimpleErrors(
-            &crate::conversions::simple_errors_config::_simple_errors_config::to_dafny(conf),
+            &crate::conversions::simple_errors_config::to_dafny(conf),
         );
         if matches!(
             inner.as_ref(),

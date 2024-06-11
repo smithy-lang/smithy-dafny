@@ -29,7 +29,7 @@ impl AlwaysNativeError {
                 ),
             )
         } else {
-            Err(crate::conversions::error::_error::from_dafny(
+            Err(crate::conversions::error::from_dafny(
                 inner_result.error().clone(),
             ))
         }

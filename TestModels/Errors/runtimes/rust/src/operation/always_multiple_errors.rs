@@ -27,7 +27,7 @@ impl AlwaysMultipleErrors {
         ) {
             Ok(crate::conversions::always_multiple_errors::_always_multiple_errors_output::from_dafny(inner_result.value().clone()))
         } else {
-            Err(crate::conversions::error::_error::from_dafny(
+            Err(crate::conversions::error::from_dafny(
                 inner_result.error().clone(),
             ))
         }
