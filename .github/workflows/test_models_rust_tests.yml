@@ -22,7 +22,7 @@ jobs:
             # TestModels/Constraints,
             # TestModels/Constructor,
             # TestModels/Dependencies,
-            # TestModels/Errors,
+            TestModels/Errors,
             # TestModels/Extendable,
             # TestModels/Extern,
             # TestModels/LanguageSpecificLogic,
