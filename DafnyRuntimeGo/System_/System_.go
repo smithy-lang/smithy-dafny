@@ -4,8 +4,9 @@
 package _System
 
 import (
-	_dafny "dafny"
 	os "os"
+
+	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
 )
 
 var _ _dafny.Dummy__
