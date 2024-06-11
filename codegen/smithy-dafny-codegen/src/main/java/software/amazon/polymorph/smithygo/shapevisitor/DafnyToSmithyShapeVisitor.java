@@ -63,7 +63,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     protected String referenceStructureShape(StructureShape shape) {
         ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
         Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
-        return "%1$s{%2$s}".formatted(resourceOrService.toShapeId().getName(), dataSource);
+        var namespace = "";
+        if (!resourceOrService.toShapeId().getNamespace().equals(context.settings().getService().getNamespace())) {
+            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(resourceOrService.toShapeId().getNamespace()), SmithyNameResolver.shapeNamespace(resourceOrService));
+            namespace = SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
+        }
+        return "%1$s{%2$s}".formatted(namespace.concat(resourceOrService.toShapeId().getName()), dataSource);
     }
 
     @Override

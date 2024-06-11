@@ -37,46 +37,25 @@ public class SmithyNameResolver {
         return SmithyNameResolver.smithyTypesNamespace(shape).concat(DOT).concat(symbol.getName());
     }
 
+    public static String getSmithyType(final Shape shape) {
+        return SmithyNameResolver.smithyTypesNamespace(shape).concat(DOT).concat(shape.toShapeId().getName());
+    }
+
     public static String getToDafnyMethodName(final ServiceShape serviceShape, final Shape shape, final String disambiguator) {
-        final var methodName = serviceShape.getContextualName(shape);
-        return methodName.concat(disambiguator).concat("_ToDafny");
+        final var methodName = serviceShape.getContextualName(shape).concat("_ToDafny");
+        if (serviceShape.toShapeId().getNamespace().equals(shape.toShapeId().getNamespace())) {
+            return methodName;
+        } else {
+            return SmithyNameResolver.shapeNamespace(shape).concat(DOT).concat(methodName);
+        }
     }
 
     public static String getFromDafnyMethodName(final ServiceShape serviceShape, final Shape shape, final String disambiguator) {
-        final var methodName = serviceShape.getContextualName(shape);
-        return methodName.concat(disambiguator).concat("_FromDafny");
+        final var methodName = serviceShape.getContextualName(shape).concat("_FromDafny");
+        if (serviceShape.toShapeId().getNamespace().equals(shape.toShapeId().getNamespace())) {
+            return methodName;
+        } else {
+            return SmithyNameResolver.shapeNamespace(shape).concat(DOT).concat(methodName);
+        }
     }
-
-//    public static String getInputToDafnyMethodName(final ServiceShape serviceShape, final Shape shape) {
-//        final var methodName = getToDafnyMethodName(serviceShape, shape, "_Input");
-//        if (serviceShape.toShapeId().getNamespace().equals(shape.toShapeId().getNamespace())) {
-//            return methodName;
-//        }
-//        return smithyTypesNamespace(shape).concat(DOT).concat(methodName);
-//    }
-//
-//    public static String getOutputToDafnyMethodName(final ServiceShape serviceShape, final Shape shape) {
-//        final var methodName = getToDafnyMethodName(serviceShape, shape, "_Output");
-//        if (serviceShape.toShapeId().getNamespace().equals(shape.toShapeId().getNamespace())) {
-//            return methodName;
-//        }
-//        return smithyTypesNamespace(shape).concat(DOT).concat(methodName);
-//    }
-//
-//
-//    public static String getOutputFromDafnyMethodName(final ServiceShape serviceShape, final Shape shape) {
-//        final var methodName =  getFromDafnyMethodName(serviceShape, shape, "_Output");
-//        if (serviceShape.toShapeId().getNamespace().equals(shape.toShapeId().getNamespace())) {
-//            return methodName;
-//        }
-//        return smithyTypesNamespace(shape).concat(DOT).concat(methodName);
-//    }
-//
-//    public static String getInputFromDafnyMethodName(final ServiceShape serviceShape, final Shape shape) {
-//        final var methodName =  getFromDafnyMethodName(serviceShape, shape, "_Input");
-//        if (serviceShape.toShapeId().getNamespace().equals(shape.toShapeId().getNamespace())) {
-//            return methodName;
-//        }
-//        return smithyTypesNamespace(shape).concat(DOT).concat(methodName);
-//    }
 }

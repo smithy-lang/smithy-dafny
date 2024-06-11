@@ -95,17 +95,31 @@ public final class StructureGenerator implements Runnable {
                     Symbol memberSymbol = symbolProvider.toSymbol(member);
 
                     var targetShape = model.expectShape(member.getTarget());
-                    if (!targetShape.toShapeId().getNamespace().equals(member.toShapeId().getNamespace()) && !targetShape.toShapeId().getNamespace().startsWith("smithy") ) {
-                        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(targetShape.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespace(targetShape));
-                    }
 
                     if (isInputStructure) {
                         memberSymbol = memberSymbol.getProperty(SymbolUtils.INPUT_VARIANT, Symbol.class)
                                 .orElse(memberSymbol);
                     }
+                    var namespace = SmithyNameResolver.smithyTypesNamespace(targetShape);
+
                     if (targetShape.hasTrait(ReferenceTrait.class)) {
                         memberSymbol = memberSymbol.getProperty("Referred", Symbol.class).get();
+                        var refShape = targetShape.expectTrait(ReferenceTrait.class);
+                        if (refShape.isService()) {
+                            namespace = SmithyNameResolver.shapeNamespace(model.expectShape(refShape.getReferentId()));
+                        }
+                        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(refShape.getReferentId().getNamespace()), namespace);
+                    } else {
+                        System.out.println("!!!!!!!!!   1" + memberSymbol.getNamespace());
+                        System.out.println("!!!!!!!!!   2" + targetShape.toShapeId().getNamespace());
+                        System.out.println("!!!!!!!!!   3" + member.toShapeId().getNamespace());
+                        System.out.println("!!!!!!!!!   4" + shape.toShapeId().getNamespace());
+
+                        if (!member.toShapeId().getNamespace().equals(targetShape.toShapeId().getNamespace()) && !targetShape.toShapeId().getNamespace().startsWith("smithy") && targetShape.asStructureShape().isPresent()) {
+                            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(targetShape.toShapeId().getNamespace()), namespace);
+                        }
                     }
+
                     writer.write("$L $P", memberName, memberSymbol);
 
                 });
