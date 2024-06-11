@@ -3,13 +3,13 @@
 pub fn to_dafny(
     value: crate::operation::get_resources::GetResourcesInput,
 ) -> ::std::rc::Rc<
-    ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesInput,
+    ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
 > {
     let dafny_value = match value.value {
         Some(b) => ::simple_resources_dafny::_Wrappers_Compile::Option::Some { value: b },
         None => ::simple_resources_dafny::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesInput::GetResourcesInput {
+    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput::GetResourcesInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -17,7 +17,7 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::GetResourcesInput,
+        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
     >,
 ) -> crate::operation::get_resources::GetResourcesInput {
     let value = if matches!(

@@ -548,15 +548,16 @@ pub mod r#_simple_dresources_dinternaldafny_dtypes {
             }
         }
     }
-/*
-    impl ::std::default::Default for GetResourcesOutput {
-        fn default() -> GetResourcesOutput {
-            GetResourcesOutput::GetResourcesOutput {
-                output: ::std::default::Default::default(),
-            }
-        }
-    }
-*/
+
+    // the trait `Default` is not implemented for `Object<(dyn ISimpleResource + 'static)>`
+    // impl ::std::default::Default for GetResourcesOutput {
+    //     fn default() -> GetResourcesOutput {
+    //         GetResourcesOutput::GetResourcesOutput {
+    //             output: ::std::default::Default::default(),
+    //         }
+    //     }
+    // }
+
     impl ::std::convert::AsRef<GetResourcesOutput> for &GetResourcesOutput {
         fn as_ref(&self) -> Self {
             self
@@ -588,7 +589,7 @@ pub mod r#_simple_dresources_dinternaldafny_dtypes {
             let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
             let mut _out0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
             _out0 = ::dafny_runtime::MaybePlacebo::from(
-                self.r#_GetResourceData_k(input)
+                self.r#_GetResourceData_k(input),
             );
             output = ::dafny_runtime::MaybePlacebo::from(_out0.read());
             return output.read();
@@ -845,8 +846,8 @@ pub mod r#_SimpleResource_Compile {
                 ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>,
             >,
         > {
-            // let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
-            let _out1 = ::dafny_runtime::MaybePlacebo::from(
+            let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dresources_dinternaldafny_dtypes::Error>>>>::new();
+            _out1 = ::dafny_runtime::MaybePlacebo::from(
                 super::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResource::GetResourceData(
                     self,
                     input,
@@ -959,6 +960,7 @@ pub mod r#_SimpleResource_Compile {
                 },
             ));
             return output.read();
+            return output.read();
         }
     }
 }
@@ -1025,6 +1027,7 @@ pub mod r#_SimpleResourcesOperations_Compile {
                     value: result.clone(),
                 },
             ));
+            return output.read();
             return output.read();
         }
     }

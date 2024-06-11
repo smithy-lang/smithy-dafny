@@ -4,15 +4,15 @@
 pub fn to_dafny(
     value: crate::types::simple_resources_config::SimpleResourcesConfig,
 ) -> ::std::rc::Rc<
-    ::simple_resources_dafny::_simple_dtypes_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
->{
-    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::SimpleResourcesConfig::SimpleResourcesConfig {})
+    ::simple_resources_dafny::_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
+> {
+    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig::SimpleResourcesConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_resources_dafny::r#_simple_dtypes_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
+        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
     >,
 ) -> crate::types::simple_resources_config::SimpleResourcesConfig {
     crate::types::simple_resources_config::SimpleResourcesConfig {}
