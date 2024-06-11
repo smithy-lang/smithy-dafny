@@ -36,9 +36,9 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   {
     // TODO: Actually compute the binary
     var fakeBinary := [[12], [34, 56]];
-    var fakeBinaryIter := new SeqEnumerator(fakeBinary);
+    var fakeBinaryEnumerator := new SeqEnumerator(fakeBinary);
     
-    var outStream := new SimpleStream<bytes>(fakeBinaryIter);
+    var outStream := new SimpleStream<bytes>(fakeBinaryEnumerator);
 
     return Success(BinaryOfOutput(binary := outStream));
   }
@@ -48,7 +48,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   {true}
 
 
-  class Chunker extends BlockingPipeline<bytes, bytes> {
+  class Chunker extends Pipeline<bytes, bytes> {
 
     const chunkSize: int32
     var chunkBuffer: bytes
@@ -71,12 +71,13 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
       }
 
       while chunkSize as nat <= |chunkBuffer| {
-        var _ := a.Call(chunkBuffer[..chunkSize]);
+        var _ := a.Invoke(chunkBuffer[..chunkSize]);
         chunkBuffer := chunkBuffer[chunkSize..];
       }
+      
       if event == None {
         if 0 < |chunkBuffer| {
-          var _ := a.Call(chunkBuffer);
+          var _ := a.Invoke(chunkBuffer);
         }
       }
     }
@@ -86,11 +87,6 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     returns (output: Result<ChunksOutput, Error>)
   {
     var chunker := new Chunker(input.bytesIn, input.chunkSize);
-
-    // TODO: Connect streams together for flow control.
-    // May want to wrap Chunker as a transform that offers flow control from the downstream.
-    // Can we create the right kind of output stream (e.g. InputStream vs Publisher)
-    // based on what kind of input stream we were passed?
 
     return Success(ChunksOutput(bytesOut := chunker));
   }

@@ -142,7 +142,7 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
 
     ghost predicate Valid() 
       reads this, Repr 
-      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> this in Repr
       ensures Valid() ==> CanProduce(history)
       decreases height, 0
     {

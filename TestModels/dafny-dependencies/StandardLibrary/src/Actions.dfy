@@ -111,6 +111,13 @@ module {:options "--function-syntax:4"} Std.Actions {
     else [f(xs[0])] + SeqMap(f, xs[1..])
   }
 
+  /* Returns the last element of a non-empty sequence. */
+  function SeqLast<T>(xs: seq<T>): T
+    requires |xs| > 0
+  {
+    xs[|xs|-1]
+  }
+
   function Max(a: int, b: int): int
   {
     if a < b
@@ -183,13 +190,33 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   trait Stream<T(!new)> extends Action<(), Option<T>> {
 
-    method ForEach(a: Accumulator<T>)
-
+    // A Stream is just a specialization of an Enumerator
+    // with the potentially-optimized ForEach().
+    // All implementors have to provide a body for this lemma
+    // to prove they are in fact enumerators.
+    // (think of this like `extends Enumerator<T>` which you can't actually say)
     lemma IsEnumerator()
       ensures (this as object) is Enumerator<T>
+
+    // Pass every value in sequence into the given accumulator.
+    // Equivalent to DefaultForEach below,
+    // but may be implemented more efficiently with concurrent execution
+    // in the target language.
+    method ForEach(a: Accumulator<T>)
+      requires Valid()
+      requires a.Valid()
+      requires Repr !! a.Repr 
+      // The stream has produced all values
+      // TODO: Needs to be more precise about producing exactly one None.
+      // Something like EnumeratorDone(this)
+      ensures 0 < |Produced()| && SeqLast(Produced()) == None
+      // Each value was fed into the accumulator in sequence
+      ensures Produced() == a.Consumed()
+
+    
   }
 
-  method {:verify false} DefaultForEach<T(!new)>(s: Enumerator<T>, a: Aggregator<T>) {
+  method {:verify false} DefaultForEach<T(!new)>(s: Enumerator<T>, a: Accumulator<T>) {
     // TODO: Actual specs to prove this terminates
     while (true) {
       var next := s.Invoke(());
@@ -197,8 +224,7 @@ module {:options "--function-syntax:4"} Std.Actions {
         break;
       }
 
-      var success := a.Invoke(next.value);
-      assert success;
+      var _ := a.Invoke(next);
     }
   }
 
