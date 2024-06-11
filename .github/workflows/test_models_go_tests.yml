@@ -95,7 +95,7 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
-          export dafny-version=4.6
+          export DAFNY_VERSION=4.6
           make polymorph_dafny
           sh ./removeDotFromExtern.sh
           make transpile_go
