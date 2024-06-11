@@ -90,7 +90,7 @@ public record DafnyNameResolver(
         MAP -> dafnyModulePrefixForShape(shape) + shapeName;
       case BLOB -> {
         if (shape.hasTrait(StreamingTrait.class)) {
-          yield "Enumerator<bytes>";
+          yield "Stream<bytes>";
         } else {
           yield dafnyModulePrefixForShape(shape) + shapeName;
         }

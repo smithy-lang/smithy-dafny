@@ -162,9 +162,6 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
       true
     }
 
-    // TODO: Need built in buffering so the subscriber isn't actually
-    // called unless the subscription requests values.
-    // OR expose an isomorphic concept and thread it through.
     method Invoke(e: SubscriptionEvent<T>) returns (nothing: ()) {
       match e {
         case Some(Success(value)) => {

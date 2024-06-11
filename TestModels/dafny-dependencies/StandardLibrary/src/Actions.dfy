@@ -79,7 +79,6 @@ module {:options "--function-syntax:4"} Std.Actions {
     // Helpers
 
     ghost method Update(t: T, r: R)
-      reads `history
       modifies `history
       ensures history == old(history) + [(t, r)]
     {
@@ -175,12 +174,20 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   // Aggregators
 
+  // TODO: Names need improvement
   type IAggregator<T> = Action<T, ()>
   type Aggregator<T(!new)> = a: Action<T, bool> | exists limit :: ProducesTerminatedBy(a, false, limit) witness *
+  type Accumulator<T(!new)> = Action<Option<T>, ()> // | exists limit :: ConsumesTerminatedBy(a, None, limit) witness *
 
-  // Utilities
+  // Streams
 
-  method {:extern} ForEach<T(!new)>(s: Enumerator<T>, a: Aggregator<T>)
+  trait Stream<T(!new)> extends Action<(), Option<T>> {
+
+    method ForEach(a: Accumulator<T>)
+
+    lemma IsEnumerator()
+      ensures (this as object) is Enumerator<T>
+  }
 
   method {:verify false} DefaultForEach<T(!new)>(s: Enumerator<T>, a: Aggregator<T>) {
     // TODO: Actual specs to prove this terminates
@@ -240,7 +247,6 @@ module {:options "--function-syntax:4"} Std.Actions {
 
     method Invoke(t: T) returns (r: ()) 
       requires Requires(t)
-      reads Reads(t)
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
@@ -346,7 +352,7 @@ module {:options "--function-syntax:4"} Std.Actions {
   // }
 
   // TODO: This is also a Folder([], (x, y) => x + [y])
-  class Collector<T> extends Action<T, bool> {
+  class Collector<T> extends Action<Option<T>, ()> {
 
     var values: seq<T>
 
@@ -363,21 +369,23 @@ module {:options "--function-syntax:4"} Std.Actions {
       this in Repr 
     }
 
-    ghost predicate CanConsume(history: seq<(T, bool)>, next: T)
+    ghost predicate CanConsume(history: seq<(Option<T>, ())>, next: Option<T>)
       requires CanProduce(history)
       decreases height
     {
       true
     }
 
-    ghost predicate CanProduce(history: seq<(T, bool)>)
+    ghost predicate CanProduce(history: seq<(Option<T>, ())>)
       decreases height
     {
       true
     }
 
-    method {:verify false} Invoke(t: T) returns (success: bool) {
-      values := values + [t];
+    method {:verify false} Invoke(t: Option<T>) returns (nothing: ()) {
+      if t.Some? {
+        values := values + [t.value];
+      }
     }
 
     method {:verify false} Pop() returns (t: T) 
@@ -389,17 +397,12 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   }
 
-  trait {:termination false} Pipeline<U, T(!new)> extends Action<(), Option<T>> {
+  trait {:termination false} Pipeline<U(!new), T(!new)> extends Stream<T> {
 
-    const upstream: Action<(), Option<U>>
+    const upstream: Stream<U>
     const buffer: Collector<T>
 
     method {:verify false} Invoke(nothing: ()) returns (t: Option<T>) {
-      if 0 < |buffer.values| {
-        var next := buffer.Pop();
-        return Some(next);
-      }
-
       while (|buffer.values| == 0) {
         var u := upstream.Invoke(());
         Process(u, buffer);
@@ -409,27 +412,58 @@ module {:options "--function-syntax:4"} Std.Actions {
         }
       }
 
-      // TODO: redundant and off still
       if 0 < |buffer.values| {
         var next := buffer.Pop();
         return Some(next);
+      } else {
+        return None;
       }
     }
 
-    method {:verify false} ForEach(a: Aggregator<T>)
+    method {:verify false} ForEach(a: Accumulator<T>)
     {
-      // TODO: Actual Action specs to prove this terminates (iter has to be an Enumerable)
-      while (true) {
-        var next := upstream.Invoke(());
-        Process(next, a);
-
-        if next == None {
-          break;
-        }
-      }
+      var a' := new PipelineProcessor(this, a);
+      upstream.ForEach(a');
     }
 
-    method Process(u: Option<U>, a: Aggregator<T>)
+    method Process(u: Option<U>, a: Accumulator<T>)
 
+  }
+
+  class PipelineProcessor<U(!new), T(!new)> extends Action<Option<U>, ()> {
+
+    const pipeline: Pipeline<U, T>
+    const accumulator: Accumulator<T>
+
+    constructor(pipeline: Pipeline<U, T>, accumulator: Accumulator<T>) {
+      this.pipeline := pipeline;
+      this.accumulator := accumulator;
+    }
+
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> CanProduce(history)
+      decreases height, 0
+    {
+      this in Repr 
+    }
+
+    ghost predicate CanConsume(history: seq<(Option<U>, ())>, next: Option<U>)
+      requires CanProduce(history)
+      decreases height
+    {
+      true
+    }
+
+    ghost predicate CanProduce(history: seq<(Option<U>, ())>)
+      decreases height
+    {
+      true
+    }
+
+    method {:verify false} Invoke(u: Option<U>) returns (nothing: ()) {
+      pipeline.Process(u, accumulator);
+    }
   }
 }
