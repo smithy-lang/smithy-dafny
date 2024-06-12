@@ -69,7 +69,7 @@ public final class UnionGenerator implements Runnable {
                 member.getMemberTrait(model, DocumentationTrait.class).ifPresent(trait -> {
                     writer.writeDocs(trait.getValue());
                 });
-                writer.openBlock("def __init__(self, value: '$T'):", "", targetSymbol, () -> {
+                writer.openBlock("def __init__(self, value: $T):", "", targetSymbol, () -> {
                     writer.write("self.value = value");
                 });
 
