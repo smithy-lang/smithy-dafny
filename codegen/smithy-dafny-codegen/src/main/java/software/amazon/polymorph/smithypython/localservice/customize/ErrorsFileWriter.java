@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithypython.localservice.customize;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -300,8 +301,21 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     // Import this service's error that wraps the dependency service's errors
                     ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
                     String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
-                    String serviceDependencyErrorDafnyName =
-                        software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace());
+
+                    List<ShapeId> serviceDependencyErrors = serviceDependencyShape.getErrors();
+                    if (serviceDependencyErrors.size() > 1) {
+                        throw new IllegalArgumentException(
+                                "Only 1 service-modelled error per service supported");
+                    }
+
+                    ShapeId serviceDependencyError = serviceDependencyErrors.get(0);
+
+                    DafnyNameResolver.importDafnyTypeForError(writer, serviceDependencyError, codegenContext);
+
+                    String defaultWrappingError =
+                            !serviceShape.getErrors().isEmpty()
+                                    ? DafnyNameResolver.getDafnyTypeForError(serviceDependencyError)
+                                    : "Error";
 
                     // Generate conversion method:
                     // "If this is a dependency-specific error, defer to the dependency's
@@ -311,11 +325,11 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     writer.write(
                             """
                                 if isinstance(e, $L):
-                                    return $L.Error_$L($L(e.message))
+                                    return $L.$L($L(e.message))
                                 """,
                             dependencyErrorName,
                             DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape, codegenContext),
-                            serviceDependencyErrorDafnyName,
+                            defaultWrappingError,
                             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                     serviceDependencyShapeId.getNamespace())
                                     + nativeToDafnyErrorName);
