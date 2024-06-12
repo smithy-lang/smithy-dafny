@@ -7,5 +7,9 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.short
 
+GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/SimpleTypes/SimpleShort"
+
+PROJECT_DTR := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

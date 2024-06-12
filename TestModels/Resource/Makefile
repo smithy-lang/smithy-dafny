@@ -16,7 +16,7 @@ SERVICE_DEPS_SimpleResources :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-GO_MODULE_NAME="github.com/ShubhamChaturvedi7/Resource"
+GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/Resource"
 
 PROJECT_DTR := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr

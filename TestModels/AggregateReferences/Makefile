@@ -22,6 +22,8 @@ GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/AggregateReferences"
 _polymorph_wrapped :
 	echo Skipping wrapped service for aggregate references
 
+PROJECT_DTR := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
