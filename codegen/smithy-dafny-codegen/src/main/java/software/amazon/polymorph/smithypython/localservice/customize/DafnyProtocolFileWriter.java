@@ -29,8 +29,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
 
-    // Collect all `inputShapeIds` to identify all possible types `dafny_operation_input` can take
-    // on
+    // Collect all `inputShapeIds` to identify all possible types `dafny_operation_input` can take on
     Set<ShapeId> inputShapeIds = new HashSet<>();
     for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
       OperationShape operationShape =
@@ -86,7 +85,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
     // If all operations on the service take no inputs,
     // or if the service has no operations,
     // write `None`
-    if (inputShapeIds.size() == 0) {
+    if (inputShapeIds.isEmpty()) {
       writer.write("None");
     }
     for (ShapeId inputShapeId : inputShapeIds) {

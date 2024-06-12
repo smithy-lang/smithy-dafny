@@ -535,24 +535,14 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                     serviceDependencyShapeId.getNamespace())
                 + "_sdk_error_to_dafny_error");
         // Generate deserializer for dependency that defers to its `_deserialize_error`
-        //                writer.write(
-        //                        """
-        //                        elif error.is_$L:
-        //                            return $L($L(error.$L.obj))""",
-        //                        code,
-        //                        code,
-        //
-        // SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-        //                                serviceDependencyShapeId.getNamespace())
-        //                                + "_sdk_error_to_dafny_error",
-        //                        code);
         writer.write(
             """
-                        elif error.is_$L:
-                            return $L(message=_dafny.string_of(error.$L.message))""",
+            elif error.is_$L:
+                return $L(message=_dafny.string_of(error.$L.message))""",
             code,
             code,
-            code);
+            code
+        );
         writer.addStdlibImport("_dafny");
       }
     }

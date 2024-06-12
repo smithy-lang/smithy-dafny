@@ -142,7 +142,7 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
 
-    // Only open a writer if there are reference shapes; otherwise this will write an empty file.
+    // Only write a `references.py` file if there are reference shapes (resources, resource interfaces, etc)
     if (!referenceShapes.isEmpty()) {
       for (Shape referenceShape : referenceShapes) {
         if (referenceShape.isResourceShape()) {
