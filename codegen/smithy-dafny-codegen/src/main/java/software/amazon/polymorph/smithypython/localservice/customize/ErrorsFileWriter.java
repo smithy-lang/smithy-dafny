@@ -302,7 +302,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
                     String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
                     String serviceDependencyErrorDafnyName =
-                            software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName(serviceShape.getId().getNamespace()) + ".Error";
+                            software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName(serviceDependencyShape.getId().getNamespace()) + ".Error";
                     final String errorConstructorName = serviceDependencyErrorDafnyName.replace("Types.Error", "");
 
                     // Generate conversion method:
