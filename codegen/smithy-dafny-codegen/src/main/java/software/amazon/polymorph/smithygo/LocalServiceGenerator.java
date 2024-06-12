@@ -288,7 +288,7 @@ public class LocalServiceGenerator implements Runnable {
                              inputType, typeConversion, clientResponse, clientCall,
                              writer.consumer(this::shimErrors),
                              SmithyNameResolver.smithyTypesNamespace(service),
-                             SmithyNameResolver.smithyTypesNamespace(service),
+                             SmithyNameResolver.shapeNamespace(service),
                              SmithyNameResolver.shapeNamespace(service),
                              SmithyNameResolver.smithyTypesNamespace(service),
                              SmithyNameResolver.shapeNamespace(service),
