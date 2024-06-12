@@ -191,7 +191,7 @@ public class CodegenEngine {
       "dafnyVersion",
       dafnyVersionString
     );
-    writeTemplatedFile("project.properties", parameters);
+    writeTemplatedFile("project.properties", outputPath.toString(), parameters);
   }
 
   private void generateDafny(final Path outputDir) {
@@ -735,11 +735,24 @@ public class CodegenEngine {
     String templatePath,
     Map<String, String> parameters
   ) {
-    IOUtils.writeTemplatedFile(
-      getClass(),
-      libraryRoot,
+    writeTemplatedFile(
+      templatePath,
       templatePath,
       parameters
+    );
+  }
+
+  private void writeTemplatedFile(
+          String templatePath,
+          String outputTemplatePath,
+          Map<String, String> parameters
+  ) {
+    IOUtils.writeTemplatedFile(
+            getClass(),
+            libraryRoot,
+            templatePath,
+            outputTemplatePath,
+            parameters
     );
   }
 
