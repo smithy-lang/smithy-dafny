@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithypython.localservice.customize;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -301,7 +302,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
                     String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
                     String serviceDependencyErrorDafnyName =
-                        software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace());
+                            software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName(serviceDependencyShape.getId().getNamespace()) + ".Error";
+                    final String errorConstructorName = serviceDependencyErrorDafnyName.replace("Types.Error", "");
 
                     // Generate conversion method:
                     // "If this is a dependency-specific error, defer to the dependency's
@@ -315,7 +317,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                                 """,
                             dependencyErrorName,
                             DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape, codegenContext),
-                            serviceDependencyErrorDafnyName,
+                            errorConstructorName,
                             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                     serviceDependencyShapeId.getNamespace())
                                     + nativeToDafnyErrorName);
