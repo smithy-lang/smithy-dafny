@@ -33,6 +33,10 @@ public abstract class BaseConversionWriter {
   final List<Shape> shapesToGenerate = new ArrayList<>();
   // Flag to block generating inside a file while already generating another function
   // (prevents generating a conversion function inside another conversion function)
+  // Note: This is not thread-safe. If Smithy-Dafny-Python runs from multiple threads,
+  // this code won't work.
+  // A mutex would prevent this.
+  // SIM: https://sim.amazon.com/issues/CrypTool-5331
   boolean generating = false;
 
   protected GenerationContext context;
