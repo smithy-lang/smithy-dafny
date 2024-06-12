@@ -42,7 +42,7 @@ SERVICE_DEPS_SimpleDependencies := \
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-GO_MODULE_NAME="github.com/ShubhamChaturvedi7/Dependencies"
+GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/Dependencies"
 
 GO_DEPENDENCY_MODULE_NAMES := \
 	--dependency-module-name=simple.constraints=github.com/ShubhamChaturvedi7/Constraints \

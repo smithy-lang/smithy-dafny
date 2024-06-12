@@ -16,5 +16,7 @@ SERVICE_DEPS_SimpleConstructor :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/Constructor"
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

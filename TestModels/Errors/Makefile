@@ -14,7 +14,7 @@ SERVICE_DEPS_SimpleErrors :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-GO_MODULE_NAME="github.com/ShubhamChaturvedi7/Errors"
+GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/Errors"
 
 
 PROJECT_DTR := \
