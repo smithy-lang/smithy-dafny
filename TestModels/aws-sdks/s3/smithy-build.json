@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "projections": {
+    "list-queues-and-add-permission-only": {
+      "transforms": [
+        {
+          "name": "excludeShapesBySelector",
+          "args": {
+            "selector": "[id|name *= 'CopyObject', 'MultipartUpload', 'Create', 'DeleteBucket', 'DeleteObjectTagging', 'DeletePublicAccess', 'GetBucket', 'GetObjectAcl', 'GetObjectAttributes', 'TODO add other GetObjectFoo operations lol', 'Head', 'List', 'PutBucket', 'TODO everything after PutBucket']"
+          }
+        },
+        {
+          "name": "removeUnusedShapes"
+        }
+      ]
+    }
+  },
+  "plugins": {
+    "dafny-client-codegen": {
+      "edition": "2023",
+      "service": "com.amazonaws.s3#AmazonS3",
+      "targetLanguages": ["dotnet"],
+      "includeDafnyFile": "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
+    }
+  }
+}

@@ -1,11 +1,6 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# For this project, the Makefile should ONLY be used for:
-# - make transpile_net
-# - make test_net
-# The polymorph commands should be done using gradle instead. 
-
 CORES=2
 
 include ../../SharedMakefile.mk
