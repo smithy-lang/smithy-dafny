@@ -116,7 +116,7 @@ public class StructureGenerator implements Runnable {
         var code = shape.getId().getName();
         var symbol = symbolProvider.toSymbol(shape);
         var apiError = CodegenUtils.getApiError(settings);
-        writer.openBlock("class $L($L[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
+        writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
             writer.write("code: Literal[$1S] = $1S", code);
             writer.write("message: str");
             writeProperties(true);
