@@ -301,17 +301,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     // Import this service's error that wraps the dependency service's errors
                     ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
                     String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
-
-                    List<ShapeId> serviceDependencyErrors = serviceDependencyShape.getErrors();
-                    if (serviceDependencyErrors.size() > 1) {
-                        throw new IllegalArgumentException(
-                                "Only 1 service-modelled error per service supported");
-                    }
-
-                    String defaultWrappingError =
-                            !serviceDependencyErrors.isEmpty()
-                                    ? DafnyNameResolver.getDafnyTypeForError(serviceDependencyErrors.get(0))
-                                    : "Error";
+                    String serviceDependencyErrorDafnyName =
+                            software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName(serviceShape.getId().getNamespace()) + ".Error";
+                    final String errorConstructorName = serviceDependencyErrorDafnyName.replace("Types.Error", "");
 
                     // Generate conversion method:
                     // "If this is a dependency-specific error, defer to the dependency's
@@ -321,11 +313,11 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     writer.write(
                             """
                                 if isinstance(e, $L):
-                                    return $L.$L($L(e.message))
+                                    return $L.Error_$L($L(e.message))
                                 """,
                             dependencyErrorName,
                             DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape, codegenContext),
-                            defaultWrappingError,
+                            errorConstructorName,
                             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                     serviceDependencyShapeId.getNamespace())
                                     + nativeToDafnyErrorName);
