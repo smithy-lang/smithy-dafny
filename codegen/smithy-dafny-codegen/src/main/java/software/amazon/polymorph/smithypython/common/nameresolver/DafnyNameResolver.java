@@ -6,18 +6,15 @@ package software.amazon.polymorph.smithypython.common.nameresolver;
 import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
+
+import java.util.Optional;
 
 import static software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName;
 
@@ -232,6 +229,11 @@ public class DafnyNameResolver {
 
     else if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
       importDafnyTypeForError(writer, shapeId, context);
+    }
+
+    else if (context.model().expectShape(shapeId).hasTrait(PositionalTrait.class)) {
+      // Don't import positional shapes; their underlying types are discovered and imported
+      return;
     }
 
     else {
