@@ -91,6 +91,8 @@ jobs:
           make polymorph_dafny
           make transpile_go
           make polymorph_go 
+          go mod init github.com/dafny-lang/DafnyStandardLibGo
+          echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod; \
 
       - name: Generate Polymorph Dafny and Go code
         shell: bash
