@@ -83,6 +83,13 @@ jobs:
         run: |
           go install golang.org/x/tools/cmd/goimports@latest
 
+      - name: Add go mod to Dafny Runtime Go
+        shell: bash
+        working-directory: ./DafnyRuntimeGo
+        run: | 
+          go mod init github.com/dafny-lang/DafnyRuntimeGo
+          go mod tidy
+
       - name: polymorph dafny dependencies
         shell: bash
         working-directory: ./TestModels/dafny-dependencies/StandardLibrary
@@ -93,7 +100,7 @@ jobs:
           make polymorph_go 
           cd ./runtimes/go/ImplementationFromDafny-go/
           go mod init github.com/dafny-lang/DafnyStandardLibGo
-          echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod; \
+          echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod;
 
       - name: Generate Polymorph Dafny and Go code
         shell: bash
