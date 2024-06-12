@@ -6,7 +6,6 @@ package software.amazon.polymorph.smithypython.localservice.shapevisitor.convers
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -67,7 +66,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
           "def $L($L):",
           "",
           SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape, context),
-          Utils.isUnitShape(structureShape.getId()) ? "" : dataSourceInsideConversionFunction,
+          SmithyNameResolver.isUnitShape(structureShape.getId()) ? "" : dataSourceInsideConversionFunction,
           () -> {
             if (structureShape.hasTrait(ReferenceTrait.class)) {
               writeReferenceStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);

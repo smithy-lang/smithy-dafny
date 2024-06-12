@@ -4,7 +4,6 @@
 package software.amazon.polymorph.smithypython.localservice.shapevisitor;
 
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.DafnyToLocalServiceConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceToDafnyConversionFunctionWriter;
@@ -89,7 +88,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     // ONLY write converters if the shape under generation is in the current namespace (or Unit
     // shape)
     if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())
-        || Utils.isUnitShape(structureShape.getId())) {
+        || SmithyNameResolver.isUnitShape(structureShape.getId())) {
       LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
           structureShape, context, writer);
       DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
@@ -110,7 +109,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
         .formatted(
             pythonModuleSmithygeneratedPath,
             SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape, context),
-            Utils.isUnitShape(structureShape.getId()) ? "" : dataSource);
+            SmithyNameResolver.isUnitShape(structureShape.getId()) ? "" : dataSource);
   }
 
   @Override
@@ -186,35 +185,12 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
       writer.addStdlibImport("standard_library.internaldafny.generated", "UTF8");
       return "bytes(''.join(UTF8.default__.Decode(%1$s).value.Elements), encoding='utf-8')"
           .formatted(dataSource);
-      //        return "%1$s.encode('utf-8')".formatted(dataSource);
-      //        return "''.join([chr(a) for a in %1$s])".formatted(dataSource);
-      //        return "bytes(%1$s)".formatted(dataSource);
-      // Smithy has deprecated EnumTrait, but Polymorph still uses it to mark enums
-    } else if (shape.hasTrait(EnumTrait.class)) {
-      // ONLY write converters if the shape under generation is in the current namespace
-      if (shape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
-        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
-            shape, context, writer);
-        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
-            shape, context, writer);
-      }
-
-      // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-      String pythonModuleSmithygeneratedPath =
-          SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-              shape.getId().getNamespace(), context);
-      writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".dafny_to_smithy");
-
-      // Return a reference to the generated conversion method
-      // ex. for shape example.namespace.ExampleShape
-      // returns
-      // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s.dafny_to_smithy.%2$s(%3$s)"
-          .formatted(
-              pythonModuleSmithygeneratedPath,
-              SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(shape, context),
-              dataSource);
     }
+    // Note: Other Smithy-Dafny code generators would treat enums here,
+    // as Polymorph-compatible Smithy models often define an enum
+    // as a StringShape with an EnumTrait.
+    // Smithy-Dafny-Python converts these StringShapes to EnumShapes
+    // at model load time, so those shapes are not handled here.
     return dataSource + ".VerbatimString(False)";
   }
 
