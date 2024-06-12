@@ -467,7 +467,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                 + "_deserialize_error");
         // Generate deserializer for dependency that defers to its `_deserialize_error`
         String serviceDependencyErrorDafnyName =
-            software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace());
+            software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceDependencyShapeId.getNamespace());
 
         // Import this service's Dafny error
         ServiceShape dependencyServiceShape =
