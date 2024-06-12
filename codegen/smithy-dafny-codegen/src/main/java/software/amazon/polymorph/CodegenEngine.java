@@ -735,24 +735,20 @@ public class CodegenEngine {
     String templatePath,
     Map<String, String> parameters
   ) {
-    writeTemplatedFile(
-      templatePath,
-      templatePath,
-      parameters
-    );
+    writeTemplatedFile(templatePath, templatePath, parameters);
   }
 
   private void writeTemplatedFile(
-          String templatePath,
-          String outputTemplatePath,
-          Map<String, String> parameters
+    String templatePath,
+    String outputTemplatePath,
+    Map<String, String> parameters
   ) {
     IOUtils.writeTemplatedFile(
-            getClass(),
-            libraryRoot,
-            templatePath,
-            outputTemplatePath,
-            parameters
+      getClass(),
+      libraryRoot,
+      templatePath,
+      outputTemplatePath,
+      parameters
     );
   }
 
