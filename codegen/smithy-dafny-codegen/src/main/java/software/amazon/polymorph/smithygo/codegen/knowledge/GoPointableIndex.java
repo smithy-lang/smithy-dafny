@@ -99,7 +99,17 @@ public class GoPointableIndex implements KnowledgeIndex {
             ShapeType.BIG_INTEGER
     );
 
-
+    // All types types that are comparable to nil
+    private static final Set<ShapeType> NUMBER_SHAPE = SetUtils.of(
+            ShapeType.BYTE,
+            ShapeType.SHORT,
+            ShapeType.INTEGER,
+            ShapeType.LONG,
+            ShapeType.FLOAT,
+            ShapeType.DOUBLE,
+            ShapeType.BIG_DECIMAL,
+            ShapeType.BIG_INTEGER
+    );
 
     private final Model model;
     private final NullableIndex nullableIndex;
@@ -163,7 +173,7 @@ public class GoPointableIndex implements KnowledgeIndex {
             return false;
         }
 
-        if (targetShape.isIntegerShape() && !member.hasTrait(RequiredTrait.class) && !model.expectShape(member.getContainer()).isMapShape()) {
+        if (NUMBER_SHAPE.contains(targetShape.getType()) && !member.hasTrait(RequiredTrait.class) && !model.expectShape(member.getContainer()).isMapShape()) {
             return true;
         }
 
