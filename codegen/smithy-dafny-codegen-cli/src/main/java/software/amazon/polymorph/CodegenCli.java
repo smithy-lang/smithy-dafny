@@ -364,9 +364,9 @@ public class CodegenCli {
         .toArray(Path[]::new);
 
       // Maps a Smithy namespace to its module name
-      // ex. `aws.cryptography.materialproviders` -> `aws_cryptographic_materialproviders`
-      // These values are provided via the command line right now,
-      //   but should eventually be sourced from doo files
+      // ex. `dependency-module-name=aws.cryptography.materialproviders=aws_cryptographic_materialproviders`
+      // maps the Smithy namespace `aws.cryptography.materialproviders` to a module name `aws_cryptographic_materialproviders`
+      // via a map key of "aws.cryptography.materialproviders" and a value of "aws_cryptographic_materialproviders"
       final Map<String, String> dependencyNamespacesToModuleNamesMap =
               commandLine.hasOption("dependency-module-name")
                       ? Arrays.stream(commandLine.getOptionValues("dmn"))
