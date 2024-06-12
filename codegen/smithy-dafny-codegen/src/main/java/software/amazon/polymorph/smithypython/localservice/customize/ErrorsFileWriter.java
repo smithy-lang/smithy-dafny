@@ -309,7 +309,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     }
 
                     String defaultWrappingError =
-                            !serviceShape.getErrors().isEmpty()
+                            !serviceDependencyErrors.isEmpty()
                                     ? DafnyNameResolver.getDafnyTypeForError(serviceDependencyErrors.get(0))
                                     : "Error";
 
