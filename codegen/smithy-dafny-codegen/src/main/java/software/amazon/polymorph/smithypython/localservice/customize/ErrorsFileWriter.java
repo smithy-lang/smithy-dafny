@@ -308,13 +308,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
                                 "Only 1 service-modelled error per service supported");
                     }
 
-                    ShapeId serviceDependencyError = serviceDependencyErrors.get(0);
-
-                    DafnyNameResolver.importDafnyTypeForError(writer, serviceDependencyError, codegenContext);
-
                     String defaultWrappingError =
                             !serviceShape.getErrors().isEmpty()
-                                    ? DafnyNameResolver.getDafnyTypeForError(serviceDependencyError)
+                                    ? DafnyNameResolver.getDafnyTypeForError(serviceDependencyErrors.get(0))
                                     : "Error";
 
                     // Generate conversion method:
