@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -187,7 +186,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           return DafnyRequest(operation_name="$L", dafny_operation_input=$L)
           """,
         operation.getId().getName(),
-        Utils.isUnitShape(operation.getInputShape()) ? "None" : input);
+        SmithyNameResolver.isUnitShape(operation.getInputShape()) ? "None" : input);
   }
 
   @Override
@@ -286,7 +285,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           }
 
           // Smithy Unit shapes have no data, and do not need deserialization
-          if (Utils.isUnitShape(outputShape)) {
+          if (SmithyNameResolver.isUnitShape(outputShape)) {
             writer.write(
                 """
           return None
@@ -536,24 +535,14 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                     serviceDependencyShapeId.getNamespace())
                 + "_sdk_error_to_dafny_error");
         // Generate deserializer for dependency that defers to its `_deserialize_error`
-        //                writer.write(
-        //                        """
-        //                        elif error.is_$L:
-        //                            return $L($L(error.$L.obj))""",
-        //                        code,
-        //                        code,
-        //
-        // SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-        //                                serviceDependencyShapeId.getNamespace())
-        //                                + "_sdk_error_to_dafny_error",
-        //                        code);
         writer.write(
             """
-                        elif error.is_$L:
-                            return $L(message=_dafny.string_of(error.$L.message))""",
+            elif error.is_$L:
+                return $L(message=_dafny.string_of(error.$L.message))""",
             code,
             code,
-            code);
+            code
+        );
         writer.addStdlibImport("_dafny");
       }
     }

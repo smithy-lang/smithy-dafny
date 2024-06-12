@@ -114,7 +114,6 @@ public class ConfigFileWriter implements CustomFileWriter {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
     NullableIndex index = NullableIndex.of(codegenContext.model());
     for (Entry<String, MemberShape> memberShapeEntry : memberShapeSet.entrySet()) {
-      String memberName = memberShapeEntry.getKey();
       MemberShape memberShape = memberShapeEntry.getValue();
       final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
       Symbol targetShapeSymbol = codegenContext.symbolProvider().toSymbol(targetShape);
@@ -152,7 +151,7 @@ public class ConfigFileWriter implements CustomFileWriter {
   }
 
   /**
-   * Generates constructor parameters for the localService's Config class. Called when writing
+   * Generates constructor documentation for the localService's Config class. Called when writing
    * parameters for the Config class' constructor (__init__ method).
    *
    * @param configShape
@@ -189,7 +188,6 @@ public class ConfigFileWriter implements CustomFileWriter {
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
     for (String memberName : memberShapeSet.keySet()) {
-      // TODO-Python: Instead of `Any`, map the targetShape.getType Smithy type to the Python type
       writer.write(
           "self.$L = $L", CaseUtils.toSnakeCase(memberName), CaseUtils.toSnakeCase(memberName));
     }
@@ -222,8 +220,6 @@ public class ConfigFileWriter implements CustomFileWriter {
    */
   private void generateSmithyConfigToDafnyConfigFunctionBody(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
-    // Dafny-generated config shapes contain a piece of unmodelled behavior,
-    //   which is that every config member is required.
     String output =
         configShape.accept(
             new LocalServiceToDafnyShapeVisitor(codegenContext, "smithy_config", writer));

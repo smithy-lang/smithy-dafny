@@ -274,7 +274,6 @@ public class ErrorsFileWriter implements CustomFileWriter {
                             .get();
 
                     String nativeToDafnyErrorName;
-                    String conversionFilename;
                     if (dependencyServiceShape.hasTrait(LocalServiceTrait.class)) {
                         nativeToDafnyErrorName = "_smithy_error_to_dafny_error";
                     } else if (AwsSdkNameResolver.isAwsSdkShape(dependencyServiceShape)) {
