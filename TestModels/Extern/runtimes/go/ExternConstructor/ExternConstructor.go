@@ -2,7 +2,7 @@ package ExternConstructor
 
 import (
 	simpledafnyexterninternaldafnytypes "github.com/Smithy-dafny/TestModels/Extern/simpledafnyexterninternaldafnytypes"
-	simpleexterntypes "github.com/Smithy-dafny/TestModels/Extern/simpleexterntypes"
+	simpleexterntypes "github.com/Smithy-dafny/TestModels/Extern/simpledafnyexterntypes"
 	dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	Wrappers "github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 )
