@@ -11,7 +11,8 @@ import software.amazon.smithy.python.codegen.*;
 import static java.lang.String.format;
 
 /**
- * Override Smithy-Python's ConfigGenerator to support namespaces in other modules.
+ * Override Smithy-Python's ConfigGenerator to support namespaces in other modules
+ * via the getPythonModuleSmithygeneratedPathForSmithyNamespace method.
  */
 public class DafnyPythonLocalServiceConfigGenerator extends ConfigGenerator {
 

@@ -88,7 +88,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
 
   /**
    * For each object with a Polymorph {@link JavaDocTrait} containing documentation,
-   * add a new Smithy {@link DocumentationTrait} with that documentation.
+   * replace it with a new Smithy {@link DocumentationTrait} with that documentation.
    * Smithy plugins will generate docs for DocumentationTraits.
    * @param model
    * @return
@@ -102,10 +102,11 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
         AbstractShapeBuilder<?,?> builder = ModelUtils.getBuilderForShape(shape);
         builder.addTrait(documentationTrait);
         return builder.build();
-      // We sometimes write out long strings of slashes to mark a "break" in our smithy files
+      // Crypto Tools developers sometimes write out long strings of slashes to mark a "break" in our smithy files
       // However, Smithy plugins interpret strings starting with `//` as a comment
       //   that becomes a DocumentationTrait!
-      // This leads to poor UX on some pydocs. Remove any DocumentationTraits consisting solely of `/`s.
+      // This leads to poor UX on some pydocs.
+      // Remove any DocumentationTraits consisting solely of `/`s.
       } else if (shape.hasTrait(DocumentationTrait.class)) {
         DocumentationTrait documentationTrait = shape.getTrait(DocumentationTrait.class).get();
         String documentation = documentationTrait.getValue();
@@ -155,13 +156,21 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     });
   }
 
+  /**
+   * Replace any StringShapes with EnumTraits
+   * with StringShapes.
+   * Smithy-Dafny Smithy usually model enums as StringShapes with EnumTraits,
+   * but Smithy-Python will only generate native models for EnumShapes.
+   * Replacing this lets Smithy-Dafny-Python plug in to Smithy-Python enum generation.
+   * @param model
+   * @return
+   */
   public static Model transformStringEnumShapesToEnumShapes(
-      Model model, ServiceShape serviceShape) {
+      Model model) {
 
     return ModelTransformer.create().mapShapes(model, shape -> {
-      if (shape.hasTrait(EnumTrait.class)) {
-        EnumShape asEnum = EnumShape.fromStringShape(shape.asStringShape().get()).get();
-        return asEnum;
+      if (shape.isStringShape() && shape.hasTrait(EnumTrait.class)) {
+        return EnumShape.fromStringShape(shape.asStringShape().get()).get();
       } else {
         return shape;
       }
