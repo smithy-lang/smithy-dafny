@@ -1,15 +1,12 @@
 use simple_resources::operation::get_resource_data::*;
-use simple_resources::operation::get_resources::*;
 use simple_resources::types::i_simple_resource::ISimpleResource;
 use simple_resources::types::*;
 use simple_resources::*;
 
-// This must fail, because SimpleResourcesConfig::name is required
-// #[tokio::test]
-// async fn TestDefaultConfig()
-//   {
-//     TestClient(SimpleResourcesConfig::builder().build().unwrap());
-//   }
+#[tokio::test]
+async fn TestDefaultConfig() {
+    TestClient(SimpleResourcesConfig::DefaultSimpleResourcesConfig()).await;
+}
 
 #[tokio::test]
 async fn TestCustomConfig() {
@@ -18,14 +15,15 @@ async fn TestCustomConfig() {
             .name("Dafny")
             .build()
             .unwrap(),
-    );
+    )
+    .await;
 }
 
 async fn TestClient(config: SimpleResourcesConfig) {
     let client = Client::from_conf(config.clone()).unwrap();
     let resource = TestGetResources(client).await;
-    TestNoneGetData(config.clone(), resource.clone());
-    TestSomeGetData(config.clone(), resource.clone());
+    TestNoneGetData(config.clone(), resource.clone()).await;
+    TestSomeGetData(config.clone(), resource.clone()).await;
 }
 
 async fn TestNoneGetData(
@@ -61,28 +59,28 @@ pub fn allNone() -> GetResourceDataInput {
 }
 
 pub fn checkMostNone(name: String, output: GetResourceDataOutput) {
-    assert_eq!(Some(name), *output.stringValue());
-    assert_eq!(None, *output.blobValue());
-    assert_eq!(None, output.booleanValue());
-    assert_eq!(None, output.integerValue());
-    assert_eq!(None, output.longValue());
+    assert_eq!(Some(name), *output.string_value());
+    assert_eq!(None, *output.blob_value());
+    assert_eq!(None, output.boolean_value());
+    assert_eq!(None, output.integer_value());
+    assert_eq!(None, output.long_value());
 }
 
 pub fn allSome() -> GetResourceDataInput {
     GetResourceDataInput::builder()
-        .blobValue(vec![1u8])
-        .booleanValue(true)
-        .stringValue("Some".to_string())
-        .integerValue(1)
-        .longValue(1)
+        .blob_value(vec![1u8])
+        .boolean_value(true)
+        .string_value("Some".to_string())
+        .integer_value(1)
+        .long_value(1)
         .build()
         .unwrap()
 }
 
 pub fn checkSome(name: String, output: GetResourceDataOutput) {
-    assert_eq!(Some(name + " Some"), *output.stringValue());
-    assert_eq!(Some(vec![1u8]), *output.blobValue());
-    assert_eq!(Some(true), output.booleanValue());
-    assert_eq!(Some(1), output.integerValue());
-    assert_eq!(Some(1), output.longValue());
+    assert_eq!(Some(name + " Some"), *output.string_value());
+    assert_eq!(Some(vec![1u8]), *output.blob_value());
+    assert_eq!(Some(true), output.boolean_value());
+    assert_eq!(Some(1), output.integer_value());
+    assert_eq!(Some(1), output.long_value());
 }

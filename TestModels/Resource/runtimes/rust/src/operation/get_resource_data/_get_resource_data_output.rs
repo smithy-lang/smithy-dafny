@@ -3,33 +3,33 @@
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetResourceDataOutput {
-    pub(crate) blobValue: Option<Vec<u8>>,
-    pub(crate) booleanValue: Option<bool>,
-    pub(crate) stringValue: Option<String>,
-    pub(crate) integerValue: Option<i32>,
-    pub(crate) longValue: Option<i64>,
+    pub(crate) blob_value: Option<Vec<u8>>,
+    pub(crate) boolean_value: Option<bool>,
+    pub(crate) string_value: Option<String>,
+    pub(crate) integer_value: Option<i32>,
+    pub(crate) long_value: Option<i64>,
 }
 
 impl GetResourceDataOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn blobValue(&self) -> &Option<Vec<u8>> {
-        &self.blobValue
+    pub fn blob_value(&self) -> &Option<Vec<u8>> {
+        &self.blob_value
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn booleanValue(&self) -> Option<bool> {
-        self.booleanValue
+    pub fn boolean_value(&self) -> Option<bool> {
+        self.boolean_value
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn stringValue(&self) -> &Option<String> {
-        &self.stringValue
+    pub fn string_value(&self) -> &Option<String> {
+        &self.string_value
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn integerValue(&self) -> Option<i32> {
-        self.integerValue
+    pub fn integer_value(&self) -> Option<i32> {
+        self.integer_value
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn longValue(&self) -> Option<i64> {
-        self.longValue
+    pub fn long_value(&self) -> Option<i64> {
+        self.long_value
     }
 }
 
@@ -47,97 +47,97 @@ impl GetResourceDataOutput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetResourceDataOutputBuilder {
-    blobValue: Option<Vec<u8>>,
-    booleanValue: Option<bool>,
-    stringValue: Option<String>,
-    integerValue: Option<i32>,
-    longValue: Option<i64>,
+    blob_value: Option<Vec<u8>>,
+    boolean_value: Option<bool>,
+    string_value: Option<String>,
+    integer_value: Option<i32>,
+    long_value: Option<i64>,
 }
 
 impl GetResourceDataOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn blobValue(mut self, input: Vec<u8>) -> Self {
-        self.blobValue = Some(input);
+    pub fn blob_value(mut self, input: Vec<u8>) -> Self {
+        self.blob_value = Some(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_blobValue(mut self, input: Option<Vec<u8>>) -> Self {
-        self.blobValue = input;
+    pub fn set_blob_value(mut self, input: Option<Vec<u8>>) -> Self {
+        self.blob_value = input;
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_blobValue(&self) -> &Option<Vec<u8>> {
-        &self.blobValue
+    pub fn get_blob_value(&self) -> &Option<Vec<u8>> {
+        &self.blob_value
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn booleanValue(mut self, input: bool) -> Self {
-        self.booleanValue = Some(input);
+    pub fn boolean_value(mut self, input: bool) -> Self {
+        self.boolean_value = Some(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_booleanValue(mut self, input: Option<bool>) -> Self {
-        self.booleanValue = input;
+    pub fn set_boolean_value(mut self, input: Option<bool>) -> Self {
+        self.boolean_value = input;
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_booleanValue(&self) -> Option<bool> {
-        self.booleanValue
+    pub fn get_boolean_value(&self) -> Option<bool> {
+        self.boolean_value
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn stringValue(mut self, input: String) -> Self {
-        self.stringValue = Some(input);
+    pub fn string_value(mut self, input: String) -> Self {
+        self.string_value = Some(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_stringValue(mut self, input: Option<String>) -> Self {
-        self.stringValue = input;
+    pub fn set_string_value(mut self, input: Option<String>) -> Self {
+        self.string_value = input;
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_stringValue(&self) -> &Option<String> {
-        &self.stringValue
+    pub fn get_string_value(&self) -> &Option<String> {
+        &self.string_value
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn integerValue(mut self, input: i32) -> Self {
-        self.integerValue = Some(input);
+    pub fn integer_value(mut self, input: i32) -> Self {
+        self.integer_value = Some(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_integerValue(mut self, input: Option<i32>) -> Self {
-        self.integerValue = input;
+    pub fn set_integer_value(mut self, input: Option<i32>) -> Self {
+        self.integer_value = input;
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_integerValue(&self) -> Option<i32> {
-        self.integerValue
+    pub fn get_integer_value(&self) -> Option<i32> {
+        self.integer_value
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn longValue(mut self, input: i64) -> Self {
-        self.longValue = Some(input);
+    pub fn long_value(mut self, input: i64) -> Self {
+        self.long_value = Some(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_longValue(mut self, input: Option<i64>) -> Self {
-        self.longValue = input;
+    pub fn set_long_value(mut self, input: Option<i64>) -> Self {
+        self.long_value = input;
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_longValue(&self) -> Option<i64> {
-        self.longValue
+    pub fn get_long_value(&self) -> Option<i64> {
+        self.long_value
     }
 
     /// Consumes the builder and constructs a [`GetResourceDataOutput`](crate::operation::operation::GetResourceDataOutput).
@@ -148,11 +148,11 @@ impl GetResourceDataOutputBuilder {
         ::aws_smithy_types::error::operation::BuildError,
     > {
         ::std::result::Result::Ok(crate::operation::get_resource_data::GetResourceDataOutput {
-            blobValue: self.blobValue,
-            booleanValue: self.booleanValue,
-            stringValue: self.stringValue,
-            integerValue: self.integerValue,
-            longValue: self.longValue,
+            blob_value: self.blob_value,
+            boolean_value: self.boolean_value,
+            string_value: self.string_value,
+            integer_value: self.integer_value,
+            long_value: self.long_value,
         })
     }
 }

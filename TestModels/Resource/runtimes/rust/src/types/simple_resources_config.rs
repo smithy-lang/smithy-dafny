@@ -13,6 +13,29 @@ impl SimpleResourcesConfig {
         &self.name
     }
 }
+// impl Default for SimpleResourcesConfig {
+//     fn default() -> Self {
+//         crate::conversions::simple_resources_config::_simple_resources_config::from_dafny(
+//         ::simple_resources_dafny::_simple_dresources_dinternaldafny::_default::DefaultSimpleResourcesConfig()
+//         )
+//     }
+// }
+
+impl SimpleResourcesConfig {
+    pub fn DefaultSimpleResourcesConfig() -> Self {
+        crate::conversions::simple_resources_config::_simple_resources_config::from_dafny(
+            ::simple_resources_dafny::_simple_dresources_dinternaldafny::_default::DefaultSimpleResourcesConfig()
+        )
+    }
+}
+
+impl Default for SimpleResourcesConfig {
+    fn default() -> Self {
+        Self {
+            name: "default".to_string(),
+        }
+    }
+}
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug, ::std::default::Default)]
 pub struct SimpleResourcesConfigBuilder {

@@ -58,87 +58,87 @@ impl GetResourceDataFluentBuilder {
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn blobValue(mut self, input: impl ::std::convert::Into<Vec<u8>>) -> Self {
-        self.inner = self.inner.blobValue(input.into());
+    pub fn blob_value(mut self, input: impl ::std::convert::Into<Vec<u8>>) -> Self {
+        self.inner = self.inner.blob_value(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_blobValue(mut self, input: Option<Vec<u8>>) -> Self {
-        self.inner = self.inner.set_blobValue(input);
+    pub fn set_blob_value(mut self, input: Option<Vec<u8>>) -> Self {
+        self.inner = self.inner.set_blob_value(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_blobValue(&self) -> &Option<Vec<u8>> {
-        self.inner.get_blobValue()
+    pub fn get_blob_value(&self) -> &Option<Vec<u8>> {
+        self.inner.get_blob_value()
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn booleanValue(mut self, input: impl ::std::convert::Into<bool>) -> Self {
-        self.inner = self.inner.booleanValue(input.into());
+    pub fn boolean_value(mut self, input: impl ::std::convert::Into<bool>) -> Self {
+        self.inner = self.inner.boolean_value(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_booleanValue(mut self, input: Option<bool>) -> Self {
-        self.inner = self.inner.set_booleanValue(input);
+    pub fn set_boolean_value(mut self, input: Option<bool>) -> Self {
+        self.inner = self.inner.set_boolean_value(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_booleanValue(&self) -> Option<bool> {
-        self.inner.get_booleanValue()
+    pub fn get_boolean_value(&self) -> Option<bool> {
+        self.inner.get_boolean_value()
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn stringValue(mut self, input: impl ::std::convert::Into<String>) -> Self {
-        self.inner = self.inner.stringValue(input.into());
+    pub fn string_value(mut self, input: impl ::std::convert::Into<String>) -> Self {
+        self.inner = self.inner.string_value(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_stringValue(mut self, input: Option<String>) -> Self {
-        self.inner = self.inner.set_stringValue(input);
+    pub fn set_string_value(mut self, input: Option<String>) -> Self {
+        self.inner = self.inner.set_string_value(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_stringValue(&self) -> &Option<String> {
-        self.inner.get_stringValue()
+    pub fn get_string_value(&self) -> &Option<String> {
+        self.inner.get_string_value()
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn integerValue(mut self, input: impl ::std::convert::Into<i32>) -> Self {
-        self.inner = self.inner.integerValue(input.into());
+    pub fn integer_value(mut self, input: impl ::std::convert::Into<i32>) -> Self {
+        self.inner = self.inner.integer_value(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_integerValue(mut self, input: Option<i32>) -> Self {
-        self.inner = self.inner.set_integerValue(input);
+    pub fn set_integer_value(mut self, input: Option<i32>) -> Self {
+        self.inner = self.inner.set_integer_value(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_integerValue(&self) -> Option<i32> {
-        self.inner.get_integerValue()
+    pub fn get_integer_value(&self) -> Option<i32> {
+        self.inner.get_integer_value()
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn longValue(mut self, input: impl ::std::convert::Into<i64>) -> Self {
-        self.inner = self.inner.longValue(input.into());
+    pub fn long_value(mut self, input: impl ::std::convert::Into<i64>) -> Self {
+        self.inner = self.inner.long_value(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_longValue(mut self, input: Option<i64>) -> Self {
-        self.inner = self.inner.set_longValue(input);
+    pub fn set_long_value(mut self, input: Option<i64>) -> Self {
+        self.inner = self.inner.set_long_value(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_longValue(&self) -> Option<i64> {
-        self.inner.get_longValue()
+    pub fn get_long_value(&self) -> Option<i64> {
+        self.inner.get_long_value()
     }
 }

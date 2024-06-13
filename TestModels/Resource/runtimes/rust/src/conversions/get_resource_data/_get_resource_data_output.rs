@@ -6,11 +6,11 @@ pub fn to_dafny(
     ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput,
 > {
     ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataOutput::GetResourceDataOutput {
-        stringValue: dafny_standard_library::conversion::ostring_to_dafny(value.stringValue()),
-        booleanValue: dafny_standard_library::conversion::obool_to_dafny(value.booleanValue()),
-        integerValue: dafny_standard_library::conversion::oint_to_dafny(value.integerValue()),
-        longValue: dafny_standard_library::conversion::olong_to_dafny(value.longValue()),
-        blobValue: dafny_standard_library::conversion::oblob_to_dafny(value.blobValue())
+        stringValue: dafny_standard_library::conversion::ostring_to_dafny(value.string_value()),
+        booleanValue: dafny_standard_library::conversion::obool_to_dafny(value.boolean_value()),
+        integerValue: dafny_standard_library::conversion::oint_to_dafny(value.integer_value()),
+        longValue: dafny_standard_library::conversion::olong_to_dafny(value.long_value()),
+        blobValue: dafny_standard_library::conversion::oblob_to_dafny(value.blob_value())
   })
 }
 // _get_resource_data_output
@@ -29,11 +29,11 @@ pub fn from_dafny(
             stringValue,
         } =>
         crate::operation::get_resource_data::GetResourceDataOutput {
-            stringValue: dafny_standard_library::conversion::ostring_from_dafny(stringValue.clone()),
-            booleanValue: dafny_standard_library::conversion::obool_from_dafny(booleanValue.clone()),
-            integerValue: dafny_standard_library::conversion::oint_from_dafny(integerValue.clone()),
-            longValue: dafny_standard_library::conversion::olong_from_dafny(longValue.clone()),
-            blobValue: dafny_standard_library::conversion::oblob_from_dafny(blobValue.clone())
+            string_value: dafny_standard_library::conversion::ostring_from_dafny(stringValue.clone()),
+            boolean_value: dafny_standard_library::conversion::obool_from_dafny(booleanValue.clone()),
+            integer_value: dafny_standard_library::conversion::oint_from_dafny(integerValue.clone()),
+            long_value: dafny_standard_library::conversion::olong_from_dafny(longValue.clone()),
+            blob_value: dafny_standard_library::conversion::oblob_from_dafny(blobValue.clone())
          }
     }
 }
