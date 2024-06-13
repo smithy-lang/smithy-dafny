@@ -180,7 +180,7 @@ public final class CodegenUtils {
      * @param shape The member to check.
      * @return Returns whether the member is probably the error message.
      */
-    static boolean isErrorMessage(Model model, MemberShape shape) {
+    public static boolean isErrorMessage(Model model, MemberShape shape) {
         return ERROR_MESSAGE_MEMBER_NAMES.contains(shape.getMemberName().toLowerCase(Locale.US))
                 && model.expectShape(shape.getContainer()).hasTrait(ErrorTrait.class);
     }

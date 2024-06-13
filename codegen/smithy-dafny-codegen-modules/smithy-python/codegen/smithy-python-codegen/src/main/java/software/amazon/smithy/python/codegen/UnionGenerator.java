@@ -29,7 +29,7 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Renders unions.
  */
-final class UnionGenerator implements Runnable {
+public final class UnionGenerator implements Runnable {
 
     private final Model model;
     private final SymbolProvider symbolProvider;
@@ -37,7 +37,7 @@ final class UnionGenerator implements Runnable {
     private final UnionShape shape;
     private final Set<Shape> recursiveShapes;
 
-    UnionGenerator(
+    public UnionGenerator(
             Model model,
             SymbolProvider symbolProvider,
             PythonWriter writer,
