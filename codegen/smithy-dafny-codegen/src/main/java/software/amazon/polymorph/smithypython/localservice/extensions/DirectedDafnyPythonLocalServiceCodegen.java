@@ -17,9 +17,10 @@ import software.amazon.smithy.python.codegen.*;
 
 /**
  * DirectedCodegen for Dafny Python LocalServices. This overrides Smithy-Python's
- * DirectedPythonCodegen behavior. Changes include not writing symbols in a different namespace,
- * generating a `client.py` file with a synchronous interface, and handling {@link
- * software.amazon.smithy.model.shapes.ResourceShape}s.
+ * DirectedPythonCodegen behavior. Changes include:
+ * - Not writing symbols in a different namespace
+ * - Generating a `client.py` file with a synchronous interface
+ * - Handling {@link software.amazon.smithy.model.shapes.ResourceShape}s.
  */
 public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodegen {
 
@@ -144,16 +145,17 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
         });
   }
 
-
   /**
-   * Override Smithy-Python's generateResource to actually generate resources.
+   * Override Smithy-Python's generateResource to use Smithy-Dafny-Python resource generation.
+   * (Smithy-Python doesn't generate anything for resources.)
    *
    * @param directive Directive to perform.
    */
   @Override
   public void generateResource(
       GenerateResourceDirective<GenerationContext, PythonSettings> directive) {
-    if (ReferencesFileWriter.shouldGenerateResourceForShape(directive.shape(), directive.context())) {
+    if (ReferencesFileWriter.shouldGenerateResourceForShape(
+        directive.shape(), directive.context())) {
       String moduleName =
           SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
               directive.context().settings().getService().getNamespace());
@@ -236,8 +238,14 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
     }
   }
 
-    @Override
-    public void generateEnumShape(GenerateEnumDirective<GenerationContext, PythonSettings> directive) {
+  /**
+   * Override Smithy-Python to not write a symbol in a different namespace.
+   *
+   * @param directive Directive to perform.
+   */
+  @Override
+  public void generateEnumShape(
+      GenerateEnumDirective<GenerationContext, PythonSettings> directive) {
     if (directive
         .shape()
         .getId()
@@ -263,7 +271,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
                 generator.run();
               });
     }
-    }
+  }
 
   /**
    * Override Smithy-Python's generateUnion to not write a symbol in a different namespace.
@@ -354,6 +362,8 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
 
   /**
    * Override Smithy-Python's generateService to generate a synchronous client.
+   * Smithy-Python-generated clients' methods are all async.
+   * Smithy-Dafny-Python-generated clients' methods are not async.
    *
    * @param directive Directive to perform.
    */

@@ -2,9 +2,8 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import static java.lang.String.format;
 
+import java.time.ZonedDateTime;
 import java.util.Set;
-
-import org.checkerframework.checker.units.qual.Length;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -13,21 +12,22 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.NullableIndex;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.LengthTrait;
-import software.amazon.smithy.model.traits.RangeTrait;
-import software.amazon.smithy.model.traits.SensitiveTrait;
+import software.amazon.smithy.model.traits.*;
+import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
 
 /**
- * Override Smithy-Python's StructureGenerator, almost entirely to support memberShapes with {@link
- * ReferenceTrait}. This often defers to Smithy-Python's StructureGenerator if not processing a
- * reference shape.
+ * Override Smithy-Python's StructureGenerator:
+ * - Do not render StructureShapes with {@link PositionalTrait}s
+ * - Support errors from other namespaces
+ * - Support {@link ReferenceTrait}s (forward references, other namespaces)
+ * - Support Smithy constraints in constructors ({@link RangeTrait}, {@link LengthTrait})
  */
 public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerator {
 
@@ -55,7 +55,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   }
 
   /**
-   * Override Smithy-Python renderError to use the correct namespace.
+   * Override Smithy-Python renderError to use the correct namespace via
+   * getPythonModuleSmithygeneratedPathForSmithyNamespace.
    */
   @Override
   protected void renderError() {
@@ -98,28 +99,43 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.write("");
   }
 
-    @Override
-    protected void writeReprMembers(boolean isError) {
-        var iter = shape.members().iterator();
-        while (iter.hasNext()) {
-            var member = iter.next();
-            var memberName = symbolProvider.toMemberName(member);
-            var trailingComma = iter.hasNext() ? ", " : "";
-            if (member.hasTrait(SensitiveTrait.class)) {
-                // Sensitive members must not be printed
-                // see: https://smithy.io/2.0/spec/documentation-traits.html#smithy-api-sensitive-trait
-                writer.write("""
+    /**
+     * Override Smithy-Python to not unambiguously write a `message`
+     * attribute on errors;
+     * Smithy-Dafny defines this attribute on its errors,
+     * so Smithy-Python behavior is changed to not write `message` multiple times.
+     * (In particular, OpaqueErrors may not have a `message` attribute,
+     * which leads to issues.)
+     * @param isError
+     */
+  @Override
+  protected void writeReprMembers(boolean isError) {
+    var iter = shape.members().iterator();
+    while (iter.hasNext()) {
+      var member = iter.next();
+      var memberName = symbolProvider.toMemberName(member);
+      var trailingComma = iter.hasNext() ? ", " : "";
+      if (member.hasTrait(SensitiveTrait.class)) {
+        // Sensitive members must not be printed
+        // see: https://smithy.io/2.0/spec/documentation-traits.html#smithy-api-sensitive-trait
+        writer.write(
+            """
                     if self.$1L is not None:
                         result += f"$1L=...$2L"
-                    """, memberName, trailingComma);
-            } else {
-                writer.write("""
+                    """,
+            memberName,
+            trailingComma);
+      } else {
+        writer.write(
+            """
                     if self.$1L is not None:
                         result += f"$1L={repr(self.$1L)}$2L"
-                    """, memberName, trailingComma);
-            }
-        }
+                    """,
+            memberName,
+            trailingComma);
+      }
     }
+  }
 
   /**
    * Override Smithy-Python writePropertyForMember to handle importing reference modules to avoid
@@ -145,7 +161,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       Symbol targetSymbol = symbolProvider.toSymbol(referentShape);
 
       // Use forward reference for reference traits to avoid circular import
-      //   and do not import the symbol to avoid circular import
       String formatString = "$L: list['$L']";
       writer.write(
           formatString, memberName, targetSymbol.getNamespace() + "." + targetSymbol.getName());
@@ -171,7 +186,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       if (index.isMemberNullable(memberShape)) {
         writer.addStdlibImport("typing", "Optional");
         // Use forward reference for reference traits to avoid circular import
-        //   and do not import the symbol to avoid circular import
         String formatString = "$L: Optional['$L']";
         writer.write(
             formatString,
@@ -182,7 +196,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
         writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
       } else {
         // Use forward reference for reference traits to avoid circular import,
-        //   and do not import the symbol to avoid circular import
         String formatString = "$L: '$L'";
         writer.write(
             formatString,
@@ -222,7 +235,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       Symbol targetSymbol = symbolProvider.toSymbol(referentShape);
 
       // Use forward reference for reference traits to avoid circular import
-      //   and do not import the symbol to avoid circular import
       String formatString = "$L: list['$L'],";
       writer.write(
           formatString, memberName, targetSymbol.getNamespace() + "." + targetSymbol.getName());
@@ -243,7 +255,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       Shape referentShape =
           model.expectShape(target.expectTrait(ReferenceTrait.class).getReferentId());
       // Use forward reference for reference traits to avoid circular import
-      //   and do not import the symbol to avoid circular import
       String formatString = "$L: '$L',";
       writer.write(
           formatString,
@@ -402,98 +413,157 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.write("");
   }
 
-    protected void writeInitMethodAssignerForRequiredMember(MemberShape member, String memberName) {
-        // Smithy-Dafny: Check traits
-        // LengthTrait, RangeTrait
-        Shape targetShape = model.expectShape(member.getTarget());
-        if (targetShape.hasTrait(RangeTrait.class)) {
-            RangeTrait rangeTrait = targetShape.getTrait(RangeTrait.class).get();
-            if (rangeTrait.getMin().isPresent()) {
-                writeRangeTraitMinCheckForMember(member, memberName, rangeTrait);
-            }
-            if (rangeTrait.getMax().isPresent()) {
-                writeRangeTraitMaxCheckForMember(member, memberName, rangeTrait);
-            }
-        }
+  /**
+   * Write assignment from __init__ method parameter to new object's required attribute.
+   * Writes any constraint-checking code before writing assignment.
+   * @param member
+   * @param memberName
+   */
+  protected void writeInitMethodAssignerForRequiredMember(MemberShape member, String memberName) {
+    writeInitMethodConstraintsChecksForMember(member, memberName);
+    writer.write("self.$1L = $1L", memberName);
+  }
 
-        if (targetShape.hasTrait(LengthTrait.class)) {
-            LengthTrait lengthTrait = targetShape.getTrait(LengthTrait.class).get();
-            if (lengthTrait.getMin().isPresent()) {
-                writeLengthTraitMinCheckForMember(member, memberName, lengthTrait);
-            }
-            if (lengthTrait.getMax().isPresent()) {
-                writeLengthTraitMaxCheckForMember(member, memberName, lengthTrait);
-            }
-        }
-        writer.write("self.$1L = $1L", memberName);
+  /**
+   * Write assignment from __init__ method parameter to new object's optional attribute.
+   * Writes any constraint-checking code before writing assignment.
+   * @param member
+   * @param memberName
+   */
+  protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
+    writeInitMethodConstraintsChecksForMember(member, memberName);
+    writer.write(
+        "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
+  }
+
+  /**
+   * Write checks for supported constraint traits.
+   * Currently, {@link RangeTrait} and {@link LengthTrait} are supported.
+   * @param member
+   * @param memberName
+   */
+  protected void writeInitMethodConstraintsChecksForMember(MemberShape member, String memberName) {
+    // RangeTrait
+    Shape targetShape = model.expectShape(member.getTarget());
+    if (targetShape.hasTrait(RangeTrait.class)) {
+      RangeTrait rangeTrait = targetShape.getTrait(RangeTrait.class).get();
+      if (rangeTrait.getMin().isPresent()) {
+        writeRangeTraitMinCheckForMember(member, memberName, rangeTrait);
+      }
+      if (rangeTrait.getMax().isPresent()) {
+        writeRangeTraitMaxCheckForMember(member, memberName, rangeTrait);
+      }
     }
 
-    protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
-        writer.write("self.$1L = $1L if $1L is not None else $2L",
-                memberName, getDefaultValue(writer, member));
+    // LengthTrait
+    if (targetShape.hasTrait(LengthTrait.class)) {
+      LengthTrait lengthTrait = targetShape.getTrait(LengthTrait.class).get();
+      if (lengthTrait.getMin().isPresent()) {
+        writeLengthTraitMinCheckForMember(memberName, lengthTrait);
+      }
+      if (lengthTrait.getMax().isPresent()) {
+        writeLengthTraitMaxCheckForMember(memberName, lengthTrait);
+      }
     }
+  }
 
-    protected void writeLengthTraitMinCheckForMember(MemberShape member, String memberName, LengthTrait lengthTrait) {
-        String min = ConstrainTraitUtils.LengthTraitUtils.min(lengthTrait);
-        writer.openBlock("if ($1L is not None) and (len($1L) < $2L):",
-                "",
-                memberName,
-                min,
-                () -> {
-                    writer.write("""
+  /**
+   * Write validation for {@link LengthTrait} min value. Called from __init__.
+   *
+   * @param memberName
+   * @param lengthTrait
+   */
+  protected void writeLengthTraitMinCheckForMember(String memberName, LengthTrait lengthTrait) {
+    String min = ConstrainTraitUtils.LengthTraitUtils.min(lengthTrait);
+    writer.openBlock(
+        "if ($1L is not None) and (len($1L) < $2L):",
+        "",
+        memberName,
+        min,
+        () -> {
+          writer.write(
+              """
                     raise ValueError("The size of $1L must be greater than or equal to $2L")
                     """,
-                            memberName,
-                            min
-                    );
-                });
-    }
+              memberName,
+              min);
+        });
+  }
 
-    protected void writeLengthTraitMaxCheckForMember(MemberShape member, String memberName, LengthTrait lengthTrait) {
-        String max = ConstrainTraitUtils.LengthTraitUtils.max(lengthTrait);
-        writer.openBlock("if ($1L is not None) and (len($1L) > $2L):",
-                "",
-                memberName,
-                max,
-                () -> {
-                    writer.write("""
+  /**
+   * Write validation for {@link LengthTrait} max value. Called from __init__.
+   *
+   * @param memberName
+   * @param lengthTrait
+   */
+  protected void writeLengthTraitMaxCheckForMember(String memberName, LengthTrait lengthTrait) {
+    String max = ConstrainTraitUtils.LengthTraitUtils.max(lengthTrait);
+    writer.openBlock(
+        "if ($1L is not None) and (len($1L) > $2L):",
+        "",
+        memberName,
+        max,
+        () -> {
+          writer.write(
+              """
                     raise ValueError("The size of $1L must be less than or equal to $2L")
                     """,
-                            memberName,
-                            max
-                    );
-                });
-    }
+              memberName,
+              max);
+        });
+  }
 
-    protected void writeRangeTraitMinCheckForMember(MemberShape member, String memberName, RangeTrait rangeTrait) {
-        String min = ConstrainTraitUtils.RangeTraitUtils.minAsShapeType(model.expectShape(member.getTarget()), rangeTrait);
-        writer.openBlock("if ($1L is not None) and ($1L < $2L):",
-                "",
-                memberName,
-                min,
-                () -> {
-                    writer.write("""
+  /**
+   * Write validation for {@link RangeTrait} min value. Called from __init__.
+   *
+   * @param member
+   * @param memberName
+   * @param rangeTrait
+   */
+  protected void writeRangeTraitMinCheckForMember(
+      MemberShape member, String memberName, RangeTrait rangeTrait) {
+    String min =
+        ConstrainTraitUtils.RangeTraitUtils.minAsShapeType(
+            model.expectShape(member.getTarget()), rangeTrait);
+    writer.openBlock(
+        "if ($1L is not None) and ($1L < $2L):",
+        "",
+        memberName,
+        min,
+        () -> {
+          writer.write(
+              """
                     raise ValueError("$1L must be greater than or equal to $2L")
                     """,
-                            memberName,
-                            min
-                    );
-                });
-    }
+              memberName,
+              min);
+        });
+  }
 
-    protected void writeRangeTraitMaxCheckForMember(MemberShape member, String memberName, RangeTrait rangeTrait) {
-        String max = ConstrainTraitUtils.RangeTraitUtils.maxAsShapeType(model.expectShape(member.getTarget()), rangeTrait);
-        writer.openBlock("if ($1L is not None) and ($1L > $2L):",
-                "",
-                memberName,
-                max,
-                () -> {
-                    writer.write("""
+  /**
+   * Write validation for {@link RangeTrait} max value. Called from __init__.
+   *
+   * @param member
+   * @param memberName
+   * @param rangeTrait
+   */
+  protected void writeRangeTraitMaxCheckForMember(
+      MemberShape member, String memberName, RangeTrait rangeTrait) {
+    String max =
+        ConstrainTraitUtils.RangeTraitUtils.maxAsShapeType(
+            model.expectShape(member.getTarget()), rangeTrait);
+    writer.openBlock(
+        "if ($1L is not None) and ($1L > $2L):",
+        "",
+        memberName,
+        max,
+        () -> {
+          writer.write(
+              """
                     raise ValueError("$1L must be less than or equal to $2L")
                     """,
-                            memberName,
-                            max
-                    );
-                });
-    }
+              memberName,
+              max);
+        });
+  }
 }
