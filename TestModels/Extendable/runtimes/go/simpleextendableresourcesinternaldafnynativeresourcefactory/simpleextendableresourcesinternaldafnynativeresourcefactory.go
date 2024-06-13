@@ -6,18 +6,16 @@ package simpleextendableresourcesinternaldafnynativeresourcefactory
 import (
 	os "os"
 
-	ExtendableResource "ExtendableResource"
-	"simpleextendableresources"
-
-	SimpleExtendableResourcesOperations "SimpleExtendableResourcesOperations"
-	StandardLibrary "StandardLibrary"
-	StandardLibraryInterop "StandardLibraryInterop"
-	StandardLibrary_UInt "StandardLibrary_UInt"
-	_System "System_"
-	TestHelpers "TestHelpers"
-	Wrappers "Wrappers"
-	_dafny "dafny"
-	simpleextendableresourcesinternaldafnytypes "simpleextendableresourcesinternaldafnytypes"
+	ExtendableResource "github.com/Smithy-dafny/TestModels/Extern/ExtendableResource"
+	SimpleExtendableResourcesOperations "github.com/Smithy-dafny/TestModels/Extern/SimpleExtendableResourcesOperations"
+	simpleextendableresources "github.com/Smithy-dafny/TestModels/Extern/simpleextendableresources"
+	simpleextendableresourcesinternaldafnytypes "github.com/Smithy-dafny/TestModels/Extern/simpleextendableresourcesinternaldafnytypes"
+	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
+	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
+	StandardLibrary "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
+	StandardLibraryInterop "github.com/dafny-lang/DafnyStandardLibGo/StandardLibraryInterop"
+	StandardLibrary_UInt "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary_UInt"
+	Wrappers "github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 )
 
 var _ = os.Args
@@ -29,7 +27,6 @@ var _ StandardLibrary.Dummy__
 var _ StandardLibraryInterop.Dummy__
 var _ ExtendableResource.Dummy__
 var _ SimpleExtendableResourcesOperations.Dummy__
-var _ TestHelpers.Dummy__
 
 type Dummy__ struct{}
 
