@@ -3,7 +3,6 @@
 /// Types for the `SimpleResource`
 pub mod simple_resource;
 pub use simple_resource::SimpleResource;
-pub use simple_resource::SimpleResourceImpl;
 
 /// Types for the `SimpleResourcesConfig`
 pub mod simple_resources_config;

@@ -15,24 +15,24 @@ async fn TestCustomConfig() {
 
 async fn TestClient(config: SimpleResourcesConfig) {
     let client = Client::from_conf(config.clone()).unwrap();
-    let resource = TestGetResources(client).await;
-    TestNoneGetData(config.clone(), resource.clone()).await;
-    TestSomeGetData(config.clone(), resource.clone()).await;
+    let mut resource = TestGetResources(client).await;
+    TestNoneGetData(config.clone(), &mut resource).await;
+    TestSomeGetData(config.clone(), &mut resource).await;
 }
 
-async fn TestNoneGetData(config: SimpleResourcesConfig, resource: SimpleResourceImpl) {
+async fn TestNoneGetData(config: SimpleResourcesConfig, resource: &mut impl SimpleResource) {
     let input = allNone();
-    let result = resource.clone().GetResourceData(input).unwrap();
+    let result = resource.GetResourceData(input).unwrap();
     checkMostNone(config.name().to_string(), result);
 }
 
-async fn TestSomeGetData(config: SimpleResourcesConfig, resource: SimpleResourceImpl) {
+async fn TestSomeGetData(config: SimpleResourcesConfig, resource: &mut impl SimpleResource) {
     let input = allSome();
-    let result = resource.clone().GetResourceData(input).unwrap();
+    let result = resource.GetResourceData(input).unwrap();
     checkSome(config.name().to_string(), result);
 }
 
-async fn TestGetResources(client: Client) -> SimpleResourceImpl {
+async fn TestGetResources(client: Client) -> impl SimpleResource {
     let output = client.get_resources().value("Test").send().await.unwrap();
     output.output()
 }
