@@ -419,18 +419,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    */
   protected void writeInitMethodAssignerForRequiredMember(MemberShape member, String memberName) {
     writeInitMethodConstraintsChecksForMember(member, memberName);
-    writer.openBlock(
-            "if ($1L is None):",
-            "",
-            memberName,
-            () -> {
-              writer.write(
-                      """
-                            raise ValueError("$1L must be provided")
-                            """,
-                      memberName
-              );
-            });
     writer.write("self.$1L = $1L", memberName);
   }
 
@@ -442,9 +430,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    */
   protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
     writeInitMethodConstraintsChecksForMember(member, memberName);
-    // Optional members are assigned default value of "None" in __init__ arguments
     writer.write(
-        "self.$1L = $1L", memberName);
+        "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
   }
 
   protected void writeInitMethodConstraintsChecksForMember(MemberShape member, String memberName) {
