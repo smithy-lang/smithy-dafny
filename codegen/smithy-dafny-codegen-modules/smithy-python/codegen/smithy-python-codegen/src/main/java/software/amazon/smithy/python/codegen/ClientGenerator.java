@@ -32,7 +32,6 @@ import software.amazon.smithy.python.codegen.sections.ResolveEndpointSection;
 import software.amazon.smithy.python.codegen.sections.ResolveIdentitySection;
 import software.amazon.smithy.python.codegen.sections.SendRequestSection;
 import software.amazon.smithy.python.codegen.sections.SignRequestSection;
-import software.amazon.smithy.utils.CodeSection;
 
 /**
  * Generates the actual client and implements operations.
