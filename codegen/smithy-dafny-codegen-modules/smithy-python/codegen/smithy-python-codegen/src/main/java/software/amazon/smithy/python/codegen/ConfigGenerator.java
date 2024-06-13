@@ -224,9 +224,7 @@ public class ConfigGenerator implements Runnable {
         writer.getImportContainer().addImport("smithy_python.interfaces.interceptor", "Interceptor", "Interceptor");
 
         writer.writeInline("_ServiceInterceptor = Union[");
-        if (operationShapes.isEmpty()) {
-            writer.writeInline("]");
-        } else {
+        if (!operationShapes.isEmpty()) {
             var iter = operationShapes.iterator();
             while (iter.hasNext()) {
                 var operation = iter.next();
@@ -238,12 +236,10 @@ public class ConfigGenerator implements Runnable {
                 writer.writeInline("Interceptor[$T, $T, Any, Any]", input, output);
                 if (iter.hasNext()) {
                     writer.writeInline(", ");
-                } else {
-                    writer.writeInline("]");
                 }
             }
         }
-        writer.write("");
+        writer.write("]");
     }
 
     protected void generateConfig(GenerationContext context, PythonWriter writer) {
