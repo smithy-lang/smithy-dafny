@@ -4,16 +4,17 @@
 package SimpleExternImpl
 
 import (
-	ExternConstructor "ExternConstructor"
-	StandardLibrary "StandardLibrary"
-	StandardLibraryInterop "StandardLibraryInterop"
-	StandardLibrary_UInt "StandardLibrary_UInt"
-	_System "System_"
-	Wrappers "Wrappers"
-	_dafny "dafny"
 	os "os"
-	simpledafnyexterninternaldafnytypes "simpledafnyexterninternaldafnytypes"
-	"types"
+
+	ExternConstructor "github.com/Smithy-dafny/TestModels/Extern/ExternConstructor"
+	simpleexterntypes "github.com/Smithy-dafny/TestModels/Extern/simpleexterntypes"
+	simpledafnyexterninternaldafnytypes "github.com/Smithy-dafny/TestModels/Externsimpledafnyexterninternaldafnytypes"
+	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
+	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
+	StandardLibrary "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
+	StandardLibraryInterop "github.com/dafny-lang/DafnyStandardLibGo/StandardLibraryInterop"
+	StandardLibrary_UInt "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary_UInt"
+	Wrappers "github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 )
 
 var _ _dafny.Dummy__
@@ -212,7 +213,7 @@ func (CompanionStruct_Default___) GetExtern(c Config, input simpledafnyexternint
 func (CompanionStruct_Default___) ExternMustError(c Config, input simpledafnyexterninternaldafnytypes.ExternMustErrorInput) Wrappers.Result {
 
 	return Wrappers.Companion_Result_.Create_Failure_(
-		simpledafnyexterninternaldafnytypes.Companion_Error_.Create_Opaque_(types.OpaqueError{
+		simpledafnyexterninternaldafnytypes.Companion_Error_.Create_Opaque_(simpleexterntypes.OpaqueError{
 			input.Dtor_value()}))
 
 }
