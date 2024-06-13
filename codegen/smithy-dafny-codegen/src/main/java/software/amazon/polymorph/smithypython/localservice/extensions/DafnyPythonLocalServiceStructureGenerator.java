@@ -419,6 +419,18 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    */
   protected void writeInitMethodAssignerForRequiredMember(MemberShape member, String memberName) {
     writeInitMethodConstraintsChecksForMember(member, memberName);
+    writer.openBlock(
+            "if ($1L is None):",
+            "",
+            memberName,
+            () -> {
+              writer.write(
+                      """
+                            raise ValueError("$1L must be provided")
+                            """,
+                      memberName
+              );
+            });
     writer.write("self.$1L = $1L", memberName);
   }
 
