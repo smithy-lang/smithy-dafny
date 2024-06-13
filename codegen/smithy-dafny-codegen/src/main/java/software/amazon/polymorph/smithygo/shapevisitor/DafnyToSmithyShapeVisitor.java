@@ -136,9 +136,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         StringBuilder builder = new StringBuilder();
 
         MemberShape memberShape = shape.getMember();
-        final String typeName = context.symbolProvider().toSymbol(memberShape).getName();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-        
+        final String typeName = targetShape.isStructureShape() ? context.symbolProvider().toSymbol(memberShape).getFullName() : context.symbolProvider().toSymbol(memberShape).getName();
         builder.append("""
                        func() []%s{
                        var fieldValue []%s
