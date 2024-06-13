@@ -91,7 +91,7 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
   public static Model transformModelForAwsSdkService(Model model, ServiceShape serviceShape) {
     Model transformedModel = model;
     transformedModel = addAwsSdkProtocolTrait(transformedModel, serviceShape);
-    transformedModel = DafnyPythonLocalServiceClientCodegenPlugin.transformStringEnumShapesToEnumShapes(transformedModel, serviceShape);
+    transformedModel = DafnyPythonLocalServiceClientCodegenPlugin.transformStringEnumShapesToEnumShapes(transformedModel);
     return transformedModel;
   }
 }
