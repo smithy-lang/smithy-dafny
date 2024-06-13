@@ -3,12 +3,12 @@
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetResourcesOutput {
-    pub(crate) output: crate::types::i_simple_resource::ISimpleResourceObject,
+    pub(crate) output: crate::types::simple_resource::SimpleResourceImpl,
 }
 
 impl GetResourcesOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn output(&self) -> crate::types::i_simple_resource::ISimpleResourceObject {
+    pub fn output(&self) -> crate::types::simple_resource::SimpleResourceImpl {
         self.output.clone()
     }
 }
@@ -26,13 +26,12 @@ impl GetResourcesOutput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetResourcesOutputBuilder {
-    pub(crate) output:
-        ::std::option::Option<crate::types::i_simple_resource::ISimpleResourceObject>,
+    pub(crate) output: ::std::option::Option<crate::types::simple_resource::SimpleResourceImpl>,
 }
 
 impl GetResourcesOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn output(mut self, input: crate::types::i_simple_resource::ISimpleResourceObject) -> Self {
+    pub fn output(mut self, input: crate::types::simple_resource::SimpleResourceImpl) -> Self {
         self.output = ::std::option::Option::Some(input);
         self
     }
@@ -40,7 +39,7 @@ impl GetResourcesOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn set_output(
         mut self,
-        input: ::std::option::Option<crate::types::i_simple_resource::ISimpleResourceObject>,
+        input: ::std::option::Option<crate::types::simple_resource::SimpleResourceImpl>,
     ) -> Self {
         self.output = input;
         self
@@ -49,7 +48,7 @@ impl GetResourcesOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn get_output(
         &self,
-    ) -> &::std::option::Option<crate::types::i_simple_resource::ISimpleResourceObject> {
+    ) -> &::std::option::Option<crate::types::simple_resource::SimpleResourceImpl> {
         &self.output
     }
 

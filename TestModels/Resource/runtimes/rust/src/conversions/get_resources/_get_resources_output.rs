@@ -21,7 +21,7 @@ pub fn from_dafny(
             output,
         } =>
         crate::operation::get_resources::GetResourcesOutput {
-            output: crate::types::i_simple_resource::ISimpleResourceObject{obj : output.clone()}
+            output: crate::types::simple_resource::SimpleResourceImpl{obj : output.clone()}
          }
     }
 }

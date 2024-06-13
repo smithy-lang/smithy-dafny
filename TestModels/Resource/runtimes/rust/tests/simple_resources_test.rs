@@ -20,19 +20,19 @@ async fn TestClient(config: SimpleResourcesConfig) {
     TestSomeGetData(config.clone(), resource.clone()).await;
 }
 
-async fn TestNoneGetData(config: SimpleResourcesConfig, resource: ISimpleResourceObject) {
+async fn TestNoneGetData(config: SimpleResourcesConfig, resource: SimpleResourceImpl) {
     let input = allNone();
     let result = resource.clone().GetResourceData(input).unwrap();
     checkMostNone(config.name().to_string(), result);
 }
 
-async fn TestSomeGetData(config: SimpleResourcesConfig, resource: ISimpleResourceObject) {
+async fn TestSomeGetData(config: SimpleResourcesConfig, resource: SimpleResourceImpl) {
     let input = allSome();
     let result = resource.clone().GetResourceData(input).unwrap();
     checkSome(config.name().to_string(), result);
 }
 
-async fn TestGetResources(client: Client) -> ISimpleResourceObject {
+async fn TestGetResources(client: Client) -> SimpleResourceImpl {
     let output = client.get_resources().value("Test").send().await.unwrap();
     output.output()
 }
