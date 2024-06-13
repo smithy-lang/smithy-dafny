@@ -3,11 +3,6 @@ use simple_resources::types::*;
 use simple_resources::*;
 
 #[tokio::test]
-async fn TestDefaultConfig() {
-    TestClient(SimpleResourcesConfig::DefaultSimpleResourcesConfig()).await;
-}
-
-#[tokio::test]
 async fn TestCustomConfig() {
     TestClient(
         SimpleResourcesConfig::builder()

@@ -13,29 +13,6 @@ impl SimpleResourcesConfig {
         &self.name
     }
 }
-// impl Default for SimpleResourcesConfig {
-//     fn default() -> Self {
-//         crate::conversions::simple_resources_config::_simple_resources_config::from_dafny(
-//         ::simple_resources_dafny::_simple_dresources_dinternaldafny::_default::DefaultSimpleResourcesConfig()
-//         )
-//     }
-// }
-
-impl SimpleResourcesConfig {
-    pub fn DefaultSimpleResourcesConfig() -> Self {
-        crate::conversions::simple_resources_config::_simple_resources_config::from_dafny(
-            ::simple_resources_dafny::_simple_dresources_dinternaldafny::_default::DefaultSimpleResourcesConfig()
-        )
-    }
-}
-
-impl Default for SimpleResourcesConfig {
-    fn default() -> Self {
-        Self {
-            name: "default".to_string(),
-        }
-    }
-}
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug, ::std::default::Default)]
 pub struct SimpleResourcesConfigBuilder {
@@ -58,6 +35,13 @@ impl SimpleResourcesConfigBuilder {
                 aws_smithy_types::error::operation::BuildError::missing_field(
                     "name",
                     "Required for SimpleResourcesConfig.",
+                ),
+            )
+        } else if self.name.as_ref().unwrap().len() < 1 {
+            Err(
+                aws_smithy_types::error::operation::BuildError::invalid_field(
+                    "name",
+                    "Length must be at least 1.",
                 ),
             )
         } else {
