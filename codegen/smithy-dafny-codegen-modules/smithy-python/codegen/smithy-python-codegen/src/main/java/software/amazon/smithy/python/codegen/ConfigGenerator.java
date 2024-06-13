@@ -225,7 +225,7 @@ public class ConfigGenerator implements Runnable {
 
         writer.writeInline("_ServiceInterceptor = Union[");
         if (operationShapes.isEmpty()) {
-            writer.writeInline("None]");
+            writer.writeInline("]");
         } else {
             var iter = operationShapes.iterator();
             while (iter.hasNext()) {

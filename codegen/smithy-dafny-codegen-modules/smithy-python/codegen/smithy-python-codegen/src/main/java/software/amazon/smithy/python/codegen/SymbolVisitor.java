@@ -126,7 +126,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return "message";
         }
 
-        var memberName = CaseUtils.toSnakeCase(escaper.escapeMemberName(shape.getMemberName()));
+        var memberName = escaper.escapeMemberName(CaseUtils.toSnakeCase(shape.getMemberName()));
 
         // Escape words that are only reserved for error members.
         if (shape.hasTrait(ErrorTrait.class)) {
