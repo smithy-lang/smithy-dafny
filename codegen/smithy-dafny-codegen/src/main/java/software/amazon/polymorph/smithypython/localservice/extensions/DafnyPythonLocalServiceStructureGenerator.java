@@ -100,37 +100,40 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   }
 
     /**
-     * Override Smithy-Python to
+     * Override Smithy-Python to not unambiguously write a `message`
+     * attribute on errors;
+     * Smithy-Dafny defines this attribute on its errors,
+     * so Smithy-Python behavior is changed to not write `message` multiple times
      * @param isError
      */
-//  @Override
-//  protected void writeReprMembers(boolean isError) {
-//    var iter = shape.members().iterator();
-//    while (iter.hasNext()) {
-//      var member = iter.next();
-//      var memberName = symbolProvider.toMemberName(member);
-//      var trailingComma = iter.hasNext() ? ", " : "";
-//      if (member.hasTrait(SensitiveTrait.class)) {
-//        // Sensitive members must not be printed
-//        // see: https://smithy.io/2.0/spec/documentation-traits.html#smithy-api-sensitive-trait
-//        writer.write(
-//            """
-//                    if self.$1L is not None:
-//                        result += f"$1L=...$2L"
-//                    """,
-//            memberName,
-//            trailingComma);
-//      } else {
-//        writer.write(
-//            """
-//                    if self.$1L is not None:
-//                        result += f"$1L={repr(self.$1L)}$2L"
-//                    """,
-//            memberName,
-//            trailingComma);
-//      }
-//    }
-//  }
+  @Override
+  protected void writeReprMembers(boolean isError) {
+    var iter = shape.members().iterator();
+    while (iter.hasNext()) {
+      var member = iter.next();
+      var memberName = symbolProvider.toMemberName(member);
+      var trailingComma = iter.hasNext() ? ", " : "";
+      if (member.hasTrait(SensitiveTrait.class)) {
+        // Sensitive members must not be printed
+        // see: https://smithy.io/2.0/spec/documentation-traits.html#smithy-api-sensitive-trait
+        writer.write(
+            """
+                    if self.$1L is not None:
+                        result += f"$1L=...$2L"
+                    """,
+            memberName,
+            trailingComma);
+      } else {
+        writer.write(
+            """
+                    if self.$1L is not None:
+                        result += f"$1L={repr(self.$1L)}$2L"
+                    """,
+            memberName,
+            trailingComma);
+      }
+    }
+  }
 
   /**
    * Override Smithy-Python writePropertyForMember to handle importing reference modules to avoid
@@ -408,9 +411,24 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.write("");
   }
 
+  /**
+   *
+   * @param member
+   * @param memberName
+   */
   protected void writeInitMethodAssignerForRequiredMember(MemberShape member, String memberName) {
-    // Smithy-Dafny: Check traits
-    // LengthTrait, RangeTrait
+    writeInitMethodConstraintsChecksForMember(member, memberName);
+    writer.write("self.$1L = $1L", memberName);
+  }
+
+  protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
+    writeInitMethodConstraintsChecksForMember(member, memberName);
+    writer.write(
+        "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
+  }
+
+  protected void writeInitMethodConstraintsChecksForMember(MemberShape member, String memberName) {
+    // RangeTrait
     Shape targetShape = model.expectShape(member.getTarget());
     if (targetShape.hasTrait(RangeTrait.class)) {
       RangeTrait rangeTrait = targetShape.getTrait(RangeTrait.class).get();
@@ -422,6 +440,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       }
     }
 
+    // LengthTrait
     if (targetShape.hasTrait(LengthTrait.class)) {
       LengthTrait lengthTrait = targetShape.getTrait(LengthTrait.class).get();
       if (lengthTrait.getMin().isPresent()) {
@@ -431,12 +450,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
         writeLengthTraitMaxCheckForMember(memberName, lengthTrait);
       }
     }
-    writer.write("self.$1L = $1L", memberName);
-  }
-
-  protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
-    writer.write(
-        "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
   }
 
   /**
