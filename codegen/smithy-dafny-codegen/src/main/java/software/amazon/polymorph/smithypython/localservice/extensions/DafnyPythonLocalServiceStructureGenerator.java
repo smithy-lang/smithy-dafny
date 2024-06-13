@@ -412,7 +412,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   }
 
   /**
-   *
+   * Write assignment from __init__ method parameter to new object's required attribute.
+   * Writes any constraint-checking code before writing assignment.
    * @param member
    * @param memberName
    */
@@ -421,6 +422,12 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.write("self.$1L = $1L", memberName);
   }
 
+  /**
+   * Write assignment from __init__ method parameter to new object's optional attribute.
+   * Writes any constraint-checking code before writing assignment.
+   * @param member
+   * @param memberName
+   */
   protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
     writeInitMethodConstraintsChecksForMember(member, memberName);
     writer.write(
