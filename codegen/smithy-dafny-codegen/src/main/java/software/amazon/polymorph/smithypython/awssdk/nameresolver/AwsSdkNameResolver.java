@@ -9,6 +9,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.utils.CaseUtils;
 
 /**
@@ -21,26 +22,37 @@ public class AwsSdkNameResolver {
     return isAwsSdkShape(shape.getId());
   }
 
+  /**
+   * Returns true if the shape is in an AWS SDK service namespace.
+   * @param shapeId
+   * @return
+   */
   public static boolean isAwsSdkShape(ShapeId shapeId) {
     // If the shape namespace is not in our list of known SDK namespaces,
     // it is not a (known) SDK namespace
     return isAwsSdkNamespace(shapeId.getNamespace());
   }
 
+  /**
+   * Returns true if the namespace represents an AWS SDK service namespace.
+   * @param namespace
+   * @return
+   */
   public static boolean isAwsSdkNamespace(String namespace) {
-    // If the shape namespace is not in our list of known SDK namespaces,
-    // it is not a (known) SDK namespace
     return namespace.startsWith("com.amazonaws");
   }
 
   /**
-   * Returns the type name of the client for the provided AWS SDK serviceShape. The
-   * serviceShape SHOULD be an AWS SDK. This also standardizes some "legacy" service names.
+   * Returns the type name of the client for the provided AWS SDK serviceShape.
+   * This also standardizes some "legacy" service names.
    *
    * @param serviceShape
    * @return
    */
   public static String clientNameForService(ServiceShape serviceShape) {
+    if (!isAwsSdkNamespace(serviceShape.getId().getNamespace())) {
+      throw new IllegalArgumentException("serviceShape is not an AWS SDK service: " + serviceShape);
+    }
     return switch (serviceShape.getId().getName()) {
       case "TrentService" -> "KMSClient";
       case "DynamoDB_20120810" -> "DynamoDBClient";
@@ -71,25 +83,6 @@ public class AwsSdkNameResolver {
   }
 
   /**
-   * Resolve the provided smithyNamespace to its corresponding Dafny Extern namespace. Our Dafny
-   * code declares an extern namespace independent of the Smithy namespace; this function maps the
-   * two namespaces.
-   *
-   * @param smithyNamespace
-   * @return
-   */
-  public static String resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(
-      String smithyNamespace) {
-    String rtn = smithyNamespace.toLowerCase();
-    if (smithyNamespace.startsWith("aws")) {
-      rtn = rtn.replaceFirst("aws", "software.amazon");
-    } else if (smithyNamespace.startsWith("com.amazonaws")) {
-      rtn = rtn.replaceFirst("com.amazonaws", "software.amazon.cryptography.services");
-    }
-    return rtn;
-  }
-
-  /**
    * Returns the name of the function that converts the provided shape's Dafny-modelled type to the
    * corresponding AWS SDK-modelled type. This function will be defined in the `dafny_to_aws_sdk.py`
    * file. ex. example.namespace.ExampleShape -> "example_namespace_ExampleShape"
@@ -98,10 +91,7 @@ public class AwsSdkNameResolver {
    * @return
    */
   public static String getDafnyToAwsSdkFunctionNameForShape(Shape shape) {
-    return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            shape.getId().getNamespace())
-        + "_"
-        + shape.getId().getName();
+    return getConversionFunctionNameForShape(shape);
   }
 
   /**
@@ -114,9 +104,18 @@ public class AwsSdkNameResolver {
    * @return
    */
   public static String getAwsSdkToDafnyFunctionNameForShape(Shape shape) {
+    return getConversionFunctionNameForShape(shape);
+  }
+
+  /**
+   * Returns the function name to use when converting the shape between boto/Dafny types.
+   * @param shape
+   * @return
+   */
+  public static String getConversionFunctionNameForShape(Shape shape) {
     return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             shape.getId().getNamespace())
-        + "_"
-        + shape.getId().getName();
+            + "_"
+            + shape.getId().getName();
   }
 }

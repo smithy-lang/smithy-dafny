@@ -160,6 +160,14 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
         });
   }
 
+    /**
+     * Returns true if the error value is on the root of the response,
+     * rather than on the response's `['Error']` attribute.
+     * This is not a common case.
+     * @param memberShape
+     * @param structureShape
+     * @return
+     */
   private boolean shapeMemberIsOnResponseRoot(MemberShape memberShape, StructureShape structureShape) {
       // Case: TransactionCanceledException.CancellationReasons
       if ("CancellationReasons".equals(memberShape.getMemberName())
@@ -313,9 +321,9 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                 // Write case to handle if union member does not match any of the above cases
                 conversionWriter.write(
                     """
-                                        else:
-                                            raise ValueError("No recognized union value in union type: " + str($L))
-                                        """,
+                    else:
+                        raise ValueError("No recognized union value in union type: " + str($L))
+                    """,
                     dataSourceInsideConversionFunction);
 
                 // Return the result of the union conversion
@@ -370,8 +378,8 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                   String value = enumDefinition.getValue();
                   conversionWriter.write(
                       """
-                                            $L $L == "$L":
-                                                return $L()""",
+                      $L $L == "$L":
+                          return $L()""",
                       // If we need a new `if` block, open one; otherwise, expand on existing one
                       // with `elif`
                       shouldOpenNewIfBlock ? "if" : "elif",
@@ -388,9 +396,9 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                 // Write case to handle if union member does not match any of the above cases
                 conversionWriter.write(
                     """
-                                        else:
-                                            raise ValueError("No recognized enum value in enum type: " + $L)
-                                        """,
+                    else:
+                        raise ValueError("No recognized enum value in enum type: " + $L)
+                    """,
                     dataSourceInsideConversionFunction);
               });
         });
