@@ -44,23 +44,23 @@ public class ShimFileWriter implements CustomFileWriter {
 
               writer.write(
                   """
-          import standard_library.internaldafny.generated.Wrappers as Wrappers
-          import $L
-          import $L.client as client_impl
-
-          class $L($L.$L):
-              def __init__(self, _impl: client_impl) :
-                  self._impl = _impl
-
-              ${C|}
+              import standard_library.internaldafny.generated.Wrappers as Wrappers
+              import $L
+              import $L.client as client_impl
+    
+              class $L($L.$L):
+                  def __init__(self, _impl: client_impl) :
+                      self._impl = _impl
+    
+                  ${C|}
               """,
-                  typesModulePrelude,
-                  SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                      serviceShape.getId().getNamespace(), codegenContext.settings()),
-                  SmithyNameResolver.shimNameForService(serviceShape),
-                  typesModulePrelude,
-                  DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
-                  writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w)));
+              typesModulePrelude,
+              SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                  serviceShape.getId().getNamespace(), codegenContext.settings()),
+              SmithyNameResolver.shimNameForService(serviceShape),
+              typesModulePrelude,
+              DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
+              writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w)));
             });
   }
 
