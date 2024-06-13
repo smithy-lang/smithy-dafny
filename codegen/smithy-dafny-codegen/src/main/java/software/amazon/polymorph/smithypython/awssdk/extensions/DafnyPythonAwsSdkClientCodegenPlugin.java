@@ -23,8 +23,8 @@ import java.util.Map;
 
 /**
  * Plugin to trigger Smithy-Dafny Python code generation for AWS SDK services. This Plugin differs
- * from the PythonClientCodegenPlugin by not calling runner.performDefaultCodegenTransforms(); and
- * runner.createDedicatedInputsAndOutputs(); These methods transform the model in ways that the
+ * from the PythonClientCodegenPlugin by not calling `runner.performDefaultCodegenTransforms()` and
+ * `runner.createDedicatedInputsAndOutputs()`. These methods transform the model in ways such that the
  * model does not align with the generated Dafny code. This Plugin also attaches a
  * DafnyAwsSdkProtocolTrait to the ServiceShape provided in settings. AWS SDKs do not consistently
  * label a protocol, and Smithy-Python requires that a protocol is assigned. Rather than declare
@@ -39,6 +39,12 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
     SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
   }
 
+  /**
+   * Define some custom throwaway protocol so Smithy-Python codegen can run.
+   * @param model
+   * @param serviceShape
+   * @return
+   */
   public static Model addAwsSdkProtocolTrait(Model model, ServiceShape serviceShape) {
     return ModelTransformer.create()
         .mapShapes(
@@ -80,12 +86,5 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
     runner.model(addAwsSdkProtocolTrait(context.getModel(), serviceShape));
 
     runner.run();
-  }
-
-  public static Model transformModelForAwsSdkService(Model model, ServiceShape serviceShape) {
-    Model transformedModel = model;
-    transformedModel = addAwsSdkProtocolTrait(transformedModel, serviceShape);
-    transformedModel = DafnyPythonLocalServiceClientCodegenPlugin.transformStringEnumShapesToEnumShapes(transformedModel);
-    return transformedModel;
   }
 }

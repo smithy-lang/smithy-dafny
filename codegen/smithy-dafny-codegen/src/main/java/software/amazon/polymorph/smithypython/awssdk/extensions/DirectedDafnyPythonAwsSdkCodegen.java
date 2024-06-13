@@ -21,10 +21,11 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonSettings;
 
 /**
- * DirectedCodegen for Dafny Python AWS SDK models. This overrides DirectedPythonCodegen to 1) Not
- * generate a Smithy client (nor its serialize/deserialize bodies, client config, etc.), and 2)
- * Remove extraneous generated files. AWS SDK generation does NOT involve generating a Smithy
- * client; it will only generate a shim wrapping boto3.
+ * DirectedCodegen for Dafny Python AWS SDK models. This overrides DirectedPythonCodegen to
+ * 1) Not generate a Smithy client (nor its serialize/deserialize bodies, client config, etc.)
+ * 2) Remove extraneous generated files.
+ * AWS SDK client generation does NOT involve generating a Smithy client;
+ * it will only generate a shim wrapping boto3.
  */
 public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
 
