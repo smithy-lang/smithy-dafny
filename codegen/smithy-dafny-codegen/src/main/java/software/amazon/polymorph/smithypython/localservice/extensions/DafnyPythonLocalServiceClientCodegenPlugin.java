@@ -82,7 +82,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     Model transformedModel = model;
     transformedModel = transformJavadocTraitsToDocumentationTraits(transformedModel);
     transformedModel = transformServiceShapeToAddReferenceResources(transformedModel, serviceShape);
-    transformedModel = transformStringEnumShapesToEnumShapes(transformedModel, serviceShape);
+    transformedModel = transformStringEnumShapesToEnumShapes(transformedModel);
     return transformedModel;
   }
 
