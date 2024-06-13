@@ -14,10 +14,7 @@ import software.amazon.smithy.model.knowledge.NullableIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.LengthTrait;
-import software.amazon.smithy.model.traits.RangeTrait;
-import software.amazon.smithy.model.traits.SensitiveTrait;
+import software.amazon.smithy.model.traits.*;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
@@ -444,6 +441,10 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writeInitMethodConstraintsChecksForMember(member, memberName);
     writer.write(
         "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
+  }
+
+  protected boolean isOptionalDefault(MemberShape member) {
+    return !member.hasTrait(RequiredTrait.class);
   }
 
   protected void writeInitMethodConstraintsChecksForMember(MemberShape member, String memberName) {
