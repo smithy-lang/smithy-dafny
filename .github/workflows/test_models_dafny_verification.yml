@@ -50,6 +50,7 @@ jobs:
             TestModels/aws-sdks/ddb,
             TestModels/aws-sdks/glue,
             TestModels/aws-sdks/kms,
+            TestModels/aws-sdks/sqs,
             TestModels/aws-sdks/lakeformation,
             TestModels/aws-sdks/sqs-via-cli,
           ]
@@ -87,6 +88,12 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
           dafny-version: ${{ matrix.dafny-version }}
+
+      - name: Setup Java 17 for codegen
+        uses: actions/setup-java@v3
+        with:
+          distribution: "corretto"
+          java-version: "17"
 
       - name: Generate Polymorph Wrapper Dafny code
         working-directory: ./${{ matrix.library }}
