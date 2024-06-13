@@ -438,7 +438,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         if (shape.hasTrait(EnumTrait.class)) {
             String name = getDefaultShapeName(shape);
             return symbolBuilderFor(shape, name, SmithyNameResolver.smithyTypesNamespace(settings.getService(model)))
-                    .definitionFile("./types/enums.go")
+                    .definitionFile("./%s/enums.go".formatted(SmithyNameResolver.smithyTypesNamespace(shape)))
                     .build();
         }
 
@@ -518,7 +518,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol intEnumShape(IntEnumShape shape) {
         String name = getDefaultShapeName(shape);
         return symbolBuilderFor(shape, name, SmithyNameResolver.smithyTypesNamespace(settings.getService(model)))
-                .definitionFile("./types/enums.go")
+                .definitionFile("./%s/enums.go".formatted(SmithyNameResolver.smithyTypesNamespace(shape)))
                 .build();
     }
 }
