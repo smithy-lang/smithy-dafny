@@ -103,7 +103,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
      * Override Smithy-Python to not unambiguously write a `message`
      * attribute on errors;
      * Smithy-Dafny defines this attribute on its errors,
-     * so Smithy-Python behavior is changed to not write `message` multiple times
+     * so Smithy-Python behavior is changed to not write `message` multiple times.
+     * (In particular, OpaqueErrors may not have a `message` attribute,
+     * which leads to issues.)
      * @param isError
      */
   @Override
