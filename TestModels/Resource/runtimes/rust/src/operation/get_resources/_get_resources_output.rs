@@ -3,14 +3,13 @@
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetResourcesOutput {
-    #[allow(missing_docs)] // documentation missing in model
-    pub value: ::std::option::Option<::std::primitive::bool>,
+    pub(crate) output: crate::types::i_simple_resource::ISimpleResourceObject,
 }
 
 impl GetResourcesOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(&self) -> ::std::option::Option<bool> {
-        self.value
+    pub fn output(&self) -> crate::types::i_simple_resource::ISimpleResourceObject {
+        self.output.clone()
     }
 }
 
@@ -27,25 +26,31 @@ impl GetResourcesOutput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetResourcesOutputBuilder {
-    pub(crate) value: ::std::option::Option<::std::primitive::bool>,
+    pub(crate) output:
+        ::std::option::Option<crate::types::i_simple_resource::ISimpleResourceObject>,
 }
 
 impl GetResourcesOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(mut self, input: impl ::std::convert::Into<::std::primitive::bool>) -> Self {
-        self.value = ::std::option::Option::Some(input.into());
+    pub fn output(mut self, input: crate::types::i_simple_resource::ISimpleResourceObject) -> Self {
+        self.output = ::std::option::Option::Some(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(mut self, input: ::std::option::Option<::std::primitive::bool>) -> Self {
-        self.value = input;
+    pub fn set_output(
+        mut self,
+        input: ::std::option::Option<crate::types::i_simple_resource::ISimpleResourceObject>,
+    ) -> Self {
+        self.output = input;
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> &::std::option::Option<::std::primitive::bool> {
-        &self.value
+    pub fn get_output(
+        &self,
+    ) -> &::std::option::Option<crate::types::i_simple_resource::ISimpleResourceObject> {
+        &self.output
     }
 
     /// Consumes the builder and constructs a [`GetResourcesOutput`](crate::operation::operation::GetResourcesOutput).
@@ -56,7 +61,7 @@ impl GetResourcesOutputBuilder {
         ::aws_smithy_types::error::operation::BuildError,
     > {
         ::std::result::Result::Ok(crate::operation::get_resources::GetResourcesOutput {
-            value: self.value,
+            output: self.output.unwrap(),
         })
     }
 }

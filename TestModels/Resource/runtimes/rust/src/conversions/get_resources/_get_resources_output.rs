@@ -5,12 +5,8 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<
     ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesOutput,
 > {
-    let dafny_value = match value.value {
-        Some(b) => ::simple_resources_dafny::_Wrappers_Compile::Option::Some { value: b },
-        None => ::simple_resources_dafny::_Wrappers_Compile::Option::None {},
-    };
     ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesOutput::GetResourcesOutput {
-    value: ::std::rc::Rc::new(dafny_value)
+    output: value.output.obj
   })
 }
 
@@ -20,18 +16,12 @@ pub fn from_dafny(
         ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesOutput,
     >,
 ) -> crate::operation::get_resources::GetResourcesOutput {
-    let value = if matches!(
-        dafny_value.value().as_ref(),
-        ::simple_resources_dafny::_Wrappers_Compile::Option::Some { .. }
-    ) {
-        Some(dafny_value.value().Extract())
-    } else if matches!(
-        dafny_value.value().as_ref(),
-        ::simple_resources_dafny::_Wrappers_Compile::Option::None { .. }
-    ) {
-        None
-    } else {
-        panic!("Unreachable")
-    };
-    crate::operation::get_resources::GetResourcesOutput { value }
+    match &*dafny_value {
+        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesOutput::GetResourcesOutput {
+            output,
+        } =>
+        crate::operation::get_resources::GetResourcesOutput {
+            output: crate::types::i_simple_resource::ISimpleResourceObject{obj : output.clone()}
+         }
+    }
 }

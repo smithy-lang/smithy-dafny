@@ -4,12 +4,12 @@
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetResourcesInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub value: ::std::option::Option<::std::primitive::bool>,
+    pub(crate) value: ::std::option::Option<::std::string::String>,
 }
 impl GetResourcesInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(&self) -> ::std::option::Option<bool> {
-        self.value
+    pub fn value(&self) -> &::std::option::Option<String> {
+        &self.value
     }
 }
 impl GetResourcesInput {
@@ -25,21 +25,21 @@ impl GetResourcesInput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetResourcesInputBuilder {
-    pub(crate) value: ::std::option::Option<::std::primitive::bool>,
+    pub(crate) value: ::std::option::Option<::std::string::String>,
 }
 impl GetResourcesInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(mut self, input: impl ::std::convert::Into<::std::primitive::bool>) -> Self {
+    pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.value = ::std::option::Option::Some(input.into());
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(mut self, input: ::std::option::Option<::std::primitive::bool>) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
         self.value = input;
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> &::std::option::Option<::std::primitive::bool> {
+    pub fn get_value(&self) -> &::std::option::Option<::std::string::String> {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetResourcesInput`](crate::operation::operation::GetResourcesInput).

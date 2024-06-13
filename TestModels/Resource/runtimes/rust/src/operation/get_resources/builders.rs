@@ -56,17 +56,17 @@ impl GetResourcesFluentBuilder {
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(mut self, input: impl ::std::convert::Into<::std::primitive::bool>) -> Self {
+    pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.inner = self.inner.value(input.into());
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(mut self, input: ::std::option::Option<::std::primitive::bool>) -> Self {
+    pub fn set_value(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
         self.inner = self.inner.set_value(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> &::std::option::Option<::std::primitive::bool> {
+    pub fn get_value(&self) -> &::std::option::Option<::std::string::String> {
         self.inner.get_value()
     }
 }

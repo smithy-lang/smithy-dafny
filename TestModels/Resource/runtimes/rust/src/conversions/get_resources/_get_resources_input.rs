@@ -6,7 +6,9 @@ pub fn to_dafny(
     ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
 > {
     let dafny_value = match value.value {
-        Some(b) => ::simple_resources_dafny::_Wrappers_Compile::Option::Some { value: b },
+        Some(b) => ::simple_resources_dafny::_Wrappers_Compile::Option::Some { value:
+            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
+            },
         None => ::simple_resources_dafny::_Wrappers_Compile::Option::None {},
     };
     ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput::GetResourcesInput {
@@ -24,7 +26,11 @@ pub fn from_dafny(
         dafny_value.value().as_ref(),
         ::simple_resources_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
-        Some(dafny_value.value().Extract())
+        Some(
+            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
+                &dafny_value.value().Extract(),
+            ),
+        )
     } else if matches!(
         dafny_value.value().as_ref(),
         ::simple_resources_dafny::_Wrappers_Compile::Option::None { .. }

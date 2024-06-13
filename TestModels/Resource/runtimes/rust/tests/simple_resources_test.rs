@@ -1,52 +1,88 @@
+use simple_resources::operation::get_resource_data::*;
+use simple_resources::operation::get_resources::*;
+use simple_resources::types::i_simple_resource::ISimpleResource;
+use simple_resources::types::*;
 use simple_resources::*;
-/*
-    method{:test} GetResourcesTrue(){
-        var client :- expect SimpleResources.SimpleResources();
-        TestGetResourcesTrue(client);
-    }
-    method{:test} GetResourcesFalse(){
-        var client :- expect SimpleResources.SimpleResources();
-        TestGetResourcesFalse(client);
-    }
-*/
 
-/*method TestGetResourcesTrue(client: ISimpleTypesResourcesClient)
-      requires client.ValidState()
-      modifies client.Modifies
-      ensures client.ValidState()
-    {
-        var ret :- expect client.GetResources(SimpleResources.Types.GetResourcesInput(value:= Some(true)));
-        expect ret.value.UnwrapOr(false) == true;
-        print ret;
-    }
-} */
+// This must fail, because SimpleResourcesConfig::name is required
+// #[tokio::test]
+// async fn TestDefaultConfig()
+//   {
+//     TestClient(SimpleResourcesConfig::builder().build().unwrap());
+//   }
+
 #[tokio::test]
-async fn test_get_resources_true() {
-    let result = client().get_resources().value(true).send().await;
-    let output = result.unwrap();
-    let value = output.value().unwrap();
-    assert!(value);
+async fn TestCustomConfig() {
+    TestClient(
+        SimpleResourcesConfig::builder()
+            .name("Dafny")
+            .build()
+            .unwrap(),
+    );
 }
 
-/*method TestGetResourcesFalse(client: ISimpleTypesResourcesClient)
-      requires client.ValidState()
-      modifies client.Modifies
-      ensures client.ValidState()
-    {
-        var ret :- expect client.GetResources(SimpleResources.Types.GetResourcesInput(value:= Some(false)));
-        expect ret.value.UnwrapOr(true) == false;
-        print ret;
-    }
-} */
-#[tokio::test]
-async fn test_get_resources_false() {
-    let result = client().get_resources().value(false).send().await;
-    let output = result.unwrap();
-    let value = output.value().unwrap();
-    assert!(!value);
+async fn TestClient(config: SimpleResourcesConfig) {
+    let client = Client::from_conf(config.clone()).unwrap();
+    let resource = TestGetResources(client).await;
+    TestNoneGetData(config.clone(), resource.clone());
+    TestSomeGetData(config.clone(), resource.clone());
+}
+
+async fn TestNoneGetData(
+    config: SimpleResourcesConfig,
+    resource: i_simple_resource::ISimpleResourceObject,
+) {
+    let input = allNone();
+    let result = resource.clone().GetResourceData(input).unwrap();
+    checkMostNone(config.name().to_string(), result);
+}
+
+async fn TestSomeGetData(
+    config: SimpleResourcesConfig,
+    resource: i_simple_resource::ISimpleResourceObject,
+) {
+    let input = allSome();
+    let result = resource.clone().GetResourceData(input).unwrap();
+    checkSome(config.name().to_string(), result);
+}
+
+async fn TestGetResources(client: Client) -> i_simple_resource::ISimpleResourceObject {
+    let output = client.get_resources().value("Test").send().await.unwrap();
+    output.output()
 }
 
 pub fn client() -> Client {
     let config = SimpleResourcesConfig::builder().build().unwrap();
     Client::from_conf(config).unwrap()
+}
+
+pub fn allNone() -> GetResourceDataInput {
+    GetResourceDataInput::builder().build().unwrap()
+}
+
+pub fn checkMostNone(name: String, output: GetResourceDataOutput) {
+    assert_eq!(Some(name), *output.stringValue());
+    assert_eq!(None, *output.blobValue());
+    assert_eq!(None, output.booleanValue());
+    assert_eq!(None, output.integerValue());
+    assert_eq!(None, output.longValue());
+}
+
+pub fn allSome() -> GetResourceDataInput {
+    GetResourceDataInput::builder()
+        .blobValue(vec![1u8])
+        .booleanValue(true)
+        .stringValue("Some".to_string())
+        .integerValue(1)
+        .longValue(1)
+        .build()
+        .unwrap()
+}
+
+pub fn checkSome(name: String, output: GetResourceDataOutput) {
+    assert_eq!(Some(name + " Some"), *output.stringValue());
+    assert_eq!(Some(vec![1u8]), *output.blobValue());
+    assert_eq!(Some(true), output.booleanValue());
+    assert_eq!(Some(1), output.integerValue());
+    assert_eq!(Some(1), output.longValue());
 }
