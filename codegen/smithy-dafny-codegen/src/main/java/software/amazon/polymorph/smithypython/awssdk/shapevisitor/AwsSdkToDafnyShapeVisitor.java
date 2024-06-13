@@ -167,28 +167,11 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   public String stringShape(StringShape shape) {
     writer.addStdlibImport("_dafny", "Seq");
 
-    // String shapes with the enum trait have their own converters
+    // String shapes with the enum trait are treated as EnumShapes
     if (shape.hasTrait(EnumTrait.class)) {
-      DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(
-          shape, context, writer);
-      AwsSdkToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
-          shape, context, writer);
-
-      // Import the dafny_to_aws_sdk converter from where the ShapeVisitor was called
-      String pythonModuleSmithygeneratedPath =
-          SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-              shape.getId().getNamespace(), context);
-      writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".aws_sdk_to_dafny");
-
-      // Return a reference to the generated conversion method
-      // ex. for shape example.namespace.ExampleShape
-      // returns
-      // `example_namespace.smithygenerated.dafny_to_aws_sdk.DafnyToAwsSdk_example_namespace_ExampleShape(input)`
-      return "%1$s.aws_sdk_to_dafny.%2$s(%3$s)"
-          .formatted(
-              pythonModuleSmithygeneratedPath,
-              AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(shape),
-              dataSource);
+      return enumShape(
+        EnumShape.fromStringShape(shape).get()
+      );
     }
 
     return "Seq(" + dataSource + ")";
@@ -260,7 +243,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String timestampShape(TimestampShape shape) {
-    // TODO-Python BLOCKING: This lets code generate, but will fail when code uses it
+    // TODO-Python: This lets code generate, but will fail when code uses it
     return "TypeError(\"TimestampShape not supported\")";
   }
 
