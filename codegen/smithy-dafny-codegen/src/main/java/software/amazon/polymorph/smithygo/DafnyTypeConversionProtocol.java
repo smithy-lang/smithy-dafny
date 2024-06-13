@@ -420,7 +420,7 @@ func OpaqueError_Input_ToDafny(nativeInput error)($L.Error) {
                                  """, SmithyNameResolver.smithyTypesNamespace(serviceShape), context.symbolProvider().toSymbol(error).getName(), SmithyNameResolver.getToDafnyMethodName(serviceShape, error, ""), SmithyNameResolver.smithyTypesNamespace(serviceShape), context.symbolProvider().toSymbol(error).getName());
                     }
                 }), SmithyNameResolver.smithyTypesNamespace(serviceShape), SmithyNameResolver.smithyTypesNamespace(serviceShape), SmithyNameResolver.smithyTypesNamespace(serviceShape),
-                        DafnyNameResolver.dafnyTypesNamespace(serviceShape), SmithyNameResolver.smithyTypesNamespace(serviceShape), DafnyNameResolver.dafnyTypesNamespace(serviceShape), DafnyNameResolver.dafnyTypesNamespace(serviceShape));
+                        DafnyNameResolver.dafnyTypesNamespace(serviceShape), DafnyNameResolver.dafnyTypesNamespace(serviceShape), DafnyNameResolver.dafnyTypesNamespace(serviceShape));
             });
     }
 

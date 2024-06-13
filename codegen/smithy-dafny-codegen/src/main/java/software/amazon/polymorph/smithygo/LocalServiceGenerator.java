@@ -288,9 +288,7 @@ public class LocalServiceGenerator implements Runnable {
                              SmithyNameResolver.smithyTypesNamespace(service), 
                              SmithyNameResolver.shapeNamespace(service),
                              SmithyNameResolver.smithyTypesNamespace(service),
-                             SmithyNameResolver.smithyTypesNamespace(service),
                              SmithyNameResolver.shapeNamespace(service),
-                             SmithyNameResolver.smithyTypesNamespace(service),
                              returnResponse
                 );
             });
