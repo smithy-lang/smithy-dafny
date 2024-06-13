@@ -35,7 +35,7 @@ public class SynchronousClientGenerator extends ClientGenerator {
   }
 
   /**
-   * Override Smithy-Python's `generateService` to
+   * Override Smithy-Python's `generateService` to reference the Config shape from the correct module,
    *
    * @param writer
    */
@@ -143,8 +143,8 @@ public class SynchronousClientGenerator extends ClientGenerator {
   }
 
   /**
-   * This overrides Smithy-Python's operation generator to generate synchronous user-facing
-   * operations.
+   * Override Smithy-Python to generate correct operations considering {@link PositionalTrait}s
+   * and {@link ReferenceTrait}s.
    *
    * @param writer
    * @param operation
@@ -158,7 +158,8 @@ public class SynchronousClientGenerator extends ClientGenerator {
     var operationInputShape =
         context.model().expectShape(operation.getInputShape()).asStructureShape().get();
 
-    // "visible" in the sense that this the actual input/output shape considering the @positional trait
+    // "visible" in the sense that this the actual input/output shape considering the @positional
+    // trait
     Shape visibleOperationInputShape;
     Symbol interceptorInputSymbol;
 
@@ -173,7 +174,8 @@ public class SynchronousClientGenerator extends ClientGenerator {
 
     var operationOutputShape =
         context.model().expectShape(operation.getOutputShape()).asStructureShape().get();
-    // "visible" in the sense that this the actual input/output shape considering the @positional trait
+    // "visible" in the sense that this the actual input/output shape considering the @positional
+    // trait
     Shape visibleOperationOutputShape;
     Symbol interceptorOutputSymbol;
 

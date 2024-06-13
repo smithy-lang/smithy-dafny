@@ -36,6 +36,12 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     super(model, settings);
   }
 
+  /**
+   * Override Smithy-Python to support namespaces in other modules.
+   * @param namespace
+   * @param filename
+   * @return
+   */
   protected String getSymbolNamespacePathForNamespaceAndFilename(
       String namespace, String filename) {
     return format(
@@ -45,6 +51,12 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
         filename);
   }
 
+  /**
+   * Override Smithy-Python to support namespaces in other modules.
+   * @param namespace
+   * @param filename
+   * @return
+   */
   protected String getSymbolDefinitionFilePathForNamespaceAndFilename(
       String namespace, String filename) {
     String directoryFilePath;
@@ -118,7 +130,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   /**
-   * Override Smithy-Python's resourceShape to handle resource shapes.
+   * Override Smithy-Python's resourceShape to handle writing resource shapes.
    * @param resourceShape
    * @return
    */
@@ -239,7 +251,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   /**
-   * Override Smithy-Python to handle other namespaces
+   * Override Smithy-Python to support namespaces in other modules.
    * @param target
    * @return
    */
@@ -259,7 +271,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   /**
-   * Override Smithy-Python to handle other namespaces
+   * Override Smithy-Python to support namespaces in other modules.
    * @param target
    * @return
    */
@@ -288,7 +300,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   /**
-   * Override Smithy-Python to handle other namespaces
+   * Override Smithy-Python to support namespaces in other modules.
    * @param shape
    * @return
    */
@@ -318,7 +330,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   /**
-   * Override Smithy-Python to handle other namespaces
+   * Override Smithy-Python to support namespaces in other modules.
    * @param target
    * @return
    */
@@ -343,18 +355,8 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     return builder.build();
   }
 
-  @Override
-  public Symbol stringShape(StringShape shape) {
-    if (shape.hasTrait(EnumTrait.class)) {
-      EnumShape asEnum = EnumShape.fromStringShape(shape).get();
-      return enumShape(asEnum);
-    } else {
-      return super.stringShape(shape);
-    }
-  }
-
   /**
-   * Override Smithy-Python to handle other namespaces
+   * Override Smithy-Python to support namespaces in other modules.
    * @param target
    * @return
    */
@@ -388,7 +390,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   /**
-   * Override Smithy-Python to handle other namespaces
+   * Override Smithy-Python to support namespaces in other modules.
    * @param shape
    * @return
    */
@@ -407,7 +409,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   /**
-   * Override Smithy-Python to handle other namespaces
+   * Override Smithy-Python to support namespaces in other modules.
    * @param shape
    * @return
    */

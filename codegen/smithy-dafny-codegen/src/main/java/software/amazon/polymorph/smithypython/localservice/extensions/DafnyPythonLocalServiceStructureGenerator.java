@@ -434,6 +434,12 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
         "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
   }
 
+  /**
+   * Write checks for supported constraint traits.
+   * Currently, {@link RangeTrait} and {@link LengthTrait} are supported.
+   * @param member
+   * @param memberName
+   */
   protected void writeInitMethodConstraintsChecksForMember(MemberShape member, String memberName) {
     // RangeTrait
     Shape targetShape = model.expectShape(member.getTarget());
