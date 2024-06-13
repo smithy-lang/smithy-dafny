@@ -275,10 +275,8 @@ public class LocalServiceGenerator implements Runnable {
                                                 ${C|}
                                                 case $L.CollectionOfErrors:
                                                     return Wrappers.Companion_Result_.Create_Failure_($L.CollectionOfErrors_Input_ToDafny(native_error.($L.CollectionOfErrors)))
-                                                case $L.OpaqueError:
-                                                    return Wrappers.Companion_Result_.Create_Failure_($L.OpaqueError_Input_ToDafny(native_error.($L.OpaqueError)))
                                                 default:
-                                                    return Wrappers.Companion_Result_.Create_Failure_(native_error)
+                                                    return Wrappers.Companion_Result_.Create_Failure_($L.OpaqueError_Input_ToDafny(native_error))
                                                 }
                                            }
                                            return Wrappers.Companion_Result_.Create_Success_($L)

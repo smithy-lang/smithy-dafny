@@ -408,8 +408,8 @@ func CollectionOfErrors_Input_ToDafny(nativeInput $L.CollectionOfErrors)($L.Erro
 	}
 	return $L.Companion_Error_.Create_CollectionOfErrors_(dafny.SeqOf(e...), dafny.SeqOfChars([]dafny.Char(nativeInput.Message)...))
 }
-func OpaqueError_Input_ToDafny(nativeInput $L.OpaqueError)($L.Error) {
-	return $L.Companion_Error_.Create_Opaque_(nativeInput.ErrObject)
+func OpaqueError_Input_ToDafny(nativeInput error)($L.Error) {
+	return $L.Companion_Error_.Create_Opaque_(nativeInput)
 }""",             SmithyNameResolver.smithyTypesNamespace(serviceShape),
                 DafnyNameResolver.dafnyTypesNamespace(serviceShape), writer.consumer(w -> {
                     for (Shape error:
