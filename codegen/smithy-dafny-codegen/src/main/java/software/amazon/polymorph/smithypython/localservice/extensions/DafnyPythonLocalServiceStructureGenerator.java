@@ -442,16 +442,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    */
   protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
     writeInitMethodConstraintsChecksForMember(member, memberName);
+    // Optional members are assigned default value of "None" in __init__ arguments
     writer.write(
-        "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
-  }
-
-  protected boolean isOptionalDefault(MemberShape member) {
-    return !member.hasTrait(RequiredTrait.class);
-  }
-
-  protected String getDefaultValue(PythonWriter writer, MemberShape member) {
-    return "None";
+        "self.$1L = $1L", memberName);
   }
 
   protected void writeInitMethodConstraintsChecksForMember(MemberShape member, String memberName) {
