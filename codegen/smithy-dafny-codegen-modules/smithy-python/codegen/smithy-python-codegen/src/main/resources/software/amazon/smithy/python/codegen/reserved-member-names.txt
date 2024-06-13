@@ -14,6 +14,9 @@
 #
 # https://docs.python.org/3/reference/lexical_analysis.html#keywords
 #
+# Note that None, True, and False aren't here - members are always lower
+# cased, so they'll never match here. Those are in the clas names reserve
+# list.
 and
 as
 assert
@@ -27,7 +30,6 @@ del
 elif
 else
 except
-False
 finally
 for
 from
@@ -37,14 +39,12 @@ import
 in
 is
 lambda
-None
 nonlocal
 not
 or
 pass
 raise
 return
-True
 try
 while
 with
