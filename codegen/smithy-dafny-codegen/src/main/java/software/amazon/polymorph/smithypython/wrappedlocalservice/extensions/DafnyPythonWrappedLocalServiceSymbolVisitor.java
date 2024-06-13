@@ -9,11 +9,15 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.python.codegen.PythonSettings;
 
 /**
- * SymbolVisitor for wrapped localService codegen. Overrides the generated file for codegen to
- * something that is immediately deleted. Smithy ALWAYS writes visited symbols to a file. For
- * wrapped codegen, we do NOT want to write visited symbols to a file. We want to reuse the
- * generated files from localService codegen. It is very, very difficult to change this writing
- * behavior without rewriting Smithy logic in addition to Smithy-Python specific logic. I have tried
+ * SymbolVisitor for wrapped localService codegen.
+ *
+ * Overrides the generated file for codegen to something that is immediately deleted.
+ * Smithy ALWAYS writes visited symbols to a file. For wrapped codegen,
+ * we do NOT want to write visited symbols to a file. We want to reuse the
+ * generated files from localService codegen.
+ *
+ * It is very, very difficult to change this writing
+ * behavior without rewriting Smithy logic, in addition to Smithy-Python specific logic. I have tried
  * some workarounds like deleting writers or writing to /dev/null but these were not fruitful. This
  * workaround dumps any visited symbols into a file whose name will never be used and deletes this
  * file as part of its Smithy codegen plugin.
@@ -43,7 +47,7 @@ public class DafnyPythonWrappedLocalServiceSymbolVisitor
           SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(namespace);
     }
 
-    // Ignore the filename! Wrapped codegen deletes this file.
+    // Wrapped codegen deletes this file.
     return format("%s/%s.py", directoryFilePath, WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME);
   }
 }

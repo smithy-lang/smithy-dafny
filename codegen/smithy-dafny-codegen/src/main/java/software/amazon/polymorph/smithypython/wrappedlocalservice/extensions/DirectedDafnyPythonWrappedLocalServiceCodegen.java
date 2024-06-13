@@ -24,7 +24,7 @@ import software.amazon.smithy.python.codegen.PythonSettings;
 /**
  * DirectedCodegen for Dafny Python wrapped LocalServices. This overrides DirectedPythonCodegen to
  * 1) Not generate a Smithy client (nor its serialize/deserialize bodies, client config, etc.)
- * 2) Remove extraneous generated files (TODO-Python: Consider rewriting SymbolVisitor to avoid this)
+ * 2) Remove extraneous generated files
  * Wrapped LocalService generation does NOT involve generating a Smithy client; it will only
  * generate a shim wrapping the LocalService-generated Smithy client.
  */

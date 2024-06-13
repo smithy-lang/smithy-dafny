@@ -20,13 +20,13 @@ import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
- * Plugin to trigger Smithy-Dafny Python code generation for a wrapped localService. This differs
- * from the PythonClientCodegenPlugin by not calling runner.performDefaultCodegenTransforms(); and
- * runner.createDedicatedInputsAndOutputs(); This differs from the non-wrapped plugin by adding a
- * WrappedLocalServiceTrait to the service that is being generated. This is stores the context that
- * this plugin requires wrapped localService generation, so that we can identify this from within
- * code generation. These methods transform the model such that the model used by the code generator
- * does not align with the generated Dafny code.
+ * Plugin to trigger Smithy-Dafny Python code generation for a wrapped localService.
+ * This differs from the PythonClientCodegenPlugin by not calling `runner.performDefaultCodegenTransforms()`
+ * and `runner.createDedicatedInputsAndOutputs()`.
+ *
+ * This differs from the non-wrapped plugin by adding a WrappedLocalServiceTrait
+ * to the service that is being generated. This signals that this plugin requires wrapped localService
+ * generation, so that we can identify this from within code generation.
  */
 @SmithyUnstableApi
 public final class DafnyPythonWrappedLocalServiceClientCodegenPlugin implements SmithyBuildPlugin {
