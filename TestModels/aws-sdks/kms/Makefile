@@ -17,6 +17,11 @@ SERVICE_DEPS_ComAmazonawsKms :=
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 AWS_SDK_CMD=--aws-sdk
+GO_MODULE_NAME="github.com/smithy-dafny/kms"
+
+
+PROJECT_DTR := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 
 # This project has no dependencies
 # DEPENDENT-MODELS:=

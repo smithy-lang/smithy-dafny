@@ -50,6 +50,11 @@ public class SmithyNameResolver {
         }
     }
 
+    public static String getToDafnyMethodName(final Shape shape, final String disambiguator) {
+        final var methodName = shape.getId().getName().concat("_ToDafny");
+            return SmithyNameResolver.shapeNamespace(shape).concat(DOT).concat(methodName);
+    }
+
     public static String getFromDafnyMethodName(final ServiceShape serviceShape, final Shape shape, final String disambiguator) {
         final var methodName = serviceShape.getContextualName(shape).concat("_FromDafny");
         if (serviceShape.toShapeId().getNamespace().equals(shape.toShapeId().getNamespace())) {
@@ -57,5 +62,10 @@ public class SmithyNameResolver {
         } else {
             return SmithyNameResolver.shapeNamespace(shape).concat(DOT).concat(methodName);
         }
+    }
+
+    public static String getFromDafnyMethodName(final Shape shape, final String disambiguator) {
+        final var methodName = shape.getId().getName().concat("_FromDafny");
+        return SmithyNameResolver.shapeNamespace(shape).concat(DOT).concat(methodName);
     }
 }

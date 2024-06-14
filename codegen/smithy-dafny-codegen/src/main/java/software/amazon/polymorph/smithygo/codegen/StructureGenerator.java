@@ -17,6 +17,7 @@ package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -40,14 +41,15 @@ public final class StructureGenerator implements Runnable {
     private final SymbolProvider symbolProvider;
     private final GoWriter writer;
     private final StructureShape shape;
+    private final GenerationContext context;
 
     public StructureGenerator(
-            Model model,
-            SymbolProvider symbolProvider,
+            final GenerationContext context,
             GoWriter writer,
             StructureShape shape) {
-        this.model = model;
-        this.symbolProvider = symbolProvider;
+        this.context = context;
+        this.model = context.model();
+        this.symbolProvider = context.symbolProvider();
         this.writer = writer;
         this.shape = shape;
     }
@@ -108,13 +110,10 @@ public final class StructureGenerator implements Runnable {
                         if (refShape.isService()) {
                             namespace = SmithyNameResolver.shapeNamespace(model.expectShape(refShape.getReferentId()));
                         }
-                        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(refShape.getReferentId().getNamespace()), namespace);
+                        if (!member.toShapeId().getNamespace().equals(refShape.getReferentId().getNamespace())) {
+                            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(refShape.getReferentId().getNamespace()), namespace);
+                        }
                     } else {
-                        System.out.println("!!!!!!!!!   1" + memberSymbol.getNamespace());
-                        System.out.println("!!!!!!!!!   2" + targetShape.toShapeId().getNamespace());
-                        System.out.println("!!!!!!!!!   3" + member.toShapeId().getNamespace());
-                        System.out.println("!!!!!!!!!   4" + shape.toShapeId().getNamespace());
-
                         if (!member.toShapeId().getNamespace().equals(targetShape.toShapeId().getNamespace()) && !targetShape.toShapeId().getNamespace().startsWith("smithy") && targetShape.asStructureShape().isPresent()) {
                             writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(targetShape.toShapeId().getNamespace()), namespace);
                         }
@@ -140,6 +139,7 @@ public final class StructureGenerator implements Runnable {
             writer.openBlock("type $L struct {", "}", structureSymbol.getName(), () -> {
                 // The message is the only part of the standard APIError interface that isn't known ahead of time.
                 // Message is a pointer mostly for the sake of consistency.
+                writer.write("$LBaseException", context.settings().getService().getName());
                 writer.write("Message *string").write("");
                 writer.write("ErrorCodeOverride *string").write("");
 

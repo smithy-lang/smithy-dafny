@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithygo.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -19,7 +20,9 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -88,7 +91,8 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
         for (var refResource : refResources) {
             final var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
             if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
-                model.expectShape(resource, ResourceShape.class).getOperations().forEach(eachOperation -> {
+                var resourceShape = model.expectShape(resource, ResourceShape.class);
+                resourceShape.getOperations().forEach(eachOperation -> {
                     final var operation = model.expectShape(eachOperation, OperationShape.class);
                     final var input = model.expectShape(operation.getInputShape());
                     if (!alreadyVisited.contains(input.toShapeId())) {
@@ -124,6 +128,28 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                              writer.consumer(w -> generateResponseSerializer(context, operation, context.writerDelegator())));
                             });
                         }
+                    }
+                    if (!alreadyVisited.contains(resourceShape.toShapeId()) && resourceShape.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
+                        alreadyVisited.add(resourceShape.toShapeId());
+                        writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+                            var goBody = """
+                                    return nativeResource.(*%s).Impl
+                                    """.formatted(resourceShape.getId().getName());
+                            if (resourceShape.hasTrait(ExtendableTrait.class)) {
+                                goBody = """
+                                                                           val, ok := nativeResource.(*%s)
+                                        if ok {
+                                        	return val.Impl
+                                        }
+                                        return %s{&NativeWrapper{Impl: nativeResource}}.Impl
+                                                                           """.formatted(resourceShape.getId().getName(), resourceShape.getId().getName());
+                            }
+                            writer.write("""
+                                                 func $L_ToDafny(nativeResource $L.I$L) $L.I$L {
+                                                     $L
+                                                 }
+                                                 """, resourceShape.getId().getName(), SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), DafnyNameResolver.dafnyTypesNamespace(resourceShape), resourceShape.getId().getName(), goBody);
+                        });
                     }
                 });
             }
@@ -188,8 +214,8 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             final var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
 
             if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
-
-                context.model().expectShape(resource, ResourceShape.class).getOperations().forEach(eachOperation -> {
+                var resourceShape = context.model().expectShape(resource, ResourceShape.class);
+                resourceShape.getOperations().forEach(eachOperation -> {
                     final var operation = context.model().expectShape(eachOperation, OperationShape.class);
                     final var input = context.model().expectShape(operation.getInputShape());
                     if (!alreadyVisited.contains(input.toShapeId())) {
@@ -230,6 +256,27 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                             });
                         }
                     }
+                    if (!alreadyVisited.contains(resourceShape.toShapeId()) && resourceShape.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
+                        alreadyVisited.add(resourceShape.toShapeId());
+                        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+                            var extendableResourceWrapperCheck = "";
+                            if (resourceShape.hasTrait(ExtendableTrait.class)) {
+                                extendableResourceWrapperCheck = """
+                                        val, ok := dafnyResource.(*NativeWrapper)
+                                        if ok {
+                                            return val.Impl
+                                        }
+                                        """;
+                            }
+                            writer.write("""
+                                                 func $L_FromDafny(dafnyResource $L.I$L)($L.I$L) {
+                                                     $L
+                                                     return &$L{dafnyResource}
+                                                 }
+                                                 """, resourceShape.getId().getName(), DafnyNameResolver.dafnyTypesNamespace(resourceShape), resourceShape.getId().getName(), SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), extendableResourceWrapperCheck, resourceShape.getId().getName());
+                        });
+                    }
+
                 });
             }
         }
@@ -407,7 +454,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
 
         context.writerDelegator()
-               .useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(context.settings().getService(context.model())), TO_NATIVE),
+               .useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(context.settings().getService(context.model())), TO_DAFNY),
                               SmithyNameResolver.shapeNamespace(context.settings().getService(context.model())), writer -> {
                            writer.write("""
                                                 func Error_ToDafny(err error)($L.Error) {
@@ -437,12 +484,15 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                             }
                                         }),
                                         writer.consumer(w -> {
-                                            for (var error : context.model().getShapesWithTrait(ErrorTrait.class).stream().filter(shape -> !shape.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())).collect(Collectors.toSet())) {
-                                                w.write("""
-                                                                case $L:
-                                                                    return $L.Error_ToDafny(err)
-                                                                }
-                                                                """,  SmithyNameResolver.getSmithyType(error), SmithyNameResolver.shapeNamespace(error));
+                                            var dependencies = serviceShape.hasTrait(LocalServiceTrait.class) ? serviceShape.expectTrait(LocalServiceTrait.class).getDependencies() : new LinkedList<ShapeId>();
+                                            if (dependencies != null) {
+                                                for (var dep : dependencies) {
+                                                    var depShape = context.model().expectShape(dep);
+                                                    w.write("""
+                                                                    case $L.$LBaseException:
+                                                                        return $L.Create_$L_($L.Error_ToDafny(err))
+                                                                    """, SmithyNameResolver.smithyTypesNamespace(depShape), dep.getName(), DafnyNameResolver.getDafnyErrorCompanion(serviceShape), dep.getName(), SmithyNameResolver.shapeNamespace(depShape));
+                                                }
                                             }
                                         }),
                                         SmithyNameResolver.smithyTypesNamespace(serviceShape), SmithyNameResolver.smithyTypesNamespace(serviceShape), SmithyNameResolver.smithyTypesNamespace(serviceShape)
@@ -577,7 +627,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                             }
                                         }),
                                         writer.consumer(w -> {
-                                            var dependencies = serviceShape.expectTrait(LocalServiceTrait.class).getDependencies();
+                                            var dependencies = serviceShape.hasTrait(LocalServiceTrait.class) ? serviceShape.expectTrait(LocalServiceTrait.class).getDependencies() : null;
                                             if (dependencies == null) {
                                                 return;
                                             }
@@ -585,7 +635,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                                 var depService = context.model().expectShape(dep, ServiceShape.class);
                                                 w.write("""
                                                                 if err.Is_$L() {
-                                                                    return $L.Error_FromDafny(err.Dtor_$L)
+                                                                    return $L.Error_FromDafny(err.Dtor_$L())
                                                                 }
                                                                 """, depService.expectTrait(LocalServiceTrait.class).getSdkId(), SmithyNameResolver.shapeNamespace(depService), depService.expectTrait(LocalServiceTrait.class).getSdkId());
                                             }

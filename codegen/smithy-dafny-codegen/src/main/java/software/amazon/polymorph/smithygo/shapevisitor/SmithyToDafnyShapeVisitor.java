@@ -80,12 +80,34 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(resourceShape.toShapeId().getNamespace()), SmithyNameResolver.shapeNamespace(resourceShape));
                 namespace = SmithyNameResolver.shapeNamespace(resourceShape).concat(".");
             }
-            return dataSource + ".(*%s).Impl".formatted(namespace.concat(resourceShape.toShapeId().getName()));
+            if(!this.isOptional) {
+                return "%s_ToDafny(%s)".formatted(namespace.concat(resourceShape.toShapeId().getName()), dataSource);
+            } else {
+                var goCodeBlock = """
+                        func () Wrappers.Option {
+                            if %s == nil {
+                            return Wrappers.Companion_Option_.Create_None_()
+                            }
+                            return Wrappers.Companion_Option_.Create_Some_(%s)
+                        }()""";
+                return goCodeBlock.formatted(dataSource, "%s_ToDafny(%s)".formatted(namespace.concat(resourceShape.toShapeId().getName()), dataSource));
+            }
         }
 
         if (resourceOrService.asServiceShape().isPresent()) {
             ServiceShape resourceShape = resourceOrService.asServiceShape().get();
-            return dataSource + ".(*%s).Impl".formatted(resourceShape.toShapeId().getName(context.settings().getService(context.model())));
+            if(!this.isOptional) {
+                return dataSource;
+            } else {
+                var goCodeBlock = """
+                        func () Wrappers.Option {
+                            if %s == nil {
+                            return Wrappers.Companion_Option_.Create_None_()
+                            }
+                            return Wrappers.Companion_Option_.Create_Some_(%s)
+                        }()""";
+                return goCodeBlock.formatted(dataSource, dataSource);
+            }
         }
 
         throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);

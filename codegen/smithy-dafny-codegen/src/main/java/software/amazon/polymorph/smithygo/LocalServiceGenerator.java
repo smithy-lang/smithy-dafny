@@ -68,7 +68,7 @@ public class LocalServiceGenerator implements Runnable {
         final var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
 
         writerDelegator.useFileWriter("%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer1 -> {
-            new StructureGenerator(model, symbolProvider, writer1,
+            new StructureGenerator(context, writer1,
                                    model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
         });
 
@@ -80,7 +80,7 @@ public class LocalServiceGenerator implements Runnable {
         final var dafnyClient = DafnyNameResolver.getDafnyClient(service, serviceTrait.getSdkId());
         writer.write("""
                              type $T struct {
-                                 dafnyClient *$L
+                                 DafnyClient *$L
                              }
                              
                              func NewClient(clientConfig $L) (*$T, error) {
@@ -118,11 +118,11 @@ public class LocalServiceGenerator implements Runnable {
 
             String baseClientCall;
             if (inputShape.hasTrait(UnitTypeTrait.class)) {
-                baseClientCall = "var dafny_response = client.dafnyClient.%s()".formatted(operationShape.getId().getName());
+                baseClientCall = "var dafny_response = client.DafnyClient.%s()".formatted(operationShape.getId().getName());
             } else {
                 baseClientCall = """
                         var dafny_request %s = %s(params)
-                        var dafny_response = client.dafnyClient.%s(dafny_request)
+                        var dafny_response = client.DafnyClient.%s(dafny_request)
                         """.formatted(DafnyNameResolver.getDafnyType(inputShape, symbolProvider.toSymbol(inputShape)),
                                       SmithyNameResolver.getToDafnyMethodName(service, inputShape, ""), operationShape.getId().getName());
             }
@@ -210,7 +210,7 @@ public class LocalServiceGenerator implements Runnable {
                                                                                : "input %s".formatted(DafnyNameResolver.getDafnyType(inputShape, symbolProvider.toSymbol(inputShape)));
 
                 final var typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? ""
-                                                                                    : "var native_request = %s.%s(input)".formatted(SmithyNameResolver.shapeNamespace(operationShape), SmithyNameResolver.getFromDafnyMethodName(service, inputShape, ""));
+                                                                                    : "var native_request = %s(input)".formatted(SmithyNameResolver.getFromDafnyMethodName(inputShape, ""));
 
                 final var clientCall = "shim.client.%s(context.Background() %s)".formatted(operationShape.getId().getName(),
                                                                                            inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", native_request");
@@ -222,7 +222,7 @@ public class LocalServiceGenerator implements Runnable {
                     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
                 } else {
                     clientResponse = "var native_response, native_error";
-                    returnResponse = "%s.%s(*native_response)".formatted(SmithyNameResolver.shapeNamespace(operationShape), SmithyNameResolver.getToDafnyMethodName(service, outputShape, ""));
+                    returnResponse = "%s(*native_response)".formatted(SmithyNameResolver.getToDafnyMethodName(outputShape, ""));
                 }
 
                 writer.write("""
@@ -273,10 +273,21 @@ public class LocalServiceGenerator implements Runnable {
     }
 
     void generateUnmodelledErrors(GenerationContext context) {
+        writerDelegator.useFileWriter("%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer -> {
+            writer.write("""
+                                 type $LBaseException interface {
+                                     // This is a dummy method to allow type assertion since Go empty interfaces
+                                     // aren't useful for type assertion checks. No concrete class is expected to implement
+                                     // this method. This is also not exported.
+                                     interfaceBindingMethod()
+                                 }
+                                 """, service.toShapeId().getName());
+        });
         writerDelegator.useFileWriter("%s/unmodelled_errors.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer -> {
             writer.addUseImports(SmithyGoDependency.FMT);
             writer.write("""
                                  type CollectionOfErrors struct {
+                                     $LBaseException
                                      ListOfErrors []error
                                      Message string
                                  }
@@ -286,13 +297,14 @@ public class LocalServiceGenerator implements Runnable {
                                  }
                                  
                                  type OpaqueError struct {
+                                    $LBaseException
                                     ErrObject interface{}
                                  }
                                  
                                  func (e OpaqueError) Error() string {
                                     return fmt.Sprintf("message: %v", e.ErrObject )
                                  }
-                                 """);
+                                 """, service.toShapeId().getName(), service.toShapeId().getName());
         });
     }
 
@@ -312,9 +324,9 @@ public class LocalServiceGenerator implements Runnable {
         for (final var operationShapeId : nonServiceOperationShapes) {
             OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
             StructureShape inputShape = model.expectShape(operationShape.getInputShape(), StructureShape.class);
-            writerDelegator.useShapeWriter(inputShape, w -> new StructureGenerator(model, symbolProvider, w, inputShape).run());
+            writerDelegator.useShapeWriter(inputShape, w -> new StructureGenerator(context, w, inputShape).run());
             StructureShape outputShape = model.expectShape(operationShape.getOutputShape(), StructureShape.class);
-            writerDelegator.useShapeWriter(outputShape, w -> new StructureGenerator(model, symbolProvider, w, outputShape).run());
+            writerDelegator.useShapeWriter(outputShape, w -> new StructureGenerator(context, w, outputShape).run());
         }
     }
 
@@ -443,22 +455,6 @@ public class LocalServiceGenerator implements Runnable {
                                      Impl %s.I%s
                                  }
                                  """.formatted(DafnyNameResolver.dafnyTypesNamespace(resourceShape), resourceShape.getId().getName(), SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName()));
-
-            writer.write("""
-                                 func ToNative$L(dafnyResource $L.I$L)($L.I$L) {
-                                     val, ok := dafnyResource.(*NativeWrapper)
-                                     if ok {
-                                         return val.Impl
-                                     }
-                                     return &$L{dafnyResource}
-                                 }
-                                 """, resourceShape.getId().getName(), DafnyNameResolver.dafnyTypesNamespace(resourceShape), resourceShape.getId().getName(), SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), resourceShape.getId().getName());
-
-            writer.write("""
-                                 func ToDafny$L(nativeResource $L.I$L) $L.I$L {
-                                     return nativeResource.(*$L).Impl
-                                 }
-                                 """, resourceShape.getId().getName(), SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), DafnyNameResolver.dafnyTypesNamespace(resourceShape), resourceShape.getId().getName(), resourceShape.getId().getName());
 
             resourceShape.getOperations().forEach(operation -> {
                 final var operationShape = model.expectShape(operation, OperationShape.class);
