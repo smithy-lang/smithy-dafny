@@ -403,7 +403,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String doubleShape(DoubleShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        writer.addUseImports(SmithyGoDependency.stdlib("encoding.binary"));
+        writer.addUseImports(SmithyGoDependency.stdlib("encoding/binary"));
         writer.addUseImports(SmithyGoDependency.MATH);
 
         String nilWrapIfRequired = "nil";
