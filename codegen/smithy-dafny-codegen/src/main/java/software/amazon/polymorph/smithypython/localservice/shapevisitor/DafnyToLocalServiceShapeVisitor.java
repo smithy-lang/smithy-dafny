@@ -263,7 +263,8 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
 
   @Override
   public String timestampShape(TimestampShape shape) {
-    return dataSource;
+    // TODO-Python: This lets code generate, but will fail when code uses it
+    return "TypeError(\"TimestampShape not supported\")";
   }
 
   @Override
