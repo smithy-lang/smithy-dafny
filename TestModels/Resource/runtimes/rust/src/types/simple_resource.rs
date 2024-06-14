@@ -10,6 +10,9 @@ pub trait SimpleResource {
     >;
 }
 
+pub type SimpleResourceImpl = ::std::rc::Rc<std::cell::RefCell<dyn SimpleResource>>;
+
+/*
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct SimpleResourceImpl {
     pub(crate) obj: ::dafny_runtime::Object<
@@ -54,3 +57,4 @@ impl SimpleResource for SimpleResourceImpl {
         }
     }
 }
+*/
