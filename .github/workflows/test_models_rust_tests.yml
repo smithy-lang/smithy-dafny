@@ -28,7 +28,7 @@ jobs:
             # TestModels/LanguageSpecificLogic,
             # TestModels/LocalService,
             # TestModels/MultipleModels,
-            # TestModels/Refinement,
+            TestModels/Refinement,
             TestModels/Resource,
             # TestModels/SimpleTypes/BigDecimal,
             # TestModels/SimpleTypes/BigInteger,
