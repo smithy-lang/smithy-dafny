@@ -32,7 +32,7 @@ pub fn from_dafny(
 }
 
 pub struct SimpleResourceWrapper {
-    obj: crate::types::simple_resource::SimpleResourceImpl,
+    obj: crate::types::simple_resource::SimpleResourceRef,
 }
 
 impl ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResource
@@ -56,7 +56,7 @@ impl ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::ISimp
             crate::conversions::get_resource_data::_get_resource_data_input::from_dafny(
                 input.clone(),
             );
-        let inner_result = self.obj.borrow_mut().GetResourceData(inner_input);
+        let inner_result = self.obj.borrow_mut().get_resource_data(inner_input);
         let result = match inner_result {
             Ok(x) => ::simple_resources_dafny::r#_Wrappers_Compile::Result::Success {
                 value: crate::conversions::get_resource_data::_get_resource_data_output::to_dafny(
@@ -79,7 +79,7 @@ pub struct SimpleResourceDafnyWrapper {
 }
 
 impl SimpleResource for SimpleResourceDafnyWrapper {
-    fn GetResourceData(
+    fn get_resource_data(
         &mut self,
         input: crate::operation::get_resource_data::GetResourceDataInput,
     ) -> Result<

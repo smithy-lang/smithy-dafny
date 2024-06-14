@@ -1,4 +1,4 @@
-use simple_resource::SimpleResourceImpl;
+use simple_resource::SimpleResourceRef;
 use simple_resources::operation::get_resource_data::*;
 use simple_resources::types::*;
 use simple_resources::*;
@@ -21,19 +21,19 @@ async fn TestClient(config: SimpleResourcesConfig) {
     TestSomeGetData(config.clone(), resource.clone()).await;
 }
 
-async fn TestNoneGetData(config: SimpleResourcesConfig, resource: SimpleResourceImpl) {
+async fn TestNoneGetData(config: SimpleResourcesConfig, resource: SimpleResourceRef) {
     let input = allNone();
-    let result = resource.borrow_mut().GetResourceData(input).unwrap();
+    let result = resource.borrow_mut().get_resource_data(input).unwrap();
     checkMostNone(config.name().to_string(), result);
 }
 
-async fn TestSomeGetData(config: SimpleResourcesConfig, resource: SimpleResourceImpl) {
+async fn TestSomeGetData(config: SimpleResourcesConfig, resource: SimpleResourceRef) {
     let input = allSome();
-    let result = resource.borrow_mut().GetResourceData(input).unwrap();
+    let result = resource.borrow_mut().get_resource_data(input).unwrap();
     checkSome(config.name().to_string(), result);
 }
 
-async fn TestGetResources(client: Client) -> SimpleResourceImpl {
+async fn TestGetResources(client: Client) -> SimpleResourceRef {
     let output = client.get_resources().value("Test").send().await.unwrap();
     output.output()
 }

@@ -2,12 +2,12 @@
 #[allow(missing_docs)] // documentation missing in model
 #[non_exhaustive]
 pub struct GetResourcesOutput {
-    pub(crate) output: crate::types::simple_resource::SimpleResourceImpl,
+    pub(crate) output: crate::types::simple_resource::SimpleResourceRef,
 }
 
 impl GetResourcesOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn output(&self) -> crate::types::simple_resource::SimpleResourceImpl {
+    pub fn output(&self) -> crate::types::simple_resource::SimpleResourceRef {
         self.output.clone()
     }
 }
@@ -23,12 +23,12 @@ impl GetResourcesOutput {
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::default::Default)]
 pub struct GetResourcesOutputBuilder {
-    pub(crate) output: ::std::option::Option<crate::types::simple_resource::SimpleResourceImpl>,
+    pub(crate) output: ::std::option::Option<crate::types::simple_resource::SimpleResourceRef>,
 }
 
 impl GetResourcesOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn output(mut self, input: crate::types::simple_resource::SimpleResourceImpl) -> Self {
+    pub fn output(mut self, input: crate::types::simple_resource::SimpleResourceRef) -> Self {
         self.output = ::std::option::Option::Some(input);
         self
     }
@@ -36,7 +36,7 @@ impl GetResourcesOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn set_output(
         mut self,
-        input: ::std::option::Option<crate::types::simple_resource::SimpleResourceImpl>,
+        input: ::std::option::Option<crate::types::simple_resource::SimpleResourceRef>,
     ) -> Self {
         self.output = input;
         self
@@ -45,7 +45,7 @@ impl GetResourcesOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn get_output(
         &self,
-    ) -> &::std::option::Option<crate::types::simple_resource::SimpleResourceImpl> {
+    ) -> &::std::option::Option<crate::types::simple_resource::SimpleResourceRef> {
         &self.output
     }
 

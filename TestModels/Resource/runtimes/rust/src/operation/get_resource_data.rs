@@ -10,13 +10,13 @@ impl GetResourceData {
         Self
     }
     pub(crate) async fn send(
-        client: crate::types::simple_resource::SimpleResourceImpl,
+        client: crate::types::simple_resource::SimpleResourceRef,
         input: crate::operation::get_resource_data::GetResourceDataInput,
     ) -> ::std::result::Result<
         crate::operation::get_resource_data::GetResourceDataOutput,
         crate::operation::get_resource_data::GetResourceDataError,
     > {
-        client.borrow_mut().GetResourceData(input)
+        client.borrow_mut().get_resource_data(input)
     }
 }
 

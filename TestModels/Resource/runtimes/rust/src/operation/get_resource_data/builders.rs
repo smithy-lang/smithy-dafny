@@ -7,7 +7,7 @@ impl GetResourceDataInputBuilder {
     /// Sends a request with this input using the given client.
     pub async fn send_with(
         self,
-        client: crate::types::simple_resource::SimpleResourceImpl,
+        client: crate::types::simple_resource::SimpleResourceRef,
     ) -> ::std::result::Result<
         crate::operation::get_resource_data::GetResourceDataOutput,
         crate::operation::get_resource_data::GetResourceDataError,
@@ -17,19 +17,20 @@ impl GetResourceDataInputBuilder {
         // let mut fluent_builder = client.borrow_mut().get_resource_data();
         // fluent_builder.inner = self;
         // fluent_builder.send().await
-        client.borrow_mut().GetResourceData(input)
+        client.borrow_mut().get_resource_data(input)
     }
 }
 /// Fluent builder constructing a request to `GetResourceData`.
 ///
 #[derive(::std::clone::Clone)]
 pub struct GetResourceDataFluentBuilder {
-    client: crate::types::simple_resource::SimpleResourceImpl,
+    client: crate::types::simple_resource::SimpleResourceRef,
     inner: crate::operation::get_resource_data::builders::GetResourceDataInputBuilder,
 }
 impl GetResourceDataFluentBuilder {
     /// Creates a new `GetResourceData`.
-    pub(crate) fn new(client: crate::types::simple_resource::SimpleResourceImpl) -> Self {
+    #[allow(dead_code)]
+    pub(crate) fn new(client: crate::types::simple_resource::SimpleResourceRef) -> Self {
         Self {
             client,
             inner: ::std::default::Default::default(),
