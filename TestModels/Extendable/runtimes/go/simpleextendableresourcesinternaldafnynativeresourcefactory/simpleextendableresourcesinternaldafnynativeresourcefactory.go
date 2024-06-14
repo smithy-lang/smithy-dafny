@@ -6,10 +6,10 @@ package simpleextendableresourcesinternaldafnynativeresourcefactory
 import (
 	os "os"
 
-	ExtendableResource "github.com/Smithy-dafny/TestModels/Extern/ExtendableResource"
-	SimpleExtendableResourcesOperations "github.com/Smithy-dafny/TestModels/Extern/SimpleExtendableResourcesOperations"
-	simpleextendableresources "github.com/Smithy-dafny/TestModels/Extern/simpleextendableresources"
-	simpleextendableresourcesinternaldafnytypes "github.com/Smithy-dafny/TestModels/Extern/simpleextendableresourcesinternaldafnytypes"
+	ExtendableResource "github.com/Smithy-dafny/TestModels/Extendable/ExtendableResource"
+	SimpleExtendableResourcesOperations "github.com/Smithy-dafny/TestModels/Extendable/SimpleExtendableResourcesOperations"
+	simpleextendableresources "github.com/Smithy-dafny/TestModels/Extendable/simpleextendableresources"
+	simpleextendableresourcesinternaldafnytypes "github.com/Smithy-dafny/TestModels/Extendable/simpleextendableresourcesinternaldafnytypes"
 	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	StandardLibrary "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
