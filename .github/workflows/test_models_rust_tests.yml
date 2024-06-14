@@ -29,7 +29,7 @@ jobs:
             # TestModels/LocalService,
             # TestModels/MultipleModels,
             TestModels/Refinement,
-            # TestModels/Resource,
+            TestModels/Resource,
             # TestModels/SimpleTypes/BigDecimal,
             # TestModels/SimpleTypes/BigInteger,
             TestModels/SimpleTypes/SimpleBlob,
