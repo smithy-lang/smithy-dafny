@@ -7,8 +7,8 @@ import (
 	os "os"
 
 	ExternConstructor "github.com/Smithy-dafny/TestModels/Extern/ExternConstructor"
+	simpledafnyexterninternaldafnytypes "github.com/Smithy-dafny/TestModels/Extern/simpledafnyexterninternaldafnytypes"
 	simpleexterntypes "github.com/Smithy-dafny/TestModels/Extern/simpledafnyexterntypes"
-	simpledafnyexterninternaldafnytypes "github.com/Smithy-dafny/TestModels/Externsimpledafnyexterninternaldafnytypes"
 	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	StandardLibrary "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
