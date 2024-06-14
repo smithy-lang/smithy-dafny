@@ -32,7 +32,7 @@ public class WrappedLocalServiceTrait extends AbstractTrait
   }
 
   public static Shape getDefinition() {
-    return StructureShape.builder().id(MutableLocalStateTrait.ID).build();
+    return StructureShape.builder().id(WrappedLocalServiceTrait.ID).build();
   }
 
   @Override
