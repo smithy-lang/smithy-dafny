@@ -63,8 +63,7 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
         }
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             StructureGenerator generator = new StructureGenerator(
-                    directive.model(),
-                    directive.symbolProvider(),
+                    directive.context(),
                     writer,
                     directive.shape()
             );
@@ -80,8 +79,7 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
         }
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             StructureGenerator generator = new StructureGenerator(
-                    directive.model(),
-                    directive.symbolProvider(),
+                    directive.context(),
                     writer,
                     directive.shape()
             );

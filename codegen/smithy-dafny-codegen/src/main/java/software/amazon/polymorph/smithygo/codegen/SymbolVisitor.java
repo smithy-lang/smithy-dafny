@@ -458,7 +458,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                         .build();
             }
         }
-        Symbol.Builder builder = symbolBuilderFor(shape, name, SmithyNameResolver.smithyTypesNamespace(settings.getService(model)));
+        Symbol.Builder builder = symbolBuilderFor(shape, name);
         if (shape.hasTrait(ErrorTrait.ID)) {
             builder.definitionFile("./%s/errors.go".formatted(SmithyNameResolver.smithyTypesNamespace(shape)));
         } else {

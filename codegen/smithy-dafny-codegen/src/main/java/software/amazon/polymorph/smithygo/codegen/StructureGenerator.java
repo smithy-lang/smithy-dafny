@@ -17,6 +17,7 @@ package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -48,14 +49,15 @@ public final class StructureGenerator implements Runnable {
     private final SymbolProvider symbolProvider;
     private final GoWriter writer;
     private final StructureShape shape;
+    private final GenerationContext context;
 
     public StructureGenerator(
-            Model model,
-            SymbolProvider symbolProvider,
+            final GenerationContext context,
             GoWriter writer,
             StructureShape shape) {
-        this.model = model;
-        this.symbolProvider = symbolProvider;
+        this.context = context;
+        this.model = context.model();
+        this.symbolProvider = context.symbolProvider();
         this.writer = writer;
         this.shape = shape;
     }
@@ -104,17 +106,28 @@ public final class StructureGenerator implements Runnable {
                     Symbol memberSymbol = symbolProvider.toSymbol(member);
 
                     var targetShape = model.expectShape(member.getTarget());
-                    if (!targetShape.toShapeId().getNamespace().equals(member.toShapeId().getNamespace()) && !targetShape.toShapeId().getNamespace().startsWith("smithy") ) {
-                        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(targetShape.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespace(targetShape));
-                    }
 
                     if (isInputStructure) {
                         memberSymbol = memberSymbol.getProperty(SymbolUtils.INPUT_VARIANT, Symbol.class)
                                 .orElse(memberSymbol);
                     }
+                    var namespace = SmithyNameResolver.smithyTypesNamespace(targetShape);
+
                     if (targetShape.hasTrait(ReferenceTrait.class)) {
                         memberSymbol = memberSymbol.getProperty("Referred", Symbol.class).get();
+                        var refShape = targetShape.expectTrait(ReferenceTrait.class);
+                        if (refShape.isService()) {
+                            namespace = SmithyNameResolver.shapeNamespace(model.expectShape(refShape.getReferentId()));
+                        }
+                        if (!member.toShapeId().getNamespace().equals(refShape.getReferentId().getNamespace())) {
+                            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(refShape.getReferentId().getNamespace()), namespace);
+                        }
+                    } else {
+                        if (!member.toShapeId().getNamespace().equals(targetShape.toShapeId().getNamespace()) && !targetShape.toShapeId().getNamespace().startsWith("smithy") && targetShape.asStructureShape().isPresent()) {
+                            writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(targetShape.toShapeId().getNamespace()), namespace);
+                        }
                     }
+
                     writer.write("$L $P", memberName, memberSymbol);
 
                 });
@@ -281,6 +294,7 @@ public final class StructureGenerator implements Runnable {
             writer.openBlock("type $L struct {", "}", structureSymbol.getName(), () -> {
                 // The message is the only part of the standard APIError interface that isn't known ahead of time.
                 // Message is a pointer mostly for the sake of consistency.
+                writer.write("$LBaseException", context.settings().getService().getName());
                 writer.write("Message *string").write("");
                 writer.write("ErrorCodeOverride *string").write("");
 

@@ -75,12 +75,39 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
         if (resourceOrService.asResourceShape().isPresent()) {
             ResourceShape resourceShape = resourceOrService.asResourceShape().get();
-            return dataSource + ".(*%s).impl".formatted(resourceShape.toShapeId().getName());
+            var namespace = "";
+            if (!resourceShape.toShapeId().getNamespace().equals(context.settings().getService().getNamespace())) {
+                writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(resourceShape.toShapeId().getNamespace()), SmithyNameResolver.shapeNamespace(resourceShape));
+                namespace = SmithyNameResolver.shapeNamespace(resourceShape).concat(".");
+            }
+            if(!this.isOptional) {
+                return "%s_ToDafny(%s)".formatted(namespace.concat(resourceShape.toShapeId().getName()), dataSource);
+            } else {
+                var goCodeBlock = """
+                        func () Wrappers.Option {
+                            if %s == nil {
+                            return Wrappers.Companion_Option_.Create_None_()
+                            }
+                            return Wrappers.Companion_Option_.Create_Some_(%s)
+                        }()""";
+                return goCodeBlock.formatted(dataSource, "%s_ToDafny(%s)".formatted(namespace.concat(resourceShape.toShapeId().getName()), dataSource));
+            }
         }
 
         if (resourceOrService.asServiceShape().isPresent()) {
             ServiceShape resourceShape = resourceOrService.asServiceShape().get();
-            return dataSource + ".(*%s).impl".formatted(resourceShape.toShapeId().getName());
+            if(!this.isOptional) {
+                return dataSource;
+            } else {
+                var goCodeBlock = """
+                        func () Wrappers.Option {
+                            if %s == nil {
+                            return Wrappers.Companion_Option_.Create_None_()
+                            }
+                            return Wrappers.Companion_Option_.Create_Some_(%s)
+                        }()""";
+                return goCodeBlock.formatted(dataSource, dataSource);
+            }
         }
 
         throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
@@ -148,10 +175,10 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
         }
         var goCodeBlock = """
-                               func () %s {
-                                   %s
-                                   return %s
-                               }()""";
+                func () %s {
+                    %s
+                    return %s
+                }()""";
 
 
         builder.append("%1$s(".formatted(companionStruct));
@@ -164,7 +191,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                     targetShape.accept(
                             new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
                                                           writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
-                                                          )), fieldSeparator
+                            )), fieldSeparator
             ));
         }
 
@@ -199,11 +226,11 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                                	   }
                                	   return %s
                                }()""".formatted(returnType, dataSource, nilWrapIfRequired, dataSource,
-                                             keyTargetShape.accept(
-                                                     new SmithyToDafnyShapeVisitor(context, "key", writer, isConfigShape, false, false)),
-                                             valueTargetShape.accept(
-                                                     new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)),
-                                             someWrapIfRequired.formatted("fieldValue.ToMap()")
+                                                keyTargetShape.accept(
+                                                        new SmithyToDafnyShapeVisitor(context, "key", writer, isConfigShape, false, false)),
+                                                valueTargetShape.accept(
+                                                        new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)),
+                                                someWrapIfRequired.formatted("fieldValue.ToMap()")
                        )
         );
 
@@ -240,9 +267,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                                       }
                                       return %s
                                }()""".formatted(returnType, dataSource, nilWrapIfRequired, dataSource,
-                                             targetShape.accept(
-                                                     new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)
-                                             ), someWrapIfRequired.formatted("dafny.SeqOf(fieldValue...)")));
+                                                targetShape.accept(
+                                                        new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)
+                                                ), someWrapIfRequired.formatted("dafny.SeqOf(fieldValue...)")));
 
         // Close structure
         return builder.toString();
@@ -267,10 +294,10 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         }
 
         return """
-                    func () %s {
-                        %s
-                        return %s
-                    }()""".formatted(returnType, nilCheck,  someWrapIfRequired.formatted(dereferenceIfRequired, dataSource));
+                func () %s {
+                    %s
+                    return %s
+                }()""".formatted(returnType, nilCheck, someWrapIfRequired.formatted(dereferenceIfRequired, dataSource));
     }
 
     @Override
@@ -292,25 +319,25 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
             }
             return """
-        func () %s {
-        %s
-		var index int
-		for _, enumVal := range %s.Values() {
-			index++
-			if enumVal == %s%s{
-				break;
-			}
-		}
-		var enum interface{}
-		for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
-			var ok bool
-			enum, ok = allEnums()
-			if !ok {
-				break;
-			}
-		}
-		return %s
-	}()""".formatted(returnType, nilCheck, dataSource, dereferenceIfRequired, dataSource, DafnyNameResolver.getDafnyCompanionStructType(shape, context.symbolProvider().toSymbol(shape)), someWrapIfRequired.formatted("enum"));
+                           func () %s {
+                           %s
+                    	var index int
+                    	for _, enumVal := range %s.Values() {
+                    		index++
+                    		if enumVal == %s%s{
+                    			break;
+                    		}
+                    	}
+                    	var enum interface{}
+                    	for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
+                    		var ok bool
+                    		enum, ok = allEnums()
+                    		if !ok {
+                    			break;
+                    		}
+                    	}
+                    	return %s
+                    }()""".formatted(returnType, nilCheck, dataSource, dereferenceIfRequired, dataSource, DafnyNameResolver.getDafnyCompanionStructType(shape, context.symbolProvider().toSymbol(shape)), someWrapIfRequired.formatted("enum"));
         } else {
             String nilWrapIfRequired = "nil";
             String someWrapIfRequired = "%s";
@@ -327,18 +354,19 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
             }
 
-            if(shape.hasTrait(DafnyUtf8BytesTrait.class)) writer.addUseImports(SmithyGoDependency.stdlib("unicode/utf8"));
+            if (shape.hasTrait(DafnyUtf8BytesTrait.class))
+                writer.addUseImports(SmithyGoDependency.stdlib("unicode/utf8"));
 
-            var underlyingType =  shape.hasTrait(DafnyUtf8BytesTrait.class) ? """
-                dafny.SeqOf(func () []interface{} {
-                utf8.ValidString(%s%s)
-                b := []byte(%s%s)
-                f := make([]interface{}, len(b))
-                for i, v := range b {
-                    f[i] = v
-                }
-                return f
-            }()...)""".formatted(dereferenceIfRequired, dataSource, dereferenceIfRequired, dataSource) : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(dereferenceIfRequired, dataSource);
+            var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? """
+                        dafny.SeqOf(func () []interface{} {
+                        utf8.ValidString(%s%s)
+                        b := []byte(%s%s)
+                        f := make([]interface{}, len(b))
+                        for i, v := range b {
+                            f[i] = v
+                        }
+                        return f
+                    }()...)""".formatted(dereferenceIfRequired, dataSource, dereferenceIfRequired, dataSource) : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(dereferenceIfRequired, dataSource);
 
             return """
                     func () %s {
@@ -367,10 +395,10 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         }
 
         return """
-                    func () %s {
-                        %s
-                        return %s
-                    }()""".formatted(returnType, nilCheck,  someWrapIfRequired.formatted(dereferenceIfRequired, dataSource));
+                func () %s {
+                    %s
+                    return %s
+                }()""".formatted(returnType, nilCheck, someWrapIfRequired.formatted(dereferenceIfRequired, dataSource));
 
     }
 
@@ -394,10 +422,10 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
 
         return """
-                    func () %s {
-                        %s
-                        return %s
-                    }()""".formatted(returnType, nilCheck,  someWrapIfRequired.formatted(dereferenceIfRequired, dataSource));
+                func () %s {
+                    %s
+                    return %s
+                }()""".formatted(returnType, nilCheck, someWrapIfRequired.formatted(dereferenceIfRequired, dataSource));
     }
 
     @Override
@@ -424,14 +452,14 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         return """
                 func () %s {
                     %s
-    	            var bits = math.Float64bits(%s%s)
+                 var bits = math.Float64bits(%s%s)
                     var bytes = make([]byte, 8)
                     binary.LittleEndian.PutUint64(bytes, bits)
-    	            var v []interface{}
-    	            for _, e := range bytes {
-    		            v = append(v, e)
-    	            }
-    	            return %s;
+                 var v []interface{}
+                 for _, e := range bytes {
+                  v = append(v, e)
+                 }
+                 return %s;
                 }()""".formatted(returnType, nilCheck, dereferenceIfRequired, dataSource, someWrapIfRequired.formatted("dafny.SeqOf(v...)"));
     }
 

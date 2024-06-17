@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -69,7 +70,43 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     protected String referenceStructureShape(StructureShape shape) {
         ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
         Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
-        return "%1$s{%2$s}".formatted(resourceOrService.toShapeId().getName(), dataSource);
+        var namespace = "";
+        if (resourceOrService.asResourceShape().isPresent()) {
+            var resourceShape = resourceOrService.asResourceShape().get();
+            if (!resourceOrService.toShapeId().getNamespace().equals(context.settings().getService().getNamespace())) {
+                writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(resourceOrService.toShapeId().getNamespace()), SmithyNameResolver.shapeNamespace(resourceShape));
+                namespace = SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
+            }
+            if (!this.isOptional) {
+                return "%s_FromDafny(%s)".formatted(namespace.concat(resourceShape.toShapeId().getName()), dataSource);
+            }
+            return """
+                    func () %s.I%s {
+                        if %s == nil {
+                            return nil;
+                        }
+                        return %s
+                    }()""".formatted(SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), dataSource,
+                                     "%s_FromDafny(%s.(%s.I%s))".formatted(namespace.concat(resourceShape.toShapeId().getName()), dataSource,
+                                                                         DafnyNameResolver.dafnyTypesNamespace(resourceShape), resourceShape.getId().getName()));
+        } else {
+            var serviceShape = resourceOrService.asServiceShape().get();
+            if (!resourceOrService.toShapeId().getNamespace().equals(context.settings().getService().getNamespace())) {
+                writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(resourceOrService.toShapeId().getNamespace()), SmithyNameResolver.shapeNamespace(serviceShape));
+                namespace = SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
+            }
+            if (!this.isOptional) {
+                return "%1$s{%2$s}".formatted(namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()), dataSource);
+            }
+            return """
+                    func () *%s {
+                        if %s == nil {
+                            return nil;
+                        }
+                        return &%s{%s.(*%s)}
+                    }()""".formatted(namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()), dataSource, namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()),
+                                     dataSource, DafnyNameResolver.getDafnyClient(serviceShape, serviceShape.toShapeId().getName()));
+        }
     }
 
     @Override
@@ -113,13 +150,14 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberName = memberShapeEntry.getKey();
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
+            //TODO: Is it ever possible for structure to be nil?
             final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
                                                                        ".Dtor_%s()".formatted(memberName),
                                                                        memberShape.isOptional() ? ".UnwrapOr(nil)" : "",
-            memberShape.isOptional() && targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(memberShape))) : "");
+                                                                       memberShape.isOptional() && targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class) ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
                 builder.append("%1$s: %2$s%3$s,".formatted(
                         StringUtils.capitalize(memberName),
-                        targetShape.isStructureShape() ? "&" : "",
+                        targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class) ? "&" : "",
                         targetShape.accept(
                                 new DafnyToSmithyShapeVisitor(context, derivedDataSource, writer, isConfigShape, memberShape.isOptional())
                         )

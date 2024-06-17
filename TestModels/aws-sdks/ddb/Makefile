@@ -16,6 +16,8 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 AWS_SDK_CMD=--aws-sdk
 
+GO_MODULE_NAME="github.com/smithy-dafny/Constraints"
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
