@@ -45,6 +45,8 @@ public class AwsSdkNameResolver {
   /**
    * Returns the type name of the client for the provided AWS SDK serviceShape.
    * This also standardizes some "legacy" service names.
+   * When setting up a new AWS service with Smithy-Dafny,
+   * this logic will need to be extended to support that service.
    *
    * @param serviceShape
    * @return

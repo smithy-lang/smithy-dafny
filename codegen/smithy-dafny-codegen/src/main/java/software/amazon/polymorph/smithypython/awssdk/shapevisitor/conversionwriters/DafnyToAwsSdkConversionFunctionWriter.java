@@ -74,7 +74,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                 conversionWriter.write("output = {}");
 
                 // Recursively dispatch a new ShapeVisitor for each member of the structure
-                for (Entry<String, MemberShape> memberShapeEntry :
+                for (final Entry<String, MemberShape> memberShapeEntry :
                     structureShape.getAllMembers().entrySet()) {
                   String memberName = memberShapeEntry.getKey();
                   MemberShape memberShape = memberShapeEntry.getValue();
@@ -177,7 +177,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                 //   ExampleUnion_union_value = ExampleUnionIntegerValue(input.IntegerValue)
                 // elif isinstance(input, ExampleUnion_StringValue):
                 //   ExampleUnion_union_value = ExampleUnionStringValue(input.StringValue)
-                for (MemberShape memberShape : unionShape.getAllMembers().values()) {
+                for (final MemberShape memberShape : unionShape.getAllMembers().values()) {
                   final Shape targetShape = context.model().expectShape(memberShape.getTarget());
                   conversionWriter.write(
                       """
@@ -215,8 +215,8 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                 // `return ExampleUnion_union_value`
                 conversionWriter.write(
                     """
-                return $L_union_value
-                """,
+                    return $L_union_value
+                    """,
                     unionShape.getId().getName());
               });
         });
@@ -261,7 +261,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                 // elif isinstance(input, ExampleUnion_StringValue):
                 //   ExampleUnion_union_value = ExampleUnionStringValue(input.StringValue)
 
-                for (EnumDefinition enumDefinition :
+                for (final EnumDefinition enumDefinition :
                     stringShapeWithEnumTrait.getTrait(EnumTrait.class).get().getValues()) {
                   String value = enumDefinition.getValue();
                   conversionWriter.write(
