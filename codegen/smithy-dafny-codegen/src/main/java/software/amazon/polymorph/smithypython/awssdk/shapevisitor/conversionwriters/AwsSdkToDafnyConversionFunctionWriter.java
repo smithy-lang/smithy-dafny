@@ -81,7 +81,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                         ? DafnyNameResolver.getDafnyTypeForError(structureShape)
                         : DafnyNameResolver.getDafnyTypeForShape(structureShape),
                     () -> {
-                      for (Entry<String, MemberShape> memberShapeEntry :
+                      for (final Entry<String, MemberShape> memberShapeEntry :
                           structureShape.getAllMembers().entrySet()) {
                         String memberName = memberShapeEntry.getKey();
                         MemberShape memberShape = memberShapeEntry.getValue();
@@ -219,8 +219,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
     // e.g.
     // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
     // The nature of the `smithy_structure_member` conversion depends on the properties of the
-    // shape,
-    //   as described below
+    // shape, as described below
     conversionWriter.writeInline("$L=", memberName);
 
     // If this shape is optional, write conversion logic to detect and possibly pass
@@ -285,7 +284,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
 
                 // First union value opens a new `if` block; others do not need to and write `elif`
                 boolean shouldOpenNewIfBlock = true;
-                for (MemberShape memberShape : unionShape.getAllMembers().values()) {
+                for (final MemberShape memberShape : unionShape.getAllMembers().values()) {
                   final Shape targetShape = context.model().expectShape(memberShape.getTarget());
                   // Write out conversion:
                   // ex. if ExampleUnion can take on either of (IntegerValue, StringValue), write:
@@ -373,7 +372,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                 // elif isinstance(input, ExampleUnion_StringValue):
                 //   ExampleUnion_union_value = ExampleUnionStringValue(input.StringValue)
 
-                for (EnumDefinition enumDefinition :
+                for (final EnumDefinition enumDefinition :
                     stringShapeWithEnumTrait.getTrait(EnumTrait.class).get().getValues()) {
                   String value = enumDefinition.getValue();
                   conversionWriter.write(
