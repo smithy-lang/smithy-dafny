@@ -15,13 +15,16 @@ module {:options "--function-syntax:4"} Std.Actions {
   import opened DynamicArray
 
   // TODO: Documentation, especially overall design
-  trait {:termination false} Action<T, R> extends GenericAction<T, R>, Validatable {
+  trait {:termination false} Action<T, TV(!new), R, RV(!new)> extends GenericAction<T, R>, Validatable {
 
-    ghost var history: seq<(T, R)>
+    ghost var history: seq<(TV, RV)>
+    // TODO: Make these --> functions (not ~>, they are useless if they read the heap)
+    ghost const inputF: T -> TV
+    ghost const outputF: R -> RV
 
-    ghost predicate Valid() 
-      reads this, Repr 
-      ensures Valid() ==> this in Repr 
+    ghost predicate Valid()
+      reads this, Repr
+      ensures Valid() ==> this in Repr
       ensures Valid() ==> CanProduce(history)
       decreases height, 0
 
@@ -39,18 +42,18 @@ module {:options "--function-syntax:4"} Std.Actions {
     // TODO: Necessary but not sufficient that:
     // CanConsume(history, nextIn) ==> exists nextOut :: CanProduce(history + [(nextIn, nextOut)])
     // Does that need to be explicitly part of the spec?
-    ghost predicate CanConsume(history: seq<(T, R)>, next: T)
+    ghost predicate CanConsume(history: seq<(TV, RV)>, next: TV)
       requires CanProduce(history)
       decreases height
 
-    ghost predicate CanProduce(history: seq<(T, R)>)
+    ghost predicate CanProduce(history: seq<(TV, RV)>)
       decreases height
 
     ghost predicate Requires(t: T)
       reads Reads(t) 
     {
       && Valid()
-      && CanConsume(history, t)
+      && CanConsume(history, inputF(t))
     }
     ghost function Reads(t: T): set<object> 
       reads this
@@ -72,7 +75,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       reads Reads(t)
     {
       && Valid()
-      && history == old(history) + [(t, r)]
+      && history == old(history) + [(inputF(t), outputF(r))]
       && fresh(Repr - old(Repr))
     }
 
@@ -80,18 +83,18 @@ module {:options "--function-syntax:4"} Std.Actions {
 
     ghost method Update(t: T, r: R)
       modifies `history
-      ensures history == old(history) + [(t, r)]
+      ensures history == old(history) + [(inputF(t), outputF(r))]
     {
-      history := history + [(t, r)];
+      history := history + [(inputF(t), outputF(r))];
     }
 
-    ghost function Consumed(): seq<T> 
+    ghost function Consumed(): seq<TV> 
       reads this
     {
       Inputs(history)
     }
 
-    ghost function Produced(): seq<R> 
+    ghost function Produced(): seq<RV> 
       reads this
     {
       Outputs(history)
@@ -135,12 +138,12 @@ module {:options "--function-syntax:4"} Std.Actions {
     SeqMap((e: (T, R)) => e.1, history)
   }
 
-  ghost predicate OnlyProduces<T, R>(i: Action<T, R>, history: seq<(T, R)>, c: R) 
+  ghost predicate OnlyProduces<T, TV(!new), R, RV(!new)>(i: Action<T, TV, R, RV>, history: seq<(TV, RV)>, c: RV) 
   {
     i.CanProduce(history) <==> forall e <- history :: e.1 == c
   }
 
-  ghost predicate CanConsumeAll<T(!new), R(!new)>(a: Action<T, R>, input: seq<T>) 
+  ghost predicate CanConsumeAll<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, input: seq<TV>) 
   {
     forall i | 0 < i < |input| ::
       var consumed := input[..(i - 1)];
@@ -162,33 +165,33 @@ module {:options "--function-syntax:4"} Std.Actions {
   }
 
   // TODO: generalize to "EventuallyProducesSequence"?
-  ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, limit: nat) {
-    forall history: seq<(T, R)> | i.CanProduce(history) 
+  ghost predicate ProducesTerminatedBy<T, TV(!new), R, RV(!new)>(i: Action<T, TV, R, RV>, c: RV, limit: nat) {
+    forall history: seq<(TV, RV)> | i.CanProduce(history) 
       :: exists n: nat | n <= limit :: Terminated(Outputs(history), c, n)
   }
 
   // Class of actions whose precondition doesn't depend on history (probably needs a better name)
-  ghost predicate ContextFree<T(!new), R(!new)>(a: Action<T, R>, p: T -> bool) {
+  ghost predicate ContextFree<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, p: TV -> bool) {
     forall history, next | a.CanProduce(history)
       :: a.CanConsume(history, next) <==> p(next)
   }
 
   // Enumerators
 
-  type IEnumerator<T> = Action<(), T>
-  type Enumerator<T(!new)> = a: Action<(), Option<T>> | exists limit :: ProducesTerminatedBy(a, None, limit) witness *
+  type IEnumerator<T, TV(!new)> = Action<(), (), T, TV>
+  type Enumerator<T, TV(!new)> = a: Action<(), (), Option<T>, Option<TV>> | exists limit :: ProducesTerminatedBy(a, None, limit) witness *
   
 
   // Aggregators
 
   // TODO: Names need improvement
-  type IAggregator<T> = Action<T, ()>
-  type Aggregator<T(!new)> = a: Action<T, bool> | exists limit :: ProducesTerminatedBy(a, false, limit) witness *
-  type Accumulator<T(!new)> = Action<Option<T>, ()> // | exists limit :: ConsumesTerminatedBy(a, None, limit) witness *
+  type IAggregator<T, TV(!new)> = Action<T, TV, (), ()>
+  type Aggregator<T, TV(!new)> = a: Action<T, TV, bool, bool> | exists limit :: ProducesTerminatedBy(a, false, limit) witness *
+  type Accumulator<T, TV(!new)> = Action<Option<T>, Option<TV>, (), ()> // | exists limit :: ConsumesTerminatedBy(a, None, limit) witness *
 
   // Streams
 
-  trait Stream<T(!new)> extends Action<(), Option<T>> {
+  trait Stream<T, TV(!new)> extends Action<(), (), Option<T>, Option<TV>> {
 
     // A Stream is just a specialization of an Enumerator
     // with the potentially-optimized ForEach().
@@ -196,13 +199,13 @@ module {:options "--function-syntax:4"} Std.Actions {
     // to prove they are in fact enumerators.
     // (think of this like `extends Enumerator<T>` which you can't actually say)
     lemma IsEnumerator()
-      ensures (this as object) is Enumerator<T>
+      ensures (this as object) is Enumerator<T, TV>
 
     // Pass every value in sequence into the given accumulator.
     // Equivalent to DefaultForEach below,
     // but may be implemented more efficiently with concurrent execution
     // in the target language.
-    method ForEach(a: Accumulator<T>)
+    method ForEach(a: Accumulator<T, TV>)
       requires Valid()
       requires a.Valid()
       requires Repr !! a.Repr 
@@ -216,7 +219,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     
   }
 
-  method {:verify false} DefaultForEach<T(!new)>(s: Enumerator<T>, a: Accumulator<T>) {
+  method {:verify false} DefaultForEach<T, TV(!new)>(s: Enumerator<T, TV>, a: Accumulator<T, TV>) {
     // TODO: Actual specs to prove this terminates
     while (true) {
       var next := s.Invoke(());
@@ -228,7 +231,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     }
   }
 
-  class ArrayAggregator<T> extends Action<T, ()> {
+  class ArrayAggregator<T, TV(!new)> extends Action<T, TV, (), ()> {
 
     var storage: DynamicArray<T>
 
@@ -244,13 +247,15 @@ module {:options "--function-syntax:4"} Std.Actions {
       && this !in storage.Repr
       && storage.Repr <= Repr
       && storage.Valid?()
-      && Consumed() == storage.items
+      && Consumed() == SeqMap(inputF, storage.items)
     }
 
-    constructor() 
+    constructor(inputF: T -> TV) 
       ensures Valid()
       ensures fresh(Repr - {this})
       ensures history == []
+      ensures this.inputF == inputF
+      ensures this.outputF == (nothing => ())
     {
       var a := new DynamicArray();
 
@@ -258,14 +263,16 @@ module {:options "--function-syntax:4"} Std.Actions {
       height := 1;
       Repr := {this} + {a} + a.Repr;
       this.storage := a;
+      this.inputF := inputF;
+      this.outputF := nothing => ();
     }
 
-    ghost predicate CanConsume(history: seq<(T, ())>, next: T)
+    ghost predicate CanConsume(history: seq<(TV, ())>, next: TV)
       decreases height
     {
       true
     }
-    ghost predicate CanProduce(history: seq<(T, ())>)
+    ghost predicate CanProduce(history: seq<(TV, ())>)
       decreases height
     {
       true
@@ -277,23 +284,121 @@ module {:options "--function-syntax:4"} Std.Actions {
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
     {
+      assert Consumed() == SeqMap(inputF, storage.items);
       storage.Push(t);
 
       r := ();
       Update(t, r);
       Repr := {this} + {storage} + storage.Repr;
+      assert Consumed() == old(Consumed()) + [inputF(t)];
       assert Valid();
     }
   }
 
   method {:rlimit 0} AggregatorExample() {
-    var a := new ArrayAggregator();
+    var a: ArrayAggregator<nat, nat> := new ArrayAggregator(i => i);
     var _ := a.Invoke(1);
     var _ := a.Invoke(2);
     var _ := a.Invoke(3);
     var _ := a.Invoke(4);
     var _ := a.Invoke(5);
-    assert a.storage.items == [1, 2, 3, 4, 5];
+    var _ := a.Invoke(6);
+    assert a.Consumed() == [1, 2, 3, 4, 5, 6];
+    assert a.storage.items == [1, 2, 3, 4, 5, 6];
+  }
+
+  class Box {
+    const i: nat
+
+    constructor(i: nat) 
+      ensures this.i == i
+    {
+      this.i := i;
+    }
+  }
+
+  function SeqRange(n: nat): seq<nat> {
+    seq(n, i => i)
+  }
+
+  lemma SeqRangeIncr(prefix: seq<nat>, n: nat)
+    requires prefix == SeqRange(n)
+    ensures prefix + [n] == SeqRange(n + 1) 
+  {}
+
+  class BoxEnumerator extends Action<(), (), Box, nat> {
+
+    var nextValue: nat
+
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> CanProduce(history)
+      decreases height, 0
+    {
+      && this in Repr
+      && CanProduce(history)
+      && nextValue == |history|
+      && inputF == (i => i)
+      && outputF == ((b: Box) => b.i)
+    }
+
+    constructor() 
+      ensures Valid()
+      ensures fresh(Repr)
+      ensures history == []
+    {
+      nextValue := 0;
+      history := [];
+      Repr := {this};
+      height := 1;
+      inputF := (i => i);
+      outputF := ((b: Box) => b.i);
+    }
+
+    ghost predicate CanConsume(history: seq<((), nat)>, next: ())
+      decreases height
+    {
+      true
+    }
+    ghost predicate CanProduce(history: seq<((), nat)>)
+      decreases height
+    {
+      Outputs(history) == SeqRange(|history|)
+    }
+
+    method Invoke(t: ()) returns (r: Box) 
+      requires Requires(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
+    {
+      ghost var producedBefore := Produced();
+
+      r := new Box(nextValue);
+      Update(t, r);
+      Repr := {this};
+      nextValue := nextValue + 1;
+
+      SeqRangeIncr(producedBefore, |producedBefore|);
+      assert Valid();
+    }
+  }
+
+  method {:rlimit 0} BoxEnumeratorExample() {
+    var enum: BoxEnumerator := new BoxEnumerator();
+    assert |enum.Produced()| == 0;
+    var a := enum.Invoke(());
+
+    assert enum.Produced() == [enum.outputF(a)];
+    assert enum.Produced() == SeqRange(1) == [0];
+    assert a.i == 0;
+    
+    // var b := enum.Invoke(());
+    // var c := enum.Invoke(());
+    // var d := enum.Invoke(());
+    // var e := enum.Invoke(());
+
   }
 
   // Other primitives/examples todo:
@@ -316,7 +421,7 @@ module {:options "--function-syntax:4"} Std.Actions {
   //        supporting constraints on the order of calls etc.
 
 
-  class SeqEnumerator<T> extends Action<(), Option<T>> {
+  class SeqEnumerator<T, TV(!new)> extends Action<(), (), Option<T>, Option<TV>> {
 
     var values: seq<T>
 
@@ -333,14 +438,14 @@ module {:options "--function-syntax:4"} Std.Actions {
       this in Repr
     }
     
-    ghost predicate CanConsume(history: seq<((), Option<T>)>, next: ())
+    ghost predicate CanConsume(history: seq<((), Option<TV>)>, next: ())
       requires CanProduce(history)
       decreases height
     {
       true
     }
 
-    ghost predicate CanProduce(history: seq<((), Option<T>)>)
+    ghost predicate CanProduce(history: seq<((), Option<TV>)>)
       decreases height
     {
       true
@@ -378,7 +483,7 @@ module {:options "--function-syntax:4"} Std.Actions {
   // }
 
   // TODO: This is also a Folder([], (x, y) => x + [y])
-  class Collector<T> extends Action<Option<T>, ()> {
+  class Collector<T, TV(!new)> extends Action<Option<T>, Option<TV>, (), ()> {
 
     var values: seq<T>
 
@@ -395,14 +500,14 @@ module {:options "--function-syntax:4"} Std.Actions {
       this in Repr 
     }
 
-    ghost predicate CanConsume(history: seq<(Option<T>, ())>, next: Option<T>)
+    ghost predicate CanConsume(history: seq<(Option<TV>, ())>, next: Option<TV>)
       requires CanProduce(history)
       decreases height
     {
       true
     }
 
-    ghost predicate CanProduce(history: seq<(Option<T>, ())>)
+    ghost predicate CanProduce(history: seq<(Option<TV>, ())>)
       decreases height
     {
       true
@@ -423,10 +528,11 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   }
 
-  trait {:termination false} Pipeline<U(!new), T(!new)> extends Stream<T> {
+  trait {:termination false} Pipeline<U, UV(!new), T, TV(!new)> extends Stream<T, TV> {
+    
 
-    const upstream: Stream<U>
-    const buffer: Collector<T>
+    const upstream: Stream<U, UV>
+    const buffer: Collector<T, TV>
 
     method {:verify false} Invoke(nothing: ()) returns (t: Option<T>) {
       while (|buffer.values| == 0) {
@@ -446,22 +552,22 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
 
-    method {:verify false} ForEach(a: Accumulator<T>)
+    method {:verify false} ForEach(a: Accumulator<T, TV>)
     {
       var a' := new PipelineProcessor(this, a);
       upstream.ForEach(a');
     }
 
-    method Process(u: Option<U>, a: Accumulator<T>)
+    method Process(u: Option<U>, a: Accumulator<T, TV>)
 
   }
 
-  class PipelineProcessor<U(!new), T(!new)> extends Action<Option<U>, ()> {
+  class PipelineProcessor<U, UV(!new), T, TV(!new)> extends Action<Option<U>, Option<UV>, (), ()> {
 
-    const pipeline: Pipeline<U, T>
-    const accumulator: Accumulator<T>
+    const pipeline: Pipeline<U, UV, T, TV>
+    const accumulator: Accumulator<T, TV>
 
-    constructor(pipeline: Pipeline<U, T>, accumulator: Accumulator<T>) {
+    constructor(pipeline: Pipeline<U, UV, T, TV>, accumulator: Accumulator<T, TV>) {
       this.pipeline := pipeline;
       this.accumulator := accumulator;
     }
@@ -475,14 +581,14 @@ module {:options "--function-syntax:4"} Std.Actions {
       this in Repr 
     }
 
-    ghost predicate CanConsume(history: seq<(Option<U>, ())>, next: Option<U>)
+    ghost predicate CanConsume(history: seq<(Option<UV>, ())>, next: Option<UV>)
       requires CanProduce(history)
       decreases height
     {
       true
     }
 
-    ghost predicate CanProduce(history: seq<(Option<U>, ())>)
+    ghost predicate CanProduce(history: seq<(Option<UV>, ())>)
       decreases height
     {
       true

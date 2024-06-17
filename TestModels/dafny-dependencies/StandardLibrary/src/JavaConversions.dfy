@@ -8,6 +8,12 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
   import opened Std.Actions
   import opened Wrappers
   
+  // TODO: Add these aliases to the main Actions library?
+  type Action'<T(!new), R(!new)> = Action<T, T, R, R>
+  type Enumerator'<T(!new)> = Enumerator<T, T>
+  type Accumulator'<T(!new)> = Accumulator<T, T>
+  type Stream'<T(!new)> = Stream<T, T>
+
   trait {:compile false} {:extern "java.lang.Throwable"} Throwable {
 
   }
@@ -44,16 +50,16 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
     method onComplete()
   }
 
-  type SubscriptionEvent<T> = SubscriptionEvent<T>
+  type SubscriptionEvent<T(!new)> = Option<Result<T, Throwable>>
 
   // Publisher<T> -> Action
 
-  class SequentialActionSubscriber<T> extends Subscriber<T> {
+  class SequentialActionSubscriber<T(!new)> extends Subscriber<T> {
 
     var subscription: Subscription?
-    var action: Action<SubscriptionEvent<T>, ()>
+    var action: Action'<SubscriptionEvent<T>, ()>
 
-    constructor(a: Action<SubscriptionEvent<T>, ()>) {
+    constructor(a: Action'<SubscriptionEvent<T>, ()>) {
       this.action := a;
     }
 
@@ -79,11 +85,11 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
 
   }
 
-  method AsSequentialSubscriber<T>(a: Action<SubscriptionEvent<T>, ()>) returns (s: Subscriber<T>) {
+  method AsSequentialSubscriber<T>(a: Action'<SubscriptionEvent<T>, ()>) returns (s: Subscriber<T>) {
     s := new SequentialActionSubscriber(a);
   }
 
-  class SubscribingAction<T> extends Action<(), SubscriptionEvent<T>> {
+  class SubscribingAction<T> extends Action<(), (), SubscriptionEvent<T>, SubscriptionEvent<T>> {
 
     const publisher: Publisher<T>
 
@@ -118,7 +124,7 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
       r := None;
     }
 
-    method ForEach(a: Aggregator<Result<T, Throwable>>) {
+    method ForEach(a: Accumulator'<Result<T, Throwable>>) {
       var subscriber := AsSequentialSubscriber(a);
       publisher.subscribe(subscriber);
 
@@ -126,13 +132,13 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
     }
   }
 
-  method AsStream<T>(p: Publisher<T>) returns (s: Enumerator<Result<T, Throwable>>) {
+  method AsStream<T>(p: Publisher<T>) returns (s: Enumerator'<Result<T, Throwable>>) {
     s := new SubscribingAction(p);
   } 
 
   // Stream -> Pulisher<T>
 
-  class SubscriberAction<T> extends Action<SubscriptionEvent<T>, ()> {
+  class SubscriberAction<T> extends Action<SubscriptionEvent<T>, SubscriptionEvent<T>, (), ()> {
 
     const subscriber: Subscriber<T>
 
@@ -180,9 +186,9 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
   }
 
   class ActionPublisher<T> extends Publisher<T> {
-    const subscribeAction: Enumerator<Result<T, Throwable>>
+    const subscribeAction: Stream'<Result<T, Throwable>>
 
-    constructor(subscribeAction: Enumerator<Result<T, Throwable>>) {
+    constructor(subscribeAction: Enumerator'<Result<T, Throwable>>) {
       this.subscribeAction := subscribeAction;
     }
 
@@ -192,7 +198,7 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
     }
   }
 
-  method AsPublisher<T>(a: Enumerator<Result<T, Throwable>>) returns (s: Publisher<T>) {
+  method AsPublisher<T>(a: Enumerator'<Result<T, Throwable>>) returns (s: Publisher<T>) {
     s := new ActionPublisher(a);
   } 
 
