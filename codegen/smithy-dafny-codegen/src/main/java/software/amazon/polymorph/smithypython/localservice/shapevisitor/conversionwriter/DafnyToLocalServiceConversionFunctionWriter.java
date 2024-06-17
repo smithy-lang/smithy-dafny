@@ -53,6 +53,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
     singleton.baseWriteConverterForShapeAndMembers(shape, context, writer);
   }
 
+  @Override
   protected void writeStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
@@ -277,6 +278,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
    * This SHOULD only be called once so only one function definition is written.
    * @param unionShape
    */
+  @Override
   protected void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
@@ -357,6 +359,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
     });
   }
 
+    @Override
     protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
         WriterDelegator<PythonWriter> delegator = context.writerDelegator();
         String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
@@ -410,5 +413,4 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
             );
         });
     }
-
 }

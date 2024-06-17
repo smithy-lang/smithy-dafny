@@ -54,7 +54,9 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
    * @param writer The PythonWriter being used
    */
   public DafnyToLocalServiceShapeVisitor(
-      GenerationContext context, String dataSource, PythonWriter writer) {
+        final GenerationContext context,
+        final String dataSource,
+        final PythonWriter writer) {
     this.context = context;
     this.dataSource = dataSource;
     this.writer = writer;
@@ -62,7 +64,10 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
   }
 
   public DafnyToLocalServiceShapeVisitor(
-      GenerationContext context, String dataSource, PythonWriter writer, String filename) {
+        final GenerationContext context,
+        final String dataSource,
+        final PythonWriter writer,
+        final String filename) {
     this.context = context;
     this.dataSource = dataSource;
     this.writer = writer;

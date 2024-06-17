@@ -45,7 +45,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  */
 public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
-    private String dataSource;
+    private final String dataSource;
     private final PythonWriter writer;
     private final String filename;
 
@@ -55,10 +55,10 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
      *                   ({@code input.foo}, {@code entry}, etc.)
      */
     public LocalServiceToDafnyShapeVisitor(
-        GenerationContext context,
-        String dataSource,
-        PythonWriter writer,
-        String filename
+        final GenerationContext context,
+        final String dataSource,
+        final PythonWriter writer,
+        final String filename
     ) {
       this.context = context;
       this.dataSource = dataSource;
@@ -67,9 +67,9 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
     }
 
   public LocalServiceToDafnyShapeVisitor(
-      GenerationContext context,
-      String dataSource,
-      PythonWriter writer
+      final GenerationContext context,
+      final String dataSource,
+      final PythonWriter writer
   ) {
     this.context = context;
     this.dataSource = dataSource;

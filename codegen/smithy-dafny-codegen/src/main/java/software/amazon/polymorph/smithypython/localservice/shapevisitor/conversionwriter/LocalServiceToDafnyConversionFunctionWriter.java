@@ -52,6 +52,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
     singleton.baseWriteConverterForShapeAndMembers(shape, context, writer);
   }
 
+  @Override
   protected void writeStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
@@ -131,7 +132,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
     if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
       if (memberShape.isOptional()) {
         conversionWriter.write(
-            "((Option_Some($1L)) if (($2L is not None) and ($1L is not None)) else (Option_None())),",
+            "((Option_Some($1L)) if (($1L is not None) and ($2L is not None)) else (Option_None())),",
             targetShape.accept(
                 ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
                     targetShape,
@@ -151,24 +152,6 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
                     conversionWriter,
                     "smithy_to_dafny")));
       }
-
-    }
-
-    // If this is a localService config shape, defer conversion to the config ShapeVisitor TODO
-    // remove this
-    else if (SmithyNameResolver.getLocalServiceConfigShapes(context)
-        .contains(targetShape.getId())) {
-      conversionWriter.write(
-          "$L,",
-          targetShape.accept(
-              new LocalServiceToDafnyShapeVisitor(
-                  context,
-                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                  // Pass the `conversionWriter` as our source writer;
-                  // if we need to add imports, the imports will only be needed
-                  // from the conversionwriter file
-                  conversionWriter,
-                  "smithy_to_dafny")));
     }
 
     // If this shape is optional, write conversion logic to detect and possibly pass
@@ -310,7 +293,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
    *
    * @param unionShape
    */
-  public void writeUnionShapeConverter(UnionShape unionShape) {
+  @Override
+  protected void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
@@ -391,6 +375,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
         });
   }
 
+  @Override
   protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
