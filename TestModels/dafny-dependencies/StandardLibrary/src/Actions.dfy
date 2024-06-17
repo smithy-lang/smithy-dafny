@@ -5,6 +5,7 @@ include "Frames.dfy"
 include "GenericAction.dfy"
 include "DecreasesClauses.dfy"
 include "DynamicArray.dfy"
+include "Seq.dfy"
 
 module {:options "--function-syntax:4"} Std.Actions {
 
@@ -13,6 +14,7 @@ module {:options "--function-syntax:4"} Std.Actions {
   import opened GenericActions
   import opened Termination
   import opened DynamicArray
+  import Seq
 
   // TODO: Documentation, especially overall design
   trait {:termination false} Action<T, TV(!new), R, RV(!new)> extends GenericAction<T, R>, Validatable {
@@ -104,23 +106,6 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   // Dependencies stolen from DafnyStandardLibraries
   
-  function {:opaque} SeqMap<T, R>(f: (T ~> R), xs: seq<T>): (result: seq<R>)
-    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
-    ensures |result| == |xs|
-    ensures forall i {:trigger result[i]} :: 0 <= i < |xs| ==> result[i] == f(xs[i])
-    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
-  {
-    if |xs| == 0 then []
-    else [f(xs[0])] + SeqMap(f, xs[1..])
-  }
-
-  /* Returns the last element of a non-empty sequence. */
-  function SeqLast<T>(xs: seq<T>): T
-    requires |xs| > 0
-  {
-    xs[|xs|-1]
-  }
-
   function Max(a: int, b: int): int
   {
     if a < b
@@ -131,11 +116,11 @@ module {:options "--function-syntax:4"} Std.Actions {
   // Common action invariants
 
   function Inputs<T, R>(history: seq<(T, R)>): seq<T> {
-    SeqMap((e: (T, R)) => e.0, history)
+    Seq.Map((e: (T, R)) => e.0, history)
   }
 
   function Outputs<T, R>(history: seq<(T, R)>): seq<R> {
-    SeqMap((e: (T, R)) => e.1, history)
+    Seq.Map((e: (T, R)) => e.1, history)
   }
 
   ghost predicate OnlyProduces<T, TV(!new), R, RV(!new)>(i: Action<T, TV, R, RV>, history: seq<(TV, RV)>, c: RV) 
@@ -212,7 +197,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       // The stream has produced all values
       // TODO: Needs to be more precise about producing exactly one None.
       // Something like EnumeratorDone(this)
-      ensures 0 < |Produced()| && SeqLast(Produced()) == None
+      ensures 0 < |Produced()| && Seq.Last(Produced()) == None
       // Each value was fed into the accumulator in sequence
       ensures Produced() == a.Consumed()
 
@@ -247,7 +232,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       && this !in storage.Repr
       && storage.Repr <= Repr
       && storage.Valid?()
-      && Consumed() == SeqMap(inputF, storage.items)
+      && Consumed() == Seq.Map(inputF, storage.items)
     }
 
     constructor(inputF: T -> TV) 
@@ -284,7 +269,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
     {
-      assert Consumed() == SeqMap(inputF, storage.items);
+      assert Consumed() == Seq.Map(inputF, storage.items);
       storage.Push(t);
 
       r := ();
