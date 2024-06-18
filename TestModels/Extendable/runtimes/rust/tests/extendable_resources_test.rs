@@ -54,8 +54,10 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
     eprintln!("\nafter TestCreateExtendableResource");
     // expect resource is ExtendableResource.ExtendableResource;
     // The `is` test above asserts this a "pure" Dafny resource
-    // TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
-    // TestSomeUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
+    TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
+    eprintln!("\nafter TestNoneUseExtendableResource");
+    TestSomeUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
+    eprintln!("\nafter TestSomeUseExtendableResource");
     // TestUseAlwaysModeledError(client, resource);
     // TestUseAlwaysMultipleErrors(client, resource);
     // TestDafnyUseAlwaysOpaqueError(client, resource);
@@ -83,23 +85,12 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
     name: &str
   ) -> ExtendableResourceRef
   {
-    let x1 = client.create_extendable_resource();
-    eprintln!("\n x1 : {:?}\n", x1);
-    let x2 = x1.name(name);
-    eprintln!("\n x2 : {:?}\n", x2);
-    let x3 = x2.send();
-    eprintln!("\n x3 \n");
-    let x4 = x3.await;
-    eprintln!("\n x4 \n");
-    let x5 = x4.unwrap();
-    eprintln!("\n x5 \n");
-    x5.output()
-    // client.create_extendable_resource()
-    //   .name(name)
-    //   .send()
-    //   .await
-    //   .unwrap()
-    //   .output()
+    client.create_extendable_resource()
+      .name(name)
+      .send()
+      .await
+      .unwrap()
+      .output()
   }
 
   pub async fn TestNoneUseExtendableResource(
