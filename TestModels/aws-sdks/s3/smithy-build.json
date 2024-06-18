@@ -1,12 +1,12 @@
 {
   "version": "1.0",
   "projections": {
-    "list-queues-and-add-permission-only": {
+    "s3-encryption-client-only": {
       "transforms": [
         {
           "name": "excludeShapesBySelector",
           "args": {
-            "selector": "[id|name *= 'CopyObject', 'MultipartUpload', 'Create', 'DeleteBucket', 'DeleteObjectTagging', 'DeletePublicAccess', 'GetBucket', 'GetObjectAcl', 'GetObjectAttributes', 'TODO add other GetObjectFoo operations lol', 'Head', 'List', 'PutBucket', 'TODO everything after PutBucket']"
+            "selector": "[id|name *= 'CopyObject', 'MultipartUpload', 'Create', 'DeleteBucket', 'DeleteObjectTagging', 'DeletePublicAccess', 'GetBucket', 'GetObjectA', 'GetObjectL', 'GetObjectR', GetObjectT', 'Head', 'List', 'PutBucket', 'PutObjectA', 'PutObjectL', 'PutObjectR', 'PutObjectR', 'PutObjectT', 'PutPublic', 'RestoreObject', 'SelectObject', 'UploadPart', 'WriteGetObject']"
           }
         },
         {
