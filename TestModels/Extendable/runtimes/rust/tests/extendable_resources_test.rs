@@ -51,6 +51,7 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
     let resource = TestCreateExtendableResource(
       &client, TEST_RESOURCE_NAME
     ).await;
+    eprintln!("\nafter TestCreateExtendableResource");
     // expect resource is ExtendableResource.ExtendableResource;
     // The `is` test above asserts this a "pure" Dafny resource
     // TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
