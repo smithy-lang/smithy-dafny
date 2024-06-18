@@ -37,3 +37,4 @@ impl Client {
 }
 
 mod create_extendable_resource;
+mod use_extendable_resource;

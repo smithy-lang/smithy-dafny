@@ -2,5 +2,7 @@
 pub mod create_extendable_resource;
 
 pub mod get_extendable_resource_data;
+pub mod use_extendable_resource;
+pub mod extendable_resource;
 
 pub mod simple_extendable_resources_config;

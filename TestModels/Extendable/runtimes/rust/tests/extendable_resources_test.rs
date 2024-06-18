@@ -6,14 +6,6 @@ use simple_extendable::*;
 // const TEST_RESOURCE_NAME : &str = "Dafny-Test";
 const DEFAULT_RESOURCE_NAME: &str = "dafny-default";
 
-// var rtnString: string := if input.stringValue.Some? then
-// input.stringValue.value + " " + this.name
-// else
-// this.name;
-// var rtn: Types.GetExtendableResourceDataOutput := Types.GetExtendableResourceDataOutput(
-// stringValue := Some(rtnString),
-// );
-
 struct MyResource {}
 impl ExtendableResource for MyResource {
     fn get_extendable_resource_data(
