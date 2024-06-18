@@ -8,7 +8,6 @@ pub struct CreateExtendableResourceOutput {
 impl CreateExtendableResourceOutput {
     #[allow(missing_docs)] // documentation missing in model
     pub fn output(&self) -> crate::types::extendable_resource::ExtendableResourceRef {
-        eprintln!("\n output \n");
         self.output.clone()
     }
 }

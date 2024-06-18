@@ -17,7 +17,6 @@ pub fn from_dafny(
         ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::CreateExtendableResourceOutput,
     >,
 ) -> crate::operation::create_extendable_resource::CreateExtendableResourceOutput {
-    eprintln!("\nCreateExtendableResourceOutput from_dafny");
     crate::operation::create_extendable_resource::CreateExtendableResourceOutput {
         output: crate::conversions::extendable_resource::_extendable_resource::from_dafny(
             dafny_value.resource().clone(),
