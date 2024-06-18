@@ -48,7 +48,7 @@ jobs:
             # TestModels/aws-sdks/ddb,
             # TestModels/aws-sdks/kms,
           ]
-    runs-on: "macos-12"
+    runs-on: "ubuntu-latest"
     permissions:
       id-token: write
       contents: read
