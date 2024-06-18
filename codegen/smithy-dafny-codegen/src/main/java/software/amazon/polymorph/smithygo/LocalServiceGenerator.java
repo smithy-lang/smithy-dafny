@@ -121,17 +121,21 @@ public class LocalServiceGenerator implements Runnable {
                                                                            : ", params %s.%s".formatted(SmithyNameResolver.smithyTypesNamespace(inputShape), inputShape.toShapeId().getName());
             final var outputType = outputShape.hasTrait(UnitTypeTrait.class) ? ""
                                                                              : "*%s.%s,".formatted(SmithyNameResolver.smithyTypesNamespace(outputShape), outputShape.toShapeId().getName());
+            System.out.println(SmithyNameResolver.smithyTypesNamespace(inputShape));
             String validationCheck = "";
             if(!inputType.equals("")) {
                 validationCheck = """
                     err := params.Validate()
                     if err != nil {
-                """;
+                        opaqueErr := &%s.OpaqueError{
+                            ErrObject: err,
+                        }
+                """.formatted(SmithyNameResolver.smithyTypesNamespace(inputShape));
                 if(outputType.equals("")) {
-                    validationCheck += "return err }";
+                    validationCheck += "return opaqueErr }";
                 }
                 else{
-                    validationCheck += "return nil, err }";
+                    validationCheck += "return nil, opaqueErr }";
                 }
             }
             String baseClientCall;
