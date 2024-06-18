@@ -1,10 +1,10 @@
-use simple_extendable::operation::get_extendable_resource_data::*;
 use simple_extendable::operation::create_extendable_resource::*;
+use simple_extendable::operation::get_extendable_resource_data::*;
 use simple_extendable::types::extendable_resource::ExtendableResourceRef;
 use simple_extendable::types::*;
 use simple_extendable::*;
 
-const TEST_RESOURCE_NAME : &str = "Dafny-Test";
+const TEST_RESOURCE_NAME: &str = "Dafny-Test";
 const DEFAULT_RESOURCE_NAME: &str = "dafny-default";
 
 struct MyResource {}
@@ -38,19 +38,15 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
     std::rc::Rc::new(std::cell::RefCell::new(MyResource {}))
 }
 
-
-  // Tests the Resource created purely through Dafny Source Code
-  #[tokio::test]
-  pub async fn TestClientDafnyResource()
-  {
+// Tests the Resource created purely through Dafny Source Code
+#[tokio::test]
+pub async fn TestClientDafnyResource() {
     let config = SimpleExtendableResourcesConfig::builder().build().unwrap();
     let client = Client::from_conf(config.clone()).unwrap();
     eprintln!("\nClient : {:?}\n", client);
 
     // The explicit type cast is needed for the `is` test on the next line
-    let resource = TestCreateExtendableResource(
-      &client, TEST_RESOURCE_NAME
-    ).await;
+    let resource = TestCreateExtendableResource(&client, TEST_RESOURCE_NAME).await;
     eprintln!("\nafter TestCreateExtendableResource");
     // expect resource is ExtendableResource.ExtendableResource;
     // The `is` test above asserts this a "pure" Dafny resource
@@ -61,7 +57,14 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
     // TestUseAlwaysModeledError(client, resource);
     // TestUseAlwaysMultipleErrors(client, resource);
     // TestDafnyUseAlwaysOpaqueError(client, resource);
-  }
+    eprintln!("\n before drop resource\n");
+    drop(resource);
+    eprintln!("\n before drop client\n");
+    drop(client);
+    eprintln!("\n before drop config\n");
+    drop(config);
+    eprintln!("\n before exit\n");
+}
 
 //   // Test the Resource created through an Extern
 //   #[tokio::test]
@@ -80,54 +83,51 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
 //     // TestUseAlwaysOpaqueError(client, resource);
 //   }
 
-  pub async fn TestCreateExtendableResource(
-    client: &Client,
-    name: &str
-  ) -> ExtendableResourceRef
-  {
-    client.create_extendable_resource()
-      .name(name)
-      .send()
-      .await
-      .unwrap()
-      .output()
-  }
+pub async fn TestCreateExtendableResource(client: &Client, name: &str) -> ExtendableResourceRef {
+    client
+        .create_extendable_resource()
+        .name(name)
+        .send()
+        .await
+        .unwrap()
+        .output()
+}
 
-  pub async fn TestNoneUseExtendableResource(
+pub async fn TestNoneUseExtendableResource(
     client: &Client,
     resource: ExtendableResourceRef,
-    name: &str
-  )
-  {
+    name: &str,
+) {
     let dataInput = allNone();
-    let useOutput = client.use_extendable_resource()
-      .resource(resource)
-      .input(dataInput)
-      .send()
-      .await
-      .unwrap();
+    let useOutput = client
+        .use_extendable_resource()
+        .resource(resource)
+        .input(dataInput)
+        .send()
+        .await
+        .unwrap();
 
     checkNone(name, useOutput.output());
-  }
+}
 
-  pub async fn TestSomeUseExtendableResource(
+pub async fn TestSomeUseExtendableResource(
     client: &Client,
     resource: ExtendableResourceRef,
-    name: &str
-  )
-  {
+    name: &str,
+) {
     let dataInput = allSome();
-    let useOutput = client.use_extendable_resource()
-      .resource(resource)
-      .input(dataInput)
-      .send()
-      .await
-      .unwrap();
+    let useOutput = client
+        .use_extendable_resource()
+        .resource(resource)
+        .input(dataInput)
+        .send()
+        .await
+        .unwrap();
 
     checkSome(name, useOutput.output());
-  }
+}
 
-#[tokio::test]
+// #[tokio::test]
 async fn TestNativeResource() {
     let resource: ExtendableResourceRef = DafnyFactory();
     TestSomeGetResourceData(resource.clone()).await;

@@ -4,16 +4,14 @@ use crate::types::extendable_resource::ExtendableResource;
 #[allow(dead_code)]
 pub fn to_dafny(
     value: crate::types::extendable_resource::ExtendableResourceRef,
-) -> 
+) ->
 ::dafny_runtime::Object<dyn simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource>
 {
-    let wrap = ExtendableResourceWrapper {
-        obj: value.clone(),
-    };
+    let wrap = ExtendableResourceWrapper { obj: value.clone() };
     let inner : ::std::rc::Rc<::std::cell::UnsafeCell<dyn ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource>>
     = ::std::rc::Rc::new(::std::cell::UnsafeCell::new(wrap));
 
-     ::dafny_runtime::Object (Some(inner) )
+    ::dafny_runtime::Object(Some(inner))
 }
 
 #[allow(dead_code)]

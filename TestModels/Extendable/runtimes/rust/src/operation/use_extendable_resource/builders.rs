@@ -63,37 +63,57 @@ impl UseExtendableResourceFluentBuilder {
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn input(mut self, input: impl ::std::convert::Into<crate::operation::get_extendable_resource_data::GetExtendableResourceDataInput>) -> Self {
+    pub fn input(
+        mut self,
+        input: impl ::std::convert::Into<
+            crate::operation::get_extendable_resource_data::GetExtendableResourceDataInput,
+        >,
+    ) -> Self {
         self.inner = self.inner.input(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_input(mut self, input: Option<crate::operation::get_extendable_resource_data::GetExtendableResourceDataInput>) -> Self {
+    pub fn set_input(
+        mut self,
+        input: Option<
+            crate::operation::get_extendable_resource_data::GetExtendableResourceDataInput,
+        >,
+    ) -> Self {
         self.inner = self.inner.set_input(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_input(&self) -> &Option<crate::operation::get_extendable_resource_data::GetExtendableResourceDataInput> {
+    pub fn get_input(
+        &self,
+    ) -> &Option<crate::operation::get_extendable_resource_data::GetExtendableResourceDataInput>
+    {
         self.inner.get_input()
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn resource(mut self, input: impl ::std::convert::Into<crate::types::extendable_resource::ExtendableResourceRef>) -> Self {
+    pub fn resource(
+        mut self,
+        input: impl ::std::convert::Into<crate::types::extendable_resource::ExtendableResourceRef>,
+    ) -> Self {
         self.inner = self.inner.resource(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_resource(mut self, input: Option<crate::types::extendable_resource::ExtendableResourceRef>) -> Self {
+    pub fn set_resource(
+        mut self,
+        input: Option<crate::types::extendable_resource::ExtendableResourceRef>,
+    ) -> Self {
         self.inner = self.inner.set_resource(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_resource(&self) -> &Option<crate::types::extendable_resource::ExtendableResourceRef> {
+    pub fn get_resource(
+        &self,
+    ) -> &Option<crate::types::extendable_resource::ExtendableResourceRef> {
         self.inner.get_resource()
     }
-
 }

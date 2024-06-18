@@ -29,9 +29,7 @@ impl UseExtendableResourceInput {
 
 /// A builder for [`UseExtendableResourceInput`](crate::operation::operation::UseExtendableResourceInput).
 #[non_exhaustive]
-#[derive(
-    ::std::clone::Clone, ::std::default::Default,
-)]
+#[derive(::std::clone::Clone, ::std::default::Default)]
 pub struct UseExtendableResourceInputBuilder {
     input: Option<GetExtendableResourceDataInput>,
     resource: Option<crate::types::extendable_resource::ExtendableResourceRef>,
@@ -56,19 +54,27 @@ impl UseExtendableResourceInputBuilder {
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn resource(mut self, input: crate::types::extendable_resource::ExtendableResourceRef) -> Self {
+    pub fn resource(
+        mut self,
+        input: crate::types::extendable_resource::ExtendableResourceRef,
+    ) -> Self {
         self.resource = Some(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_resource(mut self, input: Option<crate::types::extendable_resource::ExtendableResourceRef>) -> Self {
+    pub fn set_resource(
+        mut self,
+        input: Option<crate::types::extendable_resource::ExtendableResourceRef>,
+    ) -> Self {
         self.resource = input;
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_resource(&self) -> &Option<crate::types::extendable_resource::ExtendableResourceRef> {
+    pub fn get_resource(
+        &self,
+    ) -> &Option<crate::types::extendable_resource::ExtendableResourceRef> {
         &self.resource
     }
 
