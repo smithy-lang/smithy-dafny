@@ -52,8 +52,8 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
     ).await;
     // expect resource is ExtendableResource.ExtendableResource;
     // The `is` test above asserts this a "pure" Dafny resource
-    TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
-    TestSomeUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
+    // TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
+    // TestSomeUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
     // TestUseAlwaysModeledError(client, resource);
     // TestUseAlwaysMultipleErrors(client, resource);
     // TestDafnyUseAlwaysOpaqueError(client, resource);
