@@ -45,11 +45,12 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
   {
     let config = SimpleExtendableResourcesConfig::builder().build().unwrap();
     let client = Client::from_conf(config.clone()).unwrap();
+    eprintln!("\nClient : {:?}\n", client);
 
     // The explicit type cast is needed for the `is` test on the next line
-    // let resource = TestCreateExtendableResource(
-    //   &client, TEST_RESOURCE_NAME
-    // ).await;
+    let resource = TestCreateExtendableResource(
+      &client, TEST_RESOURCE_NAME
+    ).await;
     // expect resource is ExtendableResource.ExtendableResource;
     // The `is` test above asserts this a "pure" Dafny resource
     // TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
