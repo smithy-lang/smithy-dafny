@@ -82,6 +82,7 @@ public class IOUtils {
     Class<?> klass,
     Path rootPath,
     String templatePath,
+    String templateOutputPath,
     Map<String, String> parameters
   ) {
     String content = IoUtils.readUtf8Resource(
@@ -90,9 +91,9 @@ public class IOUtils {
     );
 
     content = evalTemplate(content, parameters);
-    templatePath = evalTemplate(templatePath, parameters);
+    templateOutputPath = evalTemplate(templateOutputPath, parameters);
 
-    Path outputPath = rootPath.resolve(templatePath);
+    Path outputPath = rootPath.resolve(templateOutputPath);
     try {
       Files.createDirectories(outputPath.getParent());
     } catch (IOException e) {
