@@ -82,12 +82,23 @@ pub fn DafnyFactory() -> ExtendableResourceRef {
     name: &str
   ) -> ExtendableResourceRef
   {
-    client.create_extendable_resource()
-      .name(name)
-      .send()
-      .await
-      .unwrap()
-      .output()
+    let x1 = client.create_extendable_resource();
+    eprintln!("\n x1 : {:?}\n", x1);
+    let x2 = x1.name(name);
+    eprintln!("\n x2 : {:?}\n", x2);
+    let x3 = x2.send();
+    eprintln!("\n x3 \n");
+    let x4 = x3.await;
+    eprintln!("\n x4 \n");
+    let x5 = x4.unwrap();
+    eprintln!("\n x5 \n");
+    x5.output()
+    // client.create_extendable_resource()
+    //   .name(name)
+    //   .send()
+    //   .await
+    //   .unwrap()
+    //   .output()
   }
 
   pub async fn TestNoneUseExtendableResource(
