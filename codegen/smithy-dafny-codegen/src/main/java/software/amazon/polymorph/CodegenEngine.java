@@ -260,7 +260,7 @@ public class CodegenEngine {
 
     if (awsSdkStyle) {
       if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
-        writeTemplatedFile("src/$forSDK:LIndex.dfy", parameters);
+        writeTemplatedFile("src/$forSDK;LIndex.dfy", parameters);
       }
     } else {
       final String serviceConfig = serviceShape
@@ -270,17 +270,17 @@ public class CodegenEngine {
       parameters.put("serviceConfig", serviceConfig);
 
       if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
-        writeTemplatedFile("src/$forLocalService:LIndex.dfy", parameters);
+        writeTemplatedFile("src/$forLocalService;LIndex.dfy", parameters);
         if (localServiceTest) {
-          writeTemplatedFile("src/Wrapped$service:LImpl.dfy", parameters);
+          writeTemplatedFile("src/Wrapped$service;LImpl.dfy", parameters);
         }
       }
 
       if (generationAspects.contains(GenerationAspect.IMPL_STUB)) {
         generateDafnySkeleton(outputDir);
-        writeTemplatedFile("test/$sdkID:LImplTest.dfy", parameters);
+        writeTemplatedFile("test/$sdkID;LImplTest.dfy", parameters);
         if (localServiceTest) {
-          writeTemplatedFile("test/Wrapped$sdkID:LTest.dfy", parameters);
+          writeTemplatedFile("test/Wrapped$sdkID;LTest.dfy", parameters);
         }
       }
     }
@@ -435,7 +435,7 @@ public class CodegenEngine {
     if (awsSdkStyle) {
       if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
         writeTemplatedFile(
-          "runtimes/java/$forSDK:Lbuild.gradle.kts",
+          "runtimes/java/$forSDK;Lbuild.gradle.kts",
           parameters
         );
       }
@@ -449,19 +449,19 @@ public class CodegenEngine {
 
       if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
         writeTemplatedFile(
-          "runtimes/java/$forLocalService:Lbuild.gradle.kts",
+          "runtimes/java/$forLocalService;Lbuild.gradle.kts",
           parameters
         );
       }
 
       if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
         writeTemplatedFile(
-          "runtimes/java/src/main/java/Dafny/$namespaceDir:L/__default.java",
+          "runtimes/java/src/main/java/Dafny/$namespaceDir;L/__default.java",
           parameters
         );
         if (localServiceTest) {
           writeTemplatedFile(
-            "runtimes/java/src/test/java/$namespaceDir:L/internaldafny/wrapped/__default.java",
+            "runtimes/java/src/test/java/$namespaceDir;L/internaldafny/wrapped/__default.java",
             parameters
           );
         }
@@ -571,10 +571,10 @@ public class CodegenEngine {
 
     if (awsSdkStyle) {
       if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
-        writeTemplatedFile("runtimes/net/$forSDK:L$sdkID:L.csproj", parameters);
+        writeTemplatedFile("runtimes/net/$forSDK;L$sdkID;L.csproj", parameters);
       }
       if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
-        writeTemplatedFile("runtimes/net/Extern/$sdkID:LClient.cs", parameters);
+        writeTemplatedFile("runtimes/net/Extern/$sdkID;LClient.cs", parameters);
       }
     } else {
       final String serviceConfig = serviceShape
@@ -591,14 +591,14 @@ public class CodegenEngine {
 
       if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
         writeTemplatedFile(
-          "runtimes/net/$forLocalService:L$sdkID:L.csproj",
+          "runtimes/net/$forLocalService;L$sdkID;L.csproj",
           parameters
         );
       }
       if (localServiceTest) {
         if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
           writeTemplatedFile(
-            "runtimes/net/Extern/Wrapped$sdkID:LService.cs",
+            "runtimes/net/Extern/Wrapped$sdkID;LService.cs",
             parameters
           );
         }
@@ -606,7 +606,7 @@ public class CodegenEngine {
     }
 
     if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
-      writeTemplatedFile("runtimes/net/tests/$sdkID:LTest.csproj", parameters);
+      writeTemplatedFile("runtimes/net/tests/$sdkID;LTest.csproj", parameters);
     }
   }
 
