@@ -466,6 +466,7 @@ _polymorph_go: _polymorph _mv_polymorph_go _gomod_init
 
 _gomod_init:
 	@(cd $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go && \
+		#TODO: Think about handwritten go.mod
 		if [ -f go.mod ]; then rm -f go.mod; fi && \
 		go mod init $(GO_MODULE_NAME) && \
 		echo "require github.com/dafny-lang/DafnyStandardLibGo v0.0.0" >> go.mod && \
