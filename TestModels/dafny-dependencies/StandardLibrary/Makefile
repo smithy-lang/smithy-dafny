@@ -97,7 +97,7 @@ transpile_implementation:
 		-spillTargetCode:3 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:0 \
+		-compileSuffix:1 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
