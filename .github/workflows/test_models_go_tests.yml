@@ -100,7 +100,7 @@ jobs:
           make polymorph_go 
           cd ./runtimes/go/ImplementationFromDafny-go/
           go mod init github.com/dafny-lang/DafnyStandardLibGo
-          
+          # TODO: This should handwritten (in the makefile or something)          
           echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod;
 
       - name: Generate Polymorph Dafny and Go code
