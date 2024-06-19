@@ -121,7 +121,6 @@ public class LocalServiceGenerator implements Runnable {
                                                                            : ", params %s.%s".formatted(SmithyNameResolver.smithyTypesNamespace(inputShape), inputShape.toShapeId().getName());
             final var outputType = outputShape.hasTrait(UnitTypeTrait.class) ? ""
                                                                              : "*%s.%s,".formatted(SmithyNameResolver.smithyTypesNamespace(outputShape), outputShape.toShapeId().getName());
-            System.out.println(SmithyNameResolver.smithyTypesNamespace(inputShape));
             String validationCheck = "";
             if(!inputType.equals("")) {
                 validationCheck = """
