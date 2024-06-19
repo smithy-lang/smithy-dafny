@@ -388,6 +388,7 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   // Other primitives/examples todo:
   //  * Promise-like single-use Action<T, ()> to capture a value for reading later
+  //  * datatype/codatatype-based enumerations
   //  * Eliminate all the (!new) restrictions - look into "older" parameters?
   //    * How to state the invariant that a constructor as an action creates a new object every time?
   //      * Lemma that takes produced as input, instead of forall produced?
