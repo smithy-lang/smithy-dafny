@@ -1,7 +1,7 @@
 # This workflow performs tests in Java.
 name: Library Java tests
 
-'on':
+on:
   workflow_call:
     inputs:
       dafny:
@@ -124,4 +124,3 @@ jobs:
         shell: bash
         run: |
           make test_java
-Transform: AWS::Serverless-2016-10-31
