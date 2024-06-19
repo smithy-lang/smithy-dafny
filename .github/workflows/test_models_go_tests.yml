@@ -77,7 +77,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.19'
+          go-version: '1.21'
 
       - name: Install Go imports
         run: |
@@ -100,6 +100,7 @@ jobs:
           make polymorph_go 
           cd ./runtimes/go/ImplementationFromDafny-go/
           go mod init github.com/dafny-lang/DafnyStandardLibGo
+          
           echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod;
 
       - name: Generate Polymorph Dafny and Go code
