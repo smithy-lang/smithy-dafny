@@ -45,7 +45,7 @@ impl ExtendableResource for MyResource {
             crate::error::simple_extendable_resources_exception::SimpleExtendableResourcesException
         {
             message : "Hard Coded Exception in src/dafny".to_string(),
-            meta : ::std::default::Default::default()    
+            meta : ::std::default::Default::default()
     }))
     }
 }
@@ -177,7 +177,7 @@ fn CheckModeledError(
     assert_eq!(e,
         crate::error::simple_extendable_resources_exception::SimpleExtendableResourcesException {
             message : "Hard Coded Exception in src/dafny".to_string(),
-            meta : ::std::default::Default::default()    
+            meta : ::std::default::Default::default()
         }
     );
 }
