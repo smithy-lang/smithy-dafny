@@ -1,10 +1,6 @@
 name: Library Go tests
 
-on:
-  pull_request:
-  push:
-    branches:
-      - '*'
+on: ["pull_request", "push"]
 
 jobs:
   test_go:
