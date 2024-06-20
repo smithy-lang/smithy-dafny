@@ -1,11 +1,4 @@
-import standard_library.internaldafny.generated.UTF8
-
-
-from standard_library.internaldafny.generated.UTF8 import *
-import _dafny
-import struct
-
-'''
+"""
 Extern UTF8 encode and decode methods.
 
 Note:
@@ -14,7 +7,13 @@ However, these encode/decode methods are expected to handle surrogates (e.g. "\u
 To work around this, we encode Dafny strings into UTF-16-LE (little endian)
 and decode them before encoding into UTF-8 (`_strict_tostring`).
 To decode, we reverse the encode step. (`_reverse_strict_tostring`)
-'''
+"""
+import _dafny
+import struct
+
+import standard_library.internaldafny.generated.UTF8
+from standard_library.internaldafny.generated.UTF8 import *
+
 
 # Extend the Dafny-generated class with our extern methods
 class default__(standard_library.internaldafny.generated.UTF8.default__):
@@ -51,13 +50,21 @@ class default__(standard_library.internaldafny.generated.UTF8.default__):
     while `replace` will fail silently.
     :param s:
     :return:
-    '''
-    return b''.join([c.to_bytes(2, 'little') if isinstance(c, int) else ord(c).to_bytes(2, 'little') for c in dafny_ascii_string]).decode("utf-16-le", errors = 'strict')
+    """
+    return b''\
+      .join([c.to_bytes(2, 'little') \
+             if isinstance(c, int) \
+             else ord(c).to_bytes(2, 'little') \
+             for c in dafny_ascii_string])\
+      .decode("utf-16-le", errors = 'strict')
 
   @staticmethod
   def Decode(s):
     try:
+      a = bytes(s)
+      print(f"{a=}")
       utf8_str = bytes(s).decode('utf-8')
+      print(f"{utf8_str=}")
       # out = []
       # for a in s:
       #   out.append(a.to_bytes(2, "little"))
@@ -66,6 +73,7 @@ class default__(standard_library.internaldafny.generated.UTF8.default__):
       #   out2.append(a.decode("utf-8"))
       # utf8_str = ''.join(out2)
       unicode_escaped_utf8_str = default__._reverse_strict_tostring(utf8_str)
+      print(f"{unicode_escaped_utf8_str=}")
       return Wrappers.Result_Success(unicode_escaped_utf8_str)
     # Catch both UnicodeEncodeError and UnicodeDecodeError.
     # The `try` block involves both encoding and decoding.
@@ -77,12 +85,12 @@ class default__(standard_library.internaldafny.generated.UTF8.default__):
 
   @staticmethod
   def _reverse_strict_tostring(utf8_str):
-    '''
+    """
     Converts a string into a Dafny Seq of unicode-escaped ASCII characters.
     This is the inverse of the `_strict_tostring` function in this file.
     :param s:
     :return:
-    '''
+    """
     utf16_bytes = utf8_str.encode("utf-16-le", errors = "strict")
     out = []
     # len(b)/2 is an integer by construction of UTF-16 encoding (2 bytes per encoded character)
@@ -97,4 +105,5 @@ class default__(standard_library.internaldafny.generated.UTF8.default__):
       out.append(char_representation)
     return _dafny.Seq(out)
 
+# Export externs
 standard_library.internaldafny.generated.UTF8.default__ = default__

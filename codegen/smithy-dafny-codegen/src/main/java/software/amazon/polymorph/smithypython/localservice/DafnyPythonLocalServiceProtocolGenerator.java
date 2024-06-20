@@ -301,7 +301,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             writer.write(
                 """
           if input.IsFailure():
-              return await _deserialize_error(input.error)
+              return _deserialize_error(input.error)
           return $L
           """,
                 output);
@@ -353,7 +353,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           writer.addImport(".errors", "CollectionOfErrors");
           writer.addStdlibImport("_dafny");
           writer.openBlock(
-              "async def _deserialize_error(error: Error) -> ServiceError:",
+              "def _deserialize_error(error: Error) -> ServiceError:",
               "",
               () -> {
                 writer.write(
@@ -363,7 +363,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                 elif error.is_CollectionOfErrors:
                     return CollectionOfErrors(
                         message=_dafny.string_of(error.message),
-                        list=[await _deserialize_error(dafny_e) for dafny_e in error.list],
+                        list=[_deserialize_error(dafny_e) for dafny_e in error.list],
                     )""");
 
                 // Write converters for errors modelled on this local service
@@ -477,6 +477,8 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           throw new IllegalArgumentException(
               "Only 1 service-modelled error per service supported");
         }
+
+        System.out.println(serviceDependencyShapeId);
 
         ShapeId serviceDependencyError = serviceDependencyErrors.get(0);
 

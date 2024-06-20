@@ -13,10 +13,10 @@ import WrappedSimpleExtendableResources
 class default__(WrappedSimpleExtendableResources.default__):
 
     @staticmethod
-    def WrappedSimpleExtenendableResources(config):
+    def WrappedSimpleExtendableResources(config):
         wrapped_config = dafny_config_to_smithy_config(config)
-        impl = SimpleResources(wrapped_config)
-        wrapped_client = SimpleResourcesShim(impl)
+        impl = SimpleExtendableResources(wrapped_config)
+        wrapped_client = SimpleExtendableResourcesShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
 WrappedSimpleExtendableResources.default__ = default__

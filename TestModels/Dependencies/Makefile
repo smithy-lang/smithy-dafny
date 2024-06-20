@@ -5,8 +5,6 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-PYTHON_MODULE_NAME=simple_dependencies
-
 PROJECT_SERVICES := \
 	SimpleDependencies
 
@@ -42,4 +40,19 @@ clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
 
+# Python
 
+PYTHON_MODULE_NAME=simple_dependencies
+
+PYTHON_DEPENDENCY_MODULE_NAMES := \
+	--dependency-module-name=simple.resources=simple_resources \
+	--dependency-module-name=simple.errors=simple_errors \
+	--dependency-module-name=simple.extendable.resources=simple_extendable_resources \
+	--dependency-module-name=simple.constraints=simple_constraints
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr \
+    --translation-record ../Resource/runtimes/python/src/simple_resources/internaldafny/generated/dafny_src-py.dtr \
+    --translation-record ../Errors/runtimes/python/src/simple_errors/internaldafny/generated/dafny_src-py.dtr \
+    --translation-record ../Extendable/runtimes/python/src/simple_extendable_resources/internaldafny/generated/dafny_src-py.dtr \
+    --translation-record ../Constraints/runtimes/python/src/simple_constraints/internaldafny/generated/dafny_src-py.dtr
