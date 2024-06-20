@@ -8,6 +8,14 @@ pub trait ExtendableResource {
         crate::operation::get_extendable_resource_data::GetExtendableResourceDataOutput,
         crate::operation::get_extendable_resource_data::GetExtendableResourceDataError,
     >;
+    fn always_modeled_error(
+        &mut self,
+        input: crate::operation::always_modeled_error::AlwaysModeledErrorInput,
+    ) -> Result<
+        crate::operation::always_modeled_error::AlwaysModeledErrorOutput,
+        crate::operation::always_modeled_error::AlwaysModeledErrorError,
+    >;
 }
 
-pub type ExtendableResourceRef = ::std::rc::Rc<std::cell::RefCell<dyn ExtendableResource>>;
+pub trait ExtendableResourceDebug: ExtendableResource + std::fmt::Debug {}
+pub type ExtendableResourceRef = ::std::rc::Rc<std::cell::RefCell<dyn ExtendableResourceDebug>>;

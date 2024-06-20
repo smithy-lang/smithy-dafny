@@ -11,4 +11,5 @@ pub use ::aws_smithy_types::error::display::DisplayErrorContext;
 pub use ::aws_smithy_types::error::metadata::ErrorMetadata;
 pub use ::aws_smithy_types::error::metadata::ProvideErrorMetadata;
 
-pub(crate) mod sealed_unhandled;
+pub mod sealed_unhandled;
+pub mod simple_extendable_resources_exception;

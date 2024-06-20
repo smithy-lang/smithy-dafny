@@ -1,13 +1,18 @@
 use simple_extendable::operation::create_extendable_resource::*;
 use simple_extendable::operation::get_extendable_resource_data::*;
 use simple_extendable::types::extendable_resource::ExtendableResourceRef;
+use simple_extendable::types::extendable_resource::ExtendableResourceDebug;
 use simple_extendable::types::*;
 use simple_extendable::*;
+
 
 const TEST_RESOURCE_NAME: &str = "Dafny-Test";
 const DEFAULT_RESOURCE_NAME: &str = "dafny-default";
 
+#[derive(Debug)]
 struct MyResource {}
+impl ExtendableResourceDebug for MyResource {}
+
 impl ExtendableResource for MyResource {
     fn get_extendable_resource_data(
         &mut self,
@@ -31,6 +36,20 @@ impl ExtendableResource for MyResource {
             .build()
             .unwrap()
         )
+    }
+    fn always_modeled_error(
+        &mut self,
+        input: crate::operation::always_modeled_error::AlwaysModeledErrorInput,
+    ) -> Result<
+        crate::operation::always_modeled_error::AlwaysModeledErrorOutput,
+        crate::operation::always_modeled_error::AlwaysModeledErrorError,
+    > {
+        Err(crate::operation::always_modeled_error::AlwaysModeledErrorError::SimpleExtendableResourcesException(
+            crate::error::simple_extendable_resources_exception::SimpleExtendableResourcesException
+        {
+            message : "Hard Coded Exception in src/dafny".to_string(),
+            meta : ::std::default::Default::default()    
+    }))
     }
 }
 
@@ -131,11 +150,47 @@ async fn TestNativeResource() {
     let resource: ExtendableResourceRef = DafnyFactory();
     TestSomeGetResourceData(resource.clone()).await;
     TestNoneGetResourceData(resource.clone()).await;
-    //   TestAlwaysModeledError(resource);
+    TestAlwaysModeledError(resource);
     //   TestAlwaysMultipleErrors(resource);
     //   TestAlwaysOpaqueError(resource);
     //   TestNoneAlwaysOpaqueError(resource);
 }
+
+fn TestAlwaysModeledError(
+    resource: ExtendableResourceRef
+  )
+  {
+    let dataInput = crate::operation::always_modeled_error::AlwaysModeledErrorInput::builder()
+        .value("Some".to_string())
+        .build()
+        .unwrap();
+
+    let dataOutput = resource
+    .borrow_mut()
+    .always_modeled_error(dataInput);
+
+    CheckModeledError(dataOutput);
+  }
+
+  fn CheckModeledError(
+    errorOutput: Result<crate::operation::always_modeled_error::AlwaysModeledErrorOutput, crate::operation::always_modeled_error::AlwaysModeledErrorError>
+  )
+  {
+    assert!(errorOutput.is_err());
+    let actualError = errorOutput.unwrap_err();
+    match actualError {
+        crate::operation::always_modeled_error::AlwaysModeledErrorError::SimpleExtendableResourcesException(e) => {
+    assert_eq!(e,
+        crate::error::simple_extendable_resources_exception::SimpleExtendableResourcesException {
+            message : "Hard Coded Exception in src/dafny".to_string(),
+            meta : ::std::default::Default::default()    
+        }
+    );
+}
+        _ => assert!(false)
+    }
+  }
+
 
 async fn TestSomeGetResourceData(resource: ExtendableResourceRef) {
     let dataInput = allSome();

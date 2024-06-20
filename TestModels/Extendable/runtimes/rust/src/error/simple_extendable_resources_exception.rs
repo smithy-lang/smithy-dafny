@@ -15,8 +15,9 @@ variable wildcard pattern and check `.code()`:
  \
 See [`ProvideErrorMetadata`](::aws_smithy_types::error::metadata::ProvideErrorMetadata) for what information is available for the error."
 )]
-#[derive(::std::fmt::Debug)]
-pub struct Unhandled {
-    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
-    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
+#[derive(::std::clone::Clone, ::std::fmt::Debug, ::std::cmp::PartialEq)]
+pub struct SimpleExtendableResourcesException {
+    pub message: String,
+    pub meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
 }
+// simple_extendable_resources_exception

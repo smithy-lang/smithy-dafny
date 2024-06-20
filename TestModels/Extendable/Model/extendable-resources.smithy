@@ -136,7 +136,7 @@ operation AlwaysMultipleErrors {
   output: GetExtendableResourceErrorsOutput,
 }
 
-// This operation MUST ==> native unmodled error
+// This operation MUST ==> native unmodeled error
 operation AlwaysOpaqueError {
   input: GetExtendableResourceErrorsInput,
   output: GetExtendableResourceErrorsOutput,
