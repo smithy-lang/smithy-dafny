@@ -20,6 +20,11 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
+import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
+import static software.amazon.polymorph.smithygo.nameresolver.Constants.DOT;
+import static software.amazon.polymorph.smithygo.nameresolver.Constants.INTERNAL_DAFNY;
+import static software.amazon.polymorph.smithygo.nameresolver.Constants.INTERNAL_DAFNY_TYPES;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -469,7 +474,19 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                                         return CollectionOfErrors_Input_ToDafny(err.($L.CollectionOfErrors))
                                                 
                                                     default:
-                                                        return OpaqueError_Input_ToDafny(err.($L.OpaqueError))
+                                                        // TODO: Is changing from the commented code to this new one reasonable?
+                                                        // return OpaqueError_Input_ToDafny(err.(*simpleconstraintstypes.OpaqueError))
+
+                                                        // TODO: why is err a pointer?
+                                                        error, ok := err.(*$L.OpaqueError)
+
+                                                        if !ok {
+                                                            panic("Error is not an OpaqueError")
+                                                        }
+                                                        if error == nil {
+                                                            panic("Error is nil")
+                                                        }
+                                                        return OpaqueError_Input_ToDafny(*error)
                                                     }
                                                 }
                                                 """, DafnyNameResolver.dafnyTypesNamespace(serviceShape),

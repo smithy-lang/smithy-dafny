@@ -18,6 +18,10 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 NET_SRC_INDEX=src/replaces/net
 NET_TEST_INDEX=test/replaces/net
 
+GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/LanguageSpecificLogic"
+
+PROJECT_DTR := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 

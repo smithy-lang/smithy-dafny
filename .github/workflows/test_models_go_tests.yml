@@ -1,0 +1,118 @@
+name: Library Go tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  test_go:
+    strategy:
+      fail-fast: false
+      matrix:
+        library: [
+          # TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+          TestModels/Aggregate,
+          # TestModels/AggregateReferences,
+          TestModels/CodegenPatches,
+          TestModels/Constraints,
+          TestModels/Constructor,
+          # TestModels/Dependencies,
+          TestModels/Errors,
+          TestModels/Extendable,
+          TestModels/Extern,
+          # TestModels/LanguageSpecificLogic,
+          # TestModels/LocalService,
+          # TestModels/MultipleModels,
+          TestModels/Refinement,
+          TestModels/Resource,
+          # TestModels/SimpleTypes/BigDecimal,
+          # TestModels/SimpleTypes/BigInteger,
+          TestModels/SimpleTypes/SimpleBlob,
+          TestModels/SimpleTypes/SimpleBoolean,
+          # TestModels/SimpleTypes/SimpleByte,
+          TestModels/SimpleTypes/SimpleDouble,
+          TestModels/SimpleTypes/SimpleEnum,
+          # TestModels/SimpleTypes/SimpleEnumV2,
+          # TestModels/SimpleTypes/SimpleFloat,
+          TestModels/SimpleTypes/SimpleInteger,
+          TestModels/SimpleTypes/SimpleLong,
+          # TestModels/SimpleTypes/SimpleShort,
+          TestModels/SimpleTypes/SimpleString,
+          # TestModels/SimpleTypes/SimpleTimestamp,
+          # TestModels/Union,
+          # TestModels/aws-sdks/ddb,
+          # TestModels/aws-sdks/kms
+        ]
+    runs-on: "macos-12"
+    steps:
+      - uses: actions/checkout@v2
+
+      # - name: Setup Dafny 4.5.0
+      #   uses: dafny-lang/setup-dafny-action@v1.7.0
+      #   with:
+      #     dafny-version: 4.5.0
+      # TODO: Setup Dafny once its released
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Build Dafny from source
+        run: |
+          git clone https://github.com/dafny-lang/dafny.git --recurse-submodules
+          cd dafny
+          make exe
+      
+      - name: Install Z3 version 4.12.1
+        run: |
+          cd $GITHUB_WORKSPACE/dafny
+          make z3-mac
+
+      - name: Add Dafny to PATH
+        run: |
+          echo "$GITHUB_WORKSPACE/dafny/Scripts" >> $GITHUB_PATH
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.21'
+
+      - name: Install Go imports
+        run: |
+          go install golang.org/x/tools/cmd/goimports@latest
+
+      - name: Add go mod to Dafny Runtime Go
+        shell: bash
+        working-directory: ./DafnyRuntimeGo
+        run: | 
+          go mod init github.com/dafny-lang/DafnyRuntimeGo
+          go mod tidy
+
+      - name: polymorph dafny dependencies
+        shell: bash
+        working-directory: ./TestModels/dafny-dependencies/StandardLibrary
+        run: |
+          export DAFNY_VERSION=4.6
+          make polymorph_dafny
+          make transpile_go
+          make polymorph_go 
+          cd ./runtimes/go/ImplementationFromDafny-go/
+          go mod init github.com/dafny-lang/DafnyStandardLibGo
+          # TODO: This should handwritten (in the makefile or something)          
+          echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod;
+
+      - name: Generate Polymorph Dafny and Go code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          export DAFNY_VERSION=4.6
+          make polymorph_dafny
+          sh ./removeDotFromExtern.sh
+          make transpile_go
+          make polymorph_go
+
+          goimports -w runtimes/go/
+          cd runtimes/go/TestsFromDafny-go/
+          go run TestsFromDafny.go

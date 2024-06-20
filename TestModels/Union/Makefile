@@ -16,6 +16,11 @@ SERVICE_DEPS_SimpleUnion :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+PROJECT_DTR := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+
+GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/Union"
+
 # This project has no dependencies
 # DEPENDENT-MODELS:=
 

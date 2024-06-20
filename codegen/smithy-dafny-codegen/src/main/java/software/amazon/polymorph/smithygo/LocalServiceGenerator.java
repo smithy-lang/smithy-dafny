@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithygo.codegen.GoDelegator;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.StructureGenerator;
+import software.amazon.polymorph.smithygo.codegen.UnionGenerator;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ExtendableTrait;
@@ -70,6 +71,11 @@ public class LocalServiceGenerator implements Runnable {
         writerDelegator.useFileWriter("%s/types.go".formatted(SmithyNameResolver.smithyTypesNamespace(service)), SmithyNameResolver.smithyTypesNamespace(service), writer1 -> {
             new StructureGenerator(context, writer1,
                                    model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
+            model.getUnionShapes().stream()
+            .filter(unionShape -> unionShape.getId().getNamespace().equals(service.getId().getNamespace()))
+            .forEach(unionShape -> {
+                new UnionGenerator(model, symbolProvider, unionShape).generateUnion(writer1);
+            });
         });
 
         writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(context.settings().getService().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(service));
@@ -115,7 +121,22 @@ public class LocalServiceGenerator implements Runnable {
                                                                            : ", params %s.%s".formatted(SmithyNameResolver.smithyTypesNamespace(inputShape), inputShape.toShapeId().getName());
             final var outputType = outputShape.hasTrait(UnitTypeTrait.class) ? ""
                                                                              : "*%s.%s,".formatted(SmithyNameResolver.smithyTypesNamespace(outputShape), outputShape.toShapeId().getName());
-
+            String validationCheck = "";
+            if(!inputType.equals("")) {
+                validationCheck = """
+                    err := params.Validate()
+                    if err != nil {
+                        opaqueErr := &%s.OpaqueError{
+                            ErrObject: err,
+                        }
+                """.formatted(SmithyNameResolver.smithyTypesNamespace(inputShape));
+                if(outputType.equals("")) {
+                    validationCheck += "return opaqueErr }";
+                }
+                else{
+                    validationCheck += "return nil, opaqueErr }";
+                }
+            }
             String baseClientCall;
             if (inputShape.hasTrait(UnitTypeTrait.class)) {
                 baseClientCall = "var dafny_response = client.DafnyClient.%s()".formatted(operationShape.getId().getName());
@@ -140,9 +161,9 @@ public class LocalServiceGenerator implements Runnable {
                 returnError = "return nil,";
             }
 
-
             writer.write("""
                                    func (client *$T) $L(ctx context.Context $L) ($L error) {
+                                       $L
                                        $L
                                        if (dafny_response.Is_Failure()) {
                                            err := dafny_response.Dtor_error().($L.Error);
@@ -154,6 +175,7 @@ public class LocalServiceGenerator implements Runnable {
                          serviceSymbol,
                          operationShape.getId().getName(),
                          inputType, outputType,
+                         validationCheck,
                          baseClientCall, DafnyNameResolver.dafnyTypesNamespace(service), returnError, returnResponse
             );
         });

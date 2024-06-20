@@ -207,7 +207,7 @@ transpile_implementation:
 
 transpile_implementation_new: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation_new:
-	find ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+	find ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate go \
 		--stdin \
 		--no-verify \
@@ -254,7 +254,7 @@ transpile_test:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
+		-compileSuffix:0 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
@@ -263,7 +263,7 @@ transpile_test:
 		$(TRANSPILE_DEPENDENCIES) \
 
 transpile_test_new:
-	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate go \
 		--stdin \
 		--no-verify \
@@ -462,8 +462,32 @@ polymorph_go:
 _polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_go: MODULE_NAME=--module-name $(GO_MODULE_NAME)
 _polymorph_go: DEPENDENCY_MODULE_NAMES = $(GO_DEPENDENCY_MODULE_NAMES)
-_polymorph_go: _polymorph
+_polymorph_go: _polymorph _mv_polymorph_go _gomod_init
 
+_gomod_init:
+	#TODO: Think about handwritten go.mod
+	@(cd $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go && \
+		if [ -f go.mod ]; then rm -f go.mod; fi && \
+		go mod init $(GO_MODULE_NAME) && \
+		echo "require github.com/dafny-lang/DafnyStandardLibGo v0.0.0" >> go.mod && \
+		echo "require github.com/dafny-lang/DafnyRuntimeGo v0.0.0" >> go.mod && \
+		if [ $$(basename $$(dirname $(LIBRARY_ROOT))) == "SimpleTypes" ]; then \
+			echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../../DafnyRuntimeGo/" >> go.mod; \
+			echo "replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/" >> go.mod; \
+		else \
+			echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod; \
+			echo "replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/" >> go.mod; \
+		fi && \
+		go mod tidy)
+
+_mv_polymorph_go:
+	@for dir in $(LIBRARY_ROOT)/runtimes/go/* ; do \
+        if [ "$$(basename $$dir)" != "ImplementationFromDafny-go" ] && [ "$$(basename $$dir)" != "TestsFromDafny-go" ]; then \
+			cp -Rf $$dir runtimes/go/ImplementationFromDafny-go/; \
+			cp -Rf $$dir runtimes/go/TestsFromDafny-go; \
+			rm -r $$dir; \
+		fi \
+    done
 ########################## .NET targets
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
@@ -621,7 +645,7 @@ _clean:
 
 clean: _clean
 
-transpile_go: transpile_implementation_go transpile_test_go transpile_dependencies_go migrate_go
+transpile_go: transpile_implementation_go transpile_test_go transpile_dependencies_go
 
 transpile_implementation_go: TARGET=go
 transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
@@ -641,10 +665,6 @@ transpile_dependencies_go: transpile_dependencies
 clean_go:
 	rm -rf $(LIBRARY_ROOT)/runtimes/go/ImplementationFromDafny-go
 	rm -rf $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go
-
-migrate_go:
-	cd $(LIBRARY_ROOT)/runtimes/go
-	./run_go_tooling_migrations.sh
 
 ########################## local testing targets
 

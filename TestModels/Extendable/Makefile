@@ -16,7 +16,7 @@ SERVICE_DEPS_SimpleExtendableResources :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-GO_MODULE_NAME="github.com/ShubhamChaturvedi7/Extendable"
+GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/Extendable"
 
 
 PROJECT_DTR := \

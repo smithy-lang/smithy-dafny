@@ -27,9 +27,15 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
@@ -164,11 +170,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     // TODO: smithy-dafny-conversion library
     @Override
     public String listShape(ListShape shape) {
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         StringBuilder builder = new StringBuilder();
 
         MemberShape memberShape = shape.getMember();
-        final String typeName = context.symbolProvider().toSymbol(memberShape).getName();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+        final String typeName = targetShape.isStructureShape() ? context.symbolProvider().toSymbol(memberShape).getFullName() : context.symbolProvider().toSymbol(memberShape).getName();
         builder.append("""
                        func() []%s{
                        var fieldValue []%s
@@ -193,6 +200,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String mapShape(MapShape shape) {
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         StringBuilder builder = new StringBuilder();
 
         MemberShape keyMemberShape = shape.getKey();
@@ -200,6 +208,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         MemberShape valueMemberShape = shape.getValue();
         final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
         final var type = context.symbolProvider().toSymbol(valueTargetShape).getName();
+
         builder.append("""
                                func() map[string]%s {
                                var m map[string]%s = make(map[string]%s)
@@ -226,6 +235,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String booleanShape(BooleanShape shape) {
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         return """
                 func() *bool {
                     var b bool
@@ -263,6 +273,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 	}()""".formatted(SmithyNameResolver.smithyTypesNamespace(shape), context.symbolProvider().toSymbol(shape).getName(), SmithyNameResolver.smithyTypesNamespace(shape), context.symbolProvider().toSymbol(shape).getName(), dataSource, dataSource, DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)), DafnyNameResolver.getDafnyCompanionStructType(shape, context.symbolProvider().toSymbol(shape)),
                   DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)));
         }
+
         var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? "uint8" : "dafny.Char";
         return """
                 func() (*string) {
@@ -283,7 +294,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String integerShape(IntegerShape shape) {
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
+
         if ((boolean)isPointable) {
             return ("""
                     func() *int32 {
@@ -291,16 +304,22 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                         if %s == nil {
                             return nil
                         }
-                        b = %s.(int32)
+                        b = %s.(int32)   
                         return &b
-                    }()""").formatted(dataSource, dataSource);
-        } else {
-            return "%s.(int32)".formatted(dataSource);
+                    }()""".formatted(dataSource, dataSource));
+        }else {
+            return """
+                func() int32 {
+                    var b = %s.(int32)
+                    return b
+                }()
+                    """.formatted(dataSource);
         }
     }
 
     @Override
     public String longShape(LongShape shape) {
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         return ("""
                 func() *int64 {
                     var b int64
@@ -335,7 +354,18 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String unionShape(UnionShape shape) {
-        return "Unionnnnnn";
+        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+        return """
+            func () types.%s {
+                var union types.%s
+                union = &types.MyUnionMemberIntegerValue{
+                    Value: %s.(int32),
+                }
+                return union
+            }()""".formatted(
+                shape.toShapeId().getName(),
+                shape.toShapeId().getName(),
+                dataSource);
     }
 
     @Override
