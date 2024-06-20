@@ -1,12 +1,14 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import WrappedSimpleExternService
+# src imports
 from simple_dafnyextern.smithygenerated.simple_dafnyextern.client import SimpleExtern
 from simple_dafnyextern.smithygenerated.simple_dafnyextern.shim import SimpleExternShim
 from simple_dafnyextern.smithygenerated.simple_dafnyextern.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
+
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleExternService
 
 class default__(WrappedSimpleExternService.default__):
 

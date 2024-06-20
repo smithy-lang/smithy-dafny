@@ -11,6 +11,7 @@ import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.DocumentationTrait;
@@ -44,7 +45,9 @@ public class ReferencesFileWriter implements CustomFileWriter {
       ResourceShape resourceShape, GenerationContext codegenContext, PythonWriter writer) {
     if (shouldGenerateResourceForShape(resourceShape, codegenContext)) {
       generatedResourceShapes.add(resourceShape.getId());
-      generateResourceInterface(resourceShape, codegenContext, writer);
+      if (resourceShape.hasTrait(ExtendableTrait.class)) {
+          generateResourceInterface(resourceShape, codegenContext, writer);
+      }
       generateResourceImplementation(resourceShape, codegenContext, writer);
     }
   }

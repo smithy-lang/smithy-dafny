@@ -1,14 +1,16 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import simple_types_smithydouble_internaldafny_wrapped
+# src imports
 from simple_types_smithydouble.smithygenerated.simple_types_smithydouble.client import SimpleTypesDouble
 from simple_types_smithydouble.smithygenerated.simple_types_smithydouble.shim import SimpleDoubleShim
 from simple_types_smithydouble.smithygenerated.simple_types_smithydouble.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(simple_types_smithydouble_internaldafny_wrapped.default__):
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleTypesDouble
+
+class default__(WrappedSimpleTypesDouble.default__):
 
     @staticmethod
     def WrappedSimpleDouble(config):
@@ -17,5 +19,4 @@ class default__(simple_types_smithydouble_internaldafny_wrapped.default__):
         wrapped_client = SimpleDoubleShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-simple_types_smithydouble_internaldafny_wrapped.default__ = default__
+WrappedSimpleTypesDouble.default__ = default__

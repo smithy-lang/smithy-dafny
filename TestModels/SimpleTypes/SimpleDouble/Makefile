@@ -7,8 +7,6 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.smithyDouble
 
-PYTHON_MODULE_NAME=simple_types_smithydouble
-
 PROJECT_SERVICES := \
 	SimpleDouble
 
@@ -25,3 +23,10 @@ transpile_net_dependencies:
 
 format_net:
 	pushd runtimes/net && dotnet format && popd
+
+# Python
+
+PYTHON_MODULE_NAME=simple_types_smithydouble
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr

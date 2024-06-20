@@ -7,12 +7,4 @@
 from .internaldafny.generated import module_
 
 # Initialize externs
-from .internaldafny.extern import *
-
-# If this is the first Dafny module to load,
-# set this as the main module for the DafnyRuntime package
-try:
-    import module_
-except ImportError:
-    import sys
-    sys.modules["module_"] = module_
+from .internaldafny import extern

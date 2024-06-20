@@ -1,21 +1,22 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import simple_extendable_resources_internaldafny_wrapped
+# src imports
 from simple_extendable_resources.smithygenerated.simple_extendable_resources.client import SimpleExtendableResources
 from simple_extendable_resources.smithygenerated.simple_extendable_resources.shim import SimpleExtendableResourcesShim
 from simple_extendable_resources.smithygenerated.simple_extendable_resources.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(simple_extendable_resources_internaldafny_wrapped.default__):
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleExtendableResources
+
+class default__(WrappedSimpleExtendableResources.default__):
 
     @staticmethod
-    def WrappedSimpleExtendableResources(config):
+    def WrappedSimpleExtenendableResources(config):
         wrapped_config = dafny_config_to_smithy_config(config)
-        impl = SimpleExtendableResources(wrapped_config)
-        wrapped_client = SimpleExtendableResourcesShim(impl)
+        impl = SimpleResources(wrapped_config)
+        wrapped_client = SimpleResourcesShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-simple_extendable_resources_internaldafny_wrapped.default__ = default__
+WrappedSimpleExtendableResources.default__ = default__

@@ -7,8 +7,6 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.refinement
 
-PYTHON_MODULE_NAME=simple_refinement
-
 PROJECT_SERVICES := \
 	SimpleRefinement
 
@@ -21,3 +19,9 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+# Python
+
+PYTHON_MODULE_NAME=simple_refinement
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr

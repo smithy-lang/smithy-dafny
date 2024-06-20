@@ -1,14 +1,16 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import simple_types_smithyenum_internaldafny_wrapped
+# src imports
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.client import SimpleTypesEnum
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.shim import SimpleEnumShim
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(simple_types_smithyenum_internaldafny_wrapped.default__):
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleTypesEnumService
+
+class default__(WrappedSimpleTypesEnumService.default__):
 
     @staticmethod
     def WrappedSimpleEnum(config):
@@ -17,5 +19,4 @@ class default__(simple_types_smithyenum_internaldafny_wrapped.default__):
         wrapped_client = SimpleEnumShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-simple_types_smithyenum_internaldafny_wrapped.default__ = default__
+WrappedSimpleTypesEnumService.default__ = default__

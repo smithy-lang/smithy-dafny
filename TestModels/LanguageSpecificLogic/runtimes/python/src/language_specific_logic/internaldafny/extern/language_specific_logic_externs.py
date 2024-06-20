@@ -1,9 +1,10 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
-import LanguageSpecificLogicImpl
-import sys
-import standard_library.internaldafny.generated.Wrappers as Wrappers
 import _dafny
+import sys
+
+import language_specific_logic.internaldafny.generated.LanguageSpecificLogicImpl as LanguageSpecificLogicImpl
+import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 class default__(LanguageSpecificLogicImpl.default__):
     @staticmethod

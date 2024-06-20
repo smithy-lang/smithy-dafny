@@ -1,14 +1,16 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import language_specific_logic_internaldafny_wrapped
+# src imports
 from language_specific_logic.smithygenerated.language_specific_logic.client import LanguageSpecificLogic
 from language_specific_logic.smithygenerated.language_specific_logic.shim import LanguageSpecificLogicShim
 from language_specific_logic.smithygenerated.language_specific_logic.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(language_specific_logic_internaldafny_wrapped.default__):
+# test imports, not qualified since this isn't in a package
+import WrappedLanguageSpecificLogicService
+
+class default__(WrappedLanguageSpecificLogicService.default__):
 
     @staticmethod
     def WrappedLanguageSpecificLogic(config):
@@ -17,5 +19,4 @@ class default__(language_specific_logic_internaldafny_wrapped.default__):
         wrapped_client = LanguageSpecificLogicShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-language_specific_logic_internaldafny_wrapped.default__ = default__
+WrappedLanguageSpecificLogicService.default__ = default__

@@ -5,8 +5,6 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-PYTHON_MODULE_NAME=language_specific_logic
-
 PROJECT_SERVICES := \
 	LanguageSpecificLogic
 
@@ -25,3 +23,9 @@ PYTHON_TEST_INDEX=test/replaces/python
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+# Python
+
+PYTHON_MODULE_NAME=language_specific_logic
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr

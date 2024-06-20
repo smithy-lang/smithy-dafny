@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleMultiplemodelsDependencyprojectTypesWrapped.dfy"
 
-module {:extern "simple.multiplemodels.dependencyproject.internaldafny.wrapped"} WrappedSimpleMultiplemodelsDependencyprojectService refines WrappedAbstractSimpleMultiplemodelsDependencyprojectService {
-    import WrappedService = SimpleMultiplemodelsDependencyprojectService
+module WrappedDependencyProject refines WrappedAbstractDependencyProject {
+    import WrappedService = DependencyProject
     function method WrappedDefaultDependencyProjectConfig(): DependencyProjectConfig {
         DependencyProjectConfig
     }

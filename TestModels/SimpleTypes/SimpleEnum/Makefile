@@ -7,8 +7,6 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.smithyEnum
 
-PYTHON_MODULE_NAME=simple_types_smithyenum
-
 PROJECT_SERVICES := \
 	SimpleEnum
 
@@ -21,3 +19,9 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+# Python
+
+PYTHON_MODULE_NAME=simple_types_smithyenum
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr

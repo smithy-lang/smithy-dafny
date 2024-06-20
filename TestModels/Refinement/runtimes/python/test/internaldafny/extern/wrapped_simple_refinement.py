@@ -1,14 +1,16 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import simple_refinement_internaldafny_wrapped
+# src imports
 from simple_refinement.smithygenerated.simple_refinement.client import SimpleRefinement
 from simple_refinement.smithygenerated.simple_refinement.shim import SimpleRefinementShim
 from simple_refinement.smithygenerated.simple_refinement.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(simple_refinement_internaldafny_wrapped.default__):
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleRefinementService
+
+class default__(WrappedSimpleRefinementService.default__):
 
     @staticmethod
     def WrappedSimpleRefinement(config):
@@ -17,5 +19,4 @@ class default__(simple_refinement_internaldafny_wrapped.default__):
         wrapped_client = SimpleRefinementShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-simple_refinement_internaldafny_wrapped.default__ = default__
+WrappedSimpleRefinementService.default__ = default__

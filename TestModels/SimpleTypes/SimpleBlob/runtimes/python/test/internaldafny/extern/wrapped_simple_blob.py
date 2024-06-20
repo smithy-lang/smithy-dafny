@@ -1,14 +1,16 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import simple_types_blob_internaldafny_wrapped
+# src imports
 from simple_types_blob.smithygenerated.simple_types_blob.client import SimpleTypesBlob
 from simple_types_blob.smithygenerated.simple_types_blob.shim import SimpleBlobShim
 from simple_types_blob.smithygenerated.simple_types_blob.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(simple_types_blob_internaldafny_wrapped.default__):
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleTypesBlobService
+
+class default__(WrappedSimpleTypesBlobService.default__):
 
     @staticmethod
     def WrappedSimpleBlob(config):
@@ -17,5 +19,4 @@ class default__(simple_types_blob_internaldafny_wrapped.default__):
         wrapped_client = SimpleBlobShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-simple_types_blob_internaldafny_wrapped.default__ = default__
+WrappedSimpleTypesBlobService.default__ = default__
