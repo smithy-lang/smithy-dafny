@@ -18,4 +18,5 @@ pub trait ExtendableResource {
 }
 
 pub trait ExtendableResourceDebug: ExtendableResource + std::fmt::Debug {}
+impl<T> ExtendableResourceDebug for T where T: ExtendableResource + std::fmt::Debug {}
 pub type ExtendableResourceRef = ::std::rc::Rc<std::cell::RefCell<dyn ExtendableResourceDebug>>;

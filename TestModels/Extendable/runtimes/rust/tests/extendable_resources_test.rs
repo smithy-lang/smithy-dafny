@@ -1,17 +1,14 @@
 use simple_extendable::operation::create_extendable_resource::*;
 use simple_extendable::operation::get_extendable_resource_data::*;
 use simple_extendable::types::extendable_resource::ExtendableResourceRef;
-use simple_extendable::types::extendable_resource::ExtendableResourceDebug;
 use simple_extendable::types::*;
 use simple_extendable::*;
-
 
 const TEST_RESOURCE_NAME: &str = "Dafny-Test";
 const DEFAULT_RESOURCE_NAME: &str = "dafny-default";
 
 #[derive(Debug)]
 struct MyResource {}
-impl ExtendableResourceDebug for MyResource {}
 
 impl ExtendableResource for MyResource {
     fn get_extendable_resource_data(
@@ -156,26 +153,23 @@ async fn TestNativeResource() {
     //   TestNoneAlwaysOpaqueError(resource);
 }
 
-fn TestAlwaysModeledError(
-    resource: ExtendableResourceRef
-  )
-  {
+fn TestAlwaysModeledError(resource: ExtendableResourceRef) {
     let dataInput = crate::operation::always_modeled_error::AlwaysModeledErrorInput::builder()
         .value("Some".to_string())
         .build()
         .unwrap();
 
-    let dataOutput = resource
-    .borrow_mut()
-    .always_modeled_error(dataInput);
+    let dataOutput = resource.borrow_mut().always_modeled_error(dataInput);
 
     CheckModeledError(dataOutput);
-  }
+}
 
-  fn CheckModeledError(
-    errorOutput: Result<crate::operation::always_modeled_error::AlwaysModeledErrorOutput, crate::operation::always_modeled_error::AlwaysModeledErrorError>
-  )
-  {
+fn CheckModeledError(
+    errorOutput: Result<
+        crate::operation::always_modeled_error::AlwaysModeledErrorOutput,
+        crate::operation::always_modeled_error::AlwaysModeledErrorError,
+    >,
+) {
     assert!(errorOutput.is_err());
     let actualError = errorOutput.unwrap_err();
     match actualError {
@@ -189,8 +183,7 @@ fn TestAlwaysModeledError(
 }
         _ => assert!(false)
     }
-  }
-
+}
 
 async fn TestSomeGetResourceData(resource: ExtendableResourceRef) {
     let dataInput = allSome();
