@@ -1,3 +1,89 @@
+diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+index ca9dc612..0d923e39 100644
+--- b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
++++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+@@ -1,7 +1,7 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ pub use dafny_standard_library::implementation_from_dafny::*;
+-
++    
+ pub mod r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes {
+     #[derive(PartialEq, Clone)]
+     pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
+@@ -444,7 +444,7 @@ pub mod r#_SimpleLongImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(input.value().value());
++            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*input.value().value());
+             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
+             value: input.value().clone()
+           });
+@@ -457,7 +457,7 @@ pub mod r#_SimpleLongImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(res.value().value());
++            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*res.value().value());
+             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
+                 super::r#_Wrappers_Compile::Result::<
+                     ::std::rc::Rc<
+@@ -491,8 +491,8 @@ pub mod r#_SimpleLongImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(input.value().value());
+-            if !(input.value().value() == 33) {
++            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*input.value().value());
++            if !(input.value().value() == &33i64) {
+                 panic!("Halt")
+             };
+             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
+@@ -507,7 +507,7 @@ pub mod r#_SimpleLongImpl_Compile {
+             ) {
+                 panic!("Halt")
+             };
+-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(res.value().value());
++            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*res.value().value());
+             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
+                 super::r#_Wrappers_Compile::Result::<
+                     ::std::rc::Rc<
+@@ -522,10 +522,11 @@ pub mod r#_SimpleLongImpl_Compile {
+             return output.read();
+         }
+         pub fn ValidateLongType(input: i64) -> () {
++	    return;
+             if input >= 0 {
+                 if input
+                     >= ::dafny_runtime::truncate!(
+-                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(
++                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(
+                         ),
+                         i64
+                     )
+@@ -534,7 +535,7 @@ pub mod r#_SimpleLongImpl_Compile {
+                 };
+                 if !(0 < input
+                     + ::dafny_runtime::truncate!(
+-                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(
++                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(
+                         ),
+                         i64
+                     ))
+@@ -543,10 +544,10 @@ pub mod r#_SimpleLongImpl_Compile {
+                 }
+             } else {
+                 if input < 0 {
+-                    if input < 0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i64) {
++                    if input < 0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(), i64) {
+             return ();
+           };
+-                    if !(input + (0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i64)) < 0) {
++                    if !(input + (0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(), i64)) < 0) {
+             panic!("Halt")
+           }
+                 } else {
 diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs
 new file mode 100644
 index 00000000..8fb3793c
