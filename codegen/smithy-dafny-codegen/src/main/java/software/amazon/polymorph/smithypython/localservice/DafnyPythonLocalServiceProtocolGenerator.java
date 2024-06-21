@@ -16,6 +16,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.WriterDelegator;
@@ -469,31 +470,42 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
         String serviceDependencyErrorDafnyName =
             software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceDependencyShapeId.getNamespace());
 
-        // Import this service's Dafny error
-        ServiceShape dependencyServiceShape =
-            context.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
-        List<ShapeId> serviceDependencyErrors = dependencyServiceShape.getErrors();
-        if (serviceDependencyErrors.size() > 1) {
-          throw new IllegalArgumentException(
-              "Only 1 service-modelled error per service supported");
-        }
-
-        System.out.println(serviceDependencyShapeId);
-
-        ShapeId serviceDependencyError = serviceDependencyErrors.get(0);
-
-        DafnyNameResolver.importDafnyTypeForError(writer, serviceDependencyError, context);
+//        // Import this service's Dafny error
+//        ServiceShape dependencyServiceShape =
+//            context.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
+//        List<ShapeId> serviceDependencyErrors = dependencyServiceShape.getErrors();
+//        ShapeId singleServiceDependencyError;
+//        if (serviceDependencyErrors.size() > 1) {
+//          throw new IllegalArgumentException(
+//              "Only 1 service-modelled error per service supported");
+//        } else if (serviceDependencyErrors.isEmpty()) {
+//            // If there is not a "preferred" error on the service,
+//            // try to grab the assumed SINGLE namespace error
+//            var namespaceErrors = context.model().getStructureShapesWithTrait(ErrorTrait.class)
+//                .stream()
+//                .filter(structureShape ->
+//                    structureShape.getId().getNamespace().equals(dependencyServiceShape.getId().getNamespace())
+//                ).toList();
+//            if (namespaceErrors.size() > 1) {
+//                throw new IllegalArgumentException(
+//                    "Only 1 service-modelled error per service supported");
+//            }
+//            singleServiceDependencyError = namespaceErrors.get(0).getId();
+//        } else {
+//            singleServiceDependencyError = serviceDependencyErrors.get(0);
+//        }
+//
+//        DafnyNameResolver.importDafnyTypeForError(writer, singleServiceDependencyError, context);
 
         writer.write(
             """
             elif error.is_$L:
-                return $L(await $L($L(message=error.$L)))""",
+                return $L($L(error.$L))""",
             serviceDependencyErrorDafnyName,
             serviceDependencyShapeId.getName(),
             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                     serviceDependencyShapeId.getNamespace())
                 + "_deserialize_error",
-            DafnyNameResolver.getDafnyTypeForError(serviceDependencyError),
             serviceDependencyErrorDafnyName);
       }
     }

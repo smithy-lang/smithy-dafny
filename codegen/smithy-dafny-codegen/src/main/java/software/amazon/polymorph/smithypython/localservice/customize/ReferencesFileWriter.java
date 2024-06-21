@@ -123,7 +123,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
     // Write implementation for resource shape
     writer.write(
         """
-        class $1L(I$1L):
+        class $1L$6L:
             ${5C|}
             _impl: $2L
 
@@ -141,7 +141,13 @@ public class ReferencesFileWriter implements CustomFileWriter {
         writer.consumer(
             w -> generateSmithyOperationFunctionDefinitionForResource(context, resourceShape, w)),
         writer.consumer(w -> generateDictConvertersForResource(resourceShape, w)),
-        writer.consumer(w -> writeDocsForResourceOrInterfaceClass(w, resourceShape, context)));
+        writer.consumer(w -> writeDocsForResourceOrInterfaceClass(w, resourceShape, context)),
+        // Only extend interface if extendable;
+        // otherwise doesn't extend anything
+        resourceShape.hasTrait(ExtendableTrait.class)
+            ? "(I%1$s)".formatted(resourceShape.getId().getName())
+            : ""
+    );
   }
 
   /**
