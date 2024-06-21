@@ -76,7 +76,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
 
   @Override
   protected String getDefault(Shape shape) {
-    String protocolName = context.protocolGenerator().getName();
+    final String protocolName = context.protocolGenerator().getName();
     throw new CodegenException(
         String.format(
             "Unsupported conversion of %s to %s using the %s protocol",
@@ -94,6 +94,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     // shape)
     if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())
         || SmithyNameResolver.isUnitShape(structureShape.getId())) {
+      // Write the conversion method for the opposite direction to support WrappedLocalServices
       LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
           structureShape, context, writer);
       DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
@@ -101,7 +102,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     }
 
     // Import the converter from where the ShapeVisitor was called
-    String pythonModuleSmithygeneratedPath =
+    final String pythonModuleSmithygeneratedPath =
         SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
             structureShape.getId().getNamespace(), context);
     writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".dafny_to_smithy");
@@ -119,12 +120,12 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
 
   @Override
   public String listShape(ListShape shape) {
-    StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
 
     // Open list:
     // `[`
     builder.append("[");
-    MemberShape memberShape = shape.getMember();
+    final MemberShape memberShape = shape.getMember();
     final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
     // Add converted list elements into the list:
@@ -148,9 +149,9 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     // Open map:
     // `{`
     builder.append("{");
-    MemberShape keyMemberShape = shape.getKey();
+    final MemberShape keyMemberShape = shape.getKey();
     final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
-    MemberShape valueMemberShape = shape.getValue();
+    final MemberShape valueMemberShape = shape.getValue();
     final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
 
     // Write converted map keys into the map:
@@ -188,7 +189,8 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     // If shape has @DafnyUtf8BytesTrait, use bytes converter
     if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
       writer.addStdlibImport("standard_library.internaldafny.generated", "UTF8");
-      return "bytes(''.join(UTF8.default__.Decode(%1$s).value.Elements), encoding='utf-8')"
+      // Decode, then convert to native type
+      return "''.join(UTF8.default__.Decode(%1$s).value.Elements)"
           .formatted(dataSource);
     }
     // Note: Other Smithy-Dafny code generators would treat enums here,
@@ -243,6 +245,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
   public String enumShape(EnumShape shape) {
     // ONLY write converters if the shape under generation is in the current namespace
     if (shape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+      // Write the conversion method for the opposite direction to support WrappedLocalServices
       LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
           shape, context, writer);
       DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
@@ -250,7 +253,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     }
 
     // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-    String pythonModuleSmithygeneratedPath =
+    final String pythonModuleSmithygeneratedPath =
         SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
             shape.getId().getNamespace(), context);
     writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".dafny_to_smithy");
@@ -276,6 +279,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
   public String unionShape(UnionShape unionShape) {
     // ONLY write converters if the shape under generation is in the current namespace
     if (unionShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+      // Write the conversion method for the opposite direction to support WrappedLocalServices
       LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
           unionShape, context, writer);
       DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
@@ -283,7 +287,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     }
 
     // Import the converter from where the ShapeVisitor was called
-    String pythonModuleSmithygeneratedPath =
+    final String pythonModuleSmithygeneratedPath =
         SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
             unionShape.getId().getNamespace(), context);
     writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".dafny_to_smithy");

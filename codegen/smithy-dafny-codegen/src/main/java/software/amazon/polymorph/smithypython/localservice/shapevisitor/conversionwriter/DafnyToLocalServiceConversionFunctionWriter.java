@@ -55,13 +55,13 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 
   @Override
   protected void writeStructureShapeConverter(StructureShape structureShape) {
-    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
+    final WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    final String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
 
     delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {
       // Within the conversion function, the dataSource becomes the function's input
       // This hardcodes the input parameter name for a conversion function to always be "dafny_input"
-      String dataSourceInsideConversionFunction = "dafny_input";
+      final String dataSourceInsideConversionFunction = "dafny_input";
 
       conversionWriter.openBlock(
           "def $L($L):",
@@ -106,8 +106,8 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 
           // Recursively dispatch a new ShapeVisitor for each member of the structure
           for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
-            String memberName = memberShapeEntry.getKey();
-            MemberShape memberShape = memberShapeEntry.getValue();
+            final String memberName = memberShapeEntry.getKey();
+            final MemberShape memberShape = memberShapeEntry.getValue();
             writeNonReferenceStructureShapeMemberConverter(conversionWriter,
                 dataSourceInsideConversionFunction, memberName, memberShape);
           }
@@ -212,8 +212,8 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
    */
   private void writeReferenceStructureShapeConverter(StructureShape structureShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
-    ReferenceTrait referenceTrait = structureShape.expectTrait(ReferenceTrait.class);
-    Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+    final ReferenceTrait referenceTrait = structureShape.expectTrait(ReferenceTrait.class);
+    final Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
 
     if (resourceOrService.isResourceShape()) {
       writeResourceShapeConverter(resourceOrService.asResourceShape().get(), conversionWriter,
@@ -280,8 +280,8 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
    */
   @Override
   protected void writeUnionShapeConverter(UnionShape unionShape) {
-    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
+    final WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    final String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
 
     // Write out common conversion function inside dafny_to_smithy
     delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {
@@ -361,8 +361,8 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 
     @Override
     protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
-        WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-        String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
+        final WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+        final String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
 
         delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {
             // Within the conversion function, the dataSource becomes the function's input
