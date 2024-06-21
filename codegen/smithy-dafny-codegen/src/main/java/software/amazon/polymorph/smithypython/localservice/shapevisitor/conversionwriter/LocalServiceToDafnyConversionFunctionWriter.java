@@ -54,8 +54,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
   @Override
   protected void writeStructureShapeConverter(StructureShape structureShape) {
-    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName =
+    final WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    final String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
@@ -222,8 +222,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       StructureShape shape,
       PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
-    ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
-    Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+    final ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+    final Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
 
     if (resourceOrService.isResourceShape()) {
       writeResourceShapeConverter(
@@ -295,8 +295,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
    */
   @Override
   protected void writeUnionShapeConverter(UnionShape unionShape) {
-    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName =
+    final WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    final String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
@@ -377,8 +377,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
   @Override
   protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
-    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName =
+    final WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    final String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
@@ -389,7 +389,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
           // Within the conversion function, the dataSource becomes the function's input
           // This hardcodes the input parameter name for a conversion function to always be
           // "native_input"
-          String dataSourceInsideConversionFunction = "native_input";
+          final String dataSourceInsideConversionFunction = "native_input";
 
           conversionWriter.openBlock(
               "def $L($L):",

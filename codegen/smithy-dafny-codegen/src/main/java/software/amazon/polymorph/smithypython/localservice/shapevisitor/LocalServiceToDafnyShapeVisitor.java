@@ -79,7 +79,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     protected String getDefault(Shape shape) {
-      String protocolName = context.protocolGenerator().getName();
+      final String protocolName = context.protocolGenerator().getName();
       throw new CodegenException(String.format(
           "Unsupported conversion of %s to %s using the %s protocol",
           shape, shape.getType(), protocolName));
@@ -104,7 +104,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       }
 
       // Import the converter from where the ShapeVisitor was called
-      String pythonModuleName = SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+      final String pythonModuleName = SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
           structureShape.getId().getNamespace(),
           context
       );
@@ -125,12 +125,12 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
     public String listShape(ListShape shape) {
       writer.addStdlibImport("_dafny", "Seq");
 
-      StringBuilder builder = new StringBuilder();
+      final StringBuilder builder = new StringBuilder();
 
       // Open Dafny sequence:
       // `Seq([`
       builder.append("Seq([");
-      MemberShape memberShape = shape.getMember();
+      final MemberShape memberShape = shape.getMember();
       final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
       // Add converted list elements into the list:
@@ -149,14 +149,14 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
     public String mapShape(MapShape shape) {
       writer.addStdlibImport("_dafny", "Map");
 
-      StringBuilder builder = new StringBuilder();
+      final StringBuilder builder = new StringBuilder();
 
       // Open Dafny map:
       // `Map({`
       builder.append("Map({");
-      MemberShape keyMemberShape = shape.getKey();
+      final MemberShape keyMemberShape = shape.getKey();
       final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
-      MemberShape valueMemberShape = shape.getValue();
+      final MemberShape valueMemberShape = shape.getValue();
       final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
 
       // Write converted map keys into the map:
@@ -254,7 +254,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       }
 
       // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-      String pythonModuleSmithygeneratedPath =
+      final String pythonModuleSmithygeneratedPath =
               SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                       shape.getId().getNamespace(),
                       context
@@ -290,7 +290,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       }
 
       // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-      String pythonModuleSmithygeneratedPath =
+      final String pythonModuleSmithygeneratedPath =
           SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
               unionShape.getId().getNamespace(),
               context
