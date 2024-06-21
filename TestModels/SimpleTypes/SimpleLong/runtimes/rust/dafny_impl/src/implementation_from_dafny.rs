@@ -1,7 +1,7 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
 pub use dafny_standard_library::implementation_from_dafny::*;
-    
+
 pub mod r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes {
     #[derive(PartialEq, Clone)]
     pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
@@ -444,7 +444,9 @@ pub mod r#_SimpleLongImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*input.value().value());
+            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(
+                input.value().value().clone(),
+            );
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
             value: input.value().clone()
           });
@@ -457,7 +459,9 @@ pub mod r#_SimpleLongImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*res.value().value());
+            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(
+                res.value().value().clone(),
+            );
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
                     ::std::rc::Rc<
@@ -491,8 +495,10 @@ pub mod r#_SimpleLongImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*input.value().value());
-            if !(input.value().value() == &33i64) {
+            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(
+                input.value().value().clone(),
+            );
+            if !(input.value().value().clone() == 33) {
                 panic!("Halt")
             };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
@@ -507,7 +513,9 @@ pub mod r#_SimpleLongImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*res.value().value());
+            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(
+                res.value().value().clone(),
+            );
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
                     ::std::rc::Rc<
@@ -522,11 +530,10 @@ pub mod r#_SimpleLongImpl_Compile {
             return output.read();
         }
         pub fn ValidateLongType(input: i64) -> () {
-	    return;
             if input >= 0 {
                 if input
                     >= ::dafny_runtime::truncate!(
-                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(
+                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(
                         ),
                         i64
                     )
@@ -535,7 +542,7 @@ pub mod r#_SimpleLongImpl_Compile {
                 };
                 if !(0 < input
                     + ::dafny_runtime::truncate!(
-                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(
+                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(
                         ),
                         i64
                     ))
@@ -544,10 +551,10 @@ pub mod r#_SimpleLongImpl_Compile {
                 }
             } else {
                 if input < 0 {
-                    if input < 0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(), i64) {
+                    if input < 0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i64) {
             return ();
           };
-                    if !(input + (0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(), i64)) < 0) {
+                    if !(input + (0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i64)) < 0) {
             panic!("Halt")
           }
                 } else {
