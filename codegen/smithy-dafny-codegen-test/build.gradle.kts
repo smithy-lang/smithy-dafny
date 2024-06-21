@@ -36,6 +36,7 @@ repositories {
 
 dependencies {
     implementation(project(":smithy-dafny-codegen"))
+    implementation("software.amazon.smithy:smithy-codegen-core:$smithyVersion")
     testImplementation(platform("org.junit:junit-bom:5.9.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.hamcrest:hamcrest:2.1")
