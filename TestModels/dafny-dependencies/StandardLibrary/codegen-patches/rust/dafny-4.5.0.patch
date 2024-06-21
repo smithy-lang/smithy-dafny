@@ -184,10 +184,10 @@ index 00000000..3b7c2e76
 +}
 diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs
 new file mode 100644
-index 00000000..20cb9f07
+index 00000000..ecfecc03
 --- /dev/null
 +++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs
-@@ -0,0 +1,1340 @@
+@@ -0,0 +1,1385 @@
 +#![allow(warnings, unconditional_panic)]
 +#![allow(nonstandard_style)]
 +pub mod r#_Wrappers_Compile {
@@ -705,6 +705,12 @@ index 00000000..20cb9f07
 +    #[repr(transparent)]
 +    pub struct uint8(pub u8);
 +
++    impl uint8 {
++        pub fn is(_source: u8) -> bool {
++            return true;
++        }
++    }
++
 +    impl ::std::default::Default for uint8 {
 +        fn default() -> Self {
 +            uint8(::std::default::Default::default())
@@ -731,6 +737,12 @@ index 00000000..20cb9f07
 +    #[derive(Clone, PartialEq)]
 +    #[repr(transparent)]
 +    pub struct uint16(pub u16);
++
++    impl uint16 {
++        pub fn is(_source: u16) -> bool {
++            return true;
++        }
++    }
 +
 +    impl ::std::default::Default for uint16 {
 +        fn default() -> Self {
@@ -759,6 +771,12 @@ index 00000000..20cb9f07
 +    #[repr(transparent)]
 +    pub struct uint32(pub u32);
 +
++    impl uint32 {
++        pub fn is(_source: u32) -> bool {
++            return true;
++        }
++    }
++
 +    impl ::std::default::Default for uint32 {
 +        fn default() -> Self {
 +            uint32(::std::default::Default::default())
@@ -785,6 +803,12 @@ index 00000000..20cb9f07
 +    #[derive(Clone, PartialEq)]
 +    #[repr(transparent)]
 +    pub struct uint64(pub u64);
++
++    impl uint64 {
++        pub fn is(_source: u64) -> bool {
++            return true;
++        }
++    }
 +
 +    impl ::std::default::Default for uint64 {
 +        fn default() -> Self {
@@ -813,6 +837,12 @@ index 00000000..20cb9f07
 +    #[repr(transparent)]
 +    pub struct int32(pub i32);
 +
++    impl int32 {
++        pub fn is(_source: i32) -> bool {
++            return true;
++        }
++    }
++
 +    impl ::std::default::Default for int32 {
 +        fn default() -> Self {
 +            int32(::std::default::Default::default())
@@ -840,6 +870,12 @@ index 00000000..20cb9f07
 +    #[repr(transparent)]
 +    pub struct int64(pub i64);
 +
++    impl int64 {
++        pub fn is(_source: i64) -> bool {
++            return true;
++        }
++    }
++
 +    impl ::std::default::Default for int64 {
 +        fn default() -> Self {
 +            int64(::std::default::Default::default())
@@ -866,6 +902,15 @@ index 00000000..20cb9f07
 +    #[derive(Clone, PartialEq)]
 +    #[repr(transparent)]
 +    pub struct posInt64(pub u64);
++
++    impl posInt64 {
++        pub fn is(_source: u64) -> bool {
++            let mut x: ::dafny_runtime::DafnyInt =
++                Into::<::dafny_runtime::DafnyInt>::into(_source.clone());
++            return ::dafny_runtime::int!(0) < x.clone()
++                && x.clone() < ::dafny_runtime::int!(b"9223372036854775808");
++        }
++    }
 +
 +    impl ::std::default::Default for posInt64 {
 +        fn default() -> Self {
@@ -1158,7 +1203,7 @@ index 00000000..20cb9f07
 +          let mut a = a.clone();
 +          let mut b = b.clone();
 +          let mut less = less.clone();
-+          ::std::rc::Rc::new(move |r#__exists_var_0: ::dafny_runtime::DafnyInt| -> bool {
++          ::std::rc::Rc::new(move |r#__exists_var_0: &::dafny_runtime::DafnyInt| -> bool {
 +              let mut k: ::dafny_runtime::DafnyInt = r#__exists_var_0.clone();
 +              ::dafny_runtime::int!(0) <= k.clone() && k.clone() <= a.cardinality() && super::r#_StandardLibrary_Compile::_default::LexicographicLessOrEqualAux::<_T>(&a, &b, &less, &k)
 +            })
@@ -1181,7 +1226,7 @@ index 00000000..20cb9f07
 +                        let mut a = a.clone();
 +                        let mut b = b.clone();
 +                        ::std::rc::Rc::new(
-+                            move |r#__forall_var_0: ::dafny_runtime::DafnyInt| -> bool {
++                            move |r#__forall_var_0: &::dafny_runtime::DafnyInt| -> bool {
 +                                let mut i: ::dafny_runtime::DafnyInt = r#__forall_var_0.clone();
 +                                !(::dafny_runtime::int!(0) <= i.clone()
 +                                    && i.clone() < lengthOfCommonPrefix.clone())
@@ -1237,11 +1282,11 @@ index 00000000..20cb9f07
 +            s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>,
 +            less: &::std::rc::Rc<dyn::std::ops::Fn(&_T, &_T) -> bool>,
 +        ) -> bool {
-+            s.contains(a) && s.iter().cloned().all(({
++            s.contains(a) && s.iter().all(({
 +          let mut a = a.clone();
 +          let mut s = s.clone();
 +          let mut less = less.clone();
-+          ::std::rc::Rc::new(move |r#__forall_var_1: ::dafny_runtime::Sequence<_T>| -> bool {
++          ::std::rc::Rc::new(move |r#__forall_var_1: &::dafny_runtime::Sequence<_T>| -> bool {
 +              let mut z: ::dafny_runtime::Sequence<_T> = r#__forall_var_1.clone();
 +              !s.contains(&z) || super::r#_StandardLibrary_Compile::_default::LexicographicLessOrEqual::<_T>(&a, &z, &less)
 +            })
