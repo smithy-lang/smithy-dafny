@@ -21,7 +21,7 @@ class CodegenCliTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "Resource"
+            "SimpleTypes/SimpleString"
     })
     void testModelsForJava(String relativeTestModelPath) {
         Path testModelPath = getTestModelPath(relativeTestModelPath);
