@@ -48,9 +48,11 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
   public static final String RESPONSE = "Response";
 
   public static final String S3_SERVICE_NAME = "AmazonS3";
+  public static final String S3_DELETE_OBJECT = "DeleteObject";
+  public static final String S3_DELETE_OBJECTS = "DeleteObjects";
   public static final String S3_PUT_OBJECT = "PutObject";
   public static final String S3_GET_OBJECT = "GetObject";
-  public static List<String> S3_OPERATIONS = ImmutableList.of(S3_PUT_OBJECT, S3_GET_OBJECT);
+  public static List<String> S3_OPERATIONS = ImmutableList.of(S3_DELETE_OBJECT, S3_DELETE_OBJECTS, S3_PUT_OBJECT, S3_GET_OBJECT);
 
   public AwsSdkDotNetNameResolver(
     final Model model,
@@ -84,7 +86,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     final Shape targetShape = getModel().expectShape(memberShape.getTarget());
 
     // The .NET AWS SDK represents a list-of-enums as a list-of-strings, even though it represents enums as the
-    // corresponding enum class every where else AFAICT.
+    // corresponding enum class everywhere else AFAICT.
     final String memberType = targetShape.hasTrait(EnumTrait.class)
       ? "string"
       : baseTypeForMember(memberShape);
