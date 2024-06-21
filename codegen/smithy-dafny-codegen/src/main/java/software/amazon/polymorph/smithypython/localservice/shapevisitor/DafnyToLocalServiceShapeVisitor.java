@@ -188,7 +188,8 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     // If shape has @DafnyUtf8BytesTrait, use bytes converter
     if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
       writer.addStdlibImport("standard_library.internaldafny.generated", "UTF8");
-      return "bytes(''.join(UTF8.default__.Decode(%1$s).value.Elements), encoding='utf-8')"
+      // Decode, then convert to native type
+      return "''.join(UTF8.default__.Decode(%1$s).value.Elements)"
           .formatted(dataSource);
     }
     // Note: Other Smithy-Dafny code generators would treat enums here,

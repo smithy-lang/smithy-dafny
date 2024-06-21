@@ -2,11 +2,40 @@
 Extern UTF8 encode and decode methods.
 
 Note:
-Python's `.encode('utf-8')` does not handle surrogates.
-However, these encode/decode methods are expected to handle surrogates (e.g. "\uD808\uDC00").
-To work around this, we encode Dafny strings into UTF-16-LE (little endian)
-and decode them before encoding into UTF-8 (`_strict_tostring`).
-To decode, we reverse the encode step. (`_reverse_strict_tostring`)
+Python's `.encode()`/`.decode()` handle surrogates with 'surrogatepass'.
+However, the results of 'surrogatepass' does not comply with Dafny's expectations.
+Dafny expects a strict interpretation of Python's Unicode handling.
+Python represents Unicode characters based on their presence in the Basic Multilingual Plane (BMP).
+The BMP includes characters from U+0000 to U+FFFF (or, 0 <= ord(chr) < 65535).
+
+If a character is inside the BMP, Python internally represents it as a single UTF-16-encoded code unit.
+ex.
+"\u2386" == '⎆' --> ord('⎆') == 9094 --> 9094 < 65535 --> in BMP
+Since "\u2386" is in the BMP, Python internally represents it as '⎆':
+
+```
+>>> s = "\u2386"
+>>> s
+'⎆'
+```
+
+In contrast, if a character is outside the BMP, Python internally represents it
+as a unicode-escaped string using surrogate pairs.
+ex.
+"\uD808\uDC00" == '𒀀' --> ord('𒀀') == 73728 --> 73728 > 65535 --> outside BMP
+Since "\uD808\uDC00" is outside the BMP, Python internally represents it as "\uD808\uDC00":
+
+```
+>>> s = "\uD808\uDC00"
+>>> s
+'\ud808\udc00'
+```
+
+However, the `.decode()` method with 'surrogatepass' leaves '\ud808\udc00' as '𒀀',
+which does not match Dafny's expectation of the literal interpretation of this field.
+To correct this, the Decode extern implementation
+re-encodes any characters outside the BMP,
+then decodes them under the expected decoding.
 """
 import _dafny
 import struct
@@ -14,96 +43,61 @@ import struct
 import standard_library.internaldafny.generated.UTF8
 from standard_library.internaldafny.generated.UTF8 import *
 
+def _convert_char_outside_bmp_to_unicode_escaped_string(char_outside_bmp):
+  # Re-encode the character to UTF-16. This is necessary to get the surrogate pairs.
+  utf16_encoded_char = char_outside_bmp.encode('utf-16')
+  # Define the size of the Byte Order Mark (BOM). UTF-16 encoding includes a BOM at the start.
+  bom_size = 2
+  # Extract and decode the high surrogate pair. The high surrogate is the first 2 bytes after the BOM.
+  high_surrogate = utf16_encoded_char[bom_size:bom_size+2].decode('utf-16', 'surrogatepass')
+  # Extract and decode the low surrogate pair. The low surrogate is the next 2 bytes after the high surrogate.
+  low_surrogate = utf16_encoded_char[bom_size+2:bom_size+4].decode('utf-16', 'surrogatepass')
+  # Return the high and low surrogate pairs as a tuple so they can be appended individually.
+  return (high_surrogate, low_surrogate)
+
+def _is_outside_bmp(native_char):
+  # Any char greater than 0xFFFF is outside the BMP.
+  return ord(native_char) > 0xFFFF
 
 # Extend the Dafny-generated class with our extern methods
 class default__(standard_library.internaldafny.generated.UTF8.default__):
 
   @staticmethod
   def Encode(s):
-    print(f"{s.Elements=}")
     try:
       return Wrappers.Result_Success(_dafny.Seq(
-          default__._strict_tostring(s).encode('utf-8')
+          s.VerbatimString(False).encode('utf-16', 'surrogatepass').decode('utf-16').encode('utf-8')
       ))
     # Catch both UnicodeEncodeError and UnicodeDecodeError.
     # The `try` block involves both encoding and decoding.
     # OverflowError is possibly raised at `_strict_tostring`'s `ord(c).to_bytes`
-    #   if the char `c` is not valid.
+    # if the char `c` is not valid.
     except (UnicodeDecodeError, UnicodeEncodeError, OverflowError):
       return Wrappers.Result_Failure(_dafny.Seq("Could not encode input to Dafny Bytes."))
 
   @staticmethod
-  def _strict_tostring(dafny_ascii_string):
-    '''
-    Converts a Dafny Seq of unicode-escaped ASCII characters
-    into a string that can be encoded with Python's built-in `.encode('utf-8')`.
-
-    This encoding-decoding allows subsequent UTF8 encodings
-    to handle surrogates as expected by Dafny code.
-
-    This is exactly the `_dafny.string_from_utf_16` method from the DafnyRuntime, except with
-    `errors = 'strict'` here,
-    instead of
-    `errors = 'replace'` in the `_dafny.string_from_utf_16` function.
-    `strict` will throw an exception for invalid encodings, allowing us
-    to detect invalid encodings and raise exceptions,
-    while `replace` will fail silently.
-    :param s:
-    :return:
-    """
-    return b''\
-      .join([c.to_bytes(2, 'little') \
-             if isinstance(c, int) \
-             else ord(c).to_bytes(2, 'little') \
-             for c in dafny_ascii_string])\
-      .decode("utf-16-le", errors = 'strict')
-
-  @staticmethod
   def Decode(s):
     try:
-      a = bytes(s)
-      print(f"{a=}")
-      utf8_str = bytes(s).decode('utf-8')
-      print(f"{utf8_str=}")
-      # out = []
-      # for a in s:
-      #   out.append(a.to_bytes(2, "little"))
-      # out2 = []
-      # for a in out:
-      #   out2.append(a.decode("utf-8"))
-      # utf8_str = ''.join(out2)
-      unicode_escaped_utf8_str = default__._reverse_strict_tostring(utf8_str)
-      print(f"{unicode_escaped_utf8_str=}")
-      return Wrappers.Result_Success(unicode_escaped_utf8_str)
-    # Catch both UnicodeEncodeError and UnicodeDecodeError.
-    # The `try` block involves both encoding and decoding.
-    # ValueError and TypeError are possibly raised at `_reverse_strict_tostring`'s `chr()`.
-    # struct.error is possibly raised at `struct.unpack`.
+      first_pass_decoded = bytes(s).decode('utf-8')
+      decoded = []
+      for i in range(len(first_pass_decoded)):
+        char = first_pass_decoded[i]
+        # Dafny-generated code expects any characters outside the BMP
+        # to be rendered as unicode-escaped strings.
+        if _is_outside_bmp(char):
+          # Any char outside the BMP needs to be re-encoded,
+          # then decoded as separate bytes.
+          high_surrogate, low_surrogate = _convert_char_outside_bmp_to_unicode_escaped_string(char)
+          decoded.append(high_surrogate)
+          decoded.append(low_surrogate)
+        else:
+          decoded.append(char)
+      return Wrappers.Result_Success(_dafny.Seq(
+        decoded
+      ))
     except (UnicodeDecodeError, UnicodeEncodeError, ValueError, TypeError, struct.error):
       return Wrappers.Result_Failure(_dafny.Seq("Could not decode input from Dafny Bytes."))
 
-
-  @staticmethod
-  def _reverse_strict_tostring(utf8_str):
-    """
-    Converts a string into a Dafny Seq of unicode-escaped ASCII characters.
-    This is the inverse of the `_strict_tostring` function in this file.
-    :param s:
-    :return:
-    """
-    utf16_bytes = utf8_str.encode("utf-16-le", errors = "strict")
-    out = []
-    # len(b)/2 is an integer by construction of UTF-16 encoding (2 bytes per encoded character)
-    for i in range(int(len(utf16_bytes)/2)):
-      # Take two consecutive bytes;
-      utf_16_bytepair = utf16_bytes[2*i:2*i+2]
-      # Unpack them into an ordinal representation;
-      packed_bytes = struct.unpack('<H', utf_16_bytepair)
-      # Convert into a character representation;
-      char_representation = chr(packed_bytes[0])
-      # Append to returned string
-      out.append(char_representation)
-    return _dafny.Seq(out)
 
 # Export externs
 standard_library.internaldafny.generated.UTF8.default__ = default__

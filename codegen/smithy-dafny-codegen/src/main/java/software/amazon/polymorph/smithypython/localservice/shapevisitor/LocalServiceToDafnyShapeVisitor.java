@@ -189,7 +189,10 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       writer.addStdlibImport("_dafny", "Seq");
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
         writer.addStdlibImport("standard_library.internaldafny.generated", "UTF8");
+
         return "UTF8.default__.Encode(Seq(%1$s)).value".formatted(dataSource);
+//        return "Seq([d for d in %1$s])".formatted(dataSource);
+//        return "Seq(%1$s.encode('utf-16', 'surrogatepass').decode('utf-16').encode('utf-8'))".formatted(dataSource);
       }
       // Note: Other Smithy-Dafny code generators would treat enums here,
       // as Polymorph-compatible Smithy models often define an enum
