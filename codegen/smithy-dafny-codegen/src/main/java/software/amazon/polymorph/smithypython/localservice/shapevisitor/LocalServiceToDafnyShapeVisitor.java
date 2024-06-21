@@ -98,6 +98,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
           || SmithyNameResolver.isUnitShape(structureShape.getId())) {
         LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
             context, writer);
+        // Write the conversion method for the opposite direction to support WrappedLocalServices
         DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
             context, writer);
       }
@@ -189,10 +190,8 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       writer.addStdlibImport("_dafny", "Seq");
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
         writer.addStdlibImport("standard_library.internaldafny.generated", "UTF8");
-
+        // Convert to Dafny type, then UTF8 encode
         return "UTF8.default__.Encode(Seq(%1$s)).value".formatted(dataSource);
-//        return "Seq([d for d in %1$s])".formatted(dataSource);
-//        return "Seq(%1$s.encode('utf-16', 'surrogatepass').decode('utf-16').encode('utf-8'))".formatted(dataSource);
       }
       // Note: Other Smithy-Dafny code generators would treat enums here,
       // as Polymorph-compatible Smithy models often define an enum
@@ -249,6 +248,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       if (shape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
         LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
                 context, writer);
+        // Write the conversion method for the opposite direction to support WrappedLocalServices
         DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
                 context, writer);
       }
@@ -284,6 +284,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       if (unionShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
         LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
             context, writer);
+        // Write the conversion method for the opposite direction to support WrappedLocalServices
         DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
             context, writer);
       }

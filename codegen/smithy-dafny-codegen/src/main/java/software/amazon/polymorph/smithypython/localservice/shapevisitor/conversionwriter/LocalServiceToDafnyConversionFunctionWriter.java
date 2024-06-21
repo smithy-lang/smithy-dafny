@@ -132,7 +132,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
     if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
       if (memberShape.isOptional()) {
         conversionWriter.write(
-            "((Option_Some($1L)) if (($1L is not None) and ($2L is not None)) else (Option_None())),",
+            "((Option_Some($1L)) if (($2L is not None) and ($1L is not None)) else (Option_None())),",
             targetShape.accept(
                 ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
                     targetShape,
