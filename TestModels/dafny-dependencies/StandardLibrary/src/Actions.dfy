@@ -176,14 +176,16 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   // Streams
 
-  // BETTER IDEA?
+  // BETTER IDEA!!!
   // 
-  // RepeatWhile(a: Action<(), ()>, p) returns (Action<(), ()>)
-  //   - invokes a until !p
-  //   - p must imply CanConsume
+  // RepeatUntil(t: T, stop: R) returns (Action<(), ()>)
+  //   - invokes 1 or more times until stop is returned
+  //   - requires CanConsume(<(t, !stop)*>, t)
+  //   - NOT stopFn: R -> bool because then externs can't specialize
+  //     - BUT instead: Compose(e, Compose(a, Function(stopFn))).RepeatUntil(t, true)
   // 
-  // ForEach(e: Action<(), Option<T>>, a: Action<Option<T>, ()>)
-  //   = RepeatWhile(Compose(e, a), e didn't just produce None)
+  // ForEach(e: Action<(), Option<T>>, a: Action<Option<T>, bool>)
+  //   = Compose(e, a).RepeatUntil((), false)
 
   trait Stream<T, TV(!new)> extends Action<(), (), Option<T>, Option<TV>> {
 
