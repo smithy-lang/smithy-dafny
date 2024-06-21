@@ -1,25 +1,3 @@
-diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index c2850c0e..06c0c0ea 100644
---- b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-+++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -434,7 +434,7 @@ pub mod r#_SimpleBooleanImpl_Compile {
-             ) {
-                 panic!("Halt")
-             };
--            if !(input.value().value() == true || input.value().value() == false) {
-+            if !(*input.value().value() == true || *input.value().value() == false) {
-                 panic!("Halt")
-             };
-             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
-@@ -443,7 +443,7 @@ pub mod r#_SimpleBooleanImpl_Compile {
-             res = ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
-             value: input.value().clone()
-           });
--            if !(res.value().value() == true || res.value().value() == false) {
-+            if !(*res.value().value() == true || *res.value().value() == false) {
-                 panic!("Halt")
-             };
-             if !(input.value().value() == res.value().value()) {
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs
 new file mode 100644
 index 00000000..5170a9ce
