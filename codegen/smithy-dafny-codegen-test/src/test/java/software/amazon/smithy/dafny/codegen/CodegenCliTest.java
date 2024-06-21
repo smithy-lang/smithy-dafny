@@ -17,33 +17,18 @@ import java.util.stream.Stream;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-// I'd love to replace the GitHub workflows that are testing all TestModels with this approach,
-// but although it's straightforward to model them with a @ParameterizedTest,
-// I haven't yet worked out how to execute them in parallel,
-// and without that we'll have a fairly significant CI efficiency regression.
-// For now, we can at least use this harness for negative tests of unsupported models.
 class CodegenCliTest {
 
-    @Test
-    public void testUnsupportedShape() {
-        Path testModelPath = getTestModelPath("SimpleTypes/SimpleDocument");
-        AssertionError e = Assertions.assertThrows(AssertionError.class, () ->
-                make(testModelPath, "polymorph_dafny"));
-        String expectedMessage = "Exception in thread \"main\" java.lang.IllegalArgumentException: The following shapes in the service's closure are not supported: \n" +
-                "(document: `smithy.api#Document`)\n" +
-                " - (shape type `document` is not supported)";
-        assertThat(e.getMessage(), containsString(expectedMessage));
-    }
-
-    @Test
-    public void testUnsupportedTrait() {
-        Path testModelPath = getTestModelPath("Streaming");
-        AssertionError e = Assertions.assertThrows(AssertionError.class, () ->
-                make(testModelPath, "polymorph_dafny"));
-        String expectedMessage = "Exception in thread \"main\" java.lang.IllegalArgumentException: The following shapes in the service's closure are not supported: \n" +
-                "(blob: `simple.streaming#StreamingBlob`)\n" +
-                " - (trait `smithy.api#streaming` is not supported)";
-        assertThat(e.getMessage(), containsString(expectedMessage));
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "Resource"
+    })
+    void testModelsForJava(String relativeTestModelPath) {
+        Path testModelPath = getTestModelPath(relativeTestModelPath);
+        make(testModelPath, "polymorph_dafny");
+        make(testModelPath, "polymorph_java");
+        make(testModelPath, "build_java");
+        make(testModelPath, "test_java");
     }
 
     private Path getTestModelPath(String relativeTestModelPath) {
@@ -57,7 +42,8 @@ class CodegenCliTest {
     private static final String[] PASSTHROUGH_ENVIRONMENT_VARIABLES = new String[] {
             "JAVA_HOME",
             "PATH",
-            "DOTNET_CLI_HOME"
+            "DOTNET_CLI_HOME",
+            "DAFNY_VERSION"
     };
 
     private static void make(Path workdir, String... makeArgs) {
