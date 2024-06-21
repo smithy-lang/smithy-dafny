@@ -164,14 +164,14 @@ module {:options "--function-syntax:4"} Std.Actions {
   // Enumerators
 
   type IEnumerator<T, TV(!new)> = Action<(), (), T, TV>
-  type Enumerator<T, TV(!new)> = a: Action<(), (), Option<T>, Option<TV>> | exists limit :: ProducesTerminatedBy(a, None, limit) witness *
+  type Enumerator<T, TV(!new)> = a: Action<(), (), Option<T>, Option<TV>> | exists limit: nat :: ProducesTerminatedBy(a, None, limit) witness *
   
 
   // Aggregators
 
   // TODO: Names need improvement
   type IAggregator<T, TV(!new)> = Action<T, TV, (), ()>
-  type Aggregator<T, TV(!new)> = a: Action<T, TV, bool, bool> | exists limit :: ProducesTerminatedBy(a, false, limit) witness *
+  type Aggregator<T, TV(!new)> = a: Action<T, TV, bool, bool> | exists limit: nat :: ProducesTerminatedBy(a, false, limit) witness *
   type Accumulator<T, TV(!new)> = Action<Option<T>, Option<TV>, (), ()> // | exists limit :: ConsumesTerminatedBy(a, None, limit) witness *
 
   // Streams
@@ -292,7 +292,7 @@ module {:options "--function-syntax:4"} Std.Actions {
   }
 
   method {:rlimit 0} AggregatorExample() {
-    var a: ArrayAggregator<nat, nat> := new ArrayAggregator(i => i);
+    var a: ArrayAggregator<nat, nat> := new ArrayAggregator((i: nat) => i);
     var _ := a.Invoke(1);
     var _ := a.Invoke(2);
     var _ := a.Invoke(3);
@@ -301,6 +301,57 @@ module {:options "--function-syntax:4"} Std.Actions {
     var _ := a.Invoke(6);
     assert a.Consumed() == [1, 2, 3, 4, 5, 6];
     assert a.storage.items == [1, 2, 3, 4, 5, 6];
+  }
+
+  class FunctionalEnumerator<S, T, TV(!new)> extends Action<(), (), Option<T>, Option<TV>> {
+
+    const stepFn: S -> Option<(S, T)>
+    var state: S
+
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> CanProduce(history)
+      decreases height, 0
+    {
+      this in Repr
+    }
+
+    constructor(state: S, stepFn: S -> Option<(S, T)>) {
+      this.state := state;
+      this.stepFn := stepFn;
+    }
+
+    ghost predicate CanConsume(history: seq<((), Option<TV>)>, next: ())
+      decreases height
+    {
+      true
+    }
+    ghost predicate CanProduce(history: seq<((), Option<TV>)>)
+      decreases height
+    {
+      true
+    }
+
+    method Invoke(t: ()) returns (r: Option<T>) 
+      requires Requires(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
+    {
+      var next := stepFn(state);
+      match next {
+        case Some(result) => {
+          var (newState, result') := result;
+          state := newState;
+          r := Some(result');
+        }
+        case None => {
+          r := None;
+        }
+      }
+      Update(t, r);
+    }
   }
 
   class Box {
