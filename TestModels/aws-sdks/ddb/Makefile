@@ -5,8 +5,6 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
-PYTHON_MODULE_NAME=com_amazonaws_dynamodb
-
 PROJECT_SERVICES := \
 	ComAmazonawsDynamodb \
 
@@ -36,3 +34,10 @@ clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+
+# Python
+
+PYTHON_MODULE_NAME=com_amazonaws_dynamodb
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
