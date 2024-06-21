@@ -1,20 +1,5 @@
 {
   "version": "1.0",
-  "projections": {
-    "s3-encryption-client-only": {
-      "transforms": [
-        {
-          "name": "excludeShapesBySelector",
-          "args": {
-            "selector": "[id|name *= 'CopyObject', 'MultipartUpload', 'Create', 'DeleteBucket', 'DeleteObjectTagging', 'DeletePublicAccess', 'GetBucket', 'GetObjectA', 'GetObjectL', 'GetObjectR', GetObjectT', 'Head', 'List', 'PutBucket', 'PutObjectA', 'PutObjectL', 'PutObjectR', 'PutObjectR', 'PutObjectT', 'PutPublic', 'RestoreObject', 'SelectObject', 'UploadPart', 'WriteGetObject']"
-          }
-        },
-        {
-          "name": "removeUnusedShapes"
-        }
-      ]
-    }
-  },
   "plugins": {
     "dafny-client-codegen": {
       "edition": "2023",
