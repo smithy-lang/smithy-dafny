@@ -176,6 +176,15 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   // Streams
 
+  // BETTER IDEA?
+  // 
+  // RepeatWhile(a: Action<(), ()>, p) returns (Action<(), ()>)
+  //   - invokes a until !p
+  //   - p must imply CanConsume
+  // 
+  // ForEach(e: Action<(), Option<T>>, a: Action<Option<T>, ()>)
+  //   = RepeatWhile(Compose(e, a), e didn't just produce None)
+
   trait Stream<T, TV(!new)> extends Action<(), (), Option<T>, Option<TV>> {
 
     // A Stream is just a specialization of an Enumerator
