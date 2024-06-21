@@ -9,7 +9,7 @@ impl GetStringUTF8 {
         Self
     }
     pub(crate) async fn send(
-        handle: &crate::client::Handle,
+        client: &crate::client::Client,
         input: crate::operation::get_string_utf8::GetStringUTF8Input,
     ) -> ::std::result::Result<
         crate::operation::get_string_utf8::GetStringUTF8Output,
@@ -18,7 +18,7 @@ impl GetStringUTF8 {
         let inner_input =
             crate::conversions::get_string_utf8::_get_string_utf8_input::to_dafny(input);
         let inner_result =
-            ::simple_string_dafny::dafny_runtime::read!(handle.inner).GetStringUTF8(&inner_input);
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetStringUTF8(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }

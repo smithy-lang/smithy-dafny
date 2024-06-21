@@ -9,7 +9,7 @@ impl GetBoolean {
         Self
     }
     pub(crate) async fn send(
-        handle: &crate::client::Handle,
+        client: &crate::client::Client,
         input: crate::operation::get_boolean::GetBooleanInput,
     ) -> ::std::result::Result<
         crate::operation::get_boolean::GetBooleanOutput,
@@ -17,7 +17,7 @@ impl GetBoolean {
     > {
         let inner_input = crate::conversions::get_boolean::_get_boolean_input::to_dafny(input);
         let inner_result =
-            ::simple_boolean_dafny::dafny_runtime::read!(handle.inner).GetBoolean(&inner_input);
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetBoolean(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_boolean_dafny::r#_Wrappers_Compile::Result::Success { .. }

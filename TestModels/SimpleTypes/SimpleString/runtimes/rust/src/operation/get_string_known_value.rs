@@ -9,7 +9,7 @@ impl GetStringKnownValue {
         Self
     }
     pub(crate) async fn send(
-        handle: &crate::client::Handle,
+        client: &crate::client::Client,
         input: crate::operation::get_string_known_value::GetStringKnownValueInput,
     ) -> ::std::result::Result<
         crate::operation::get_string_known_value::GetStringKnownValueOutput,
@@ -20,7 +20,7 @@ impl GetStringKnownValue {
                 input,
             );
         let inner_result =
-            ::simple_string_dafny::dafny_runtime::read!(handle.inner).GetStringUTF8(&inner_input);
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetStringUTF8(&inner_input);
         if matches!(
             inner_result.as_ref(),
             ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }
