@@ -5,7 +5,7 @@ module {:options "--function-syntax:4"} Std.GenericActions {
 
   import opened Termination
 
-  trait {:termination false} GenericAction<T, R> {
+  trait {:termination false} GenericAction<T, R> extends object {
 
     // Specification predicates
 

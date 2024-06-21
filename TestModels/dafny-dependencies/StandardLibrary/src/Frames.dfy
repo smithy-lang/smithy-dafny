@@ -4,7 +4,7 @@ module {:options "--function-syntax:4"} Frames {
   // A trait for objects with a Valid() predicate. Necessary in order to
   // generalize some proofs, but also useful for reducing the boilerplate
   // that most such objects need to include.
-  trait {:termination false} Validatable {
+  trait {:termination false} Validatable extends object {
     // Ghost state tracking the common set of objects most
     // methods need to read.
     ghost var Repr: set<object>
