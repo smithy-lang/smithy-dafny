@@ -434,7 +434,7 @@ pub mod r#_SimpleBooleanImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            if !(input.value().value().clone() == true || input.value().value().clone() == false) {
+            if !(*input.value().value() == true || *input.value().value() == false) {
                 panic!("Halt")
             };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
@@ -443,10 +443,10 @@ pub mod r#_SimpleBooleanImpl_Compile {
             res = ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
             value: input.value().clone()
           });
-            if !(res.value().value().clone() == true || res.value().value().clone() == false) {
+            if !(*res.value().value() == true || *res.value().value() == false) {
                 panic!("Halt")
             };
-            if !(input.value().value().clone() == res.value().value().clone()) {
+            if !(input.value().value() == res.value().value()) {
                 panic!("Halt")
             };
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
