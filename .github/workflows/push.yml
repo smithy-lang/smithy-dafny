@@ -49,9 +49,9 @@ jobs:
       fail-fast: false
       matrix:
         # Rust code generation is under development and depends on pending changes to the
-        # Dafny Rust code generation, so we test on a specific commit from the feat-rust feature branch instead.
+        # Dafny Rust code generation, so we test on a specific commit from the feat-rust-smithy feature branch instead.
         dafny-version:
-          - 00fe7ff70d3858d67d69a2b897a65c7f9d209e0a
+          - 54ec70655b5d827d6f84eb13c6a2d751133a3464
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}
