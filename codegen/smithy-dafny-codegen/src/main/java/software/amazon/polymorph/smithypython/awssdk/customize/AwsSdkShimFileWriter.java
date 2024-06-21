@@ -20,7 +20,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
- * Writes the shim.py file for AWS SDKs.The shim wraps boto3 calls. Its inputs are Dafny-modelled
+ * Writes the shim.py file for AWS SDKs. The shim wraps boto3 calls. Its inputs are Dafny-modeled
  * requests; its outputs are Dafny-modelled responses. Internally, the shim will convert the
  * Dafny-modelled requests to dictionaries passed to boto3 via kwargs, call boto3 with the request
  * return the Dafny-modelled response. Other Dafny-generated Python code will use the shim to call

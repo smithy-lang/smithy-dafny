@@ -57,7 +57,7 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
     protocolGenerators.add(
         new DafnyPythonAwsSdkProtocolGenerator() {
           // Setting a Polymorph-specific protocol allows any services that
-          //  have this protocol trait to be generated using this PythonIntegration.
+          // have this protocol trait to be generated using this PythonIntegration.
           // See DafnyAwsSdkProtocolTrait class.
           @Override
           public ShapeId getProtocol() {

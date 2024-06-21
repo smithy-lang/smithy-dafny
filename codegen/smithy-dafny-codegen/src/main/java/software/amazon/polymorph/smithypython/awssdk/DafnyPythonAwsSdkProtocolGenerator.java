@@ -8,7 +8,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
-/** This will implement any handling of components outside the request body and error handling. */
+// This will implement any handling of components outside the request body and error handling.
 @SmithyUnstableApi
 public abstract class DafnyPythonAwsSdkProtocolGenerator implements ProtocolGenerator {
 
