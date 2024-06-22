@@ -81,6 +81,17 @@ module {:options "--function-syntax:4"} Std.Actions {
       && fresh(Repr - old(Repr))
     }
 
+    // Possibly optimized extensions
+
+    // Equivalent to DefaultRepeatUntil below, but may be implemented more efficiently.
+    method RepeatUntil(t: T, stop: R -> bool)
+      requires Valid()
+      requires CanConsume(history, inputF(t))
+      reads Reads(t)
+      modifies Repr
+      ensures Valid()
+      //ensures history == old(history) + (n copies of t)/(n - 1 not stop values + stop)
+
     // Helpers
 
     ghost method Update(t: T, r: R)
@@ -103,6 +114,22 @@ module {:options "--function-syntax:4"} Std.Actions {
     }
   }
 
+  method DefaultRepeatUntil<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, t: T, stop: R -> bool) 
+    requires a.Valid()
+    reads a.Repr
+    modifies a.Repr
+  {
+    // TODO: Actual specs to prove this terminates
+    while (true) 
+      invariant a.Valid()
+      invariant fresh(a.Repr - old(a.Repr))
+    {
+      var next := a.Invoke(t);
+      if stop(next) {
+        break;
+      }
+    }
+  }
 
   // Dependencies stolen from DafnyStandardLibraries
   
@@ -215,18 +242,6 @@ module {:options "--function-syntax:4"} Std.Actions {
     
   }
 
-  method {:verify false} DefaultForEach<T, TV(!new)>(s: Enumerator<T, TV>, a: Accumulator<T, TV>) {
-    // TODO: Actual specs to prove this terminates
-    while (true) {
-      var next := s.Invoke(());
-      if next == None {
-        break;
-      }
-
-      var _ := a.Invoke(next);
-    }
-  }
-
   class ArrayAggregator<T, TV(!new)> extends Action<T, TV, (), ()> {
 
     var storage: DynamicArray<T>
@@ -288,6 +303,16 @@ module {:options "--function-syntax:4"} Std.Actions {
       Repr := {this} + {storage} + storage.Repr;
       assert Consumed() == old(Consumed()) + [inputF(t)];
       assert Valid();
+    }
+
+    method RepeatUntil(t: T, stop: (()) -> bool)
+      requires Valid()
+      requires CanConsume(history, inputF(t))
+      reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop);
     }
   }
 
@@ -351,6 +376,16 @@ module {:options "--function-syntax:4"} Std.Actions {
         }
       }
       Update(t, r);
+    }
+
+    method RepeatUntil(t: (), stop: Option<T> -> bool)
+      requires Valid()
+      requires CanConsume(history, t)
+      reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop);
     }
   }
 
@@ -429,6 +464,16 @@ module {:options "--function-syntax:4"} Std.Actions {
 
       SeqRangeIncr(producedBefore, |producedBefore|);
       assert Valid();
+    }
+
+    method RepeatUntil(t: (), stop: Box -> bool)
+      requires Valid()
+      requires CanConsume(history, t)
+      reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop);
     }
   }
 
@@ -510,6 +555,16 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
 
+    method RepeatUntil(t: (), stop: Option<T> -> bool)
+      requires Valid()
+      requires CanConsume(history, t)
+      reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop);
+    }
+
   }
 
   // TODO
@@ -565,6 +620,16 @@ module {:options "--function-syntax:4"} Std.Actions {
       if t.Some? {
         values := values + [t.value];
       }
+    }
+
+    method RepeatUntil(t: Option<T>, stop: (()) -> bool)
+      requires Valid()
+      requires CanConsume(history, inputF(t))
+      reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop);
     }
 
     method {:verify false} Pop() returns (t: T) 
@@ -644,6 +709,16 @@ module {:options "--function-syntax:4"} Std.Actions {
 
     method {:verify false} Invoke(u: Option<U>) returns (nothing: ()) {
       pipeline.Process(u, accumulator);
+    }
+
+    method RepeatUntil(t: Option<U>, stop: (()) -> bool)
+      requires Valid()
+      requires CanConsume(history, inputF(t))
+      reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop);
     }
   }
 }
