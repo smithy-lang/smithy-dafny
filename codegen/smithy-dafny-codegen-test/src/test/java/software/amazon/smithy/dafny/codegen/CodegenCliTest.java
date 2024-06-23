@@ -1,14 +1,11 @@
 package software.amazon.smithy.dafny.codegen;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import software.amazon.polymorph.utils.IOUtils;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 import software.amazon.smithy.utils.IoUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,10 +15,37 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-
 class CodegenCliTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+            CodegenCliTest.class
+    );
+
+    private static class LoggerAppendable implements Appendable {
+
+        private final Logger logger;
+
+        private LoggerAppendable(Logger logger) {
+            this.logger = logger;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq) throws IOException {
+            logger.trace(null, () -> csq.toString());
+            return this;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq, int start, int end) throws IOException {
+            logger.trace(null, () -> csq.subSequence(start, end).toString());
+            return this;
+        }
+
+        @Override
+        public Appendable append(char c) throws IOException {
+            throw new UnsupportedOperationException();
+        }
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -32,7 +56,6 @@ class CodegenCliTest {
 
     })
     void testModelsForDotnet(String relativeTestModelPath) {
-        System.out.println("HELLO");
         Path testModelPath = getTestModelPath(relativeTestModelPath);
         make(testModelPath, "polymorph_dafny");
         make(testModelPath, "polymorph_dotnet");
@@ -60,8 +83,7 @@ class CodegenCliTest {
                 .collect(Collectors.toMap(name -> name, System::getenv));
         List<String> args = Stream.concat(Stream.of("make"), Stream.of(makeArgs)).toList();
         
-        System.out.println("[[[" + args + "]]]");
-        int exitCode = IoUtils.runCommand(args, workdir, System.out, env);
+        int exitCode = IoUtils.runCommand(args, workdir, new LoggerAppendable(LOGGER), env);
         if (exitCode != 0) {
             throw new RuntimeException("make command failed (exit code: " + exitCode + ")");
         }
