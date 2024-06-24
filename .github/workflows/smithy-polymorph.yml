@@ -27,7 +27,7 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
           # Matching the hard-coded version for the "2023" edition for now
-          dafny-version: 4.1.0
+          dafny-version: 4.6.0
 
       # - name: Execute smithy-dafny-codegen-cli tests
       #   uses: gradle/gradle-build-action@v2
