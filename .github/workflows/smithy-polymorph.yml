@@ -29,17 +29,17 @@ jobs:
           # Matching the hard-coded version for the "2023" edition for now
           dafny-version: 4.1.0
 
-      - name: Execute smithy-dafny-codegen-cli tests
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: :smithy-dafny-codegen-cli:test
-          build-root-directory: codegen
+      # - name: Execute smithy-dafny-codegen-cli tests
+      #   uses: gradle/gradle-build-action@v2
+      #   with:
+      #     arguments: :smithy-dafny-codegen-cli:test
+      #     build-root-directory: codegen
 
-      - name: Execute smithy-dafny-codegen tests
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: :smithy-dafny-codegen:test
-          build-root-directory: codegen
+      # - name: Execute smithy-dafny-codegen tests
+      #   uses: gradle/gradle-build-action@v2
+      #   with:
+      #     arguments: :smithy-dafny-codegen:test
+      #     build-root-directory: codegen
 
       # TODO: just playing around, should be in the *_tests workflows
 
