@@ -52,10 +52,15 @@ class CodegenCliTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
+            "SimpleTypes/SimpleBlob",
+            "SimpleTypes/SimpleBoolean",
+            "SimpleTypes/SimpleDouble",
+            "SimpleTypes/SimpleEnum",
+            "SimpleTypes/SimpleEnumV2",
+            "SimpleTypes/SimpleInteger",
+            "SimpleTypes/SimpleLong",
             "SimpleTypes/SimpleString",
-//            "SimpleTypes/SimpleBoolean",
-//            "SimpleTypes/SimpleInteger",
-//            "SimpleTypes/SimpleLong",
+            "SimpleTypes/SimpleTimestamp",
 
     })
     void testModelsForDotnet(String relativeTestModelPath) {
@@ -93,7 +98,7 @@ class CodegenCliTest {
                 .collect(Collectors.toMap(identity(), System::getenv));
         List<String> args = Stream.concat(Stream.of("make"), Stream.of(makeArgs)).toList();
         
-        int exitCode = IoUtils.runCommand(args, workdir, System.out /* new LoggerAppendable(LOGGER) */, env);
+        int exitCode = IoUtils.runCommand(args, workdir, new LoggerAppendable(LOGGER), env);
         if (exitCode != 0) {
             throw new RuntimeException("make command failed (exit code: " + exitCode + ")");
         }
