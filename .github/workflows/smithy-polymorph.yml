@@ -41,7 +41,13 @@ jobs:
           arguments: :smithy-dafny-codegen:test
           build-root-directory: codegen
 
-      # TODO: just playing around, should be in the java_tests workflow
+      # TODO: just playing around, should be in the *_tests workflows
+
+      - name: Setup .NET Core SDK 6.0.x
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
       - name: Execute smithy-dafny-codegen-test tests
         uses: gradle/gradle-build-action@v2
         with:
