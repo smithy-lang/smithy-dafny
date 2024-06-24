@@ -82,7 +82,6 @@ class CodegenCliTest {
     private static final String[] PASSTHROUGH_ENVIRONMENT_VARIABLES = new String[] {
             "JAVA_HOME",
             "PATH",
-//            "DOTNET_CLI_HOME",
             "DAFNY_VERSION"
     };
 
