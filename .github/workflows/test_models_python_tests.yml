@@ -35,6 +35,7 @@ jobs:
           TestModels/dafny-dependencies/StandardLibrary,
           TestModels/Aggregate,
           # TestModels/AggregateReferences,
+          # TestModels/CodegenPatches,
           TestModels/Constraints,
           TestModels/Constructor,
           TestModels/Dependencies,

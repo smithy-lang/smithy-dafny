@@ -1,11 +1,14 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-import WrappedSimpleAggregateService
+# src imports
 from simple_aggregate.smithygenerated.simple_aggregate.client import SimpleAggregate
 from simple_aggregate.smithygenerated.simple_aggregate.shim import SimpleAggregateShim
 from simple_aggregate.smithygenerated.simple_aggregate.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
+
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleAggregateService
 
 class default__(WrappedSimpleAggregateService.default__):
 
