@@ -16,7 +16,6 @@ module TestComAmazonawsS3 {
                 Bucket := testBucket,
                 Key := testObjectKey,
                 Body := Wrappers.Some([ 97, 115, 100, 102 ])
-                // might need to pass Wrappers.None for extra params?
             )
         );
     }

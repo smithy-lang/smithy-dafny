@@ -197,8 +197,6 @@ public class DafnyNameResolver {
   /**
    * Returns a String representing the Dafny-generated Python type corresponding to the provided
    * EnumShape. ex. example.namespace.ExampleShape -> "DafnyExampleShape"
-   *
-   * TODO: replace - with __, : with __
    * This should be sufficient for both SDK to Dafny, and Dafny to SDK.
    *
    * @param stringShape
@@ -212,9 +210,13 @@ public class DafnyNameResolver {
           "Argument is not a StringShape with EnumTrait: " + stringShape.getId());
     }
 
+    final String replacedEnumValue = enumValue.replace("_", "__" )
+      .replace("-", "__")
+      .replace(":", "__");
+
     return mangleDafnyType(stringShape.getId().getName())
             + "_"
-            + mangleDafnyType(enumValue.replace("_", "__"));
+            + mangleDafnyType(replacedEnumValue);
   }
 
   public static void importDafnyTypeForStringShapeWithEnumTrait(

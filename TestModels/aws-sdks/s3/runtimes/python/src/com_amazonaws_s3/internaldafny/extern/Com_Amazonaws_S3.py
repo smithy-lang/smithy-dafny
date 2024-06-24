@@ -22,7 +22,7 @@ def get_available_aws_regions():
 
 class default__(com_amazonaws_s3.internaldafny.generated.Com_Amazonaws_S3.default__):
     @staticmethod
-    def s3Client(boto_client = None, region = None):
+    def S3Client(boto_client = None, region = None):
         if boto_client is None:
             if region is not None and region in get_available_aws_regions():
                 boto_config = Config(
@@ -38,7 +38,7 @@ class default__(com_amazonaws_s3.internaldafny.generated.Com_Amazonaws_S3.defaul
         return Wrappers.Result_Success(wrapped_client)
     
     @staticmethod
-    def s3ClientForRegion(region: _dafny.Seq):
+    def S3ClientForRegion(region: _dafny.Seq):
         region_string = _dafny.string_of(region)
         return default__.s3Client(region=region_string)
 
