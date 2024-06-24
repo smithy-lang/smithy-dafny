@@ -198,6 +198,9 @@ public class DafnyNameResolver {
    * Returns a String representing the Dafny-generated Python type corresponding to the provided
    * EnumShape. ex. example.namespace.ExampleShape -> "DafnyExampleShape"
    *
+   * TODO: replace - with __, : with __
+   * This should be sufficient for both SDK to Dafny, and Dafny to SDK.
+   *
    * @param stringShape
    * @param enumValue
    * @return

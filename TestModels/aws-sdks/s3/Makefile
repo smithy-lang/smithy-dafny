@@ -24,21 +24,20 @@ AWS_SDK_CMD=--aws-sdk
 
 SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/model
 
-# Override calling the polymorph CLI to invoke the Smithy build instead
-_polymorph_dafny:
-	./gradlew polymorphDafny
-
-_polymorph_dotnet:
-	./gradlew polymorphDotnet
-
-
 # There is no wrapped target for aws-sdk types
 _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
 _polymorph_wrapped_java: ;
+_polymorph_wrapped_python: ;
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+
+#Python 
+PYTHON_MODULE_NAME=com_amazonaws_s3
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
