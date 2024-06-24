@@ -93,7 +93,7 @@ class CodegenCliTest {
                 .collect(Collectors.toMap(identity(), System::getenv));
         List<String> args = Stream.concat(Stream.of("make"), Stream.of(makeArgs)).toList();
         
-        int exitCode = IoUtils.runCommand(args, workdir, System.out, /* new LoggerAppendable(LOGGER) */, env);
+        int exitCode = IoUtils.runCommand(args, workdir, System.out /* new LoggerAppendable(LOGGER) */, env);
         if (exitCode != 0) {
             throw new RuntimeException("make command failed (exit code: " + exitCode + ")");
         }
