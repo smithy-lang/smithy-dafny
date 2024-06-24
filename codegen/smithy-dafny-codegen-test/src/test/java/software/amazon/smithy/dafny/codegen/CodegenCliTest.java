@@ -12,8 +12,11 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.function.Function.identity;
 
 class CodegenCliTest {
 
@@ -79,8 +82,15 @@ class CodegenCliTest {
     };
 
     private static void make(Path workdir, String... makeArgs) {
+        List<String> missingEnvVars = Arrays.stream(PASSTHROUGH_ENVIRONMENT_VARIABLES)
+              .filter(name -> System.getenv(name) == null)
+              .toList();
+        if (!missingEnvVars.isEmpty()) {
+            throw new IllegalStateException("Missing required environment variables: " + missingEnvVars);
+        }
+
         Map<String, String> env = Arrays.stream(PASSTHROUGH_ENVIRONMENT_VARIABLES)
-                .collect(Collectors.toMap(name -> name, System::getenv));
+                .collect(Collectors.toMap(identity(), System::getenv));
         List<String> args = Stream.concat(Stream.of("make"), Stream.of(makeArgs)).toList();
         
         int exitCode = IoUtils.runCommand(args, workdir, new LoggerAppendable(LOGGER), env);
