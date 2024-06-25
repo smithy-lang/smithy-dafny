@@ -19,16 +19,14 @@ pub struct GetAggregateKnownValueTestInput {
 }
 impl GetAggregateKnownValueTestInput {
     #[allow(missing_docs)] // documentation missing in model
-    ///
-    /// If no value was sent for this field, a default will be set. If you want to determine if no value was sent, use `.simple_string_list.is_none()`.
-    pub fn simple_string_list(&self) -> &[::std::string::String] {
-        self.simple_string_list.as_deref().unwrap_or_default()
+    pub fn simple_string_list(
+        &self,
+    ) -> &::std::option::Option<::std::vec::Vec<::std::string::String>> {
+        &self.simple_string_list
     }
     #[allow(missing_docs)] // documentation missing in model
-    ///
-    /// If no value was sent for this field, a default will be set. If you want to determine if no value was sent, use `.structure_list.is_none()`.
-    pub fn structure_list(&self) -> &[crate::types::StructureListElement] {
-        self.structure_list.as_deref().unwrap_or_default()
+    pub fn structure_list(&self) -> &::std::option::Option<::std::vec::Vec<crate::types::StructureListElement>> {
+        &self.structure_list
     }
     #[allow(missing_docs)] // documentation missing in model
     pub fn simple_string_map(

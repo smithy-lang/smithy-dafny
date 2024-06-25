@@ -9,25 +9,34 @@ pub fn to_dafny(
     ::std::rc::Rc::new(::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput::GetAggregateInput {
         simpleStringList:
         ::std::rc::Rc::new(
-            simple_aggregate_dafny::r#_Wrappers_Compile::Option::Some {
-                value : ::dafny_runtime::Sequence::from_array(
-                    &value.simple_string_list().iter().map(|x|
-                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x))
-                        .collect()
-                )
+            match value.simple_string_list() {
+                Some(val) =>
+                    simple_aggregate_dafny::r#_Wrappers_Compile::Option::Some {
+                        value : ::dafny_runtime::Sequence::from_array(
+                            &val.iter().map(|x|
+                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x))
+                                .collect()
+                        )
+                    },
+                None => simple_aggregate_dafny::r#_Wrappers_Compile::Option::None{}
             }
         ),
 
         structureList:
         ::std::rc::Rc::new(
-            simple_aggregate_dafny::r#_Wrappers_Compile::Option::Some {
-                value : ::dafny_runtime::Sequence::from_array(
-                    &value.structure_list().iter().map(|x|
-                        crate::conversions::structure_list_element::to_dafny(x.clone()))
-                        .collect()
-                )
+            match value.structure_list() {
+                Some(val) =>
+                    simple_aggregate_dafny::r#_Wrappers_Compile::Option::Some {
+                        value : ::dafny_runtime::Sequence::from_array(
+                            &val.iter().map(|x|
+                                crate::conversions::structure_list_element::to_dafny(x.clone()))
+                                .collect()
+                        )
+                    },
+                None => simple_aggregate_dafny::r#_Wrappers_Compile::Option::None{}
             }
         ),
+
         simpleStringMap: ::std::rc::Rc::new(match value.simple_string_map() {
             Some(x) => simple_aggregate_dafny::r#_Wrappers_Compile::Option::Some { value :
                 ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
