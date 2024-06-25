@@ -2,6 +2,7 @@
 #![allow(nonstandard_style)]
 use simple_boolean::*;
 use simple_boolean::implementation_from_dafny::*;
+mod _wrapped;
 pub mod r#_simple_dtypes_dboolean_dinternaldafny_dwrapped {
     pub struct _default {}
 
