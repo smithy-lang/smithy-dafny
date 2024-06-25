@@ -11,7 +11,7 @@ pub mod error;
 /// All operations that this crate can perform.
 pub mod operation;
 
-mod conversions;
+pub mod conversions;
 
 pub mod implementation_from_dafny;
 
