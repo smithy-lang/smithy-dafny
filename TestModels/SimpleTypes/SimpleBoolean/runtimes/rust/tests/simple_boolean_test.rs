@@ -26,7 +26,7 @@ mod tests_from_dafny;
 } */
 #[tokio::test]
 async fn test_get_boolean_true() {
-    let result = client().get_boolean().value(true).send().await;
+    let result = client().get_boolean().value(true).send();
     let output = result.unwrap();
     let value = output.value().unwrap();
     assert!(value);
@@ -44,7 +44,7 @@ async fn test_get_boolean_true() {
 } */
 #[tokio::test]
 async fn test_get_boolean_false() {
-    let result = client().get_boolean().value(false).send().await;
+    let result = client().get_boolean().value(false).send();
     let output = result.unwrap();
     let value = output.value().unwrap();
     assert!(!value);

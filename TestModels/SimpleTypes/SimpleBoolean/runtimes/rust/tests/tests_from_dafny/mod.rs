@@ -62,7 +62,7 @@ pub mod r#_SimpleBooleanImplTest_Compile {
             client = ::dafny_runtime::MaybePlacebo::from(
                 valueOrError0.read().Extract().clone(), /* <i>Coercion from T to ::dafny_runtime::Object<super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient></i> not yet implemented */
             );
-            super::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanTrue(&::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>>::upcast_to(&client.read()));
+            super::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanTrue(&::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>>::upcast_to(client.read()));
             return ();
         }
         pub fn GetBooleanFalse() -> () {
@@ -103,7 +103,7 @@ pub mod r#_SimpleBooleanImplTest_Compile {
             client = ::dafny_runtime::MaybePlacebo::from(
                 valueOrError0.read().Extract().clone(), /* <i>Coercion from T to ::dafny_runtime::Object<super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient></i> not yet implemented */
             );
-            super::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanFalse(&::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>>::upcast_to(&client.read()));
+            super::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanFalse(&::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>>::upcast_to(client.read()));
             return ();
         }
         pub fn TestGetBooleanTrue(
@@ -116,7 +116,7 @@ pub mod r#_SimpleBooleanImplTest_Compile {
             >::new();
             let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
             let mut _out2 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            _out2 = ::dafny_runtime::MaybePlacebo::from(::dafny_runtime::md!(client).GetBoolean(&::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput::GetBooleanInput {
+            _out2 = ::dafny_runtime::MaybePlacebo::from(::dafny_runtime::md!(client.clone()).GetBoolean(&::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput::GetBooleanInput {
                 value: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::Some {
                       value: true
                     })
@@ -148,7 +148,7 @@ pub mod r#_SimpleBooleanImplTest_Compile {
             >::new();
             let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
             let mut _out3 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            _out3 = ::dafny_runtime::MaybePlacebo::from(::dafny_runtime::md!(client).GetBoolean(&::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput::GetBooleanInput {
+            _out3 = ::dafny_runtime::MaybePlacebo::from(::dafny_runtime::md!(client.clone()).GetBoolean(&::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput::GetBooleanInput {
                 value: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::Some {
                       value: false
                     })

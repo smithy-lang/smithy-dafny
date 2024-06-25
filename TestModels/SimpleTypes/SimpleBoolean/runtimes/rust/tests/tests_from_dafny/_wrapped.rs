@@ -20,16 +20,16 @@ impl super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBoolean
             std::rc::Rc<implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
         >,
     > {
-      let result = self.wrapped.get_boolean().send().await;
+      let result = self.wrapped.get_boolean().send();
       match result {
         Err(error) => ::std::rc::Rc::new( crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { 
           error: crate::conversions::get_boolean::to_dafny_error(
-            error.clone(),
+            error,
            )
         }),
         Ok(client) => ::std::rc::Rc::new( crate::implementation_from_dafny::_Wrappers_Compile::Result::Success { 
           value: crate::conversions::get_boolean::_get_boolean_output::to_dafny(
-            client.clone(),
+            client,
            )
         }),
       }
@@ -41,7 +41,7 @@ impl r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default {
     super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
 >) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>> {
     let result = Client::from_conf(
-      simple_boolean::conversions::simple_boolean_config::_simple_boolean_config::from_dafny(*config)
+      simple_boolean::conversions::simple_boolean_config::_simple_boolean_config::from_dafny(config.clone())
     );
     match result {
       Err(error) => {
