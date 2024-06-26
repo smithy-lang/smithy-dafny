@@ -6,6 +6,8 @@ package software.amazon.polymorph;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -622,9 +624,21 @@ public class CodegenEngine {
     // It would be great to do this for all languages,
     // but we're not currently precise enough and do multiple passes
     // to generate code for things like wrapped services.
+    //
+    // Be sure to NOT delete src/implementation_from_dafny.rs though,
+    // by temporarily moving it out of src/
     Path outputSrcDir = outputDir.resolve("src");
-    software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
-    outputSrcDir.toFile().mkdirs();
+    Path implementationFromDafnyPath = outputSrcDir.resolve("implementation_from_dafny.rs");
+      try {
+        Path tmpPath = outputDir.resolve("implementation_from_dafny.rs");
+        Files.move(implementationFromDafnyPath, tmpPath);
+        software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
+        outputSrcDir.toFile().mkdirs();
+        Files.move(tmpPath, implementationFromDafnyPath);
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
+
 
     handlePatching(TargetLanguage.RUST, outputDir);
   }

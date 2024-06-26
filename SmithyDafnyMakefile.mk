@@ -542,9 +542,9 @@ _mv_implementation_rust:
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
-	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
-	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny/mod.rs
-	rustfmt runtimes/rust/tests/tests_from_dafny/mod.rs
+	rm -f runtimes/rust/tests/tests_from_dafny.rs
+	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny.rs
+	rustfmt runtimes/rust/tests/tests_from_dafny.rs
 	rm -rf tests_from_dafny-rust
 
 build_rust:
