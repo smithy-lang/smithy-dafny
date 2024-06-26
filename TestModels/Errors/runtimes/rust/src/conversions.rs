@@ -6,5 +6,3 @@ pub mod always_multiple_errors;
 pub mod always_error;
 
 pub mod simple_errors_config;
-
-pub mod error;

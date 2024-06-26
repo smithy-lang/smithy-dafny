@@ -102,3 +102,38 @@ pub fn oblob_from_dafny(
         None
     }
 }
+
+// A wrapper for an arbitrary Dafny value to implement std::error::Error,
+// since arbitrary Dafny values can be used as error values
+// (usually as the "error" value in a Result.Failure)
+pub struct DafnyError<T: ::dafny_runtime::DafnyType> {
+    value: T,
+}
+
+pub fn error_from_dafny<T: ::dafny_runtime::DafnyType>(
+    input: T
+) -> DafnyError<T> {
+    DafnyError { value: input }
+}
+
+impl<T: ::dafny_runtime::DafnyType> std::fmt::Display for DafnyError<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.value.fmt_print(f, false)
+    }
+}
+
+impl<T: ::dafny_runtime::DafnyType> std::fmt::Debug for DafnyError<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.value.fmt_print(f, false)
+    }
+}
+
+impl<T: ::dafny_runtime::DafnyType> std::error::Error for DafnyError<T> {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+
+    fn cause(&self) -> Option<&dyn std::error::Error> {
+        self.source()
+    }
+}
