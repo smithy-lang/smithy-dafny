@@ -76,12 +76,18 @@ public class IOUtils {
    * so they can also be used to provide more than one template
    * for the same file.
    *
+   * Note that ':' can't be used in file paths on Windows,
+   * so we use ';' instead and replace it with ':' before evaluating the templated path.
+   * We also explicitly reject ':' in paths in case someone accidentally
+   * uses that and doesn't test on Windows (purely hypothetically :)
+   *
    * See also {@link #evalTemplate(String, Map)}.
    */
   public static void writeTemplatedFile(
     Class<?> klass,
     Path rootPath,
     String templatePath,
+    String templateOutputPath,
     Map<String, String> parameters
   ) {
     String content = IoUtils.readUtf8Resource(
@@ -89,10 +95,17 @@ public class IOUtils {
       "/templates/" + templatePath
     );
 
-    content = evalTemplate(content, parameters);
-    templatePath = evalTemplate(templatePath, parameters);
+    if (templateOutputPath.contains(":")) {
+      throw new IllegalArgumentException(
+        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
+      );
+    }
+    templateOutputPath = templateOutputPath.replace(';', ':');
 
-    Path outputPath = rootPath.resolve(templatePath);
+    content = evalTemplate(content, parameters);
+    templateOutputPath = evalTemplate(templateOutputPath, parameters);
+
+    Path outputPath = rootPath.resolve(templateOutputPath);
     try {
       Files.createDirectories(outputPath.getParent());
     } catch (IOException e) {
