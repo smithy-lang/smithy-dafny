@@ -242,6 +242,7 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
+		$(DAFNY_OPTIONS) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES) \
 
@@ -296,6 +297,7 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
+	$(OUTPUT_RUST_WRAPPED) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -510,10 +512,7 @@ test_java:
 
 ########################## Rust targets
 
-# TODO: Dafny test transpilation needs manual patching to work too,
-# which isn't a high priority at this stage,
-# so don't include transpile_test_rust for now.
-transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
+transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
@@ -536,18 +535,16 @@ transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
 _mv_implementation_rust:
-	rm -rf runtimes/rust/dafny_impl/src
-	mkdir -p runtimes/rust/dafny_impl/src
+	rm -f runtimes/rust/src/implementation_from_dafny.rs
 # TODO: Currently need to insert an import of the the StandardLibrary.
 	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
-	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-	rustfmt runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs
+	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
-	rm -rf runtimes/rust/dafny_impl/tests
-	mkdir -p runtimes/rust/dafny_impl/tests
-	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
-	rustfmt runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
+	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
+	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny/mod.rs
+	rustfmt runtimes/rust/tests/tests_from_dafny/mod.rs
 	rm -rf tests_from_dafny-rust
 
 build_rust:
