@@ -29,9 +29,12 @@ plugins {
 tasks.named<Test>("test") {
     // Use JUnit Jupiter for unit tests.
     useJUnitPlatform()
-    testLogging {
-        events.add(TestLogEvent.STARTED)
-    }
+    beforeTest(closureOf<TestDescriptor> {
+        logger.lifecycle("Starting: ${this.className}.${this.name} (${this.displayName})")
+    })
+    afterTest(KotlinClosure2({ descriptor: TestDescriptor, result: TestResult ->
+        logger.lifecycle("Finished: ${descriptor.className}.${descriptor.name} (${descriptor.displayName}): $result")
+    }))
 }
 
 repositories {
