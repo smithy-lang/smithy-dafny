@@ -88,7 +88,6 @@ class CodegenCliTest {
     @MethodSource("discoverTestModels")
     void testModelsForDotnet(String relativeTestModelPath) {
         Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
-        System.out.println("Testing " + relativeTestModelPath);
 
         Path testModelPath = getTestModelPath(relativeTestModelPath);
         make(testModelPath, "polymorph_dafny");
