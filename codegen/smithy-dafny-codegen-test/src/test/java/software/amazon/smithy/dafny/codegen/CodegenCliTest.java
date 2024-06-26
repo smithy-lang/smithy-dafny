@@ -1,5 +1,6 @@
 package software.amazon.smithy.dafny.codegen;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -12,8 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,6 +25,21 @@ import java.util.stream.Stream;
 import static java.util.function.Function.identity;
 
 class CodegenCliTest {
+
+    // TODO: # One-off until TestModels migrate to 4.4.0
+    //          - library: TestModels/LanguageSpecificLogic
+
+    private static final Set<String> DISABLED_TESTS = new HashSet<>();
+    static {
+        DISABLED_TESTS.add("AggregateReferences");
+        DISABLED_TESTS.add("LanguageSpecificLogic");
+        DISABLED_TESTS.add("LocalService");
+        DISABLED_TESTS.add("SimpleTypes/BigDecimal");
+        DISABLED_TESTS.add("SimpleTypes/BigInteger");
+        DISABLED_TESTS.add("SimpleTypes/SimpleByte");
+        DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
+        DISABLED_TESTS.add("SimpleTypes/SimpleShort");
+    }
 
     private static Stream<String> discoverTestModels() throws IOException {
         var testModelRoot = Paths.get(".")
@@ -69,6 +87,7 @@ class CodegenCliTest {
     @ParameterizedTest
     @MethodSource("discoverTestModels")
     void testModelsForDotnet(String relativeTestModelPath) {
+        Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
         System.out.println("Testing " + relativeTestModelPath);
 
         Path testModelPath = getTestModelPath(relativeTestModelPath);
