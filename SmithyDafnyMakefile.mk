@@ -497,6 +497,9 @@ transpile_java: | transpile_implementation_java transpile_test_java transpile_de
 
 transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
+transpile_implementation_java: TRANSPILE_MODULE_NAME=$(if $(JAVA_PACKAGE_NAME),--java-package-name=$(JAVA_PACKAGE_NAME).internaldafny,)
+transpile_implementation_java: TRANSLATION_RECORD=$(TRANSLATION_RECORD_JAVA)
+transpile_implementation_java: SOURCE_TRANSLATION_RECORD=--translation-record runtimes/python/src/$(JAVA_PACKAGE_NAME)/internaldafny/generated/dafny_src-py.dtr
 transpile_implementation_java: _transpile_implementation_all _mv_implementation_java
 
 transpile_test_java: TARGET=java
