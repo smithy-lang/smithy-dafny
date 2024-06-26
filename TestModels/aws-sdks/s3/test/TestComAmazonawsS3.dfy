@@ -39,11 +39,8 @@ module TestComAmazonawsS3 {
 
         expect(ret.Success?);
 
-        var GetObjectOutput(MyBody, MyDeleteMarker, MyAcceptRanges, MyExpiration, MyRestore, MyModified, MyContentLength, 
-            MyETag, MyChecksumCRC32, MyChecksumCRC32C, MyChecksumSHA1, MyChecksumSHA256, MyMissingMeta, MyVersionId, MyCacheControl, 
-            MyContentDisposition, MyContentEncoding, MyContentLanguage, MyContentRange, MyContentType, MyExpires, MyWebsiteRedirectLocation, 
-            MyServerSideEncryption, MyMetadata, MySSECustomerAlgorithm, MySSECustomerKeyMD5, MySSEKMSKeyId, MyBucketKeyEnabled, MyStorageClass, MyRequestCharged, 
-            MyReplicationStatus, MyPartsCount, MyTagCount, MyObjectLockMode, MyObjectLockRetainUntilDate, MyObjectLockLegalHoldStatus) := ret.value;
+        // we only care about the Body
+        var MyBody := ret.value.Body;
         expect MyBody.Some?;
         var byteString := MyBody.value[0];
         expect MyBody.value == expectedBody;
@@ -59,9 +56,8 @@ module TestComAmazonawsS3 {
 
         expect(ret.Success?);
 
-        var PutObjectOutput(MyExpiration, MyETag, MyChecksumCRC32, MyChecksumCRC32C, MyChecksumSHA1, 
-            MyChecksumSHA256, MyServerSideEncryption, MyVersionId, MySSECustomerAlgorithm, MySSECustomerKeyMD5, 
-            MySSEKMSKeyId, MySSEKMSEncryptionContext, MyBucketKeyEnabled, MyRequestCharged) := ret.value;
+        // just check that an ETag was returned 
+        var MyETag := ret.value.ETag;
 
         expect MyETag.Some?;
     }
