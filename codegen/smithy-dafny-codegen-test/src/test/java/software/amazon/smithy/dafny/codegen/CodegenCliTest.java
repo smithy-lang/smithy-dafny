@@ -1,12 +1,14 @@
 package software.amazon.smithy.dafny.codegen;
 
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import software.amazon.smithy.utils.IoUtils;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -50,19 +52,19 @@ class CodegenCliTest {
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "SimpleTypes/SimpleBlob",
-            "SimpleTypes/SimpleBoolean",
-            "SimpleTypes/SimpleDouble",
-            "SimpleTypes/SimpleEnum",
-            "SimpleTypes/SimpleEnumV2",
-            "SimpleTypes/SimpleInteger",
-            "SimpleTypes/SimpleLong",
-            "SimpleTypes/SimpleString",
-            "SimpleTypes/SimpleTimestamp",
+    private static Stream<String> discoverTestModels() throws IOException {
+        var testModelRoot = Paths.get(".")
+                .resolve("..")
+                .resolve("..")
+                .resolve("TestModels");
+        return Files.walk(testModelRoot)
+                    .filter(p -> Files.exists(p.resolve("Makefile")))
+                    .map(testModelRoot::relativize)
+                    .map(Path::toString);
+    }
 
-    })
+    @ParameterizedTest
+    @MethodSource("discoverTestModels")
     void testModelsForDotnet(String relativeTestModelPath) {
         Path testModelPath = getTestModelPath(relativeTestModelPath);
         make(testModelPath, "polymorph_dafny");
@@ -80,7 +82,6 @@ class CodegenCliTest {
     }
 
     private static final String[] PASSTHROUGH_ENVIRONMENT_VARIABLES = new String[] {
-            "JAVA_HOME",
             "PATH",
             "DAFNY_VERSION"
     };
@@ -96,10 +97,11 @@ class CodegenCliTest {
         Map<String, String> env = Arrays.stream(PASSTHROUGH_ENVIRONMENT_VARIABLES)
                 .collect(Collectors.toMap(identity(), System::getenv));
         List<String> args = Stream.concat(Stream.of("make"), Stream.of(makeArgs)).toList();
-        
-        int exitCode = IoUtils.runCommand(args, workdir, new LoggerAppendable(LOGGER), env);
+
+        StringBuffer output = new StringBuffer();
+        int exitCode = IoUtils.runCommand(args, workdir, output, env);
         if (exitCode != 0) {
-            throw new RuntimeException("make command failed (exit code: " + exitCode + ")");
+            throw new RuntimeException("make command failed (exit code: " + exitCode + "). Output:\n" + output);
         }
     }
 }
