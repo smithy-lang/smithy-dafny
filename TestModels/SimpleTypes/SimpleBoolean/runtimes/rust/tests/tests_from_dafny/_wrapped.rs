@@ -20,7 +20,8 @@ impl super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBoolean
             std::rc::Rc<implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
         >,
     > {
-      let result = self.wrapped.get_boolean().send();
+      let inner_input = crate::conversions::get_boolean::_get_boolean_input::from_dafny(input.clone());
+      let result = crate::operation::get_boolean::GetBoolean::send(&self.wrapped, inner_input);
       match result {
         Err(error) => ::std::rc::Rc::new( crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { 
           error: crate::conversions::get_boolean::to_dafny_error(
