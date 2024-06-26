@@ -19,12 +19,6 @@ jobs:
         shard: [ 1, 2, 3, 4, 5 ]
         dotnet-version: ["6.0.x"]
         os: [ubuntu-latest]
-        include:
-          # One-off until TestModels migrate to 4.4.0
-          - library: TestModels/LanguageSpecificLogic
-            dafny-version: 4.4.0
-            dotnet-version: "6.0.x"
-            os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -68,10 +62,6 @@ jobs:
         with:
           distribution: "corretto"
           java-version: "17"
-
-      - name: Download Dependencies
-        working-directory: ./${{ matrix.library }}
-        run: make setup_net
 
       - name: Execute smithy-dafny-codegen-test tests
         uses: gradle/gradle-build-action@v2
