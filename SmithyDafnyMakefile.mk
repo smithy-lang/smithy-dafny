@@ -499,11 +499,12 @@ transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
 transpile_implementation_java: TRANSPILE_MODULE_NAME=$(if $(JAVA_PACKAGE_NAME),--java-package-name=$(JAVA_PACKAGE_NAME).internaldafny,)
 transpile_implementation_java: TRANSLATION_RECORD=$(TRANSLATION_RECORD_JAVA)
-transpile_implementation_java: SOURCE_TRANSLATION_RECORD=--translation-record runtimes/python/src/$(JAVA_PACKAGE_NAME)/internaldafny/generated/dafny_src-py.dtr
 transpile_implementation_java: _transpile_implementation_all _mv_implementation_java
 
 transpile_test_java: TARGET=java
 transpile_test_java: OUT=runtimes/java/TestsFromDafny
+transpile_test_java: TRANSLATION_RECORD=$(TRANSLATION_RECORD_JAVA)
+transpile_test_java: SOURCE_TRANSLATION_RECORD= --translation-record runtimes/java/src/main/dafny-generated/ImplementationFromDafny-java.dtr
 transpile_test_java: _transpile_test_all _mv_test_java
 
 # Currently Dafny compiles to Java by changing the directory name.
