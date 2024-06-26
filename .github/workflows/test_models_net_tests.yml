@@ -16,7 +16,7 @@ jobs:
       matrix:
         dafny-version:
           - ${{ inputs.dafny }}
-        shard: [ 1, 2, 3, 4, 5 ]
+        shard: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
         dotnet-version: ["6.0.x"]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
@@ -67,7 +67,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         env:
           JUNIT_SHARD: ${{ matrix.shard }}
-          JUNIT_SHARD_COUNT: 5
+          JUNIT_SHARD_COUNT: 10
         with:
           arguments: :smithy-dafny-codegen-test:test --info
           build-root-directory: codegen
