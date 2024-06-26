@@ -43,7 +43,10 @@ impl super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBoolean
 impl r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default {
     pub fn WrappedSimpleBoolean(config: &::std::rc::Rc<
     super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
-    >) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>{
+    >) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<
+            ::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
+            ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
+    >>{
         let result = Client::from_conf(
             simple_boolean::conversions::simple_boolean_config::_simple_boolean_config::from_dafny(
                 config.clone(),
