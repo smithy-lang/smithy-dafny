@@ -5,14 +5,14 @@ on:
   pull_request:
 
 jobs:
-  # pr-populate-dafny-versions:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Populate Dafny versions list
-  #       id: populate-dafny-versions-list
-  #       run: echo "dafny-versions-list=['4.2.0', '4.4.0']" >> $GITHUB_OUTPUT
-  #   outputs:
-  #     dafny-version-list: ${{ steps.populate-dafny-versions-list.outputs.dafny-versions-list }}
+  pr-populate-dafny-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Populate Dafny versions list
+        id: populate-dafny-versions-list
+        run: echo "dafny-versions-list=['4.2.0', '4.4.0']" >> $GITHUB_OUTPUT
+    outputs:
+      dafny-version-list: ${{ steps.populate-dafny-versions-list.outputs.dafny-versions-list }}
 
   # pr-ci-verification:
   #   needs: pr-populate-dafny-versions
@@ -32,15 +32,15 @@ jobs:
   #   uses: ./.github/workflows/test_models_java_tests.yml
   #   with:
   #     dafny: ${{ matrix.dafny-version }}
-  # pr-ci-net:
-  #   needs: pr-populate-dafny-versions
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
-  #   uses: ./.github/workflows/test_models_net_tests.yml
-  #   with:
-  #     dafny: ${{ matrix.dafny-version }}
+  pr-ci-net:
+    needs: pr-populate-dafny-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
+    uses: ./.github/workflows/test_models_net_tests.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
   # pr-ci-rust:
   #   needs: pr-populate-dafny-versions
   #   strategy:

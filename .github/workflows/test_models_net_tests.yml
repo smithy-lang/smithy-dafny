@@ -16,44 +16,7 @@ jobs:
       matrix:
         dafny-version:
           - ${{ inputs.dafny }}
-        library: [
-            TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
-            TestModels/Aggregate,
-            # TestModels/AggregateReferences,
-            TestModels/CodegenPatches,
-            TestModels/Constraints,
-            TestModels/Constructor,
-            TestModels/Dependencies,
-            TestModels/Errors,
-            TestModels/Extendable,
-            TestModels/Extern,
-            # TestModels/LanguageSpecificLogic, # Tested only for 4.4.0 below
-            # TestModels/LocalService,
-            TestModels/MultipleModels,
-            TestModels/Refinement,
-            TestModels/Resource,
-            # TestModels/SimpleTypes/BigDecimal,
-            # TestModels/SimpleTypes/BigInteger,
-            TestModels/SimpleTypes/SimpleBlob,
-            TestModels/SimpleTypes/SimpleBoolean,
-            # TestModels/SimpleTypes/SimpleByte,
-            TestModels/SimpleTypes/SimpleDouble,
-            TestModels/SimpleTypes/SimpleEnum,
-            TestModels/SimpleTypes/SimpleEnumV2,
-            # TestModels/SimpleTypes/SimpleFloat,
-            TestModels/SimpleTypes/SimpleInteger,
-            TestModels/SimpleTypes/SimpleLong,
-            # TestModels/SimpleTypes/SimpleShort,
-            TestModels/SimpleTypes/SimpleString,
-            TestModels/SimpleTypes/SimpleTimestamp,
-            TestModels/Union,
-            TestModels/aws-sdks/ddb,
-            TestModels/aws-sdks/glue,
-            TestModels/aws-sdks/kms,
-            TestModels/aws-sdks/sqs,
-            TestModels/aws-sdks/lakeformation,
-            TestModels/aws-sdks/sqs-via-cli,
-          ]
+        shard: [ 1, 2, 3, 4, 5 ]
         dotnet-version: ["6.0.x"]
         os: [ubuntu-latest]
         include:
@@ -106,27 +69,15 @@ jobs:
           distribution: "corretto"
           java-version: "17"
 
-      - name: Generate Polymorph Dafny and Dotnet code
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-          make polymorph_dotnet DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-
       - name: Download Dependencies
         working-directory: ./${{ matrix.library }}
         run: make setup_net
 
-      - name: Compile ${{ matrix.library }} implementation
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          # This works because `node` is installed by default on GHA runners
-          CORES=$(node -e 'console.log(os.cpus().length)')
-          make transpile_net CORES=$CORES
-
-      - name: Test ${{ matrix.library }}
-        working-directory: ./${{ matrix.library }}
-        shell: bash
-        run: |
-          make test_net
+      - name: Execute smithy-dafny-codegen-test tests
+        uses: gradle/gradle-build-action@v2
+        env:
+          JUNIT_SHARD: ${{ matrix.shard }}
+          JUNIT_SHARD_COUNT: 5
+        with:
+          arguments: :smithy-dafny-codegen-test:test --info
+          build-root-directory: codegen

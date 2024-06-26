@@ -16,56 +16,61 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
 
 class CodegenCliTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(
-            CodegenCliTest.class
-    );
-
-    private static class LoggerAppendable implements Appendable {
-
-        private final Logger logger;
-
-        private LoggerAppendable(Logger logger) {
-            this.logger = logger;
-        }
-
-        @Override
-        public Appendable append(CharSequence csq) throws IOException {
-            logger.trace(null, () -> csq.toString());
-            return this;
-        }
-
-        @Override
-        public Appendable append(CharSequence csq, int start, int end) throws IOException {
-            logger.trace(null, () -> csq.subSequence(start, end).toString());
-            return this;
-        }
-
-        @Override
-        public Appendable append(char c) throws IOException {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     private static Stream<String> discoverTestModels() throws IOException {
         var testModelRoot = Paths.get(".")
                 .resolve("..")
                 .resolve("..")
                 .resolve("TestModels");
-        return Files.walk(testModelRoot)
+        var allTestModels = Files.walk(testModelRoot)
                     .filter(p -> Files.exists(p.resolve("Makefile")))
                     .map(testModelRoot::relativize)
                     .map(Path::toString);
+        return selectShard(allTestModels);
+    }
+
+    private static Stream<String> selectShard(Stream<String> list) {
+        var sorted = list.sorted().toList();
+
+        // Select the requested fraction of the test collections if using the JUNIT_SHARD[_COUNT] environment variables.
+        var shardEnvVar = System.getenv("JUNIT_SHARD");
+        var numShardsEnvVar = System.getenv("JUNIT_SHARD_COUNT");
+        if (shardEnvVar != null || numShardsEnvVar != null) {
+            if (shardEnvVar == null || numShardsEnvVar == null) {
+                throw new IllegalArgumentException(
+                        "The JUNIT_SHARD and JUNIT_SHARD_COUNT environment variables must both be provided.");
+            }
+
+            var shard = Integer.parseInt(shardEnvVar);
+            var numShards = Integer.parseInt(numShardsEnvVar);
+            if (numShards <= 0) {
+                throw new IllegalArgumentException(
+                        "JUNIT_SHARD_COUNT must be greater than 0.");
+            }
+            if (shard <= 0 || shard > numShards) {
+                throw new IllegalArgumentException(
+                        "JUNIT_SHARD must be at least 1 and at most JUNIT_SHARD_COUNT.");
+            }
+
+            return IntStream.range(0, sorted.size())
+                            .filter(index -> index % numShards == shard - 1)
+                            .mapToObj(sorted::get);
+        }
+
+        return sorted.stream();
     }
 
     @ParameterizedTest
     @MethodSource("discoverTestModels")
     void testModelsForDotnet(String relativeTestModelPath) {
+        System.out.println("Testing " + relativeTestModelPath);
+
         Path testModelPath = getTestModelPath(relativeTestModelPath);
         make(testModelPath, "polymorph_dafny");
         make(testModelPath, "polymorph_dotnet");
