@@ -11,7 +11,7 @@ on:
       num_shards:
         required: false
         type: number
-        default: 5
+        default: 8
 
 jobs:
   populate-matrix-dimensions:
@@ -80,7 +80,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         env:
           JUNIT_SHARD: ${{ matrix.shard }}
-          JUNIT_SHARD_COUNT: 10
+          JUNIT_SHARD_COUNT: ${{ inputs.num_shards }}
         with:
           arguments: :smithy-dafny-codegen-test:test --tests '*smithydotnet*' --info
           build-root-directory: codegen

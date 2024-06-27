@@ -14,15 +14,15 @@ jobs:
     outputs:
       dafny-version-list: ${{ steps.populate-dafny-versions-list.outputs.dafny-versions-list }}
 
-  # pr-ci-verification:
-  #   needs: pr-populate-dafny-versions
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
-  #   uses: ./.github/workflows/test_models_dafny_verification.yml
-  #   with:
-  #     dafny: ${{ matrix.dafny-version }}
+  pr-ci-verification:
+    needs: pr-populate-dafny-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
+    uses: ./.github/workflows/test_models_dafny_verification.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
   pr-ci-java:
     needs: pr-populate-dafny-versions
     strategy:

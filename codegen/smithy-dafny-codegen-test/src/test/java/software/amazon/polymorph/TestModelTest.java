@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,11 @@ import java.util.stream.Stream;
 import static java.util.function.Function.identity;
 
 public abstract class TestModelTest {
+
+    protected static final Set<String> TESTS_THAT_NEED_DAFNY_4_4 = Set.of(
+            "LanguageSpecificLogic",
+            "Extendable"
+    );
 
     protected static Stream<String> discoverTestModels() throws IOException {
         var testModelRoot = Paths.get(".")
