@@ -51,6 +51,7 @@ class JavaTestModels extends TestModelTest {
         make(testModelPath, "polymorph_dafny");
         make(testModelPath, "polymorph_java");
         make(testModelPath, "transpile_java");
+        make(testModelPath, "build_java");
         make(testModelPath, "test_java");
     }
 }

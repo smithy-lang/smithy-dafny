@@ -69,5 +69,5 @@ jobs:
           JUNIT_SHARD: ${{ matrix.shard }}
           JUNIT_SHARD_COUNT: 10
         with:
-          arguments: :smithy-dafny-codegen-test:test --tests '*smithydotnet*'
+          arguments: :smithy-dafny-codegen-test:test --tests '*smithydotnet*' --info
           build-root-directory: codegen
