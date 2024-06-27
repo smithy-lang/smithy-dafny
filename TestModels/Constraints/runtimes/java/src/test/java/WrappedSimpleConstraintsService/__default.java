@@ -8,8 +8,9 @@ import simple.constraints.ToNative;
 import simple.constraints.internaldafny.SimpleConstraintsTypes.Error;
 import simple.constraints.internaldafny.SimpleConstraintsTypes.ISimpleConstraintsClient;
 import simple.constraints.internaldafny.SimpleConstraintsTypes.SimpleConstraintsConfig;
+import simple.constraints.wrapped.TestSimpleConstraints;
 
-public class extern__default extends __default {
+public class __default extends _ExternBase___default {
 
   public static Result<
     ISimpleConstraintsClient,
@@ -25,7 +26,7 @@ public class extern__default extends __default {
       .builder()
       .impl(impl)
       .build();
-    return simple.constraints.internaldafny.__default.CreateSuccessOfClient(
+    return simple.constraints.internaldafny.SimpleConstraints.__default.CreateSuccessOfClient(
       wrappedClient
     );
   }
