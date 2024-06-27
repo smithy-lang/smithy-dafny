@@ -8,7 +8,7 @@ module {:options "--function-syntax:4"} SimplePositionalImplTest {
     import Types = SimplePositionalTypes
     import opened Wrappers
 
-    method {:test} TestClient(client: Types.ISimplePositionalClient) 
+    method TestClient(client: Types.ISimplePositionalClient) 
         requires client.ValidState()
         modifies client.Modifies
     {
