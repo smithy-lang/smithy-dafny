@@ -11,7 +11,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import software.amazon.polymorph.traits.JavaDocTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -44,9 +44,8 @@ public class ModeledEnum {
     enumSpec.addField(ENUM_VALUE_FIELD);
     enumSpec.addMethod(constructor());
     enumSpec.addMethod(toStringMethod());
-    shape
-      .getTrait(JavaDocTrait.class)
-      .map(docTrait -> enumSpec.addJavadoc(docTrait.getValue()));
+    ModelUtils.getDocumentationOrJavadoc(shape)
+              .map(enumSpec::addJavadoc);
     return JavaFile
       .builder(packageName, enumSpec.build())
       .skipJavaLangImports(true)
