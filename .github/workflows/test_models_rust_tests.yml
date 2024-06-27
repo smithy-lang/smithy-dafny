@@ -22,6 +22,7 @@ jobs:
             # TestModels/Constraints,
             # TestModels/Constructor,
             # TestModels/Dependencies,
+            # TestModels/Documentation,
             # TestModels/Errors,
             # TestModels/Extendable,
             # TestModels/Extern,
