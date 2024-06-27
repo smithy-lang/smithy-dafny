@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph;
 
+import org.junit.jupiter.api.Assumptions;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.smithy.utils.IoUtils;
 
 import java.io.IOException;
@@ -18,6 +20,10 @@ import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
 
+/**
+ * An abstract base class for a test that should be run on every test model,
+ * unless it isn't supported yet for a particular subset of those models.
+ */
 public abstract class TestModelTest {
 
     protected static final Set<String> TESTS_THAT_NEED_DAFNY_4_4 = Set.of(
@@ -33,8 +39,18 @@ public abstract class TestModelTest {
         var allTestModels = Files.walk(testModelRoot)
                 .filter(p -> Files.exists(p.resolve("Makefile")))
                 .map(testModelRoot::relativize)
-                .map(Path::toString);
+                .map(Path::toString)
+                .filter(TestModelTest::testModelSupportedForDafnyVersion);
+
         return selectShard(allTestModels);
+    }
+
+    private static boolean testModelSupportedForDafnyVersion(String testModel) {
+        if (TESTS_THAT_NEED_DAFNY_4_4.contains(testModel)) {
+            DafnyVersion dafnyVersion = DafnyVersion.parse(System.getenv("DAFNY_VERSION"));
+            return dafnyVersion.compareTo(DafnyVersion.parse("4.4.0")) >= 0;
+        }
+        return false;
     }
 
     private static Stream<String> selectShard(Stream<String> list) {

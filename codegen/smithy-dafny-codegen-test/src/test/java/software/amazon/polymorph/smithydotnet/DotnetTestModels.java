@@ -15,9 +15,6 @@ import java.util.Set;
 
 class DotnetTestModels extends TestModelTest {
 
-    // TODO: # One-off until TestModels migrate to 4.4.0
-    //          - library: TestModels/LanguageSpecificLogic
-
     private static final Set<String> DISABLED_TESTS = new HashSet<>();
     static {
         DISABLED_TESTS.add("AggregateReferences");
@@ -30,17 +27,10 @@ class DotnetTestModels extends TestModelTest {
         DISABLED_TESTS.add("SimpleTypes/SimpleShort");
     }
 
-
-
     @ParameterizedTest
     @MethodSource("discoverTestModels")
     void testModelsForDotnet(String relativeTestModelPath) {
         Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
-
-        DafnyVersion dafnyVersion = DafnyVersion.parse(System.getenv("DAFNY_VERSION"));
-        if (dafnyVersion.compareTo(DafnyVersion.parse("4.4.0")) < 0) {
-            Assumptions.assumeFalse(TESTS_THAT_NEED_DAFNY_4_4.contains(relativeTestModelPath));
-        }
 
         Path testModelPath = getTestModelPath(relativeTestModelPath);
         make(testModelPath, "polymorph_dafny");
