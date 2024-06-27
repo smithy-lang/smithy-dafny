@@ -16,11 +16,11 @@ public class Constants {
     "Unit"
   );
   public static final ClassName DAFNY_OPTION_CLASS_NAME = ClassName.get(
-    "Wrappers_Compile",
+    "software.amazon.cryptography.standardlibrary.internaldafny.Wrappers",
     "Option"
   );
   public static final ClassName DAFNY_RESULT_CLASS_NAME = ClassName.get(
-    "Wrappers_Compile",
+    "software.amazon.cryptography.standardlibrary.internaldafny.Wrappers",
     "Result"
   );
   public static final ClassName DAFNY_TUPLE0_CLASS_NAME = ClassName.get(

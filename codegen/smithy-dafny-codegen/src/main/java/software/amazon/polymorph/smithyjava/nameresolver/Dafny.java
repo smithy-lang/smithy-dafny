@@ -11,8 +11,10 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,13 +176,13 @@ public class Dafny extends NameResolver {
     if (datatypeConstructorsNeedTypeDescriptors()) {
       return CodeBlock.of(
         "$T.create_None($L)",
-        ClassName.get("Wrappers_Compile", "Option"),
+        ClassName.get("software.amazon.cryptography.standardlibrary.internaldafny.Wrappers", "Option"),
         typeDescriptor
       );
     } else {
       return CodeBlock.of(
         "$T.create_None()",
-        ClassName.get("Wrappers_Compile", "Option")
+        ClassName.get("software.amazon.cryptography.standardlibrary.internaldafny.Wrappers", "Option")
       );
     }
   }
@@ -275,6 +277,13 @@ public class Dafny extends NameResolver {
         "aggregateSizeMethod only accepts LIST, SET, or MAP. Got : " + shapeType
       );
     };
+  }
+
+  public static String convertNamespaceToPascalCase(final String namespace) {
+    String camelCase = Arrays.stream(namespace.split("\\."))
+            .map(part -> Character.toUpperCase(part.charAt(0)) + part.substring(1).toLowerCase())
+            .collect(Collectors.joining());
+    return camelCase;
   }
 
   static String modelPackageNameForNamespace(final String namespace) {

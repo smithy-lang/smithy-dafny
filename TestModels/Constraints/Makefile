@@ -37,4 +37,4 @@ TRANSLATION_RECORD_PYTHON := \
 JAVA_PACKAGE_NAME=simple.constraints
 
 TRANSLATION_RECORD_JAVA:= \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/java/src/main/dafny-generated/ImplementationFromDafny-java.dtr

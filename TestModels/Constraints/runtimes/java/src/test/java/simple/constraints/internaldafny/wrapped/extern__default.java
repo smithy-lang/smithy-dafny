@@ -1,16 +1,15 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-package simple.constraints.internaldafny.wrapped;
+package WrappedSimpleConstraintsService;
 
-import Wrappers_Compile.Result;
+import software.amazon.cryptography.standardlibrary.internaldafny.Wrappers.Result;
 import simple.constraints.SimpleConstraints;
 import simple.constraints.ToNative;
-import simple.constraints.internaldafny.types.Error;
-import simple.constraints.internaldafny.types.ISimpleConstraintsClient;
-import simple.constraints.internaldafny.types.SimpleConstraintsConfig;
-import simple.constraints.wrapped.TestSimpleConstraints;
+import simple.constraints.internaldafny.SimpleConstraintsTypes.Error;
+import simple.constraints.internaldafny.SimpleConstraintsTypes.ISimpleConstraintsClient;
+import simple.constraints.internaldafny.SimpleConstraintsTypes.SimpleConstraintsConfig;
 
-public class __default extends _ExternBase___default {
+public class extern__default extends __default {
 
   public static Result<
     ISimpleConstraintsClient,

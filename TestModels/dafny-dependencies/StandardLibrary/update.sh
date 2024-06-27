@@ -6,7 +6,7 @@ ESDK_BRANCH="$2"
 STD_DFY_SRC_FILES=('StandardLibrary.dfy' 'UInt.dfy' 'UTF8.dfy')
 STD_DFY_TST_FILES=('UTF8.dfy')
 STD_NET_FILES=('Extern/UTF8.cs' 'STD.csproj' 'tests/Test-STD.csproj')
-STD_JAVA_FILES=('src/main/java/UTF8/__default.java' 'build.gradle.kts')
+STD_JAVA_FILES=('src/main/java/UTF8/extern__default.java' 'build.gradle.kts')
 
 set -e
 

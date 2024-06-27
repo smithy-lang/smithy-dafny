@@ -881,7 +881,7 @@ public class DotNetNameResolver {
 
     final String baseType = dafnyTypeForShape(memberShape.getTarget());
     final String prefix = concrete ? "" : "_I";
-    return "Wrappers_Compile.%sOption<%s>".formatted(prefix, baseType);
+    return "software.amazon.cryptography.standardlibrary.internaldafny.Wrappers.%sOption<%s>".formatted(prefix, baseType);
   }
 
   private String dafnyTypeForService(final ServiceShape serviceShape) {
@@ -1060,7 +1060,7 @@ public class DotNetNameResolver {
     final boolean concrete
   ) {
     final String resultType = concrete ? "Result" : "_IResult";
-    return "Wrappers_Compile.%s<%s, %s>".formatted(
+    return "software.amazon.cryptography.standardlibrary.internaldafny.Wrappers.%s<%s, %s>".formatted(
         resultType,
         valueType,
         errorType

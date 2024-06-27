@@ -5,6 +5,8 @@ package software.amazon.polymorph.utils;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.smithy.model.shapes.ShapeId;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.convertNamespaceToPascalCase;
+
 /**
  * Static Methods for generating/referring to Dafny modules
  */
@@ -15,9 +17,10 @@ public class DafnyNameResolverHelpers {
    * assuming it was generated into a "Types" module.
    */
   public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
-    return DafnyNameResolver.dafnyTypesModuleExternNamespace(
-      shapeId.getNamespace()
-    );
+    return dafnyExternNamespaceForNamespace(shapeId.getNamespace());
+//    return DafnyNameResolver.dafnyTypesModuleExternNamespace(
+//      shapeId.getNamespace()
+//    );
   }
 
   /**
@@ -27,7 +30,8 @@ public class DafnyNameResolverHelpers {
   public static String dafnyExternNamespaceForNamespace(
     final String namespace
   ) {
-    return DafnyNameResolver.dafnyTypesModuleExternNamespace(namespace);
+    return packageNameForNamespace(namespace) + "Types";
+//    return DafnyNameResolver.dafnyTypesModuleExternNamespace(namespace);
   }
 
   /**
@@ -35,7 +39,7 @@ public class DafnyNameResolverHelpers {
    * but NOT the Types module.
    */
   public static String packageNameForNamespace(final String namespace) {
-    return DafnyNameResolver.dafnyExternNamespace(namespace);
+    return DafnyNameResolver.dafnyExternNamespace(namespace) + "." + convertNamespaceToPascalCase(namespace);
   }
 
   /** @return The __default for a namespace.*/
