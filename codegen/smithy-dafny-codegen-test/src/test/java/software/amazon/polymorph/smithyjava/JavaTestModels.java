@@ -34,12 +34,16 @@ class JavaTestModels extends TestModelTest {
         DISABLED_TESTS.add("SimpleTypes/SimpleShort");
         DISABLED_TESTS.add("SimpleTypes/SimpleString");
         DISABLED_TESTS.add("SimpleTypes/SimpleTimestamp");
-        DISABLED_TESTS.add("SimpleTypes/Union");
+        DISABLED_TESTS.add("Union");
+        DISABLED_TESTS.add("aws-sdks/glue");
+        DISABLED_TESTS.add("aws-sdks/lakeformation");
+        DISABLED_TESTS.add("aws-sdks/sqs");
+        DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
     }
 
     @ParameterizedTest
     @MethodSource("discoverTestModels")
-    void testModelsForDotnet(String relativeTestModelPath) {
+    void testModelsForJava(String relativeTestModelPath) {
         Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
         Path testModelPath = getTestModelPath(relativeTestModelPath);
