@@ -53,18 +53,6 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: smithy-dafny-conversion
 
-      - name: Setup Java 17 for codegen
-        uses: actions/setup-java@v3
-        with:
-          distribution: "corretto"
-          java-version: "17"
-
-      - name: Setup Java 8 for running tests
-        uses: actions/setup-java@v3
-        with:
-          distribution: "corretto"
-          java-version: "8"
-
       - name: Execute smithy-dafny-codegen-test tests
         uses: gradle/gradle-build-action@v2
         env:
