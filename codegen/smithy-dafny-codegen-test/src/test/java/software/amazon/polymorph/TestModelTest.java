@@ -50,7 +50,7 @@ public abstract class TestModelTest {
             DafnyVersion dafnyVersion = DafnyVersion.parse(System.getenv("DAFNY_VERSION"));
             return dafnyVersion.compareTo(DafnyVersion.parse("4.4.0")) >= 0;
         }
-        return false;
+        return true;
     }
 
     private static Stream<String> selectShard(Stream<String> list) {
