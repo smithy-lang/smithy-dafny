@@ -96,7 +96,9 @@ public class IOUtils {
     );
 
     if (templateOutputPath.contains(":")) {
-      throw new IllegalArgumentException("':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead.");
+      throw new IllegalArgumentException(
+        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
+      );
     }
     templateOutputPath = templateOutputPath.replace(';', ':');
 
