@@ -12,7 +12,13 @@ service SimplePositional {
   version: "2021-11-01",
   resources: [],
   operations: [ GetResource, GetResourcePositional ],
-  errors: [],
+  errors: [ SimplePositionalException ],
+}
+
+@error("client")
+structure SimplePositionalException {
+  @required
+  message: String,
 }
 
 structure SimplePositionalConfig {}
