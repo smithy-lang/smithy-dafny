@@ -14,40 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        library: [
-            TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
-            # TestModels/Aggregate,
-            # TestModels/AggregateReferences,
-            TestModels/CodegenPatches,
-            TestModels/Constraints,
-            # TestModels/Constructor,
-            # TestModels/Dependencies,
-            TestModels/Errors,
-            TestModels/Extendable,
-            # TestModels/Extern,
-            # TestModels/LanguageSpecificLogic,
-            TestModels/LocalService,
-            TestModels/MultipleModels,
-            # TestModels/Refinement,
-            TestModels/Resource,
-            # TestModels/SimpleTypes/BigDecimal,
-            # TestModels/SimpleTypes/BigInteger,
-            # TestModels/SimpleTypes/SimpleBlob,
-            # TestModels/SimpleTypes/SimpleBoolean,
-            # TestModels/SimpleTypes/SimpleByte,
-            # TestModels/SimpleTypes/SimpleDouble,
-            # TestModels/SimpleTypes/SimpleEnum,
-            # TestModels/SimpleTypes/SimpleEnumV2,
-            # TestModels/SimpleTypes/SimpleFloat,
-            # TestModels/SimpleTypes/SimpleInteger,
-            # TestModels/SimpleTypes/SimpleLong,
-            # TestModels/SimpleTypes/SimpleShort,
-            # TestModels/SimpleTypes/SimpleString,
-            # TestModels/SimpleTypes/SimpleTimestamp,
-            # TestModels/Union,
-            TestModels/aws-sdks/ddb,
-            TestModels/aws-sdks/kms,
-          ]
+        shard: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
     runs-on: "ubuntu-latest"
     permissions:
       id-token: write
@@ -92,35 +59,17 @@ jobs:
           distribution: "corretto"
           java-version: "17"
 
-      - name: Setup dependencies
-        working-directory: ./${{ matrix.library }}
-        run: |
-          make setup_prettier
-
-      - name: Generate Polymorph Dafny and Java code
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
-        run: |
-          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-          make polymorph_java DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-
       - name: Setup Java 8 for running tests
         uses: actions/setup-java@v3
         with:
           distribution: "corretto"
           java-version: "8"
 
-      - name: Compile ${{ matrix.library }} implementation
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          # This works because `node` is installed by default on GHA runners
-          CORES=$(node -e 'console.log(os.cpus().length)')
-          make build_java CORES=$CORES
-
-      - name: Test ${{ matrix.library }}
-        working-directory: ./${{ matrix.library }}
-        shell: bash
-        run: |
-          make test_java
+      - name: Execute smithy-dafny-codegen-test tests
+        uses: gradle/gradle-build-action@v2
+        env:
+          JUNIT_SHARD: ${{ matrix.shard }}
+          JUNIT_SHARD_COUNT: 10
+        with:
+          arguments: :smithy-dafny-codegen-test:test --tests '*smithyjava*'
+          build-root-directory: codegen
