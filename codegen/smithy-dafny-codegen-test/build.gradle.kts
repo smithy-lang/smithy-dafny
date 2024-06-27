@@ -1,7 +1,7 @@
-import org.gradle.api.tasks.testing.logging.TestLogEvent
-
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
+
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 extra["displayName"] = "Smithy :: Dafny :: Codegen :: Test"
 extra["moduleName"] = "software.amazon.smithy.dafny.codegen.test"

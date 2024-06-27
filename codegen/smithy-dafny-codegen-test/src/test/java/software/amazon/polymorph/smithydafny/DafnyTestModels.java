@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package software.amazon.polymorph.smithydafny;
 
 import org.junit.jupiter.api.Assumptions;
@@ -22,7 +25,7 @@ class DafnyTestModels extends TestModelTest {
 
     @ParameterizedTest
     @MethodSource("discoverTestModels")
-    void testModelsForJava(String relativeTestModelPath) {
+    void testModelsForDafny(String relativeTestModelPath) {
         Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
         DafnyVersion dafnyVersion = DafnyVersion.parse(System.getenv("DAFNY_VERSION"));
