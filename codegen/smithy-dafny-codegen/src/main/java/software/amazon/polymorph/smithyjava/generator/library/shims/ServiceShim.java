@@ -60,8 +60,7 @@ public class ServiceShim extends ShimLibrary {
       shimArgs,
       Collections.emptyList()
     );
-    ModelUtils.getDocumentationOrJavadoc(targetShape)
-              .map(spec::addJavadoc);
+    ModelUtils.getDocumentationOrJavadoc(targetShape).map(spec::addJavadoc);
     spec
       .addType(builderSpecs.builderInterface())
       .addType(

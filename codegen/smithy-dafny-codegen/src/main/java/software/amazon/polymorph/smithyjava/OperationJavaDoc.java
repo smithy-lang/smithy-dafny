@@ -68,14 +68,18 @@ public record OperationJavaDoc(
   ) {
     Shape inputShape = model.expectShape(shape.getInputShape());
     @Nullable
-    String paramDoc = ModelUtils.getDocumentationOrJavadoc(inputShape).orElse(null);;
+    String paramDoc = ModelUtils
+      .getDocumentationOrJavadoc(inputShape)
+      .orElse(null);
     @Nonnull
     String paramName = NATIVE_VAR;
     Shape outputShape = model.expectShape(shape.getOutputShape());
     @Nullable
-    String returns = ModelUtils.getDocumentationOrJavadoc(outputShape).orElse(null);;
+    String returns = ModelUtils
+      .getDocumentationOrJavadoc(outputShape)
+      .orElse(null);
     @Nullable
-    String desc = ModelUtils.getDocumentationOrJavadoc(shape).orElse(null);;
+    String desc = ModelUtils.getDocumentationOrJavadoc(shape).orElse(null);
     List<Pair<String, String>> params = StringUtils.isNotBlank(paramDoc)
       ? List.of(Pair.of(paramName, paramDoc))
       : null;

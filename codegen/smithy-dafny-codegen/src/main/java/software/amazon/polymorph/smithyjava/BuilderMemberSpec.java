@@ -116,9 +116,11 @@ public class BuilderMemberSpec {
       this.interfaceType = null;
       this.wrapCall = null;
     }
-    this.javaDoc = ModelUtils.getDocumentationOrJavadoc(memberShape)
-                             .or(() -> ModelUtils.getDocumentationOrJavadoc(resolvedShape))
-                             .orElse(null);
+    this.javaDoc =
+      ModelUtils
+        .getDocumentationOrJavadoc(memberShape)
+        .or(() -> ModelUtils.getDocumentationOrJavadoc(resolvedShape))
+        .orElse(null);
   }
 
   /** Private Method for handling Edge Cases or cases where
@@ -150,7 +152,9 @@ public class BuilderMemberSpec {
       trait.getConfigId(),
       StructureShape.class
     );
-    String javaDoc = ModelUtils.getDocumentationOrJavadoc(structureShape).orElse(null);
+    String javaDoc = ModelUtils
+      .getDocumentationOrJavadoc(structureShape)
+      .orElse(null);
     return new BuilderMemberSpec(type, name, javaDoc);
   }
 
@@ -161,7 +165,9 @@ public class BuilderMemberSpec {
       subject.serviceShape
     );
     String name = INTERFACE_VAR;
-    String javaDoc = ModelUtils.getDocumentationOrJavadoc(subject.serviceShape).orElse(null);
+    String javaDoc = ModelUtils
+      .getDocumentationOrJavadoc(subject.serviceShape)
+      .orElse(null);
     return new BuilderMemberSpec(type, name, javaDoc);
   }
 

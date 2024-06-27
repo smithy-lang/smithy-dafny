@@ -592,7 +592,9 @@ public class ModelUtils {
   }
 
   public static Optional<String> getDocumentationOrJavadoc(Shape shape) {
-    return shape.getTrait(DocumentationTrait.class).map(StringTrait::getValue)
-                .or(() -> shape.getTrait(JavaDocTrait.class).map(StringTrait::getValue));
+    return shape
+      .getTrait(DocumentationTrait.class)
+      .map(StringTrait::getValue)
+      .or(() -> shape.getTrait(JavaDocTrait.class).map(StringTrait::getValue));
   }
 }

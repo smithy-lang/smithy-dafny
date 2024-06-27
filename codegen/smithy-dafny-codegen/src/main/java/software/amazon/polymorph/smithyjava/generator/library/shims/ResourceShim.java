@@ -89,8 +89,7 @@ public class ResourceShim extends ShimLibrary {
       .addMethod(resourceAsDafny())
       .addMethod(resourceAsNativeInterface())
       .addMethod(impl());
-    ModelUtils.getDocumentationOrJavadoc(targetShape)
-              .map(spec::addJavadoc);
+    ModelUtils.getDocumentationOrJavadoc(targetShape).map(spec::addJavadoc);
     spec.addMethods(
       getOperationsForTarget()
         .stream()

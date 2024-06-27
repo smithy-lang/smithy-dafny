@@ -55,8 +55,7 @@ public class ModeledError {
       .classBuilder(className)
       .addModifiers(Modifier.PUBLIC)
       .superclass(superName);
-    ModelUtils.getDocumentationOrJavadoc(shape)
-              .map(spec::addJavadoc);
+    ModelUtils.getDocumentationOrJavadoc(shape).map(spec::addJavadoc);
     localOnlyFields.forEach(field -> {
       // Add local fields
       spec.addField(field.toFieldSpec(PRIVATE, FINAL));

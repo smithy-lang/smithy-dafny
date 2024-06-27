@@ -44,8 +44,7 @@ public class ModeledEnum {
     enumSpec.addField(ENUM_VALUE_FIELD);
     enumSpec.addMethod(constructor());
     enumSpec.addMethod(toStringMethod());
-    ModelUtils.getDocumentationOrJavadoc(shape)
-              .map(enumSpec::addJavadoc);
+    ModelUtils.getDocumentationOrJavadoc(shape).map(enumSpec::addJavadoc);
     return JavaFile
       .builder(packageName, enumSpec.build())
       .skipJavaLangImports(true)

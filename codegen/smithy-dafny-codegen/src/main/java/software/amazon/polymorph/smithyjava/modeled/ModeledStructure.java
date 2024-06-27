@@ -77,8 +77,7 @@ public class ModeledStructure {
       .addModifiers(Modifier.PUBLIC)
       .addType(builderInterface)
       .addType(builderImpl);
-    ModelUtils.getDocumentationOrJavadoc(shape)
-              .map(spec::addJavadoc);
+    ModelUtils.getDocumentationOrJavadoc(shape).map(spec::addJavadoc);
     modelFields.forEach(field -> {
       // Add fields
       spec.addField(field.toFieldSpec(PRIVATE, FINAL));
