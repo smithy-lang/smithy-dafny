@@ -63,6 +63,11 @@ operation SetWidgetName {
   input: SetWidgetNameInput
 }
 
+/////////////////////
+// Some header
+// This MUST NOT show up as public documentation.
+/////////////////////
+
 structure SetWidgetNameInput {
   @required
   name: String
