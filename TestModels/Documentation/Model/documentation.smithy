@@ -44,14 +44,16 @@ structure GetThingInput {
   name: String
 }
 
-/// Outputs for getting a thing.
+// @javadoc is deprecated but should work the same as @documentation
+@aws.polymorph#javadoc("Outputs for getting a thing.")
 structure GetThingOutput {
   /// The thing that you just got.
   @required
   thing: Thing
 }
 
-/// A different kind of thing you can get.
+@documentation("A different kind of thing you can get.
+Also exercising explicit @documentation traits, and multi-line strings to boot.")
 resource Widget {
   operations: [ SetWidgetName ]
 }
