@@ -11,7 +11,6 @@ import software.amazon.smithy.model.selector.Selector;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.validation.AbstractValidator;
-import software.amazon.smithy.model.validation.Severity;
 import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.smoketests.traits.SmokeTestCase;
 import software.amazon.smithy.smoketests.traits.SmokeTestsTrait;
@@ -27,7 +26,7 @@ import software.amazon.smithy.smoketests.traits.SmokeTestsTrait;
  * never try to bind a node value to a reference shape,
  * since there's no way to express a reference as a literal node value.
  */
-public class ReferenceTraitValidator extends AbstractValidator {
+public class NoReferencesInSmokeTestsValidator extends AbstractValidator {
 
   @Override
   public List<ValidationEvent> validate(Model model) {
