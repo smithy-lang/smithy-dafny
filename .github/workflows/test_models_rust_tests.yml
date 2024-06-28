@@ -61,6 +61,12 @@ jobs:
           rustflags: ""
           components: rustfmt
 
+      - name: Setup Java 17 for codegen
+        uses: actions/setup-java@v3
+        with:
+          distribution: "corretto"
+          java-version: "17"
+
       - name: Execute smithy-dafny-codegen-test tests
         uses: gradle/gradle-build-action@v2
         env:
