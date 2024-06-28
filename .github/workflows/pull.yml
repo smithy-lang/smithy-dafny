@@ -41,15 +41,15 @@ jobs:
     uses: ./.github/workflows/test_models_net_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}
-  # pr-ci-rust:
-  #   needs: pr-populate-dafny-versions
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       # Rust code generation is under development and depends on pending changes to the
-  #       # Dafny Rust code generation, so we test on a specific commit from the feat-rust feature branch instead.
-  #       dafny-version:
-  #         - ebe9aa5592bea6c0a7ed3fc204db2fb8addf0661
-  #   uses: ./.github/workflows/test_models_rust_tests.yml
-  #   with:
-  #     dafny: ${{ matrix.dafny-version }}
+  pr-ci-rust:
+    needs: pr-populate-dafny-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        # Rust code generation is under development and depends on pending changes to the
+        # Dafny Rust code generation, so we test on a specific commit from the feat-rust feature branch instead.
+        dafny-version:
+          - ebe9aa5592bea6c0a7ed3fc204db2fb8addf0661
+    uses: ./.github/workflows/test_models_rust_tests.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
