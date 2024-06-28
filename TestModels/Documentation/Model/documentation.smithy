@@ -71,9 +71,13 @@ structure SetWidgetNameInput {
 /// Error returned when we couldn't get the thing.
 @error("server")
 structure CouldntGetTheThingError {
-  /// Error message (this documentation is ignored!)
+  // Note our Java codegen would ignore a docstring here,
+  // because it special-cases message and adds its own docstring.
   @required
   message: String
+
+  /// The name of the thing we couldn't get
+  thingName: String
 }
 
 /// Either kind of thing.
