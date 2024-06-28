@@ -63,10 +63,14 @@ operation SetWidgetName {
   input: SetWidgetNameInput
 }
 
-/////////////////////
+//----------
 // Some header
-// This MUST NOT show up as public documentation.
-/////////////////////
+//
+// This MUST NOT affect public documentation.
+// If we used ////... as delimiters, those strings of slashes would!
+// This is why we validate that @documentation content
+// should not start with '/'.
+//----------
 
 structure SetWidgetNameInput {
   @required

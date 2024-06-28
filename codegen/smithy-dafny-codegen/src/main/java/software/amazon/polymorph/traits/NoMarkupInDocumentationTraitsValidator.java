@@ -39,7 +39,19 @@ public class NoMarkupInDocumentationTraitsValidator extends AbstractValidator {
       for (Shape shape : new Walker(model).walkShapes(localService)) {
         var trait = shape.getTrait(DocumentationTrait.class);
         if (trait.isPresent()) {
-          Node document = parser.parse(trait.get().getValue());
+          String docContent = trait.get().getValue();
+          if (docContent.startsWith("/")) {
+            events.add(
+              danger(
+                shape,
+                "@documentation content should not start with a '/'. " +
+                "This most likely happened because the source file is trying to use \"////...\" as a visual delimiter, " +
+                "but three consecutive slashes is always interpreted as @documentation."
+              )
+            );
+          }
+
+          Node document = parser.parse(docContent);
           if (!containsNoMarkup(document)) {
             events.add(
               danger(
