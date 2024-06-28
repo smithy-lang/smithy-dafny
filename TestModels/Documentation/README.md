@@ -3,7 +3,6 @@
 This project tests [smithy-dafny's](../../codegen/smithy-dafny-codegen-cli) support
 for the [`@documentation`](https://smithy.io/2.0/spec/documentation-traits.html#smithy-api-documentation-trait) trait.
 
-
 ## What is under test?
 
 `@documentation` traits are translated to comments on declarations
