@@ -17,15 +17,22 @@ public class ValidatorTest {
     Parser parser = Parser.builder().build();
 
     Node document = parser.parse(
-      "This is not Markdown\n\nBut it does have paragraphs"
+      """
+      Paragraph 1.
+
+      Line 1,
+      followed by line 2.
+
+      Paragraph 3.
+      """
     );
     assertTrue(
-      NoMarkupInDocumentationTraitsValidator.isDocumentWithNoMarkup(document)
+      NoMarkupInDocumentationTraitsValidator.containsNoMarkup(document)
     );
 
     document = parser.parse("This is *Markdown*");
     assertFalse(
-      NoMarkupInDocumentationTraitsValidator.isDocumentWithNoMarkup(document)
+      NoMarkupInDocumentationTraitsValidator.containsNoMarkup(document)
     );
   }
 }

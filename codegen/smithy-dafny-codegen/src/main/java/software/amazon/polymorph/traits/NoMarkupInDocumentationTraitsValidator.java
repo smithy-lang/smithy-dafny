@@ -4,10 +4,14 @@
 package software.amazon.polymorph.traits;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.stream.StreamSupport;
 import org.commonmark.node.Document;
 import org.commonmark.node.Node;
 import org.commonmark.node.Paragraph;
+import org.commonmark.node.SoftLineBreak;
 import org.commonmark.node.Text;
 import org.commonmark.parser.Parser;
 import software.amazon.smithy.model.Model;
@@ -36,7 +40,7 @@ public class NoMarkupInDocumentationTraitsValidator extends AbstractValidator {
         var trait = shape.getTrait(DocumentationTrait.class);
         if (trait.isPresent()) {
           Node document = parser.parse(trait.get().getValue());
-          if (!isDocumentWithNoMarkup(document)) {
+          if (!containsNoMarkup(document)) {
             events.add(
               danger(
                 shape,
@@ -50,24 +54,18 @@ public class NoMarkupInDocumentationTraitsValidator extends AbstractValidator {
     return events;
   }
 
-  public static boolean isDocumentWithNoMarkup(Node document) {
-    if (!(document instanceof Document)) {
+  public static boolean containsNoMarkup(Node node) {
+    if (
+      !(node instanceof Document ||
+        node instanceof Paragraph ||
+        node instanceof Text ||
+        node instanceof SoftLineBreak)
+    ) {
       return false;
     }
 
-    Node next;
-    for (
-      Node paragraph = document.getFirstChild();
-      paragraph != null;
-      paragraph = next
-    ) {
-      next = paragraph.getNext();
-
-      if (!(paragraph instanceof Paragraph)) {
-        return false;
-      }
-      var text = getOnlyChild(paragraph);
-      if (!(text instanceof Text)) {
+    for (var child : new NodeChildren(node)) {
+      if (!containsNoMarkup(child)) {
         return false;
       }
     }
@@ -75,11 +73,31 @@ public class NoMarkupInDocumentationTraitsValidator extends AbstractValidator {
     return true;
   }
 
-  private static Node getOnlyChild(Node node) {
-    var child = node.getFirstChild();
-    if (child == null || child != node.getLastChild()) {
-      return null;
+  private record NodeChildren(Node parent) implements Iterable<Node> {
+    @Override
+    public Iterator<Node> iterator() {
+      return new NodeIterator(parent.getFirstChild());
     }
-    return child;
+  }
+
+  private static class NodeIterator implements Iterator<Node> {
+
+    private Node next;
+
+    public NodeIterator(Node first) {
+      this.next = first;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return next != null;
+    }
+
+    @Override
+    public Node next() {
+      var result = next;
+      next = next.getNext();
+      return result;
+    }
   }
 }

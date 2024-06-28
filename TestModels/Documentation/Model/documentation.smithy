@@ -3,6 +3,14 @@
 namespace simple.documentation
 
 /// A service that supports the operation of getting things.
+///
+/// This is still part of the same documentation trait
+/// even though it's separated.
+///
+/// It's also important to make sure we don't incorrectly
+/// reject multiline plaintext comments
+/// because we incorrectly think newlines are CommonMark
+/// syntax.
 @aws.polymorph#localService(
   sdkId: "SimpleDocumentation",
   config: SimpleDocumentationConfig,
