@@ -21,8 +21,8 @@ module {:options "--function-syntax:4"} Std.Actions {
 
     ghost var history: seq<(TV, RV)>
     // TODO: Make these --> functions (not ~>, they are useless if they read the heap)
-    ghost const inputF: T -> TV
-    ghost const outputF: R -> RV
+    const inputF: T -> TV
+    const outputF: R -> RV
 
     ghost predicate Valid()
       reads this, Repr
@@ -84,9 +84,9 @@ module {:options "--function-syntax:4"} Std.Actions {
     // Possibly optimized extensions
 
     // Equivalent to DefaultRepeatUntil below, but may be implemented more efficiently.
-    method RepeatUntil(t: T, stop: R -> bool)
+    method RepeatUntil(t: T, stop: RV -> bool)
       requires Valid()
-      requires CanConsume(history, inputF(t))
+      requires EventuallyStops(this, t, stop)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -114,20 +114,27 @@ module {:options "--function-syntax:4"} Std.Actions {
     }
   }
 
-  method DefaultRepeatUntil<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, t: T, stop: R -> bool) 
+  method DefaultRepeatUntil<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, t: T, stop: RV -> bool) 
     requires a.Valid()
-    reads a.Repr
+    requires EventuallyStops(a, t, stop)
+    reads a, a.Repr
     modifies a.Repr
+    ensures a.Valid()
   {
-    // TODO: Actual specs to prove this terminates
+    // TODO: do loops need reads clauses too?
     while (true) 
       invariant a.Valid()
       invariant fresh(a.Repr - old(a.Repr))
+      decreases InvokeUntilTerminationMetric(a, t, stop)
     {
+      label beforeInvoke:
+      assert a.Valid();
       var next := a.Invoke(t);
-      if stop(next) {
+      var nextV := a.outputF(next);
+      if stop(nextV) {
         break;
       }
+      InvokeUntilTerminationMetricDecreased@beforeInvoke(a, t, stop, next);
     }
   }
 
@@ -150,6 +157,10 @@ module {:options "--function-syntax:4"} Std.Actions {
     Seq.Map((e: (T, R)) => e.1, history)
   }
 
+  ghost predicate ConsumesAll<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, next: T) {
+    forall history | a.CanProduce(history) :: a.CanConsume(history, a.inputF(next))
+  }
+
   ghost predicate OnlyProduces<T, TV(!new), R, RV(!new)>(i: Action<T, TV, R, RV>, history: seq<(TV, RV)>, c: RV) 
   {
     i.CanProduce(history) <==> forall e <- history :: e.1 == c
@@ -163,23 +174,23 @@ module {:options "--function-syntax:4"} Std.Actions {
       forall history | a.CanProduce(history) && Inputs(history) == consumed :: a.CanConsume(history, next)
   }
 
-  ghost predicate Terminated<T>(s: seq<T>, c: T, n: nat) {
-    forall i | 0 <= i < |s| :: n <= i <==> s[i] == c
+  ghost predicate Terminated<T>(s: seq<T>, stop: T -> bool, n: nat) {
+    forall i | 0 <= i < |s| :: n <= i <==> stop(s[i])
   }
 
-  lemma TerminatedUndistributes<T>(left: seq<T>, right: seq<T>, c: T, n: nat)
-    requires Terminated(left + right, c, n)
-    ensures Terminated(left, c, n)
-    ensures Terminated(right, c, Max(0, n - |left|))
+  lemma TerminatedUndistributes<T>(left: seq<T>, right: seq<T>, stop: T -> bool, n: nat)
+    requires Terminated(left + right, stop, n)
+    ensures Terminated(left, stop, n)
+    ensures Terminated(right, stop, Max(0, n - |left|))
   {
     assert forall i | 0 <= i < |left| :: left[i] == (left + right)[i];
     assert forall i | 0 <= i < |right| :: right[i] == (left + right)[i + |left|];
   }
 
   // TODO: generalize to "EventuallyProducesSequence"?
-  ghost predicate ProducesTerminatedBy<T, TV(!new), R, RV(!new)>(i: Action<T, TV, R, RV>, c: RV, limit: nat) {
+  ghost predicate ProducesTerminatedBy<T, TV(!new), R, RV(!new)>(i: Action<T, TV, R, RV>, stop: RV -> bool, limit: nat) {
     forall history: seq<(TV, RV)> | i.CanProduce(history) 
-      :: exists n: nat | n <= limit :: Terminated(Outputs(history), c, n)
+      :: exists n: nat | n <= limit :: Terminated(Outputs(history), stop, n)
   }
 
   // Class of actions whose precondition doesn't depend on history (probably needs a better name)
@@ -188,17 +199,78 @@ module {:options "--function-syntax:4"} Std.Actions {
       :: a.CanConsume(history, next) <==> p(next)
   }
 
+  ghost predicate ProducesTerminated<T, TV(!new), R, RV(!new)>(e: Action<T, TV, R, RV>, input: T, stop: RV -> bool, limit: nat) {
+    forall history: seq<(TV, RV)> 
+      | && e.CanProduce(history) 
+        && (forall i <- Inputs(history) :: i == e.inputF(input))
+      ::
+        exists n: nat, r | n <= limit :: stop(r) && Terminated(Outputs(history), stop, n)
+  }
+
+  ghost predicate EventuallyStops<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, input: T, stop: RV -> bool) {
+    && ConsumesAll(a, input)
+    && exists limit :: ProducesTerminated(a, input, stop, limit)
+  }
+
+  ghost predicate IsEnumerator<T, TV(!new)>(a: Action<(), (), Option<T>, Option<TV>>) {
+    EventuallyStops(a, (), (r: Option<TV>) => r.None?)
+  }
+
+  ghost function InvokeUntilBound<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, input: T, stop: RV -> bool): (limit: nat)
+    requires EventuallyStops(a, input, stop)
+    ensures ProducesTerminated(a, input, stop, limit)
+  {
+    var limit: nat :| ProducesTerminated(a, input, stop, limit);
+    limit
+  }
+
+  ghost function InvokeUntilTerminationMetric<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, input: T, stop: RV -> bool): nat
+    requires a.Valid()
+    requires EventuallyStops(a, input, stop)
+    reads a.Repr
+  {
+    var limit := InvokeUntilBound(a, input, stop);
+    var n: nat :| n <= limit && ProducesTerminated(a,input, stop, n);
+    limit - n
+  }
+
+  twostate lemma InvokeUntilTerminationMetricDecreased<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, input: T, stop: RV -> bool, new nextProduced: R)
+    requires old(a.Valid())
+    requires a.Valid()
+    requires EventuallyStops(a, input, stop)
+    requires a.Produced() == old(a.Produced()) + [a.outputF(nextProduced)]
+    requires !stop(a.outputF(nextProduced))
+    ensures InvokeUntilTerminationMetric(a, input, stop) < old(InvokeUntilTerminationMetric(a, input, stop))
+  {
+    // var before := old(a.Produced());
+    // var n: nat :| n <= |before| && Terminated(before, None, n);
+    // var m: nat :| Terminated(a.Produced(), None, m);
+    // if n < |before| {
+    //   assert before[|before| - 1] == None;
+    //   assert a.Produced()[|a.Produced()| - 1] != None;
+    //   assert |a.Produced()| <= m;
+    //   assert a.Produced()[|before| - 1] != None;
+    //   assert false;
+    // }
+    // assert |before| <= n;
+    
+    // TerminatedDefinesEnumerated(before, n);
+    // assert |Enumerated(before)| <= n;
+    // TerminatedDistributesOverConcat(before, [nextProduced], None, 1);
+    // assert Terminated(a.Produced(), None, |a.Produced()|);
+    // TerminatedDefinesEnumerated(a.Produced(), |a.Produced()|);
+  }
+
   // Enumerators
 
   type IEnumerator<T, TV(!new)> = Action<(), (), T, TV>
-  type Enumerator<T, TV(!new)> = a: Action<(), (), Option<T>, Option<TV>> | exists limit: nat :: ProducesTerminatedBy(a, None, limit) witness *
+  type Enumerator<T, TV(!new)> = a: Action<(), (), Option<T>, Option<TV>> | IsEnumerator(a) witness *
   
-
   // Aggregators
 
   // TODO: Names need improvement
   type IAggregator<T, TV(!new)> = Action<T, TV, (), ()>
-  type Aggregator<T, TV(!new)> = a: Action<T, TV, bool, bool> | exists limit: nat :: ProducesTerminatedBy(a, false, limit) witness *
+  type Aggregator<T, TV(!new)> = a: Action<T, TV, bool, bool> | exists limit: nat :: ProducesTerminatedBy(a, r => !r, limit) witness *
   type Accumulator<T, TV(!new)> = Action<Option<T>, Option<TV>, (), ()> // | exists limit :: ConsumesTerminatedBy(a, None, limit) witness *
 
   // Streams
@@ -307,7 +379,7 @@ module {:options "--function-syntax:4"} Std.Actions {
 
     method RepeatUntil(t: T, stop: (()) -> bool)
       requires Valid()
-      requires CanConsume(history, inputF(t))
+      requires EventuallyStops(this, t, stop)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -378,9 +450,9 @@ module {:options "--function-syntax:4"} Std.Actions {
       Update(t, r);
     }
 
-    method RepeatUntil(t: (), stop: Option<T> -> bool)
+    method RepeatUntil(t: (), stop: Option<TV> -> bool)
       requires Valid()
-      requires CanConsume(history, t)
+      requires EventuallyStops(this, t, stop)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -466,9 +538,9 @@ module {:options "--function-syntax:4"} Std.Actions {
       assert Valid();
     }
 
-    method RepeatUntil(t: (), stop: Box -> bool)
+    method RepeatUntil(t: (), stop: nat -> bool)
       requires Valid()
-      requires CanConsume(history, t)
+      requires EventuallyStops(this, t, stop)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -555,9 +627,9 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
 
-    method RepeatUntil(t: (), stop: Option<T> -> bool)
+    method RepeatUntil(t: (), stop: Option<TV> -> bool)
       requires Valid()
-      requires CanConsume(history, t)
+      requires EventuallyStops(this, t, stop)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -624,7 +696,7 @@ module {:options "--function-syntax:4"} Std.Actions {
 
     method RepeatUntil(t: Option<T>, stop: (()) -> bool)
       requires Valid()
-      requires CanConsume(history, inputF(t))
+      requires EventuallyStops(this, t, stop)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -713,7 +785,7 @@ module {:options "--function-syntax:4"} Std.Actions {
 
     method RepeatUntil(t: Option<U>, stop: (()) -> bool)
       requires Valid()
-      requires CanConsume(history, inputF(t))
+      requires EventuallyStops(this, t, stop)
       reads Reads(t)
       modifies Repr
       ensures Valid()
