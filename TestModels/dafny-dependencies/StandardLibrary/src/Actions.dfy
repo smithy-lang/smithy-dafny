@@ -117,12 +117,14 @@ module {:options "--function-syntax:4"} Std.Actions {
   method DefaultRepeatUntil<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, t: T, stop: RV -> bool) 
     requires a.Valid()
     requires EventuallyStops(a, t, stop)
-    reads a, a.Repr
+    reads a.Repr
     modifies a.Repr
     ensures a.Valid()
   {
-    // TODO: do loops need reads clauses too?
+    // TODO: loops need to support reads clauses as well!
+
     while (true) 
+      modifies a.Repr
       invariant a.Valid()
       invariant fresh(a.Repr - old(a.Repr))
       decreases InvokeUntilTerminationMetric(a, t, stop)
@@ -204,7 +206,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       | && e.CanProduce(history) 
         && (forall i <- Inputs(history) :: i == e.inputF(input))
       ::
-        exists n: nat, r | n <= limit :: stop(r) && Terminated(Outputs(history), stop, n)
+        exists n: nat | n <= limit :: Terminated(Outputs(history), stop, n)
   }
 
   ghost predicate EventuallyStops<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, input: T, stop: RV -> bool) {
@@ -230,7 +232,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     reads a.Repr
   {
     var limit := InvokeUntilBound(a, input, stop);
-    var n: nat :| n <= limit && ProducesTerminated(a,input, stop, n);
+    var n: nat :| n <= limit && ProducesTerminated(a, input, stop, n);
     limit - n
   }
 
@@ -238,27 +240,30 @@ module {:options "--function-syntax:4"} Std.Actions {
     requires old(a.Valid())
     requires a.Valid()
     requires EventuallyStops(a, input, stop)
+    requires forall i <- old(a.Consumed()) :: i == a.inputF(input)
+    requires a.Consumed() == old(a.Consumed()) + [a.inputF(input)]
     requires a.Produced() == old(a.Produced()) + [a.outputF(nextProduced)]
     requires !stop(a.outputF(nextProduced))
     ensures InvokeUntilTerminationMetric(a, input, stop) < old(InvokeUntilTerminationMetric(a, input, stop))
   {
-    // var before := old(a.Produced());
-    // var n: nat :| n <= |before| && Terminated(before, None, n);
-    // var m: nat :| Terminated(a.Produced(), None, m);
-    // if n < |before| {
-    //   assert before[|before| - 1] == None;
-    //   assert a.Produced()[|a.Produced()| - 1] != None;
-    //   assert |a.Produced()| <= m;
-    //   assert a.Produced()[|before| - 1] != None;
-    //   assert false;
-    // }
-    // assert |before| <= n;
-    
-    // TerminatedDefinesEnumerated(before, n);
-    // assert |Enumerated(before)| <= n;
-    // TerminatedDistributesOverConcat(before, [nextProduced], None, 1);
-    // assert Terminated(a.Produced(), None, |a.Produced()|);
-    // TerminatedDefinesEnumerated(a.Produced(), |a.Produced()|);
+    var before := old(a.Produced());
+    var after := a.Produced();
+    var limit := InvokeUntilBound(a, input, stop);
+    var n: nat :| n <= limit && Terminated(before, stop, n);
+    var m: nat :| m <= limit && Terminated(after, stop, m);
+    if n < |before| {
+      assert stop(before[|before| - 1]);
+      assert !stop(a.Produced()[|a.Produced()| - 1]);
+      assert |a.Produced()| <= m;
+      assert !stop(a.Produced()[|before| - 1]);
+      assert false;
+    } else {
+      // TerminatedDefinesEnumerated(before, n);
+      // assert |Enumerated(before)| <= n;
+      // TerminatedDistributesOverConcat(before, [nextProduced], None, 1);
+      // assert Terminated(a.Produced(), None, |a.Produced()|);
+      // TerminatedDefinesEnumerated(a.Produced(), |a.Produced()|);
+    }
   }
 
   // Enumerators
@@ -272,47 +277,6 @@ module {:options "--function-syntax:4"} Std.Actions {
   type IAggregator<T, TV(!new)> = Action<T, TV, (), ()>
   type Aggregator<T, TV(!new)> = a: Action<T, TV, bool, bool> | exists limit: nat :: ProducesTerminatedBy(a, r => !r, limit) witness *
   type Accumulator<T, TV(!new)> = Action<Option<T>, Option<TV>, (), ()> // | exists limit :: ConsumesTerminatedBy(a, None, limit) witness *
-
-  // Streams
-
-  // BETTER IDEA!!!
-  // 
-  // RepeatUntil(t: T, stop: R) returns (Action<(), ()>)
-  //   - invokes 1 or more times until stop is returned
-  //   - requires CanConsume(<(t, !stop)*>, t)
-  //   - NOT stopFn: R -> bool because then externs can't specialize
-  //     - BUT instead: Compose(e, Compose(a, Function(stopFn))).RepeatUntil(t, true)
-  // 
-  // ForEach(e: Action<(), Option<T>>, a: Action<Option<T>, bool>)
-  //   = Compose(e, a).RepeatUntil((), false)
-
-  trait Stream<T, TV(!new)> extends Action<(), (), Option<T>, Option<TV>> {
-
-    // A Stream is just a specialization of an Enumerator
-    // with the potentially-optimized ForEach().
-    // All implementors have to provide a body for this lemma
-    // to prove they are in fact enumerators.
-    // (think of this like `extends Enumerator<T>` which you can't actually say)
-    lemma IsEnumerator()
-      ensures (this as object) is Enumerator<T, TV>
-
-    // Pass every value in sequence into the given accumulator.
-    // Equivalent to DefaultForEach below,
-    // but may be implemented more efficiently with concurrent execution
-    // in the target language.
-    method ForEach(a: Accumulator<T, TV>)
-      requires Valid()
-      requires a.Valid()
-      requires Repr !! a.Repr 
-      // The stream has produced all values
-      // TODO: Needs to be more precise about producing exactly one None.
-      // Something like EnumeratorDone(this)
-      ensures 0 < |Produced()| && Seq.Last(Produced()) == None
-      // Each value was fed into the accumulator in sequence
-      ensures Produced() == a.Consumed()
-
-    
-  }
 
   class ArrayAggregator<T, TV(!new)> extends Action<T, TV, (), ()> {
 
@@ -713,10 +677,10 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   }
 
-  trait {:termination false} Pipeline<U, UV(!new), T, TV(!new)> extends Stream<T, TV> {
+  trait {:termination false} Pipeline<U, UV(!new), T, TV(!new)> extends Action<(), (), Option<T>, Option<TV>> {
     
 
-    const upstream: Stream<U, UV>
+    const upstream: Enumerator<U, UV>
     const buffer: Collector<T, TV>
 
     method {:verify false} Invoke(nothing: ()) returns (t: Option<T>) {
@@ -737,11 +701,11 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
 
-    method {:verify false} ForEach(a: Accumulator<T, TV>)
-    {
-      var a' := new PipelineProcessor(this, a);
-      upstream.ForEach(a');
-    }
+    // method {:verify false} ForEach(a: Accumulator<T, TV>)
+    // {
+    //   var a' := new PipelineProcessor(this, a);
+    //   upstream.ForEach(a');
+    // }
 
     method Process(u: Option<U>, a: Accumulator<T, TV>)
 
