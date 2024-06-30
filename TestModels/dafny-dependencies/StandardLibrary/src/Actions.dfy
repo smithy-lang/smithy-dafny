@@ -87,6 +87,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     method RepeatUntil(t: T, stop: RV -> bool)
       requires Valid()
       requires EventuallyStops(this, t, stop)
+      requires forall i <- Consumed() :: i == inputF(t)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -117,6 +118,7 @@ module {:options "--function-syntax:4"} Std.Actions {
   method DefaultRepeatUntil<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, t: T, stop: RV -> bool) 
     requires a.Valid()
     requires EventuallyStops(a, t, stop)
+    requires forall i <- a.Consumed() :: i == a.inputF(t)
     reads a.Repr
     modifies a.Repr
     ensures a.Valid()
@@ -127,6 +129,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       modifies a.Repr
       invariant a.Valid()
       invariant fresh(a.Repr - old(a.Repr))
+      invariant forall i <- a.Consumed() :: i == a.inputF(t)
       decreases InvokeUntilTerminationMetric(a, t, stop)
     {
       label beforeInvoke:
@@ -147,6 +150,13 @@ module {:options "--function-syntax:4"} Std.Actions {
     if a < b
     then b
     else a
+  }
+
+  function Min(a: int, b: int): int
+  {
+    if a < b
+    then a
+    else b
   }
 
   // Common action invariants
@@ -179,6 +189,12 @@ module {:options "--function-syntax:4"} Std.Actions {
   ghost predicate Terminated<T>(s: seq<T>, stop: T -> bool, n: nat) {
     forall i | 0 <= i < |s| :: n <= i <==> stop(s[i])
   }
+
+  lemma TerminatedDistributes<T>(left: seq<T>, right: seq<T>, stop: T -> bool, n: nat)
+    requires Terminated(left, stop, |left|)
+    requires Terminated(right, stop, n)
+    ensures Terminated(left + right, stop, |left| + n)
+  {}
 
   lemma TerminatedUndistributes<T>(left: seq<T>, right: seq<T>, stop: T -> bool, n: nat)
     requires Terminated(left + right, stop, n)
@@ -229,11 +245,34 @@ module {:options "--function-syntax:4"} Std.Actions {
   ghost function InvokeUntilTerminationMetric<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, input: T, stop: RV -> bool): nat
     requires a.Valid()
     requires EventuallyStops(a, input, stop)
+    requires forall i <- a.Consumed() :: i == a.inputF(input)
     reads a.Repr
   {
     var limit := InvokeUntilBound(a, input, stop);
-    var n: nat :| n <= limit && ProducesTerminated(a, input, stop, n);
-    limit - n
+    var n: nat :| n <= limit && Terminated(a.Produced(), stop, n);
+    TerminatedDefinesNonTerminalCount(a.Produced(), stop, n);
+    limit - NonTerminalCount(a.Produced(), stop)
+  }
+
+  function NonTerminalCount<T>(produced: seq<T>, stop: T -> bool): nat {
+    if |produced| == 0 || stop(produced[0]) then
+      0
+    else
+      1 + NonTerminalCount(produced[1..], stop)
+  }
+
+  lemma TerminatedDefinesNonTerminalCount<T>(s: seq<T>, stop: T -> bool, n: nat) 
+    requires Terminated(s, stop, n)
+    ensures NonTerminalCount(s, stop) == Min(|s|, n)
+  {
+    if n == 0 || |s| == 0 {
+    } else {
+      if stop(s[0]) {
+      } else {
+        assert 1 <= NonTerminalCount(s, stop);
+        TerminatedDefinesNonTerminalCount(s[1..], stop, n - 1);
+      }
+    }
   }
 
   twostate lemma InvokeUntilTerminationMetricDecreased<T, TV(!new), R, RV(!new)>(a: Action<T, TV, R, RV>, input: T, stop: RV -> bool, new nextProduced: R)
@@ -258,11 +297,11 @@ module {:options "--function-syntax:4"} Std.Actions {
       assert !stop(a.Produced()[|before| - 1]);
       assert false;
     } else {
-      // TerminatedDefinesEnumerated(before, n);
-      // assert |Enumerated(before)| <= n;
-      // TerminatedDistributesOverConcat(before, [nextProduced], None, 1);
-      // assert Terminated(a.Produced(), None, |a.Produced()|);
-      // TerminatedDefinesEnumerated(a.Produced(), |a.Produced()|);
+      TerminatedDefinesNonTerminalCount(before, stop, n);
+      assert NonTerminalCount(before, stop) <= n;
+      TerminatedDistributes(before, [a.outputF(nextProduced)], stop, 1);
+      assert Terminated(after, stop, |after|);
+      TerminatedDefinesNonTerminalCount(after, stop, |after|);
     }
   }
 
@@ -344,6 +383,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     method RepeatUntil(t: T, stop: (()) -> bool)
       requires Valid()
       requires EventuallyStops(this, t, stop)
+      requires forall i <- Consumed() :: i == inputF(t)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -417,6 +457,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     method RepeatUntil(t: (), stop: Option<TV> -> bool)
       requires Valid()
       requires EventuallyStops(this, t, stop)
+      requires forall i <- Consumed() :: i == inputF(t)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -505,6 +546,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     method RepeatUntil(t: (), stop: nat -> bool)
       requires Valid()
       requires EventuallyStops(this, t, stop)
+      requires forall i <- Consumed() :: i == inputF(t)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -594,6 +636,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     method RepeatUntil(t: (), stop: Option<TV> -> bool)
       requires Valid()
       requires EventuallyStops(this, t, stop)
+      requires forall i <- Consumed() :: i == inputF(t)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -661,6 +704,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     method RepeatUntil(t: Option<T>, stop: (()) -> bool)
       requires Valid()
       requires EventuallyStops(this, t, stop)
+      requires forall i <- Consumed() :: i == inputF(t)
       reads Reads(t)
       modifies Repr
       ensures Valid()
@@ -750,6 +794,7 @@ module {:options "--function-syntax:4"} Std.Actions {
     method RepeatUntil(t: Option<U>, stop: (()) -> bool)
       requires Valid()
       requires EventuallyStops(this, t, stop)
+      requires forall i <- Consumed() :: i == inputF(t)
       reads Reads(t)
       modifies Repr
       ensures Valid()
