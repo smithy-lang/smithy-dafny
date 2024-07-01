@@ -108,26 +108,18 @@ public class ToDafnyAwsV2Constants {
   protected static String GENERATE_CONVERT_OPAQUE_ERROR =
     """
     public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
-            software.amazon.awssdk.services.kms.model.KmsException nativeValue
+            java.lang.Exception nativeValue
     ) {
-      Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
-      message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
-            Wrappers_Compile.Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
-          : Wrappers_Compile.Option.create_None();
-      return new software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque(message);
+      return software.amazon.cryptography.services.kms.internaldafny.types.Error.create_Opaque(nativeValue);
     }
     """;
 
   protected static String GENERATE_CONVERT_OPAQUE_ERROR_WITH_TYPE_DESCRIPTORS =
     """
     public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
-            software.amazon.awssdk.services.kms.model.KmsException nativeValue
+      java.lang.Exception nativeValue
     ) {
-      Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
-      message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
-            Wrappers_Compile.Option.create_Some(dafny.DafnySequence._typeDescriptor(dafny.TypeDescriptor.CHAR), software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
-          : Wrappers_Compile.Option.create_None(dafny.DafnySequence._typeDescriptor(dafny.TypeDescriptor.CHAR));
-      return new software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque(message);
+      return software.amazon.cryptography.services.kms.internaldafny.types.Error.create_Opaque(nativeValue);
     }
     """;
 
