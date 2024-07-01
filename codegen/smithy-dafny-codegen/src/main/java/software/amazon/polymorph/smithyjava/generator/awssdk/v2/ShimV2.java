@@ -231,7 +231,6 @@ public class ShimV2 extends Generator {
             )
           );
       });
-    TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
     builder
       .nextControlFlow(
         "catch ($T ex)",
