@@ -175,6 +175,7 @@ public class ToNativeAwsV2 extends ToNative {
       .addMethods(convertRelevant)
       .addMethods(convertServiceErrors)
       .addMethod(modeledService(subject.serviceShape))
+      .addMethod(errorOpaque())
       .build();
   }
 
@@ -510,5 +511,62 @@ public class ToNativeAwsV2 extends ToNative {
       });
     method.addStatement("return $L.build()", VAR_BUILDER);
     return method.build();
+  }
+
+  protected MethodSpec errorOpaque() {
+    final String methodName = "Error";
+    final TypeName inputType = subject.dafnyNameResolver.classForOpaqueError();
+    final ClassName returnType = ClassName.get(RuntimeException.class);
+    return initializeMethodSpec(
+      methodName,
+      inputType,
+      returnType
+    )
+      // If obj is an instance of the Service's Base Exception
+      .beginControlFlow(
+        "if ($L.$L() instanceof $T)",
+        VAR_INPUT,
+        Dafny.datatypeDeconstructor("obj"),
+        subject.nativeNameResolver.baseErrorForService()
+      )
+      .addStatement(
+        "return ($T) $L.$L()",
+        subject.nativeNameResolver.baseErrorForService(),
+        VAR_INPUT,
+        Dafny.datatypeDeconstructor("obj")
+      )
+      // If obj is ANY Exception
+      .nextControlFlow("else if ($L.$L() instanceof $T)",
+        VAR_INPUT,
+        Dafny.datatypeDeconstructor("obj"),
+        Exception.class
+      )
+      .addStatement(
+        "return ($T) $L.$L()",
+        RuntimeException.class,
+        VAR_INPUT,
+        Dafny.datatypeDeconstructor("obj")
+      )
+      // If String is set
+      .nextControlFlow("else if ($L.$L().$L())",
+        VAR_INPUT,
+        Dafny.datatypeDeconstructor("message"),
+        Dafny.datatypeConstructorIs("Some")
+      )
+      .addStatement("final $T message = $L($L.$L().$L())",
+        String.class,
+        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING),
+        VAR_INPUT,
+        Dafny.datatypeDeconstructor("message"),
+        Dafny.datatypeDeconstructor("value")
+      )
+      .addStatement("return new $T(message)", RuntimeException.class)
+      .endControlFlow()
+      // If obj is not ANY exception and String is not set, Give Up with IllegalStateException
+      .addStatement("return new $T(String.format($S, $L))",
+        IllegalStateException.class,
+        "Unknown error thrown while calling " + AwsSdkNativeV2.shortNameForService(subject.serviceShape) + ". %s",
+        VAR_INPUT)
+      .build();
   }
 }

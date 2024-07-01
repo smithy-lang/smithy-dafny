@@ -60,6 +60,10 @@ public class AwsSdkNativeV2 extends Native {
     String,
     String
   > AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
+  private static final Map<
+    String,
+    String
+    > AWS_SERVICE_NAMESPACE_TO_SHORT_NAME;
 
   static {
     // The namespaces used as keys in these maps correspond to the Smithy namespace,
@@ -83,6 +87,13 @@ public class AwsSdkNativeV2 extends Native {
         Map.entry("com.amazonaws.kms", "KmsException"),
         Map.entry("com.amazonaws.dynamodb", "DynamoDbException"),
         Map.entry("com.amazonaws.s3", "S3Exception")
+      );
+    // These short names are used for convince in docs and errors messages.
+    AWS_SERVICE_NAMESPACE_TO_SHORT_NAME =
+      Map.ofEntries(
+        Map.entry("com.amazonaws.kms", "KMS"),
+        Map.entry("com.amazonaws.dynamodb", "DDB"),
+        Map.entry("com.amazonaws.s3", "S3")
       );
   }
 
@@ -112,6 +123,15 @@ public class AwsSdkNativeV2 extends Native {
           )
       );
     }
+    boolean knownShortName =
+      AWS_SERVICE_NAMESPACE_TO_SHORT_NAME.containsKey(namespace);
+    if (!knownShortName) {
+      throw new IllegalArgumentException(
+        "Polymorph does not know this service's short name: %s".formatted(
+          namespace
+        )
+      );
+    }
   }
 
   /**
@@ -135,6 +155,20 @@ public class AwsSdkNativeV2 extends Native {
       packageNameForAwsSdkV2Shape(shape),
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.get(awsServiceSmithyNamespace)
     );
+  }
+
+  public static String shortNameForService(ServiceShape shape) {
+    String awsServiceSmithyNamespace = shape.toShapeId().getNamespace();
+    boolean knownShortName =
+      AWS_SERVICE_NAMESPACE_TO_SHORT_NAME.containsKey(awsServiceSmithyNamespace);
+    if (!knownShortName) {
+      throw new IllegalArgumentException(
+        "Polymorph does not know this service's short name: %s".formatted(
+          awsServiceSmithyNamespace
+        )
+      );
+    }
+    return AWS_SERVICE_NAMESPACE_TO_SHORT_NAME.get(awsServiceSmithyNamespace);
   }
 
   /**

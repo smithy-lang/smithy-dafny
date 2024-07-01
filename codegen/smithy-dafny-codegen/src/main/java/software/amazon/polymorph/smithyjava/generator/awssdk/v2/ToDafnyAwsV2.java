@@ -184,6 +184,7 @@ public class ToDafnyAwsV2 extends ToDafny {
       .addMethods(convertServiceErrors)
       .addMethods(convertEnumEnum)
       .addMethods(convertEnumString)
+      .addMethod(generateConvertOpaqueServiceError())
       .addMethod(generateConvertOpaqueError())
       .addMethod(modeledService(subject.serviceShape))
       .build();
@@ -681,44 +682,9 @@ public class ToDafnyAwsV2 extends ToDafny {
       .build();
   }
 
-  MethodSpec generateConvertOpaqueError() {
+  MethodSpec generateConvertOpaqueServiceError() {
     // Opaque Errors are not in the model,
     // so we cannot use any of our helper methods for this method.
-
-    CodeBlock memberDeclaration = CodeBlock.of(
-      "$T $L",
-      ParameterizedTypeName.get(
-        ClassName.get("Wrappers_Compile", "Option"),
-        ParameterizedTypeName.get(
-          software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
-          WildcardTypeName.subtypeOf(Character.class)
-        )
-      ),
-      "message"
-    );
-    // This is memberAssignment from above,
-    // but with calls to dafnyNameResolver replaced with their expected response.
-    CodeBlock stringTypeDescriptor = Dafny.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(
-      ShapeType.STRING
-    );
-    CodeBlock memberAssignment = CodeBlock.of(
-      "$L = $T.nonNull($L) ?\n$L\n: $L",
-      "message",
-      ClassName.get(Objects.class),
-      "nativeValue.getMessage()",
-      subject.dafnyNameResolver.createSome(
-        stringTypeDescriptor,
-        CodeBlock.of(
-          "$T.$L($L)",
-          COMMON_TO_DAFNY_SIMPLE,
-          SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
-            .get(ShapeType.STRING)
-            .methodName(),
-          "nativeValue.getMessage()"
-        )
-      ),
-      subject.dafnyNameResolver.createNone(stringTypeDescriptor)
-    );
     return MethodSpec
       .methodBuilder("Error")
       .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -727,11 +693,27 @@ public class ToDafnyAwsV2 extends ToDafny {
         subject.nativeNameResolver.baseErrorForService(),
         "nativeValue"
       )
-      .addStatement(memberDeclaration)
-      .addStatement(memberAssignment)
       .addStatement(
-        "return new $T(message)",
-        subject.dafnyNameResolver.classForOpaqueError()
+        "return $T.create_Opaque(nativeValue)",
+        subject.dafnyNameResolver.abstractClassForError()
+      )
+      .build();
+  }
+
+  MethodSpec generateConvertOpaqueError() {
+    // Opaque Errors are not in the model,
+    // so we cannot use any of our helper methods for this method.
+    return MethodSpec
+      .methodBuilder("Error")
+      .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+      .returns(subject.dafnyNameResolver.abstractClassForError())
+      .addParameter(
+        Exception.class,
+        "nativeValue"
+      )
+      .addStatement(
+        "return $T.create_Opaque(nativeValue)",
+        subject.dafnyNameResolver.abstractClassForError()
       )
       .build();
   }
