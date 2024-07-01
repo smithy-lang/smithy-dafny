@@ -30,7 +30,8 @@ public class DafnyNameResolverHelpers {
   public static String dafnyExternNamespaceForNamespace(
     final String namespace
   ) {
-    return packageNameForNamespace(namespace) + "Types";
+//    return packageNameForNamespace(namespace) + "Types";
+    return DafnyNameResolver.dafnyExternNamespace(namespace) + ".types";
 //    return DafnyNameResolver.dafnyTypesModuleExternNamespace(namespace);
   }
 

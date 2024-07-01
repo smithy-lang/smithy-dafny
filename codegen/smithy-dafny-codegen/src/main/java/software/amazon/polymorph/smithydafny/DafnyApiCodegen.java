@@ -129,7 +129,7 @@ public class DafnyApiCodegen {
       namespace
     );
     final TokenTree typesModuleHeader = Token.of(
-      "module %s".formatted(
+      "module {:extern \"types\"} %s".formatted(
           typesModuleName
         )
     );

@@ -5,9 +5,9 @@ package WrappedSimpleConstraintsService;
 import software.amazon.cryptography.standardlibrary.internaldafny.Wrappers.Result;
 import simple.constraints.SimpleConstraints;
 import simple.constraints.ToNative;
-import simple.constraints.internaldafny.SimpleConstraintsTypes.Error;
-import simple.constraints.internaldafny.SimpleConstraintsTypes.ISimpleConstraintsClient;
-import simple.constraints.internaldafny.SimpleConstraintsTypes.SimpleConstraintsConfig;
+import simple.constraints.internaldafny.types.Error;
+import simple.constraints.internaldafny.types.ISimpleConstraintsClient;
+import simple.constraints.internaldafny.types.SimpleConstraintsConfig;
 import simple.constraints.wrapped.TestSimpleConstraints;
 
 public class __default extends _ExternBase___default {
