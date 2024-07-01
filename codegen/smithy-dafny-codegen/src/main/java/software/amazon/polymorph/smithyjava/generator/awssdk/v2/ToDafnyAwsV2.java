@@ -707,10 +707,7 @@ public class ToDafnyAwsV2 extends ToDafny {
       .methodBuilder("Error")
       .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
       .returns(subject.dafnyNameResolver.abstractClassForError())
-      .addParameter(
-        Exception.class,
-        "nativeValue"
-      )
+      .addParameter(Exception.class, "nativeValue")
       .addStatement(
         "return $T.create_Opaque(nativeValue)",
         subject.dafnyNameResolver.abstractClassForError()

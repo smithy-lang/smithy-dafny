@@ -517,45 +517,46 @@ public class ToNativeAwsV2 extends ToNative {
     final String methodName = "Error";
     final TypeName inputType = subject.dafnyNameResolver.classForOpaqueError();
     final ClassName returnType = ClassName.get(RuntimeException.class);
-    return initializeMethodSpec(
-      methodName,
-      inputType,
-      returnType
-    )
+    return initializeMethodSpec(methodName, inputType, returnType)
       // If obj is an instance of the Service's Base Exception
       .beginControlFlow(
-        "if ($L.$L() instanceof $T)",
+        "if ($L.$L instanceof $T)",
         VAR_INPUT,
         Dafny.datatypeDeconstructor("obj"),
         subject.nativeNameResolver.baseErrorForService()
       )
       .addStatement(
-        "return ($T) $L.$L()",
+        "return ($T) $L.$L",
         subject.nativeNameResolver.baseErrorForService(),
         VAR_INPUT,
         Dafny.datatypeDeconstructor("obj")
       )
       // If obj is ANY Exception
-      .nextControlFlow("else if ($L.$L() instanceof $T)",
+      .nextControlFlow(
+        "else if ($L.$L instanceof $T)",
         VAR_INPUT,
         Dafny.datatypeDeconstructor("obj"),
         Exception.class
       )
       .addStatement(
-        "return ($T) $L.$L()",
+        "return ($T) $L.$L",
         RuntimeException.class,
         VAR_INPUT,
         Dafny.datatypeDeconstructor("obj")
       )
       // If String is set
-      .nextControlFlow("else if ($L.$L().$L())",
+      .nextControlFlow(
+        "else if ($L.$L.$L())",
         VAR_INPUT,
         Dafny.datatypeDeconstructor("message"),
         Dafny.datatypeConstructorIs("Some")
       )
-      .addStatement("final $T message = $L($L.$L().$L())",
+      .addStatement(
+        "final $T message = $L($L.$L.$L)",
         String.class,
-        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING),
+        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
+          .get(ShapeType.STRING)
+          .asNormalReference(),
         VAR_INPUT,
         Dafny.datatypeDeconstructor("message"),
         Dafny.datatypeDeconstructor("value")
@@ -563,10 +564,14 @@ public class ToNativeAwsV2 extends ToNative {
       .addStatement("return new $T(message)", RuntimeException.class)
       .endControlFlow()
       // If obj is not ANY exception and String is not set, Give Up with IllegalStateException
-      .addStatement("return new $T(String.format($S, $L))",
+      .addStatement(
+        "return new $T(String.format($S, $L))",
         IllegalStateException.class,
-        "Unknown error thrown while calling " + AwsSdkNativeV2.shortNameForService(subject.serviceShape) + ". %s",
-        VAR_INPUT)
+        "Unknown error thrown while calling " +
+        AwsSdkNativeV2.shortNameForService(subject.serviceShape) +
+        ". %s",
+        VAR_INPUT
+      )
       .build();
   }
 }
