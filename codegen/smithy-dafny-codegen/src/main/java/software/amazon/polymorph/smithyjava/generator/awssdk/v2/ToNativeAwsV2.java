@@ -520,9 +520,13 @@ public class ToNativeAwsV2 extends ToNative {
     return initializeMethodSpec(methodName, inputType, returnType)
       .addComment("While the first two cases are logically identical,")
       .addComment("there is a semantic distinction.")
-      .addComment("An un-modeled Service Error is different from a Java Heap Exhaustion error.")
+      .addComment(
+        "An un-modeled Service Error is different from a Java Heap Exhaustion error."
+      )
       .addComment("In the future, Smithy-Dafny MAY allow for this distinction.")
-      .addComment("Which would allow Dafny developers to treat the two differently.")
+      .addComment(
+        "Which would allow Dafny developers to treat the two differently."
+      )
       // If obj is an instance of the Service's Base Exception
       .beginControlFlow(
         "if ($L.$L instanceof $T)",
@@ -557,8 +561,13 @@ public class ToNativeAwsV2 extends ToNative {
         Dafny.datatypeConstructorIs("Some")
       )
       // if not null, stringify the object
-      .addStatement("final String suffix = $L.dtor_obj() != null ? String.format($S, $L.dtor_obj()) : $S;",
-        VAR_INPUT, "  Unknown Object: %s", VAR_INPUT, "")
+      .addStatement(
+        "final String suffix = $L.dtor_obj() != null ? String.format($S, $L.dtor_obj()) : $S;",
+        VAR_INPUT,
+        "  Unknown Object: %s",
+        VAR_INPUT,
+        ""
+      )
       // Convert String from Dafny
       .addStatement(
         "final $T message = $L($L.$L.$L) + suffix",
