@@ -21,7 +21,7 @@ class NativeWrapperCodegenTestConstants {
     """
     catch (Exception e)
     {
-        return Wrappers_Compile
+        return Wrappers
             .Result<%s, test.foobar.internaldafny.types._IError>
             .create_Failure(TypeConversion.ToDafny_CommonError(e));
     }
@@ -29,7 +29,7 @@ class NativeWrapperCodegenTestConstants {
 
   static String DO_OUTPUT =
     """
-    public Wrappers_Compile._IResult<
+    public Wrappers._IResult<
         %s,
         test.foobar.internaldafny.types._IError
     > DoSomethingWithOutput()
@@ -42,7 +42,7 @@ class NativeWrapperCodegenTestConstants {
                 $"{_impl}._DoSomethingWithOutput returned null, should be {typeof(%s)}"
             );
             %s
-            return Wrappers_Compile.Result<
+            return Wrappers.Result<
                 %s,
                 test.foobar.internaldafny.types._IError
             >.create_Success(
@@ -53,7 +53,7 @@ class NativeWrapperCodegenTestConstants {
         %s
     }
 
-    public Wrappers_Compile._IResult<%s, test.foobar.internaldafny.types._IError>
+    public Wrappers._IResult<%s, test.foobar.internaldafny.types._IError>
         DoSomethingWithOutput_k()
     {
         throw new FoobarServiceException("Not supported at this time.");
@@ -104,7 +104,7 @@ class NativeWrapperCodegenTestConstants {
 
   static String DO_INPUT =
     """
-    public Wrappers_Compile._IResult<
+    public Wrappers._IResult<
         _System._ITuple0,
         test.foobar.internaldafny.types._IError
     > DoSomethingWithInput(test.foobar.internaldafny.types._IDoSomethingInput input)
@@ -115,14 +115,14 @@ class NativeWrapperCodegenTestConstants {
         try
         {
             _impl.DoSomethingWithInput(nativeInput);
-            return Wrappers_Compile.Result<
+            return Wrappers.Result<
                 _System._ITuple0,
                 test.foobar.internaldafny.types._IError
             >.create_Success(Tuple0.create());
         }
         %s
     }
-    public Wrappers_Compile._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> DoSomethingWithInput_k(test.foobar.internaldafny.types._IDoSomethingInput input)
+    public Wrappers._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> DoSomethingWithInput_k(test.foobar.internaldafny.types._IDoSomethingInput input)
     {
         throw new FoobarServiceException("Not supported at this time.");
     }
@@ -130,7 +130,7 @@ class NativeWrapperCodegenTestConstants {
 
   static String DO =
     """
-    public Wrappers_Compile._IResult<
+    public Wrappers._IResult<
         _System._ITuple0,
         test.foobar.internaldafny.types._IError
     > Do()
@@ -138,7 +138,7 @@ class NativeWrapperCodegenTestConstants {
         try
         {
             _impl.Do();
-            return Wrappers_Compile.Result<
+            return Wrappers.Result<
                 _System._ITuple0,
                 test.foobar.internaldafny.types._IError
             >.create_Success(Tuple0.create());
@@ -146,7 +146,7 @@ class NativeWrapperCodegenTestConstants {
         %s
     }
 
-    public Wrappers_Compile._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> Do_k()
+    public Wrappers._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> Do_k()
     {
         throw new FoobarServiceException("Not supported at this time.");
     }
@@ -196,7 +196,7 @@ class NativeWrapperCodegenTestConstants {
 
     using System;
     using _System;
-    using Wrappers_Compile;
+    using software.amazon.cryptography.standardlibrary.internaldafny.Wrappers;
     """;
 
   static String COMPLETE = "%s\n%s".formatted(PRELUDE, COMPLETE_CLASS);

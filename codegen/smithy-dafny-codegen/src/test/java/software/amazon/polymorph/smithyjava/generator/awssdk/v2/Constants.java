@@ -97,7 +97,7 @@ public class Constants {
     """
     package software.amazon.cryptography.services.kms.internaldafny;
 
-    import Wrappers_Compile.Result;
+    import Wrappers.Result;
     import dafny.Tuple0;
     import java.lang.Override;
     import java.lang.String;
@@ -137,7 +137,7 @@ public class Constants {
     """
     package software.amazon.cryptography.services.kms.internaldafny;
 
-    import Wrappers_Compile.Result;
+    import Wrappers.Result;
     import dafny.Tuple0;
     import java.lang.Override;
     import java.lang.String;

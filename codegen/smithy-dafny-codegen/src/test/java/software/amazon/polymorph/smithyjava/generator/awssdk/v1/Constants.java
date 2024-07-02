@@ -47,7 +47,7 @@ public class Constants {
     import software.amazon.cryptography.services.kms.internaldafny.types.Error;
     import software.amazon.cryptography.services.kms.internaldafny.types.IKeyManagementServiceClient;
 
-    import Wrappers_Compile.Result;
+    import Wrappers.Result;
 
     import com.amazonaws.services.kms.AWSKMS;
     import com.amazonaws.services.kms.model.AWSKMSException;

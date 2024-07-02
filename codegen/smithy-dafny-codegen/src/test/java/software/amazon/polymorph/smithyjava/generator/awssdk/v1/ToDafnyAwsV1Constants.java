@@ -102,10 +102,10 @@ public class ToDafnyAwsV1Constants {
     public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
             com.amazonaws.services.kms.model.AWSKMSException nativeValue
     ) {
-      Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
+      Wrappers.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
       message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
-            Wrappers_Compile.Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
-          : Wrappers_Compile.Option.create_None();
+            Wrappers.Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+          : Wrappers.Option.create_None();
       return new software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque(message);
     }
     """;
@@ -120,7 +120,7 @@ public class ToDafnyAwsV1Constants {
     import software.amazon.cryptography.services.kms.internaldafny.types.Error_DependencyTimeoutException;
     import software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque;
     import software.amazon.cryptography.services.kms.internaldafny.types.IKeyManagementServiceClient;
-    import Wrappers_Compile.Option;
+    import Wrappers.Option;
     import com.amazonaws.services.kms.AWSKMS;
     import com.amazonaws.services.kms.model.AWSKMSException;
     import com.amazonaws.services.kms.model.DependencyTimeoutException;
