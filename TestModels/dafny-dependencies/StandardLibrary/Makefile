@@ -6,7 +6,6 @@ CORES=2
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
-PYTHON_MODULE_NAME=standard_library
 JAVA_PACKAGE_NAME=software.amazon.cryptography.standardlibrary
 NET_NAMESPACE_NAME=software.amazon.cryptography.standardlibrary
 
@@ -66,7 +65,6 @@ transpile_net: | transpile_implementation_net transpile_test_net
 # StandardLibrary as a dependency
 transpile_java: | transpile_implementation_java transpile_test_java
 
-########################## Rust targets
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
 transpile_rust: | transpile_implementation_rust
