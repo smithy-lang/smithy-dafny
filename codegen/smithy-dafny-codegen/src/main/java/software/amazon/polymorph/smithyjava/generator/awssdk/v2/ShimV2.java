@@ -4,7 +4,6 @@ package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
-import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.convertNamespaceToPascalCase;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;

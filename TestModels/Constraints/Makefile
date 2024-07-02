@@ -25,13 +25,6 @@ polymorph:
 	make polymorph_java
 	make polymorph_dotnet
 
-# Python
-
-PYTHON_MODULE_NAME=simple_constraints
-
-TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
-
 # Java
 
 JAVA_PACKAGE_NAME=simple.constraints

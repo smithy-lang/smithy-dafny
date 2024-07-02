@@ -9,3 +9,6 @@ format_java_misc-check: setup_prettier
 
 setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
+
+
+TestModels/dafny-dependencies/StandardLibrary/runtimes/java  TestModels/dafny-dependencies/StandardLibrary/runtimes/net TestModels/dafny-dependencies/StandardLibrary/Makefile TestModels/dafny-dependencies/StandardLibrary/src

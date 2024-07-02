@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
-import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.convertNamespaceToPascalCase;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import com.squareup.javapoet.ClassName;

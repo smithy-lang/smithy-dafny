@@ -15,8 +15,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
-import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.convertNamespaceToPascalCase;
-
 public class LocalServiceWrappedCodegen extends ServiceCodegen {
 
   public LocalServiceWrappedCodegen(
