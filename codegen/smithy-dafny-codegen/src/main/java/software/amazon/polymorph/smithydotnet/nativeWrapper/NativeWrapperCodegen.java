@@ -54,7 +54,7 @@ public class NativeWrapperCodegen {
   protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
     "System",
     "_System",
-    "Wrappers_Compile"
+    "software.amazon.cryptography.standardlibrary.internaldafny.Wrappers"
   );
 
   public NativeWrapperCodegen(

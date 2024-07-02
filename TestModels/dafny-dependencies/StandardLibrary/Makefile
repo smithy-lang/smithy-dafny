@@ -6,6 +6,10 @@ CORES=2
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
+PYTHON_MODULE_NAME=standard_library
+JAVA_PACKAGE_NAME=software.amazon.cryptography.standardlibrary
+NET_NAMESPACE_NAME=software.amazon.cryptography.standardlibrary
+LIBRARIES :=
 
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
@@ -36,6 +40,9 @@ polymorph_dotnet :
 polymorph_java :
 	echo "Skipping polymorph_java for StandardLibrary"
 
+polymorph_python :
+	echo "Skipping polymorph_python for StandardLibrary"
+
 # Using this target for the side-effect of maintaining patches,
 # Since Dafny Rust code generation is incomplete and also needs to be patched.
 # That only works if you run transpile_rust first.
@@ -63,6 +70,26 @@ transpile_net: | transpile_implementation_net transpile_test_net
 # StandardLibrary as a dependency
 transpile_java: | transpile_implementation_java transpile_test_java
 
+# Override SharedMakefile's transpile_python to not transpile
+# StandardLibrary as a dependency
+transpile_python: | transpile_implementation_python transpile_test_python
+
+# Hacky workaround until Dafny supports per-language extern names.
+# Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
+# This is flawed logic and should be removed, but is a reasonable band-aid for now.
+# TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
+# This may require new Smithy-Dafny logic to generate Pythonic extern names.
+_python_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/\./_/g' {} \;
+	echo "Skipping Model modification for StandardLibrary"
+	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/\./_/g' {} \;
+
+_python_revert_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/_/\./g' {} \;
+	echo "Skipping Model modification for StandardLibrary"
+	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/_/\./g' {} \;
+
+########################## Rust targets
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
 transpile_rust: | transpile_implementation_rust
@@ -86,21 +113,19 @@ transpile_dependencies:
 
 # Override SharedMakefile's transpile_implementation to not reference
 # StandardLibrary as a Library
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		$(DAFNY_OPTIONS) \
-		-out $(OUT)
+	translate $(TARGET) \
+		--stdin \
+		--no-verify \
+		--cores:$(CORES) \
+		--optimize-erasable-datatype-wrapper:false \
+		--unicode-char:false \
+		--function-syntax:3 \
+		--allow-warnings \
+		--output $(OUT) \
+		$(TRANSPILE_MODULE_NAME)
 
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency

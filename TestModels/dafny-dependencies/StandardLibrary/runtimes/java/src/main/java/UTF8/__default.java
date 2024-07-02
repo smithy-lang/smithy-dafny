@@ -1,13 +1,13 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-package UTF8;
+package software.amazon.cryptography.standardlibrary.internaldafny.UTF8;
 
 import static software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence;
 import static software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence;
 import static software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer;
 import static software.amazon.smithy.dafny.conversion.ToNative.Simple.String;
 
-import Wrappers_Compile.Result;
+import software.amazon.cryptography.standardlibrary.internaldafny.Wrappers.Result;
 import dafny.DafnySequence;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 // If we wanted to increase performance,
 // we could declare this NOT thread/concurrent safe,
 // and reset the coder everytime.
-public class __default extends UTF8._ExternBase___default {
+public class __default extends _ExternBase___default {
 
   // This is largely copied from Polymorph's dafny-java-conversion:
   // software.amazon.smithy.dafny.conversion.ToDafny.Simple.DafnyUtf8Bytes

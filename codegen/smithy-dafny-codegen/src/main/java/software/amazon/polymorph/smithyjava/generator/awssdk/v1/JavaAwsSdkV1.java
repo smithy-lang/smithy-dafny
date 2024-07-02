@@ -13,6 +13,8 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.convertNamespaceToPascalCase;
+
 /**
  * Generates all the Java Classes needed for
  * Dafny Generated Java to call AWS Services via
@@ -46,7 +48,7 @@ public class JavaAwsSdkV1 extends CodegenSubject {
     this.packageName =
       DafnyNameResolverHelpers.packageNameForNamespace(
         serviceShape.getId().getNamespace()
-      );
+      ) + "." + convertNamespaceToPascalCase(serviceShape.getId().getNamespace());
   }
 
   public static JavaAwsSdkV1 createJavaAwsSdkV1(

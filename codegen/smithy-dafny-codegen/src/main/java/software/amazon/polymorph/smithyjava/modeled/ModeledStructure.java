@@ -19,7 +19,7 @@ import software.amazon.polymorph.smithyjava.BuildMethod;
 import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
-import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.shapes.Shape;
 
 public class ModeledStructure {
@@ -77,7 +77,9 @@ public class ModeledStructure {
       .addModifiers(Modifier.PUBLIC)
       .addType(builderInterface)
       .addType(builderImpl);
-    ModelUtils.getDocumentationOrJavadoc(shape).map(spec::addJavadoc);
+    shape
+      .getTrait(JavaDocTrait.class)
+      .map(docTrait -> spec.addJavadoc(docTrait.getValue()));
     modelFields.forEach(field -> {
       // Add fields
       spec.addField(field.toFieldSpec(PRIVATE, FINAL));

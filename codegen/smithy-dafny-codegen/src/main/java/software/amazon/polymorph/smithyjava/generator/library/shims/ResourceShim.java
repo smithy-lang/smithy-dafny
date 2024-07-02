@@ -27,7 +27,7 @@ import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.traits.ExtendableTrait;
-import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 
@@ -89,7 +89,9 @@ public class ResourceShim extends ShimLibrary {
       .addMethod(resourceAsDafny())
       .addMethod(resourceAsNativeInterface())
       .addMethod(impl());
-    ModelUtils.getDocumentationOrJavadoc(targetShape).map(spec::addJavadoc);
+    targetShape
+      .getTrait(JavaDocTrait.class)
+      .map(docTrait -> spec.addJavadoc(docTrait.getValue()));
     spec.addMethods(
       getOperationsForTarget()
         .stream()

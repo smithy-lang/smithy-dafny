@@ -24,3 +24,24 @@ polymorph:
 	make polymorph_dafny
 	make polymorph_java
 	make polymorph_dotnet
+
+# Python
+
+PYTHON_MODULE_NAME=simple_constraints
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+
+# Java
+
+JAVA_PACKAGE_NAME=simple.constraints
+
+TRANSLATION_RECORD_JAVA:= \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/java/src/main/dafny-generated/ImplementationFromDafny-java.dtr
+
+# NET
+
+NET_NAMESPACE_NAME=simple.constraints
+
+TRANSLATION_RECORD_NET:= \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/net/ImplementationFromDafny-cs.dtr

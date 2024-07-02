@@ -1,5 +1,5 @@
-// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: Apache-2.0
+// Class _ExternBase___default
+// Dafny class __default compiled into Java
 package simple.constraints.internaldafny.types;
 
-public class __default extends _ExternBase___default {}
+public abstract class __default extends _ExternBase___default { }

@@ -225,7 +225,7 @@ public abstract class ToDafny extends Generator {
     return CodeBlock.of(
       "$T $L",
       ParameterizedTypeName.get(
-        ClassName.get("Wrappers_Compile", "Option"),
+        ClassName.get("software.amazon.cryptography.standardlibrary.internaldafny.Wrappers", "Option"),
         subject.dafnyNameResolver.typeForShape(memberShape.getId())
       ),
       variable

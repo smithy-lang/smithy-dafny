@@ -10,10 +10,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import software.amazon.awssdk.utils.Pair;
 import software.amazon.awssdk.utils.StringUtils;
-import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.traits.StringTrait;
 
 /**
  * @param desc    JavaDoc Body content
@@ -66,20 +66,25 @@ public record OperationJavaDoc(
     Model model,
     OperationShape shape
   ) {
-    Shape inputShape = model.expectShape(shape.getInputShape());
     @Nullable
-    String paramDoc = ModelUtils
-      .getDocumentationOrJavadoc(inputShape)
+    String paramDoc = model
+      .expectShape(shape.getInputShape())
+      .getMemberTrait(model, JavaDocTrait.class)
+      .map(StringTrait::getValue)
       .orElse(null);
     @Nonnull
     String paramName = NATIVE_VAR;
-    Shape outputShape = model.expectShape(shape.getOutputShape());
     @Nullable
-    String returns = ModelUtils
-      .getDocumentationOrJavadoc(outputShape)
+    String returns = model
+      .expectShape(shape.getOutputShape())
+      .getMemberTrait(model, JavaDocTrait.class)
+      .map(StringTrait::getValue)
       .orElse(null);
     @Nullable
-    String desc = ModelUtils.getDocumentationOrJavadoc(shape).orElse(null);
+    String desc = shape
+      .getTrait(JavaDocTrait.class)
+      .map(StringTrait::getValue)
+      .orElse(null);
     List<Pair<String, String>> params = StringUtils.isNotBlank(paramDoc)
       ? List.of(Pair.of(paramName, paramDoc))
       : null;

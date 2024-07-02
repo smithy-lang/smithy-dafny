@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.convertNamespaceToPascalCase;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import com.squareup.javapoet.ClassName;
@@ -454,7 +455,7 @@ public class ToDafnyAwsV1 extends ToDafny {
     CodeBlock memberDeclaration = CodeBlock.of(
       "$T $L",
       ParameterizedTypeName.get(
-        ClassName.get("Wrappers_Compile", "Option"),
+        ClassName.get("software.amazon.cryptography.standardlibrary.internaldafny.Wrappers", "Option"),
         ParameterizedTypeName.get(
           software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
           WildcardTypeName.subtypeOf(Character.class)
@@ -472,14 +473,14 @@ public class ToDafnyAwsV1 extends ToDafny {
       "message",
       ClassName.get(Objects.class),
       "nativeValue.getMessage()",
-      ClassName.get("Wrappers_Compile", "Option"),
+      ClassName.get("software.amazon.cryptography.standardlibrary.internaldafny.Wrappers", "Option"),
       stringTypeDescriptor,
       COMMON_TO_DAFNY_SIMPLE,
       SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         .get(ShapeType.STRING)
         .methodName(),
       "nativeValue.getMessage()",
-      ClassName.get("Wrappers_Compile", "Option"),
+      ClassName.get("software.amazon.cryptography.standardlibrary.internaldafny.Wrappers", "Option"),
       stringTypeDescriptor
     );
     return MethodSpec

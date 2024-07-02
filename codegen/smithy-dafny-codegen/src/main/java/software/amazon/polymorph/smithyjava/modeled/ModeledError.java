@@ -19,7 +19,7 @@ import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.unmodeled.ErrorHelpers;
-import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 public class ModeledError {
@@ -55,7 +55,9 @@ public class ModeledError {
       .classBuilder(className)
       .addModifiers(Modifier.PUBLIC)
       .superclass(superName);
-    ModelUtils.getDocumentationOrJavadoc(shape).map(spec::addJavadoc);
+    shape
+      .getTrait(JavaDocTrait.class)
+      .map(docTrait -> spec.addJavadoc(docTrait.getValue()));
     localOnlyFields.forEach(field -> {
       // Add local fields
       spec.addField(field.toFieldSpec(PRIVATE, FINAL));
