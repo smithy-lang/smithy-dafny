@@ -6,8 +6,7 @@ package software.amazon.polymorph.traits;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.stream.StreamSupport;
+
 import org.commonmark.node.Document;
 import org.commonmark.node.Node;
 import org.commonmark.node.Paragraph;
@@ -42,7 +41,7 @@ public class NoMarkupInDocumentationTraitsValidator extends AbstractValidator {
           String docContent = trait.get().getValue();
           if (docContent.startsWith("/")) {
             events.add(
-              danger(
+              warning(
                 shape,
                 "@documentation content should not start with a '/'. " +
                 "This most likely happened because the source file is trying to use \"////...\" as a visual delimiter, " +
@@ -54,7 +53,7 @@ public class NoMarkupInDocumentationTraitsValidator extends AbstractValidator {
           Node document = parser.parse(docContent);
           if (!containsNoMarkup(document)) {
             events.add(
-              danger(
+              warning(
                 shape,
                 "smithy-dafny currently only supports @documentation with plaintext content, but this shape's documentation contains markdown."
               )
