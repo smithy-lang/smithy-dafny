@@ -520,7 +520,7 @@ public class ToNativeAwsV2 extends ToNative {
     return initializeMethodSpec(methodName, inputType, returnType)
       .addComment("While the first two cases are logically identical,")
       .addComment("there is a semantic distinction.")
-      .addComment("An unmodeled Service Error is different than a Java Heap Exhaustion error.")
+      .addComment("An un-modeled Service Error is different from a Java Heap Exhaustion error.")
       .addComment("In the future, Smithy-Dafny MAY allow for this distinction.")
       .addComment("Which would allow Dafny developers to treat the two differently.")
       // If obj is an instance of the Service's Base Exception
