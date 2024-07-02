@@ -518,6 +518,11 @@ public class ToNativeAwsV2 extends ToNative {
     final TypeName inputType = subject.dafnyNameResolver.classForOpaqueError();
     final ClassName returnType = ClassName.get(RuntimeException.class);
     return initializeMethodSpec(methodName, inputType, returnType)
+      .addComment("While the first two cases are logically identical,")
+      .addComment("there is a semantic distinction.")
+      .addComment("An unmodeled Service Error is different than a Java Heap Exhaustion error.")
+      .addComment("In the future, Smithy-Dafny MAY allow for this distinction.")
+      .addComment("Which would allow Dafny developers to treat the two differently.")
       // If obj is an instance of the Service's Base Exception
       .beginControlFlow(
         "if ($L.$L instanceof $T)",
@@ -551,8 +556,12 @@ public class ToNativeAwsV2 extends ToNative {
         Dafny.datatypeDeconstructor("message"),
         Dafny.datatypeConstructorIs("Some")
       )
+      // if not null, stringify the object
+      .addStatement("final String suffix = $L.dtor_obj() != null ? String.format($S, $L.dtor_obj()) : $S;",
+        VAR_INPUT, "  Unknown Object: %s", VAR_INPUT, "")
+      // Convert String from Dafny
       .addStatement(
-        "final $T message = $L($L.$L.$L)",
+        "final $T message = $L($L.$L.$L) + suffix",
         String.class,
         SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
           .get(ShapeType.STRING)
@@ -568,7 +577,7 @@ public class ToNativeAwsV2 extends ToNative {
         "return new $T(String.format($S, $L))",
         IllegalStateException.class,
         "Unknown error thrown while calling " +
-        AwsSdkNativeV2.shortNameForService(subject.serviceShape) +
+        AwsSdkNativeV2.titleForService(subject.serviceShape) +
         ". %s",
         VAR_INPUT
       )

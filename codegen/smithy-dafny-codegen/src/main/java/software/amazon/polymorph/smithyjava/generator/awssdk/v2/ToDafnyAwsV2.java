@@ -689,6 +689,11 @@ public class ToDafnyAwsV2 extends ToDafny {
       .methodBuilder("Error")
       .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
       .returns(subject.dafnyNameResolver.abstractClassForError())
+      .addComment("While this is logically identical to the other Opaque Error case,")
+      .addComment("it is semantically distinct.")
+      .addComment("An unmodeled Service Error is different than a Java Heap Exhaustion error.")
+      .addComment("In the future, Smithy-Dafny MAY allow for this distinction.")
+      .addComment("Which would allow Dafny developers to treat the two differently.")
       .addParameter(
         subject.nativeNameResolver.baseErrorForService(),
         "nativeValue"
@@ -708,6 +713,11 @@ public class ToDafnyAwsV2 extends ToDafny {
       .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
       .returns(subject.dafnyNameResolver.abstractClassForError())
       .addParameter(Exception.class, "nativeValue")
+      .addComment("While this is logically identical to the other Opaque Error case,")
+      .addComment("it is semantically distinct.")
+      .addComment("An unmodeled Service Error is different than a Java Heap Exhaustion error.")
+      .addComment("In the future, Smithy-Dafny MAY allow for this distinction.")
+      .addComment("Which would allow Dafny developers to treat the two differently.")
       .addStatement(
         "return $T.create_Opaque(nativeValue)",
         subject.dafnyNameResolver.abstractClassForError()
