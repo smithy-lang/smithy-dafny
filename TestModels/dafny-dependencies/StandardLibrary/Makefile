@@ -8,6 +8,7 @@ include ../../SharedMakefile.mk
 MAX_RESOURCE_COUNT=500000000
 PYTHON_MODULE_NAME=standard_library
 JAVA_PACKAGE_NAME=software.amazon.cryptography.standardlibrary
+NET_NAMESPACE_NAME=software.amazon.cryptography.standardlibrary
 LIBRARIES :=
 
 # define standard colors

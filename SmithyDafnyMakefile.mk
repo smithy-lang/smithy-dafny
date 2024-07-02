@@ -449,6 +449,8 @@ transpile_net: | transpile_implementation_net transpile_test_net transpile_depen
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
+transpile_implementation_net: TRANSPILE_MODULE_NAME=$(if $(NET_NAMESPACE_NAME),--dotnet-namespace=$(NET_NAMESPACE_NAME).internaldafny,)
+transpile_implementation_net: TRANSLATION_RECORD=$(TRANSLATION_RECORD_NET)
 transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: _transpile_implementation_all
 
@@ -456,6 +458,8 @@ transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
+transpile_test_net: TRANSLATION_RECORD=$(TRANSLATION_RECORD_NET)
+transpile_test_net: SOURCE_TRANSLATION_RECORD= --translation-record runtimes/net/ImplementationFromDafny-cs.dtr
 transpile_test_net: _transpile_test_all
 
 transpile_dependencies_net: LANG=net

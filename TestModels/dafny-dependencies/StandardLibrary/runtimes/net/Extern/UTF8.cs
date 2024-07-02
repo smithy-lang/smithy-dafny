@@ -4,13 +4,13 @@
 using System;
 using System.Text;
 
-using Wrappers_Compile;
+using software.amazon.cryptography.standardlibrary.internaldafny.Wrappers;
 using ibyteseq = Dafny.ISequence<byte>;
 using byteseq = Dafny.Sequence<byte>;
 using icharseq = Dafny.ISequence<char>;
 using charseq = Dafny.Sequence<char>;
 
-namespace UTF8 {
+namespace software.amazon.cryptography.standardlibrary.internaldafny.UTF8 {
     public partial class __default {
         public static _IResult<ibyteseq, icharseq> Encode(icharseq str) {
             UTF8Encoding utf8 = new UTF8Encoding(false, true);
