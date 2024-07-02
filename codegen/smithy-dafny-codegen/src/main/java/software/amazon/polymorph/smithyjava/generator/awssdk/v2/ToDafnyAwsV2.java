@@ -688,7 +688,7 @@ public class ToDafnyAwsV2 extends ToDafny {
     CodeBlock memberDeclaration = CodeBlock.of(
       "$T $L",
       ParameterizedTypeName.get(
-        ClassName.get("Wrappers_Compile", "Option"),
+        ClassName.get("software.amazon.cryptography.standardlibrary.internaldafny.Wrappers", "Option"),
         ParameterizedTypeName.get(
           software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
           WildcardTypeName.subtypeOf(Character.class)

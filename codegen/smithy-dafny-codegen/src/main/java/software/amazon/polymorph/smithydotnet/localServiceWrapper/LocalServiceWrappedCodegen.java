@@ -88,7 +88,7 @@ public class LocalServiceWrappedCodegen extends ServiceCodegen {
       .of(
         "public static",
         // TODO fix the Error and don't hard code it :(
-        "Wrappers_Compile._IResult<Types.%s,Types._IError>".formatted(
+        "software.amazon.cryptography.standardlibrary.internaldafny.Wrappers._IResult<Types.%s,Types._IError>".formatted(
             nameResolver.dafnyTypeForShape(serviceShape.getId())
           ),
         "Wrapped%s(Types.%s config)".formatted(
@@ -108,7 +108,7 @@ public class LocalServiceWrappedCodegen extends ServiceCodegen {
             ((LocalServiceWrappedNameResolver) nameResolver).shimClassForService()
           ),
         // TODO fix the Error and don't hard code it :(
-        "return Wrappers_Compile.Result<Types.%s,Types._IError>.create_Success(wrappedClient);".formatted(
+        "return software.amazon.cryptography.standardlibrary.internaldafny.Wrappers.Result<Types.%s,Types._IError>.create_Success(wrappedClient);".formatted(
             nameResolver.dafnyTypeForShape(serviceShape.getId())
           )
       )
@@ -123,4 +123,5 @@ public class LocalServiceWrappedCodegen extends ServiceCodegen {
         ".Wrapped"
       );
   }
+
 }
