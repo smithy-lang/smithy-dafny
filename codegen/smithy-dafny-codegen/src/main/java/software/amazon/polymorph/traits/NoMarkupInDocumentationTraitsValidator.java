@@ -40,7 +40,7 @@ public class NoMarkupInDocumentationTraitsValidator extends AbstractValidator {
           String docContent = trait.get().getValue();
           if (docContent.startsWith("/")) {
             events.add(
-              warning(
+              danger(
                 shape,
                 "@documentation content should not start with a '/'. " +
                 "This most likely happened because the source file is trying to use \"////...\" as a visual delimiter, " +
