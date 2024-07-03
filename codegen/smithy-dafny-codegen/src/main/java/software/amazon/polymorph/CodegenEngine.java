@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
+import software.amazon.polymorph.smithydotnet.AwsSdkDotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
@@ -416,6 +417,7 @@ public class CodegenEngine {
     final String sdkID = awsSdkStyle
       ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
       : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+    final String serviceName = sdkID.toLowerCase();
     final String namespace = serviceShape.getId().getNamespace();
     final String namespaceDir = namespace.replace(".", "/");
 
@@ -427,6 +429,7 @@ public class CodegenEngine {
     parameters.put("dafnyVersion", dafnyVersion.unparse());
     parameters.put("service", service);
     parameters.put("sdkID", sdkID);
+    parameters.put("serviceName", serviceName);
     parameters.put("namespace", namespace);
     parameters.put("namespaceDir", namespaceDir);
     parameters.put("gradleGroup", gradleGroup);
@@ -546,14 +549,14 @@ public class CodegenEngine {
   }
 
   private void netOtherGeneratedAspects() {
-    final DotNetNameResolver resolver = new DotNetNameResolver(
-      model,
-      serviceShape
-    );
+    final DotNetNameResolver resolver = awsSdkStyle
+            ? new AwsSdkDotNetNameResolver(model, serviceShape)
+            : new DotNetNameResolver(model, serviceShape);
     final String service = serviceShape.getId().getName();
     final String sdkID = awsSdkStyle
       ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
       : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+    final String serviceName = resolver.getServiceName();
     final String namespace = serviceShape.getId().getNamespace();
     final String dotnetNamespace = resolver.namespaceForService();
     final String dafnyNamespace =
@@ -564,6 +567,7 @@ public class CodegenEngine {
     parameters.put("dafnyVersion", dafnyVersion.unparse());
     parameters.put("service", service);
     parameters.put("sdkID", sdkID);
+    parameters.put("serviceName", serviceName);
     parameters.put("namespace", dotnetNamespace);
     parameters.put("dafnyNamespace", dafnyNamespace);
     parameters.put("namespaceDir", namespaceDir);

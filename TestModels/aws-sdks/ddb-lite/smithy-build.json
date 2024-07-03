@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "projections": {
+    "operation-subset": {
+      "transforms": [
+        {
+          "name": "excludeShapesBySelector",
+          "args": {
+            "selector": "operation :not([id|name = BatchGetItem, GetItem, PutItem, Query])"
+          }
+        },
+        {
+          "name": "removeUnusedShapes",
+          "args": {}
+        }
+      ]
+    }
+  },
+  "plugins": {
+    "dafny-client-codegen": {
+      "edition": "2023.10",
+      "service": "com.amazonaws.dynamodb#DynamoDB_20120810",
+      "dafnyVersion": "${DAFNY_VERSION}",
+      "targetLanguages": ["java", "dotnet"],
+      "includeDafnyFile": "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
+    }
+  }
+}
