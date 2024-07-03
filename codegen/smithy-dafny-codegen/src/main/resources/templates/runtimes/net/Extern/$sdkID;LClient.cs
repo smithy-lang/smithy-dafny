@@ -1,7 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 using Amazon;
-using Amazon.$sdkID:L;
+using Amazon.$serviceName:L;
 using Wrappers_Compile;
 using Amazon.Runtime;
 using $namespace:L;
@@ -25,7 +25,7 @@ namespace $dafnyNamespace:L
               types.I$sdkID:LClient,
               types._IError
           >
-          .create_Success(new $sdkID:LShim(client));
+          .create_Success(new $serviceName:LShim(client));
     }
   }
 }

@@ -76,6 +76,12 @@ jobs:
           distribution: "corretto"
           java-version: "17"
 
+      - name: Install smithy-dafny-codegen locally
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: pTML
+          build-root-directory: codegen/smithy-dafny-codegen
+
       - name: Execute smithy-dafny-codegen-test tests
         uses: gradle/gradle-build-action@v2
         env:
