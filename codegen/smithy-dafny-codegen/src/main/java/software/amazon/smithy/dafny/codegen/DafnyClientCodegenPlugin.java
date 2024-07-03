@@ -49,7 +49,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
       final Path dir = switch (lang) {
         case DOTNET -> Paths.get(
                 "runtimes",
-                lang.name().toLowerCase(),
+                "net",
                 "Generated");
         case JAVA -> Paths.get(
                 "runtimes",

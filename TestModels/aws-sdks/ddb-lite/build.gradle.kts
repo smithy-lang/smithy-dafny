@@ -53,8 +53,7 @@ tasks.register("polymorphDotnet") {
         // default (no projection) is "source"
         val projectionName = "operation-subset"
         copy {
-            // build plugin calls it "dotnet" and CLI calls it "net"
-            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/dotnet"))
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/net"))
             into("runtimes/net")
         }
     }
