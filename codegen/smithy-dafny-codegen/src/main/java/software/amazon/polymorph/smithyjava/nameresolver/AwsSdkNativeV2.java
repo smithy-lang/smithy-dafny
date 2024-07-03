@@ -13,6 +13,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import software.amazon.awssdk.codegen.model.service.ServiceModel;
 import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
@@ -28,6 +29,7 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.model.traits.TitleTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
@@ -139,13 +141,8 @@ public class AwsSdkNativeV2 extends Native {
   }
 
   public static String titleForService(ServiceShape shape) {
-    String awsServiceSmithyNamespace = shape.toShapeId().getNamespace();
-    TitleTrait titleTrait = shape.getTrait(TitleTrait.class)
-      .orElseThrow(() -> new IllegalArgumentException(
-        "Polymorph does not know this service's short name: %s".formatted(
-          awsServiceSmithyNamespace
-        )));
-    return titleTrait.getValue();
+    Optional<TitleTrait> maybeTrait = shape.getTrait(TitleTrait.class);
+    return maybeTrait.isPresent() ? maybeTrait.get().getValue() : "AWS";
   }
 
   /**

@@ -110,6 +110,11 @@ public class ToDafnyAwsV2Constants {
     public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
             java.lang.Exception nativeValue
     ) {
+      // While this is logically identical to the other Opaque Error case,
+      // it is semantically distinct.
+      // An un-modeled Service Error is different from a Java Heap Exhaustion error.
+      // In the future, Smithy-Dafny MAY allow for this distinction.
+      // Which would allow Dafny developers to treat the two differently.
       return software.amazon.cryptography.services.kms.internaldafny.types.Error.create_Opaque(nativeValue);
     }
     """;
@@ -119,6 +124,11 @@ public class ToDafnyAwsV2Constants {
     public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
       java.lang.Exception nativeValue
     ) {
+      // While this is logically identical to the other Opaque Error case,
+      // it is semantically distinct.
+      // An un-modeled Service Error is different from a Java Heap Exhaustion error.
+      // In the future, Smithy-Dafny MAY allow for this distinction.
+      // Which would allow Dafny developers to treat the two differently.
       return software.amazon.cryptography.services.kms.internaldafny.types.Error.create_Opaque(nativeValue);
     }
     """;

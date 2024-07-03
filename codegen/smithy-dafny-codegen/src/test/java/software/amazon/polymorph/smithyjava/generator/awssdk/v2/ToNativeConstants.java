@@ -140,12 +140,18 @@ public class ToNativeConstants {
        }
 
        public static RuntimeException Error(Error_Opaque dafnyValue) {
+         // While the first two cases are logically identical,
+         // there is a semantic distinction.
+         // An un-modeled Service Error is different from a Java Heap Exhaustion error.
+         // In the future, Smithy-Dafny MAY allow for this distinction.
+         // Which would allow Dafny developers to treat the two differently.
          if (dafnyValue.dtor_obj() instanceof KmsException) {
            return (KmsException) dafnyValue.dtor_obj();
          } else if (dafnyValue.dtor_obj() instanceof Exception) {
            return (RuntimeException) dafnyValue.dtor_obj();
          } else if (dafnyValue.dtor_message().is_Some()) {
-          final String message = software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value());
+          final String suffix = dafnyValue.dtor_obj() != null ? String.format(%s, dafnyValue.dtor_obj()) : %s;;
+          final String message = software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()) + suffix;
           return new RuntimeException(message);
          }
          return new IllegalStateException(String.format(%s, dafnyValue));
@@ -155,6 +161,8 @@ public class ToNativeConstants {
         STRING_CONVERSION,
         STRING_CONVERSION,
         STRING_CONVERSION,
-        "\"Unknown error thrown while calling KMS. %s\""
+        "\"  Unknown Object: %s\"",
+        "\"\"",
+        "\"Unknown error thrown while calling AWS. %s\""
       );
 }
