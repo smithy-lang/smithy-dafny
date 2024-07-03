@@ -18,7 +18,7 @@
   },
   "plugins": {
     "dafny-client-codegen": {
-      "edition": "2023.10",
+      "edition": "2023",
       "service": "com.amazonaws.dynamodb#DynamoDB_20120810",
       "dafnyVersion": "${DAFNY_VERSION}",
       "targetLanguages": ["java", "dotnet"],
