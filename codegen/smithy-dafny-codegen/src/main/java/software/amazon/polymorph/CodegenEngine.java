@@ -558,7 +558,7 @@ public class CodegenEngine {
       : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
     final String serviceName = resolver.getServiceName();
     final String namespace = serviceShape.getId().getNamespace();
-    final String dotnetNamespace = resolver.namespaceForService();
+    final String dotnetNamespace = resolver.namespaceForShapeId(serviceShape.getId());
     final String dafnyNamespace =
       DafnyNameResolverHelpers.packageNameForNamespace(namespace);
     final String namespaceDir = namespace.replace(".", "/");
