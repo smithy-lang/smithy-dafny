@@ -152,6 +152,8 @@ public class CodegenEngine {
       System.exit(1);
     }
 
+    propertiesFile.ifPresent(this::generateProjectPropertiesFile);
+    
     for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
       final Path outputDir = targetLangOutputDirs
         .get(lang)
@@ -171,8 +173,6 @@ public class CodegenEngine {
         );
       }
     }
-
-    propertiesFile.ifPresent(this::generateProjectPropertiesFile);
   }
 
   private void generateProjectPropertiesFile(final Path outputPath)
@@ -339,8 +339,16 @@ public class CodegenEngine {
     LOGGER.info("Formatting Java code in {}", outputDir);
     runCommand(
       outputDir,
+      "npm",
+      "i",
+      "--no-save",
+      "prettier@3",
+      "prettier-plugin-java@2.5"
+    );
+    runCommand(
+      outputDir,
       "npx",
-      "prettier",
+      "prettier@3",
       "--plugin=prettier-plugin-java",
       outputDir.toString(),
       "--write"
