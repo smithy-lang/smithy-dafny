@@ -153,7 +153,7 @@ public class CodegenEngine {
     }
 
     propertiesFile.ifPresent(this::generateProjectPropertiesFile);
-    
+
     for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
       final Path outputDir = targetLangOutputDirs
         .get(lang)

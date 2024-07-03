@@ -34,6 +34,10 @@ tasks.register("polymorphDafny") {
         // default (no projection) is "source"
         val projectionName = "operation-subset"
         copy {
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/project.properties"))
+            into(".")
+        }
+        copy {
             from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/Model/"))
             into("model")
         }
