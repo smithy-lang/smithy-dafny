@@ -410,7 +410,7 @@ public class AwsSdkNativeV2 extends Native {
     return "software.amazon.awssdk.services.%s".formatted(rtn);
   }
 
-  static String packageNameForAwsSdkV2Shape(final Shape shape) {
+  public static String packageNameForAwsSdkV2Shape(final Shape shape) {
     String awsServiceName = AwsSdkNameResolverHelpers.awsServiceNameFromShape(
       shape
     );

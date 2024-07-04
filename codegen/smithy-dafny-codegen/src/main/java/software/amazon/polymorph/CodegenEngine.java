@@ -22,6 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.squareup.javapoet.ClassName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -43,6 +45,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
@@ -428,6 +431,10 @@ public class CodegenEngine {
     final String serviceName = sdkID.toLowerCase();
     final String namespace = serviceShape.getId().getNamespace();
     final String namespaceDir = namespace.replace(".", "/");
+    final String dafnyNamespace =
+            DafnyNameResolverHelpers.packageNameForNamespace(namespace);
+    final String dafnyNamespaceDir = dafnyNamespace.replace(".", "/");
+    final ClassName clientClassName = AwsSdkNativeV2.classNameForServiceClient(serviceShape);
 
     final String gradleGroup = namespace;
     // TODO: This should be @title, but we have to actually add that to all services first
@@ -440,6 +447,10 @@ public class CodegenEngine {
     parameters.put("serviceName", serviceName);
     parameters.put("namespace", namespace);
     parameters.put("namespaceDir", namespaceDir);
+    parameters.put("dafnyNamespace", dafnyNamespace);
+    parameters.put("dafnyNamespaceDir", dafnyNamespaceDir);
+    parameters.put("sdkClientNamespace", clientClassName.packageName());
+    parameters.put("sdkClientName", clientClassName.simpleName());
     parameters.put("gradleGroup", gradleGroup);
     parameters.put("gradleDescription", gradleDescription);
 
@@ -450,7 +461,16 @@ public class CodegenEngine {
           parameters
         );
       }
-      // TODO generate sdk constructor
+      if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
+        writeTemplatedFile(
+                "runtimes/java/src/main/java/$dafnyNamespaceDir;L/__default.java",
+                parameters
+        );
+        writeTemplatedFile(
+                "runtimes/java/src/main/java/$dafnyNamespaceDir;L/types/__default.java",
+                parameters
+        );
+      }
     } else {
       final String serviceConfig = serviceShape
         .expectTrait(LocalServiceTrait.class)
@@ -568,7 +588,7 @@ public class CodegenEngine {
     final String namespace = serviceShape.getId().getNamespace();
     final String dotnetNamespace = resolver.namespaceForShapeId(serviceShape.getId());
     final String dafnyNamespace =
-      DafnyNameResolverHelpers.packageNameForNamespace(namespace);
+            DafnyNameResolverHelpers.packageNameForNamespace(namespace);
     final String namespaceDir = namespace.replace(".", "/");
 
     Map<String, String> parameters = new HashMap<>();
