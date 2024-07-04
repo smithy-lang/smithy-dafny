@@ -434,7 +434,6 @@ public class CodegenEngine {
     final String dafnyNamespace =
             DafnyNameResolverHelpers.packageNameForNamespace(namespace);
     final String dafnyNamespaceDir = dafnyNamespace.replace(".", "/");
-    final ClassName clientClassName = AwsSdkNativeV2.classNameForServiceClient(serviceShape);
 
     final String gradleGroup = namespace;
     // TODO: This should be @title, but we have to actually add that to all services first
@@ -449,8 +448,7 @@ public class CodegenEngine {
     parameters.put("namespaceDir", namespaceDir);
     parameters.put("dafnyNamespace", dafnyNamespace);
     parameters.put("dafnyNamespaceDir", dafnyNamespaceDir);
-    parameters.put("sdkClientNamespace", clientClassName.packageName());
-    parameters.put("sdkClientName", clientClassName.simpleName());
+
     parameters.put("gradleGroup", gradleGroup);
     parameters.put("gradleDescription", gradleDescription);
 
@@ -462,6 +460,10 @@ public class CodegenEngine {
         );
       }
       if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
+        final ClassName clientClassName = AwsSdkNativeV2.classNameForServiceClient(serviceShape);
+        parameters.put("sdkClientNamespace", clientClassName.packageName());
+        parameters.put("sdkClientName", clientClassName.simpleName());
+
         writeTemplatedFile(
                 "runtimes/java/src/main/java/$dafnyNamespaceDir;L/__default.java",
                 parameters

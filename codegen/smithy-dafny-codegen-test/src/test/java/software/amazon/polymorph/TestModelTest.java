@@ -129,9 +129,5 @@ public abstract class TestModelTest {
         "make command [" + args + "] failed (exit code: " + exitCode + "). Output:\n" + output
       );
     }
-
-    // TODO: debugging
-    System.out.println(args);
-    System.out.println(output);
   }
 }
