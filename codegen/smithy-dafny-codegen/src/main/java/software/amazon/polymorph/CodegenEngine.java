@@ -6,6 +6,7 @@ package software.amazon.polymorph;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
+import com.squareup.javapoet.ClassName;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -22,8 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.squareup.javapoet.ClassName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -432,7 +431,7 @@ public class CodegenEngine {
     final String namespace = serviceShape.getId().getNamespace();
     final String namespaceDir = namespace.replace(".", "/");
     final String dafnyNamespace =
-            DafnyNameResolverHelpers.packageNameForNamespace(namespace);
+      DafnyNameResolverHelpers.packageNameForNamespace(namespace);
     final String dafnyNamespaceDir = dafnyNamespace.replace(".", "/");
 
     final String gradleGroup = namespace;
@@ -460,17 +459,18 @@ public class CodegenEngine {
         );
       }
       if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
-        final ClassName clientClassName = AwsSdkNativeV2.classNameForServiceClient(serviceShape);
+        final ClassName clientClassName =
+          AwsSdkNativeV2.classNameForServiceClient(serviceShape);
         parameters.put("sdkClientNamespace", clientClassName.packageName());
         parameters.put("sdkClientName", clientClassName.simpleName());
 
         writeTemplatedFile(
-                "runtimes/java/src/main/java/$dafnyNamespaceDir;L/__default.java",
-                parameters
+          "runtimes/java/src/main/java/$dafnyNamespaceDir;L/__default.java",
+          parameters
         );
         writeTemplatedFile(
-                "runtimes/java/src/main/java/$dafnyNamespaceDir;L/types/__default.java",
-                parameters
+          "runtimes/java/src/main/java/$dafnyNamespaceDir;L/types/__default.java",
+          parameters
         );
       }
     } else {
@@ -580,17 +580,19 @@ public class CodegenEngine {
 
   private void netOtherGeneratedAspects() {
     final DotNetNameResolver resolver = awsSdkStyle
-            ? new AwsSdkDotNetNameResolver(model, serviceShape)
-            : new DotNetNameResolver(model, serviceShape);
+      ? new AwsSdkDotNetNameResolver(model, serviceShape)
+      : new DotNetNameResolver(model, serviceShape);
     final String service = serviceShape.getId().getName();
     final String sdkID = awsSdkStyle
       ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
       : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
     final String serviceName = resolver.getServiceName();
     final String namespace = serviceShape.getId().getNamespace();
-    final String dotnetNamespace = resolver.namespaceForShapeId(serviceShape.getId());
+    final String dotnetNamespace = resolver.namespaceForShapeId(
+      serviceShape.getId()
+    );
     final String dafnyNamespace =
-            DafnyNameResolverHelpers.packageNameForNamespace(namespace);
+      DafnyNameResolverHelpers.packageNameForNamespace(namespace);
     final String namespaceDir = namespace.replace(".", "/");
 
     Map<String, String> parameters = new HashMap<>();
