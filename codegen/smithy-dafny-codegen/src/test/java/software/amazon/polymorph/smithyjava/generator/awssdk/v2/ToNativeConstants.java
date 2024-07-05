@@ -100,7 +100,6 @@ public class ToNativeConstants {
      import java.lang.Exception;
      import java.lang.IllegalStateException;
      import java.lang.RuntimeException;
-     import java.lang.String;
      import software.amazon.awssdk.services.kms.KmsClient;
      import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
      import software.amazon.awssdk.services.kms.model.DoSomethingRequest;
@@ -149,10 +148,6 @@ public class ToNativeConstants {
            return (KmsException) dafnyValue.dtor_obj();
          } else if (dafnyValue.dtor_obj() instanceof Exception) {
            return (RuntimeException) dafnyValue.dtor_obj();
-         } else if (dafnyValue.dtor_message().is_Some()) {
-          final String suffix = dafnyValue.dtor_obj() != null ? String.format(%s, dafnyValue.dtor_obj()) : %s;;
-          final String message = software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()) + suffix;
-          return new RuntimeException(message);
          }
          return new IllegalStateException(String.format(%s, dafnyValue));
        }
@@ -161,8 +156,6 @@ public class ToNativeConstants {
         STRING_CONVERSION,
         STRING_CONVERSION,
         STRING_CONVERSION,
-        "\"  Unknown Object: %s\"",
-        "\"\"",
         "\"Unknown error thrown while calling AWS. %s\""
       );
 }

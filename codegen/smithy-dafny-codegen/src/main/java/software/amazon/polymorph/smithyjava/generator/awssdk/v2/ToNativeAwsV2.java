@@ -553,33 +553,6 @@ public class ToNativeAwsV2 extends ToNative {
         VAR_INPUT,
         Dafny.datatypeDeconstructor("obj")
       )
-      // If String is set
-      .nextControlFlow(
-        "else if ($L.$L.$L())",
-        VAR_INPUT,
-        Dafny.datatypeDeconstructor("message"),
-        Dafny.datatypeConstructorIs("Some")
-      )
-      // if not null, stringify the object
-      .addStatement(
-        "final String suffix = $L.dtor_obj() != null ? String.format($S, $L.dtor_obj()) : $S;",
-        VAR_INPUT,
-        "  Unknown Object: %s",
-        VAR_INPUT,
-        ""
-      )
-      // Convert String from Dafny
-      .addStatement(
-        "final $T message = $L($L.$L.$L) + suffix",
-        String.class,
-        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
-          .get(ShapeType.STRING)
-          .asNormalReference(),
-        VAR_INPUT,
-        Dafny.datatypeDeconstructor("message"),
-        Dafny.datatypeDeconstructor("value")
-      )
-      .addStatement("return new $T(message)", RuntimeException.class)
       .endControlFlow()
       // If obj is not ANY exception and String is not set, Give Up with IllegalStateException
       .addStatement(

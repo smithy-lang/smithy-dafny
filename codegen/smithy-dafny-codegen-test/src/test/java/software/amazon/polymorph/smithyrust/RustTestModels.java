@@ -28,6 +28,7 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("LanguageSpecificLogic");
     DISABLED_TESTS.add("LocalService");
     DISABLED_TESTS.add("MultipleModels");
+    DISABLED_TESTS.add("Positional");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
