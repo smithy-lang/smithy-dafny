@@ -83,15 +83,17 @@ module {:options "--function-syntax:4"} Std.Actions {
 
     // Possibly optimized extensions
 
-    // // Equivalent to DefaultRepeatUntil below, but may be implemented more efficiently.
-    // method RepeatUntil(t: T, stop: R -> bool)
-    //   requires Valid()
-    //   requires EventuallyStops(this, t, stop)
-    //   requires forall i <- Consumed() :: i == t
-    //   // reads Reads(t)
-    //   modifies Repr
-    //   ensures Valid()
-    //   //ensures history == old(history) + (n copies of t)/(n - 1 not stop values + stop)
+    // Equivalent to DefaultRepeatUntil below, but may be implemented more efficiently.
+    method RepeatUntil(t: T, stop: R -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<T, R>)
+      requires Valid()
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+      //ensures history == old(history) + (n copies of t)/(n - 1 not stop values + stop)
 
     // Helpers
 
@@ -115,33 +117,38 @@ module {:options "--function-syntax:4"} Std.Actions {
     }
   }
 
-  // method DefaultRepeatUntil<T, R>(a: Action<T, R>, t: T, stop: R -> bool) 
-  //   requires a.Valid()
-  //   requires EventuallyStops(a, t, stop)
-  //   requires forall i <- a.Consumed() :: i == t
-  //   // reads a.Repr
-  //   modifies a.Repr
-  //   ensures a.Valid()
-  // {
-  //   // TODO: loops need to support reads clauses as well!
+  method DefaultRepeatUntil<T, R>(a: Action<T, R>, t: T, stop: R -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<T, R>) 
+    requires a.Valid()
+    requires eventuallyStopsProof.Action() == a
+    requires eventuallyStopsProof.FixedInput() == t
+    requires eventuallyStopsProof.StopFn() == stop
+    requires forall i <- a.Consumed() :: i == t
+    // reads a.Repr
+    modifies a.Repr
+    ensures a.Valid()
+  {
+    // TODO: loops need to support reads clauses as well!
 
-  //   while (true) 
-  //     modifies a.Repr
-  //     invariant a.Valid()
-  //     invariant fresh(a.Repr - old(a.Repr))
-  //     invariant forall i <- a.Consumed() :: i == t
-  //     decreases InvokeUntilTerminationMetric(a, t, stop)
-  //   {
-  //     label beforeInvoke:
-  //     assert a.Valid();
-  //     var next := a.Invoke(t);
-  //     var nextV := next;
-  //     if stop(nextV) {
-  //       break;
-  //     }
-  //     InvokeUntilTerminationMetricDecreased@beforeInvoke(a, t, stop, next);
-  //   }
-  // }
+    while (true) 
+      modifies a.Repr
+      invariant a.Valid()
+      invariant fresh(a.Repr - old(a.Repr))
+      invariant forall i <- a.Consumed() :: i == t
+      decreases eventuallyStopsProof.InvokeUntilTerminationMetric()
+    {
+      label beforeInvoke:
+      assert a.Valid();
+      assert a.CanProduce(a.history);
+      eventuallyStopsProof.CanConsumeAll(a.history, t);
+      assert a.CanConsume(a.history, t);
+      var next := a.Invoke(t);
+      var nextV := next;
+      if stop(nextV) {
+        break;
+      }
+      eventuallyStopsProof.InvokeUntilTerminationMetricDecreased@beforeInvoke(next);
+    }
+  }
 
   // Dependencies stolen from DafnyStandardLibraries
   
@@ -236,21 +243,66 @@ module {:options "--function-syntax:4"} Std.Actions {
     function StopFn(): R -> bool
     function Limit(): nat
 
+    lemma CanConsumeAll(history: seq<(T, R)>, next: T) 
+      requires Action().CanProduce(history) 
+      ensures Action().CanConsume(history, next)
+
     lemma Proof(history: seq<(T, R)>) 
       requires Action().CanProduce(history) 
       requires (forall i <- Inputs(history) :: i == FixedInput())
       ensures exists n: nat | n <= Limit() :: Terminated(Outputs(history), StopFn(), n)
+
+    ghost function InvokeUntilTerminationMetric(): nat
+      requires Action().Valid()
+      requires forall i <- Action().Consumed() :: i == FixedInput()
+      reads Action().Repr
+    {
+      Proof(Action().history);
+      var n: nat :| n <= Limit() && Terminated(Action().Produced(), StopFn(), n);
+      TerminatedDefinesNonTerminalCount(Action().Produced(), StopFn(), n);
+      Limit() - NonTerminalCount(Action().Produced(), StopFn())
+    }
+
+    twostate lemma InvokeUntilTerminationMetricDecreased(new nextProduced: R)
+      requires old(Action().Valid())
+      requires Action().Valid()
+      requires forall i <- old(Action().Consumed()) :: i == FixedInput()
+      requires Action().Consumed() == old(Action().Consumed()) + [FixedInput()]
+      requires Action().Produced() == old(Action().Produced()) + [nextProduced]
+      requires !StopFn()(nextProduced)
+      ensures InvokeUntilTerminationMetric() < old(InvokeUntilTerminationMetric())
+    {
+      var before := old(Action().Produced());
+      var after := Action().Produced();
+      Proof(old(Action().history));
+      var n: nat :| n <= Limit() && Terminated(before, StopFn(), n);
+      Proof(Action().history);
+      var m: nat :| m <= Limit() && Terminated(after, StopFn(), m);
+      if n < |before| {
+        assert StopFn()(before[|before| - 1]);
+        assert !StopFn()(Action().Produced()[|Action().Produced()| - 1]);
+        assert |Action().Produced()| <= m;
+        assert !StopFn()(Action().Produced()[|before| - 1]);
+        assert false;
+      } else {
+        TerminatedDefinesNonTerminalCount(before, StopFn(), n);
+        assert NonTerminalCount(before, StopFn()) <= n;
+        TerminatedDistributes(before, [nextProduced], StopFn(), 1);
+        assert Terminated(after, StopFn(), |after|);
+        TerminatedDefinesNonTerminalCount(after, StopFn(), |after|);
+      }
+    }
   }
 
-  trait EventuallyStopsProof<T, R> {
+  // trait EventuallyStopsProof<T, R> {
 
-    function Action(): Action<T, R>
+  //   function Action(): Action<T, R>
 
-    lemma Proof(history: seq<(T, R)>, input: T, stop: R -> bool, limit: nat) 
-      requires Action().CanProduce(history) 
-      requires (forall i <- Inputs(history) :: i == input)
-      ensures exists n: nat | n <= limit :: Terminated(Outputs(history), stop, n)
-  }
+  //   lemma Proof(history: seq<(T, R)>, input: T, stop: R -> bool, limit: nat) 
+  //     requires Action().CanProduce(history) 
+  //     requires (forall i <- Inputs(history) :: i == input)
+  //     ensures exists n: nat | n <= limit :: Terminated(Outputs(history), stop, n)
+  // }
 
   // ghost predicate ProducesTerminated<T, R>(e: Action<T, R>, input: T, stop: R -> bool, limit: nat) {
   //   forall history: seq<(T, R)> 
@@ -263,26 +315,6 @@ module {:options "--function-syntax:4"} Std.Actions {
   // ghost predicate EventuallyStops<T, R>(a: Action<T, R>, input: T, stop: R -> bool) {
   //   && ConsumesAll(a, input)
   //   && exists limit: nat :: ProducesTerminated(a, input, stop, limit)
-  // }
-
-  // ghost function InvokeUntilBound<T, R>(a: Action<T, R>, input: T, stop: R -> bool): (limit: nat)
-  //   requires EventuallyStops(a, input, stop)
-  //   ensures ProducesTerminated(a, input, stop, limit)
-  // {
-  //   var limit: nat :| ProducesTerminated(a, input, stop, limit);
-  //   limit
-  // }
-
-  // ghost function InvokeUntilTerminationMetric<T, R>(a: Action<T, R>, input: T, stop: R -> bool): nat
-  //   requires a.Valid()
-  //   requires EventuallyStops(a, input, stop)
-  //   requires forall i <- a.Consumed() :: i == input
-  //   reads a.Repr
-  // {
-  //   var limit := InvokeUntilBound(a, input, stop);
-  //   var n: nat :| n <= limit && Terminated(a.Produced(), stop, n);
-  //   TerminatedDefinesNonTerminalCount(a.Produced(), stop, n);
-  //   limit - NonTerminalCount(a.Produced(), stop)
   // }
 
   function NonTerminalCount<T>(produced: seq<T>, stop: T -> bool): nat {
@@ -305,36 +337,6 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
   }
-
-  // twostate lemma InvokeUntilTerminationMetricDecreased<T, R>(a: Action<T, R>, input: T, stop: R -> bool, new nextProduced: R)
-  //   requires old(a.Valid())
-  //   requires a.Valid()
-  //   requires EventuallyStops(a, input, stop)
-  //   requires forall i <- old(a.Consumed()) :: i == input
-  //   requires a.Consumed() == old(a.Consumed()) + [input]
-  //   requires a.Produced() == old(a.Produced()) + [nextProduced]
-  //   requires !stop(nextProduced)
-  //   ensures InvokeUntilTerminationMetric(a, input, stop) < old(InvokeUntilTerminationMetric(a, input, stop))
-  // {
-  //   var before := old(a.Produced());
-  //   var after := a.Produced();
-  //   var limit := InvokeUntilBound(a, input, stop);
-  //   var n: nat :| n <= limit && Terminated(before, stop, n);
-  //   var m: nat :| m <= limit && Terminated(after, stop, m);
-  //   if n < |before| {
-  //     assert stop(before[|before| - 1]);
-  //     assert !stop(a.Produced()[|a.Produced()| - 1]);
-  //     assert |a.Produced()| <= m;
-  //     assert !stop(a.Produced()[|before| - 1]);
-  //     assert false;
-  //   } else {
-  //     TerminatedDefinesNonTerminalCount(before, stop, n);
-  //     assert NonTerminalCount(before, stop) <= n;
-  //     TerminatedDistributes(before, [nextProduced], stop, 1);
-  //     assert Terminated(after, stop, |after|);
-  //     TerminatedDefinesNonTerminalCount(after, stop, |after|);
-  //   }
-  // }
 
   // Aggregators
 
@@ -402,16 +404,18 @@ module {:options "--function-syntax:4"} Std.Actions {
       assert Valid();
     }
 
-    // method RepeatUntil(t: T, stop: (()) -> bool)
-    //   requires Valid()
-    //   requires EventuallyStops(this, t, stop)
-    //   requires forall i <- Consumed() :: i == t
-    //   // reads Reads(t)
-    //   modifies Repr
-    //   ensures Valid()
-    // {
-    //   DefaultRepeatUntil(this, t, stop);
-    // }
+    method RepeatUntil(t: T, stop: (()) -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<T, ()>)
+      requires Valid()
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
+    }
   }
 
   datatype ArrayAggregatorConsumesAnythingProof<T> extends ConsumesAllProof<T, ()> 
@@ -490,16 +494,18 @@ module {:options "--function-syntax:4"} Std.Actions {
       Update(t, r);
     }
 
-    // method RepeatUntil(t: (), stop: Option<T> -> bool)
-    //   requires Valid()
-    //   requires EventuallyStops(this, t, stop)
-    //   requires forall i <- Consumed() :: i == t
-    //   // reads Reads(t)
-    //   modifies Repr
-    //   ensures Valid()
-    // {
-    //   DefaultRepeatUntil(this, t, stop);
-    // }
+    method RepeatUntil(t: (), stop: Option<T> -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<(), Option<T>>)
+      requires Valid()
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
+    }
   }
 
   class Box {
@@ -575,16 +581,18 @@ module {:options "--function-syntax:4"} Std.Actions {
       assert Valid();
     }
 
-    // method RepeatUntil(t: (), stop: Box -> bool)
-    //   requires Valid()
-    //   requires EventuallyStops(this, t, stop)
-    //   requires forall i <- Consumed() :: i == t
-    //   // reads Reads(t)
-    //   modifies Repr
-    //   ensures Valid()
-    // {
-    //   DefaultRepeatUntil(this, t, stop);
-    // }
+    method RepeatUntil(t: (), stop: Box -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<(), Box>)
+      requires Valid()
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
+    }
   }
 
   method {:rlimit 0} BoxEnumeratorExample() {
@@ -679,16 +687,18 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
 
-    // method RepeatUntil(t: Option<T>, stop: (()) -> bool)
-    //   requires Valid()
-    //   requires EventuallyStops(this, t, stop)
-    //   requires forall i <- Consumed() :: i == t
-    //   // reads Reads(t)
-    //   modifies Repr
-    //   ensures Valid()
-    // {
-    //   DefaultRepeatUntil(this, t, stop);
-    // }
+    method RepeatUntil(t: Option<T>, stop: (()) -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<Option<T>, ()>)
+      requires Valid()
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
+    }
 
     method {:verify false} Pop() returns (t: T) 
       requires 0 < |values|
