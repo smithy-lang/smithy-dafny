@@ -188,7 +188,8 @@ module {:options "--function-syntax:4"} Std.Actions {
 
   method Main() {
     var a := new ArrayAggregator<int>();
-    ghost var proof := new ArrayAggregatorConsumesAnythingProof(a);
+    ghost var proof := ArrayAggregatorConsumesAnythingProof(a);
+    assert a == proof.Action();
     CallOnce(a, proof);
   }
 
@@ -413,15 +414,8 @@ module {:options "--function-syntax:4"} Std.Actions {
     // }
   }
 
-  class ArrayAggregatorConsumesAnythingProof<T> extends ConsumesAllProof<T, ()> {
-
-    const a: ArrayAggregator<T>
-
-    ghost constructor(a: ArrayAggregator<T>) 
-      ensures this.a == a
-    {
-      this.a := a;
-    }
+  datatype ArrayAggregatorConsumesAnythingProof<T> extends ConsumesAllProof<T, ()> 
+         = ArrayAggregatorConsumesAnythingProof(a: ArrayAggregator<T>) {
 
     function Action(): Action<T, ()> {
       a
