@@ -840,8 +840,8 @@ public class DafnyApiCodegen {
       operationShape
     );
 
-    final TokenTree config = implementationType.equals(
-        ImplementationType.ABSTRACT
+    final TokenTree config = !implementationType.equals(
+        ImplementationType.CODEGEN
       )
       ? TokenTree.of(
         "config: %s".formatted(DafnyNameResolver.internalConfigType())

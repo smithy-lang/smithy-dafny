@@ -18,13 +18,12 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.StringTrait;
 
 // TODO: We can shrink our code base by combining
 //  BuilderMemberSpec w/ PolymorphFieldSpec.
@@ -117,11 +116,11 @@ public class BuilderMemberSpec {
       this.interfaceType = null;
       this.wrapCall = null;
     }
-    Optional<JavaDocTrait> maybeJavaDoc = memberShape.getMemberTrait(
-      subject.model,
-      JavaDocTrait.class
-    );
-    this.javaDoc = maybeJavaDoc.map(StringTrait::getValue).orElse(null);
+    this.javaDoc =
+      ModelUtils
+        .getDocumentationOrJavadoc(memberShape)
+        .or(() -> ModelUtils.getDocumentationOrJavadoc(resolvedShape))
+        .orElse(null);
   }
 
   /** Private Method for handling Edge Cases or cases where
@@ -153,10 +152,9 @@ public class BuilderMemberSpec {
       trait.getConfigId(),
       StructureShape.class
     );
-    Optional<JavaDocTrait> maybeJavaDoc = structureShape.getTrait(
-      JavaDocTrait.class
-    );
-    String javaDoc = maybeJavaDoc.map(StringTrait::getValue).orElse(null);
+    String javaDoc = ModelUtils
+      .getDocumentationOrJavadoc(structureShape)
+      .orElse(null);
     return new BuilderMemberSpec(type, name, javaDoc);
   }
 
@@ -167,10 +165,9 @@ public class BuilderMemberSpec {
       subject.serviceShape
     );
     String name = INTERFACE_VAR;
-    Optional<JavaDocTrait> maybeJavaDoc = subject.serviceShape.getTrait(
-      JavaDocTrait.class
-    );
-    String javaDoc = maybeJavaDoc.map(StringTrait::getValue).orElse(null);
+    String javaDoc = ModelUtils
+      .getDocumentationOrJavadoc(subject.serviceShape)
+      .orElse(null);
     return new BuilderMemberSpec(type, name, javaDoc);
   }
 

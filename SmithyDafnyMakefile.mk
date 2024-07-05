@@ -39,7 +39,7 @@ VERIFY_TIMEOUT := 100
 
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
-LIBRARY_ROOT := $(PWD)
+LIBRARY_ROOT := $(shell pwd)
 # Smithy Dafny code gen needs to know
 # where the smithy model is.
 # This is generally in the same directory as the library.
@@ -556,7 +556,7 @@ build_rust:
 
 test_rust:
 	cd runtimes/rust; \
-	cargo test
+	cargo test -- --nocapture
 
 ########################## Cleanup targets
 
