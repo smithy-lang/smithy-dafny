@@ -7,10 +7,10 @@ module {:options "--function-syntax:4"} Std.Enumerators {
   import opened Wrappers
 
   type IEnumerator<T> = Action<(), T>
-  type Enumerator<T, TV(!new)> = a: Action<(), Option<T>> | IsEnumerator(a) witness *
+  type Enumerator<T> = a: Action<(), Option<T>> | IsEnumerator(a) witness *
   
-  ghost predicate IsEnumerator<T, TV(!new)>(a: Action<(), Option<T>>) {
-    EventuallyStops(a, (), (r: Option<TV>) => r.None?)
+  ghost predicate IsEnumerator<T>(a: Action<(), Option<T>>) {
+    EventuallyStops(a, (), (r: Option<T>) => r.None?)
   }
 
   function Enumerated<T>(produced: seq<Option<T>>): seq<T> {
@@ -20,7 +20,7 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       [produced[0].value] + Enumerated(produced[1..])
   }
 
-  class SeqEnumerator<T, TV(!new)> extends Action<(), Option<T>> {
+  class SeqEnumerator<T> extends Action<(), Option<T>> {
 
     const elements: seq<T>
     var index: nat
@@ -32,7 +32,6 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       this.index := 0;
 
       Repr := {this};
-      inputF := x => x;
     }
 
     ghost predicate Valid() 
@@ -42,24 +41,23 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       decreases height, 0
     {
       && this in Repr
-      && inputF == x => x
     }
     
-    ghost predicate CanConsume(history: seq<((), Option<TV>)>, next: ())
+    ghost predicate CanConsume(history: seq<((), Option<T>)>, next: ())
       requires CanProduce(history)
       decreases height
     {
       true
     }
 
-    ghost predicate CanProduce(history: seq<((), Option<TV>)>)
+    ghost predicate CanProduce(history: seq<((), Option<T>)>)
       decreases height
     {
       var index := |history|;
       var values := Min(index, |elements|);
       var nones := index - values;
       && (forall i <- Inputs(history) :: i == ())
-      && Outputs(history) == Seq.Map(x => outputF(Some(x)), elements[..values]) + Seq.Repeat(None, nones)
+      && Outputs(history) == Seq.Map(x => Some(x), elements[..values]) + Seq.Repeat(None, nones)
     }
 
     method Invoke(t: ()) returns (value: Option<T>) 
@@ -78,25 +76,25 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       assert Valid();
     }
 
-    method RepeatUntil(t: (), stop: Option<TV> -> bool)
-      requires Valid()
-      requires EventuallyStops(this, t, stop)
-      requires forall i <- Consumed() :: i == inputF(t)
-      // reads Reads(t)
-      modifies Repr
-      ensures Valid()
-    {
-      DefaultRepeatUntil(this, t, stop);
-    }
+    // method RepeatUntil(t: (), stop: Option<TV> -> bool)
+    //   requires Valid()
+    //   requires EventuallyStops(this, t, stop)
+    //   requires forall i <- Consumed() :: i == inputF(t)
+    //   // reads Reads(t)
+    //   modifies Repr
+    //   ensures Valid()
+    // {
+    //   DefaultRepeatUntil(this, t, stop);
+    // }
 
     lemma ThisIsEnumerator() 
       ensures IsEnumerator(this)
     {
-      assert forall history | CanProduce(history) :: CanConsume(history,inputF(()));
-      var stop := (r: Option<TV>) => r.None?;
-      forall history: seq<((), Option<TV>)> 
+      assert forall history | CanProduce(history) :: CanConsume(history, ());
+      var stop := (r: Option<T>) => r.None?;
+      forall history: seq<((), Option<T>)> 
       | && CanProduce(history) 
-        && (forall i <- Inputs(history) :: i == inputF(())) 
+        && (forall i <- Inputs(history) :: i == ()) 
         ensures exists n: nat | n <= |elements| :: Terminated(Outputs(history), stop, n)
       {
         var outputs := Outputs(history);
@@ -104,11 +102,11 @@ module {:options "--function-syntax:4"} Std.Enumerators {
         var index := |history|;
         var values := Min(index, |elements|);
         var nones := index - values;
-        assert outputs == Seq.Map(x => outputF(Some(x)), elements[..values]) + Seq.Repeat(None, nones);
+        assert outputs == Seq.Map(x => Some(x), elements[..values]) + Seq.Repeat(None, nones);
         assert forall i | 0 <= i < |outputs| :: i < values <==> outputs[i].None?;
         assert Terminated(Outputs(history), stop, |elements|);
       }
-      assert ProducesTerminated(this, (), (x: Option<TV>) => x.None?, |elements|);
+      assert ProducesTerminated(this, (), (x: Option<T>) => x.None?, |elements|);
     }
 
   }
@@ -116,8 +114,8 @@ module {:options "--function-syntax:4"} Std.Enumerators {
   trait {:termination false} Pipeline<U, UV(!new), T, TV(!new)> extends Action<(), Option<T>> {
     
 
-    const upstream: Enumerator<U, UV>
-    const buffer: Collector<T, TV>
+    const upstream: Enumerator<U>
+    const buffer: Collector<T>
 
     method {:verify false} Invoke(nothing: ()) returns (t: Option<T>) {
       while (|buffer.values| == 0) {
@@ -143,16 +141,16 @@ module {:options "--function-syntax:4"} Std.Enumerators {
     //   upstream.ForEach(a');
     // }
 
-    method Process(u: Option<U>, a: Accumulator<T, TV>)
+    method Process(u: Option<U>, a: Accumulator<T>)
 
   }
 
   class PipelineProcessor<U, UV(!new), T, TV(!new)> extends Action<Option<U>, ()> {
 
     const pipeline: Pipeline<U, UV, T, TV>
-    const accumulator: Accumulator<T, TV>
+    const accumulator: Accumulator<T>
 
-    constructor(pipeline: Pipeline<U, UV, T, TV>, accumulator: Accumulator<T, TV>) {
+    constructor(pipeline: Pipeline<U, UV, T, TV>, accumulator: Accumulator<T>) {
       this.pipeline := pipeline;
       this.accumulator := accumulator;
     }
@@ -166,14 +164,14 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       this in Repr 
     }
 
-    ghost predicate CanConsume(history: seq<(Option<UV>, ())>, next: Option<UV>)
+    ghost predicate CanConsume(history: seq<(Option<U>, ())>, next: Option<U>)
       requires CanProduce(history)
       decreases height
     {
       true
     }
 
-    ghost predicate CanProduce(history: seq<(Option<UV>, ())>)
+    ghost predicate CanProduce(history: seq<(Option<U>, ())>)
       decreases height
     {
       true
@@ -183,15 +181,15 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       pipeline.Process(u, accumulator);
     }
 
-    method RepeatUntil(t: Option<U>, stop: (()) -> bool)
-      requires Valid()
-      requires EventuallyStops(this, t, stop)
-      requires forall i <- Consumed() :: i == inputF(t)
-      // reads Reads(t)
-      modifies Repr
-      ensures Valid()
-    {
-      DefaultRepeatUntil(this, t, stop);
-    }
+    // method RepeatUntil(t: Option<U>, stop: (()) -> bool)
+    //   requires Valid()
+    //   requires EventuallyStops(this, t, stop)
+    //   requires forall i <- Consumed() :: i == t
+    //   // reads Reads(t)
+    //   modifies Repr
+    //   ensures Valid()
+    // {
+    //   DefaultRepeatUntil(this, t, stop);
+    // }
   }
 }

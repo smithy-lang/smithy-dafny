@@ -649,7 +649,7 @@ module {:options "--function-syntax:4"} Std.Actions {
   // }
 
   // TODO: This is also a Folder([], (x, y) => x + [y])
-  class Collector<T, TV(!new)> extends Action<Option<T>, ()> {
+  class Collector<T> extends Action<Option<T>, ()> {
 
     var values: seq<T>
 
