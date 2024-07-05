@@ -42,6 +42,13 @@ operation CountBits {
     @required
     sum: Integer
   }
+  errors: [OverflowError]
+}
+
+@error("client")
+structure OverflowError {
+  @required
+  message: String
 }
 
 /// Returns the binary representation of the input.

@@ -110,6 +110,7 @@ module {:options "--function-syntax:4"} Std.Aggregators {
 
     constructor(init: R, f: (R, T) -> R) 
       ensures Valid()
+      ensures fresh(Repr)
     {
       this.f := f;
       this.value := init;
@@ -173,8 +174,13 @@ module {:options "--function-syntax:4"} Std.Aggregators {
 
     var values: seq<T>
 
-    constructor() {
+    constructor() 
+      ensures Valid()
+      ensures fresh(Repr)
+    {
       values := [];
+      history := [];
+      Repr := {this};
     }
 
     ghost predicate Valid() 

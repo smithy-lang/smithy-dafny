@@ -19,11 +19,17 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     returns (output: Result<CountBitsOutput, Error>)
   {
     // TODO: actually count bits. Just guessing the average (like guessing all C's on a test :) 
-    var counter := new Folder(0, (x, y) => x + 4);
-
+    var counter := new Folder<bytes, nat>(0 as int, (x, y) => x + 4);
+ 
     ForEach(input.bits, counter);
-    
-    return Success(CountBitsOutput(sum := counter.value));
+
+    // Should really have the Folder fail instead,
+    // but this is a simpler correct approach.
+    if counter.value < INT32_MAX_LIMIT {
+      return Success(CountBitsOutput(sum := counter.value as int32));
+    } else {
+      return Failure(OverflowError(message := "Ah crap"));
+    }
   }
 
 

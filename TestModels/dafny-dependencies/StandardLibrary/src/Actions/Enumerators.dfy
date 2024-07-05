@@ -32,7 +32,7 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       requires Valid()
       modifies Modifies(())
       ensures Ensures((), r)
-      ensures r.Some? ==> InvokeUntilTerminationMetric() < old(InvokeUntilTerminationMetric())
+      ensures r.Some? ==> Remaining() < old(Remaining())
     {
       CanConsumeAll(history, ());
       label before:
@@ -64,7 +64,7 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       invariant e.ValidAndDisjoint()
       invariant a.ValidAndDisjoint()
       invariant e.Repr !! a.Repr
-      decreases e.InvokeUntilTerminationMetric()
+      decreases e.Remaining()
     {
       a.CanConsumeAll(a.history, t.value);
       a.Accept(t.value);
@@ -181,6 +181,9 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       decreases height, 0
     {
       && this in Repr
+      && ValidComponent(upstream)
+      && ValidComponent(buffer)
+      && upstream.Repr !! buffer.Repr
       && CanProduce(history)
     }
 
@@ -197,15 +200,29 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       true
     }
 
-    method {:verify false} Invoke(nothing: ()) returns (t: Option<T>) 
+    method Invoke(t: ()) returns (r: Option<T>) 
+      requires Requires(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
     {
-      while (|buffer.values| == 0) {
-        var u := upstream.Invoke(());
+      label start:
+      while (|buffer.values| == 0) 
+        invariant Valid()
+        invariant buffer.ValidAndDisjoint()
+        invariant upstream.ValidAndDisjoint()
+        invariant upstream.Repr !! buffer.Repr
+        modifies Repr
+        decreases upstream.Remaining()
+      {
+        var u := upstream.Next();
         Process(u, buffer);
 
         if u.None? {
           break;
         }
+
+         Repr := {this} + upstream.Repr + buffer.Repr;
       }
 
       if 0 < |buffer.values| {
@@ -219,6 +236,7 @@ module {:options "--function-syntax:4"} Std.Enumerators {
     method Process(u: Option<U>, a: Accumulator<T>)
       requires a.Valid()
       modifies a.Repr
+      ensures a.ValidAndDisjoint()
       // TODO: need a postcondition that a was invoked at least once etc
 
     method RepeatUntil(t: (), stop: Option<T> -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<(), Option<T>>)
@@ -255,18 +273,22 @@ module {:options "--function-syntax:4"} Std.Enumerators {
 
   class ExamplePipeline<T> extends Pipeline<T, T> {
     constructor(upstream: Enumerator<T>) 
+      requires upstream.Valid()
       ensures Valid()
     {
       this.upstream := upstream;
-      this.buffer := new Collector<T>();
+      var buffer := new Collector<T>();
 
-      Repr := {this};
+      Repr := {this} + upstream.Repr + buffer.Repr;
       history := [];
+      this.buffer := buffer; 
+      this.height := upstream.height + buffer.height + 1;
     }
 
     method Process(u: Option<T>, a: Accumulator<T>) 
       requires a.Valid()
       modifies a.Repr
+      ensures a.ValidAndDisjoint()
     {
       if u.Some? {
         a.Accept(u.value);

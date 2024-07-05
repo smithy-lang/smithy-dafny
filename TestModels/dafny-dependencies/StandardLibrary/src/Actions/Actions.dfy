@@ -134,7 +134,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       invariant a.Valid()
       invariant fresh(a.Repr - old(a.Repr))
       invariant forall i <- a.Consumed() :: i == t
-      decreases eventuallyStopsProof.InvokeUntilTerminationMetric()
+      decreases eventuallyStopsProof.Remaining()
     {
       label beforeInvoke:
       assert a.Valid();
@@ -218,7 +218,8 @@ module {:options "--function-syntax:4"} Std.Actions {
       requires (forall i <- Inputs(history) :: i == FixedInput())
       ensures exists n: nat | n <= Limit() :: Terminated(Outputs(history), StopFn(), n)
 
-    ghost function InvokeUntilTerminationMetric(): nat
+    // Termination metric
+    ghost function Remaining(): nat
       requires Action().Valid()
       requires forall i <- Action().Consumed() :: i == FixedInput()
       reads Action().Repr
@@ -236,7 +237,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       requires Action().Consumed() == old(Action().Consumed()) + [FixedInput()]
       requires Action().Produced() == old(Action().Produced()) + [nextProduced]
       requires !StopFn()(nextProduced)
-      ensures InvokeUntilTerminationMetric() < old(InvokeUntilTerminationMetric())
+      ensures Remaining() < old(Remaining())
     {
       var before := old(Action().Produced());
       var after := Action().Produced();
