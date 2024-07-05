@@ -3,6 +3,7 @@ include "Actions.dfy"
 module Composed {
 
   import opened Std.Actions
+  import opened Wrappers
 
   class ComposedAction<T, TV(!new), V, VV(!new), R, RV(!new)> extends Action<T, TV, R, RV> {
     const first: Action<T, TV, V, VV>
@@ -45,11 +46,11 @@ module Composed {
       requires CanProduce(history)
       decreases height
     {
-      forall piped: seq<V> | CanPipe(history, piped) :: 
+      forall piped: seq<VV> | CanPipe(history, piped) :: 
         && var firstHistory := Seq.Zip(Inputs(history), piped);
         && var secondHistory := Seq.Zip(piped, Outputs(history));
         && first.CanConsume(firstHistory, next)
-        && forall pipedNext: V | first.CanProduce(firstHistory + [(next, pipedNext)]) ::
+        && forall pipedNext: VV | first.CanProduce(firstHistory + [(next, pipedNext)]) ::
           && second.CanConsume(secondHistory, pipedNext)
 
       // Note that you can't compose any arbitrary first with a second:
@@ -61,10 +62,10 @@ module Composed {
     predicate CanProduce(history: seq<(TV, RV)>)
       decreases height
     {
-      exists piped: seq<V> :: CanPipe(history, piped)
+      exists piped: seq<VV> :: CanPipe(history, piped)
     }
 
-    predicate CanPipe(history: seq<(TV, RV)>, piped: seq<V>) 
+    predicate CanPipe(history: seq<(TV, RV)>, piped: seq<VV>) 
       decreases height, 0
     {
       && |piped| == |history|
@@ -86,10 +87,21 @@ module Composed {
       Update(t, r);
       Repr := {this} + first.Repr + second.Repr;
     }
+
+    method RepeatUntil(t: T, stop: RV -> bool)
+      requires Valid()
+      requires EventuallyStops(this, t, stop)
+      requires forall i <- Consumed() :: i == inputF(t)
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop);
+    }
   }
 
   method Example() {
-    var e: SeqEnumerator<int> := new SeqEnumerator([1, 2, 3, 4, 5]);
+    var e: SeqEnumerator<int, int> := new SeqEnumerator([1, 2, 3, 4, 5]);
     SeqEnumeratorIsEnumerator(e);
     var f := (x: Option<int>) => match x {
       case Some(v) => Some(v + v)

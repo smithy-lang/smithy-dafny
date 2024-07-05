@@ -26,6 +26,7 @@ module {:options "--function-syntax:4"} Std.GenericActions {
 
     method Invoke(t: T) returns (r: R) 
       requires Requires(t)
+      // TODO: enable --reads-clauses-on-methods
       // reads Reads(t)
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()

@@ -44,4 +44,12 @@ module {:options "--function-syntax:4"} Seq {
       var (a, b):= Unzip(DropLast(xs));
       (a + [Last(xs).0], b + [Last(xs).1])
   }
+
+  /* Returns a constant sequence of a given length. */
+  function {:opaque} Repeat<T>(v: T, length: nat): (xs: seq<T>)
+    ensures |xs| == length
+    ensures forall i: nat | i < |xs| :: xs[i] == v
+  {
+    seq(length, i => v)
+  }
 }
