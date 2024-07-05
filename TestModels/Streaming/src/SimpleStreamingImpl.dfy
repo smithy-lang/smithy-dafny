@@ -4,6 +4,8 @@
 include "../Model/SimpleStreamingTypes.dfy"
 module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
+  import opened Std.Aggregators
+
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)
@@ -19,7 +21,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     // TODO: actually count bits. Just guessing the average (like guessing all C's on a test :) 
     var counter := new Folder(0, (x, y) => x + 4);
 
-    input.bits.ForEach(counter);
+    ForEach(input.bits, counter);
     
     return Success(CountBitsOutput(sum := counter.value));
   }
@@ -35,12 +37,10 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   {
     // TODO: Actually compute the binary
-    var fakeBinary := [[12], [34, 56]];
+    var fakeBinary: seq<bytes> := [[12], [34, 56]];
     var fakeBinaryEnumerator := new SeqEnumerator(fakeBinary);
     
-    var outStream := new SimpleStream<bytes>(fakeBinaryEnumerator);
-
-    return Success(BinaryOfOutput(binary := outStream));
+    return Success(BinaryOfOutput(binary := fakeBinaryEnumerator));
   }
 
 
@@ -53,7 +53,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     const chunkSize: int32
     var chunkBuffer: bytes
 
-    constructor(upstream: Stream<bytes>, chunkSize: int32)
+    constructor(upstream: Enumerator<bytes>, chunkSize: int32)
     {
       this.buffer := new Collector<bytes>();
       this.upstream := upstream;
@@ -105,6 +105,6 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   method SomeOtherServiceOp( input: StreamingBlob ) returns (r: StreamingBlob) {
     // Imagine this was external
-    r := new EmptyStream();
+    r := new SeqEnumerator([]);
   }
 }

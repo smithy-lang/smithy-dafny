@@ -29,7 +29,7 @@ module Std.Composed {
       && Produced() == second.Produced()
     }
 
-    constructor(second: Action<V, R>, first: Action<T, V>) 
+    constructor(first: Action<T, V>, second: Action<V, R>) 
       requires first.Valid()
       requires second.Valid()
       requires first.Repr !! second.Repr
@@ -113,7 +113,7 @@ module Std.Composed {
       case None => None
     };
     var doubler := new FunctionAction(f);
-    var mapped: ComposedAction<(), Option<int>, Option<int>> := new ComposedAction(doubler, e);
+    var mapped: ComposedAction<(), Option<int>, Option<int>> := new ComposedAction(e, doubler);
 
     // TODO: Need some lemmas
     var x := mapped.Invoke(());

@@ -7,12 +7,25 @@ module {:options "--function-syntax:4"} Std.Aggregators {
   import opened Wrappers
   import opened DynamicArray
 
-  // TODO: Names need improvement
-  type IAggregator<T> = Action<T, ()>
-  type Aggregator<T> = Action<T, bool> // | exists limit: nat :: ProducesTerminatedBy(a, r => !r, limit) witness *
-  type Accumulator<T> = Action<Option<T>, ()> // | exists limit :: ConsumesTerminatedBy(a, None, limit) witness *
-  
-  class ArrayAggregator<T> extends Action<T, ()>, ConsumesAllProof<T, ()> {
+  trait Accumulator<T> extends Action<T, ()>, ConsumesAllProof<T, ()> {
+
+    ghost function Action(): Action<T, ()> {
+      this
+    }
+
+    // For better readability
+    method Accept(t: T)
+      requires Valid()
+      modifies Modifies(t)
+      ensures Ensures(t, ())
+    {
+      CanConsumeAll(history, t);
+      var r := Invoke(t);
+      assert r == ();
+    }
+  }
+
+  class ArrayAggregator<T> extends Accumulator<T> {
 
     var storage: DynamicArray<T>
 
@@ -84,15 +97,136 @@ module {:options "--function-syntax:4"} Std.Aggregators {
       DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
     }
 
-    ghost function Action(): Action<T, ()> {
-      this
+    lemma CanConsumeAll(history: seq<(T, ())>, next: T) 
+      requires Action().CanProduce(history)
+      ensures Action().CanConsume(history, next) 
+    {}
+  }
+
+  class Folder<T, R> extends Accumulator<T> {
+
+    const f: (R, T) -> R
+    var value: R
+
+    constructor(init: R, f: (R, T) -> R) 
+      ensures Valid()
+    {
+      this.f := f;
+      this.value := init;
+      this.Repr := {this};
+    }
+
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> 
+        && CanProduce(history)
+      decreases height, 0
+    {
+      && this in Repr
+    }
+
+    ghost predicate CanConsume(history: seq<(T, ())>, next: T)
+      decreases height
+    {
+      true
+    }
+    ghost predicate CanProduce(history: seq<(T, ())>)
+      decreases height
+    {
+      true
+    }
+
+    method Invoke(t: T) returns (r: ()) 
+      requires Requires(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
+    {
+      value := f(value, t);
+      r := ();
+      Update(t, ());
+      assert Valid();
+    }
+
+    method RepeatUntil(t: T, stop: (()) -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<T, ()>)
+      requires Valid()
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
     }
 
     lemma CanConsumeAll(history: seq<(T, ())>, next: T) 
       requires Action().CanProduce(history)
       ensures Action().CanConsume(history, next) 
-    {
+    {}
+  }
+
+  // TODO: This is also a Folder([], (x, y) => x + [y])
+  class Collector<T> extends Accumulator<T> {
+
+    var values: seq<T>
+
+    constructor() {
+      values := [];
     }
+
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> CanProduce(history)
+      decreases height, 0
+    {
+      this in Repr 
+    }
+
+    ghost predicate CanConsume(history: seq<(T, ())>, next: T)
+      requires CanProduce(history)
+      decreases height
+    {
+      true
+    }
+
+    ghost predicate CanProduce(history: seq<(T, ())>)
+      decreases height
+    {
+      true
+    }
+
+    method {:verify false} Invoke(t: T) returns (nothing: ()) {
+      values := values + [t];
+    }
+
+    method RepeatUntil(t: T, stop: (()) -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<T, ()>)
+      requires Valid()
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
+    }
+
+    method {:verify false} Pop() returns (t: T) 
+      requires 0 < |values|
+    {
+      t := values[0];
+      values := values[1..];
+    }
+
+    lemma CanConsumeAll(history: seq<(T, ())>, next: T) 
+      requires Action().CanProduce(history)
+      ensures Action().CanConsume(history, next) 
+    {}
   }
 
   method {:rlimit 0} AggregatorExample() {

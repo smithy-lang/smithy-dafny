@@ -26,6 +26,22 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       requires Action().CanProduce(history) 
       requires (forall i <- Inputs(history) :: i == FixedInput())
       ensures exists n: nat | n <= Limit() :: Terminated(Outputs(history), StopFn(), n)
+
+    // For better readability
+    method Next() returns (r: Option<T>) 
+      requires Valid()
+      modifies Modifies(())
+      ensures Ensures((), r)
+      ensures r.Some? ==> InvokeUntilTerminationMetric() < old(InvokeUntilTerminationMetric())
+    {
+      CanConsumeAll(history, ());
+      label before:
+      r := Invoke(());
+      if r.Some? {
+        assert forall i <- old(Action().Consumed()) :: i == ();
+        InvokeUntilTerminationMetricDecreased@before(r);
+      }
+    }
   }
 
   function Enumerated<T>(produced: seq<Option<T>>): seq<T> {
@@ -33,6 +49,31 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       []
     else
       [produced[0].value] + Enumerated(produced[1..])
+  }
+
+  method ForEach<T>(e: Enumerator<T>, a: Accumulator<T>) 
+    requires e.Valid()
+    requires a.Valid()
+    requires e.Repr !! a.Repr
+    modifies e.Repr, a.Repr
+    // TODO: complete post-condition
+    // ensures Enumerated(e.Produced()) == a.Consumed()
+  {
+    var t := e.Next();
+    while t != None 
+      invariant e.ValidAndDisjoint()
+      invariant a.ValidAndDisjoint()
+      invariant e.Repr !! a.Repr
+      decreases e.InvokeUntilTerminationMetric()
+    {
+      a.CanConsumeAll(a.history, t.value);
+      a.Accept(t.value);
+
+      t := e.Next();
+      if t == None {
+        break;
+      }
+    }
   }
 
   class SeqEnumerator<T> extends Enumerator<T> {
@@ -128,12 +169,36 @@ module {:options "--function-syntax:4"} Std.Enumerators {
 
   }
 
-  trait {:termination false} Pipeline<U, T> extends Action<(), Option<T>> {
+  trait {:termination false} Pipeline<U, T> extends Enumerator<T> {
     
     const upstream: Enumerator<U>
     const buffer: Collector<T>
 
-    method {:verify false} Invoke(nothing: ()) returns (t: Option<T>) {
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> CanProduce(history)
+      decreases height, 0
+    {
+      && this in Repr
+      && CanProduce(history)
+    }
+
+    ghost predicate CanConsume(history: seq<((), Option<T>)>, next: ())
+      requires CanProduce(history)
+      decreases height
+    {
+      true
+    }
+
+    ghost predicate CanProduce(history: seq<((), Option<T>)>)
+      decreases height
+    {
+      true
+    }
+
+    method {:verify false} Invoke(nothing: ()) returns (t: Option<T>) 
+    {
       while (|buffer.values| == 0) {
         var u := upstream.Invoke(());
         Process(u, buffer);
@@ -151,14 +216,62 @@ module {:options "--function-syntax:4"} Std.Enumerators {
       }
     }
 
-    // method {:verify false} ForEach(a: Accumulator<T, TV>)
-    // {
-    //   var a' := new PipelineProcessor(this, a);
-    //   upstream.ForEach(a');
-    // }
-
     method Process(u: Option<U>, a: Accumulator<T>)
+      requires a.Valid()
+      modifies a.Repr
+      // TODO: need a postcondition that a was invoked at least once etc
 
+    method RepeatUntil(t: (), stop: Option<T> -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<(), Option<T>>)
+      requires Valid()
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
+      // reads Reads(t)
+      modifies Repr
+      ensures Valid()
+    {
+      DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
+    }
+
+    lemma CanConsumeAll(history: seq<((), Option<T>)>, next: ()) 
+      requires Action().CanProduce(history) 
+      ensures Action().CanConsume(history, next)
+    {}
+
+    ghost function Limit(): nat {
+      upstream.Limit()
+    }
+
+    lemma {:axiom} ProducesTerminated(history: seq<((), Option<T>)>)
+      requires Action().CanProduce(history) 
+      requires (forall i <- Inputs(history) :: i == FixedInput())
+      ensures exists n: nat | n <= Limit() :: Terminated(Outputs(history), StopFn(), n)
+    {
+      // TODO
+      assume {:axiom} false;
+    }
+  }
+
+  class ExamplePipeline<T> extends Pipeline<T, T> {
+    constructor(upstream: Enumerator<T>) 
+      ensures Valid()
+    {
+      this.upstream := upstream;
+      this.buffer := new Collector<T>();
+
+      Repr := {this};
+      history := [];
+    }
+
+    method Process(u: Option<T>, a: Accumulator<T>) 
+      requires a.Valid()
+      modifies a.Repr
+    {
+      if u.Some? {
+        a.Accept(u.value);
+      }
+    }
   }
 
   class PipelineProcessor<U, T> extends Action<Option<U>, ()> {
@@ -259,6 +372,7 @@ module {:options "--function-syntax:4"} Std.Enumerators {
         }
       }
       Update(t, r);
+      assert Valid();
     }
 
     method RepeatUntil(t: (), stop: Option<T> -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<(), Option<T>>)
