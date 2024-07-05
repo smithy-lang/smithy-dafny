@@ -311,7 +311,7 @@ public class CodegenEngine {
    * Generate a skeletal implementation of the local service operations,
    * with `expect false` statements to ensure tests will initially fail.
    */
-  public void generateDafnySkeleton(Path outputDir) {
+  private void generateDafnySkeleton(Path outputDir) {
     final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
       model,
       serviceShape,

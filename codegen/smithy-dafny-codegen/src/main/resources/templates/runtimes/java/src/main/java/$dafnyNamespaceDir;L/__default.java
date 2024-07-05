@@ -14,7 +14,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 import $sdkClientNamespace:L.$sdkClientName:L;
 import $dafnyNamespace:L.types.Error;
-import $dafnyNamespace:L.types.IDynamoDBClient;
+import $dafnyNamespace:L.types.I$sdkID:LClient;
 
 public class __default
   extends $dafnyNamespace:L._ExternBase___default {
@@ -30,9 +30,7 @@ public class __default
       I$sdkID:LClient shim = new Shim(nativeClient, region.toString());
       return CreateSuccessOfClient(shim);
     } catch (Exception e) {
-      Error dafny_error = Error.create_InternalServerError(
-        WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage()))
-      );
+      Error dafny_error = Error.create_Opaque(e);
       return CreateFailureOfError(dafny_error);
     }
   }
