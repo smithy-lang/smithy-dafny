@@ -8,7 +8,7 @@ module SimplePositionalImpl refines AbstractSimplePositionalOperations {
 
   datatype Config = Config
   type InternalConfig = Config
-    
+
   predicate ValidInternalConfig?(config: InternalConfig)
   {true}
   function ModifiesInternalConfig(config: InternalConfig): set<object>
@@ -28,23 +28,23 @@ module SimplePositionalImpl refines AbstractSimplePositionalOperations {
     var result: GetResourceOutput := GetResourceOutput(
       output := resource
     );
-    return Success(result);  
+    return Success(result);
   }
 
 
-  predicate GetResourcePositionalEnsuresPublicly(input: GetResourceInput , output: Result<ISimpleResource, Error>)
+  predicate GetResourcePositionalEnsuresPublicly(input: string , output: Result<ISimpleResource, Error>)
   {true}
 
 
 
-  method GetResourcePositional ( config: InternalConfig , input: GetResourceInput )
+  // @positional allows use to accept the input parameters directly without the input structure
+  method GetResourcePositional ( config: InternalConfig , input: string )
     returns (output: Result<ISimpleResource, Error>)
 
   {
-    var resource := new SimpleResource.SimpleResource(
-      input.name
-    );
+    var resource := new SimpleResource.SimpleResource(input);
+
     // @positional allows use to return the result without the output structure
-    return Success(resource);  
+    return Success(resource);
   }
 }

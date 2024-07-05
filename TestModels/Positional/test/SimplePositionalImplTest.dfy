@@ -35,9 +35,7 @@ module {:options "--function-syntax:4"} SimplePositionalImplTest {
         modifies client.Modifies
         ensures client.ValidState()
     {
-        var input := Types.GetResourceInput(
-            name := "TestPositional"
-        );
+        var input := "TestPositional";
         var resource: Types.ISimpleResource :- expect client.GetResourcePositional(input);
         var getNameOutput :- expect resource.GetName(Types.GetNameInput());
         expect getNameOutput.name == "TestPositional";

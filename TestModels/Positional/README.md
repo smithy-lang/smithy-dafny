@@ -12,9 +12,6 @@ It offers a tradeoff: a simpler and more idiomatic user experience,
 at the expense of not being able to add more members to the structure in the future
 without breaking existing callers.
 
-It is currently only actively used for operations that return a `@reference`
-to a newly-created resource, so that is the only test case so far.
-
 ## Build
 
 ### Dafny

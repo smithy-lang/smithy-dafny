@@ -58,8 +58,14 @@ structure GetResourceOutput {
 }
 
 operation GetResourcePositional {
-  input: GetResourceInput
+  input: GetResourcePositionalInput
   output: GetResourcePositionalOutput,
+}
+
+@positional
+structure GetResourcePositionalInput {
+  @required
+  name: String
 }
 
 @positional
