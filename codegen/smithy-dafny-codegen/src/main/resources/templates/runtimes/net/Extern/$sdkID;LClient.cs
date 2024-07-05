@@ -19,7 +19,7 @@ namespace $dafnyNamespace:L
         >
         $sdkID:LClient()
     {
-      var client = new Amazon$sdkID:LClient();
+      var client = new $sdkClientName:L();
 
       return Result<
               types.I$sdkID:LClient,

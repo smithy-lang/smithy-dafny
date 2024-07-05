@@ -606,6 +606,9 @@ public class CodegenEngine {
     parameters.put("stdLibPath", standardLibraryPath().toString());
 
     if (awsSdkStyle) {
+      final String clientClassName = ((AwsSdkDotNetNameResolver) resolver).implForServiceClient();
+      parameters.put("sdkClientName", clientClassName);
+
       if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
         writeTemplatedFile("runtimes/net/$forSDK;L$sdkID;L.csproj", parameters);
       }
