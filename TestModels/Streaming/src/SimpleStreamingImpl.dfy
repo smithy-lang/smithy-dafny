@@ -68,16 +68,25 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
       chunkBuffer := [];
     }
 
-    method {:verify false} Process(event: Option<bytes>, a: Accumulator<bytes>)
+    method Process(event: Option<bytes>, a: Accumulator<bytes>)
+      requires a.Valid()
+      requires Repr !! a.Repr
+      modifies Repr, a.Repr
+      ensures a.ValidAndDisjoint()
     {
+      assert this in Repr;
+      assert this !in a.Repr;
       match event {
         case Some(bits) => {
           chunkBuffer := chunkBuffer + bits;
         }
+        case None => return;
       }
 
-      while chunkSize as nat <= |chunkBuffer| {
-        var _ := a.Invoke(chunkBuffer[..chunkSize]);
+      while chunkSize as int <= |chunkBuffer| 
+        invariant a.Valid()
+      {
+        a.Accept(chunkBuffer[..chunkSize]);
         chunkBuffer := chunkBuffer[chunkSize..];
       }
       

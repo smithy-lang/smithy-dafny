@@ -234,8 +234,10 @@ module {:options "--function-syntax:4"} Std.Enumerators {
     }
 
     method Process(u: Option<U>, a: Accumulator<T>)
+      requires Valid()
       requires a.Valid()
-      modifies a.Repr
+      requires Repr !! a.Repr
+      modifies Repr, a.Repr
       ensures a.ValidAndDisjoint()
       // TODO: need a postcondition that a was invoked at least once etc
 
