@@ -1,19 +1,15 @@
 include "UInt.dfy"
 include "StandardLibrary.dfy"
-include "Actions.dfy"
+include "Actions/Actions.dfy"
+include "Actions/Enumerators.dfy"
 
 module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
 
   import opened StandardLibrary.UInt
   import opened Std.Actions
+  import opened Std.Enumerators
   import opened Wrappers
   
-  // TODO: Add these aliases to the main Actions library?
-  type Action'<T(!new), R(!new)> = Action<T, T, R, R>
-  type Enumerator'<T(!new)> = Enumerator<T, T>
-  type Accumulator'<T(!new)> = Accumulator<T, T>
-  type Stream'<T(!new)> = Stream<T, T>
-
   trait {:compile false} {:extern "java.lang.Throwable"} Throwable {
 
   }
@@ -22,7 +18,7 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
 
   }
 
-  trait {:compile false} {:extern "org.reactivestreams.Subscription"} Subscription {
+  trait {:compile false} {:extern "org.reactivestreams.Subscription"} Subscription extends object {
 
     method request(n: int64)
 
@@ -35,7 +31,7 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
 
   }
 
-  trait {:compile false} {:extern "org.reactivestreams.Subscriber"} Subscriber<T> {
+  trait {:compile false} {:extern "org.reactivestreams.Subscriber"} Subscriber<T> extends object {
 
     // NOTE: Don't put {:extern} on these,
     // or else no code will be emitted for the implementations.
@@ -57,9 +53,9 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
   class SequentialActionSubscriber<T(!new)> extends Subscriber<T> {
 
     var subscription: Subscription?
-    var action: Action'<SubscriptionEvent<T>, ()>
+    var action: Action<SubscriptionEvent<T>, ()>
 
-    constructor(a: Action'<SubscriptionEvent<T>, ()>) {
+    constructor(a: Action<SubscriptionEvent<T>, ()>) {
       this.action := a;
     }
 
@@ -85,11 +81,11 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
 
   }
 
-  method AsSequentialSubscriber<T>(a: Action'<SubscriptionEvent<T>, ()>) returns (s: Subscriber<T>) {
+  method AsSequentialSubscriber<T>(a: Action<SubscriptionEvent<T>, ()>) returns (s: Subscriber<T>) {
     s := new SequentialActionSubscriber(a);
   }
 
-  class SubscribingAction<T> extends Action<(), (), SubscriptionEvent<T>, SubscriptionEvent<T>> {
+  class SubscribingAction<T> extends Action<(), SubscriptionEvent<T>> {
 
     const publisher: Publisher<T>
 
@@ -123,22 +119,15 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
       // TODO: Connect to PublisherInputStream
       r := None;
     }
-
-    method ForEach(a: Accumulator'<Result<T, Throwable>>) {
-      var subscriber := AsSequentialSubscriber(a);
-      publisher.subscribe(subscriber);
-
-      // TODO: Needs to wait on completion (needs an extern)
-    }
   }
 
-  method AsStream<T>(p: Publisher<T>) returns (s: Enumerator'<Result<T, Throwable>>) {
+  method AsStream<T>(p: Publisher<T>) returns (s: Enumerator<Result<T, Throwable>>) {
     s := new SubscribingAction(p);
   } 
 
   // Stream -> Pulisher<T>
 
-  class SubscriberAction<T> extends Action<SubscriptionEvent<T>, SubscriptionEvent<T>, (), ()> {
+  class SubscriberAction<T> extends Action<SubscriptionEvent<T>, ()> {
 
     const subscriber: Subscriber<T>
 
@@ -186,9 +175,9 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
   }
 
   class ActionPublisher<T> extends Publisher<T> {
-    const subscribeAction: Stream'<Result<T, Throwable>>
+    const subscribeAction: Enumerator<Result<T, Throwable>>
 
-    constructor(subscribeAction: Enumerator'<Result<T, Throwable>>) {
+    constructor(subscribeAction: Enumerator<Result<T, Throwable>>) {
       this.subscribeAction := subscribeAction;
     }
 
@@ -198,7 +187,7 @@ module {:options "--function-syntax:4"} StandardLibraryJavaConversions {
     }
   }
 
-  method AsPublisher<T>(a: Enumerator'<Result<T, Throwable>>) returns (s: Publisher<T>) {
+  method AsPublisher<T>(a: Enumerator<Result<T, Throwable>>) returns (s: Publisher<T>) {
     s := new ActionPublisher(a);
   } 
 
