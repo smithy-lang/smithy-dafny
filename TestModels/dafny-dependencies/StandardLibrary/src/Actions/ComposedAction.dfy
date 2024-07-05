@@ -1,13 +1,17 @@
 include "Actions.dfy"
+include "Enumerators.dfy"
 
-module Composed {
+module Std.Composed {
 
-  import opened Std.Actions
+  import opened Actions
+  import opened Enumerators
   import opened Wrappers
 
-  class ComposedAction<T, TV(!new), V, VV(!new), R, RV(!new)> extends Action<T, TV, R, RV> {
-    const first: Action<T, TV, V, VV>
-    const second: Action<V, VV, R, RV>
+  class ComposedAction<T, V, R> extends Action<T, R> {
+    const first: Action<T, V>
+    const second: Action<V, R>
+
+    // TODO: Needs at least one proof token to quantify over seq<V>
 
     predicate Valid() 
       reads this, Repr 
@@ -25,7 +29,7 @@ module Composed {
       && Produced() == second.Produced()
     }
 
-    constructor(second: Action<V, VV, R, RV>, first: Action<T, TV, V, VV>) 
+    constructor(second: Action<V, R>, first: Action<T, V>) 
       requires first.Valid()
       requires second.Valid()
       requires first.Repr !! second.Repr
@@ -42,15 +46,15 @@ module Composed {
       height := first.height + second.height + 1;
     }
 
-    predicate CanConsume(history: seq<(TV, RV)>, next: TV)
+    predicate CanConsume(history: seq<(T, R)>, next: T)
       requires CanProduce(history)
       decreases height
     {
-      forall piped: seq<VV> | CanPipe(history, piped) :: 
+      forall piped: seq<V> | CanPipe(history, piped) :: 
         && var firstHistory := Seq.Zip(Inputs(history), piped);
         && var secondHistory := Seq.Zip(piped, Outputs(history));
         && first.CanConsume(firstHistory, next)
-        && forall pipedNext: VV | first.CanProduce(firstHistory + [(next, pipedNext)]) ::
+        && forall pipedNext: V | first.CanProduce(firstHistory + [(next, pipedNext)]) ::
           && second.CanConsume(secondHistory, pipedNext)
 
       // Note that you can't compose any arbitrary first with a second:
@@ -59,13 +63,13 @@ module Composed {
       // (...unless there's a way of inferring what was produced from second.produced)
     }
 
-    predicate CanProduce(history: seq<(TV, RV)>)
+    predicate CanProduce(history: seq<(T, R)>)
       decreases height
     {
-      exists piped: seq<VV> :: CanPipe(history, piped)
+      exists piped: seq<V> :: CanPipe(history, piped)
     }
 
-    predicate CanPipe(history: seq<(TV, RV)>, piped: seq<VV>) 
+    predicate CanPipe(history: seq<(T, R)>, piped: seq<V>) 
       decreases height, 0
     {
       && |piped| == |history|
@@ -88,27 +92,28 @@ module Composed {
       Repr := {this} + first.Repr + second.Repr;
     }
 
-    method RepeatUntil(t: T, stop: RV -> bool)
+    method RepeatUntil(t: T, stop: R -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<T, R>)
       requires Valid()
-      requires EventuallyStops(this, t, stop)
-      requires forall i <- Consumed() :: i == inputF(t)
+      requires eventuallyStopsProof.Action() == this
+      requires eventuallyStopsProof.FixedInput() == t
+      requires eventuallyStopsProof.StopFn() == stop
+      requires forall i <- Consumed() :: i == t
       // reads Reads(t)
       modifies Repr
       ensures Valid()
     {
-      DefaultRepeatUntil(this, t, stop);
+      DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
     }
   }
 
   method Example() {
-    var e: SeqEnumerator<int, int> := new SeqEnumerator([1, 2, 3, 4, 5]);
-    SeqEnumeratorIsEnumerator(e);
+    var e: SeqEnumerator<int> := new SeqEnumerator([1, 2, 3, 4, 5]);
     var f := (x: Option<int>) => match x {
       case Some(v) => Some(v + v)
       case None => None
     };
     var doubler := new FunctionAction(f);
-    var mapped: Compose<(), Option<int>, Option<int>> := new Compose(doubler, e);
+    var mapped: ComposedAction<(), Option<int>, Option<int>> := new ComposedAction(doubler, e);
 
     // TODO: Need some lemmas
     var x := mapped.Invoke(());

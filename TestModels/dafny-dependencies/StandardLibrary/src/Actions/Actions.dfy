@@ -176,32 +176,15 @@ module {:options "--function-syntax:4"} Std.Actions {
     Seq.Map((e: (T, R)) => e.1, history)
   }
 
-  trait ConsumesAllProof<T, R> {
-    function Action(): Action<T, R>
+  trait {:termination false} ConsumesAllProof<T, R> {
+    ghost function Action(): Action<T, R>
 
-    lemma Proof(history: seq<(T, R)>, next: T) 
+    lemma CanConsumeAll(history: seq<(T, R)>, next: T)
       requires Action().CanProduce(history)
       ensures Action().CanConsume(history, next)
   }
 
-  method CallOnce<R>(a: Action<int, R>, ghost p: ConsumesAllProof<int, R>) 
-    requires a.Valid()
-    requires p.Action() == a
-    modifies a, a.Repr
-  {
-    p.Proof(a.history, 42);
-    var x := a.Invoke(42);
-  }
-
-  method Main() {
-    var a := new ArrayAggregator<int>();
-    ghost var proof := ArrayAggregatorConsumesAnythingProof(a);
-    assert a == proof.Action();
-    CallOnce(a, proof);
-  }
-
-  ghost predicate OnlyProduces<T, R>(i: Action<T, R>, history: seq<(T, R)>, c: R) 
-  {
+  ghost predicate OnlyProduces<T, R>(i: Action<T, R>, history: seq<(T, R)>, c: R) {
     i.CanProduce(history) <==> forall e <- history :: e.1 == c
   }
 
@@ -224,30 +207,13 @@ module {:options "--function-syntax:4"} Std.Actions {
     assert forall i | 0 <= i < |right| :: right[i] == (left + right)[i + |left|];
   }
 
-  // TODO: generalize to "EventuallyProducesSequence"?
-  // ghost predicate ProducesTerminatedBy<T, R>(i: Action<T, R>, stop: R -> bool, limit: nat) {
-  //   forall history: seq<(T, R)> | i.CanProduce(history) 
-  //     :: exists n: nat | n <= limit :: Terminated(Outputs(history), stop, n)
-  // }
+  trait {:termination false} ProducesTerminatedProof<T, R> extends ConsumesAllProof<T, R> {
 
-  // Class of actions whose precondition doesn't depend on history (probably needs a better name)
-  // ghost predicate ContextFree<T, R>(a: Action<T, R>, p: T -> bool) {
-  //   forall history, next | a.CanProduce(history)
-  //     :: a.CanConsume(history, next) <==> p(next)
-  // }
+    ghost function FixedInput(): T
+    ghost function StopFn(): R -> bool
+    ghost function Limit(): nat
 
-  trait ProducesTerminatedProof<T, R> {
-
-    function Action(): Action<T, R>
-    function FixedInput(): T
-    function StopFn(): R -> bool
-    function Limit(): nat
-
-    lemma CanConsumeAll(history: seq<(T, R)>, next: T) 
-      requires Action().CanProduce(history) 
-      ensures Action().CanConsume(history, next)
-
-    lemma Proof(history: seq<(T, R)>) 
+    lemma ProducesTerminated(history: seq<(T, R)>) 
       requires Action().CanProduce(history) 
       requires (forall i <- Inputs(history) :: i == FixedInput())
       ensures exists n: nat | n <= Limit() :: Terminated(Outputs(history), StopFn(), n)
@@ -257,7 +223,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       requires forall i <- Action().Consumed() :: i == FixedInput()
       reads Action().Repr
     {
-      Proof(Action().history);
+      ProducesTerminated(Action().history);
       var n: nat :| n <= Limit() && Terminated(Action().Produced(), StopFn(), n);
       TerminatedDefinesNonTerminalCount(Action().Produced(), StopFn(), n);
       Limit() - NonTerminalCount(Action().Produced(), StopFn())
@@ -274,9 +240,9 @@ module {:options "--function-syntax:4"} Std.Actions {
     {
       var before := old(Action().Produced());
       var after := Action().Produced();
-      Proof(old(Action().history));
+      ProducesTerminated(old(Action().history));
       var n: nat :| n <= Limit() && Terminated(before, StopFn(), n);
-      Proof(Action().history);
+      ProducesTerminated(Action().history);
       var m: nat :| m <= Limit() && Terminated(after, StopFn(), m);
       if n < |before| {
         assert StopFn()(before[|before| - 1]);
@@ -293,29 +259,6 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
   }
-
-  // trait EventuallyStopsProof<T, R> {
-
-  //   function Action(): Action<T, R>
-
-  //   lemma Proof(history: seq<(T, R)>, input: T, stop: R -> bool, limit: nat) 
-  //     requires Action().CanProduce(history) 
-  //     requires (forall i <- Inputs(history) :: i == input)
-  //     ensures exists n: nat | n <= limit :: Terminated(Outputs(history), stop, n)
-  // }
-
-  // ghost predicate ProducesTerminated<T, R>(e: Action<T, R>, input: T, stop: R -> bool, limit: nat) {
-  //   forall history: seq<(T, R)> 
-  //     | && e.CanProduce(history) 
-  //       && (forall i <- Inputs(history) :: i == input)
-  //     ::
-  //       exists n: nat | n <= limit :: Terminated(Outputs(history), stop, n)
-  // }
-
-  // ghost predicate EventuallyStops<T, R>(a: Action<T, R>, input: T, stop: R -> bool) {
-  //   && ConsumesAll(a, input)
-  //   && exists limit: nat :: ProducesTerminated(a, input, stop, limit)
-  // }
 
   function NonTerminalCount<T>(produced: seq<T>, stop: T -> bool): nat {
     if |produced| == 0 || stop(produced[0]) then
@@ -337,19 +280,13 @@ module {:options "--function-syntax:4"} Std.Actions {
       }
     }
   }
+  
+  class FunctionAction<T, R> extends Action<T, R> {
 
-  // Aggregators
+    // TODO: Can we support ~>?
+    const f: T --> R
 
-  // TODO: Names need improvement
-  type IAggregator<T> = Action<T, ()>
-  // type Aggregator<T> = a: Action<T, bool> | exists limit: nat :: ProducesTerminatedBy(a, r => !r, limit) witness *
-  type Accumulator<T> = Action<Option<T>, ()> // | exists limit :: ConsumesTerminatedBy(a, None, limit) witness *
-
-  class ArrayAggregator<T> extends Action<T, ()> {
-
-    var storage: DynamicArray<T>
-
-    ghost predicate Valid() 
+    ghost predicate Valid()
       reads this, Repr 
       ensures Valid() ==> this in Repr 
       ensures Valid() ==> 
@@ -357,54 +294,48 @@ module {:options "--function-syntax:4"} Std.Actions {
       decreases height, 0
     {
       && this in Repr
-      && storage in Repr
-      && this !in storage.Repr
-      && storage.Repr <= Repr
-      && storage.Valid?()
-      && Consumed() == storage.items
+      && CanProduce(history)
+      && Produced() == Seq.Map(f, Consumed())
     }
 
-    constructor() 
+    constructor(f: T -> R) 
       ensures Valid()
-      ensures fresh(Repr - {this})
+      ensures this.f == f
+      ensures fresh(Repr)
       ensures history == []
-    {
-      var a := new DynamicArray();
+    { 
+      this.f := f;
 
       history := [];
-      height := 1;
-      Repr := {this} + {a} + a.Repr;
-      this.storage := a;
+      Repr := {this};
     }
 
-    ghost predicate CanConsume(history: seq<(T, ())>, next: T)
+    ghost predicate CanConsume(history: seq<(T, R)>, next: T)
+      requires CanProduce(history)
       decreases height
     {
-      true
+      f.requires(next)
     }
-    ghost predicate CanProduce(history: seq<(T, ())>)
+    ghost predicate CanProduce(history: seq<(T, R)>)
       decreases height
     {
-      true
+      forall e <- history :: f.requires(e.0) && e.1 == f(e.0)
     }
 
-    method Invoke(t: T) returns (r: ()) 
+    method Invoke(t: T) returns (r: R) 
       requires Requires(t)
+      // reads Reads(t)
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
     {
-      assert Consumed() == storage.items;
-      storage.Push(t);
-
-      r := ();
-      Update(t, r);
-      Repr := {this} + {storage} + storage.Repr;
-      assert Consumed() == old(Consumed()) + [t];
       assert Valid();
+      r := f(t);
+
+      Update(t, r);
     }
 
-    method RepeatUntil(t: T, stop: (()) -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<T, ()>)
+    method RepeatUntil(t: T, stop: R -> bool, ghost eventuallyStopsProof: ProducesTerminatedProof<T, R>)
       requires Valid()
       requires eventuallyStopsProof.Action() == this
       requires eventuallyStopsProof.FixedInput() == t
@@ -416,32 +347,6 @@ module {:options "--function-syntax:4"} Std.Actions {
     {
       DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
     }
-  }
-
-  datatype ArrayAggregatorConsumesAnythingProof<T> extends ConsumesAllProof<T, ()> 
-         = ArrayAggregatorConsumesAnythingProof(a: ArrayAggregator<T>) {
-
-    function Action(): Action<T, ()> {
-      a
-    }
-
-    lemma Proof(history: seq<(T, ())>, next: T) 
-      requires Action().CanProduce(history)
-      ensures Action().CanConsume(history, next) 
-    {
-    }
-  }
-
-  method {:rlimit 0} AggregatorExample() {
-    var a: ArrayAggregator<nat> := new ArrayAggregator();
-    var _ := a.Invoke(1);
-    var _ := a.Invoke(2);
-    var _ := a.Invoke(3);
-    var _ := a.Invoke(4);
-    var _ := a.Invoke(5);
-    var _ := a.Invoke(6);
-    assert a.Consumed() == [1, 2, 3, 4, 5, 6];
-    assert a.storage.items == [1, 2, 3, 4, 5, 6];
   }
 
   class FunctionalEnumerator<S, T> extends Action<(), Option<T>> {
@@ -507,7 +412,7 @@ module {:options "--function-syntax:4"} Std.Actions {
       DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
     }
   }
-
+  
   class Box {
     const i: nat
 
