@@ -8,7 +8,7 @@ pub struct GetBlobInput {
 }
 impl GetBlobInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
+    pub fn value(&self) -> ::std::option::Option<&::std::vec::Vec<::std::primitive::u8>> {
         self.value.as_ref()
     }
 }

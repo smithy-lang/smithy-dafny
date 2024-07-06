@@ -6,11 +6,14 @@ package software.amazon.polymorph.utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.SimpleCodeWriter;
 
 public class IOUtils {
 
@@ -61,5 +64,74 @@ public class IOUtils {
         e.printStackTrace();
       }
     }
+  }
+
+  /**
+   * Evaluate a simple template as a resource under "/templates/<templatePath>"
+   * and then write it to "<rootPath>/<templatePath>".
+   * The template path is also evaluated as a template,
+   * so the path can be customized by parameter values as well.
+   *
+   * Template parameters with no value bound become "",
+   * so they can also be used to provide more than one template
+   * for the same file.
+   *
+   * Note that ':' can't be used in file paths on Windows,
+   * so we use ';' instead and replace it with ':' before evaluating the templated path.
+   * We also explicitly reject ':' in paths in case someone accidentally
+   * uses that and doesn't test on Windows (purely hypothetically :)
+   *
+   * See also {@link #evalTemplate(String, Map)}.
+   */
+  public static void writeTemplatedFile(
+    Class<?> klass,
+    Path rootPath,
+    String templatePath,
+    String templateOutputPath,
+    Map<String, String> parameters
+  ) {
+    String content = IoUtils.readUtf8Resource(
+      klass,
+      "/templates/" + templatePath
+    );
+
+    if (templateOutputPath.contains(":")) {
+      throw new IllegalArgumentException(
+        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
+      );
+    }
+    templateOutputPath = templateOutputPath.replace(';', ':');
+
+    content = evalTemplate(content, parameters);
+    templateOutputPath = evalTemplate(templateOutputPath, parameters);
+
+    Path outputPath = rootPath.resolve(templateOutputPath);
+    try {
+      Files.createDirectories(outputPath.getParent());
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+
+    IOUtils.writeToFile(content, outputPath.toFile());
+    LOGGER.info("Additional templated content written to {}", outputPath);
+  }
+
+  /**
+   * Evaluate a simple template using a {@link SimpleCodeWriter}.
+   * See {@link software.amazon.smithy.utils.AbstractCodeWriter} for documentation
+   * on the templating syntax.
+   */
+  public static String evalTemplate(
+    String template,
+    Map<String, String> context
+  ) {
+    SimpleCodeWriter writer = new SimpleCodeWriter()
+      .disableNewlines()
+      .insertTrailingNewline(false);
+    for (Map.Entry<String, String> entry : context.entrySet()) {
+      writer.putContext(entry.getKey(), entry.getValue());
+    }
+    writer.write(template);
+    return writer.toString();
   }
 }

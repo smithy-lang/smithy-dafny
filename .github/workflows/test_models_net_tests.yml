@@ -8,57 +8,30 @@ on:
         description: "The Dafny version to run"
         required: true
         type: string
+      num_shards:
+        required: false
+        type: number
+        default: 10
 
 jobs:
+  populate-matrix-dimensions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Populate shard list
+        id: populate-shard-list
+        run: echo "shard-list=[`seq -s , 1 ${{ inputs.num_shards }}`]" >> $GITHUB_OUTPUT
+    outputs:
+      shard-list: ${{ steps.populate-shard-list.outputs.shard-list }}
   testDotNet:
+    needs: populate-matrix-dimensions
     strategy:
       fail-fast: false
       matrix:
         dafny-version:
           - ${{ inputs.dafny }}
-        library: [
-            TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
-            TestModels/Aggregate,
-            # TestModels/AggregateReferences,
-            TestModels/CodegenPatches,
-            TestModels/Constraints,
-            TestModels/Constructor,
-            TestModels/Dependencies,
-            TestModels/Errors,
-            TestModels/Extendable,
-            TestModels/Extern,
-            # TestModels/LanguageSpecificLogic, # Tested only for 4.4.0 below
-            # TestModels/LocalService,
-            TestModels/MultipleModels,
-            TestModels/Refinement,
-            TestModels/Resource,
-            # TestModels/SimpleTypes/BigDecimal,
-            # TestModels/SimpleTypes/BigInteger,
-            TestModels/SimpleTypes/SimpleBlob,
-            TestModels/SimpleTypes/SimpleBoolean,
-            # TestModels/SimpleTypes/SimpleByte,
-            TestModels/SimpleTypes/SimpleDouble,
-            TestModels/SimpleTypes/SimpleEnum,
-            TestModels/SimpleTypes/SimpleEnumV2,
-            # TestModels/SimpleTypes/SimpleFloat,
-            TestModels/SimpleTypes/SimpleInteger,
-            TestModels/SimpleTypes/SimpleLong,
-            # TestModels/SimpleTypes/SimpleShort,
-            TestModels/SimpleTypes/SimpleString,
-            # TestModels/SimpleTypes/SimpleTimestamp,
-            TestModels/Union,
-            TestModels/aws-sdks/ddb,
-            TestModels/aws-sdks/kms,
-            TestModels/aws-sdks/sqs-via-cli,
-          ]
+        shard: ${{ fromJson(needs.populate-matrix-dimensions.outputs.shard-list) }}
         dotnet-version: ["6.0.x"]
         os: [ubuntu-latest]
-        include:
-          # One-off until TestModels migrate to 4.4.0
-          - library: TestModels/LanguageSpecificLogic
-            dafny-version: 4.4.0
-            dotnet-version: "6.0.x"
-            os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -99,33 +72,17 @@ jobs:
         # https://github.com/actions/setup-dotnet/blob/main/.github/csc.json
         run: echo "::remove-matcher owner=csc::"
 
-      - name: Download Dependencies
-        working-directory: ./${{ matrix.library }}
-        run: make setup_net
-
       - name: Setup Java 17 for codegen
         uses: actions/setup-java@v3
         with:
           distribution: "corretto"
           java-version: "17"
 
-      - name: Generate Polymorph Dafny and Dotnet code
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-          make polymorph_dotnet DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-
-      - name: Compile ${{ matrix.library }} implementation
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          # This works because `node` is installed by default on GHA runners
-          CORES=$(node -e 'console.log(os.cpus().length)')
-          make transpile_net CORES=$CORES
-
-      - name: Test ${{ matrix.library }}
-        working-directory: ./${{ matrix.library }}
-        shell: bash
-        run: |
-          make test_net
+      - name: Execute smithy-dafny-codegen-test tests
+        uses: gradle/gradle-build-action@v2
+        env:
+          JUNIT_SHARD: ${{ matrix.shard }}
+          JUNIT_SHARD_COUNT: ${{ inputs.num_shards }}
+        with:
+          arguments: :smithy-dafny-codegen-test:test --tests '*smithydotnet*' --info
+          build-root-directory: codegen

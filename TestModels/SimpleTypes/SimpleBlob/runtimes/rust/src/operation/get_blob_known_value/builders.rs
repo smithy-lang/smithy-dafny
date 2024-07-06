@@ -21,17 +21,15 @@ impl GetBlobKnownValueInputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetBlobKnownValueFluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::client::Client,
     inner: crate::operation::get_blob_known_value::builders::GetBlobKnownValueInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
 impl GetBlobKnownValueFluentBuilder {
     /// Creates a new `GetBlobKnownValue`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::client::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetBlobKnownValue as a reference.
@@ -56,24 +54,9 @@ impl GetBlobKnownValueFluentBuilder {
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
             .map_err(crate::operation::get_blob_known_value::GetBlobKnownValueError::unhandled)?;
-        crate::operation::get_blob_known_value::GetBlobKnownValue::send(&self.handle, input).await
+        crate::operation::get_blob_known_value::GetBlobKnownValue::send(&self.client, input).await
     }
 
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(
         mut self,

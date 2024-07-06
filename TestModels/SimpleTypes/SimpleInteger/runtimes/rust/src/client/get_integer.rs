@@ -8,6 +8,6 @@ impl super::Client {
     ///   - [`value(Option<Integer>)`](crate::operation::get_integer::GetIntegerOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetIntegerError>`](crate::operation::get_integer::GetIntegerError)
     pub fn get_integer(&self) -> crate::operation::get_integer::builders::GetIntegerFluentBuilder {
-        crate::operation::get_integer::builders::GetIntegerFluentBuilder::new(self.handle.clone())
+        crate::operation::get_integer::builders::GetIntegerFluentBuilder::new(self.clone())
     }
 }

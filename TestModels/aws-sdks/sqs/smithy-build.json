@@ -1,5 +1,30 @@
 {
   "version": "1.0",
+  "projections": {
+    "list-queues-and-add-permission-only": {
+      "transforms": [
+        {
+          "name": "excludeShapesBySelector",
+          "args": {
+            "selector": "[id|name *= 'Change', 'Create', 'Get', 'Delete', 'Send', 'RemovePermission', 'Tag', 'Untag', 'DeadLetter', 'Purge', 'Receive', 'Set']"
+          }
+        },
+        {
+          "name": "removeUnusedShapes"
+        }
+      ]
+    },
+    "permissions-only": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": "[id|name *= 'Permission', 'AmazonSQS', 'service']"
+          }
+        }
+      ]
+    }
+  },
   "plugins": {
     "dafny-client-codegen": {
       "edition": "2023",

@@ -4,11 +4,16 @@
 package software.amazon.polymorph.smithydafny;
 
 import com.google.common.base.Joiner;
+
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import com.squareup.javapoet.ParameterizedTypeName;
+import org.reactivestreams.Publisher;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -21,6 +26,7 @@ import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.ReadonlyTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 public record DafnyNameResolver(
@@ -40,7 +46,9 @@ public record DafnyNameResolver(
       //            Map.entry(ShapeType.SHORT, "int16"),
       Map.entry(ShapeType.INTEGER, "int32"),
       Map.entry(ShapeType.LONG, "int64"),
-      Map.entry(ShapeType.DOUBLE, "seq<uint8>")
+      Map.entry(ShapeType.DOUBLE, "seq<uint8>"),
+      // TODO create/use better timestamp type in Dafny libraries
+      Map.entry(ShapeType.TIMESTAMP, "string")
     );
 
   public static String nameForService(final ServiceShape serviceShape) {
@@ -70,8 +78,7 @@ public record DafnyNameResolver(
     }
 
     return switch (shape.getType()) {
-      case BLOB,
-        BOOLEAN,
+      case BOOLEAN,
         STRING,
         ENUM,
         // currently unused in model and unsupported in StandardLibrary.UInt
@@ -81,6 +88,13 @@ public record DafnyNameResolver(
         DOUBLE,
         LIST,
         MAP -> dafnyModulePrefixForShape(shape) + shapeName;
+      case BLOB -> {
+        if (shape.hasTrait(StreamingTrait.class)) {
+          yield "Enumerator<bytes>";
+        } else {
+          yield dafnyModulePrefixForShape(shape) + shapeName;
+        }
+      }
       case STRUCTURE -> {
         if (shape.hasTrait(ReferenceTrait.class)) {
           yield baseTypeForShape(
@@ -350,7 +364,8 @@ public record DafnyNameResolver(
     return Stream.of(
       "import opened Wrappers",
       "import opened StandardLibrary.UInt",
-      "import opened UTF8"
+      "import opened UTF8",
+      "import opened Std.Enumerators"
     );
   }
 

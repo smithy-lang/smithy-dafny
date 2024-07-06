@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>$sdkID:L</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <LangVersion>10</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DafnyRuntime" Version="$dafnyVersion:L"/>
+    <!--
+      System.Collections.Immutable can be removed once dafny.msbuild is updated with
+      https://github.com/dafny-lang/dafny.msbuild/pull/10 and versioned
+    -->
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+
+    <Compile Include="Extern/**/*.cs" />
+    <Compile Include="Generated/**/*.cs" />
+    <Compile Include="ImplementationFromDafny.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$stdLibPath:L/runtimes/net/STD.csproj" />
+  </ItemGroup>
+
+</Project>

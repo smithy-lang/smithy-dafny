@@ -39,7 +39,7 @@ VERIFY_TIMEOUT := 100
 
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
-LIBRARY_ROOT := $(PWD)
+LIBRARY_ROOT := $(shell pwd)
 # Smithy Dafny code gen needs to know
 # where the smithy model is.
 # This is generally in the same directory as the library.
@@ -305,6 +305,7 @@ _polymorph_wrapped:
 	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
+	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
@@ -384,6 +385,8 @@ polymorph_dotnet:
 
 _polymorph_dotnet: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+_polymorph_dotnet: INPUT_DAFNY=\
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project
@@ -400,6 +403,8 @@ polymorph_java:
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
+_polymorph_java: INPUT_DAFNY=\
+	--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_java: _polymorph
 
 # Generates python code for all namespaces in this project
@@ -586,7 +591,7 @@ build_rust:
 
 test_rust:
 	cd runtimes/rust; \
-	cargo test
+	cargo test -- --nocapture
 
 ########################## Cleanup targets
 

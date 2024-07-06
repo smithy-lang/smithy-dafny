@@ -6,9 +6,7 @@ pub fn to_dafny(
     ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
 > {
     let dafny_value = match value.value {
-        Some(v) => ::simple_integer_dafny::_Wrappers_Compile::Option::Some {
-            value: v,
-        },
+        Some(v) => ::simple_integer_dafny::_Wrappers_Compile::Option::Some { value: v },
         None => ::simple_integer_dafny::_Wrappers_Compile::Option::None {},
     };
     ::std::rc::Rc::new(::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput::GetIntegerInput {
