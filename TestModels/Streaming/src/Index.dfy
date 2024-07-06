@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleStreamingImpl.dfy"
 
-module {:extern "simple.streaming.internaldafny" } SimpleStreaming refines AbstractSimpleStreamingService {
+module SimpleStreaming refines AbstractSimpleStreamingService {
   import Operations = SimpleStreamingImpl
 
   function method DefaultSimpleStreamingConfig(): SimpleStreamingConfig {

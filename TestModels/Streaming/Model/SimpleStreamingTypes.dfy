@@ -37,12 +37,10 @@ module SimpleStreamingTypes
       CountBits := [];
       BinaryOf := [];
       Chunks := [];
-      WrapService := [];
     }
     ghost var CountBits: seq<DafnyCallEvent<CountBitsInput, Result<CountBitsOutput, Error>>>
     ghost var BinaryOf: seq<DafnyCallEvent<BinaryOfInput, Result<BinaryOfOutput, Error>>>
     ghost var Chunks: seq<DafnyCallEvent<ChunksInput, Result<ChunksOutput, Error>>>
-    ghost var WrapService: seq<DafnyCallEvent<WrapServiceInput, Result<WrapServiceOutput, Error>>>
   }
   trait {:termination false} ISimpleStreamingClient extends object
   {
@@ -116,32 +114,11 @@ module SimpleStreamingTypes
       ensures ChunksEnsuresPublicly(input, output)
       ensures History.Chunks == old(History.Chunks) + [DafnyCallEvent(input, output)]
 
-    predicate WrapServiceEnsuresPublicly(input: WrapServiceInput , output: Result<WrapServiceOutput, Error>)
-    // The public method to be called by library consumers
-    method WrapService ( input: WrapServiceInput )
-      returns (output: Result<WrapServiceOutput, Error>)
-      requires
-        && ValidState()
-      modifies Modifies - {History} ,
-               History`WrapService
-      // Dafny will skip type parameters when generating a default decreases clause.
-      decreases Modifies - {History}
-      ensures
-        && ValidState()
-      ensures WrapServiceEnsuresPublicly(input, output)
-      ensures History.WrapService == old(History.WrapService) + [DafnyCallEvent(input, output)]
-
   }
   datatype SimpleStreamingConfig = | SimpleStreamingConfig (
 
                                    )
   type StreamingBlob = Enumerator<bytes>
-  datatype WrapServiceInput = | WrapServiceInput (
-    nameonly bytesIn: Enumerator<bytes>
-  )
-  datatype WrapServiceOutput = | WrapServiceOutput (
-    nameonly bytesOut: Enumerator<bytes>
-  )
   datatype Error =
       // Local Error structures are listed here
     | OverflowError (
@@ -275,26 +252,6 @@ abstract module AbstractSimpleStreamingService
       History.Chunks := History.Chunks + [DafnyCallEvent(input, output)];
     }
 
-    predicate WrapServiceEnsuresPublicly(input: WrapServiceInput , output: Result<WrapServiceOutput, Error>)
-    {Operations.WrapServiceEnsuresPublicly(input, output)}
-    // The public method to be called by library consumers
-    method WrapService ( input: WrapServiceInput )
-      returns (output: Result<WrapServiceOutput, Error>)
-      requires
-        && ValidState()
-      modifies Modifies - {History} ,
-               History`WrapService
-      // Dafny will skip type parameters when generating a default decreases clause.
-      decreases Modifies - {History}
-      ensures
-        && ValidState()
-      ensures WrapServiceEnsuresPublicly(input, output)
-      ensures History.WrapService == old(History.WrapService) + [DafnyCallEvent(input, output)]
-    {
-      output := Operations.WrapService(config, input);
-      History.WrapService := History.WrapService + [DafnyCallEvent(input, output)];
-    }
-
   }
 }
 abstract module AbstractSimpleStreamingOperations {
@@ -346,26 +303,10 @@ abstract module AbstractSimpleStreamingOperations {
     returns (output: Result<ChunksOutput, Error>)
     requires
       && ValidInternalConfig?(config)
-    modifies ModifiesInternalConfig(config), input.bytesIn.Repr
-    // Dafny will skip type parameters when generating a default decreases clause.
-    decreases ModifiesInternalConfig(config)
-    ensures
-      && ValidInternalConfig?(config)
-    ensures ChunksEnsuresPublicly(input, output)
-
-
-  predicate WrapServiceEnsuresPublicly(input: WrapServiceInput , output: Result<WrapServiceOutput, Error>)
-  // The private method to be refined by the library developer
-
-
-  method WrapService ( config: InternalConfig , input: WrapServiceInput )
-    returns (output: Result<WrapServiceOutput, Error>)
-    requires
-      && ValidInternalConfig?(config)
     modifies ModifiesInternalConfig(config)
     // Dafny will skip type parameters when generating a default decreases clause.
     decreases ModifiesInternalConfig(config)
     ensures
       && ValidInternalConfig?(config)
-    ensures WrapServiceEnsuresPublicly(input, output)
+    ensures ChunksEnsuresPublicly(input, output)
 }
