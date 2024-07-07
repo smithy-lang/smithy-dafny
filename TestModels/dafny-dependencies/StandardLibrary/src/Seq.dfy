@@ -52,4 +52,26 @@ module {:options "--function-syntax:4"} Seq {
   {
     seq(length, i => v)
   }
+
+  function {:opaque} FoldLeft<A,T>(f: (A, T) -> A, init: A, xs: seq<T>): A
+  {
+    if |xs| == 0 then init
+    else FoldLeft(f, f(init, xs[0]), xs[1..])
+  }
+
+  lemma FoldLeftNewRightElement<A,T>(f: (A, T) -> A, init: A, xs: seq<T>, x: T)
+    ensures FoldLeft(f, init, xs + [x]) == f(FoldLeft(f, init, xs), x)
+  {
+    reveal FoldLeft();
+    if |xs| == 0 {
+    } else {
+      FoldLeftNewRightElement(f, init, xs[1..], x);
+      assert FoldLeft(f, init, xs[1..] + [x]) == f(FoldLeft(f, init, xs[1..]), x);
+      assert xs == [xs[0]] + xs[1..];
+      assert FoldLeft(f, init, xs[1..] + [x]) == f(FoldLeft(f, init, xs[1..]), x);
+      reveal FoldLeft();
+      assert FoldLeft(f, init, xs) == FoldLeft(f, f(init, xs[0]), xs[1..]);
+      assert FoldLeft(f, init, xs + [x]) == f(FoldLeft(f, init, xs), x);
+    }
+  }
 }

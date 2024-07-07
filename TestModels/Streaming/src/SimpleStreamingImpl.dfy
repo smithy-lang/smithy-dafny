@@ -19,7 +19,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     returns (output: Result<CountBitsOutput, Error>)
   {
     // TODO: actually count bits. Just guessing the average (like guessing all C's on a test :) 
-    var counter := new Folder<bytes, nat>(0 as int, (x, y) => x + 4);
+    var counter := new Folder<bytes, nat>(0 as int, (sum, byte) => sum + BitCount(byte));
  
     ForEach(input.bits, counter);
 
@@ -32,6 +32,14 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     }
   }
 
+  function BitCount(x: uint8): uint8 {
+    if x == 0 then
+      0
+    else if x % 1 == 1 then
+      1 + BitCount(x / 2)
+    else
+      BitCount(x / 2)
+  }
 
   predicate BinaryOfEnsuresPublicly(input: BinaryOfInput , output: Result<BinaryOfOutput, Error>)
   {true}

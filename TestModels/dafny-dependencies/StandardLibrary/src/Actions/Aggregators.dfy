@@ -105,6 +105,7 @@ module {:options "--function-syntax:4"} Std.Aggregators {
 
   class Folder<T, R> extends Accumulator<T> {
 
+    ghost const init: R
     const f: (R, T) -> R
     var value: R
 
@@ -112,6 +113,7 @@ module {:options "--function-syntax:4"} Std.Aggregators {
       ensures Valid()
       ensures fresh(Repr)
     {
+      this.init := init;
       this.f := f;
       this.value := init;
       this.Repr := {this};
@@ -125,6 +127,7 @@ module {:options "--function-syntax:4"} Std.Aggregators {
       decreases height, 0
     {
       && this in Repr
+      && value == Seq.FoldLeft(f, init, Consumed())
     }
 
     ghost predicate CanConsume(history: seq<(T, ())>, next: T)
@@ -147,6 +150,13 @@ module {:options "--function-syntax:4"} Std.Aggregators {
       value := f(value, t);
       r := ();
       Update(t, ());
+
+      // TODO: needs a lemma
+      assert old(value) == Seq.FoldLeft(f, init, old(Consumed()));
+      assert Consumed() == old(Consumed()) + [t];
+      reveal Seq.FoldLeft();
+      Seq.FoldLeftNewRightElement(f, init, old(Consumed()), t);
+      assert value == Seq.FoldLeft(f, init, Consumed());
       assert Valid();
     }
 
