@@ -21,7 +21,7 @@ module SimpleStreamingTypes
   )
   datatype ChunksInput = | ChunksInput (
     nameonly bytesIn: Enumerator<bytes> ,
-    nameonly chunkSize: int32
+    nameonly chunkSize: CountingInteger
   )
   datatype ChunksOutput = | ChunksOutput (
     nameonly bytesOut: Enumerator<bytes>
@@ -32,6 +32,10 @@ module SimpleStreamingTypes
   datatype CountBitsOutput = | CountBitsOutput (
     nameonly sum: int32
   )
+  type CountingInteger = x: int32 | IsValid_CountingInteger(x) witness *
+  predicate method IsValid_CountingInteger(x: int32) {
+    ( 1 <= x  )
+  }
   class ISimpleStreamingClientCallHistory {
     ghost constructor() {
       CountBits := [];

@@ -67,10 +67,11 @@ module {:options "--function-syntax:4"} Seq {
     } else {
       FoldLeftNewRightElement(f, init, xs[1..], x);
       assert FoldLeft(f, init, xs[1..] + [x]) == f(FoldLeft(f, init, xs[1..]), x);
-      assert xs == [xs[0]] + xs[1..];
-      assert FoldLeft(f, init, xs[1..] + [x]) == f(FoldLeft(f, init, xs[1..]), x);
+
       reveal FoldLeft();
       assert FoldLeft(f, init, xs) == FoldLeft(f, f(init, xs[0]), xs[1..]);
+      assert xs == [xs[0]] + xs[1..];
+      assert FoldLeft(f, f(init, xs[0]), xs[1..]) == f(FoldLeft(f, f(init, xs[0]), xs), x);
       assert FoldLeft(f, init, xs + [x]) == f(FoldLeft(f, init, xs), x);
     }
   }

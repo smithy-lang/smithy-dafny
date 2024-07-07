@@ -62,21 +62,8 @@ operation BinaryOf {
   }
 }
 
-/// Returns input in chunks of the given size.
-operation Chunks {
-  input := {
-    @required
-    bytesIn: StreamingBlob
-
-    @required
-    @range(min: 1)
-    chunkSize: Integer
-  }
-  output := {
-    @required
-    bytesOut: StreamingBlob
-  }
-}
+@range(min: 1)
+integer CountingInteger
 
 /// Returns input in chunks of the given size.
 operation Chunks {
@@ -85,8 +72,7 @@ operation Chunks {
     bytesIn: StreamingBlob
 
     @required
-    @range(min: 1)
-    chunkSize: Integer
+    chunkSize: CountingInteger
   }
   output := {
     @required

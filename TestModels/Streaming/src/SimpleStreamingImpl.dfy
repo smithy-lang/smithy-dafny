@@ -5,6 +5,7 @@ include "../Model/SimpleStreamingTypes.dfy"
 module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   import opened Std.Aggregators
+  import Seq
 
   datatype Config = Config
   type InternalConfig = Config
@@ -18,21 +19,24 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   method CountBits ( config: InternalConfig , input: CountBitsInput )
     returns (output: Result<CountBitsOutput, Error>)
   {
-    // TODO: actually count bits. Just guessing the average (like guessing all C's on a test :) 
-    var counter := new Folder<bytes, nat>(0 as int, (sum, byte) => sum + BitCount(byte));
+    var counter := new Folder<bytes, int>(0, (sum, byte) => sum + BytesBitCount(byte));
  
     ForEach(input.bits, counter);
 
     // Should really have the Folder fail instead,
     // but this is a simpler correct approach.
-    if counter.value < INT32_MAX_LIMIT {
+    if 0 <= counter.value < INT32_MAX_LIMIT {
       return Success(CountBitsOutput(sum := counter.value as int32));
     } else {
       return Failure(OverflowError(message := "Ah crap"));
     }
   }
 
-  function BitCount(x: uint8): uint8 {
+  function method BytesBitCount(b: bytes): int {
+    Seq.FoldLeft((sum, byte) => sum + BitCount(byte), 0 as int, b)
+  }
+
+  function method BitCount(x: uint8): int {
     if x == 0 then
       0
     else if x % 1 == 1 then
@@ -64,10 +68,10 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   class Chunker extends Pipeline<bytes, bytes> {
 
-    const chunkSize: int32
+    const chunkSize: CountingInteger
     var chunkBuffer: bytes
 
-    constructor(upstream: Enumerator<bytes>, chunkSize: int32)
+    constructor(upstream: Enumerator<bytes>, chunkSize: CountingInteger)
     {
       this.buffer := new Collector<bytes>();
       this.upstream := upstream;
@@ -77,6 +81,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     }
 
     method Process(event: Option<bytes>, a: Accumulator<bytes>)
+      requires Valid()
       requires a.Valid()
       requires Repr !! a.Repr
       modifies Repr, a.Repr
@@ -92,7 +97,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
       }
 
       while chunkSize as int <= |chunkBuffer| 
-        invariant a.Valid()
+        invariant a.ValidAndDisjoint()
       {
         a.Accept(chunkBuffer[..chunkSize]);
         chunkBuffer := chunkBuffer[chunkSize..];
