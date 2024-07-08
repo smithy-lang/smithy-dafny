@@ -9,7 +9,7 @@ This demonstrates how to use a projection in a `smithy-dafny` project when neces
 but also provides a much smaller code generation target
 when building new language support.
 
-NOTE: The `model.json` in this project comes from [private-aws-encryption-sdk-dafny-staging/ComAmazonawsKms/Model/](https://github.com/aws/private-aws-encryption-sdk-dafny-staging/tree/v4-seperate-modules/ComAmazonawsKms/Model), and is different from the standard model at https://github.com/aws/aws-models/kms/
+The `model.json` in this project comes from [here](https://github.com/aws/aws-cryptographic-material-providers-library/tree/cdd4885cb22957b04167b11d8b40edbdf4301d8d/ComAmazonawsKms/Model/kms).
 
 ## Build
 
