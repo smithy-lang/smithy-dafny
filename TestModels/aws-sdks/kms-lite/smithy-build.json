@@ -6,7 +6,7 @@
         {
           "name": "excludeShapesBySelector",
           "args": {
-            "selector": "operation :not([id|name = GenerateDataKey, Encrypt, Decrypt, GenerateDataKeyWithoutPlaintext, ReEncrypt])"
+            "selector": "operation :not([id|name = GenerateDataKey, Encrypt, Decrypt, GenerateDataKeyWithoutPlaintext, ReEncrypt, DeriveSharedSecret, GetPublicKey])"
           }
         },
         {
