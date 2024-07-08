@@ -1,4 +1,5 @@
-# 100% generated for this test model (using --generate)
-runtimes/java/**
-runtimes/net/**
+# Mostly generated for this test model (using --generate)
+runtimes/java/src
+runtimes/net/Extern
+runtimes/net/tests
 

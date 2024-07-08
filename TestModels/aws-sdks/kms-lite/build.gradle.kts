@@ -48,9 +48,20 @@ tasks.register("polymorphDotnet") {
         // if needed, specify a projection to use instead
         // default (no projection) is "source"
         val projectionName = "operation-subset"
+        // We can't just copy runtimes/net over unfortunately,
+        // because we need a fresher AWSSDK.KeyManagementService version
+        // than what's in the template.
         copy {
-            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/net"))
-            into("runtimes/net")
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/net/Extern"))
+            into("runtimes/net/Extern")
+        }
+        copy {
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/net/Generated"))
+            into("runtimes/net/Generated")
+        }
+        copy {
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/net/tests"))
+            into("runtimes/net/tests")
         }
         exec {
             // need to adjust the relative import, since we're copying it away
@@ -67,9 +78,12 @@ tasks.register("polymorphJava") {
         // if needed, specify a projection to use instead
         // default (no projection) is "source"
         val projectionName = "operation-subset"
+        // We can't just copy runtimes/java over unfortunately,
+        // because we need a fresher software.amazon.awssdk:kms version
+        // than what's in the template.
         copy {
-            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/java"))
-            into("runtimes/java")
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/java/src"))
+            into("runtimes/java/src")
         }
     }
 }
