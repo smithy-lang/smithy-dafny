@@ -3,14 +3,14 @@
 include "../src/Index.dfy"
 include "../src/WrappedSimpleStreamingImpl.dfy"
 
-module SimpleBlobImplTest {
+module SimpleStreamingImplTest {
     import SimpleStreaming
     import SimpleStreamingImpl
     import Std.Enumerators
     import opened StandardLibrary.UInt
     import opened SimpleStreamingTypes
     import opened Wrappers
-    method{:test} GetBlob(){
+    method{:test} TestClient(){
         var client :- expect SimpleStreaming.SimpleStreaming();
         TestCountBits(client);
     }
