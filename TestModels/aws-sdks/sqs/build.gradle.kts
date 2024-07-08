@@ -19,14 +19,6 @@ dependencies {
     implementation("software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0")
 }
 
-configure<software.amazon.smithy.gradle.SmithyExtension> {
-    // Uncomment this to use a custom projection when building the JAR.
-    // projection = "foo"
-}
-
-// Uncomment to disable creating a JAR.
-tasks["jar"].enabled = false
-
 tasks.register("polymorphDafny") {
     dependsOn("build")
     doLast {
