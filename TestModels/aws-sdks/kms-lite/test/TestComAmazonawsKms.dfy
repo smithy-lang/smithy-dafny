@@ -92,7 +92,7 @@ module TestComAmazonawsKms {
 
     expect(ret.Success?);
 
-    var DecryptResponse(KeyId, Plaintext, EncryptionAlgorithm) := ret.value;
+    var DecryptResponse(KeyId, Plaintext, EncryptionAlgorithm, CiphertextBlob) := ret.value;
 
     expect Plaintext.Some?;
     expect KeyId.Some?;
@@ -111,7 +111,7 @@ module TestComAmazonawsKms {
 
     expect(ret.Success?);
 
-    var GenerateDataKeyResponse(CiphertextBlob, Plaintext, KeyId) := ret.value;
+    var GenerateDataKeyResponse(CiphertextBlob, Plaintext, KeyId, CiphertextForRecipient) := ret.value;
 
     expect CiphertextBlob.Some?;
     expect Plaintext.Some?;
