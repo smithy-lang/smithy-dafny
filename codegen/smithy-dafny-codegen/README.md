@@ -140,6 +140,10 @@ to one of the shape types that this plugin does not yet support:
           "args": {
             "selector": "operation :test(~> document)"
           }
+        },
+        {
+          "name": "removeUnusedShapes",
+          "args": {}
         }
       ],
       "plugins": {

@@ -1,23 +1,18 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# For this project, the Makefile should ONLY be used for:
-# - make transpile_net
-# - make test_net
-# The polymorph commands should be done using gradle instead. 
-
 CORES=2
 
 include ../../SharedMakefile.mk
 
-NAMESPACE=com.amazonaws.sqs
+NAMESPACE=com.amazonaws.kms
 
 PROJECT_SERVICES := \
-	ComAmazonawsSqs \
+	ComAmazonawsKms\
 
-SERVICE_NAMESPACE_ComAmazonawsSqs=com.amazonaws.sqs
+SERVICE_NAMESPACE_ComAmazonawsKms=com.amazonaws.kms
 
-SERVICE_DEPS_ComAmazonawsSqs :=
+SERVICE_DEPS_ComAmazonawsKms :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
@@ -26,16 +21,15 @@ AWS_SDK_CMD=--aws-sdk
 # This project has no dependencies
 # DEPENDENT-MODELS:=
 
-
-SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/model
-
 # Override calling the polymorph CLI to invoke the Smithy build instead
 _polymorph_dafny:
-	./gradlew polymorphDafny
+	$(GRADLEW) polymorphDafny
 
 _polymorph_dotnet:
-	./gradlew polymorphDotnet
+	$(GRADLEW) polymorphDotnet
 
+_polymorph_java:
+	$(GRADLEW) polymorphJava
 
 # There is no wrapped target for aws-sdk types
 _polymorph: ;
@@ -43,3 +37,8 @@ _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
 _polymorph_wrapped_java: ;
+
+clean: _clean
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated

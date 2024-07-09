@@ -6,6 +6,7 @@ package software.amazon.polymorph;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
+import com.squareup.javapoet.ClassName;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
+import software.amazon.polymorph.smithydotnet.AwsSdkDotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
@@ -42,6 +44,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
@@ -151,6 +154,8 @@ public class CodegenEngine {
       System.exit(1);
     }
 
+    propertiesFile.ifPresent(this::generateProjectPropertiesFile);
+
     for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
       final Path outputDir = targetLangOutputDirs
         .get(lang)
@@ -170,8 +175,6 @@ public class CodegenEngine {
         );
       }
     }
-
-    propertiesFile.ifPresent(this::generateProjectPropertiesFile);
   }
 
   private void generateProjectPropertiesFile(final Path outputPath)
@@ -308,7 +311,7 @@ public class CodegenEngine {
    * Generate a skeletal implementation of the local service operations,
    * with `expect false` statements to ensure tests will initially fail.
    */
-  public void generateDafnySkeleton(Path outputDir) {
+  private void generateDafnySkeleton(Path outputDir) {
     final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
       model,
       serviceShape,
@@ -338,8 +341,16 @@ public class CodegenEngine {
     LOGGER.info("Formatting Java code in {}", outputDir);
     runCommand(
       outputDir,
+      "npm",
+      "i",
+      "--no-save",
+      "prettier@3",
+      "prettier-plugin-java@2.5"
+    );
+    runCommand(
+      outputDir,
       "npx",
-      "prettier",
+      "prettier@3",
       "--plugin=prettier-plugin-java",
       outputDir.toString(),
       "--write"
@@ -416,8 +427,12 @@ public class CodegenEngine {
     final String sdkID = awsSdkStyle
       ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
       : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+    final String serviceName = sdkID.toLowerCase();
     final String namespace = serviceShape.getId().getNamespace();
     final String namespaceDir = namespace.replace(".", "/");
+    final String dafnyNamespace =
+      DafnyNameResolverHelpers.packageNameForNamespace(namespace);
+    final String dafnyNamespaceDir = dafnyNamespace.replace(".", "/");
 
     final String gradleGroup = namespace;
     // TODO: This should be @title, but we have to actually add that to all services first
@@ -427,8 +442,12 @@ public class CodegenEngine {
     parameters.put("dafnyVersion", dafnyVersion.unparse());
     parameters.put("service", service);
     parameters.put("sdkID", sdkID);
+    parameters.put("serviceName", serviceName);
     parameters.put("namespace", namespace);
     parameters.put("namespaceDir", namespaceDir);
+    parameters.put("dafnyNamespace", dafnyNamespace);
+    parameters.put("dafnyNamespaceDir", dafnyNamespaceDir);
+
     parameters.put("gradleGroup", gradleGroup);
     parameters.put("gradleDescription", gradleDescription);
 
@@ -439,7 +458,21 @@ public class CodegenEngine {
           parameters
         );
       }
-      // TODO generate sdk constructor
+      if (generationAspects.contains(GenerationAspect.CLIENT_CONSTRUCTORS)) {
+        final ClassName clientClassName =
+          AwsSdkNativeV2.classNameForServiceClient(serviceShape);
+        parameters.put("sdkClientNamespace", clientClassName.packageName());
+        parameters.put("sdkClientName", clientClassName.simpleName());
+
+        writeTemplatedFile(
+          "runtimes/java/src/main/java/$dafnyNamespaceDir;L/__default.java",
+          parameters
+        );
+        writeTemplatedFile(
+          "runtimes/java/src/main/java/$dafnyNamespaceDir;L/types/__default.java",
+          parameters
+        );
+      }
     } else {
       final String serviceConfig = serviceShape
         .expectTrait(LocalServiceTrait.class)
@@ -546,16 +579,18 @@ public class CodegenEngine {
   }
 
   private void netOtherGeneratedAspects() {
-    final DotNetNameResolver resolver = new DotNetNameResolver(
-      model,
-      serviceShape
-    );
+    final DotNetNameResolver resolver = awsSdkStyle
+      ? new AwsSdkDotNetNameResolver(model, serviceShape)
+      : new DotNetNameResolver(model, serviceShape);
     final String service = serviceShape.getId().getName();
     final String sdkID = awsSdkStyle
       ? serviceShape.expectTrait(ServiceTrait.class).getSdkId()
       : serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+    final String serviceName = resolver.getServiceName();
     final String namespace = serviceShape.getId().getNamespace();
-    final String dotnetNamespace = resolver.namespaceForService();
+    final String dotnetNamespace = resolver.namespaceForShapeId(
+      serviceShape.getId()
+    );
     final String dafnyNamespace =
       DafnyNameResolverHelpers.packageNameForNamespace(namespace);
     final String namespaceDir = namespace.replace(".", "/");
@@ -564,12 +599,17 @@ public class CodegenEngine {
     parameters.put("dafnyVersion", dafnyVersion.unparse());
     parameters.put("service", service);
     parameters.put("sdkID", sdkID);
+    parameters.put("serviceName", serviceName);
     parameters.put("namespace", dotnetNamespace);
     parameters.put("dafnyNamespace", dafnyNamespace);
     parameters.put("namespaceDir", namespaceDir);
     parameters.put("stdLibPath", standardLibraryPath().toString());
 
     if (awsSdkStyle) {
+      final String clientClassName =
+        ((AwsSdkDotNetNameResolver) resolver).implForServiceClient();
+      parameters.put("sdkClientName", clientClassName);
+
       if (generationAspects.contains(GenerationAspect.PROJECT_FILES)) {
         writeTemplatedFile("runtimes/net/$forSDK;L$sdkID;L.csproj", parameters);
       }

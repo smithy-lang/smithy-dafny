@@ -24,7 +24,11 @@ tasks.register("polymorphDafny") {
     doLast {
         // if needed, specify a projection to use instead
         // default (no projection) is "source"
-        val projectionName = "list-queues-and-add-permission-only"
+        val projectionName = "operation-subset"
+        copy {
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/project.properties"))
+            into(".")
+        }
         copy {
             from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/Model/"))
             into("model")
@@ -33,7 +37,7 @@ tasks.register("polymorphDafny") {
             // need to adjust the relative import, since we're copying it away
             // the commandLine method does not play nice with sed,
             // so we have to execute it through bash :(
-            commandLine("bash", "-c", "sed '4s|../../../../../../../../dafny-dependencies/StandardLibrary/src/Index.dfy|../../../dafny-dependencies/StandardLibrary/src/Index.dfy|' model/ComAmazonawsSqsTypes.dfy > model/tmp && mv model/tmp model/ComAmazonawsSqsTypes.dfy")
+            commandLine("bash", "-c", "sed '4s|../../../../../../../../dafny-dependencies/StandardLibrary/src/Index.dfy|../../../dafny-dependencies/StandardLibrary/src/Index.dfy|' model/ComAmazonawsDynamodbTypes.dfy > model/tmp && mv model/tmp model/ComAmazonawsDynamodbTypes.dfy")
         }
     }
 }
@@ -43,7 +47,7 @@ tasks.register("polymorphDotnet") {
     doLast {
         // if needed, specify a projection to use instead
         // default (no projection) is "source"
-        val projectionName = "list-queues-and-add-permission-only"
+        val projectionName = "operation-subset"
         copy {
             from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/net"))
             into("runtimes/net")
@@ -52,7 +56,20 @@ tasks.register("polymorphDotnet") {
             // need to adjust the relative import, since we're copying it away
             // the commandLine method does not play nice with sed,
             // so we have to execute it through bash :(
-            commandLine("bash", "-c", "sed 's|../../../../../../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj|../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj|' runtimes/net/SQS.csproj > runtimes/net/tmp && mv runtimes/net/tmp runtimes/net/SQS.csproj")
+            commandLine("bash", "-c", "sed 's|../../../../../../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj|../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj|' runtimes/net/DynamoDB.csproj > runtimes/net/tmp && mv runtimes/net/tmp runtimes/net/DynamoDB.csproj")
+        }
+    }
+}
+
+tasks.register("polymorphJava") {
+    dependsOn("build")
+    doLast {
+        // if needed, specify a projection to use instead
+        // default (no projection) is "source"
+        val projectionName = "operation-subset"
+        copy {
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/java"))
+            into("runtimes/java")
         }
     }
 }

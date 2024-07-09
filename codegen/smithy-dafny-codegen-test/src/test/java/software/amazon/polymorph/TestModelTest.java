@@ -126,7 +126,12 @@ public abstract class TestModelTest {
     int exitCode = IoUtils.runCommand(args, workdir, output, env);
     if (exitCode != 0) {
       throw new RuntimeException(
-        "make command failed (exit code: " + exitCode + "). Output:\n" + output
+        "make command [" +
+        args +
+        "] failed (exit code: " +
+        exitCode +
+        "). Output:\n" +
+        output
       );
     }
   }

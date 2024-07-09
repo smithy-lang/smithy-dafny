@@ -10,14 +10,13 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
-NAMESPACE=com.amazonaws.sqs
 
 PROJECT_SERVICES := \
-	ComAmazonawsSqs \
+	ComAmazonawsDynamodb \
 
-SERVICE_NAMESPACE_ComAmazonawsSqs=com.amazonaws.sqs
+SERVICE_NAMESPACE_ComAmazonawsDynamodb=com.amazonaws.dynamodb
 
-SERVICE_DEPS_ComAmazonawsSqs :=
+SERVICE_DEPS_ComAmazonawsDynamodb :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
@@ -31,11 +30,13 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/model
 
 # Override calling the polymorph CLI to invoke the Smithy build instead
 _polymorph_dafny:
-	./gradlew polymorphDafny
+	$(GRADLEW) polymorphDafny
 
 _polymorph_dotnet:
-	./gradlew polymorphDotnet
+	$(GRADLEW) polymorphDotnet
 
+_polymorph_java:
+	$(GRADLEW) polymorphJava
 
 # There is no wrapped target for aws-sdk types
 _polymorph: ;
@@ -43,3 +44,4 @@ _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
 _polymorph_wrapped_java: ;
+
