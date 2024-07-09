@@ -662,9 +662,27 @@ public class CodegenEngine {
     // It would be great to do this for all languages,
     // but we're not currently precise enough and do multiple passes
     // to generate code for things like wrapped services.
+    //
+    // Be sure to NOT delete src/implementation_from_dafny.rs though,
+    // by temporarily moving it out of src/
     Path outputSrcDir = outputDir.resolve("src");
-    software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
-    outputSrcDir.toFile().mkdirs();
+    Path implementationFromDafnyPath = outputSrcDir.resolve(
+      "implementation_from_dafny.rs"
+    );
+    Path tmpPath = null;
+    try {
+      if (Files.exists(implementationFromDafnyPath)) {
+        tmpPath = outputDir.resolve("implementation_from_dafny.rs");
+        Files.move(implementationFromDafnyPath, tmpPath);
+      }
+      software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
+      outputSrcDir.toFile().mkdirs();
+      if (tmpPath != null) {
+        Files.move(tmpPath, implementationFromDafnyPath);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
 
     handlePatching(TargetLanguage.RUST, outputDir);
   }

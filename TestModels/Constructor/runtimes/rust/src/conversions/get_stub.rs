@@ -9,7 +9,7 @@ pub fn to_dafny_error(
     match value {
         crate::operation::get_stub::GetStubError::Unhandled(unhandled) => {
             ::std::rc::Rc::new(::stub_dafny::r#_stub_dinternaldafny_dtypes::Error::Opaque {
-                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
+                obj: ::dafny_runtime::upcast_object()(
                     ::dafny_runtime::object::new(unhandled),
                 ),
             })

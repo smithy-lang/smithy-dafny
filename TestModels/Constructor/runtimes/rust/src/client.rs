@@ -36,11 +36,7 @@ impl Client {
         }
         let handle = Handle {
             conf: conf.clone(),
-            inner: ::dafny_runtime::UpcastTo::<
-                dafny_runtime::Object<
-                    (dyn ::stub_dafny::r#_stub_dinternaldafny_dtypes::IStubClient + 'static),
-                >,
-            >::upcast_to(inner.Extract()),
+            inner: ::dafny_runtime::upcast_object()(inner.Extract()),
         };
         Ok(Self {
             handle: ::std::sync::Arc::new(handle),

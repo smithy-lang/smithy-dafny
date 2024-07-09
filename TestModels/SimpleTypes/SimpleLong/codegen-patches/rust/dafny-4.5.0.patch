@@ -1,92 +1,6 @@
-diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index ca9dc612..0d923e39 100644
---- b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-+++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -1,7 +1,7 @@
- #![allow(warnings, unconditional_panic)]
- #![allow(nonstandard_style)]
- pub use dafny_standard_library::implementation_from_dafny::*;
--
-+    
- pub mod r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes {
-     #[derive(PartialEq, Clone)]
-     pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
-@@ -444,7 +444,7 @@ pub mod r#_SimpleLongImpl_Compile {
-             ) {
-                 panic!("Halt")
-             };
--            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(input.value().value());
-+            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*input.value().value());
-             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
-             value: input.value().clone()
-           });
-@@ -457,7 +457,7 @@ pub mod r#_SimpleLongImpl_Compile {
-             ) {
-                 panic!("Halt")
-             };
--            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(res.value().value());
-+            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*res.value().value());
-             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
-                 super::r#_Wrappers_Compile::Result::<
-                     ::std::rc::Rc<
-@@ -491,8 +491,8 @@ pub mod r#_SimpleLongImpl_Compile {
-             ) {
-                 panic!("Halt")
-             };
--            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(input.value().value());
--            if !(input.value().value() == 33) {
-+            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*input.value().value());
-+            if !(input.value().value() == &33i64) {
-                 panic!("Halt")
-             };
-             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongOutput::GetLongOutput {
-@@ -507,7 +507,7 @@ pub mod r#_SimpleLongImpl_Compile {
-             ) {
-                 panic!("Halt")
-             };
--            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(res.value().value());
-+            super::r#_SimpleLongImpl_Compile::_default::ValidateLongType(*res.value().value());
-             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
-                 super::r#_Wrappers_Compile::Result::<
-                     ::std::rc::Rc<
-@@ -522,10 +522,11 @@ pub mod r#_SimpleLongImpl_Compile {
-             return output.read();
-         }
-         pub fn ValidateLongType(input: i64) -> () {
-+	    return;
-             if input >= 0 {
-                 if input
-                     >= ::dafny_runtime::truncate!(
--                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(
-+                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(
-                         ),
-                         i64
-                     )
-@@ -534,7 +535,7 @@ pub mod r#_SimpleLongImpl_Compile {
-                 };
-                 if !(0 < input
-                     + ::dafny_runtime::truncate!(
--                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(
-+                        super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(
-                         ),
-                         i64
-                     ))
-@@ -543,10 +544,10 @@ pub mod r#_SimpleLongImpl_Compile {
-                 }
-             } else {
-                 if input < 0 {
--                    if input < 0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i64) {
-+                    if input < 0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(), i64) {
-             return ();
-           };
--                    if !(input + (0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT32_MAX_LIMIT(), i64)) < 0) {
-+                    if !(input + (0 - ::dafny_runtime::truncate!(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::INT64_MAX_LIMIT(), i64)) < 0) {
-             panic!("Halt")
-           }
-                 } else {
 diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..8fb3793c
+index 00000000..014f1471
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/client.rs
 @@ -0,0 +1,39 @@
@@ -121,7 +35,7 @@ index 00000000..8fb3793c
 +            ));
 +        }
 +        Ok(Self {
-+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::ISimpleTypesLongClient + 'static)>>::upcast_to(inner.Extract()),
++            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
 +        })
 +    }
 +}
@@ -185,7 +99,7 @@ index 00000000..4ff5bcbc
 +pub mod simple_long_config;
 diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long.rs
 new file mode 100644
-index 00000000..86e9ba5c
+index 00000000..85d0d5ad
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long.rs
 @@ -0,0 +1,32 @@
@@ -199,7 +113,7 @@ index 00000000..86e9ba5c
 +) -> ::std::rc::Rc<::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::get_long::GetLongError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -309,7 +223,7 @@ index 00000000..17daf271
 +}
 diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value.rs
 new file mode 100644
-index 00000000..c34bda65
+index 00000000..63f0c943
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/conversions/get_long_known_value.rs
 @@ -0,0 +1,32 @@
@@ -323,7 +237,7 @@ index 00000000..c34bda65
 +) -> ::std::rc::Rc<::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::get_long_known_value::GetLongKnownValueError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -487,10 +401,10 @@ index 00000000..ec89cbec
 +pub(crate) mod sealed_unhandled;
 diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error/sealed_unhandled.rs
 new file mode 100644
-index 00000000..9d21fbd6
+index 00000000..cce22d1c
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/error/sealed_unhandled.rs
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,26 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +/// This struct is not intended to be used.
 +///
@@ -512,6 +426,10 @@ index 00000000..9d21fbd6
 +pub struct Unhandled {
 +    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
 +    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
++}
++
++impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
++    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 +}
 diff --git b/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleLong/runtimes/rust/src/lib.rs
 new file mode 100644

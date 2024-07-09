@@ -9,7 +9,7 @@ pub fn to_dafny_error(
     match value {
         crate::operation::get_enum_v2::GetEnumV2Error::Unhandled(unhandled) => ::std::rc::Rc::new(
             ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque {
-                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
+                obj: ::dafny_runtime::upcast_object()(
                     ::dafny_runtime::object::new(unhandled),
                 ),
             },
