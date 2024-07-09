@@ -8,7 +8,7 @@ pub fn to_dafny_error(
 ) -> ::std::rc::Rc<::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error> {
     match value {
     crate::operation::get_long::GetLongError::Unhandled(unhandled) =>
-      ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
+      ::std::rc::Rc::new(::simple_long_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
   }
 }
 

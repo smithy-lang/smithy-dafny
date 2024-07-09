@@ -199,7 +199,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
       );
   }
 
-  private String getServiceName() {
+  public String getServiceName() {
     Optional<ServiceTrait> serviceTraitOptional = serviceShape.getTrait(
       ServiceTrait.class
     );

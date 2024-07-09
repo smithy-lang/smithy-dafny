@@ -49,7 +49,7 @@ jobs:
         # Rust code generation is under development and depends on pending changes to the
         # Dafny Rust code generation, so we test on a specific commit from the feat-rust feature branch instead.
         dafny-version:
-          - ebe9aa5592bea6c0a7ed3fc204db2fb8addf0661
+          - f82ce12a800efddb22c987be0adb559752c7b6b9
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}

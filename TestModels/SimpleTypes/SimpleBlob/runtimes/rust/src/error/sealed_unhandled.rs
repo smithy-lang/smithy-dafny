@@ -20,3 +20,7 @@ pub struct Unhandled {
     pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
     pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
 }
+
+impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
+    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
+}

@@ -6,21 +6,11 @@
         {
           "name": "excludeShapesBySelector",
           "args": {
-            "selector": "[id|name *= 'Change', 'Create', 'Get', 'Delete', 'Send', 'RemovePermission', 'Tag', 'Untag', 'DeadLetter', 'Purge', 'Receive', 'Set']"
+            "selector": "operation :not([id|name = 'AddPermission', 'ListQueues'])"
           }
         },
         {
           "name": "removeUnusedShapes"
-        }
-      ]
-    },
-    "permissions-only": {
-      "transforms": [
-        {
-          "name": "includeShapesBySelector",
-          "args": {
-            "selector": "[id|name *= 'Permission', 'AmazonSQS', 'service']"
-          }
         }
       ]
     }

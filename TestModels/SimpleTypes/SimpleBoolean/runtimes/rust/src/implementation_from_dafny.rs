@@ -2,7 +2,7 @@
 #![allow(nonstandard_style)]
 pub use dafny_standard_library::implementation_from_dafny::*;
 
-pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
+pub mod r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes {
     #[derive(PartialEq, Clone)]
     pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
         DafnyCallEvent { input: I, output: O },
@@ -42,7 +42,7 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
         ) -> std::fmt::Result {
             match self {
                 DafnyCallEvent::DafnyCallEvent { input, output } => {
-                    write!(_formatter, "r#_simple_dtypes_dboolean_dinternaldafny_dtypes.DafnyCallEvent.DafnyCallEvent(")?;
+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.DafnyCallEvent.DafnyCallEvent(")?;
                     ::dafny_runtime::DafnyPrint::fmt_print(input, _formatter, false)?;
                     write!(_formatter, ", ")?;
                     ::dafny_runtime::DafnyPrint::fmt_print(output, _formatter, false)?;
@@ -101,35 +101,45 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
     }
 
     #[derive(PartialEq, Clone)]
-    pub enum GetBooleanInput {
-        GetBooleanInput {
-            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<bool>>,
+    pub enum GetTimestampInput {
+        GetTimestampInput {
+            value: ::std::rc::Rc<
+                super::r#_Wrappers_Compile::Option<
+                    ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+                >,
+            >,
         },
     }
 
-    impl GetBooleanInput {
-        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<bool>> {
+    impl GetTimestampInput {
+        pub fn value(
+            &self,
+        ) -> &::std::rc::Rc<
+            super::r#_Wrappers_Compile::Option<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            >,
+        > {
             match self {
-                GetBooleanInput::GetBooleanInput { value } => value,
+                GetTimestampInput::GetTimestampInput { value } => value,
             }
         }
     }
 
-    impl ::std::fmt::Debug for GetBooleanInput {
+    impl ::std::fmt::Debug for GetTimestampInput {
         fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
             ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
         }
     }
 
-    impl ::dafny_runtime::DafnyPrint for GetBooleanInput {
+    impl ::dafny_runtime::DafnyPrint for GetTimestampInput {
         fn fmt_print(
             &self,
             _formatter: &mut ::std::fmt::Formatter,
             _in_seq: bool,
         ) -> std::fmt::Result {
             match self {
-                GetBooleanInput::GetBooleanInput { value } => {
-                    write!(_formatter, "r#_simple_dtypes_dboolean_dinternaldafny_dtypes.GetBooleanInput.GetBooleanInput(")?;
+                GetTimestampInput::GetTimestampInput { value } => {
+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.GetTimestampInput.GetTimestampInput(")?;
                     ::dafny_runtime::DafnyPrint::fmt_print(value, _formatter, false)?;
                     write!(_formatter, ")")?;
                     Ok(())
@@ -138,60 +148,70 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
         }
     }
 
-    impl Eq for GetBooleanInput {}
+    impl Eq for GetTimestampInput {}
 
-    impl ::std::hash::Hash for GetBooleanInput {
+    impl ::std::hash::Hash for GetTimestampInput {
         fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
             match self {
-                GetBooleanInput::GetBooleanInput { value } => value.hash(_state),
+                GetTimestampInput::GetTimestampInput { value } => value.hash(_state),
             }
         }
     }
 
-    impl ::std::default::Default for GetBooleanInput {
-        fn default() -> GetBooleanInput {
-            GetBooleanInput::GetBooleanInput {
+    impl ::std::default::Default for GetTimestampInput {
+        fn default() -> GetTimestampInput {
+            GetTimestampInput::GetTimestampInput {
                 value: ::std::default::Default::default(),
             }
         }
     }
 
-    impl ::std::convert::AsRef<GetBooleanInput> for &GetBooleanInput {
+    impl ::std::convert::AsRef<GetTimestampInput> for &GetTimestampInput {
         fn as_ref(&self) -> Self {
             self
         }
     }
 
     #[derive(PartialEq, Clone)]
-    pub enum GetBooleanOutput {
-        GetBooleanOutput {
-            value: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<bool>>,
+    pub enum GetTimestampOutput {
+        GetTimestampOutput {
+            value: ::std::rc::Rc<
+                super::r#_Wrappers_Compile::Option<
+                    ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+                >,
+            >,
         },
     }
 
-    impl GetBooleanOutput {
-        pub fn value(&self) -> &::std::rc::Rc<super::r#_Wrappers_Compile::Option<bool>> {
+    impl GetTimestampOutput {
+        pub fn value(
+            &self,
+        ) -> &::std::rc::Rc<
+            super::r#_Wrappers_Compile::Option<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            >,
+        > {
             match self {
-                GetBooleanOutput::GetBooleanOutput { value } => value,
+                GetTimestampOutput::GetTimestampOutput { value } => value,
             }
         }
     }
 
-    impl ::std::fmt::Debug for GetBooleanOutput {
+    impl ::std::fmt::Debug for GetTimestampOutput {
         fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
             ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
         }
     }
 
-    impl ::dafny_runtime::DafnyPrint for GetBooleanOutput {
+    impl ::dafny_runtime::DafnyPrint for GetTimestampOutput {
         fn fmt_print(
             &self,
             _formatter: &mut ::std::fmt::Formatter,
             _in_seq: bool,
         ) -> std::fmt::Result {
             match self {
-                GetBooleanOutput::GetBooleanOutput { value } => {
-                    write!(_formatter, "r#_simple_dtypes_dboolean_dinternaldafny_dtypes.GetBooleanOutput.GetBooleanOutput(")?;
+                GetTimestampOutput::GetTimestampOutput { value } => {
+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.GetTimestampOutput.GetTimestampOutput(")?;
                     ::dafny_runtime::DafnyPrint::fmt_print(value, _formatter, false)?;
                     write!(_formatter, ")")?;
                     Ok(())
@@ -200,100 +220,100 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
         }
     }
 
-    impl Eq for GetBooleanOutput {}
+    impl Eq for GetTimestampOutput {}
 
-    impl ::std::hash::Hash for GetBooleanOutput {
+    impl ::std::hash::Hash for GetTimestampOutput {
         fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
             match self {
-                GetBooleanOutput::GetBooleanOutput { value } => value.hash(_state),
+                GetTimestampOutput::GetTimestampOutput { value } => value.hash(_state),
             }
         }
     }
 
-    impl ::std::default::Default for GetBooleanOutput {
-        fn default() -> GetBooleanOutput {
-            GetBooleanOutput::GetBooleanOutput {
+    impl ::std::default::Default for GetTimestampOutput {
+        fn default() -> GetTimestampOutput {
+            GetTimestampOutput::GetTimestampOutput {
                 value: ::std::default::Default::default(),
             }
         }
     }
 
-    impl ::std::convert::AsRef<GetBooleanOutput> for &GetBooleanOutput {
+    impl ::std::convert::AsRef<GetTimestampOutput> for &GetTimestampOutput {
         fn as_ref(&self) -> Self {
             self
         }
     }
 
     #[derive(PartialEq, Clone)]
-    pub enum SimpleBooleanConfig {
-        SimpleBooleanConfig {},
+    pub enum SimpleTimestampConfig {
+        SimpleTimestampConfig {},
     }
 
-    impl SimpleBooleanConfig {}
+    impl SimpleTimestampConfig {}
 
-    impl ::std::fmt::Debug for SimpleBooleanConfig {
+    impl ::std::fmt::Debug for SimpleTimestampConfig {
         fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
             ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
         }
     }
 
-    impl ::dafny_runtime::DafnyPrint for SimpleBooleanConfig {
+    impl ::dafny_runtime::DafnyPrint for SimpleTimestampConfig {
         fn fmt_print(
             &self,
             _formatter: &mut ::std::fmt::Formatter,
             _in_seq: bool,
         ) -> std::fmt::Result {
             match self {
-                SimpleBooleanConfig::SimpleBooleanConfig {} => {
-                    write!(_formatter, "r#_simple_dtypes_dboolean_dinternaldafny_dtypes.SimpleBooleanConfig.SimpleBooleanConfig")?;
+                SimpleTimestampConfig::SimpleTimestampConfig {} => {
+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.SimpleTimestampConfig.SimpleTimestampConfig")?;
                     Ok(())
                 }
             }
         }
     }
 
-    impl Eq for SimpleBooleanConfig {}
+    impl Eq for SimpleTimestampConfig {}
 
-    impl ::std::hash::Hash for SimpleBooleanConfig {
+    impl ::std::hash::Hash for SimpleTimestampConfig {
         fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
             match self {
-                SimpleBooleanConfig::SimpleBooleanConfig {} => {}
+                SimpleTimestampConfig::SimpleTimestampConfig {} => {}
             }
         }
     }
 
-    impl ::std::default::Default for SimpleBooleanConfig {
-        fn default() -> SimpleBooleanConfig {
-            SimpleBooleanConfig::SimpleBooleanConfig {}
+    impl ::std::default::Default for SimpleTimestampConfig {
+        fn default() -> SimpleTimestampConfig {
+            SimpleTimestampConfig::SimpleTimestampConfig {}
         }
     }
 
-    impl ::std::convert::AsRef<SimpleBooleanConfig> for &SimpleBooleanConfig {
+    impl ::std::convert::AsRef<SimpleTimestampConfig> for &SimpleTimestampConfig {
         fn as_ref(&self) -> Self {
             self
         }
     }
 
-    pub struct ISimpleTypesBooleanClientCallHistory {}
+    pub struct ISimpleTypesTimestampClientCallHistory {}
 
-    impl ISimpleTypesBooleanClientCallHistory {
+    impl ISimpleTypesTimestampClientCallHistory {
         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
             ::dafny_runtime::allocate_rcmut::<Self>()
         }
     }
 
-    pub trait ISimpleTypesBooleanClient {
-        fn GetBoolean(
+    pub trait ISimpleTypesTimestampClient {
+        fn GetTimestamp(
             &mut self,
             input: &::std::rc::Rc<
-                super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput,
+                super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
             >,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::std::rc::Rc<
-                    super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
                 >,
-                ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
             >,
         >;
     }
@@ -302,7 +322,7 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
     pub enum Error {
         CollectionOfErrors {
             list: ::dafny_runtime::Sequence<
-                ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
             >,
             message: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
         },
@@ -315,7 +335,7 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
         pub fn list(
             &self,
         ) -> &::dafny_runtime::Sequence<
-            ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
+            ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
         > {
             match self {
                 Error::CollectionOfErrors { list, message } => list,
@@ -352,10 +372,7 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
         ) -> std::fmt::Result {
             match self {
                 Error::CollectionOfErrors { list, message } => {
-                    write!(
-                        _formatter,
-                        "r#_simple_dtypes_dboolean_dinternaldafny_dtypes.Error.CollectionOfErrors("
-                    )?;
+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.Error.CollectionOfErrors(")?;
                     ::dafny_runtime::DafnyPrint::fmt_print(list, _formatter, false)?;
                     write!(_formatter, ", ")?;
                     ::dafny_runtime::DafnyPrint::fmt_print(message, _formatter, false)?;
@@ -365,7 +382,7 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
                 Error::Opaque { obj } => {
                     write!(
                         _formatter,
-                        "r#_simple_dtypes_dboolean_dinternaldafny_dtypes.Error.Opaque("
+                        "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.Error.Opaque("
                     )?;
                     ::dafny_runtime::DafnyPrint::fmt_print(obj, _formatter, false)?;
                     write!(_formatter, ")")?;
@@ -405,28 +422,29 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dtypes {
     }
 
     pub type OpaqueError =
-        ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>;
+        ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>;
 }
-pub mod r#_SimpleBooleanImpl_Compile {
+pub mod r#_SimpleTypesTimestampImpl_Compile {
     pub struct _default {}
 
     impl _default {
         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
             ::dafny_runtime::allocate_rcmut::<Self>()
         }
-        pub fn GetBoolean(
-            config: &::std::rc::Rc<super::r#_SimpleBooleanImpl_Compile::Config>,
+        pub fn GetTimestamp(
+            config: &::std::rc::Rc<super::r#_SimpleTypesTimestampImpl_Compile::Config>,
             input: &::std::rc::Rc<
-                super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput,
+                super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
             >,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::std::rc::Rc<
-                    super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
                 >,
-                ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
             >,
         > {
+<<<<<<<< HEAD:TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/implementation_from_dafny.rs
             let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
             if !matches!(
                 input.value().as_ref(),
@@ -438,11 +456,16 @@ pub mod r#_SimpleBooleanImpl_Compile {
                 panic!("Halt")
             };
             let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
+========
+            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>>::new();
+            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput::GetTimestampOutput {
+>>>>>>>> c902dcd80715925a3535f32ac280ae7ee0e7bd50:TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
             value: input.value().clone()
           });
-            res = ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
+            res = ::std::rc::Rc::new(super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput::GetTimestampOutput {
             value: input.value().clone()
           });
+<<<<<<<< HEAD:TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/implementation_from_dafny.rs
             if !(res.value().value().clone() == true || res.value().value().clone() == false) {
                 panic!("Halt")
             };
@@ -459,6 +482,11 @@ pub mod r#_SimpleBooleanImpl_Compile {
                     value: res.clone(),
                 },
             ));
+========
+            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>::Success {
+              value: res.clone()
+            }));
+>>>>>>>> c902dcd80715925a3535f32ac280ae7ee0e7bd50:TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
             return output.read();
             return output.read();
         }
@@ -485,7 +513,10 @@ pub mod r#_SimpleBooleanImpl_Compile {
         ) -> std::fmt::Result {
             match self {
                 Config::Config {} => {
-                    write!(_formatter, "r#_SimpleBooleanImpl_Compile.Config.Config")?;
+                    write!(
+                        _formatter,
+                        "r#_SimpleTypesTimestampImpl_Compile.Config.Config"
+                    )?;
                     Ok(())
                 }
             }
@@ -514,59 +545,48 @@ pub mod r#_SimpleBooleanImpl_Compile {
         }
     }
 }
-pub mod r#_simple_dtypes_dboolean_dinternaldafny {
+pub mod r#_simple_dtypes_dtimestamp_dinternaldafny {
     pub struct _default {}
 
     impl _default {
         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
             ::dafny_runtime::allocate_rcmut::<Self>()
         }
-        pub fn DefaultSimpleBooleanConfig() -> ::std::rc::Rc<
-            super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
+        pub fn DefaultSimpleTimestampConfig() -> ::std::rc::Rc<
+            super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig,
         > {
-            ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig::SimpleBooleanConfig {})
+            ::std::rc::Rc::new(super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig::SimpleTimestampConfig {})
         }
-        pub fn SimpleBoolean(
+        pub fn SimpleTimestamp(
             config: &::std::rc::Rc<
-                super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
+                super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig,
             >,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::dafny_runtime::Object<
-                    super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient,
                 >,
-                ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
             >,
         > {
-            let mut res = ::dafny_runtime::MaybePlacebo::<
-                ::std::rc::Rc<
-                    super::r#_Wrappers_Compile::Result<
-                        ::dafny_runtime::Object<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
-                        >,
-                        ::std::rc::Rc<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
-                        >,
-                    >,
-                >,
-            >::new();
+            let mut res = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>>::new();
             let mut client = ::dafny_runtime::MaybePlacebo::<
                 ::dafny_runtime::Object<
-                    super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient,
                 >,
             >::new();
-            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient> = super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient::_allocate_rcmut();
-            super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient::_ctor(
+            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient> = super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient::_allocate_rcmut();
+            super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient::_ctor(
                 &_nw0,
-                &::std::rc::Rc::new(super::r#_SimpleBooleanImpl_Compile::Config::Config {}),
+                &::std::rc::Rc::new(super::r#_SimpleTypesTimestampImpl_Compile::Config::Config {}),
             );
             client = ::dafny_runtime::MaybePlacebo::from(_nw0.clone());
             res = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
                     ::dafny_runtime::Object<
-                        super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                        super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient,
                     >,
-                    ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
+                    ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
                 >::Success {
                     value: client.read(),
                 },
@@ -574,29 +594,29 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny {
             return res.read();
             return res.read();
         }
-        pub fn CreateSuccessOfClient(client: &::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>{
-            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>::Success {
+        pub fn CreateSuccessOfClient(client: &::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>{
+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>::Success {
           value: client.clone()
         })
         }
-        pub fn CreateFailureOfError(error: &::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>{
-            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>::Failure {
+        pub fn CreateFailureOfError(error: &::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>{
+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>::Failure {
           error: error.clone()
         })
         }
     }
 
-    pub struct SimpleBooleanClient {
-        pub r#__i_config: ::std::rc::Rc<super::r#_SimpleBooleanImpl_Compile::Config>,
+    pub struct SimpleTimestampClient {
+        pub r#__i_config: ::std::rc::Rc<super::r#_SimpleTypesTimestampImpl_Compile::Config>,
     }
 
-    impl SimpleBooleanClient {
+    impl SimpleTimestampClient {
         pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
             ::dafny_runtime::allocate_rcmut::<Self>()
         }
         pub fn _ctor(
             this: &::dafny_runtime::Object<Self>,
-            config: &::std::rc::Rc<super::r#_SimpleBooleanImpl_Compile::Config>,
+            config: &::std::rc::Rc<super::r#_SimpleTypesTimestampImpl_Compile::Config>,
         ) -> () {
             let mut _set__i_config: bool = false;
             ::dafny_runtime::update_field_uninit_rcmut!(
@@ -607,31 +627,34 @@ pub mod r#_simple_dtypes_dboolean_dinternaldafny {
             );
             return ();
         }
-        pub fn config(&self) -> ::std::rc::Rc<super::r#_SimpleBooleanImpl_Compile::Config> {
+        pub fn config(&self) -> ::std::rc::Rc<super::r#_SimpleTypesTimestampImpl_Compile::Config> {
             self.r#__i_config.clone()
         }
     }
 
-    impl super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient
-        for super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient
+    impl super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient
+        for super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient
     {
-        fn GetBoolean(
+        fn GetTimestamp(
             &mut self,
             input: &::std::rc::Rc<
-                super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput,
+                super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
             >,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::std::rc::Rc<
-                    super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
                 >,
-                ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
             >,
         > {
-            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            let mut _out0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
+            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>>::new();
+            let mut _out0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>>::new();
             _out0 = ::dafny_runtime::MaybePlacebo::from(
-                super::r#_SimpleBooleanImpl_Compile::_default::GetBoolean(&self.config(), input),
+                super::r#_SimpleTypesTimestampImpl_Compile::_default::GetTimestamp(
+                    &self.config(),
+                    input,
+                ),
             );
             output = ::dafny_runtime::MaybePlacebo::from(_out0.read());
             return output.read();

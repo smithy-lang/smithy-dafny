@@ -31,7 +31,7 @@ impl Client {
             ));
         }
         Ok(Self {
-            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient + 'static)>>::upcast_to(inner.Extract()),
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
         })
     }
 }

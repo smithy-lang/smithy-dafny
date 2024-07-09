@@ -19,14 +19,6 @@ dependencies {
     implementation("software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0")
 }
 
-configure<software.amazon.smithy.gradle.SmithyExtension> {
-    // Uncomment this to use a custom projection when building the JAR.
-    // projection = "foo"
-}
-
-// Uncomment to disable creating a JAR.
-tasks["jar"].enabled = false
-
 tasks.register("polymorphDafny") {
     dependsOn("build")
     doLast {
@@ -53,9 +45,14 @@ tasks.register("polymorphDotnet") {
         // default (no projection) is "source"
         val projectionName = "list-queues-and-add-permission-only"
         copy {
-            // build plugin calls it "dotnet" and CLI calls it "net"
-            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/dotnet"))
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/net"))
             into("runtimes/net")
+        }
+        exec {
+            // need to adjust the relative import, since we're copying it away
+            // the commandLine method does not play nice with sed,
+            // so we have to execute it through bash :(
+            commandLine("bash", "-c", "sed 's|../../../../../../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj|../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj|' runtimes/net/SQS.csproj > runtimes/net/tmp && mv runtimes/net/tmp runtimes/net/SQS.csproj")
         }
     }
 }
