@@ -117,6 +117,10 @@ module {:options "--function-syntax:4"} Std.Aggregators {
       this.f := f;
       this.value := init;
       this.Repr := {this};
+      this.history := [];
+      new;
+      reveal Seq.FoldLeft();
+      assert value == Seq.FoldLeft(f, init, Consumed());
     }
 
     ghost predicate Valid() 
