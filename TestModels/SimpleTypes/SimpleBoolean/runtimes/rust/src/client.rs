@@ -29,7 +29,7 @@ impl Client {
             ));
         }
         Ok(Self {
-            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient + 'static)>>::upcast_to(inner.Extract()),
+            dafny_client: ::dafny_runtime::upcast_object::<::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient, dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>()(inner.Extract())
         })
     }
 }
