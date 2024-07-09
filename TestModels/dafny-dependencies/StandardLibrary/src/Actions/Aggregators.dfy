@@ -232,8 +232,11 @@ module {:options "--function-syntax:4"} Std.Aggregators {
       DefaultRepeatUntil(this, t, stop, eventuallyStopsProof);
     }
 
-    method {:verify false} Pop() returns (t: T) 
+    method Pop() returns (t: T) 
+      requires Valid()
       requires 0 < |values|
+      modifies Repr
+      ensures Valid()
     {
       t := values[0];
       values := values[1..];
