@@ -29,7 +29,7 @@ impl Client {
             ));
         }
         Ok(Self {
-            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::ISimpleTypesEnumV2Client + 'static)>>::upcast_to(inner.Extract()),
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
         })
     }
 }
