@@ -2,8 +2,7 @@
 from _dafny import Seq
 from smithy_python.interfaces.blobs import ByteStream
 from standard_library.internaldafny.generated.Std_Enumerators import Enumerator
-from standard_library.internaldafny.generated.Wrappers import Option
-from standard_library.internaldafny.generated.Wrappers import Option
+from standard_library.internaldafny.generated.Wrappers import Option, Option_Some, Option_None
 
 
 class EnumeratorByteStream(ByteStream):
@@ -14,7 +13,7 @@ class EnumeratorByteStream(ByteStream):
   def read(self, size: int = -1) -> bytes:
     # TODO: assert size is -1, buffer, 
     # or define a more specialized Action<int, bytes> type for streams.
-    next = self.dafny_enumerator.Next()
+    next = Enumerator.Next(self.dafny_enumerator)
     if next.is_None:
       # NOT None, because that indicates "no data right now, might be more later"
       return bytes()
@@ -26,6 +25,9 @@ class StreamingBlobEnumerator(Enumerator):
   
   def __init__(self, streaming_blob):
     self.streaming_blob = streaming_blob
+
+  def Next(self):
+    return Enumerator.Next(self)
 
   def Invoke(self, _) -> Option:
     next = self.streaming_blob.read()
