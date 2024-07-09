@@ -1,25 +1,3 @@
-diff --git b/TestModels/Union/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/Union/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index 931a24b5..eeb13dc0 100644
---- b/TestModels/Union/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-+++ a/TestModels/Union/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -645,7 +645,7 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
-             message: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-         },
-         Opaque {
--            obj: ::dafny_runtime::Object<dyn::std::any::Any>,
-+            obj: ::dafny_runtime::Object<dyn ::std::any::Any>,
-         },
-     }
- 
-@@ -666,7 +666,7 @@ pub mod r#_simple_dunion_dinternaldafny_dtypes {
-                 Error::Opaque { obj } => panic!("field does not exist on this variant"),
-             }
-         }
--        pub fn obj(&self) -> &::dafny_runtime::Object<dyn::std::any::Any> {
-+        pub fn obj(&self) -> &::dafny_runtime::Object<dyn ::std::any::Any> {
-             match self {
-                 Error::CollectionOfErrors { list, message } => {
-                     panic!("field does not exist on this variant")
 diff --git b/TestModels/Union/runtimes/rust/src/client.rs a/TestModels/Union/runtimes/rust/src/client.rs
 new file mode 100644
 index 00000000..058b2ed9

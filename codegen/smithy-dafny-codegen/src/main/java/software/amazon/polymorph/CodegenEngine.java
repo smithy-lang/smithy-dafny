@@ -667,12 +667,17 @@ public class CodegenEngine {
     // by temporarily moving it out of src/
     Path outputSrcDir = outputDir.resolve("src");
     Path implementationFromDafnyPath = outputSrcDir.resolve("implementation_from_dafny.rs");
+    Path tmpPath = null;
     try {
-      Path tmpPath = outputDir.resolve("implementation_from_dafny.rs");
-      Files.move(implementationFromDafnyPath, tmpPath);
+      if (Files.exists(implementationFromDafnyPath)) {
+        tmpPath = outputDir.resolve("implementation_from_dafny.rs");
+        Files.move(implementationFromDafnyPath, tmpPath);
+      }
       software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
       outputSrcDir.toFile().mkdirs();
-      Files.move(tmpPath, implementationFromDafnyPath);
+      if (tmpPath != null) {
+        Files.move(tmpPath, implementationFromDafnyPath);
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
