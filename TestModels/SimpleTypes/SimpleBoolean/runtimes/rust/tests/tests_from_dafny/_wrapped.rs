@@ -1,9 +1,16 @@
+use std::any::Any;
+
 use crate::tests_from_dafny::*;
 use aws_smithy_types::error::operation::BuildError;
+use dafny_runtime::UpcastObject;
 use simple_boolean::*;
 
 struct WrappedClient {
     wrapped: Client,
+}
+
+impl UpcastObject<dyn Any> for WrappedClient {
+    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 }
 
 impl super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient
