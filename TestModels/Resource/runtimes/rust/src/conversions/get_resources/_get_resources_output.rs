@@ -35,6 +35,10 @@ pub struct SimpleResourceWrapper {
     obj: crate::types::simple_resource::SimpleResourceRef,
 }
 
+impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for SimpleResourceWrapper {
+    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
+}
+
 impl ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResource
     for SimpleResourceWrapper
 {
