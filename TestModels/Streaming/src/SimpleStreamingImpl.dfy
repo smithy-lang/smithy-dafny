@@ -39,7 +39,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   function method BitCount(x: uint8): int {
     if x == 0 then
       0
-    else if x % 1 == 1 then
+    else if x % 2 == 1 then
       1 + BitCount(x / 2)
     else
       BitCount(x / 2)
