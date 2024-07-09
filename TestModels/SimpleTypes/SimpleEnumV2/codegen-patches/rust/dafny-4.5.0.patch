@@ -1,6 +1,6 @@
 diff --git b/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..7009f031
+index 00000000..cccf551e
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/client.rs
 @@ -0,0 +1,41 @@
@@ -35,7 +35,7 @@ index 00000000..7009f031
 +            ));
 +        }
 +        Ok(Self {
-+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::ISimpleTypesEnumV2Client + 'static)>>::upcast_to(inner.Extract()),
++            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
 +        })
 +    }
 +}
@@ -153,7 +153,7 @@ index 00000000..323761ef
 +pub mod simple_enum_v2_shape;
 diff --git b/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2.rs a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2.rs
 new file mode 100644
-index 00000000..c018494a
+index 00000000..ee62a4b2
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2.rs
 @@ -0,0 +1,37 @@
@@ -168,7 +168,7 @@ index 00000000..c018494a
 +    match value {
 +        crate::operation::get_enum_v2::GetEnumV2Error::Unhandled(unhandled) => ::std::rc::Rc::new(
 +            ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque {
-+                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
++                obj: ::dafny_runtime::upcast_object()(
 +                    ::dafny_runtime::object::new(unhandled),
 +                ),
 +            },
@@ -298,7 +298,7 @@ index 00000000..9dbe77a6
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_first_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_first_known_value_test.rs
 new file mode 100644
-index 00000000..45440aaa
+index 00000000..772c94f5
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_first_known_value_test.rs
 @@ -0,0 +1,32 @@
@@ -312,7 +312,7 @@ index 00000000..45440aaa
 +) -> ::std::rc::Rc<::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::get_enum_v2_first_known_value_test::GetEnumV2FirstKnownValueTestError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -442,7 +442,7 @@ index 00000000..72480cb5
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_second_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_second_known_value_test.rs
 new file mode 100644
-index 00000000..b3ce7158
+index 00000000..94e88a86
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_second_known_value_test.rs
 @@ -0,0 +1,32 @@
@@ -456,7 +456,7 @@ index 00000000..b3ce7158
 +) -> ::std::rc::Rc<::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::get_enum_v2_second_known_value_test::GetEnumV2SecondKnownValueTestError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -586,7 +586,7 @@ index 00000000..e5799cd4
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_third_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_third_known_value_test.rs
 new file mode 100644
-index 00000000..c8edb2e8
+index 00000000..7176a32a
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/conversions/get_enum_v2_third_known_value_test.rs
 @@ -0,0 +1,32 @@
@@ -600,7 +600,7 @@ index 00000000..c8edb2e8
 +) -> ::std::rc::Rc<::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::get_enum_v2_third_known_value_test::GetEnumV2ThirdKnownValueTestError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -822,10 +822,10 @@ index 00000000..ec89cbec
 +pub(crate) mod sealed_unhandled;
 diff --git b/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/error/sealed_unhandled.rs
 new file mode 100644
-index 00000000..9d21fbd6
+index 00000000..cce22d1c
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/error/sealed_unhandled.rs
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,26 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +/// This struct is not intended to be used.
 +///
@@ -847,6 +847,10 @@ index 00000000..9d21fbd6
 +pub struct Unhandled {
 +    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
 +    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
++}
++
++impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
++    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleEnumV2/runtimes/rust/src/lib.rs
 new file mode 100644
