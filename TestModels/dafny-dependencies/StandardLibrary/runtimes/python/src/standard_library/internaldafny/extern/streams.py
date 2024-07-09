@@ -14,11 +14,10 @@ class EnumeratorByteStream(ByteStream):
     # TODO: assert size is -1, buffer, 
     # or define a more specialized Action<int, bytes> type for streams.
     next = Enumerator.Next(self.dafny_enumerator)
-    if next.is_None:
-      # NOT None, because that indicates "no data right now, might be more later"
-      return bytes()
-    else:
-      return bytes(next.value)
+    while next.is_Some and len(next.value) == 0:
+      next = Enumerator.Next(self.dafny_enumerator)
+    # Do NOT return None, because that indicates "no data right now, might be more later"
+    return bytes(next.value) if next.is_Some else bytes() 
 
 
 class StreamingBlobEnumerator(Enumerator):
