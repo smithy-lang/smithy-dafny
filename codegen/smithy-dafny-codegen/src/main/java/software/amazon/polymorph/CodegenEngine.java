@@ -666,7 +666,9 @@ public class CodegenEngine {
     // Be sure to NOT delete src/implementation_from_dafny.rs though,
     // by temporarily moving it out of src/
     Path outputSrcDir = outputDir.resolve("src");
-    Path implementationFromDafnyPath = outputSrcDir.resolve("implementation_from_dafny.rs");
+    Path implementationFromDafnyPath = outputSrcDir.resolve(
+      "implementation_from_dafny.rs"
+    );
     Path tmpPath = null;
     try {
       if (Files.exists(implementationFromDafnyPath)) {
