@@ -1,16 +1,19 @@
-package software.amazon.polymorph.smithygo.codegen;
+package software.amazon.polymorph.smithygo.localservice;
 
+import software.amazon.polymorph.smithygo.codegen.GenerationContext;
+import software.amazon.polymorph.smithygo.codegen.GoSettings;
+import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.integration.GoIntegration;
-import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 
 import java.util.Map;
 
-public class GoClientCodegenPlugin implements SmithyBuildPlugin {
+public class DafnyLocalServiceCodegenPlugin implements SmithyBuildPlugin {
 
-    public GoClientCodegenPlugin(final Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+    public DafnyLocalServiceCodegenPlugin(final Map<String, String> smithyNamespaceToPythonModuleNameMap) {
         super();
         SmithyNameResolver.setSmithyNamespaceToGoModuleNameMap(smithyNamespaceToPythonModuleNameMap);
     }
@@ -18,7 +21,7 @@ public class GoClientCodegenPlugin implements SmithyBuildPlugin {
         CodegenDirector<GoWriter, GoIntegration, GenerationContext, GoSettings> runner
                 = new CodegenDirector<>();
 
-        runner.directedCodegen(new DirectedGoCodegen());
+        runner.directedCodegen(new DafnyLocalServiceDirectedCodegen());
 
         // Set the SmithyIntegration class to look for and apply using SPI.
         runner.integrationClass(GoIntegration.class);

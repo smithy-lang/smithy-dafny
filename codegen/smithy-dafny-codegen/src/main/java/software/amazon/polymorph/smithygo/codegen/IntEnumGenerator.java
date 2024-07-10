@@ -31,14 +31,14 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Renders intEnums and their constants.
  */
-final class IntEnumGenerator implements Runnable {
+public final class IntEnumGenerator implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(IntEnumGenerator.class.getName());
 
     private final SymbolProvider symbolProvider;
     private final GoWriter writer;
     private final IntEnumShape shape;
 
-    IntEnumGenerator(SymbolProvider symbolProvider, GoWriter writer, IntEnumShape shape) {
+    public IntEnumGenerator(SymbolProvider symbolProvider, GoWriter writer, IntEnumShape shape) {
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.shape = shape;

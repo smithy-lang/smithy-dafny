@@ -1,6 +1,12 @@
-package software.amazon.polymorph.smithygo.codegen;
+package software.amazon.polymorph.smithygo.localservice;
 
-import software.amazon.polymorph.smithygo.DafnyTypeConversionProtocol;
+import software.amazon.polymorph.smithygo.codegen.EnumGenerator;
+import software.amazon.polymorph.smithygo.codegen.GenerationContext;
+import software.amazon.polymorph.smithygo.codegen.GoDelegator;
+import software.amazon.polymorph.smithygo.codegen.GoSettings;
+import software.amazon.polymorph.smithygo.codegen.IntEnumGenerator;
+import software.amazon.polymorph.smithygo.codegen.StructureGenerator;
+import software.amazon.polymorph.smithygo.codegen.SymbolVisitor;
 import software.amazon.polymorph.smithygo.codegen.integration.GoIntegration;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.directed.CreateContextDirective;
@@ -16,8 +22,8 @@ import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
 
 import java.util.logging.Logger;
 
-public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoSettings, GoIntegration> {
-    private static final Logger LOGGER = Logger.getLogger(DirectedGoCodegen.class.getName());
+public class DafnyLocalServiceDirectedCodegen implements DirectedCodegen<GenerationContext, GoSettings, GoIntegration> {
+    private static final Logger LOGGER = Logger.getLogger(DafnyLocalServiceDirectedCodegen.class.getName());
     @Override
     public SymbolProvider createSymbolProvider(CreateSymbolProviderDirective<GoSettings> directive) {
         return new SymbolVisitor(directive.model(), directive.settings());
@@ -32,7 +38,7 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
                                 .fileManifest(directive.fileManifest())
                                 .integrations(directive.integrations())
                                 .writerDelegator(new GoDelegator(directive.fileManifest(), directive.symbolProvider()))
-                                .protocolGenerator(new DafnyTypeConversionProtocol())
+                                .protocolGenerator(new DafnyLocalServiceTypeConversionProtocol())
                                 .build();
     }
 
@@ -42,7 +48,7 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
         {
             return;
         }
-        new ClientGenerator(directive.context(), directive.service()).run();
+        new DafnyLocalServiceGenerator(directive.context(), directive.service()).run();
 
         var protocolGenerator = directive.context().protocolGenerator();
         if (protocolGenerator == null) {

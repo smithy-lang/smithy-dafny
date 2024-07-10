@@ -32,14 +32,14 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Renders enums and their constants.
  */
-final class EnumGenerator implements Runnable {
+public final class EnumGenerator implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(EnumGenerator.class.getName());
 
     private final SymbolProvider symbolProvider;
     private final GoWriter writer;
     private final Shape shape;
 
-    EnumGenerator(SymbolProvider symbolProvider, GoWriter writer, Shape shape) {
+    public EnumGenerator(SymbolProvider symbolProvider, GoWriter writer, Shape shape) {
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.shape = shape;

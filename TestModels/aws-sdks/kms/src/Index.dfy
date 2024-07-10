@@ -3,7 +3,7 @@
 
 include "../Model/ComAmazonawsKmsTypes.dfy"
 
-module {:extern "comamazonkmsinternaldafny"} Com.Amazonaws.Kms refines AbstractComAmazonawsKmsService {
+module {:extern "comamazonawskmsinternaldafny"} Com.Amazonaws.Kms refines AbstractComAmazonawsKmsService {
 
   function method DefaultKMSClientConfigType() : KMSClientConfigType {
     KMSClientConfigType

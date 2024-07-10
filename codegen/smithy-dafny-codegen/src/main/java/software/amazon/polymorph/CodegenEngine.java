@@ -29,6 +29,7 @@ import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedConversionCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedShimCodegen;
+import software.amazon.polymorph.smithygo.awssdk.DafnyGoAwsSdkClientCodegenPlugin;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
@@ -43,7 +44,7 @@ import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.build.PluginContext;
-import software.amazon.polymorph.smithygo.codegen.GoClientCodegenPlugin;
+import software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceCodegenPlugin;
 import software.amazon.smithy.utils.Pair;
 
 import java.util.HashMap;
@@ -540,8 +541,11 @@ public class CodegenEngine {
 
     final Map<String, String> smithyNamespaceToGoModuleNameMap = new HashMap<>(dependencyModuleNames);
     smithyNamespaceToGoModuleNameMap.put(serviceShape.getId().getNamespace(), moduleName.get());
-    new GoClientCodegenPlugin(smithyNamespaceToGoModuleNameMap).run(pluginContext);
-
+    if (this.awsSdkStyle) {
+      new DafnyGoAwsSdkClientCodegenPlugin(smithyNamespaceToGoModuleNameMap).run(pluginContext);
+    } else {
+      new DafnyLocalServiceCodegenPlugin(smithyNamespaceToGoModuleNameMap).run(pluginContext);
+    }
 
   }
 

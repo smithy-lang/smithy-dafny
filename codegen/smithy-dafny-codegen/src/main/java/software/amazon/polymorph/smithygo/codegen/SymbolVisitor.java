@@ -16,7 +16,7 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
-import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
@@ -65,9 +65,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
-
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.DOT;
 
 /**
  * Responsible for type mapping and file/identifier formatting.

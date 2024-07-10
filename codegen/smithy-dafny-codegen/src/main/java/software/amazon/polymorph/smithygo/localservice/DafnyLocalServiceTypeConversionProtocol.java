@@ -1,37 +1,29 @@
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.localservice;
 
 import software.amazon.polymorph.smithygo.codegen.ApplicationProtocol;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoDelegator;
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
-import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithygo.shapevisitor.DafnyToSmithyShapeVisitor;
-import software.amazon.polymorph.smithygo.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
+import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.DOT;
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.INTERNAL_DAFNY;
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.INTERNAL_DAFNY_TYPES;
-
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-public class DafnyTypeConversionProtocol implements ProtocolGenerator {
+public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerator {
     public static String TO_DAFNY = "to_dafny.go";
     public static String TO_NATIVE = "to_native.go";
 

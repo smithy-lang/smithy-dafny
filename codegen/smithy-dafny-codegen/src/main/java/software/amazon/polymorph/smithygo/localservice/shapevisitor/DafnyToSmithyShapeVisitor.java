@@ -1,14 +1,11 @@
-package software.amazon.polymorph.smithygo.shapevisitor;
+package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
-import software.amazon.polymorph.smithygo.codegen.SymbolVisitor;
-import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
-import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -26,16 +23,9 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.LengthTrait;
-import software.amazon.smithy.model.traits.RangeTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-
-import java.math.BigDecimal;
-import java.util.Optional;
 
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
@@ -175,7 +165,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
         MemberShape memberShape = shape.getMember();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-        final String typeName = targetShape.isStructureShape() ? context.symbolProvider().toSymbol(memberShape).getFullName() : context.symbolProvider().toSymbol(memberShape).getName();
+        final var typeName = targetShape.isStructureShape() ? context.symbolProvider().toSymbol(memberShape) : context.symbolProvider().toSymbol(memberShape);
         builder.append("""
                        func() []%s{
                        var fieldValue []%s
@@ -188,7 +178,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 				break
 			}
 			fieldValue = append(fieldValue, %s%s)}
-			""".formatted(typeName, typeName, dataSource, dataSource,
+			""".formatted(SmithyNameResolver.getSmithyType(shape, typeName), SmithyNameResolver.getSmithyType(shape, typeName), dataSource, dataSource,
                 targetShape.isStructureShape() ? "" : "*",
                 targetShape.accept(
                         new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
@@ -236,15 +226,19 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String booleanShape(BooleanShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        return """
-                func() *bool {
-                    var b bool
-                    if %s == nil {
-                        return nil
-                    }
-                    b = %s.(%s)
-                    return &b
-                }()""".formatted(dataSource, dataSource, context.symbolProvider().toSymbol(shape).getName());
+        if (this.isOptional) {
+            return """
+                    func() *bool {
+                        var b bool
+                        if %s == nil {
+                            return nil
+                        }
+                        b = %s.(%s)
+                        return &b
+                    }()""".formatted(dataSource, dataSource, context.symbolProvider().toSymbol(shape).getName());
+        } else {
+            return "%s.(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape).getName());
+        }
     }
 
     @Override
@@ -370,6 +364,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-        return "Timestampppppp";
+        return "nil";
     }
 }

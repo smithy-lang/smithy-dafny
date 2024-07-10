@@ -462,7 +462,7 @@ polymorph_go:
 _polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_go: MODULE_NAME=--module-name $(GO_MODULE_NAME)
 _polymorph_go: DEPENDENCY_MODULE_NAMES = $(GO_DEPENDENCY_MODULE_NAMES)
-_polymorph_go: _polymorph _mv_polymorph_go _gomod_init
+_polymorph_go: _polymorph
 
 _gomod_init:
 	#TODO: Think about handwritten go.mod

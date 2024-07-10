@@ -1,17 +1,12 @@
-package software.amazon.polymorph.smithygo.nameresolver;
+package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
-import software.amazon.polymorph.smithygo.codegen.GenerationContext;
-import software.amazon.polymorph.smithygo.codegen.GoSettings;
 import software.amazon.smithy.codegen.core.Symbol;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ToShapeId;
 
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.DOT;
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.INTERNAL_DAFNY;
-import static software.amazon.polymorph.smithygo.nameresolver.Constants.INTERNAL_DAFNY_TYPES;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.INTERNAL_DAFNY;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.INTERNAL_DAFNY_TYPES;
 
 public class DafnyNameResolver {
 

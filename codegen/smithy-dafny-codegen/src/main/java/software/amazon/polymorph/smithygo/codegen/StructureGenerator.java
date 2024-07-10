@@ -15,16 +15,13 @@
 
 package software.amazon.polymorph.smithygo.codegen;
 
-import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
-import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.LengthTrait;

@@ -1,7 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.localservice;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoDelegator;
@@ -9,8 +9,8 @@ import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.StructureGenerator;
 import software.amazon.polymorph.smithygo.codegen.UnionGenerator;
-import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithygo.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 
-public class LocalServiceGenerator implements Runnable {
+public class DafnyLocalServiceGenerator implements Runnable {
     private final GenerationContext context;
     private final ServiceShape service;
     private final TopDownIndex topDownIndex;
@@ -37,7 +37,7 @@ public class LocalServiceGenerator implements Runnable {
     private final Model model;
     private final SymbolProvider symbolProvider;
 
-    public LocalServiceGenerator(GenerationContext context, ServiceShape service) {
+    public DafnyLocalServiceGenerator(GenerationContext context, ServiceShape service) {
         this.context = context;
         this.service = service;
         model = context.model();

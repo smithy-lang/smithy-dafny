@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithygo.nameresolver;
+package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 public class Constants {
     public static final String DOT = ".";
