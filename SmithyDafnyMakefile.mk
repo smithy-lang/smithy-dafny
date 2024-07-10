@@ -252,6 +252,10 @@ transpile_dependencies:
 	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG), )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(PROJECT_DEPENDENCIES))
 
+transpile_dependencies_test:
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_test_$(LANG), )
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_test_$(LANG);, $(PROJECT_DEPENDENCIES))
+
 ########################## Code-Gen targets
 
 # The OUTPUT variables are created this way
@@ -512,7 +516,11 @@ test_java:
 
 ########################## Rust targets
 
-transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust
+# Note that transpile_dependencies_test_rust is necessary
+# only because we are patching test code in the StandardLibrary,
+# so we don't transpile that code then the recursive call to polymorph_rust
+# on the StandardLibrary will fail because the patch does not apply.
+transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust transpile_dependencies_test_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
@@ -533,6 +541,9 @@ transpile_test_rust: _transpile_test_all _mv_test_rust
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
+
+transpile_dependencies_test_rust: LANG=rust
+transpile_dependencies_test_rust: transpile_dependencies_test
 
 _mv_implementation_rust:
 	rm -rf runtimes/rust/dafny_impl/src
