@@ -721,3 +721,16 @@ index 00000000..6bf027f6
 +        ::std::result::Result::Ok(SimpleBooleanConfig {})
 +    }
 +}
+diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
+index ce6d90a2..7f1ba031 100644
+--- b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
++++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
+@@ -1,5 +1,8 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
++use ::simple_boolean_dafny::*;
++use simple_boolean::*;
++mod _wrapped;
+ 
+ pub mod r#_simple_dtypes_dboolean_dinternaldafny_dwrapped {
+     pub struct _default {}
