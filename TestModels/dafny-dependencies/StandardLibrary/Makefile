@@ -65,7 +65,7 @@ transpile_java: | transpile_implementation_java transpile_test_java
 
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
-transpile_rust: | transpile_implementation_rust
+transpile_rust: | transpile_implementation_rust transpile_test_rust
 
 # Override the targets to relocate translated Rust code directly into the main crate,
 # instead of the dafny_impl sub-crate.
