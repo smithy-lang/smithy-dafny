@@ -13,7 +13,5 @@ pub mod operation;
 
 pub mod conversions;
 
-pub mod implementation_from_dafny;
-
 pub use client::Client;
 pub use types::simple_boolean_config::SimpleBooleanConfig;

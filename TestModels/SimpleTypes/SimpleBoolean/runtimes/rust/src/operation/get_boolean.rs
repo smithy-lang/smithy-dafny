@@ -20,7 +20,7 @@ impl GetBoolean {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetBoolean(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            ::simple_boolean_dafny::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_boolean::_get_boolean_output::from_dafny(

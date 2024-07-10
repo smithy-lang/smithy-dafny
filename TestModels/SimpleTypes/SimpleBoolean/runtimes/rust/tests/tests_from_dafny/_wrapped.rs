@@ -13,20 +13,20 @@ impl UpcastObject<dyn Any> for WrappedClient {
     ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 }
 
-impl super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient
+impl ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient
     for WrappedClient
 {
     fn GetBoolean(
         &mut self,
         input: &std::rc::Rc<
-            implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput,
+            ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput,
         >,
     ) -> std::rc::Rc<
-        implementation_from_dafny::r#_Wrappers_Compile::Result<
+        ::simple_boolean_dafny::r#_Wrappers_Compile::Result<
             std::rc::Rc<
-                implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
+                ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
             >,
-            std::rc::Rc<implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
+            std::rc::Rc<::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
         >,
     >{
         let inner_input =
@@ -34,12 +34,12 @@ impl super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBoolean
         let result = crate::operation::get_boolean::GetBoolean::send(&self.wrapped, inner_input);
         match result {
             Err(error) => ::std::rc::Rc::new(
-                crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+                ::simple_boolean_dafny::_Wrappers_Compile::Result::Failure {
                     error: crate::conversions::get_boolean::to_dafny_error(error),
                 },
             ),
             Ok(client) => ::std::rc::Rc::new(
-                crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
+                ::simple_boolean_dafny::_Wrappers_Compile::Result::Success {
                     value: crate::conversions::get_boolean::_get_boolean_output::to_dafny(client),
                 },
             ),
@@ -49,10 +49,10 @@ impl super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBoolean
 
 impl r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default {
     pub fn WrappedSimpleBoolean(config: &::std::rc::Rc<
-    super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
-    >) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<
-            ::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
-            ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
+        ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
+    >) -> ::std::rc::Rc<::simple_boolean_dafny::r#_Wrappers_Compile::Result<
+            ::dafny_runtime::Object<dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
+            ::std::rc::Rc<::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
     >>{
         let result = Client::from_conf(
             simple_boolean::conversions::simple_boolean_config::_simple_boolean_config::from_dafny(
@@ -66,9 +66,9 @@ impl r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default {
                         ::std::cell::UnsafeCell::new(error),
                     )));
                 ::std::rc::Rc::new(
-                    crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+                    ::simple_boolean_dafny::_Wrappers_Compile::Result::Failure {
                         error: ::std::rc::Rc::new(
-                            super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error::Opaque {
+                            ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error::Opaque {
                                 obj: error_obj,
                             },
                         ),
@@ -79,11 +79,11 @@ impl r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default {
                 let wrap = WrappedClient {
                     wrapped: client.clone(),
                 };
-                let inner: ::std::rc::Rc<::std::cell::UnsafeCell<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>>
+                let inner: ::std::rc::Rc<::std::cell::UnsafeCell<dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>>
                     = ::std::rc::Rc::new(::std::cell::UnsafeCell::new(wrap));
 
                 ::std::rc::Rc::new(
-                    crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
+                    ::simple_boolean_dafny::_Wrappers_Compile::Result::Success {
                         value: ::dafny_runtime::Object(Some(inner)),
                     },
                 )
