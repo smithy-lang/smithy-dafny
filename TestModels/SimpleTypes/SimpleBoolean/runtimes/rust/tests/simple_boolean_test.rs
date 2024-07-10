@@ -24,8 +24,8 @@ mod tests_from_dafny;
         print ret;
     }
 } */
-#[tokio::test]
-async fn test_get_boolean_true() {
+#[test]
+fn test_get_boolean_true() {
     let result = client().get_boolean().value(true).send();
     let output = result.unwrap();
     let value = output.value().unwrap();
@@ -42,8 +42,8 @@ async fn test_get_boolean_true() {
         print ret;
     }
 } */
-#[tokio::test]
-async fn test_get_boolean_false() {
+#[test]
+fn test_get_boolean_false() {
     let result = client().get_boolean().value(false).send();
     let output = result.unwrap();
     let value = output.value().unwrap();
@@ -55,7 +55,7 @@ pub fn client() -> Client {
     Client::from_conf(config).unwrap()
 }
 
-#[tokio::test]
-async fn dafny_tests() {
+#[test]
+fn dafny_tests() {
     crate::tests_from_dafny::_module::_default::_Test__Main_()
 }
