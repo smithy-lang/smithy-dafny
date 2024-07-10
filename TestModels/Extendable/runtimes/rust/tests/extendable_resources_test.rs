@@ -63,7 +63,7 @@ pub async fn TestClientDafnyResource() {
     // The explicit type cast is needed for the `is` test on the next line
     let resource = TestCreateExtendableResource(&client, TEST_RESOURCE_NAME).await;
     eprintln!("\nafter TestCreateExtendableResource");
-    expect resource is ExtendableResource.ExtendableResource;
+    // expect resource is ExtendableResource.ExtendableResource;
     // The `is` test above asserts this a "pure" Dafny resource
     TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
     eprintln!("\nafter TestNoneUseExtendableResource");
@@ -83,14 +83,14 @@ pub async fn TestClientDafnyResource() {
 
   // Test the Resource created through an Extern
   #[tokio::test]
-  pub fn TestClientNativeResource()
+  pub async fn TestClientNativeResource()
   {
     let client = SimpleExtendableResources::builder().build();
     // The explicit type cast is needed for the `is` test on the next line
-    var resource: Types.IExtendableResource := DafnyFactory();
+    // var resource: Types.IExtendableResource := DafnyFactory();
     // expect !(resource is ExtendableResource.ExtendableResource);
     // The `is` test above asserts this NOT a "pure" Dafny resource
-    assert fresh(resource.Modifies - client.Modifies - {client.History});
+    // assert fresh(resource.Modifies - client.Modifies - {client.History});
     TestNoneUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
     TestSomeUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
     // TestUseAlwaysModeledError(client, resource);
@@ -153,7 +153,7 @@ async fn TestNativeResource() {
     //   TestNoneAlwaysOpaqueError(resource);
 }
 
-fn TestAlwaysModeledError(resource: ExtendableResourceRef) {
+fn TestUseAlwaysModeledError(resource: ExtendableResourceRef) {
     let dataInput = crate::operation::always_modeled_error::AlwaysModeledErrorInput::builder()
         .value("Some".to_string())
         .build()
