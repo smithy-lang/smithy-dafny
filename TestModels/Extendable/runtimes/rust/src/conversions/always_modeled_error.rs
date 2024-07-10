@@ -14,7 +14,7 @@ pub fn to_dafny_error(
         message: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&e.message)
       }),
       crate::operation::always_modeled_error::AlwaysModeledErrorError::Unhandled(unhandled) =>
-      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
+      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
   }
 }
 

@@ -29,6 +29,10 @@ pub struct ExtendableResourceWrapper {
     obj: crate::types::extendable_resource::ExtendableResourceRef,
 }
 
+impl dafny_runtime::UpcastObject<dyn std::any::Any> for ExtendableResourceWrapper {
+    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
+}
+
 impl ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource
     for ExtendableResourceWrapper
 {

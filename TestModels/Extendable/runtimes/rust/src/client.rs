@@ -31,7 +31,7 @@ impl Client {
             ));
         }
         Ok(Self {
-            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::ISimpleExtendableResourcesClient + 'static)>>::upcast_to(inner.Extract()),
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
         })
     }
 }
