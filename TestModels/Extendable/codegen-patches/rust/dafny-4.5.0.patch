@@ -1,165 +1,6 @@
-diff --git b/TestModels/Extendable/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/Extendable/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index 3682c3bb..d4c684ca 100644
---- b/TestModels/Extendable/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-+++ a/TestModels/Extendable/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -233,13 +233,14 @@ pub mod r#_simple_dextendable_dresources_dinternaldafny_dtypes {
-         }
-     }
- 
--    impl ::std::default::Default for CreateExtendableResourceOutput {
--        fn default() -> CreateExtendableResourceOutput {
--            CreateExtendableResourceOutput::CreateExtendableResourceOutput {
--                resource: ::std::default::Default::default(),
--            }
--        }
--    }
-+    //  the trait `Default` is not implemented for `Object<(dyn IExtendableResource + 'static)>`
-+    // impl ::std::default::Default for CreateExtendableResourceOutput {
-+    //     fn default() -> CreateExtendableResourceOutput {
-+    //         CreateExtendableResourceOutput::CreateExtendableResourceOutput {
-+    //             resource: ::std::default::Default::default(),
-+    //         }
-+    //     }
-+    // }
- 
-     impl ::std::convert::AsRef<CreateExtendableResourceOutput> for &CreateExtendableResourceOutput {
-         fn as_ref(&self) -> Self {
-@@ -260,7 +261,7 @@ pub mod r#_simple_dextendable_dresources_dinternaldafny_dtypes {
-             let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
-             let mut _out0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
-             _out0 = ::dafny_runtime::MaybePlacebo::from(
--                ::dafny_runtime::md!(self).r#_GetExtendableResourceData_k(input),
-+                self.r#_GetExtendableResourceData_k(input),
-             );
-             output = ::dafny_runtime::MaybePlacebo::from(_out0.read());
-             return output.read();
-@@ -270,7 +271,7 @@ pub mod r#_simple_dextendable_dresources_dinternaldafny_dtypes {
-             let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
-             let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
-             _out1 = ::dafny_runtime::MaybePlacebo::from(
--                ::dafny_runtime::md!(self).r#_AlwaysMultipleErrors_k(input),
-+                self.r#_AlwaysMultipleErrors_k(input),
-             );
-             output = ::dafny_runtime::MaybePlacebo::from(_out1.read());
-             return output.read();
-@@ -280,7 +281,7 @@ pub mod r#_simple_dextendable_dresources_dinternaldafny_dtypes {
-             let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
-             let mut _out2 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
-             _out2 = ::dafny_runtime::MaybePlacebo::from(
--                ::dafny_runtime::md!(self).r#_AlwaysModeledError_k(input),
-+                self.r#_AlwaysModeledError_k(input),
-             );
-             output = ::dafny_runtime::MaybePlacebo::from(_out2.read());
-             return output.read();
-@@ -290,7 +291,7 @@ pub mod r#_simple_dextendable_dresources_dinternaldafny_dtypes {
-             let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
-             let mut _out3 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
-             _out3 = ::dafny_runtime::MaybePlacebo::from(
--                ::dafny_runtime::md!(self).r#_AlwaysOpaqueError_k(input),
-+                self.r#_AlwaysOpaqueError_k(input),
-             );
-             output = ::dafny_runtime::MaybePlacebo::from(_out3.read());
-             return output.read();
-@@ -914,15 +915,15 @@ pub mod r#_simple_dextendable_dresources_dinternaldafny_dtypes {
-             }
-         }
-     }
--
--    impl ::std::default::Default for UseExtendableResourceErrorsInput {
--        fn default() -> UseExtendableResourceErrorsInput {
--            UseExtendableResourceErrorsInput::UseExtendableResourceErrorsInput {
--                resource: ::std::default::Default::default(),
--                input: ::std::default::Default::default(),
--            }
--        }
--    }
-+    // the trait `Default` is not implemented for `Object<(dyn IExtendableResource + 'static)>`
-+    // impl ::std::default::Default for UseExtendableResourceErrorsInput {
-+    //     fn default() -> UseExtendableResourceErrorsInput {
-+    //         UseExtendableResourceErrorsInput::UseExtendableResourceErrorsInput {
-+    //             resource: ::std::default::Default::default(),
-+    //             input: ::std::default::Default::default(),
-+    //         }
-+    //     }
-+    // }
- 
-     impl ::std::convert::AsRef<UseExtendableResourceErrorsInput> for &UseExtendableResourceErrorsInput {
-         fn as_ref(&self) -> Self {
-@@ -994,15 +995,15 @@ pub mod r#_simple_dextendable_dresources_dinternaldafny_dtypes {
-             }
-         }
-     }
--
--    impl ::std::default::Default for UseExtendableResourceInput {
--        fn default() -> UseExtendableResourceInput {
--            UseExtendableResourceInput::UseExtendableResourceInput {
--                resource: ::std::default::Default::default(),
--                input: ::std::default::Default::default(),
--            }
--        }
--    }
-+    // the trait `Default` is not implemented for `Object<(dyn IExtendableResource + 'static)>`
-+    // impl ::std::default::Default for UseExtendableResourceInput {
-+    //     fn default() -> UseExtendableResourceInput {
-+    //         UseExtendableResourceInput::UseExtendableResourceInput {
-+    //             resource: ::std::default::Default::default(),
-+    //             input: ::std::default::Default::default(),
-+    //         }
-+    //     }
-+    // }
- 
-     impl ::std::convert::AsRef<UseExtendableResourceInput> for &UseExtendableResourceInput {
-         fn as_ref(&self) -> Self {
-@@ -1235,19 +1236,23 @@ pub mod r#_ExtendableResource_Compile {
-         }
-         pub fn AlwaysModeledError(&mut self, input: &::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>{
-             let mut _out4 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
--            _out4 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource::AlwaysModeledError(self.unwrap(), input));
-+            _out4 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource::AlwaysModeledError(self, input));
-+            _out4.read()
-         }
-         pub fn AlwaysMultipleErrors(&mut self, input: &::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>{
-             let mut _out5 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
--            _out5 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource::AlwaysMultipleErrors(self.unwrap(), input));
-+            _out5 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource::AlwaysMultipleErrors(self, input));
-+            _out5.read()
-         }
-         pub fn AlwaysOpaqueError(&mut self, input: &::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>{
-             let mut _out6 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
--            _out6 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource::AlwaysOpaqueError(self.unwrap(), input));
-+            _out6 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource::AlwaysOpaqueError(self, input));
-+            _out6.read()
-         }
-         pub fn GetExtendableResourceData(&mut self, input: &::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>{
-             let mut _out7 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput>, ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>>::new();
--            _out7 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource::GetExtendableResourceData(self.unwrap(), input));
-+            _out7 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource::GetExtendableResourceData(self, input));
-+            _out7.read()
-         }
-         pub fn _ctor(this: &::dafny_runtime::Object<Self>) -> () {
-             let mut _set__i_name: bool = false;
-@@ -1265,7 +1270,7 @@ pub mod r#_ExtendableResource_Compile {
-         ) -> () {
-             let mut _set__i_name: bool = false;
-             self.r#__i_name = name.clone();
--            ::dafny_runtime::update_field_if_uninit!(this, r#__i_name, _set__i_name, <::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> as std::default::Default>::default());
-+            ::dafny_runtime::update_field_if_uninit!(self, r#__i_name, _set__i_name, <::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> as std::default::Default>::default());
-             return ();
-         }
-         pub fn name(&self) -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
-@@ -1394,7 +1399,8 @@ pub mod r#_SimpleExtendableResourcesOperations_Compile {
-             let mut _nw1: ::dafny_runtime::Object<
-                 super::r#_ExtendableResource_Compile::ExtendableResource,
-             > = super::r#_ExtendableResource_Compile::ExtendableResource::_allocate_rcmut();
--            super::r#_ExtendableResource_Compile::ExtendableResource::OfName(&_nw1, input.name());
-+            // expected `&mut ExtendableResource`, found `Object<ExtendableResource>`
-+            // super::r#_ExtendableResource_Compile::ExtendableResource::OfName(_nw1, input.name());
-             resource = ::dafny_runtime::MaybePlacebo::from(_nw1.clone());
-             let mut result: ::std::rc::Rc<super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::CreateExtendableResourceOutput> = ::std::rc::Rc::new(super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::CreateExtendableResourceOutput::CreateExtendableResourceOutput {
-             resource: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn super::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource>>::upcast_to(resource.read())
 diff --git b/TestModels/Extendable/runtimes/rust/src/client.rs a/TestModels/Extendable/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..0f26233b
+index 00000000..34b1e013
 --- /dev/null
 +++ a/TestModels/Extendable/runtimes/rust/src/client.rs
 @@ -0,0 +1,40 @@
@@ -196,7 +37,7 @@ index 00000000..0f26233b
 +            ));
 +        }
 +        Ok(Self {
-+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::ISimpleExtendableResourcesClient + 'static)>>::upcast_to(inner.Extract()),
++            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
 +        })
 +    }
 +}
@@ -266,7 +107,7 @@ index 00000000..7e0a4c35
 +pub mod simple_extendable_resources_config;
 diff --git b/TestModels/Extendable/runtimes/rust/src/conversions/always_modeled_error.rs a/TestModels/Extendable/runtimes/rust/src/conversions/always_modeled_error.rs
 new file mode 100644
-index 00000000..7886b541
+index 00000000..f7e0ac0f
 --- /dev/null
 +++ a/TestModels/Extendable/runtimes/rust/src/conversions/always_modeled_error.rs
 @@ -0,0 +1,69 @@
@@ -286,7 +127,7 @@ index 00000000..7886b541
 +        message: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&e.message)
 +      }),
 +      crate::operation::always_modeled_error::AlwaysModeledErrorError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -407,7 +248,7 @@ index 00000000..4f4c2cb7
 +}
 diff --git b/TestModels/Extendable/runtimes/rust/src/conversions/create_extendable_resource.rs a/TestModels/Extendable/runtimes/rust/src/conversions/create_extendable_resource.rs
 new file mode 100644
-index 00000000..d127ec30
+index 00000000..40b42003
 --- /dev/null
 +++ a/TestModels/Extendable/runtimes/rust/src/conversions/create_extendable_resource.rs
 @@ -0,0 +1,34 @@
@@ -423,7 +264,7 @@ index 00000000..d127ec30
 +> {
 +    match value {
 +    crate::operation::create_extendable_resource::CreateExtendableResourceError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -520,10 +361,10 @@ index 00000000..9accd4b5
 +pub mod _extendable_resource;
 diff --git b/TestModels/Extendable/runtimes/rust/src/conversions/extendable_resource/_extendable_resource.rs a/TestModels/Extendable/runtimes/rust/src/conversions/extendable_resource/_extendable_resource.rs
 new file mode 100644
-index 00000000..82603ded
+index 00000000..ca1db0da
 --- /dev/null
 +++ a/TestModels/Extendable/runtimes/rust/src/conversions/extendable_resource/_extendable_resource.rs
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,161 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +use crate::types::extendable_resource::ExtendableResource;
 +
@@ -553,6 +394,10 @@ index 00000000..82603ded
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct ExtendableResourceWrapper {
 +    obj: crate::types::extendable_resource::ExtendableResourceRef,
++}
++
++impl dafny_runtime::UpcastObject<dyn std::any::Any> for ExtendableResourceWrapper {
++    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 +}
 +
 +impl ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource
@@ -683,7 +528,7 @@ index 00000000..82603ded
 +}
 diff --git b/TestModels/Extendable/runtimes/rust/src/conversions/get_extendable_resource_data.rs a/TestModels/Extendable/runtimes/rust/src/conversions/get_extendable_resource_data.rs
 new file mode 100644
-index 00000000..d4624591
+index 00000000..14212841
 --- /dev/null
 +++ a/TestModels/Extendable/runtimes/rust/src/conversions/get_extendable_resource_data.rs
 @@ -0,0 +1,34 @@
@@ -699,7 +544,7 @@ index 00000000..d4624591
 +> {
 +    match value {
 +    crate::operation::get_extendable_resource_data::GetExtendableResourceDataError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -848,7 +693,7 @@ index 00000000..c8d0fdb5
 +}
 diff --git b/TestModels/Extendable/runtimes/rust/src/conversions/use_extendable_resource.rs a/TestModels/Extendable/runtimes/rust/src/conversions/use_extendable_resource.rs
 new file mode 100644
-index 00000000..41c2fe26
+index 00000000..18d1252d
 --- /dev/null
 +++ a/TestModels/Extendable/runtimes/rust/src/conversions/use_extendable_resource.rs
 @@ -0,0 +1,34 @@
@@ -864,7 +709,7 @@ index 00000000..41c2fe26
 +> {
 +    match value {
 +    crate::operation::use_extendable_resource::UseExtendableResourceError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -978,10 +823,14 @@ index 00000000..04805d4d
 +pub mod simple_extendable_resources_exception;
 diff --git b/TestModels/Extendable/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/Extendable/runtimes/rust/src/error/sealed_unhandled.rs
 new file mode 100644
-index 00000000..2e898d5d
+index 00000000..a220e04d
 --- /dev/null
 +++ a/TestModels/Extendable/runtimes/rust/src/error/sealed_unhandled.rs
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,30 @@
++use std::any::Any;
++
++use dafny_runtime::UpcastObject;
++
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +/// This struct is not intended to be used.
 +///
@@ -1004,6 +853,11 @@ index 00000000..2e898d5d
 +    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
 +    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
 +}
++
++impl UpcastObject<dyn Any> for Unhandled {
++    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
++}
+\ No newline at end of file
 diff --git b/TestModels/Extendable/runtimes/rust/src/error/simple_extendable_resources_exception.rs a/TestModels/Extendable/runtimes/rust/src/error/simple_extendable_resources_exception.rs
 new file mode 100644
 index 00000000..1f7ff852
