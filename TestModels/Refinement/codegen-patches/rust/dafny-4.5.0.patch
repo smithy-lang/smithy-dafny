@@ -1,6 +1,6 @@
 diff --git b/TestModels/Refinement/runtimes/rust/src/client.rs a/TestModels/Refinement/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..d7e87890
+index 00000000..d13672bd
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/client.rs
 @@ -0,0 +1,40 @@
@@ -35,7 +35,7 @@ index 00000000..d7e87890
 +            ));
 +        }
 +        Ok(Self {
-+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ISimpleRefinementClient + 'static)>>::upcast_to(inner.Extract()),
++            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
 +        })
 +    }
 +}
@@ -143,7 +143,7 @@ index 00000000..54b3f0f2
 +pub mod simple_refinement_config;
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement.rs a/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement.rs
 new file mode 100644
-index 00000000..7d9afc33
+index 00000000..600b0008
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement.rs
 @@ -0,0 +1,32 @@
@@ -157,7 +157,7 @@ index 00000000..7d9afc33
 +) -> ::std::rc::Rc<::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::get_refinement::GetRefinementError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -297,7 +297,7 @@ index 00000000..a190e228
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/only_input.rs a/TestModels/Refinement/runtimes/rust/src/conversions/only_input.rs
 new file mode 100644
-index 00000000..68745fe3
+index 00000000..080dfdc9
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/only_input.rs
 @@ -0,0 +1,37 @@
@@ -312,7 +312,7 @@ index 00000000..68745fe3
 +    match value {
 +        crate::operation::only_input::OnlyInputError::Unhandled(unhandled) => ::std::rc::Rc::new(
 +            ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque {
-+                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
++                obj: ::dafny_runtime::upcast_object()(
 +                    ::dafny_runtime::object::new(unhandled),
 +                ),
 +            },
@@ -397,7 +397,7 @@ index 00000000..24a58661
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/only_output.rs a/TestModels/Refinement/runtimes/rust/src/conversions/only_output.rs
 new file mode 100644
-index 00000000..2dfa7b01
+index 00000000..e0cde99f
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/only_output.rs
 @@ -0,0 +1,37 @@
@@ -412,7 +412,7 @@ index 00000000..2dfa7b01
 +    match value {
 +        crate::operation::only_output::OnlyOutputError::Unhandled(unhandled) => ::std::rc::Rc::new(
 +            ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque {
-+                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
++                obj: ::dafny_runtime::upcast_object()(
 +                    ::dafny_runtime::object::new(unhandled),
 +                ),
 +            },
@@ -497,7 +497,7 @@ index 00000000..1217ce39
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation.rs a/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation.rs
 new file mode 100644
-index 00000000..e584f835
+index 00000000..c19efc31
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation.rs
 @@ -0,0 +1,32 @@
@@ -511,7 +511,7 @@ index 00000000..e584f835
 +) -> ::std::rc::Rc<::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::readonly_operation::ReadonlyOperationError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
@@ -705,10 +705,10 @@ index 00000000..ec89cbec
 +pub(crate) mod sealed_unhandled;
 diff --git b/TestModels/Refinement/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/Refinement/runtimes/rust/src/error/sealed_unhandled.rs
 new file mode 100644
-index 00000000..9d21fbd6
+index 00000000..cce22d1c
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/error/sealed_unhandled.rs
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,26 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +/// This struct is not intended to be used.
 +///
@@ -730,6 +730,10 @@ index 00000000..9d21fbd6
 +pub struct Unhandled {
 +    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
 +    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
++}
++
++impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
++    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/lib.rs a/TestModels/Refinement/runtimes/rust/src/lib.rs
 new file mode 100644

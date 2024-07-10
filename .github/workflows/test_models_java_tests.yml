@@ -8,46 +8,26 @@ on:
         description: "The Dafny version to run"
         required: true
         type: string
+      num_shards:
+        required: false
+        type: number
+        default: 5
 
 jobs:
+  populate-matrix-dimensions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Populate shard list
+        id: populate-shard-list
+        run: echo "shard-list=[`seq -s , 1 ${{ inputs.num_shards }}`]" >> $GITHUB_OUTPUT
+    outputs:
+      shard-list: ${{ steps.populate-shard-list.outputs.shard-list }}
   testJava:
+    needs: populate-matrix-dimensions
     strategy:
       fail-fast: false
       matrix:
-        library: [
-            TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
-            # TestModels/Aggregate,
-            # TestModels/AggregateReferences,
-            TestModels/CodegenPatches,
-            TestModels/Constraints,
-            # TestModels/Constructor,
-            # TestModels/Dependencies,
-            TestModels/Errors,
-            TestModels/Extendable,
-            # TestModels/Extern,
-            # TestModels/LanguageSpecificLogic,
-            TestModels/LocalService,
-            TestModels/MultipleModels,
-            # TestModels/Refinement,
-            TestModels/Resource,
-            # TestModels/SimpleTypes/BigDecimal,
-            # TestModels/SimpleTypes/BigInteger,
-            # TestModels/SimpleTypes/SimpleBlob,
-            # TestModels/SimpleTypes/SimpleBoolean,
-            # TestModels/SimpleTypes/SimpleByte,
-            # TestModels/SimpleTypes/SimpleDouble,
-            # TestModels/SimpleTypes/SimpleEnum,
-            # TestModels/SimpleTypes/SimpleEnumV2,
-            # TestModels/SimpleTypes/SimpleFloat,
-            # TestModels/SimpleTypes/SimpleInteger,
-            # TestModels/SimpleTypes/SimpleLong,
-            # TestModels/SimpleTypes/SimpleShort,
-            # TestModels/SimpleTypes/SimpleString,
-            # TestModels/SimpleTypes/SimpleTimestamp,
-            # TestModels/Union,
-            TestModels/aws-sdks/ddb,
-            TestModels/aws-sdks/kms,
-          ]
+        shard: ${{ fromJson(needs.populate-matrix-dimensions.outputs.shard-list) }}
     runs-on: "ubuntu-latest"
     permissions:
       id-token: write
@@ -86,41 +66,17 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: smithy-dafny-conversion
 
-      - name: Setup Java 17 for codegen
-        uses: actions/setup-java@v3
+      - name: Install smithy-dafny-codegen locally
+        uses: gradle/gradle-build-action@v2
         with:
-          distribution: "corretto"
-          java-version: "17"
+          arguments: :smithy-dafny-codegen:pTML
+          build-root-directory: codegen
 
-      - name: Setup dependencies
-        working-directory: ./${{ matrix.library }}
-        run: |
-          make setup_prettier
-
-      - name: Generate Polymorph Dafny and Java code
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
-        run: |
-          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-          make polymorph_java DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-
-      - name: Setup Java 8 for running tests
-        uses: actions/setup-java@v3
+      - name: Execute smithy-dafny-codegen-test tests
+        uses: gradle/gradle-build-action@v2
+        env:
+          JUNIT_SHARD: ${{ matrix.shard }}
+          JUNIT_SHARD_COUNT: ${{ inputs.num_shards }}
         with:
-          distribution: "corretto"
-          java-version: "8"
-
-      - name: Compile ${{ matrix.library }} implementation
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          # This works because `node` is installed by default on GHA runners
-          CORES=$(node -e 'console.log(os.cpus().length)')
-          make build_java CORES=$CORES
-
-      - name: Test ${{ matrix.library }}
-        working-directory: ./${{ matrix.library }}
-        shell: bash
-        run: |
-          make test_java
+          arguments: :smithy-dafny-codegen-test:test --tests '*smithyjava*' --info
+          build-root-directory: codegen

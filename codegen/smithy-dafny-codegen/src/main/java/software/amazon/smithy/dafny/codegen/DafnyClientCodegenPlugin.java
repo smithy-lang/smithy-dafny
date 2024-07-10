@@ -46,11 +46,20 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
       manifest.resolvePath(Paths.get("Model"))
     );
     settings.targetLanguages.forEach(lang -> {
-      final Path dir = Paths.get(
-        "runtimes",
-        lang.name().toLowerCase(),
-        "Generated"
-      );
+      final Path dir =
+        switch (lang) {
+          case DOTNET -> Paths.get("runtimes", "net", "Generated");
+          case JAVA -> Paths.get(
+            "runtimes",
+            lang.name().toLowerCase(),
+            "src",
+            "main",
+            "smithy-generated"
+          );
+          default -> throw new UnsupportedOperationException(
+            lang + " is not yet supported"
+          );
+        };
       outputDirs.put(lang, manifest.resolvePath(dir));
     });
     final Path propertiesFile = manifest.resolvePath(
