@@ -61,42 +61,42 @@ pub async fn TestClientDafnyResource() {
     let client = Client::from_conf(config.clone()).unwrap();
 
     // The explicit type cast is needed for the `is` test on the next line
-    // let resource = TestCreateExtendableResource(&client, TEST_RESOURCE_NAME).await;
-    // eprintln!("\nafter TestCreateExtendableResource");
-    // expect resource is ExtendableResource.ExtendableResource;
+    let resource = TestCreateExtendableResource(&client, TEST_RESOURCE_NAME).await;
+    eprintln!("\nafter TestCreateExtendableResource");
+    expect resource is ExtendableResource.ExtendableResource;
     // The `is` test above asserts this a "pure" Dafny resource
-    // TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
-    // eprintln!("\nafter TestNoneUseExtendableResource");
-    // TestSomeUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
-    // eprintln!("\nafter TestSomeUseExtendableResource");
-    // TestUseAlwaysModeledError(client, resource);
-    // TestUseAlwaysMultipleErrors(client, resource);
-    // TestDafnyUseAlwaysOpaqueError(client, resource);
-    // eprintln!("\n before drop resource\n");
-    // drop(resource);
-    // eprintln!("\n before drop client\n");
-    // drop(client);
-    // eprintln!("\n before drop config\n");
-    // drop(config);
-    // eprintln!("\n before exit\n");
+    TestNoneUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
+    eprintln!("\nafter TestNoneUseExtendableResource");
+    TestSomeUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
+    eprintln!("\nafter TestSomeUseExtendableResource");
+    TestUseAlwaysModeledError(client, resource);
+    TestUseAlwaysMultipleErrors(client, resource);
+    TestDafnyUseAlwaysOpaqueError(client, resource);
+    eprintln!("\n before drop resource\n");
+    drop(resource);
+    eprintln!("\n before drop client\n");
+    drop(client);
+    eprintln!("\n before drop config\n");
+    drop(config);
+    eprintln!("\n before exit\n");
 }
 
-//   // Test the Resource created through an Extern
-//   #[tokio::test]
-//   pub fn TestClientNativeResource()
-//   {
-//     let client = SimpleExtendableResources::builder().build();
-//     // The explicit type cast is needed for the `is` test on the next line
-//     var resource: Types.IExtendableResource := DafnyFactory();
-//     // expect !(resource is ExtendableResource.ExtendableResource);
-//     // The `is` test above asserts this NOT a "pure" Dafny resource
-//     assert fresh(resource.Modifies - client.Modifies - {client.History});
-//     TestNoneUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
-//     TestSomeUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
-//     // TestUseAlwaysModeledError(client, resource);
-//     // TestUseAlwaysMultipleErrors(client, resource);
-//     // TestUseAlwaysOpaqueError(client, resource);
-//   }
+  // Test the Resource created through an Extern
+  #[tokio::test]
+  pub fn TestClientNativeResource()
+  {
+    let client = SimpleExtendableResources::builder().build();
+    // The explicit type cast is needed for the `is` test on the next line
+    var resource: Types.IExtendableResource := DafnyFactory();
+    // expect !(resource is ExtendableResource.ExtendableResource);
+    // The `is` test above asserts this NOT a "pure" Dafny resource
+    assert fresh(resource.Modifies - client.Modifies - {client.History});
+    TestNoneUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
+    TestSomeUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
+    // TestUseAlwaysModeledError(client, resource);
+    // TestUseAlwaysMultipleErrors(client, resource);
+    // TestUseAlwaysOpaqueError(client, resource);
+  }
 
 pub async fn TestCreateExtendableResource(client: &Client, name: &str) -> ExtendableResourceRef {
     client
