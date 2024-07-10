@@ -74,5 +74,7 @@ _polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 _polymorph_rust: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_rust: _polymorph
+# TODO: This doesn't yet work for Rust because we are patching transpiled code,
+# so this target will complain about "patch does not apply" because it was already applied.
 # _polymorph_rust: OUTPUT_RUST_WRAPPED=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 # _polymorph_rust: _polymorph_wrapped
