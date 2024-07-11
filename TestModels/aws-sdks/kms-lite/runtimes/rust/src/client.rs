@@ -1,7 +1,11 @@
 use dafny_standard_library::implementation_from_dafny;
 
+use crate::conversions;
+
 struct Client {
   inner: aws_sdk_kms::Client,
+
+  rt: tokio::runtime::Runtime
 }
 
 impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
@@ -27,7 +31,12 @@ impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservic
     }
   
     fn GenerateDataKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-        todo!()
+        let native_result = 
+          self.rt.block_on(conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone(), self.inner).send());
+        match native_result {
+          Ok(output) => conversions::generate_data_key::_generate_data_key_response::to_dafny(output),
+          Err(error) => conversions::generate_data_key::to_dafny_error(error)
+        }
     }
   
     fn GenerateDataKeyWithoutPlaintext(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
@@ -61,7 +70,7 @@ impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservic
 
     let shared_config = rt.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
     let inner = aws_sdk_kms::Client::new(&shared_config);
-    let client = Client { inner };
+    let client = Client { inner, rt };
     let dafny_client = ::dafny_runtime::upcast_object::<Client, dyn crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient>()(::dafny_runtime::object::new(client));
     std::rc::Rc::new(crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { value: dafny_client })
   }
