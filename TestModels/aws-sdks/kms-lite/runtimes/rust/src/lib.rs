@@ -1,3 +1,3 @@
 mod conversions;
 mod client;
-mod implementation_from_dafny;
+pub mod implementation_from_dafny;

@@ -1,3 +1,5 @@
+use dafny_standard_library::implementation_from_dafny;
+
 struct Client {
   inner: aws_sdk_kms::Client,
 }
@@ -43,9 +45,41 @@ impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservic
 
 #[allow(non_snake_case)]
 impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny::_default {
-  async fn KMSClient() -> ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient> {
-    let shared_config = aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()).await;
+  pub fn KMSClient() -> ::std::rc::Rc<
+    crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+      ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient>,
+      ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+      >
+    > {
+    let rt_result = tokio::runtime::Builder::new_current_thread()
+      .enable_all()
+      .build();
+    if rt_result.is_err() {
+      return ::std::rc::Rc::new(to_opaque_error_result(rt_result.err().unwrap()));
+    }
+    let rt = rt_result.unwrap();
+
+    let shared_config = rt.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
     let inner = aws_sdk_kms::Client::new(&shared_config);
-    ::dafny_runtime::upcast_object::<Client, dyn crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient>()(::dafny_runtime::object::new(inner))
+    let client = Client { inner };
+    let dafny_client = ::dafny_runtime::upcast_object::<Client, dyn crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient>()(::dafny_runtime::object::new(client));
+    std::rc::Rc::new(crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { value: dafny_client })
   }
+}
+
+fn to_opaque_error_result(error: std::io::Error) -> crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient>,
+::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+> {
+  let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> =
+      ::dafny_runtime::Object(Some(::std::rc::Rc::new(
+          ::std::cell::UnsafeCell::new(error),
+      )));
+    implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+        error: ::std::rc::Rc::new(
+            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::Opaque {
+                obj: error_obj,
+            },
+        ),
+    }
 }
