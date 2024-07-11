@@ -6,7 +6,7 @@ pub fn to_dafny(
     ::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest,
 > {
     ::std::rc::Rc::new(::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest::GenerateDataKeyRequest  {
-        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id).Extract(),
+        KeyId: dafny_standard_library::conversion::ostring_to_dafny(value.key_id.clone()).Extract(),
         EncryptionContext: 
         ::std::rc::Rc::new(match value.encryption_context() {
             Some(x) => kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value :
@@ -27,7 +27,8 @@ pub fn to_dafny(
         }),
         GrantTokens:
         ::std::rc::Rc::new(
-            match value.grant_tokens {
+            // Have to clone or else this becomes a borrow that can interfere with other branches
+            match value.grant_tokens.clone() {
                 Some(val) =>
                 kms_lite_dafny::r#_Wrappers_Compile::Option::Some {
                         value : ::dafny_runtime::Sequence::from_array(
@@ -85,11 +86,11 @@ pub fn from_dafny(
         .set_recipient(match  &**dafny_value.Recipient() {
             kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value } =>
                 Some(
-                    crate::conversions::recipient_info::from_dafny(*value)
+                    crate::conversions::recipient_info::from_dafny(value.clone())
                 ),
             _ => None
         })
-        .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(*dafny_value.DryRun()))
+        .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
         .build()
         .unwrap()
 
