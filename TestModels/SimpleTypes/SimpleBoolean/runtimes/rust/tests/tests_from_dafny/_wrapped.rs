@@ -4,9 +4,14 @@ use crate::tests_from_dafny::*;
 use aws_smithy_types::error::operation::BuildError;
 use dafny_runtime::UpcastObject;
 use simple_boolean::*;
+use tokio::runtime::Runtime;
 
 struct WrappedClient {
     wrapped: Client,
+
+    /// A `current_thread` runtime for executing operations on the
+    /// asynchronous client in a blocking manner.
+    rt: Runtime
 }
 
 impl UpcastObject<dyn Any> for WrappedClient {
@@ -31,7 +36,7 @@ impl ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::IS
     >{
         let inner_input =
             crate::conversions::get_boolean::_get_boolean_input::from_dafny(input.clone());
-        let result = crate::operation::get_boolean::GetBoolean::send(&self.wrapped, inner_input);
+        let result = self.rt.block_on(crate::operation::get_boolean::GetBoolean::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
                 ::simple_boolean_dafny::_Wrappers_Compile::Result::Failure {

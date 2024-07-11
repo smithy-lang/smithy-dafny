@@ -24,9 +24,9 @@ mod tests_from_dafny;
         print ret;
     }
 } */
-#[test]
-fn test_get_boolean_true() {
-    let result = client().get_boolean().value(true).send();
+#[tokio::test]
+async fn test_get_boolean_true() {
+    let result = client().get_boolean().value(true).send().await;
     let output = result.unwrap();
     let value = output.value().unwrap();
     assert!(value);
@@ -42,9 +42,9 @@ fn test_get_boolean_true() {
         print ret;
     }
 } */
-#[test]
-fn test_get_boolean_false() {
-    let result = client().get_boolean().value(false).send();
+#[tokio::test]
+async fn test_get_boolean_false() {
+    let result = client().get_boolean().value(false).send().await;
     let output = result.unwrap();
     let value = output.value().unwrap();
     assert!(!value);
