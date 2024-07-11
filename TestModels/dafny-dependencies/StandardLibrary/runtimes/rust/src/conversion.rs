@@ -1,4 +1,24 @@
+use dafny_runtime::DafnyType;
+
 use crate::implementation_from_dafny::*;
+
+pub fn optional_to_dafny<R, D: DafnyType, F: FnOnce(&R) -> D>(f: F, input: &Option<R>) -> ::std::rc::Rc<_Wrappers_Compile::Option<D>>
+{
+    let dafny_value = match input {
+        Some(r) => _Wrappers_Compile::Option::Some { value: f(r) },
+        None => _Wrappers_Compile::Option::None {},
+    };
+    ::std::rc::Rc::new(dafny_value)
+}
+
+pub fn optional_from_dafny<R, D: DafnyType, F: FnOnce(&D) -> R>(f: F, input: &::std::rc::Rc<_Wrappers_Compile::Option<D>>) -> Option<R>
+{
+    if matches!(input.as_ref(), _Wrappers_Compile::Option::Some { .. }) {
+        Some(f(&input.Extract()))
+    } else {
+        None
+    }
+}
 
 pub fn ostring_to_dafny(
     input: &Option<String>,
@@ -79,11 +99,11 @@ pub fn olong_from_dafny(input: ::std::rc::Rc<_Wrappers_Compile::Option<i64>>) ->
 }
 
 pub fn oblob_to_dafny(
-    input: &Option<Vec<u8>>,
+    input: &Option<::aws_smithy_types::Blob>,
 ) -> ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
     let dafny_value = match input {
         Some(b) => _Wrappers_Compile::Option::Some {
-            value: ::dafny_runtime::Sequence::from_array(&b),
+            value: ::dafny_runtime::Sequence::from_array(&b.clone().into_inner()),
         },
         None => _Wrappers_Compile::Option::None {},
     };
@@ -92,11 +112,13 @@ pub fn oblob_to_dafny(
 
 pub fn oblob_from_dafny(
     input: ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
-) -> Option<Vec<u8>> {
+) -> Option<::aws_smithy_types::Blob> {
     if matches!(input.as_ref(), _Wrappers_Compile::Option::Some { .. }) {
         Some(
-            ::std::rc::Rc::try_unwrap(input.Extract().to_array())
-                .unwrap_or_else(|rc| (*rc).clone()),
+            ::aws_smithy_types::Blob::new(
+                ::std::rc::Rc::try_unwrap(input.Extract().to_array())
+                    .unwrap_or_else(|rc| (*rc).clone()),
+            )
         )
     } else {
         None

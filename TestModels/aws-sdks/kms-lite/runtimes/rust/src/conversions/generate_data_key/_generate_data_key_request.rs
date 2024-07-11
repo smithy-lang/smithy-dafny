@@ -6,13 +6,41 @@ pub fn to_dafny(
     ::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest,
 > {
     ::std::rc::Rc::new(::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest::GenerateDataKeyRequest  {
-        KeyId: todo!(),
-        EncryptionContext: todo!(),
-        NumberOfBytes: todo!(),
-        KeySpec: todo!(),
-        GrantTokens: todo!(),
-        Recipient: todo!(),
-        DryRun: todo!(),
+        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id).Extract(),
+        EncryptionContext: 
+        ::std::rc::Rc::new(match value.encryption_context() {
+            Some(x) => kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value :
+                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
+                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
+                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&v),
+                )
+            },
+            None => kms_lite_dafny::r#_Wrappers_Compile::Option::None {}
+        }),
+        NumberOfBytes: dafny_standard_library::conversion::oint_to_dafny(value.number_of_bytes),
+        KeySpec: 
+        ::std::rc::Rc::new(match value.key_spec() {
+            Some(x) => kms_lite_dafny::r#_Wrappers_Compile::Option::Some { 
+                value: crate::conversions::data_key_spec::to_dafny(*x)
+            },
+            _ => kms_lite_dafny::r#_Wrappers_Compile::Option::None {}
+        }),
+        GrantTokens:
+        ::std::rc::Rc::new(
+            match value.grant_tokens {
+                Some(val) =>
+                kms_lite_dafny::r#_Wrappers_Compile::Option::Some {
+                        value : ::dafny_runtime::Sequence::from_array(
+                            &val.iter().map(|x|
+                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x))
+                                .collect()
+                        )
+                    },
+                None => kms_lite_dafny::r#_Wrappers_Compile::Option::None{}
+            }
+        ),
+        Recipient: crate::conversions::recipient_info::option_to_dafny(value.recipient()),
+        DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
     })
 }
 
@@ -22,13 +50,47 @@ pub fn from_dafny(
         ::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest,
     >,
 ) -> aws_sdk_kms::operation::generate_data_key::GenerateDataKeyInput {
-    aws_sdk_kms::operation::generate_data_key::GenerateDataKeyInput { 
-        key_id: todo!(),
-        encryption_context: todo!(),
-        number_of_bytes: todo!(),
-        key_spec: todo!(),
-        grant_tokens: todo!(),
-        recipient: todo!(),
-        dry_run: todo!()
-    }
+    aws_sdk_kms::operation::generate_data_key::GenerateDataKeyInput::builder()
+        .set_key_id(Some(
+            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
+                dafny_value.KeyId(),
+            ),
+        ))
+        .set_encryption_context( match (*dafny_value.EncryptionContext()).as_ref() {
+            kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                Some(
+                    ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
+                    )
+                ),
+            _ => None
+        })
+        .set_number_of_bytes(dafny_standard_library::conversion::oint_from_dafny(dafny_value.NumberOfBytes().clone()))
+        .set_key_spec(match  &**dafny_value.KeySpec() {
+            kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                Some(
+                    crate::conversions::data_key_spec::from_dafny(value)
+                ),
+            _ => None
+        })
+        .set_grant_tokens(match  &**dafny_value.GrantTokens() {
+            kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                Some(
+                    ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, 
+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string)
+                ),
+            _ => None
+        })
+        .set_recipient(match  &**dafny_value.Recipient() {
+            kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                Some(
+                    crate::conversions::recipient_info::from_dafny(*value)
+                ),
+            _ => None
+        })
+        .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(*dafny_value.DryRun()))
+        .build()
+        .unwrap()
+
 }
