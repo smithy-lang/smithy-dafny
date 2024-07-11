@@ -322,7 +322,7 @@ index 00000000..eb38b9f1
 +pub mod get_boolean;
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean.rs
 new file mode 100644
-index 00000000..638abe84
+index 00000000..1784adba
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean.rs
 @@ -0,0 +1,145 @@
@@ -336,7 +336,7 @@ index 00000000..638abe84
 +    pub fn new() -> Self {
 +        Self
 +    }
-+    pub fn send(
++    pub async fn send(
 +        client: &crate::client::Client,
 +        input: crate::operation::get_boolean::GetBooleanInput,
 +    ) -> ::std::result::Result<
@@ -603,7 +603,7 @@ index 00000000..d2943f38
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean/builders.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean/builders.rs
 new file mode 100644
-index 00000000..b30d9072
+index 00000000..e672a270
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean/builders.rs
 @@ -0,0 +1,72 @@
@@ -614,7 +614,7 @@ index 00000000..b30d9072
 +
 +impl GetBooleanInputBuilder {
 +    /// Sends a request with this input using the given client.
-+    pub fn send_with(
++    pub async fn send_with(
 +        self,
 +        client: &crate::Client,
 +    ) -> ::std::result::Result<
@@ -623,7 +623,7 @@ index 00000000..b30d9072
 +    > {
 +        let mut fluent_builder = client.get_boolean();
 +        fluent_builder.inner = self;
-+        fluent_builder.send()
++        fluent_builder.send().await
 +    }
 +}
 +/// Fluent builder constructing a request to `GetBoolean`.
@@ -646,7 +646,7 @@ index 00000000..b30d9072
 +        &self.inner
 +    }
 +    /// Sends the request and returns the response.
-+    pub fn send(
++    pub async fn send(
 +        self,
 +    ) -> ::std::result::Result<
 +        crate::operation::get_boolean::GetBooleanOutput,
@@ -661,7 +661,7 @@ index 00000000..b30d9072
 +            // Vanilla smithy-rs uses SdkError::construction_failure,
 +            // but we aren't using SdkError.
 +            .map_err(crate::operation::get_boolean::GetBooleanError::unhandled)?;
-+        crate::operation::get_boolean::GetBoolean::send(&self.client, input)
++        crate::operation::get_boolean::GetBoolean::send(&self.client, input).await
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
