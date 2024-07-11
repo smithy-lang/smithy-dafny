@@ -59,6 +59,13 @@ impl r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default {
             ::dafny_runtime::Object<dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
             ::std::rc::Rc<::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
     >>{
+        let rt_result = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build();
+        if rt_result.is_err() {
+        return ::std::rc::Rc::new(to_opaque_error_result(rt_result.err().unwrap()));
+        }
+        let rt = rt_result.unwrap();
         let result = Client::from_conf(
             simple_boolean::conversions::simple_boolean_config::_simple_boolean_config::from_dafny(
                 config.clone(),
@@ -83,6 +90,7 @@ impl r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default {
             Ok(client) => {
                 let wrap = WrappedClient {
                     wrapped: client.clone(),
+                    rt
                 };
                 let inner: ::std::rc::Rc<::std::cell::UnsafeCell<dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>>
                     = ::std::rc::Rc::new(::std::cell::UnsafeCell::new(wrap));
@@ -94,5 +102,22 @@ impl r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default {
                 )
             }
         }
+    }
+}
+
+fn to_opaque_error_result(error: std::io::Error) -> ::simple_boolean_dafny::r#_Wrappers_Compile::Result<
+::dafny_runtime::Object<dyn ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
+::std::rc::Rc<::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
+> {
+  let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> =
+      ::dafny_runtime::Object(Some(::std::rc::Rc::new(
+          ::std::cell::UnsafeCell::new(error),
+      )));
+      simple_boolean_dafny::_Wrappers_Compile::Result::Failure {
+        error: ::std::rc::Rc::new(
+            ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error::Opaque {
+                obj: error_obj,
+            },
+        ),
     }
 }
