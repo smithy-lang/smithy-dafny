@@ -7,7 +7,12 @@ pub fn to_dafny(
 > {
   ::std::rc::Rc::new(::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo::RecipientInfo {
     AttestationDocument: dafny_standard_library::conversion::oblob_to_dafny(&value.attestation_document),
-    KeyEncryptionAlgorithm: crate::conversions::key_encryption_mechanism::to_dafny(value.key_encryption_algorithm),
+    KeyEncryptionAlgorithm: ::std::rc::Rc::new(match value.key_encryption_algorithm {
+        None => kms_lite_dafny::_Wrappers_Compile::Option::None {},
+        Some(x) => kms_lite_dafny::_Wrappers_Compile::Option::Some {
+            value: crate::conversions::key_encryption_mechanism::to_dafny(x),
+        },
+    })
   })
 }
 
@@ -16,7 +21,12 @@ pub fn to_dafny_plain(
 ) -> ::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo {
   ::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo::RecipientInfo {
     AttestationDocument: dafny_standard_library::conversion::oblob_to_dafny(&value.attestation_document),
-    KeyEncryptionAlgorithm: crate::conversions::key_encryption_mechanism::to_dafny(value.key_encryption_algorithm),
+    KeyEncryptionAlgorithm: ::std::rc::Rc::new(match &value.key_encryption_algorithm {
+        None => kms_lite_dafny::_Wrappers_Compile::Option::None {},
+        Some(x) => kms_lite_dafny::_Wrappers_Compile::Option::Some {
+            value: crate::conversions::key_encryption_mechanism::to_dafny(x.clone()),
+        },
+    })
   }
 }
 
@@ -45,11 +55,14 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_kms::types::RecipientInfo {
   aws_sdk_kms::types::RecipientInfo::builder()
-    .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.AttestationDocument()))
-    // .set_key_encryption_algorithm(Some(
-    //   dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
-    //       dafny_value.KeyId(),
-    //   ),
+    .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.AttestationDocument().clone()))
+    .set_key_encryption_algorithm(match &**dafny_value.KeyEncryptionAlgorithm() {
+        kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+            Some(
+                crate::conversions::key_encryption_mechanism::from_dafny(value)
+            ),
+        _ => None
+    })
     .build()
 }
 
@@ -59,17 +72,16 @@ pub fn from_dafny(
 pub fn plain_from_dafny(
     dafny_value: &::kms_lite_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
 ) -> aws_sdk_kms::types::RecipientInfo {
-  aws_sdk_kms::types::RecipientInfo::builder()
-  .set_attestation_document(Some(
-      dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
-          dafny_value.KeyId(),
-      ),
-  ))
-  .set_key_encryption_algorithm(Some(
-    dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
-        dafny_value.KeyId(),
-    ),
-))
+    aws_sdk_kms::types::RecipientInfo::builder()
+    .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.AttestationDocument().clone()))
+    .set_key_encryption_algorithm(match &**dafny_value.KeyEncryptionAlgorithm() {
+        kms_lite_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+            Some(
+                crate::conversions::key_encryption_mechanism::from_dafny(value)
+            ),
+        _ => None
+    })
+    .build()
 }
 
 #[allow(dead_code)]

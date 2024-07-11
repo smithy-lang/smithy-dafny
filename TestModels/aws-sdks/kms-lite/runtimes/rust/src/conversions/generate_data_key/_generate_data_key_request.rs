@@ -21,7 +21,7 @@ pub fn to_dafny(
         KeySpec: 
         ::std::rc::Rc::new(match value.key_spec() {
             Some(x) => kms_lite_dafny::r#_Wrappers_Compile::Option::Some { 
-                value: crate::conversions::data_key_spec::to_dafny(*x)
+                value: crate::conversions::data_key_spec::to_dafny(x.clone())
             },
             _ => kms_lite_dafny::r#_Wrappers_Compile::Option::None {}
         }),
