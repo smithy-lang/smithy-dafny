@@ -5,7 +5,7 @@ pub use crate::operation::get_boolean::_get_boolean_input::GetBooleanInputBuilde
 
 impl GetBooleanInputBuilder {
     /// Sends a request with this input using the given client.
-    pub fn send_with(
+    pub async fn send_with(
         self,
         client: &crate::Client,
     ) -> ::std::result::Result<
@@ -14,7 +14,7 @@ impl GetBooleanInputBuilder {
     > {
         let mut fluent_builder = client.get_boolean();
         fluent_builder.inner = self;
-        fluent_builder.send()
+        fluent_builder.send().await
     }
 }
 /// Fluent builder constructing a request to `GetBoolean`.
@@ -37,7 +37,7 @@ impl GetBooleanFluentBuilder {
         &self.inner
     }
     /// Sends the request and returns the response.
-    pub fn send(
+    pub async fn send(
         self,
     ) -> ::std::result::Result<
         crate::operation::get_boolean::GetBooleanOutput,
@@ -52,7 +52,7 @@ impl GetBooleanFluentBuilder {
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
             .map_err(crate::operation::get_boolean::GetBooleanError::unhandled)?;
-        crate::operation::get_boolean::GetBoolean::send(&self.client, input)
+        crate::operation::get_boolean::GetBoolean::send(&self.client, input).await
     }
 
     #[allow(missing_docs)] // documentation missing in model

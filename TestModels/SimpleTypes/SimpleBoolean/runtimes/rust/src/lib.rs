@@ -11,7 +11,10 @@ pub mod error;
 /// All operations that this crate can perform.
 pub mod operation;
 
-pub mod conversions;
+mod conversions;
+
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
 
 pub use client::Client;
 pub use types::simple_boolean_config::SimpleBooleanConfig;
