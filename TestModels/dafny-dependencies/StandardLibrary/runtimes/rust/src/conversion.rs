@@ -102,3 +102,34 @@ pub fn oblob_from_dafny(
         None
     }
 }
+
+pub fn result_from_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
+    input: ::std::rc::Rc<_Wrappers_Compile::Result<T, E>>,
+    converter_t: fn(&T) -> TR,
+    converter_e: fn(&E) -> ER,
+) -> Result<TR, ER> {
+    match &*input {
+        _Wrappers_Compile::Result::Success { value } => Ok(converter_t(value)),
+        _Wrappers_Compile::Result::Failure { error } => Err(converter_e(error)),
+        _Wrappers_Compile::Result::_PhantomVariant(_, _) => panic!(),
+    }
+}
+
+pub fn result_to_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
+    input: Result<TR, ER>,
+    converter_t: fn(&TR) -> T,
+    converter_e: fn(&ER) -> E,
+) -> ::std::rc::Rc<_Wrappers_Compile::Result<T, E>> {
+    match input {
+        Ok(value) => ::std::rc::Rc::new(
+            _Wrappers_Compile::Result::Success {
+                value: converter_t(&value)
+            }
+        ),
+        Err(error) => ::std::rc::Rc::new(
+            _Wrappers_Compile::Result::Failure {
+                error: converter_e(&error)
+            }
+        ),
+    }
+}
