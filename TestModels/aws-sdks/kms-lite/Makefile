@@ -8,7 +8,7 @@ include ../../SharedMakefile.mk
 NAMESPACE=com.amazonaws.kms
 
 PROJECT_SERVICES := \
-	ComAmazonawsKms\
+	ComAmazonawsKms
 
 SERVICE_NAMESPACE_ComAmazonawsKms=com.amazonaws.kms
 
@@ -32,7 +32,6 @@ _polymorph_java:
 	$(GRADLEW) polymorphJava
 
 # There is no wrapped target for aws-sdk types
-_polymorph: ;
 _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
