@@ -32,10 +32,22 @@ impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservic
   
     fn GenerateDataKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
         let native_result = 
-          self.rt.block_on(conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone(), self.inner).send());
+          self.rt.block_on(conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone(), self.inner.clone()).send());
         match native_result {
-          Ok(output) => conversions::generate_data_key::_generate_data_key_response::to_dafny(output),
-          Err(error) => conversions::generate_data_key::to_dafny_error(error)
+          Ok(output) => {
+            std::rc::Rc::new(
+              crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { 
+                value: conversions::generate_data_key::_generate_data_key_response::to_dafny(output)
+              }
+            )
+          },
+          Err(error) => {
+            std::rc::Rc::new(
+              crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Failure { 
+                error: conversions::generate_data_key::to_dafny_error(error) 
+              }
+            )
+          }
         }
     }
   

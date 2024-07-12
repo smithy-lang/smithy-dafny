@@ -7,3 +7,5 @@ pub mod data_key_spec;
 pub mod recipient_info;
 
 pub mod key_encryption_mechanism;
+
+pub mod error;

@@ -21,7 +21,7 @@ pub fn optional_from_dafny<R, D: DafnyType, F: FnOnce(&D) -> R>(f: F, input: &::
 }
 
 pub fn ostring_to_dafny(
-    input: Option<String>,
+    input: &Option<String>,
 ) -> ::std::rc::Rc<
     _Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>,
 > {

@@ -6,7 +6,7 @@ pub fn to_dafny(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest,
 > {
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest::GenerateDataKeyRequest  {
-        KeyId: dafny_standard_library::conversion::ostring_to_dafny(value.key_id.clone()).Extract(),
+        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id).Extract(),
         EncryptionContext: 
         ::std::rc::Rc::new(match value.encryption_context() {
             Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
