@@ -242,6 +242,7 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
+		$(DAFNY_OPTIONS) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES) \
 
@@ -250,6 +251,10 @@ transpile_test:
 transpile_dependencies:
 	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG), )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(PROJECT_DEPENDENCIES))
+
+transpile_dependencies_test:
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_test_$(LANG), )
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_test_$(LANG);, $(PROJECT_DEPENDENCIES))
 
 ########################## Code-Gen targets
 
@@ -296,6 +301,7 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
+	$(OUTPUT_RUST_WRAPPED) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -510,10 +516,11 @@ test_java:
 
 ########################## Rust targets
 
-# TODO: Dafny test transpilation needs manual patching to work too,
-# which isn't a high priority at this stage,
-# so don't include transpile_test_rust for now.
-transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
+# Note that transpile_dependencies_test_rust is necessary
+# only because we are patching test code in the StandardLibrary,
+# so we don't transpile that code then the recursive call to polymorph_rust
+# on the StandardLibrary will fail because the patch does not apply.
+transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust transpile_dependencies_test_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
@@ -535,6 +542,9 @@ transpile_test_rust: _transpile_test_all _mv_test_rust
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
+transpile_dependencies_test_rust: LANG=rust
+transpile_dependencies_test_rust: transpile_dependencies_test
+
 _mv_implementation_rust:
 	rm -rf runtimes/rust/dafny_impl/src
 	mkdir -p runtimes/rust/dafny_impl/src
@@ -544,10 +554,10 @@ _mv_implementation_rust:
 	rustfmt runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
-	rm -rf runtimes/rust/dafny_impl/tests
-	mkdir -p runtimes/rust/dafny_impl/tests
-	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
-	rustfmt runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
+	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
+	mkdir -p runtimes/rust/tests/tests_from_dafny
+	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny/mod.rs
+	rustfmt runtimes/rust/tests/tests_from_dafny/mod.rs
 	rm -rf tests_from_dafny-rust
 
 build_rust:
