@@ -20,6 +20,7 @@ import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -97,24 +98,6 @@ public class AwsSdkNativeV2 extends Native {
 
   /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
   private static void checkForAwsServiceConstants(String namespace) {
-    boolean knowBaseException =
-      AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
-    if (!knowBaseException) {
-      throw new IllegalArgumentException(
-        "Polymorph does not know this service's Base Exception: %s".formatted(
-            namespace
-          )
-      );
-    }
-    boolean knowClientInterface =
-      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.containsKey(namespace);
-    if (!knowClientInterface) {
-      throw new IllegalArgumentException(
-        "Polymorph does not know this service's Client Interface: %s".formatted(
-            namespace
-          )
-      );
-    }
   }
 
   /**
@@ -136,7 +119,8 @@ public class AwsSdkNativeV2 extends Native {
     checkForAwsServiceConstants(awsServiceSmithyNamespace);
     return ClassName.get(
       packageNameForAwsSdkV2Shape(shape),
-      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.get(awsServiceSmithyNamespace)
+      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(awsServiceSmithyNamespace,
+              shape.expectTrait(ServiceTrait.class).getSdkId() + "Client")
     );
   }
 
@@ -384,8 +368,9 @@ public class AwsSdkNativeV2 extends Native {
     checkInServiceNamespace(shape.getId());
     return ClassName.get(
       packageName,
-      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.get(
-        serviceShape.getId().getNamespace()
+      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
+        serviceShape.getId().getNamespace(),
+              shape.expectTrait(ServiceTrait.class).getSdkId() + "Client"
       )
     );
   }
@@ -399,8 +384,9 @@ public class AwsSdkNativeV2 extends Native {
   public ClassName baseErrorForService() {
     return ClassName.get(
       modelPackage,
-      AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.get(
-        serviceShape.getId().getNamespace()
+      AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.getOrDefault(
+        serviceShape.getId().getNamespace(),
+        serviceShape.expectTrait(ServiceTrait.class).getSdkId() + "Exception"
       )
     );
   }

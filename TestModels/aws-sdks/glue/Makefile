@@ -21,6 +21,8 @@ AWS_SDK_CMD=--aws-sdk
 # This project has no dependencies
 # DEPENDENT-MODELS:=
 
+POLYMORPH_OPTIONS=--generate project-files --generate client-constructors
+
 # There is no wrapped target for aws-sdk types
 _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
