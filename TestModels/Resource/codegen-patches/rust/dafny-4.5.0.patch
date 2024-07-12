@@ -673,7 +673,7 @@ index 00000000..ba2a8a6e
 +pub mod builders;
 diff --git b/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/_get_resource_data_input.rs a/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/_get_resource_data_input.rs
 new file mode 100644
-index 00000000..1fb85690
+index 00000000..58c53177
 --- /dev/null
 +++ a/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/_get_resource_data_input.rs
 @@ -0,0 +1,157 @@
@@ -682,7 +682,7 @@ index 00000000..1fb85690
 +#[non_exhaustive]
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetResourceDataInput {
-+    pub(crate) blob_value: Option<Vec<u8>>,
++    pub(crate) blob_value: Option<aws_smithy_types::Blob>,
 +    pub(crate) boolean_value: Option<bool>,
 +    pub(crate) string_value: Option<String>,
 +    pub(crate) integer_value: Option<i32>,
@@ -691,7 +691,7 @@ index 00000000..1fb85690
 +
 +impl GetResourceDataInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn blob_value(&self) -> &Option<Vec<u8>> {
++    pub fn blob_value(&self) -> &Option<aws_smithy_types::Blob> {
 +        &self.blob_value
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
@@ -725,7 +725,7 @@ index 00000000..1fb85690
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetResourceDataInputBuilder {
-+    blob_value: Option<Vec<u8>>,
++    blob_value: Option<aws_smithy_types::Blob>,
 +    boolean_value: Option<bool>,
 +    string_value: Option<String>,
 +    integer_value: Option<i32>,
@@ -734,19 +734,19 @@ index 00000000..1fb85690
 +
 +impl GetResourceDataInputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn blob_value(mut self, input: Vec<u8>) -> Self {
++    pub fn blob_value(mut self, input: aws_smithy_types::Blob) -> Self {
 +        self.blob_value = Some(input);
 +        self
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn set_blob_value(mut self, input: Option<Vec<u8>>) -> Self {
++    pub fn set_blob_value(mut self, input: Option<aws_smithy_types::Blob>) -> Self {
 +        self.blob_value = input;
 +        self
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_blob_value(&self) -> &Option<Vec<u8>> {
++    pub fn get_blob_value(&self) -> &Option<aws_smithy_types::Blob> {
 +        &self.blob_value
 +    }
 +
@@ -836,7 +836,7 @@ index 00000000..1fb85690
 +}
 diff --git b/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/_get_resource_data_output.rs a/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/_get_resource_data_output.rs
 new file mode 100644
-index 00000000..d9f1b9f4
+index 00000000..1814e59f
 --- /dev/null
 +++ a/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/_get_resource_data_output.rs
 @@ -0,0 +1,158 @@
@@ -845,7 +845,7 @@ index 00000000..d9f1b9f4
 +#[non_exhaustive]
 +#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 +pub struct GetResourceDataOutput {
-+    pub(crate) blob_value: Option<Vec<u8>>,
++    pub(crate) blob_value: Option<aws_smithy_types::Blob>,
 +    pub(crate) boolean_value: Option<bool>,
 +    pub(crate) string_value: Option<String>,
 +    pub(crate) integer_value: Option<i32>,
@@ -854,7 +854,7 @@ index 00000000..d9f1b9f4
 +
 +impl GetResourceDataOutput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn blob_value(&self) -> &Option<Vec<u8>> {
++    pub fn blob_value(&self) -> &Option<aws_smithy_types::Blob> {
 +        &self.blob_value
 +    }
 +    #[allow(missing_docs)] // documentation missing in model
@@ -889,7 +889,7 @@ index 00000000..d9f1b9f4
 +    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 +)]
 +pub struct GetResourceDataOutputBuilder {
-+    blob_value: Option<Vec<u8>>,
++    blob_value: Option<aws_smithy_types::Blob>,
 +    boolean_value: Option<bool>,
 +    string_value: Option<String>,
 +    integer_value: Option<i32>,
@@ -898,19 +898,19 @@ index 00000000..d9f1b9f4
 +
 +impl GetResourceDataOutputBuilder {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn blob_value(mut self, input: Vec<u8>) -> Self {
++    pub fn blob_value(mut self, input: aws_smithy_types::Blob) -> Self {
 +        self.blob_value = Some(input);
 +        self
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn set_blob_value(mut self, input: Option<Vec<u8>>) -> Self {
++    pub fn set_blob_value(mut self, input: Option<aws_smithy_types::Blob>) -> Self {
 +        self.blob_value = input;
 +        self
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_blob_value(&self) -> &Option<Vec<u8>> {
++    pub fn get_blob_value(&self) -> &Option<aws_smithy_types::Blob> {
 +        &self.blob_value
 +    }
 +
@@ -1000,7 +1000,7 @@ index 00000000..d9f1b9f4
 +}
 diff --git b/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/builders.rs a/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/builders.rs
 new file mode 100644
-index 00000000..94c5d853
+index 00000000..9c1c4890
 --- /dev/null
 +++ a/TestModels/Resource/runtimes/rust/src/operation/get_resource_data/builders.rs
 @@ -0,0 +1,148 @@
@@ -1068,19 +1068,19 @@ index 00000000..94c5d853
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn blob_value(mut self, input: impl ::std::convert::Into<Vec<u8>>) -> Self {
++    pub fn blob_value(mut self, input: impl ::std::convert::Into<aws_smithy_types::Blob>) -> Self {
 +        self.inner = self.inner.blob_value(input.into());
 +        self
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn set_blob_value(mut self, input: Option<Vec<u8>>) -> Self {
++    pub fn set_blob_value(mut self, input: Option<aws_smithy_types::Blob>) -> Self {
 +        self.inner = self.inner.set_blob_value(input);
 +        self
 +    }
 +
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn get_blob_value(&self) -> &Option<Vec<u8>> {
++    pub fn get_blob_value(&self) -> &Option<aws_smithy_types::Blob> {
 +        self.inner.get_blob_value()
 +    }
 +
