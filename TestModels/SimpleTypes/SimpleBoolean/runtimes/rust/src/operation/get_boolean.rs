@@ -8,7 +8,7 @@ impl GetBoolean {
     pub fn new() -> Self {
         Self
     }
-    pub async fn send(
+    pub(crate) async fn send(
         client: &crate::client::Client,
         input: crate::operation::get_boolean::GetBooleanInput,
     ) -> ::std::result::Result<
