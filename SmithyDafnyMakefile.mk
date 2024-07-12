@@ -550,8 +550,8 @@ _mv_implementation_rust:
 	mkdir -p runtimes/rust/dafny_impl/src
 # TODO: Currently need to insert an import of the the StandardLibrary.
 	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
-	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-	rustfmt runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs
+	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
 	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs

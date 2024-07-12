@@ -516,3 +516,14 @@ index 00000000..0fcf467d
 +mod client;
 +pub mod implementation_from_dafny;
 \ No newline at end of file
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/tests/tests_from_dafny/mod.rs
+index 1df89d6b..c0baca4a 100644
+--- b/TestModels/aws-sdks/kms-lite/runtimes/rust/tests/tests_from_dafny/mod.rs
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/tests/tests_from_dafny/mod.rs
+@@ -1,5 +1,6 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
++use ::kms_lite::implementation_from_dafny::*;
+ 
+ pub mod r#_TestComAmazonawsKms_Compile {
+     pub struct _default {}
