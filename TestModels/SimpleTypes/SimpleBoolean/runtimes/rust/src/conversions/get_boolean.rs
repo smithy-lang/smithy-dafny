@@ -15,7 +15,7 @@ pub fn to_dafny_error(
 #[allow(dead_code)]
 pub fn from_dafny_error(
     dafny_value: ::std::rc::Rc<
-      ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
+        ::simple_boolean_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
     >,
 ) -> crate::operation::get_boolean::GetBooleanError {
     // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
