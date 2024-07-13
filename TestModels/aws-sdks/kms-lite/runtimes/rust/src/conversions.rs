@@ -2,10 +2,14 @@
 
 pub mod generate_data_key;
 
+pub mod decrypt;
+
 pub mod data_key_spec;
 
 pub mod recipient_info;
 
 pub mod key_encryption_mechanism;
+
+pub mod encryption_algorithm_spec;
 
 pub mod error;

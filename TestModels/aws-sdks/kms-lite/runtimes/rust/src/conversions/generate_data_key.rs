@@ -8,7 +8,7 @@ use crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservice
 
 #[allow(dead_code)]
 pub fn to_dafny_error(
-    value: ::aws_smithy_runtime_api::client::result::SdkError<
+    value: &::aws_smithy_runtime_api::client::result::SdkError<
       aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError,
       ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
   >,
@@ -26,13 +26,13 @@ pub fn to_dafny_error(
         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KmsInternalException(e) => todo!(),
         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KmsInvalidStateException(e) => todo!(),
         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::NotFoundException(e) => todo!(),
-        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::Unhandled(e) => todo!(),
-        _ => todo!(),
+        e => panic!(),
       }
     },
     _ => {
-      let as_dafny_error = DafnyError { inner: value };
-      ::std::rc::Rc::new(Error::Opaque { obj: dafny_runtime::upcast_object()(dafny_runtime::object::new(as_dafny_error)) })
+      // TODO: SdkError isn't clonable, we need to implement a clone function for it ourselves
+      // crate::conversions::error::to_opaque_error(value)
+      panic!()
     }
   }
   
