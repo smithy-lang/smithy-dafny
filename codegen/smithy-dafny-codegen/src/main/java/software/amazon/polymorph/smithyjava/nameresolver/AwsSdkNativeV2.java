@@ -17,11 +17,13 @@ import java.util.Optional;
 import java.util.Set;
 import software.amazon.awssdk.codegen.model.service.ServiceModel;
 import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
+import software.amazon.awssdk.utils.internal.CodegenNamingUtils;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -42,6 +44,7 @@ import software.amazon.smithy.utils.StringUtils;
 public class AwsSdkNativeV2 extends Native {
 
   private final DefaultNamingStrategy awsSDKNaming;
+  private final OperationIndex operationIndex;
 
   public AwsSdkNativeV2(final ServiceShape serviceShape, final Model model) {
     super(
@@ -53,6 +56,7 @@ public class AwsSdkNativeV2 extends Native {
     );
     checkForAwsServiceConstants();
     awsSDKNaming = new DefaultNamingStrategy(new ServiceModel(), null);
+    operationIndex = new OperationIndex(model);
   }
 
   // The values of these maps are NOT in smithy models and thus must be hard-coded
@@ -257,15 +261,29 @@ public class AwsSdkNativeV2 extends Native {
       return CodeBlock.of("$L", shape.getMemberName().toLowerCase());
     }
 
-    return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
+    return CodeBlock.of("$L", CodegenNamingUtils.lowercaseFirstChar(CodegenNamingUtils.pascalCase(shape.getMemberName())));
   }
 
-  public static ClassName classNameForAwsSdkShape(final Shape shape) {
+  public ClassName classNameForAwsSdkShape(final Shape shape) {
     // Assume that the shape is in the model package
     ClassName smithyName = ClassName.get(
       defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
       StringUtils.capitalize(shape.getId().getName())
     );
+
+    if (operationIndex.isInputStructure(shape)) {
+      return ClassName.get(
+          defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
+          CodegenNamingUtils.pascalCase(shape.getId().getName())
+      );
+    }
+
+    if (operationIndex.isOutputStructure(shape)) {
+      return ClassName.get(
+              defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
+              CodegenNamingUtils.pascalCase(shape.getId().getName())
+      );
+    }
 
     if (smithyName.simpleName().endsWith("Input")) {
       return ClassName.get(
@@ -336,7 +354,7 @@ public class AwsSdkNativeV2 extends Native {
     }
     // check if this Shape is in AWS SDK for Java V2 package
     if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
-      AwsSdkNativeV2.classNameForAwsSdkShape(shape);
+      return classNameForAwsSdkShape(shape);
     }
     return super.classNameForStructure(shape);
   }
