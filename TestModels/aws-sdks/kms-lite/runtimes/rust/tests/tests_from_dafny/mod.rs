@@ -12,6 +12,29 @@ pub mod r#_TestComAmazonawsKms_Compile {
         pub fn workAround(literal: &::dafny_runtime::Sequence<u8>) -> super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CiphertextType{
             literal.clone()
         }
+        pub fn BasicDecryptTests() -> () {
+            let mut CiphertextBlob: ::dafny_runtime::Sequence<u8> = ::dafny_runtime::seq![
+                1, 1, 1, 0, 120, 64, 243, 140, 39, 94, 49, 9, 116, 22, 193, 7, 41, 81, 80, 87, 25,
+                100, 173, 163, 239, 28, 33, 233, 76, 139, 160, 189, 188, 157, 15, 180, 20, 0, 0, 0,
+                98, 48, 96, 6, 9, 42, 134, 72, 134, 247, 13, 1, 7, 6, 160, 83, 48, 81, 2, 1, 0, 48,
+                76, 6, 9, 42, 134, 72, 134, 247, 13, 1, 7, 1, 48, 30, 6, 9, 96, 134, 72, 1, 101, 3,
+                4, 1, 46, 48, 17, 4, 12, 196, 249, 60, 7, 21, 231, 87, 70, 216, 12, 31, 13, 2, 1,
+                16, 128, 31, 222, 119, 162, 112, 88, 153, 39, 197, 21, 182, 116, 176, 120, 174,
+                107, 82, 182, 223, 160, 201, 15, 29, 3, 254, 3, 208, 72, 171, 64, 207, 175
+            ];
+            super::r#_TestComAmazonawsKms_Compile::_default::BasicDecryptTest(&::std::rc::Rc::new(super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest::DecryptRequest {
+            CiphertextBlob: super::r#_TestComAmazonawsKms_Compile::_default::workAround(&CiphertextBlob),
+            EncryptionContext: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>::None {}),
+            GrantTokens: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GrantTokenList>::None {}),
+            KeyId: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Some {
+                  value: super::r#_TestComAmazonawsKms_Compile::_default::keyId()
+                }),
+            EncryptionAlgorithm: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<::std::rc::Rc<super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec>>::None {}),
+            Recipient: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<::std::rc::Rc<super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo>>::None {}),
+            DryRun: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::None {})
+          }), &::dafny_runtime::seq![165, 191, 67, 62], &super::r#_TestComAmazonawsKms_Compile::_default::keyId());
+            return ();
+        }
         pub fn BasicGenerateTests() -> () {
             super::r#_TestComAmazonawsKms_Compile::_default::BasicGenerateTest(&::std::rc::Rc::new(super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest::GenerateDataKeyRequest {
             KeyId: super::r#_TestComAmazonawsKms_Compile::_default::keyId(),
@@ -22,6 +45,17 @@ pub mod r#_TestComAmazonawsKms_Compile {
             KeySpec: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<::std::rc::Rc<super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec>>::None {}),
             GrantTokens: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GrantTokenList>::None {}),
             Recipient: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<::std::rc::Rc<super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo>>::None {}),
+            DryRun: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::None {})
+          }));
+            return ();
+        }
+        pub fn BasicEncryptTests() -> () {
+            super::r#_TestComAmazonawsKms_Compile::_default::BasicEncryptTest(&::std::rc::Rc::new(super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest::EncryptRequest {
+            KeyId: super::r#_TestComAmazonawsKms_Compile::_default::keyId(),
+            Plaintext: ::dafny_runtime::seq![97, 115, 100, 102],
+            EncryptionContext: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>::None {}),
+            GrantTokens: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GrantTokenList>::None {}),
+            EncryptionAlgorithm: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<::std::rc::Rc<super::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec>>::None {}),
             DryRun: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::None {})
           }));
             return ();
@@ -236,10 +270,38 @@ pub mod _module {
             print!(
                 "{}",
                 ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                    r#"TestComAmazonawsKms.BasicDecryptTests: "#
+                ))
+            );
+            super::r#_TestComAmazonawsKms_Compile::_default::BasicDecryptTests();
+            print!(
+                "{}",
+                ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                    r#"PASSED
+"#
+                ))
+            );
+            print!(
+                "{}",
+                ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
                     r#"TestComAmazonawsKms.BasicGenerateTests: "#
                 ))
             );
             super::r#_TestComAmazonawsKms_Compile::_default::BasicGenerateTests();
+            print!(
+                "{}",
+                ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                    r#"PASSED
+"#
+                ))
+            );
+            print!(
+                "{}",
+                ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                    r#"TestComAmazonawsKms.BasicEncryptTests: "#
+                ))
+            );
+            super::r#_TestComAmazonawsKms_Compile::_default::BasicEncryptTests();
             print!(
                 "{}",
                 ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(

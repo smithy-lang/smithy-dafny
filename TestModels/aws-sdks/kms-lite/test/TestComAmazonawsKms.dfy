@@ -26,34 +26,34 @@ module TestComAmazonawsKms {
   {literal}
 
   // These are the operations needed for the Encryption SDK
-  // method {:test} BasicDecryptTests() {
-  //   var CiphertextBlob : seq<uint8> := [
-  //       1,   1,   1,   0, 120,  64, 243, 140,  39,  94,  49,   9,
-  //     116,  22, 193,   7,  41,  81,  80,  87,  25, 100, 173, 163,
-  //     239,  28,  33, 233,  76, 139, 160, 189, 188, 157,  15, 180,
-  //     20,   0,   0,   0,  98,  48,  96,   6,   9,  42, 134,  72,
-  //     134, 247,  13,   1,   7,   6, 160,  83,  48,  81,   2,   1,
-  //       0,  48,  76,   6,   9,  42, 134,  72, 134, 247,  13,   1,
-  //       7,   1,  48,  30,   6,   9,  96, 134,  72,   1, 101,   3,
-  //       4,   1,  46,  48,  17,   4,  12, 196, 249,  60,   7,  21,
-  //     231,  87,  70, 216,  12,  31,  13,   2,   1,  16, 128,  31,
-  //     222, 119, 162, 112,  88, 153,  39, 197,  21, 182, 116, 176,
-  //     120, 174, 107,  82, 182, 223, 160, 201,  15,  29,   3, 254,
-  //       3, 208,  72, 171,  64, 207, 175
-  //   ];
+  method {:test} BasicDecryptTests() {
+    var CiphertextBlob : seq<uint8> := [
+        1,   1,   1,   0, 120,  64, 243, 140,  39,  94,  49,   9,
+      116,  22, 193,   7,  41,  81,  80,  87,  25, 100, 173, 163,
+      239,  28,  33, 233,  76, 139, 160, 189, 188, 157,  15, 180,
+      20,   0,   0,   0,  98,  48,  96,   6,   9,  42, 134,  72,
+      134, 247,  13,   1,   7,   6, 160,  83,  48,  81,   2,   1,
+        0,  48,  76,   6,   9,  42, 134,  72, 134, 247,  13,   1,
+        7,   1,  48,  30,   6,   9,  96, 134,  72,   1, 101,   3,
+        4,   1,  46,  48,  17,   4,  12, 196, 249,  60,   7,  21,
+      231,  87,  70, 216,  12,  31,  13,   2,   1,  16, 128,  31,
+      222, 119, 162, 112,  88, 153,  39, 197,  21, 182, 116, 176,
+      120, 174, 107,  82, 182, 223, 160, 201,  15,  29,   3, 254,
+        3, 208,  72, 171,  64, 207, 175
+    ];
 
-  //   BasicDecryptTest(
-  //     input := Kms.Types.DecryptRequest(
-  //       CiphertextBlob := workAround(CiphertextBlob),
-  //       EncryptionContext := Wrappers.None,
-  //       GrantTokens := Wrappers.None,
-  //       KeyId := Wrappers.Some(keyId),
-  //       EncryptionAlgorithm := Wrappers.None
-  //     ),
-  //     expectedPlaintext := [ 165, 191, 67, 62 ],
-  //     expectedKeyId := keyId
-  //   );
-  // }
+    BasicDecryptTest(
+      input := Kms.Types.DecryptRequest(
+        CiphertextBlob := workAround(CiphertextBlob),
+        EncryptionContext := Wrappers.None,
+        GrantTokens := Wrappers.None,
+        KeyId := Wrappers.Some(keyId),
+        EncryptionAlgorithm := Wrappers.None
+      ),
+      expectedPlaintext := [ 165, 191, 67, 62 ],
+      expectedKeyId := keyId
+    );
+  }
 
   method {:test} BasicGenerateTests() {
     BasicGenerateTest(
@@ -67,18 +67,18 @@ module TestComAmazonawsKms {
     );
   }
 
-  // method {:test} BasicEncryptTests() {
-  //   BasicEncryptTest(
-  //     input := Kms.Types.EncryptRequest(
-  //     KeyId := keyId,
-  //     // The string "asdf" as bytes
-  //     Plaintext := [ 97, 115, 100, 102 ],
-  //     EncryptionContext := Wrappers.None,
-  //     GrantTokens := Wrappers.None,
-  //     EncryptionAlgorithm := Wrappers.None
-  //     )
-  //   );
-  // }
+  method {:test} BasicEncryptTests() {
+    BasicEncryptTest(
+      input := Kms.Types.EncryptRequest(
+      KeyId := keyId,
+      // The string "asdf" as bytes
+      Plaintext := [ 97, 115, 100, 102 ],
+      EncryptionContext := Wrappers.None,
+      GrantTokens := Wrappers.None,
+      EncryptionAlgorithm := Wrappers.None
+      )
+    );
+  }
 
   method BasicDecryptTest(
     nameonly input: Kms.Types.DecryptRequest,
