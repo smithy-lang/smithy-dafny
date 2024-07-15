@@ -21,17 +21,15 @@ impl GetStringUTF8InputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetStringUTF8FluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::Client,
     inner: crate::operation::get_string_utf8::builders::GetStringUTF8InputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
 impl GetStringUTF8FluentBuilder {
     /// Creates a new `GetStringUTF8`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetStringUTF8 as a reference.
@@ -56,24 +54,9 @@ impl GetStringUTF8FluentBuilder {
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
             .map_err(crate::operation::get_string_utf8::GetStringUTF8Error::unhandled)?;
-        crate::operation::get_string_utf8::GetStringUTF8::send(&self.handle, input).await
+        crate::operation::get_string_utf8::GetStringUTF8::send(&self.client, input).await
     }
 
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.inner = self.inner.value(input.into());

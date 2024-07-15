@@ -10,8 +10,13 @@ in the same way that other `smithy-<language>` tools support.
 
 NOTE: The `sqs.json` in this project was copied unmodified from https://github.com/aws/aws-sdk-js-v3/blob/main/codegen/sdk-codegen/aws-models/sqs.json on March 6, 2023.
 Part of the requirements of this workflow is that you shouldn't have to manually modify models.
+
 You should be able to use the standard [projections](https://smithy.io/2.0/guides/building-models/build-config.html#projections) feature of the Smithy Gradle plugin
 to trim-down or modify a model as needed before code generation instead.
+
+The use of projections is demo'd by this test model; currently the projection `list-queues-and-add-permission-only` is being used.
+This projection reduces the SQS model to a minimum set of shapes required in order for the ListQueues sanity test to pass.
+The `AddPermission` operation is included due to a bug where models without errors do not generate valid .NET code (see [Github Issue 439](https://github.com/smithy-lang/smithy-dafny/issues/439) for more details).
 
 ## Build
 
@@ -24,6 +29,8 @@ gradle build
 ```
 
 The generated client package will appear in `build/smithyprojections/sqs/source/dafny-client-codegen`.
+
+You can also use the traditional `make polymorph_dafny` and `make polymorph_dotnet` commands instead.
 
 ## Development
 

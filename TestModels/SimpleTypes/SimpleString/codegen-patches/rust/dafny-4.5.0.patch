@@ -1,779 +1,33 @@
-diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index 5200278d..469a527f 100644
---- b/TestModels/SimpleTypes/SimpleString/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-+++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -1,103 +1,637 @@
- #![allow(warnings, unconditional_panic)]
- #![allow(nonstandard_style)]
--extern crate dafny_runtime;
--mod _System {
--  #[derive(Clone, PartialEq)]
--  #[repr(transparent)]
--  pub struct nat(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for nat {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for nat {}
--  impl ::dafny_runtime::DafnyUnerasable<nat> for nat {}
--  impl ::std::default::Default for nat {
--    fn default() -> Self {
--      nat(::std::default::Default::default())
--    }
--  }
--  impl ::dafny_runtime::DafnyPrint for nat {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
--      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
--    }
--  }
--  impl ::std::ops::Deref for nat {
--    type Target = ::dafny_runtime::BigInt;
--    fn deref(&self) -> &Self::Target {
--      &self.0
--    }
--  }
--  #[derive(PartialEq)]
--  pub enum Tuple2<T0,T1> {
--    _T2 { _0: T0, _1: T1 },
--    _PhantomVariant(::std::marker::PhantomData::<T0>, ::std::marker::PhantomData::<T1>)
--  }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>Tuple2<T0,T1>
--     where <T0 as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq, <T1 as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
--    pub fn _0(&self) -> &T0 {
--      match self {
--        Tuple2::_T2 { _0, _1, } => _0,
--        Tuple2::_PhantomVariant(..) => panic!()
--      }
--    }
--    pub fn _1(&self) -> &T1 {
--      match self {
--        Tuple2::_T2 { _0, _1, } => _1,
--        Tuple2::_PhantomVariant(..) => panic!()
--      }
--    }
--  }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyErasable for Tuple2<T0,T1> {
--    type Erased = Tuple2<T0::Erased, T1::Erased, >;
--  }
--  impl <T0__Erased, T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyUnerasable<T0__Erased> + 'static,T1__Erased, T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyUnerasable<T1__Erased> + 'static>::dafny_runtime::DafnyUnerasable<Tuple2<T0__Erased, T1__Erased, >> for Tuple2<T0,T1> {}
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyPrint for Tuple2<T0,T1> {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
--      match self {
--        Tuple2::_T2 { _0, _1, } => {
--          write!(_formatter, "_System.Tuple2._T2(")?;
--          ::dafny_runtime::DafnyPrint::fmt_print(_0, _formatter, false)?;
--          write!(_formatter, ", ")?;
--          ::dafny_runtime::DafnyPrint::fmt_print(_1, _formatter, false)?;
--          write!(_formatter, ")")?;
--          Ok(())
-+pub extern crate dafny_runtime;
-+pub extern crate dafny_standard_library;
-+pub use dafny_standard_library::implementation_from_dafny::*;
-+
-+pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
-+    /* datatype DafnyCallEvent<I, O> = DafnyCallEvent(input: I, output: O) */
-+    #[derive(Clone)]
-+    pub struct DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
-+        input: I,
-+        output: O,
-+    }
-+    impl<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> ::core::fmt::Debug
-+        for DafnyCallEvent<I, O>
-+    {
-+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-+            f.debug_struct("DafnyCallEvent")
-+                .field("input", &self.input)
-+                .field("output", &self.output)
-+                .finish()
-+        }
-+    }
-+    impl<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> ::dafny_runtime::DafnyPrint
-+        for DafnyCallEvent<I, O>
-+    {
-+        fn fmt_print(&self, f: &mut std::fmt::Formatter<'_>, in_seq: bool) -> std::fmt::Result {
-+            write!(
-+                f,
-+                "simple.types.smithystring.internaldafny.types.DafnyCallEvent("
-+            )?;
-+            self.input.fmt_print(f, false)?;
-+            write!(f, ",")?;
-+            self.output.fmt_print(f, false)?;
-+            write!(f, ")")
-+        }
-+    }
-+    impl<I: ::dafny_runtime::DafnyTypeEq, O: ::dafny_runtime::DafnyTypeEq>
-+        PartialEq<DafnyCallEvent<I, O>> for DafnyCallEvent<I, O>
-+    {
-+        fn eq(&self, other: &DafnyCallEvent<I, O>) -> bool {
-+            self.input == other.input && self.output == other.output
-+        }
-+    }
-+    impl<I: ::dafny_runtime::DafnyTypeEq, O: ::dafny_runtime::DafnyTypeEq> Eq for DafnyCallEvent<I, O> {}
-+    impl<I: ::dafny_runtime::DafnyTypeEq, O: ::dafny_runtime::DafnyTypeEq> ::core::hash::Hash
-+        for DafnyCallEvent<I, O>
-+    {
-+        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-+            self.input.hash(state);
-+            self.output.hash(state);
-+        }
-+    }
-+
-+    /*
-+     datatype GetStringInput = | GetStringInput (
-+      nameonly value: Option<string> := Option.None
-+    )
-+    */
-+    #[derive(Clone)]
-+    pub enum GetStringInput {
-+        GetStringInput {
-+            value: ::std::rc::Rc<
-+                super::r#_Wrappers_Compile::Option<::dafny_runtime::DafnyStringUTF16>,
-+            >,
-         },
--        Tuple2::_PhantomVariant(..) => {panic!()}
--      }
--    }
--  }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::default::Default for Tuple2<T0,T1> {
--    fn default() -> Self {
--      Tuple2::_T2 {
--        _0: ::std::default::Default::default(),
--        _1: ::std::default::Default::default()
--      }
--    }
--  }
--  #[derive(PartialEq)]
--  pub enum Tuple0 {
--    _T0 {}
--  }
--  impl Tuple0 {}
--  impl ::dafny_runtime::DafnyErasable for Tuple0 {
--    type Erased = Tuple0;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<Tuple0> for Tuple0 {}
--  impl ::dafny_runtime::DafnyPrint for Tuple0 {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
--      match self {
--        Tuple0::_T0 { } => {
--          write!(_formatter, "_System.Tuple0._T0")?;
--          Ok(())
--        }
--      }
--    }
--  }
--  impl ::std::default::Default for Tuple0 {
--    fn default() -> Self {
--      Tuple0::_T0 {}
--    }
--  }
-+    }
-+    impl ::std::convert::AsRef<GetStringInput> for &GetStringInput {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+    impl GetStringInput {
-+        pub fn value(
-+            &self,
-+        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::DafnyStringUTF16>>
-+        {
-+            match self {
-+                GetStringInput::GetStringInput { value } => value.clone(),
-+            }
-+        }
-+    }
-+    impl ::core::fmt::Debug for GetStringInput {
-+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-+            ::dafny_runtime::DafnyPrint::fmt_print(self, f, false)
-+        }
-+    }
-+    impl ::dafny_runtime::DafnyPrint for GetStringInput {
-+        fn fmt_print(&self, f: &mut std::fmt::Formatter<'_>, in_seq: bool) -> std::fmt::Result {
-+            write!(
-+                f,
-+                "simple.types.smithystring.internaldafny.types.GetStringInput(value := "
-+            )?;
-+            self.value().fmt_print(f, false)?;
-+            write!(f, ")")
-+        }
-+    }
-+    impl PartialEq<GetStringInput> for GetStringInput {
-+        fn eq(&self, other: &GetStringInput) -> bool {
-+            self.value() == other.value()
-+        }
-+    }
-+    impl Eq for GetStringInput {}
-+    impl ::core::hash::Hash for GetStringInput {
-+        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-+            self.value().hash(state);
-+        }
-+    }
-+
-+    /*
-+    datatype GetStringOutput = | GetStringOutput (
-+    nameonly value: Option<string> := Option.None
-+    ) */
-+    #[derive(Clone)]
-+    pub enum GetStringOutput {
-+        GetStringOutput {
-+            value: ::std::rc::Rc<
-+                super::r#_Wrappers_Compile::Option<::dafny_runtime::DafnyStringUTF16>,
-+            >,
-+        },
-+    }
-+    impl GetStringOutput {
-+        pub fn value(
-+            &self,
-+        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<::dafny_runtime::DafnyStringUTF16>>
-+        {
-+            match self {
-+                GetStringOutput::GetStringOutput { value } => value.clone(),
-+            }
-+        }
-+    }
-+    impl ::std::convert::AsRef<GetStringOutput> for &GetStringOutput {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+    impl ::core::fmt::Debug for GetStringOutput {
-+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-+            ::dafny_runtime::DafnyPrint::fmt_print(self, f, false)
-+        }
-+    }
-+    impl ::dafny_runtime::DafnyPrint for GetStringOutput {
-+        fn fmt_print(&self, f: &mut std::fmt::Formatter<'_>, in_seq: bool) -> std::fmt::Result {
-+            write!(
-+                f,
-+                "simple.types.smithystring.internaldafny.types.GetStringOutput(value := "
-+            )?;
-+            self.value().fmt_print(f, false)?;
-+            write!(f, ")")
-+        }
-+    }
-+    impl PartialEq<GetStringOutput> for GetStringOutput {
-+        fn eq(&self, other: &GetStringOutput) -> bool {
-+            self.value() == other.value()
-+        }
-+    }
-+    impl Eq for GetStringOutput {}
-+    impl ::core::hash::Hash for GetStringOutput {
-+        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-+            self.value().hash(state);
-+        }
-+    }
-+
-+    /*
-+    datatype SimpleStringConfig = | SimpleStringConfig (
-+    ) */
-+    #[derive(Clone)]
-+    pub enum SimpleStringConfig {
-+        SimpleStringConfig {},
-+    }
-+    impl ::std::convert::AsRef<SimpleStringConfig> for &SimpleStringConfig {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+    impl ::core::fmt::Debug for SimpleStringConfig {
-+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-+            f.debug_struct("SimpleStringConfig").finish()
-+        }
-+    }
-+    impl ::dafny_runtime::DafnyPrint for SimpleStringConfig {
-+        fn fmt_print(&self, f: &mut std::fmt::Formatter<'_>, in_seq: bool) -> std::fmt::Result {
-+            write!(
-+                f,
-+                "simple.types.smithystring.internaldafny.types.SimpleStringConfig()"
-+            )
-+        }
-+    }
-+    impl PartialEq<SimpleStringConfig> for SimpleStringConfig {
-+        fn eq(&self, other: &SimpleStringConfig) -> bool {
-+            true
-+        }
-+    }
-+    impl Eq for SimpleStringConfig {}
-+    impl ::core::hash::Hash for SimpleStringConfig {
-+        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {}
-+    }
-+
-+    pub struct ISimpleTypesStringClientCallHistory {}
-+    impl ISimpleTypesStringClientCallHistory {
-+        fn ctor(this: *mut ISimpleTypesStringClientCallHistory) {}
-+    }
-+    pub trait ISimpleTypesStringClient {
-+        fn GetString(
-+            self: &Self,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        >;
-+        fn GetStringKnownValue(
-+            self: &Self,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        >;
-+        fn GetStringUTF8(
-+            self: &Self,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        >;
-+    }
-+    /*
-+    datatype Error =
-+    | CollectionOfErrors(list: seq<Error>, nameonly message: string)
-+    | Opaque(obj: object)
-+    */
-+    #[derive(Clone)]
-+    pub enum Error {
-+        CollectionOfErrors {
-+            list: ::dafny_runtime::Sequence<Error>,
-+            message: ::dafny_runtime::DafnyStringUTF16,
-+        },
-+        Opaque {
-+            obj: *mut dyn ::std::any::Any,
-+        },
-+    }
-+    impl ::core::fmt::Debug for Error {
-+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => f
-+                    .debug_struct("Error::CollectionOfErrors")
-+                    .field("list", list)
-+                    .field("message", message)
-+                    .finish(),
-+                Error::Opaque { obj } => f.debug_struct("Error::Opaque").field("obj", obj).finish(),
-+            }
-+        }
-+    }
-+    impl ::dafny_runtime::DafnyPrint for Error {
-+        fn fmt_print(&self, f: &mut std::fmt::Formatter<'_>, in_seq: bool) -> std::fmt::Result {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => {
-+                    write!(f, "Error::CollectionOfErrors(list := ")?;
-+                    list.fmt_print(f, false)?;
-+                    write!(f, ", message := ")?;
-+                    message.fmt_print(f, false)?;
-+                    write!(f, ")")
-+                }
-+                Error::Opaque { obj } => {
-+                    write!(f, "Error::Opaque(obj := ")?;
-+                    obj.fmt_print(f, false)?;
-+                    write!(f, ")")
-+                }
-+            }
-+        }
-+    }
-+    impl PartialEq<Error> for Error {
-+        fn eq(&self, other: &Error) -> bool {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => match other {
-+                    Error::CollectionOfErrors {
-+                        list: other_list,
-+                        message: other_message,
-+                    } => list == other_list && message == other_message,
-+                    _ => false,
-+                },
-+                Error::Opaque { obj } => match other {
-+                    Error::Opaque { obj: other_obj } => obj == other_obj,
-+                    _ => false,
-+                },
-+            }
-+        }
-+    }
-+    impl Eq for Error {}
-+    impl ::core::hash::Hash for Error {
-+        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => {
-+                    list.hash(state);
-+                    message.hash(state);
-+                }
-+                Error::Opaque { obj } => obj.hash(state),
-+            }
-+        }
-+    }
-+
-+    pub type OpaqueError = Error;
-+}
-+mod r#_SimpleStringImpl_Compile {
-+    pub struct _default {}
-+    impl _default {
-+        pub fn new() -> Self {
-+            _default {}
-+        }
-+        pub fn _allocated() -> *mut Self {
-+            ::dafny_runtime::allocate::<Self>()
-+        }
-+        pub fn GetString(
-+            config: &::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>>::new();
-+            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
-+            value: input.value().clone()
-+          });
-+            res = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
-+            value: input.value().clone()
-+          });
-+            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>::Success {
-+              value: res.clone()
-+            }));
-+            return output.read();
-+            return output.read();
-+        }
-+        pub fn GetStringKnownValue(
-+            config: &::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>>::new();
-+            if !matches!(
-+                input.value().as_ref(),
-+                super::r#_Wrappers_Compile::Option::Some { .. }
-+            ) {
-+                panic!("Halt")
-+            };
-+            if !(input.value().value().clone()
-+                == ::dafny_runtime::string_utf16_of("TEST_SIMPLE_STRING_KNOWN_VALUE"))
-+            {
-+                panic!("Halt")
-+            };
-+            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
-+            value: input.value().clone()
-+          });
-+            res = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
-+            value: input.value().clone()
-+          });
-+            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>::Success {
-+              value: res.clone()
-+            }));
-+            return output.read();
-+            return output.read();
-+        }
-+        pub fn GetStringUTF8(
-+            config: &::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>>::new();
-+            if !matches!(
-+                input.value().as_ref(),
-+                super::r#_Wrappers_Compile::Option::Some { .. }
-+            ) {
-+                panic!("Halt")
-+            };
-+            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
-+            value: input.value().clone()
-+          });
-+            res = ::std::rc::Rc::new(super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
-+            value: input.value().clone()
-+          });
-+            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>::Success {
-+              value: res.clone()
-+            }));
-+            return output.read();
-+            return output.read();
-+        }
-+    }
-+    impl ::std::default::Default for _default {
-+        fn default() -> Self {
-+            _default::new()
-+        }
-+    }
-+    impl ::dafny_runtime::DafnyPrint for _default {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            write!(_formatter, "SimpleStringImpl_Compile.__default")
-+        }
-+    }
-+    impl ::std::cmp::PartialEq for _default {
-+        fn eq(&self, other: &Self) -> bool {
-+            ::std::ptr::eq(self, other)
-+        }
-+    }
-+    #[derive(PartialEq, Clone)]
-+    pub enum Config {
-+        Config {},
-+    }
-+    impl Config {}
-+    impl ::dafny_runtime::DafnyPrint for Config {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            match self {
-+                Config::Config {} => {
-+                    write!(_formatter, "SimpleStringImpl_Compile.Config.Config")?;
-+                    Ok(())
-+                }
-+            }
-+        }
-+    }
-+    impl ::std::default::Default for Config {
-+        fn default() -> Config {
-+            Config::Config {}
-+        }
-+    }
-+    impl ::std::convert::AsRef<Config> for &Config {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+}
-+// SimpleString
-+pub mod r#_simple_dtypes_dsmithystring_dinternaldafny {
-+    pub struct _default {}
-+    impl _default {
-+        pub fn new() -> Self {
-+            _default {}
-+        }
-+        pub fn DefaultSimpleStringConfig(
-+        ) -> super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig
-+        {
-+            super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig::SimpleStringConfig{}
-+        }
-+        /*method SimpleString(config: SimpleStringConfig)
-+        returns (res: Result<ISimpleTypesStringClient, Error>) {
-+            var client := new SimpleStringClient(Operations.Config);
-+            return Success(client);
-+        } */
-+    pub fn SimpleString(config: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig>)
-+        -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<*mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>{
-+            let client: *mut SimpleStringClient = ::dafny_runtime::allocate::<SimpleStringClient>();
-+            SimpleStringClient::_ctor(
-+                client,
-+                &::std::rc::Rc::new(super::r#_SimpleStringImpl_Compile::Config::Config {}),
-+            );
-+            let v = client as *mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient;
-+            // build a success
-+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<*mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>::Success{
-+          value: v
-+      })
-+        }
-+    }
-+
-+    struct SimpleStringClient {
-+        r#_i_config: ::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>,
-+    }
-+
-+    impl SimpleStringClient {
-+        fn _ctor(
-+            this: *mut SimpleStringClient,
-+            config: &::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>,
-+        ) {
-+            let mut _i_set_config = false;
-+            ::dafny_runtime::update_field_uninit!(this, r#_i_config, _i_set_config, config.clone());
-+        }
-+        fn config(&self) -> ::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config> {
-+            self.r#_i_config.clone()
-+        }
-+    }
-+    impl super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient
-+        for SimpleStringClient
-+    {
-+        fn GetString(
-+            self: &Self,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            super::r#_SimpleStringImpl_Compile::_default::GetString(&self.config(), input)
-+        }
-+        fn GetStringKnownValue(
-+            self: &Self,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            super::r#_SimpleStringImpl_Compile::_default::GetStringKnownValue(&self.config(), input)
-+        }
-+        fn GetStringUTF8(
-+            self: &Self,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            super::r#_SimpleStringImpl_Compile::_default::GetStringUTF8(&self.config(), input)
-+        }
-+    }
-+    ::dafny_runtime::UpcastTo!(
-+        SimpleStringClient,
-+        dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient
-+    );
-+}
-+mod r#_StandardLibraryInterop_Compile {
-+    pub struct WrappersInterop {}
-+    impl WrappersInterop {
-+        pub fn new() -> Self {
-+            WrappersInterop {}
-+        }
-+        pub fn _allocated() -> *mut Self {
-+            ::dafny_runtime::allocate::<Self>()
-+        }
-+        pub fn CreateStringSome(
-+            s: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Option<
-+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+            >,
-+        > {
-+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<
-+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+            >::Some {
-+                value: s.clone(),
-+            })
-+        }
-+        pub fn CreateStringNone() -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Option<
-+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+            >,
-+        > {
-+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<
-+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+            >::None {})
-+        }
-+        pub fn CreateBooleanSome(
-+            b: bool,
-+        ) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<bool>> {
-+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::Some { value: b })
-+        }
-+        pub fn CreateBooleanNone() -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<bool>> {
-+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::None {})
-+        }
-+    }
-+    impl ::std::default::Default for WrappersInterop {
-+        fn default() -> Self {
-+            WrappersInterop::new()
-+        }
-+    }
-+    impl ::dafny_runtime::DafnyPrint for WrappersInterop {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            write!(_formatter, "StandardLibraryInterop_Compile.WrappersInterop")
-+        }
-+    }
-+    impl ::std::cmp::PartialEq for WrappersInterop {
-+        fn eq(&self, other: &Self) -> bool {
-+            ::std::ptr::eq(self, other)
-+        }
-+    }
- }
--mod _module {
--  
--}
-\ No newline at end of file
-+mod _module {}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..0b44b7d5
+index 00000000..c85e6fed
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client.rs
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,43 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +use aws_smithy_types::error::operation::BuildError;
 +
-+#[derive(Debug)]
-+pub(crate) struct Handle {
-+    pub(crate) conf: crate::Config,
-+    pub(crate) inner: *mut dyn ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient
-+}
-+
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    handle: ::std::sync::Arc<Handle>,
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient>
 +}
 +
 +impl Client {
 +    /// Creates a new client from the service [`Config`](crate::Config).
 +    #[track_caller]
-+    pub fn from_conf(conf: crate::Config) -> Result<Self, BuildError> {
++    pub fn from_conf(
++        conf: crate::types::simple_string_config::SimpleStringConfig,
++    ) -> Result<Self, BuildError> {
 +        // If this service had any configuration properties,
 +        // they would need converting here too.
-+        let inner_config = ::std::rc::Rc::new(
-+            ::simple_string_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::DefaultSimpleStringConfig());
 +        let inner =
-+            ::simple_string_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::SimpleString(&inner_config);
++            crate::implementation_from_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::SimpleString(
++                &crate::conversions::simple_string_config::_simple_string_config::to_dafny(conf),
++            );
 +        if matches!(
 +            inner.as_ref(),
-+            ::simple_string_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -782,27 +36,9 @@ index 00000000..0b44b7d5
 +                    .build(),
 +            ));
 +        }
-+        let handle = Handle {
-+            conf: conf.clone(),
-+            inner: inner.Extract(),
-+        };
 +        Ok(Self {
-+            handle: ::std::sync::Arc::new(handle),
++            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
 +        })
-+    }
-+
-+    /// Returns the client's configuration.
-+    pub fn config(&self) -> &crate::Config {
-+        &self.handle.conf
-+    }
-+}
-+
-+impl Drop for Handle {
-+    fn drop(&mut self) {
-+        // Ensure the Dafny values we created by calling SimpleString are deallocated.
-+        unsafe {
-+            drop(Box::from_raw(self.inner));
-+        }
 +    }
 +}
 +
@@ -813,7 +49,7 @@ index 00000000..0b44b7d5
 +mod get_string_utf8;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string.rs
 new file mode 100644
-index 00000000..0b547304
+index 00000000..da262534
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string.rs
 @@ -0,0 +1,13 @@
@@ -827,12 +63,12 @@ index 00000000..0b547304
 +    ///   - [`value(Option<String>)`](crate::operation::get_string::GetStringOutput::value): (undocumented)
 +    /// - On failure, responds with [`SdkError<GetStringError>`](crate::operation::get_string::GetStringError)
 +    pub fn get_string(&self) -> crate::operation::get_string::builders::GetStringFluentBuilder {
-+        crate::operation::get_string::builders::GetStringFluentBuilder::new(self.handle.clone())
++        crate::operation::get_string::builders::GetStringFluentBuilder::new(self.clone())
 +    }
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string_known_value.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string_known_value.rs
 new file mode 100644
-index 00000000..6ce27235
+index 00000000..8c13c6ad
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string_known_value.rs
 @@ -0,0 +1,17 @@
@@ -849,7 +85,7 @@ index 00000000..6ce27235
 +        &self,
 +    ) -> crate::operation::get_string_known_value::builders::GetStringKnownValueFluentBuilder {
 +        crate::operation::get_string_known_value::builders::GetStringKnownValueFluentBuilder::new(
-+            self.handle.clone(),
++            self.clone(),
 +        )
 +    }
 +}
@@ -878,10 +114,10 @@ index 00000000..6ce27235
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string_utf8.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string_utf8.rs
 new file mode 100644
-index 00000000..45dce92e
+index 00000000..3a487be0
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/client/get_string_utf8.rs
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,15 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +impl super::Client {
 +    /// Constructs a fluent builder for the [`GetStringUTF8`](crate::operation::get_string_utf8::builders::GetStringUTF8FluentBuilder) operation.
@@ -894,160 +130,26 @@ index 00000000..45dce92e
 +    pub fn get_string_utf8(
 +        &self,
 +    ) -> crate::operation::get_string_utf8::builders::GetStringUTF8FluentBuilder {
-+        crate::operation::get_string_utf8::builders::GetStringUTF8FluentBuilder::new(
-+            self.handle.clone(),
-+        )
++        crate::operation::get_string_utf8::builders::GetStringUTF8FluentBuilder::new(self.clone())
 +    }
 +}
-diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/config.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/config.rs
-new file mode 100644
-index 00000000..3bc5be94
---- /dev/null
-+++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/config.rs
-@@ -0,0 +1,128 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
-+
-+/// Configuration for a simple service client.
-+///
-+#[derive(::std::clone::Clone, ::std::fmt::Debug)]
-+pub struct Config {
-+    behavior_version: ::std::option::Option<crate::config::BehaviorVersion>,
-+}
-+impl Config {
-+    /// Constructs a config builder.
-+    pub fn builder() -> Builder {
-+        Builder::default()
-+    }
-+    /// Converts this config back into a builder so that it can be tweaked.
-+    pub fn to_builder(&self) -> Builder {
-+        Builder {
-+            behavior_version: self.behavior_version.clone(),
-+        }
-+    }
-+}
-+/// Builder for creating a `Config`.
-+#[derive(::std::clone::Clone, ::std::fmt::Debug)]
-+pub struct Builder {
-+    pub(crate) behavior_version: ::std::option::Option<crate::config::BehaviorVersion>,
-+}
-+impl ::std::default::Default for Builder {
-+    fn default() -> Self {
-+        Self {
-+            behavior_version: ::std::default::Default::default(),
-+        }
-+    }
-+}
-+impl Builder {
-+    /// Constructs a config builder.
-+    pub fn new() -> Self {
-+        Self::default()
-+    }
-+
-+    /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
-+    ///
-+    /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
-+    /// compatible. For example, a change which introduces new default timeouts or a new retry-mode for
-+    /// all operations might be the ideal behavior but could break existing applications.
-+    ///
-+    /// # Examples
-+    ///
-+    /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
-+    /// ```no_run
-+    /// use simple_string::config::BehaviorVersion;
-+    ///
-+    /// let config = simple_string::Config::builder()
-+    ///     .behavior_version(BehaviorVersion::latest())
-+    ///     // ...
-+    ///     .build();
-+    /// let client = simple_string::Client::from_conf(config);
-+    /// ```
-+    ///
-+    /// Customizing behavior major version:
-+    /// ```no_run
-+    /// use simple_string::config::BehaviorVersion;
-+    ///
-+    /// let config = simple_string::Config::builder()
-+    ///     .behavior_version(BehaviorVersion::v2023_11_09())
-+    ///     // ...
-+    ///     .build();
-+    /// let client = simple_string::Client::from_conf(config);
-+    /// ```
-+
-+    pub fn behavior_version(mut self, behavior_version: crate::config::BehaviorVersion) -> Self {
-+        self.set_behavior_version(Some(behavior_version));
-+        self
-+    }
-+
-+    /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
-+    ///
-+    /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
-+    /// compatible. For example, a change which introduces new default timeouts or a new retry-mode for
-+    /// all operations might be the ideal behavior but could break existing applications.
-+    ///
-+    /// # Examples
-+    ///
-+    /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
-+    /// ```no_run
-+    /// use simple_string::config::BehaviorVersion;
-+    ///
-+    /// let config = simple_string::Config::builder()
-+    ///     .behavior_version(BehaviorVersion::latest())
-+    ///     // ...
-+    ///     .build();
-+    /// let client = simple_string::Client::from_conf(config);
-+    /// ```
-+    ///
-+    /// Customizing behavior major version:
-+    /// ```no_run
-+    /// use simple_string::config::BehaviorVersion;
-+    ///
-+    /// let config = simple_string::Config::builder()
-+    ///     .behavior_version(BehaviorVersion::v2023_11_09())
-+    ///     // ...
-+    ///     .build();
-+    /// let client = simple_string::Client::from_conf(config);
-+    /// ```
-+
-+    pub fn set_behavior_version(
-+        &mut self,
-+        behavior_version: Option<crate::config::BehaviorVersion>,
-+    ) -> &mut Self {
-+        self.behavior_version = behavior_version;
-+        self
-+    }
-+
-+    /// Convenience method to set the latest behavior major version
-+    ///
-+    /// This is equivalent to enabling the `behavior-version-latest` Cargo feature
-+    pub fn behavior_version_latest(mut self) -> Self {
-+        self.set_behavior_version(Some(crate::config::BehaviorVersion::latest()));
-+        self
-+    }
-+    /// Builds a [`Config`].
-+    #[allow(unused_mut)]
-+    pub fn build(mut self) -> Config {
-+        Config {
-+            behavior_version: self.behavior_version,
-+        }
-+    }
-+}
-+
-+pub use ::aws_smithy_runtime_api::client::behavior_version::BehaviorVersion;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions.rs
 new file mode 100644
-index 00000000..25e072d2
+index 00000000..0c2b4cf1
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions.rs
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,8 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +pub mod get_string;
 +
 +pub mod get_string_known_value;
 +
 +pub mod get_string_utf8;
++
++pub mod simple_string_config;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string.rs
 new file mode 100644
-index 00000000..ed44841a
+index 00000000..a2df3f51
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string.rs
 @@ -0,0 +1,33 @@
@@ -1058,22 +160,22 @@ index 00000000..ed44841a
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_string::GetStringError,
-+) -> ::std::rc::Rc<::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>
 +{
 +    match value {
 +    crate::operation::get_string::GetStringError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj: Box::into_raw(Box::new(unhandled) as Box<dyn Any>) })
++      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::get_string::GetStringError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_string::GetStringError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -1086,7 +188,7 @@ index 00000000..ed44841a
 +pub mod _get_string_output;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string/_get_string_input.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string/_get_string_input.rs
 new file mode 100644
-index 00000000..0849a8f2
+index 00000000..ec391cc1
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string/_get_string_input.rs
 @@ -0,0 +1,43 @@
@@ -1095,15 +197,15 @@ index 00000000..0849a8f2
 +pub fn to_dafny(
 +    value: crate::operation::get_string::GetStringInput,
 +) -> ::std::rc::Rc<
-+    ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
 +> {
 +    let dafny_value = match value.value {
-+      Some(s) => ::simple_string_dafny::_Wrappers_Compile::Option::Some {
++      Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +        value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
 +      },
-+      None => ::simple_string_dafny::_Wrappers_Compile::Option::None {},
++      None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput::GetStringInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput::GetStringInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -1111,12 +213,12 @@ index 00000000..0849a8f2
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
 +    >,
 +) -> crate::operation::get_string::GetStringInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -1125,7 +227,7 @@ index 00000000..0849a8f2
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -1135,7 +237,7 @@ index 00000000..0849a8f2
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string/_get_string_output.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string/_get_string_output.rs
 new file mode 100644
-index 00000000..d658997a
+index 00000000..ac546e50
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string/_get_string_output.rs
 @@ -0,0 +1,41 @@
@@ -1144,26 +246,26 @@ index 00000000..d658997a
 +pub fn to_dafny(
 +    value: crate::operation::get_string::GetStringOutput,
 +) -> ::std::rc::Rc<
-+    ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
 +> {
 +    let dafny_value = match value.value {
-+      Some(s) => ::simple_string_dafny::_Wrappers_Compile::Option::Some {
++      Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +        value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
 +      },
-+      None => ::simple_string_dafny::_Wrappers_Compile::Option::None {},
++      None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
-+    dafny_value: ::std::rc::Rc<::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>,
++    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>,
 +) -> crate::operation::get_string::GetStringOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -1172,7 +274,7 @@ index 00000000..d658997a
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -1182,7 +284,7 @@ index 00000000..d658997a
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value.rs
 new file mode 100644
-index 00000000..2a70d89f
+index 00000000..99b1bf78
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value.rs
 @@ -0,0 +1,33 @@
@@ -1193,22 +295,22 @@ index 00000000..2a70d89f
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_string_known_value::GetStringKnownValueError,
-+) -> ::std::rc::Rc<::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>
 +{
 +    match value {
 +    crate::operation::get_string_known_value::GetStringKnownValueError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj: Box::into_raw(Box::new(unhandled) as Box<dyn Any>) })
++      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::get_string_known_value::GetStringKnownValueError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_string_known_value::GetStringKnownValueError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -1221,7 +323,7 @@ index 00000000..2a70d89f
 +pub mod _get_string_known_value_output;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value/_get_string_known_value_input.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value/_get_string_known_value_input.rs
 new file mode 100644
-index 00000000..c3525a32
+index 00000000..d27ff4ee
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value/_get_string_known_value_input.rs
 @@ -0,0 +1,43 @@
@@ -1230,15 +332,15 @@ index 00000000..c3525a32
 +pub fn to_dafny(
 +    value: crate::operation::get_string_known_value::GetStringKnownValueInput,
 +) -> ::std::rc::Rc<
-+    ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
 +> {
 +    let dafny_value = match value.value {
-+      Some(s) => ::simple_string_dafny::_Wrappers_Compile::Option::Some {
++      Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +        value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
 +      },
-+      None => ::simple_string_dafny::_Wrappers_Compile::Option::None {},
++      None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput::GetStringInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput::GetStringInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -1246,12 +348,12 @@ index 00000000..c3525a32
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
 +    >,
 +) -> crate::operation::get_string_known_value::GetStringKnownValueInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -1260,7 +362,7 @@ index 00000000..c3525a32
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -1270,7 +372,7 @@ index 00000000..c3525a32
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value/_get_string_known_value_output.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value/_get_string_known_value_output.rs
 new file mode 100644
-index 00000000..dce554ae
+index 00000000..86278e6f
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_known_value/_get_string_known_value_output.rs
 @@ -0,0 +1,41 @@
@@ -1279,26 +381,26 @@ index 00000000..dce554ae
 +pub fn to_dafny(
 +    value: crate::operation::get_string_known_value::GetStringKnownValueOutput,
 +) -> ::std::rc::Rc<
-+    ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
 +> {
 +    let dafny_value = match value.value {
-+      Some(s) => ::simple_string_dafny::_Wrappers_Compile::Option::Some {
++      Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +        value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
 +      },
-+      None => ::simple_string_dafny::_Wrappers_Compile::Option::None {},
++      None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
-+    dafny_value: ::std::rc::Rc<::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>,
++    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>,
 +) -> crate::operation::get_string_known_value::GetStringKnownValueOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -1307,7 +409,7 @@ index 00000000..dce554ae
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -1317,7 +419,7 @@ index 00000000..dce554ae
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8.rs
 new file mode 100644
-index 00000000..db5ecd27
+index 00000000..5b983954
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8.rs
 @@ -0,0 +1,33 @@
@@ -1328,22 +430,22 @@ index 00000000..db5ecd27
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_string_utf8::GetStringUTF8Error,
-+) -> ::std::rc::Rc<::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>
 +{
 +    match value {
 +    crate::operation::get_string_utf8::GetStringUTF8Error::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj: Box::into_raw(Box::new(unhandled) as Box<dyn Any>) })
++      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::get_string_utf8::GetStringUTF8Error {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_string_utf8::GetStringUTF8Error::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -1356,7 +458,7 @@ index 00000000..db5ecd27
 +pub mod _get_string_utf8_output;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8/_get_string_utf8_input.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8/_get_string_utf8_input.rs
 new file mode 100644
-index 00000000..85d17041
+index 00000000..94bece3b
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8/_get_string_utf8_input.rs
 @@ -0,0 +1,43 @@
@@ -1365,15 +467,15 @@ index 00000000..85d17041
 +pub fn to_dafny(
 +    value: crate::operation::get_string_utf8::GetStringUTF8Input,
 +) -> ::std::rc::Rc<
-+    ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
 +> {
 +    let dafny_value = match value.value {
-+      Some(s) => ::simple_string_dafny::_Wrappers_Compile::Option::Some {
++      Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +        value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
 +      },
-+      None => ::simple_string_dafny::_Wrappers_Compile::Option::None {},
++      None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput::GetStringInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput::GetStringInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -1381,12 +483,12 @@ index 00000000..85d17041
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput,
 +    >,
 +) -> crate::operation::get_string_utf8::GetStringUTF8Input {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -1395,7 +497,7 @@ index 00000000..85d17041
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -1405,7 +507,7 @@ index 00000000..85d17041
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8/_get_string_utf8_output.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8/_get_string_utf8_output.rs
 new file mode 100644
-index 00000000..fc10faa6
+index 00000000..13fa503a
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/get_string_utf8/_get_string_utf8_output.rs
 @@ -0,0 +1,41 @@
@@ -1414,26 +516,26 @@ index 00000000..fc10faa6
 +pub fn to_dafny(
 +    value: crate::operation::get_string_utf8::GetStringUTF8Output,
 +) -> ::std::rc::Rc<
-+    ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput,
 +> {
 +    let dafny_value = match value.value {
-+      Some(s) => ::simple_string_dafny::_Wrappers_Compile::Option::Some {
++      Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +        value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
 +      },
-+      None => ::simple_string_dafny::_Wrappers_Compile::Option::None {},
++      None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput::GetStringOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
-+    dafny_value: ::std::rc::Rc<::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>,
++    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>,
 +) -> crate::operation::get_string_utf8::GetStringUTF8Output {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -1442,13 +544,47 @@ index 00000000..fc10faa6
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_string_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
 +        panic!("Unreachable")
 +    };
 +    crate::operation::get_string_utf8::GetStringUTF8Output { value }
++}
+diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/simple_string_config.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/simple_string_config.rs
+new file mode 100644
+index 00000000..286313ae
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/simple_string_config.rs
+@@ -0,0 +1,3 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++pub mod _simple_string_config;
+diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/simple_string_config/_simple_string_config.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/simple_string_config/_simple_string_config.rs
+new file mode 100644
+index 00000000..e2e8a616
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/conversions/simple_string_config/_simple_string_config.rs
+@@ -0,0 +1,19 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[allow(dead_code)]
++
++pub fn to_dafny(
++    value: crate::types::simple_string_config::SimpleStringConfig,
++) -> ::std::rc::Rc<
++    crate::implementation_from_dafny::_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig,
++> {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig::SimpleStringConfig {})
++}
++
++#[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig,
++    >,
++) -> crate::types::simple_string_config::SimpleStringConfig {
++    crate::types::simple_string_config::SimpleStringConfig {}
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/error.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/error.rs
 new file mode 100644
@@ -1472,10 +608,10 @@ index 00000000..ec89cbec
 +pub(crate) mod sealed_unhandled;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/error/sealed_unhandled.rs
 new file mode 100644
-index 00000000..9d21fbd6
+index 00000000..cce22d1c
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/error/sealed_unhandled.rs
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,26 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +/// This struct is not intended to be used.
 +///
@@ -1498,23 +634,22 @@ index 00000000..9d21fbd6
 +    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
 +    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
 +}
++
++impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
++    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
++}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/lib.rs
 new file mode 100644
-index 00000000..0c773808
+index 00000000..3340c2d9
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/lib.rs
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,19 @@
 +#![allow(deprecated)]
 +
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
-+#[doc(inline)]
-+pub use config::Config;
-+
 +pub mod client;
-+
-+/// Configuration for SimpleString Service.
-+pub mod config;
++pub mod types;
 +
 +/// Common errors and error handling utilities.
 +pub mod error;
@@ -1524,7 +659,10 @@ index 00000000..0c773808
 +
 +mod conversions;
 +
++pub mod implementation_from_dafny;
++
 +pub use client::Client;
++pub use types::simple_string_config::SimpleStringConfig;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation.rs
 new file mode 100644
 index 00000000..af6d5f9c
@@ -1543,7 +681,7 @@ index 00000000..af6d5f9c
 +pub mod get_string_utf8;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string.rs
 new file mode 100644
-index 00000000..f369da68
+index 00000000..10dc7758
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string.rs
 @@ -0,0 +1,145 @@
@@ -1558,7 +696,7 @@ index 00000000..f369da68
 +        Self
 +    }
 +    pub(crate) async fn send(
-+        handle: &crate::client::Handle,
++        client: &crate::client::Client,
 +        input: crate::operation::get_string::GetStringInput,
 +    ) -> ::std::result::Result<
 +        crate::operation::get_string::GetStringOutput,
@@ -1566,10 +704,10 @@ index 00000000..f369da68
 +    > {
 +        let inner_input = crate::conversions::get_string::_get_string_input::to_dafny(input);
 +        let inner_result =
-+            ::simple_string_dafny::dafny_runtime::read!(handle.inner).GetString(&inner_input);
++            ::dafny_runtime::md!(client.dafny_client.clone()).GetString(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_string::_get_string_output::from_dafny(
@@ -1694,7 +832,7 @@ index 00000000..f369da68
 +pub mod builders;
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/_get_string_input.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/_get_string_input.rs
 new file mode 100644
-index 00000000..66233da4
+index 00000000..9c0d47f5
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/_get_string_input.rs
 @@ -0,0 +1,56 @@
@@ -1708,7 +846,7 @@ index 00000000..66233da4
 +}
 +impl GetStringInput {
 +    #[allow(missing_docs)] // documentation missing in model
-+    pub fn message(&self) -> ::std::option::Option<&str> {
++    pub fn value(&self) -> ::std::option::Option<&str> {
 +        self.value.as_deref()
 +    }
 +}
@@ -1818,10 +956,10 @@ index 00000000..ab6b1fa3
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/builders.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/builders.rs
 new file mode 100644
-index 00000000..6db3795e
+index 00000000..ec32b2e2
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string/builders.rs
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,72 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +pub use crate::operation::get_string::_get_string_output::GetStringOutputBuilder;
 +
@@ -1845,17 +983,15 @@ index 00000000..6db3795e
 +///
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct GetStringFluentBuilder {
-+    handle: ::std::sync::Arc<crate::client::Handle>,
++    client: crate::Client,
 +    inner: crate::operation::get_string::builders::GetStringInputBuilder,
-+    config_override: ::std::option::Option<crate::config::Builder>,
 +}
 +impl GetStringFluentBuilder {
 +    /// Creates a new `GetString`.
-+    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
++    pub(crate) fn new(client: crate::Client) -> Self {
 +        Self {
-+            handle,
++            client,
 +            inner: ::std::default::Default::default(),
-+            config_override: ::std::option::Option::None,
 +        }
 +    }
 +    /// Access the GetString as a reference.
@@ -1878,24 +1014,9 @@ index 00000000..6db3795e
 +            // Vanilla smithy-rs uses SdkError::construction_failure,
 +            // but we aren't using SdkError.
 +            .map_err(crate::operation::get_string::GetStringError::unhandled)?;
-+        crate::operation::get_string::GetString::send(&self.handle, input).await
++        crate::operation::get_string::GetString::send(&self.client, input).await
 +    }
 +
-+    pub(crate) fn config_override(
-+        mut self,
-+        config_override: impl Into<crate::config::Builder>,
-+    ) -> Self {
-+        self.set_config_override(Some(config_override.into()));
-+        self
-+    }
-+
-+    pub(crate) fn set_config_override(
-+        &mut self,
-+        config_override: Option<crate::config::Builder>,
-+    ) -> &mut Self {
-+        self.config_override = config_override;
-+        self
-+    }
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
 +        self.inner = self.inner.value(input.into());
@@ -1913,7 +1034,7 @@ index 00000000..6db3795e
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_known_value.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_known_value.rs
 new file mode 100644
-index 00000000..c3276c35
+index 00000000..58d58594
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_known_value.rs
 @@ -0,0 +1,146 @@
@@ -1928,7 +1049,7 @@ index 00000000..c3276c35
 +        Self
 +    }
 +    pub(crate) async fn send(
-+        handle: &crate::client::Handle,
++        client: &crate::client::Client,
 +        input: crate::operation::get_string_known_value::GetStringKnownValueInput,
 +    ) -> ::std::result::Result<
 +        crate::operation::get_string_known_value::GetStringKnownValueOutput,
@@ -1939,10 +1060,10 @@ index 00000000..c3276c35
 +                input,
 +            );
 +        let inner_result =
-+            ::simple_string_dafny::dafny_runtime::read!(handle.inner).GetStringUTF8(&inner_input);
++            ::dafny_runtime::md!(client.dafny_client.clone()).GetStringUTF8(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(crate::conversions::get_string_known_value::_get_string_known_value_output::from_dafny(inner_result.value().clone()))
 +        } else {
@@ -2196,10 +1317,10 @@ index 00000000..291e692c
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_known_value/builders.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_known_value/builders.rs
 new file mode 100644
-index 00000000..ddd6dbfb
+index 00000000..82b4c7fb
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_known_value/builders.rs
-@@ -0,0 +1,94 @@
+@@ -0,0 +1,77 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +pub use crate::operation::get_string_known_value::_get_string_known_value_output::GetStringKnownValueOutputBuilder;
 +
@@ -2223,17 +1344,15 @@ index 00000000..ddd6dbfb
 +///
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct GetStringKnownValueFluentBuilder {
-+    handle: ::std::sync::Arc<crate::client::Handle>,
++    client: crate::Client,
 +    inner: crate::operation::get_string_known_value::builders::GetStringKnownValueInputBuilder,
-+    config_override: ::std::option::Option<crate::config::Builder>,
 +}
 +impl GetStringKnownValueFluentBuilder {
 +    /// Creates a new `GetStringKnownValue`.
-+    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
++    pub(crate) fn new(client: crate::Client) -> Self {
 +        Self {
-+            handle,
++            client,
 +            inner: ::std::default::Default::default(),
-+            config_override: ::std::option::Option::None,
 +        }
 +    }
 +    /// Access the GetStringKnownValue as a reference.
@@ -2260,25 +1379,10 @@ index 00000000..ddd6dbfb
 +            .map_err(
 +                crate::operation::get_string_known_value::GetStringKnownValueError::unhandled,
 +            )?;
-+        crate::operation::get_string_known_value::GetStringKnownValue::send(&self.handle, input)
++        crate::operation::get_string_known_value::GetStringKnownValue::send(&self.client, input)
 +            .await
 +    }
 +
-+    pub(crate) fn config_override(
-+        mut self,
-+        config_override: impl Into<crate::config::Builder>,
-+    ) -> Self {
-+        self.set_config_override(Some(config_override.into()));
-+        self
-+    }
-+
-+    pub(crate) fn set_config_override(
-+        &mut self,
-+        config_override: Option<crate::config::Builder>,
-+    ) -> &mut Self {
-+        self.config_override = config_override;
-+        self
-+    }
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
 +        self.inner = self.inner.value(input.into());
@@ -2296,7 +1400,7 @@ index 00000000..ddd6dbfb
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_utf8.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_utf8.rs
 new file mode 100644
-index 00000000..a8d2a18d
+index 00000000..08e8cb25
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_utf8.rs
 @@ -0,0 +1,146 @@
@@ -2311,7 +1415,7 @@ index 00000000..a8d2a18d
 +        Self
 +    }
 +    pub(crate) async fn send(
-+        handle: &crate::client::Handle,
++        client: &crate::client::Client,
 +        input: crate::operation::get_string_utf8::GetStringUTF8Input,
 +    ) -> ::std::result::Result<
 +        crate::operation::get_string_utf8::GetStringUTF8Output,
@@ -2320,10 +1424,10 @@ index 00000000..a8d2a18d
 +        let inner_input =
 +            crate::conversions::get_string_utf8::_get_string_utf8_input::to_dafny(input);
 +        let inner_result =
-+            ::simple_string_dafny::dafny_runtime::read!(handle.inner).GetStringUTF8(&inner_input);
++            ::dafny_runtime::md!(client.dafny_client.clone()).GetStringUTF8(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_string_utf8::_get_string_utf8_output::from_dafny(
@@ -2572,10 +1676,10 @@ index 00000000..2c8dca6a
 +}
 diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_utf8/builders.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_utf8/builders.rs
 new file mode 100644
-index 00000000..f27b7882
+index 00000000..26bf3d9e
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/operation/get_string_utf8/builders.rs
-@@ -0,0 +1,91 @@
+@@ -0,0 +1,74 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +pub use crate::operation::get_string_utf8::_get_string_utf8_output::GetStringUTF8OutputBuilder;
 +
@@ -2599,17 +1703,15 @@ index 00000000..f27b7882
 +///
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct GetStringUTF8FluentBuilder {
-+    handle: ::std::sync::Arc<crate::client::Handle>,
++    client: crate::Client,
 +    inner: crate::operation::get_string_utf8::builders::GetStringUTF8InputBuilder,
-+    config_override: ::std::option::Option<crate::config::Builder>,
 +}
 +impl GetStringUTF8FluentBuilder {
 +    /// Creates a new `GetStringUTF8`.
-+    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
++    pub(crate) fn new(client: crate::Client) -> Self {
 +        Self {
-+            handle,
++            client,
 +            inner: ::std::default::Default::default(),
-+            config_override: ::std::option::Option::None,
 +        }
 +    }
 +    /// Access the GetStringUTF8 as a reference.
@@ -2634,24 +1736,9 @@ index 00000000..f27b7882
 +            // Vanilla smithy-rs uses SdkError::construction_failure,
 +            // but we aren't using SdkError.
 +            .map_err(crate::operation::get_string_utf8::GetStringUTF8Error::unhandled)?;
-+        crate::operation::get_string_utf8::GetStringUTF8::send(&self.handle, input).await
++        crate::operation::get_string_utf8::GetStringUTF8::send(&self.client, input).await
 +    }
 +
-+    pub(crate) fn config_override(
-+        mut self,
-+        config_override: impl Into<crate::config::Builder>,
-+    ) -> Self {
-+        self.set_config_override(Some(config_override.into()));
-+        self
-+    }
-+
-+    pub(crate) fn set_config_override(
-+        &mut self,
-+        config_override: Option<crate::config::Builder>,
-+    ) -> &mut Self {
-+        self.config_override = config_override;
-+        self
-+    }
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
 +        self.inner = self.inner.value(input.into());
@@ -2665,5 +1752,47 @@ index 00000000..f27b7882
 +    #[allow(missing_docs)] // documentation missing in model
 +    pub fn get_value(&self) -> &::std::option::Option<::std::string::String> {
 +        self.inner.get_value()
++    }
++}
+diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/types.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/types.rs
+new file mode 100644
+index 00000000..7ec74609
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/types.rs
+@@ -0,0 +1,4 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++/// Types for the `SimpleStringConfig`
++pub mod simple_string_config;
+diff --git b/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/types/simple_string_config.rs a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/types/simple_string_config.rs
+new file mode 100644
+index 00000000..6b9ec61a
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleString/runtimes/rust/src/types/simple_string_config.rs
+@@ -0,0 +1,26 @@
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct SimpleStringConfig {}
++
++impl SimpleStringConfig {
++    pub fn builder() -> SimpleStringConfigBuilder {
++        SimpleStringConfigBuilder::new()
++    }
++}
++
++#[derive(::std::clone::Clone, ::std::fmt::Debug)]
++pub struct SimpleStringConfigBuilder {}
++
++impl SimpleStringConfigBuilder {
++    /// Creates a new `SimpleStringConfigBuilder`.
++    pub(crate) fn new() -> Self {
++        Self {}
++    }
++    pub fn build(
++        self,
++    ) -> ::std::result::Result<SimpleStringConfig, ::aws_smithy_types::error::operation::BuildError>
++    {
++        ::std::result::Result::Ok(SimpleStringConfig {})
 +    }
 +}

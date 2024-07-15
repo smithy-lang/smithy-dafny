@@ -21,17 +21,15 @@ impl GetBooleanInputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetBooleanFluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::client::Client,
     inner: crate::operation::get_boolean::builders::GetBooleanInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
 impl GetBooleanFluentBuilder {
     /// Creates a new `GetBoolean`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::client::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetBoolean as a reference.
@@ -54,24 +52,9 @@ impl GetBooleanFluentBuilder {
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
             .map_err(crate::operation::get_boolean::GetBooleanError::unhandled)?;
-        crate::operation::get_boolean::GetBoolean::send(&self.handle, input).await
+        crate::operation::get_boolean::GetBoolean::send(&self.client, input).await
     }
 
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(mut self, input: impl ::std::convert::Into<::std::primitive::bool>) -> Self {
         self.inner = self.inner.value(input.into());

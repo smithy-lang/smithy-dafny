@@ -1,1 +1,2 @@
-software.amazon.polymorph.traits.ReferenceTraitValidator
+software.amazon.polymorph.traits.NoReferencesInSmokeTestsValidator
+software.amazon.polymorph.traits.NoMarkupInDocumentationTraitsValidator

@@ -8,6 +8,6 @@ impl super::Client {
     ///   - [`value(Option<String>)`](crate::operation::get_string::GetStringOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetStringError>`](crate::operation::get_string::GetStringError)
     pub fn get_string(&self) -> crate::operation::get_string::builders::GetStringFluentBuilder {
-        crate::operation::get_string::builders::GetStringFluentBuilder::new(self.handle.clone())
+        crate::operation::get_string::builders::GetStringFluentBuilder::new(self.clone())
     }
 }
