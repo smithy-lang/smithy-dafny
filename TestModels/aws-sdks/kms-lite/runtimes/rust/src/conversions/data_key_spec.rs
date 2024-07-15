@@ -3,7 +3,7 @@
 
 pub fn to_dafny(
     value: aws_sdk_kms::types::DataKeySpec,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec> {
+) -> ::std::rc::Rc<crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec>{
     ::std::rc::Rc::new(match value {
       aws_sdk_kms::types::DataKeySpec::Aes128 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_128 {},
       aws_sdk_kms::types::DataKeySpec::Aes256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_256 {},

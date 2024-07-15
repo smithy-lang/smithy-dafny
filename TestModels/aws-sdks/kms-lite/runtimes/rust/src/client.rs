@@ -1,13 +1,13 @@
 use crate::conversions;
 
 struct Client {
-  inner: aws_sdk_kms::Client,
+    inner: aws_sdk_kms::Client,
 
-  rt: tokio::runtime::Runtime
+    rt: tokio::runtime::Runtime,
 }
 
 impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
-  ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
+    ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
 }
 
 impl dafny_runtime::UpcastObject<dyn crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient> for Client {

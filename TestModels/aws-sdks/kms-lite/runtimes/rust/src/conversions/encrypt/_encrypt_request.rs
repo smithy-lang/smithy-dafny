@@ -4,7 +4,7 @@ pub fn to_dafny(
     value: aws_sdk_kms::operation::encrypt::EncryptInput
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest,
-> {
+>{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest::EncryptRequest  {
         Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext).Extract(),
         KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id).Extract(),
@@ -46,7 +46,7 @@ pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest,
     >,
-    client: aws_sdk_kms::Client
+    client: aws_sdk_kms::Client,
 ) -> aws_sdk_kms::operation::encrypt::builders::EncryptFluentBuilder {
     client.encrypt()
         .set_plaintext(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.Plaintext().clone())))
@@ -76,5 +76,4 @@ pub fn from_dafny(
             dafny_standard_library::conversion::option_from_dafny(
                 dafny_value.EncryptionAlgorithm().clone(), 
                 |x| crate::conversions::encryption_algorithm_spec::from_dafny(x)))
-
 }

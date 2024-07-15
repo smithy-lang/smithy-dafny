@@ -4,7 +4,7 @@ pub fn to_dafny(
     value: aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextInput
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest,
-> {
+>{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest::GenerateDataKeyWithoutPlaintextRequest  {
         KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id).Extract(),
         EncryptionContext: 
@@ -50,7 +50,7 @@ pub fn from_dafny(
         crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest,
     >,
     client: aws_sdk_kms::Client
-) -> aws_sdk_kms::operation::generate_data_key_without_plaintext::builders::GenerateDataKeyWithoutPlaintextFluentBuilder {
+) -> aws_sdk_kms::operation::generate_data_key_without_plaintext::builders::GenerateDataKeyWithoutPlaintextFluentBuilder{
     client.generate_data_key_without_plaintext()
         .set_key_id(Some(
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -84,5 +84,4 @@ pub fn from_dafny(
             _ => None
         })
         .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
-
 }

@@ -2,18 +2,17 @@ pub mod _generate_data_key_request;
 
 pub mod _generate_data_key_response;
 
-
 use aws_sdk_kms::error::SdkError;
 use crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::*;
 
 #[allow(dead_code)]
 pub fn to_dafny_error(
     value: &::aws_smithy_runtime_api::client::result::SdkError<
-      aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError,
-      ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-  >,
+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError,
+        ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
+    >,
 ) -> ::std::rc::Rc<Error> {
-  match value {
+    match value {
     SdkError::ServiceError(service_error) => {
       match service_error.err() {  
         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::DependencyTimeoutException(e) => 
@@ -35,5 +34,4 @@ pub fn to_dafny_error(
       panic!()
     }
   }
-  
 }
