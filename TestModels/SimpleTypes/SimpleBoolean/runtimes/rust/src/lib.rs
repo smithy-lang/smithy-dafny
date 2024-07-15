@@ -13,6 +13,8 @@ pub mod operation;
 
 mod conversions;
 
+pub mod implementation_from_dafny;
+
 #[cfg(feature = "wrapped-client")]
 pub mod wrapped;
 
