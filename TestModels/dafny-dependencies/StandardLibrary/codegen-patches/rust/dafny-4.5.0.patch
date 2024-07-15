@@ -74,7 +74,7 @@ index 00000000..fb5e7bf9
 \ No newline at end of file
 diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs
 new file mode 100644
-index 00000000..070faeb2
+index 00000000..8b20a995
 --- /dev/null
 +++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs
 @@ -0,0 +1,175 @@
@@ -208,7 +208,7 @@ index 00000000..070faeb2
 +}
 +
 +pub fn option_to_dafny<T: ::dafny_runtime::DafnyType, TR>(
-+    input: Option<TR>,
++    input: &Option<TR>,
 +    converter: fn(&TR) -> T,
 +) -> ::std::rc::Rc<_Wrappers_Compile::Option<T>> {
 +    match input {
@@ -236,7 +236,7 @@ index 00000000..070faeb2
 +}
 +
 +pub fn result_to_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
-+    input: Result<TR, ER>,
++    input: &Result<TR, ER>,
 +    converter_t: fn(&TR) -> T,
 +    converter_e: fn(&ER) -> E,
 +) -> ::std::rc::Rc<_Wrappers_Compile::Result<T, E>> {
