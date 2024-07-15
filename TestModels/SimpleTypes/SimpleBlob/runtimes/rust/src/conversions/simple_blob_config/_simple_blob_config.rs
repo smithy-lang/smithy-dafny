@@ -3,15 +3,15 @@
 
 pub fn to_dafny(
     value: crate::types::simple_blob_config::SimpleBlobConfig,
-) -> ::std::rc::Rc<::simple_blob_dafny::_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig>
+) -> ::std::rc::Rc<crate::implementation_from_dafny::_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig>
 {
-    ::std::rc::Rc::new(::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig::SimpleBlobConfig {})
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig::SimpleBlobConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_blob_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig,
+        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig,
     >,
 ) -> crate::types::simple_blob_config::SimpleBlobConfig {
     crate::types::simple_blob_config::SimpleBlobConfig {}
