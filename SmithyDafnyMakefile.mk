@@ -419,6 +419,7 @@ _polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python
 _polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
 # Defined per-Makefile
 _polymorph_python: DEPENDENCY_MODULE_NAMES=$(PYTHON_DEPENDENCY_MODULE_NAMES)
+_polymorph_python: _polymorph
 
 # Dependency for formatting generating Java code
 setup_prettier:

@@ -1,14 +1,16 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO-Python-PYTHONPATH: Qualify imports
-import simple_constructor_internaldafny_wrapped
+# src imports
 from simple_constructor.smithygenerated.simple_constructor.client import SimpleConstructor
 from simple_constructor.smithygenerated.simple_constructor.shim import SimpleConstructorShim
 from simple_constructor.smithygenerated.simple_constructor.config import dafny_config_to_smithy_config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
-class default__(simple_constructor_internaldafny_wrapped.default__):
+# test imports, not qualified since this isn't in a package
+import WrappedSimpleConstructorService
+
+class default__(WrappedSimpleConstructorService.default__):
 
     @staticmethod
     def WrappedSimpleConstructor(config):
@@ -17,5 +19,4 @@ class default__(simple_constructor_internaldafny_wrapped.default__):
         wrapped_client = SimpleConstructorShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-# (TODO-Python-PYTHONPATH: Remove)
-simple_constructor_internaldafny_wrapped.default__ = default__
+WrappedSimpleConstructorService.default__ = default__
