@@ -1,5 +1,3 @@
-use dafny_standard_library::implementation_from_dafny;
-
 use crate::conversions;
 
 struct Client {
@@ -26,10 +24,6 @@ impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservic
         conversions::decrypt::to_dafny_error)
     }
   
-    fn DeriveSharedSecret(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-        todo!()
-    }
-  
     fn Encrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
       let native_result = 
         self.rt.block_on(conversions::encrypt::_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
@@ -54,12 +48,16 @@ impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservic
         conversions::generate_data_key_without_plaintext::to_dafny_error)
     }
   
+    fn DeriveSharedSecret(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
+      todo!()
+    }
+
     fn GetPublicKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-        todo!()
+      todo!()
     }
   
     fn ReEncrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-        todo!()
+      todo!()
     }
   }
 

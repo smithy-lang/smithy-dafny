@@ -37,14 +37,3 @@ pub fn to_dafny_error(
   }
   
 }
-
-struct DafnyError {
-  inner: ::aws_smithy_runtime_api::client::result::SdkError<
-    aws_sdk_kms::operation::decrypt::DecryptError,
-    ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-  >
-}
-
-impl dafny_runtime::UpcastObject<dyn std::any::Any> for DafnyError {
-  ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
-}
