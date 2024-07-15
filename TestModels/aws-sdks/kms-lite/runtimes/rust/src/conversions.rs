@@ -2,6 +2,8 @@
 
 pub mod generate_data_key;
 
+pub mod generate_data_key_without_plaintext;
+
 pub mod encrypt;
 
 pub mod decrypt;
