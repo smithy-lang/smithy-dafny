@@ -3,16 +3,16 @@
 pub fn to_dafny(
     value: crate::operation::only_output::OnlyOutputOutput,
 ) -> ::std::rc::Rc<
-    ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput,
+    crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput,
 > {
     let crate::operation::only_output::OnlyOutputOutput { value } = value;
 
     let optional_string = match value {
-        Some(s) => ::simple_refinement_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-        None => ::simple_refinement_dafny::_Wrappers_Compile::Option::None {},
+        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
     };
 
-    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput::OnlyOutputOutput {
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput::OnlyOutputOutput {
         value: ::std::rc::Rc::new(optional_string)
   })
 }
@@ -20,15 +20,15 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput,
+        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput,
     >,
 ) -> crate::operation::only_output::OnlyOutputOutput {
-    let ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput::OnlyOutputOutput { value } = dafny_value.as_ref();
+    let crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput::OnlyOutputOutput { value } = dafny_value.as_ref();
 
     let optional_string = match value.as_ref() {
-        simple_refinement_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
-        simple_refinement_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
-        simple_refinement_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
     };
 
     crate::operation::only_output::OnlyOutputOutput {

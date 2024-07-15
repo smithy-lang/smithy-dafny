@@ -3,9 +3,9 @@
 pub fn to_dafny(
     value: crate::operation::get_resource_data::GetResourceDataInput,
 ) -> ::std::rc::Rc<
-    ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataInput,
+    crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataInput,
 > {
-    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataInput::GetResourceDataInput {
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataInput::GetResourceDataInput {
         stringValue: dafny_standard_library::conversion::ostring_to_dafny(value.string_value()),
         booleanValue: dafny_standard_library::conversion::obool_to_dafny(value.boolean_value()),
         integerValue: dafny_standard_library::conversion::oint_to_dafny(value.integer_value()),
@@ -17,11 +17,11 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataInput,
+        crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataInput,
     >,
 ) -> crate::operation::get_resource_data::GetResourceDataInput {
     match &*dafny_value {
-        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataInput::GetResourceDataInput {
+        crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourceDataInput::GetResourceDataInput {
             blobValue,
             booleanValue,
             integerValue,
