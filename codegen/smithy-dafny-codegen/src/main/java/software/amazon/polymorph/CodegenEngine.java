@@ -687,7 +687,7 @@ public class CodegenEngine {
 
     // TODO: Dumb special case
     if (!serviceShape.getId().getName().equals("StandardLibrary")) {
-      Generator.DoIt(model, outputDir);
+      Generator.usingSmithyRs(model, outputDir);
     }
 
     handlePatching(TargetLanguage.RUST, outputDir);

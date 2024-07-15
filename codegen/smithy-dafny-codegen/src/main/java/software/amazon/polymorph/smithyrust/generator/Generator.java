@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 public class Generator {
 
-    public static void DoIt(final Model model, final Path outputDir) {
+    public static void usingSmithyRs(final Model model, final Path outputDir) {
         // Mock up a PluginContext for the benefit of smithy-rs libraries
         FileManifest fileManifest = FileManifest.create(outputDir);
         ObjectNode settingsNode = ObjectNode.builder()
@@ -60,4 +60,8 @@ public class Generator {
         // ClientCodegenVisitor is the main driver of code generation that traverses the model and generates code
         new ClientCodegenVisitor(context, codegenDecorator).execute();
     }
+
+    public static void handRolled(final Model model, final Path outputDir) {
+    }
+
 }
