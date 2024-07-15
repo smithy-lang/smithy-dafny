@@ -20,7 +20,7 @@ impl GetDouble {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetDouble(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_double_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_double::_get_double_output::from_dafny(

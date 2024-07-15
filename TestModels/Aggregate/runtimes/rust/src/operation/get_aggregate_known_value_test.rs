@@ -20,7 +20,7 @@ impl GetAggregateKnownValueTest {
             .GetAggregateKnownValueTest(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_aggregate_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_aggregate_known_value_test::_get_aggregate_known_value_test_output::from_dafny(

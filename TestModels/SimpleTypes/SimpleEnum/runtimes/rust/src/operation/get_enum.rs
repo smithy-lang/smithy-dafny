@@ -19,7 +19,7 @@ impl GetEnum {
         let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetEnum(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_enum_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(crate::conversions::get_enum::_get_enum_output::from_dafny(
                 inner_result.value().clone(),

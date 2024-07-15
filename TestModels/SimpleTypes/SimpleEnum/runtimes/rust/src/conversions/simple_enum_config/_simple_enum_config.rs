@@ -4,15 +4,15 @@
 pub fn to_dafny(
     value: crate::types::simple_enum_config::SimpleEnumConfig,
 ) -> ::std::rc::Rc<
-    ::simple_enum_dafny::_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig,
+    crate::implementation_from_dafny::_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig,
 > {
-    ::std::rc::Rc::new(::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig::SimpleEnumConfig {})
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig::SimpleEnumConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig,
+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig,
     >,
 ) -> crate::types::simple_enum_config::SimpleEnumConfig {
     crate::types::simple_enum_config::SimpleEnumConfig {}

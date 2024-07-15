@@ -4,7 +4,7 @@ use aws_smithy_types::error::operation::BuildError;
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_string_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient>
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient>
 }
 
 impl Client {
@@ -16,12 +16,12 @@ impl Client {
         // If this service had any configuration properties,
         // they would need converting here too.
         let inner =
-            ::simple_string_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::SimpleString(
+            crate::implementation_from_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::SimpleString(
                 &crate::conversions::simple_string_config::_simple_string_config::to_dafny(conf),
             );
         if matches!(
             inner.as_ref(),
-            ::simple_string_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(

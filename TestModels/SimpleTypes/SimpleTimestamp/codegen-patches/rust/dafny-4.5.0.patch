@@ -1,641 +1,6 @@
-diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-index 589cf1aa..7564c63a 100644
---- b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-+++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-@@ -2,4 +2,630 @@
- #![allow(nonstandard_style)]
- pub use dafny_standard_library::implementation_from_dafny::*;
- 
-+pub mod r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes {
-+    #[derive(PartialEq, Clone)]
-+    pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
-+        DafnyCallEvent { input: I, output: O },
-+        _PhantomVariant(::std::marker::PhantomData<I>, ::std::marker::PhantomData<O>),
-+    }
-+
-+    impl<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> DafnyCallEvent<I, O> {
-+        pub fn input(&self) -> &I {
-+            match self {
-+                DafnyCallEvent::DafnyCallEvent { input, output } => input,
-+                DafnyCallEvent::_PhantomVariant(..) => panic!(),
-+            }
-+        }
-+        pub fn output(&self) -> &O {
-+            match self {
-+                DafnyCallEvent::DafnyCallEvent { input, output } => output,
-+                DafnyCallEvent::_PhantomVariant(..) => panic!(),
-+            }
-+        }
-+    }
-+
-+    impl<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> ::std::fmt::Debug
-+        for DafnyCallEvent<I, O>
-+    {
-+        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
-+            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-+        }
-+    }
-+
-+    impl<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> ::dafny_runtime::DafnyPrint
-+        for DafnyCallEvent<I, O>
-+    {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            match self {
-+                DafnyCallEvent::DafnyCallEvent { input, output } => {
-+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.DafnyCallEvent.DafnyCallEvent(")?;
-+                    ::dafny_runtime::DafnyPrint::fmt_print(input, _formatter, false)?;
-+                    write!(_formatter, ", ")?;
-+                    ::dafny_runtime::DafnyPrint::fmt_print(output, _formatter, false)?;
-+                    write!(_formatter, ")")?;
-+                    Ok(())
-+                }
-+                DafnyCallEvent::_PhantomVariant(..) => {
-+                    panic!()
-+                }
-+            }
-+        }
-+    }
-+
-+    impl<I: ::dafny_runtime::DafnyType + Eq, O: ::dafny_runtime::DafnyType + Eq> Eq
-+        for DafnyCallEvent<I, O>
-+    {
-+    }
-+
-+    impl<
-+            I: ::dafny_runtime::DafnyType + ::std::hash::Hash,
-+            O: ::dafny_runtime::DafnyType + ::std::hash::Hash,
-+        > ::std::hash::Hash for DafnyCallEvent<I, O>
-+    {
-+        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-+            match self {
-+                DafnyCallEvent::DafnyCallEvent { input, output } => {
-+                    input.hash(_state);
-+                    output.hash(_state)
-+                }
-+                DafnyCallEvent::_PhantomVariant(..) => {
-+                    panic!()
-+                }
-+            }
-+        }
-+    }
-+
-+    impl<
-+            I: ::dafny_runtime::DafnyType + ::std::default::Default,
-+            O: ::dafny_runtime::DafnyType + ::std::default::Default,
-+        > ::std::default::Default for DafnyCallEvent<I, O>
-+    {
-+        fn default() -> DafnyCallEvent<I, O> {
-+            DafnyCallEvent::DafnyCallEvent {
-+                input: ::std::default::Default::default(),
-+                output: ::std::default::Default::default(),
-+            }
-+        }
-+    }
-+
-+    impl<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType>
-+        ::std::convert::AsRef<DafnyCallEvent<I, O>> for &DafnyCallEvent<I, O>
-+    {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+
-+    #[derive(PartialEq, Clone)]
-+    pub enum GetTimestampInput {
-+        GetTimestampInput {
-+            value: ::std::rc::Rc<
-+                super::r#_Wrappers_Compile::Option<
-+                    ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+                >,
-+            >,
-+        },
-+    }
-+
-+    impl GetTimestampInput {
-+        pub fn value(
-+            &self,
-+        ) -> &::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Option<
-+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+            >,
-+        > {
-+            match self {
-+                GetTimestampInput::GetTimestampInput { value } => value,
-+            }
-+        }
-+    }
-+
-+    impl ::std::fmt::Debug for GetTimestampInput {
-+        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
-+            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-+        }
-+    }
-+
-+    impl ::dafny_runtime::DafnyPrint for GetTimestampInput {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            match self {
-+                GetTimestampInput::GetTimestampInput { value } => {
-+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.GetTimestampInput.GetTimestampInput(")?;
-+                    ::dafny_runtime::DafnyPrint::fmt_print(value, _formatter, false)?;
-+                    write!(_formatter, ")")?;
-+                    Ok(())
-+                }
-+            }
-+        }
-+    }
-+
-+    impl Eq for GetTimestampInput {}
-+
-+    impl ::std::hash::Hash for GetTimestampInput {
-+        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-+            match self {
-+                GetTimestampInput::GetTimestampInput { value } => value.hash(_state),
-+            }
-+        }
-+    }
-+
-+    impl ::std::default::Default for GetTimestampInput {
-+        fn default() -> GetTimestampInput {
-+            GetTimestampInput::GetTimestampInput {
-+                value: ::std::default::Default::default(),
-+            }
-+        }
-+    }
-+
-+    impl ::std::convert::AsRef<GetTimestampInput> for &GetTimestampInput {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+
-+    #[derive(PartialEq, Clone)]
-+    pub enum GetTimestampOutput {
-+        GetTimestampOutput {
-+            value: ::std::rc::Rc<
-+                super::r#_Wrappers_Compile::Option<
-+                    ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+                >,
-+            >,
-+        },
-+    }
-+
-+    impl GetTimestampOutput {
-+        pub fn value(
-+            &self,
-+        ) -> &::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Option<
-+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+            >,
-+        > {
-+            match self {
-+                GetTimestampOutput::GetTimestampOutput { value } => value,
-+            }
-+        }
-+    }
-+
-+    impl ::std::fmt::Debug for GetTimestampOutput {
-+        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
-+            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-+        }
-+    }
-+
-+    impl ::dafny_runtime::DafnyPrint for GetTimestampOutput {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            match self {
-+                GetTimestampOutput::GetTimestampOutput { value } => {
-+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.GetTimestampOutput.GetTimestampOutput(")?;
-+                    ::dafny_runtime::DafnyPrint::fmt_print(value, _formatter, false)?;
-+                    write!(_formatter, ")")?;
-+                    Ok(())
-+                }
-+            }
-+        }
-+    }
-+
-+    impl Eq for GetTimestampOutput {}
-+
-+    impl ::std::hash::Hash for GetTimestampOutput {
-+        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-+            match self {
-+                GetTimestampOutput::GetTimestampOutput { value } => value.hash(_state),
-+            }
-+        }
-+    }
-+
-+    impl ::std::default::Default for GetTimestampOutput {
-+        fn default() -> GetTimestampOutput {
-+            GetTimestampOutput::GetTimestampOutput {
-+                value: ::std::default::Default::default(),
-+            }
-+        }
-+    }
-+
-+    impl ::std::convert::AsRef<GetTimestampOutput> for &GetTimestampOutput {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+
-+    #[derive(PartialEq, Clone)]
-+    pub enum SimpleTimestampConfig {
-+        SimpleTimestampConfig {},
-+    }
-+
-+    impl SimpleTimestampConfig {}
-+
-+    impl ::std::fmt::Debug for SimpleTimestampConfig {
-+        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
-+            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-+        }
-+    }
-+
-+    impl ::dafny_runtime::DafnyPrint for SimpleTimestampConfig {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            match self {
-+                SimpleTimestampConfig::SimpleTimestampConfig {} => {
-+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.SimpleTimestampConfig.SimpleTimestampConfig")?;
-+                    Ok(())
-+                }
-+            }
-+        }
-+    }
-+
-+    impl Eq for SimpleTimestampConfig {}
-+
-+    impl ::std::hash::Hash for SimpleTimestampConfig {
-+        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-+            match self {
-+                SimpleTimestampConfig::SimpleTimestampConfig {} => {}
-+            }
-+        }
-+    }
-+
-+    impl ::std::default::Default for SimpleTimestampConfig {
-+        fn default() -> SimpleTimestampConfig {
-+            SimpleTimestampConfig::SimpleTimestampConfig {}
-+        }
-+    }
-+
-+    impl ::std::convert::AsRef<SimpleTimestampConfig> for &SimpleTimestampConfig {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+
-+    pub struct ISimpleTypesTimestampClientCallHistory {}
-+
-+    impl ISimpleTypesTimestampClientCallHistory {
-+        pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
-+            ::dafny_runtime::allocate_rcmut::<Self>()
-+        }
-+    }
-+
-+    pub trait ISimpleTypesTimestampClient {
-+        fn GetTimestamp(
-+            &mut self,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
-+            >,
-+        >;
-+    }
-+
-+    #[derive(PartialEq, Clone)]
-+    pub enum Error {
-+        CollectionOfErrors {
-+            list: ::dafny_runtime::Sequence<
-+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
-+            >,
-+            message: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+        },
-+        Opaque {
-+            obj: ::dafny_runtime::Object<dyn::std::any::Any>,
-+        },
-+    }
-+
-+    impl Error {
-+        pub fn list(
-+            &self,
-+        ) -> &::dafny_runtime::Sequence<
-+            ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
-+        > {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => list,
-+                Error::Opaque { obj } => panic!("field does not exist on this variant"),
-+            }
-+        }
-+        pub fn message(&self) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => message,
-+                Error::Opaque { obj } => panic!("field does not exist on this variant"),
-+            }
-+        }
-+        pub fn obj(&self) -> &::dafny_runtime::Object<dyn::std::any::Any> {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => {
-+                    panic!("field does not exist on this variant")
-+                }
-+                Error::Opaque { obj } => obj,
-+            }
-+        }
-+    }
-+
-+    impl ::std::fmt::Debug for Error {
-+        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
-+            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-+        }
-+    }
-+
-+    impl ::dafny_runtime::DafnyPrint for Error {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => {
-+                    write!(_formatter, "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.Error.CollectionOfErrors(")?;
-+                    ::dafny_runtime::DafnyPrint::fmt_print(list, _formatter, false)?;
-+                    write!(_formatter, ", ")?;
-+                    ::dafny_runtime::DafnyPrint::fmt_print(message, _formatter, false)?;
-+                    write!(_formatter, ")")?;
-+                    Ok(())
-+                }
-+                Error::Opaque { obj } => {
-+                    write!(
-+                        _formatter,
-+                        "r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes.Error.Opaque("
-+                    )?;
-+                    ::dafny_runtime::DafnyPrint::fmt_print(obj, _formatter, false)?;
-+                    write!(_formatter, ")")?;
-+                    Ok(())
-+                }
-+            }
-+        }
-+    }
-+
-+    impl Eq for Error {}
-+
-+    impl ::std::hash::Hash for Error {
-+        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-+            match self {
-+                Error::CollectionOfErrors { list, message } => {
-+                    list.hash(_state);
-+                    message.hash(_state)
-+                }
-+                Error::Opaque { obj } => obj.hash(_state),
-+            }
-+        }
-+    }
-+
-+    impl ::std::default::Default for Error {
-+        fn default() -> Error {
-+            Error::CollectionOfErrors {
-+                list: ::std::default::Default::default(),
-+                message: ::std::default::Default::default(),
-+            }
-+        }
-+    }
-+
-+    impl ::std::convert::AsRef<Error> for &Error {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+
-+    pub type OpaqueError =
-+        ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>;
-+}
-+pub mod r#_SimpleTypesTimestampImpl_Compile {
-+    pub struct _default {}
-+
-+    impl _default {
-+        pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
-+            ::dafny_runtime::allocate_rcmut::<Self>()
-+        }
-+        pub fn GetTimestamp(
-+            config: &::std::rc::Rc<super::r#_SimpleTypesTimestampImpl_Compile::Config>,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>>::new();
-+            let mut res: ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput> = ::std::rc::Rc::new(super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput::GetTimestampOutput {
-+            value: input.value().clone()
-+          });
-+            res = ::std::rc::Rc::new(super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput::GetTimestampOutput {
-+            value: input.value().clone()
-+          });
-+            output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>::Success {
-+              value: res.clone()
-+            }));
-+            return output.read();
-+            return output.read();
-+        }
-+    }
-+
-+    #[derive(PartialEq, Clone)]
-+    pub enum Config {
-+        Config {},
-+    }
-+
-+    impl Config {}
-+
-+    impl ::std::fmt::Debug for Config {
-+        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
-+            ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-+        }
-+    }
-+
-+    impl ::dafny_runtime::DafnyPrint for Config {
-+        fn fmt_print(
-+            &self,
-+            _formatter: &mut ::std::fmt::Formatter,
-+            _in_seq: bool,
-+        ) -> std::fmt::Result {
-+            match self {
-+                Config::Config {} => {
-+                    write!(
-+                        _formatter,
-+                        "r#_SimpleTypesTimestampImpl_Compile.Config.Config"
-+                    )?;
-+                    Ok(())
-+                }
-+            }
-+        }
-+    }
-+
-+    impl Eq for Config {}
-+
-+    impl ::std::hash::Hash for Config {
-+        fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-+            match self {
-+                Config::Config {} => {}
-+            }
-+        }
-+    }
-+
-+    impl ::std::default::Default for Config {
-+        fn default() -> Config {
-+            Config::Config {}
-+        }
-+    }
-+
-+    impl ::std::convert::AsRef<Config> for &Config {
-+        fn as_ref(&self) -> Self {
-+            self
-+        }
-+    }
-+}
-+pub mod r#_simple_dtypes_dtimestamp_dinternaldafny {
-+    pub struct _default {}
-+
-+    impl _default {
-+        pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
-+            ::dafny_runtime::allocate_rcmut::<Self>()
-+        }
-+        pub fn DefaultSimpleTimestampConfig() -> ::std::rc::Rc<
-+            super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig,
-+        > {
-+            ::std::rc::Rc::new(super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig::SimpleTimestampConfig {})
-+        }
-+        pub fn SimpleTimestamp(
-+            config: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::dafny_runtime::Object<
-+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            let mut res = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>>::new();
-+            let mut client = ::dafny_runtime::MaybePlacebo::<
-+                ::dafny_runtime::Object<
-+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient,
-+                >,
-+            >::new();
-+            let mut _nw0: ::dafny_runtime::Object<super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient> = super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient::_allocate_rcmut();
-+            super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient::_ctor(
-+                &_nw0,
-+                &::std::rc::Rc::new(super::r#_SimpleTypesTimestampImpl_Compile::Config::Config {}),
-+            );
-+            client = ::dafny_runtime::MaybePlacebo::from(_nw0.clone());
-+            res = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
-+                super::r#_Wrappers_Compile::Result::<
-+                    ::dafny_runtime::Object<
-+                        super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient,
-+                    >,
-+                    ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
-+                >::Success {
-+                    value: client.read(),
-+                },
-+            ));
-+            return res.read();
-+            return res.read();
-+        }
-+        pub fn CreateSuccessOfClient(client: &::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>{
-+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>::Success {
-+          value: client.clone()
-+        })
-+        }
-+        pub fn CreateFailureOfError(error: &::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>{
-+            ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>::Failure {
-+          error: error.clone()
-+        })
-+        }
-+    }
-+
-+    pub struct SimpleTimestampClient {
-+        pub r#__i_config: ::std::rc::Rc<super::r#_SimpleTypesTimestampImpl_Compile::Config>,
-+    }
-+
-+    impl SimpleTimestampClient {
-+        pub fn _allocate_rcmut() -> ::dafny_runtime::Object<Self> {
-+            ::dafny_runtime::allocate_rcmut::<Self>()
-+        }
-+        pub fn _ctor(
-+            this: &::dafny_runtime::Object<Self>,
-+            config: &::std::rc::Rc<super::r#_SimpleTypesTimestampImpl_Compile::Config>,
-+        ) -> () {
-+            let mut _set__i_config: bool = false;
-+            ::dafny_runtime::update_field_uninit_rcmut!(
-+                this.clone(),
-+                r#__i_config,
-+                _set__i_config,
-+                config.clone()
-+            );
-+            return ();
-+        }
-+        pub fn config(&self) -> ::std::rc::Rc<super::r#_SimpleTypesTimestampImpl_Compile::Config> {
-+            self.r#__i_config.clone()
-+        }
-+    }
-+
-+    impl super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient
-+        for super::r#_simple_dtypes_dtimestamp_dinternaldafny::SimpleTimestampClient
-+    {
-+        fn GetTimestamp(
-+            &mut self,
-+            input: &::std::rc::Rc<
-+                super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
-+            >,
-+        ) -> ::std::rc::Rc<
-+            super::r#_Wrappers_Compile::Result<
-+                ::std::rc::Rc<
-+                    super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
-+                >,
-+                ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>,
-+            >,
-+        > {
-+            let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>>::new();
-+            let mut _out0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>>>>::new();
-+            _out0 = ::dafny_runtime::MaybePlacebo::from(
-+                super::r#_SimpleTypesTimestampImpl_Compile::_default::GetTimestamp(
-+                    &self.config(),
-+                    input,
-+                ),
-+            );
-+            output = ::dafny_runtime::MaybePlacebo::from(_out0.read());
-+            return output.read();
-+        }
-+    }
-+}
- pub mod _module {}
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..016316d1
+index 00000000..c6ba180a
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/client.rs
 @@ -0,0 +1,37 @@
@@ -645,7 +10,7 @@ index 00000000..016316d1
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient>
 +}
 +
 +impl Client {
@@ -655,12 +20,12 @@ index 00000000..016316d1
 +        conf: crate::types::simple_timestamp_config::SimpleTimestampConfig,
 +    ) -> Result<Self, BuildError> {
 +        let inner =
-+            ::simple_timestamp_dafny::_simple_dtypes_dtimestamp_dinternaldafny::_default::SimpleTimestamp(
++            crate::implementation_from_dafny::_simple_dtypes_dtimestamp_dinternaldafny::_default::SimpleTimestamp(
 +                &crate::conversions::simple_timestamp_config::_simple_timestamp_config::to_dafny(conf),
 +            );
 +        if matches!(
 +            inner.as_ref(),
-+            ::simple_timestamp_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -670,7 +35,7 @@ index 00000000..016316d1
 +            ));
 +        }
 +        Ok(Self {
-+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::ISimpleTypesTimestampClient + 'static)>>::upcast_to(inner.Extract()),
++            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
 +        })
 +    }
 +}
@@ -709,7 +74,7 @@ index 00000000..6c19c684
 +pub mod simple_timestamp_config;
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp.rs
 new file mode 100644
-index 00000000..db47687e
+index 00000000..faf18468
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp.rs
 @@ -0,0 +1,33 @@
@@ -720,22 +85,22 @@ index 00000000..db47687e
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_timestamp::GetTimestampError,
-+) -> ::std::rc::Rc<::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error>
 +{
 +    match value {
 +    crate::operation::get_timestamp::GetTimestampError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::get_timestamp::GetTimestampError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_timestamp::GetTimestampError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -748,7 +113,7 @@ index 00000000..db47687e
 +pub mod _get_timestamp_output;
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp/_get_timestamp_input.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp/_get_timestamp_input.rs
 new file mode 100644
-index 00000000..7c5c8ed0
+index 00000000..eed8f2f3
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp/_get_timestamp_input.rs
 @@ -0,0 +1,40 @@
@@ -757,13 +122,13 @@ index 00000000..7c5c8ed0
 +pub fn to_dafny(
 +    value: crate::operation::get_timestamp::GetTimestampInput,
 +) -> ::std::rc::Rc<
-+    ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(s) => ::simple_timestamp_dafny::_Wrappers_Compile::Option::Some { value: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s.to_string()) },
-+        None => ::simple_timestamp_dafny::_Wrappers_Compile::Option::None {},
++        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s.to_string()) },
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput::GetTimestampInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput::GetTimestampInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -771,15 +136,15 @@ index 00000000..7c5c8ed0
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
++        crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampInput,
 +    >,
 +) -> Result<
 +    crate::operation::get_timestamp::GetTimestampInput,
 +    aws_smithy_types::date_time::DateTimeParseError,
 +> {
 +    let value = match dafny_value.value().as_ref() {
-+        simple_timestamp_dafny::_Wrappers_Compile::Option::None {} => None,
-+        simple_timestamp_dafny::_Wrappers_Compile::Option::Some { value } => {
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => None,
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
 +            let value = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value);
 +            let value = ::aws_smithy_types::DateTime::from_str(
 +                &value,
@@ -787,14 +152,14 @@ index 00000000..7c5c8ed0
 +            )?;
 +            Some(value)
 +        }
-+        simple_timestamp_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
 +    };
 +
 +    Ok(crate::operation::get_timestamp::GetTimestampInput { value })
 +}
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp/_get_timestamp_output.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp/_get_timestamp_output.rs
 new file mode 100644
-index 00000000..d1e4cf72
+index 00000000..7b170a68
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/get_timestamp/_get_timestamp_output.rs
 @@ -0,0 +1,40 @@
@@ -803,13 +168,13 @@ index 00000000..d1e4cf72
 +pub fn to_dafny(
 +    value: crate::operation::get_timestamp::GetTimestampOutput,
 +) -> ::std::rc::Rc<
-+    ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(s) => ::simple_timestamp_dafny::_Wrappers_Compile::Option::Some { value: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s.to_string()) },
-+        None => ::simple_timestamp_dafny::_Wrappers_Compile::Option::None {},
++        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s.to_string()) },
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput::GetTimestampOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput::GetTimestampOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -817,15 +182,15 @@ index 00000000..d1e4cf72
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
++        crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::GetTimestampOutput,
 +    >,
 +) -> Result<
 +    crate::operation::get_timestamp::GetTimestampOutput,
 +    aws_smithy_types::date_time::DateTimeParseError,
 +> {
 +    let value = match dafny_value.value().as_ref() {
-+        simple_timestamp_dafny::_Wrappers_Compile::Option::None {} => None,
-+        simple_timestamp_dafny::_Wrappers_Compile::Option::Some { value } => {
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => None,
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
 +            let value = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value);
 +            let value = ::aws_smithy_types::DateTime::from_str(
 +                &value,
@@ -833,7 +198,7 @@ index 00000000..d1e4cf72
 +            )?;
 +            Some(value)
 +        }
-+        simple_timestamp_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
 +    };
 +
 +    Ok(crate::operation::get_timestamp::GetTimestampOutput { value })
@@ -849,7 +214,7 @@ index 00000000..3ab14490
 +pub mod _simple_timestamp_config;
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/simple_timestamp_config/_simple_timestamp_config.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/simple_timestamp_config/_simple_timestamp_config.rs
 new file mode 100644
-index 00000000..a4cd3bba
+index 00000000..e63d9f57
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/conversions/simple_timestamp_config/_simple_timestamp_config.rs
 @@ -0,0 +1,19 @@
@@ -859,15 +224,15 @@ index 00000000..a4cd3bba
 +pub fn to_dafny(
 +    value: crate::types::simple_timestamp_config::SimpleTimestampConfig,
 +) -> ::std::rc::Rc<
-+    ::simple_timestamp_dafny::_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig,
++    crate::implementation_from_dafny::_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig,
 +>{
-+    ::std::rc::Rc::new(::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig::SimpleTimestampConfig {})
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig::SimpleTimestampConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_timestamp_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig,
++        crate::implementation_from_dafny::r#_simple_dtypes_dtimestamp_dinternaldafny_dtypes::SimpleTimestampConfig,
 +    >,
 +) -> crate::types::simple_timestamp_config::SimpleTimestampConfig {
 +    crate::types::simple_timestamp_config::SimpleTimestampConfig {}
@@ -894,10 +259,10 @@ index 00000000..ec89cbec
 +pub(crate) mod sealed_unhandled;
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/error/sealed_unhandled.rs
 new file mode 100644
-index 00000000..9d21fbd6
+index 00000000..cce22d1c
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/error/sealed_unhandled.rs
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,26 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +/// This struct is not intended to be used.
 +///
@@ -920,12 +285,16 @@ index 00000000..9d21fbd6
 +    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
 +    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
 +}
++
++impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
++    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
++}
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/lib.rs
 new file mode 100644
-index 00000000..48fd3697
+index 00000000..4e55b724
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/lib.rs
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,19 @@
 +#![allow(deprecated)]
 +
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
@@ -941,6 +310,8 @@ index 00000000..48fd3697
 +
 +mod conversions;
 +
++pub mod implementation_from_dafny;
++
 +pub use client::Client;
 +pub use types::simple_timestamp_config::SimpleTimestampConfig;
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/operation.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/operation.rs
@@ -955,7 +326,7 @@ index 00000000..14ae6ca5
 +pub mod get_timestamp;
 diff --git b/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/operation/get_timestamp.rs a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/operation/get_timestamp.rs
 new file mode 100644
-index 00000000..fe0aa3e1
+index 00000000..099c8377
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleTimestamp/runtimes/rust/src/operation/get_timestamp.rs
 @@ -0,0 +1,144 @@
@@ -981,7 +352,7 @@ index 00000000..fe0aa3e1
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetTimestamp(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_timestamp_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            crate::conversions::get_timestamp::_get_timestamp_output::from_dafny(
 +                inner_result.value().clone(),

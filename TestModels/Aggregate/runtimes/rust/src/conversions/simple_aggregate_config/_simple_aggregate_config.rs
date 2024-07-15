@@ -5,16 +5,16 @@
 pub fn to_dafny(
     value: crate::types::simple_aggregate_config::SimpleAggregateConfig,
 ) -> ::std::rc::Rc<
-    ::simple_aggregate_dafny::_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig,
+    crate::implementation_from_dafny::_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig,
 > {
-    ::std::rc::Rc::new(::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig::SimpleAggregateConfig {})
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig::SimpleAggregateConfig {})
 }
 
 #[allow(unused_variables)]
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig,
+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig,
     >,
 ) -> crate::types::simple_aggregate_config::SimpleAggregateConfig {
     crate::types::simple_aggregate_config::SimpleAggregateConfig {}
