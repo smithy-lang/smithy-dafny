@@ -3,11 +3,6 @@
 
 package software.amazon.smithy.dafny.codegen;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.CodegenEngine;
@@ -16,6 +11,12 @@ import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.model.Model;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
 
@@ -56,6 +57,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
             "main",
             "smithy-generated"
           );
+          case RUST -> Paths.get("runtimes", "rust");
           default -> throw new UnsupportedOperationException(
             lang + " is not yet supported"
           );

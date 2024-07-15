@@ -12,7 +12,7 @@ include ../../SharedMakefile.mk
 
 
 PROJECT_SERVICES := \
-	ComAmazonawsDynamodb \
+	ComAmazonawsDynamodb
 
 SERVICE_NAMESPACE_ComAmazonawsDynamodb=com.amazonaws.dynamodb
 
@@ -37,6 +37,9 @@ _polymorph_dotnet:
 
 _polymorph_java:
 	$(GRADLEW) polymorphJava
+
+_polymorph_rust:
+	$(GRADLEW) polymorphRust
 
 # There is no wrapped target for aws-sdk types
 _polymorph: ;
