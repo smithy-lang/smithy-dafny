@@ -13,16 +13,4 @@ pub fn to_dafny(
     })
 }
 
-// #[allow(dead_code)]
-// pub fn from_dafny(
-//     dafny_value: ::std::rc::Rc<
-//         crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse,
-//     >
-// ) -> aws_sdk_kms::operation::generate_data_key::GenerateDataKeyOutput {
-//   aws_sdk_kms::operation::generate_data_key::GenerateDataKeyOutput::builder()
-//     .set_ciphertext_blob(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.CiphertextBlob()))
-//     .set_plaintext(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.Plaintext()))
-//     .set_key_id(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.KeyId()))
-//     .set_ciphertext_for_recipient(dafny_standard_library::conversion::oblob_from_dafny(*dafny_value.CiphertextForRecipient()))
-//     .build()
-// }
+// from_dafny ommitted to save time until we get to actual code generation

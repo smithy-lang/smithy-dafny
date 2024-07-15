@@ -1,5 +1,25 @@
 pub mod dependency_timeout_exception;
 
+pub mod disabled_exception;
+
+pub mod dry_run_operation_exception;
+
+pub mod incorrect_key_exception;
+
+pub mod invalid_ciphertext_exception;
+
+pub mod invalid_grant_token_exception;
+
+pub mod invalid_key_usage_exception;
+
+pub mod key_unavailable_exception;
+
+pub mod kms_internal_exception;
+
+pub mod kms_invalid_state_exception;
+
+pub mod not_found_exception;
+
 /// Wraps up an arbitrary Rust Error value as a Dafny Error
 pub fn to_opaque_error<E: 'static>(value: E) ->
   ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>

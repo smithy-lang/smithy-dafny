@@ -2,10 +2,10 @@
 
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: aws_sdk_kms::types::error::DependencyTimeoutException,
+    value: aws_sdk_kms::types::error::KmsInvalidStateException,
 ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
   ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::DependencyTimeoutException {
+    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::KMSInvalidStateException {
       message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
     }
   )

@@ -12,26 +12,30 @@ pub fn to_dafny_error(
       ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
   >,
 ) -> ::std::rc::Rc<Error> {
-    match value {
-    SdkError::ServiceError(service_error) => {
-      match service_error.err() {  
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DependencyTimeoutException(e) => 
-          crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DisabledException(e) => todo!(),
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DryRunOperationException(e) => todo!(),
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::InvalidGrantTokenException(e) => todo!(),
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::InvalidKeyUsageException(e) => todo!(),
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KeyUnavailableException(e) => todo!(),
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KmsInternalException(e) => todo!(),
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KmsInvalidStateException(e) => todo!(),
-        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::NotFoundException(e) => todo!(),
-        e => panic!(),
-      }
+  match value {
+    SdkError::ServiceError(service_error) => match service_error.err() {
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DependencyTimeoutException(e) =>
+            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DisabledException(e) =>
+            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DryRunOperationException(e) =>
+            crate::conversions::error::dry_run_operation_exception::to_dafny(e.clone()),
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::InvalidGrantTokenException(e) =>
+            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::InvalidKeyUsageException(e) =>
+            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KeyUnavailableException(e) =>
+            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KmsInternalException(e) =>
+            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KmsInvalidStateException(e) =>
+            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::NotFoundException(e) =>
+            crate::conversions::error::not_found_exception::to_dafny(e.clone()),
+        e => crate::conversions::error::to_opaque_error(e.to_string()),
     },
     _ => {
-      // TODO: SdkError isn't clonable, we need to implement a clone function for it ourselves
-      // crate::conversions::error::to_opaque_error(value)
-      panic!()
+        crate::conversions::error::to_opaque_error(value.to_string())
     }
   }
 }
