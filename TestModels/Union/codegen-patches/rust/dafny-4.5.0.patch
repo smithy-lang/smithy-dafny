@@ -1,6 +1,6 @@
 diff --git b/TestModels/Union/runtimes/rust/src/client.rs a/TestModels/Union/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..d96f6d12
+index 00000000..f53a57ea
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/client.rs
 @@ -0,0 +1,40 @@
@@ -11,7 +11,7 @@ index 00000000..d96f6d12
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
 +    pub(crate) dafny_client: ::dafny_runtime::Object<
-+        dyn ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient,
++        dyn crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient,
 +    >,
 +}
 +
@@ -21,12 +21,12 @@ index 00000000..d96f6d12
 +    pub fn from_conf(
 +        conf: crate::types::simple_union_config::SimpleUnionConfig,
 +    ) -> Result<Self, BuildError> {
-+        let inner = ::simple_union_dafny::_simple_dunion_dinternaldafny::_default::SimpleUnion(
++        let inner = crate::implementation_from_dafny::_simple_dunion_dinternaldafny::_default::SimpleUnion(
 +            &crate::conversions::simple_union_config::_simple_union_config::to_dafny(conf),
 +        );
 +        if matches!(
 +            inner.as_ref(),
-+            ::simple_union_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -102,7 +102,7 @@ index 00000000..375f610e
 +pub mod simple_union_config;
 diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union.rs a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union.rs
 new file mode 100644
-index 00000000..fd4a8a05
+index 00000000..bb849ee9
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union.rs
 @@ -0,0 +1,48 @@
@@ -113,11 +113,11 @@ index 00000000..fd4a8a05
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_known_value_union::GetKnownValueUnionError,
-+) -> ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error> {
 +    match value {
 +        crate::operation::get_known_value_union::GetKnownValueUnionError::Unhandled(unhandled) => {
 +            ::std::rc::Rc::new(
-+                ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::Opaque {
++                crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::Opaque {
 +                    obj: ::dafny_runtime::upcast_object()(
 +                        ::dafny_runtime::object::new(unhandled),
 +                    ),
@@ -129,12 +129,12 @@ index 00000000..fd4a8a05
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
-+    dafny_value: ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error>,
 +) -> crate::operation::get_known_value_union::GetKnownValueUnionError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
 +    if matches!(
 +        &dafny_value.as_ref(),
-+        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }
++        crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }
 +    ) {
 +        let error_message = "TODO: can't get message yet";
 +        crate::operation::get_known_value_union::GetKnownValueUnionError::generic(
@@ -156,7 +156,7 @@ index 00000000..fd4a8a05
 +pub mod _get_known_value_union_output;
 diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/_get_known_value_union_input.rs a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/_get_known_value_union_input.rs
 new file mode 100644
-index 00000000..3d8cc1e5
+index 00000000..b967c23e
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/_get_known_value_union_input.rs
 @@ -0,0 +1,56 @@
@@ -165,14 +165,14 @@ index 00000000..3d8cc1e5
 +pub fn to_dafny(
 +    value: crate::operation::get_known_value_union::GetKnownValueUnionInput,
 +) -> ::std::rc::Rc<
-+    ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput,
++    crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => ::simple_union_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +            value: {
 +                let v = match v {
 +                        crate::types::_known_value_union::KnownValueUnion::Value(n) => {
-+                            ::simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::KnownValueUnion::Value { Value: n }
++                            crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::KnownValueUnion::Value { Value: n }
 +                        }
 +                        crate::types::_known_value_union::KnownValueUnion::Unknown => unreachable!()
 +                    };
@@ -180,9 +180,9 @@ index 00000000..3d8cc1e5
 +                ::std::rc::Rc::new(v)
 +            },
 +        },
-+        None => ::simple_union_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput::GetKnownValueUnionInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput::GetKnownValueUnionInput {
 +    r#union: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -190,24 +190,24 @@ index 00000000..3d8cc1e5
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput,
++        crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionInput,
 +    >,
 +) -> crate::operation::get_known_value_union::GetKnownValueUnionInput {
 +    let value = if matches!(
 +        dafny_value.union().as_ref(),
-+        ::simple_union_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        let v = dafny_value.union().Extract();
 +        let v = ::std::rc::Rc::try_unwrap(v).unwrap_or_else(|rc| (*rc).clone());
 +        let v = match v {
-+            simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::KnownValueUnion::Value {
++            crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::KnownValueUnion::Value {
 +                Value,
 +            } => crate::types::_known_value_union::KnownValueUnion::Value(Value),
 +        };
 +        Some(v)
 +    } else if matches!(
 +        dafny_value.union().as_ref(),
-+        ::simple_union_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -218,7 +218,7 @@ index 00000000..3d8cc1e5
 +}
 diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/_get_known_value_union_output.rs a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/_get_known_value_union_output.rs
 new file mode 100644
-index 00000000..8366c01d
+index 00000000..fecbc721
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/conversions/get_known_value_union/_get_known_value_union_output.rs
 @@ -0,0 +1,54 @@
@@ -226,13 +226,13 @@ index 00000000..8366c01d
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: crate::operation::get_known_value_union::GetKnownValueUnionOutput,
-+) -> ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput> {
 +    let dafny_value = match value.union {
-+        Some(v) => ::simple_union_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +            value: {
 +                let v = match v {
 +                crate::types::_known_value_union::KnownValueUnion::Value(n) => {
-+                    ::simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue { IntegerValue: n }
++                    crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue { IntegerValue: n }
 +                }
 +                crate::types::_known_value_union::KnownValueUnion::Unknown => unreachable!(),
 +                };
@@ -240,9 +240,9 @@ index 00000000..8366c01d
 +                ::std::rc::Rc::new(v)
 +            },
 +        },
-+        None => ::simple_union_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput::GetUnionOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput::GetUnionOutput {
 +    r#union: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -250,24 +250,24 @@ index 00000000..8366c01d
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
++        crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
 +    >,
 +) -> crate::operation::get_known_value_union::GetKnownValueUnionOutput {
 +    let union = if matches!(
 +        dafny_value.union().as_ref(),
-+        ::simple_union_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        let v = dafny_value.union().Extract();
 +        let v = ::std::rc::Rc::try_unwrap(v).unwrap_or_else(|rc| (*rc).clone());
 +        let v = match v {
-+            simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::KnownValueUnion::Value {
++            crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::KnownValueUnion::Value {
 +                Value,
 +            } => crate::types::_known_value_union::KnownValueUnion::Value(Value),
 +        };
 +        Some(v)
 +    } else if matches!(
 +        dafny_value.union().as_ref(),
-+        ::simple_union_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -278,7 +278,7 @@ index 00000000..8366c01d
 +}
 diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_union.rs a/TestModels/Union/runtimes/rust/src/conversions/get_union.rs
 new file mode 100644
-index 00000000..7346e3dd
+index 00000000..de6ea98e
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/conversions/get_union.rs
 @@ -0,0 +1,46 @@
@@ -289,10 +289,10 @@ index 00000000..7346e3dd
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_union::GetUnionError,
-+) -> ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error> {
 +    match value {
 +        crate::operation::get_union::GetUnionError::Unhandled(unhandled) => ::std::rc::Rc::new(
-+            ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::Opaque {
++            crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::Opaque {
 +                obj: ::dafny_runtime::upcast_object()(
 +                    ::dafny_runtime::object::new(unhandled),
 +                ),
@@ -303,12 +303,12 @@ index 00000000..7346e3dd
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
-+    dafny_value: ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error>,
++    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error>,
 +) -> crate::operation::get_union::GetUnionError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
 +    if matches!(
 +        &dafny_value.as_ref(),
-+        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }
++        crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }
 +    ) {
 +        let error_message = "TODO: can't get message yet";
 +        crate::operation::get_union::GetUnionError::generic(
@@ -330,7 +330,7 @@ index 00000000..7346e3dd
 +pub mod _get_union_output;
 diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_union/_get_union_input.rs a/TestModels/Union/runtimes/rust/src/conversions/get_union/_get_union_input.rs
 new file mode 100644
-index 00000000..2ba16c99
+index 00000000..bed4e88a
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/conversions/get_union/_get_union_input.rs
 @@ -0,0 +1,60 @@
@@ -338,24 +338,24 @@ index 00000000..2ba16c99
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: crate::operation::get_union::GetUnionInput,
-+) -> ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput> {
 +    let dafny_value = match value.union {
-+        Some(v) => ::simple_union_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +            value: {
 +                let v = match v {
 +                crate::types::_my_union::MyUnion::IntegerValue(n) => {
-+                    ::simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue { IntegerValue: n }
++                    crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue { IntegerValue: n }
 +                }
-+                crate::types::_my_union::MyUnion::StringValue(s) => simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::StringValue { StringValue: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
++                crate::types::_my_union::MyUnion::StringValue(s) => crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::StringValue { StringValue: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
 +                crate::types::_my_union::MyUnion::Unknown => unreachable!(),
 +                };
 +
 +                ::std::rc::Rc::new(v)
 +            },
 +        },
-+        None => ::simple_union_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput::GetUnionInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput::GetUnionInput {
 +    r#union: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -363,20 +363,20 @@ index 00000000..2ba16c99
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput,
++        crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionInput,
 +    >,
 +) -> crate::operation::get_union::GetUnionInput {
 +    let value = if matches!(
 +        dafny_value.union().as_ref(),
-+        ::simple_union_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        let v = dafny_value.union().Extract();
 +        let v = ::std::rc::Rc::try_unwrap(v).unwrap_or_else(|rc| (*rc).clone());
 +        let v = match v {
-+            simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue {
++            crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue {
 +                IntegerValue,
 +            } => crate::types::_my_union::MyUnion::IntegerValue(IntegerValue),
-+            simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::StringValue {
++            crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::StringValue {
 +                StringValue,
 +            } => crate::types::_my_union::MyUnion::StringValue(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
 +                &StringValue,
@@ -385,7 +385,7 @@ index 00000000..2ba16c99
 +        Some(v)
 +    } else if matches!(
 +        dafny_value.union().as_ref(),
-+        ::simple_union_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -396,7 +396,7 @@ index 00000000..2ba16c99
 +}
 diff --git b/TestModels/Union/runtimes/rust/src/conversions/get_union/_get_union_output.rs a/TestModels/Union/runtimes/rust/src/conversions/get_union/_get_union_output.rs
 new file mode 100644
-index 00000000..95829bf2
+index 00000000..cd9c9fdf
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/conversions/get_union/_get_union_output.rs
 @@ -0,0 +1,60 @@
@@ -404,24 +404,24 @@ index 00000000..95829bf2
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: crate::operation::get_union::GetUnionOutput,
-+) -> ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput> {
 +    let dafny_value = match value.union {
-+        Some(v) => ::simple_union_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +            value: {
 +                let v = match v {
 +                crate::types::_my_union::MyUnion::IntegerValue(n) => {
-+                    ::simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue { IntegerValue: n }
++                    crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue { IntegerValue: n }
 +                }
-+                crate::types::_my_union::MyUnion::StringValue(s) => simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::StringValue { StringValue: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
++                crate::types::_my_union::MyUnion::StringValue(s) => crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::StringValue { StringValue: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
 +                crate::types::_my_union::MyUnion::Unknown => unreachable!(),
 +                };
 +
 +                ::std::rc::Rc::new(v)
 +            },
 +        },
-+        None => ::simple_union_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput::GetUnionOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput::GetUnionOutput {
 +    r#union: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -429,20 +429,20 @@ index 00000000..95829bf2
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput,
++        crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput,
 +    >,
 +) -> crate::operation::get_union::GetUnionOutput {
 +    let union = if matches!(
 +        dafny_value.union().as_ref(),
-+        ::simple_union_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        let v = dafny_value.union().Extract();
 +        let v = ::std::rc::Rc::try_unwrap(v).unwrap_or_else(|rc| (*rc).clone());
 +        let v = match v {
-+            simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue {
++            crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue {
 +                IntegerValue,
 +            } => crate::types::_my_union::MyUnion::IntegerValue(IntegerValue),
-+            simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::StringValue {
++            crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::StringValue {
 +                StringValue,
 +            } => crate::types::_my_union::MyUnion::StringValue(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
 +                &StringValue,
@@ -451,7 +451,7 @@ index 00000000..95829bf2
 +        Some(v)
 +    } else if matches!(
 +        dafny_value.union().as_ref(),
-+        ::simple_union_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -471,7 +471,7 @@ index 00000000..f47a69b4
 +pub mod _simple_union_config;
 diff --git b/TestModels/Union/runtimes/rust/src/conversions/simple_union_config/_simple_union_config.rs a/TestModels/Union/runtimes/rust/src/conversions/simple_union_config/_simple_union_config.rs
 new file mode 100644
-index 00000000..702d25f2
+index 00000000..287ad929
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/conversions/simple_union_config/_simple_union_config.rs
 @@ -0,0 +1,17 @@
@@ -480,14 +480,14 @@ index 00000000..702d25f2
 +
 +pub fn to_dafny(
 +    value: crate::types::simple_union_config::SimpleUnionConfig,
-+) -> ::std::rc::Rc<::simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig> {
-+    ::std::rc::Rc::new(::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig::SimpleUnionConfig {})
++) -> ::std::rc::Rc<crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig> {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig::SimpleUnionConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig,
++        crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig,
 +    >,
 +) -> crate::types::simple_union_config::SimpleUnionConfig {
 +    crate::types::simple_union_config::SimpleUnionConfig {}
@@ -546,10 +546,10 @@ index 00000000..cce22d1c
 +}
 diff --git b/TestModels/Union/runtimes/rust/src/lib.rs a/TestModels/Union/runtimes/rust/src/lib.rs
 new file mode 100644
-index 00000000..e98c995a
+index 00000000..6c0e841e
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/lib.rs
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,19 @@
 +#![allow(deprecated)]
 +
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
@@ -564,6 +564,8 @@ index 00000000..e98c995a
 +pub mod operation;
 +
 +mod conversions;
++
++pub mod implementation_from_dafny;
 +
 +pub use client::Client;
 +pub use types::simple_union_config::SimpleUnionConfig;
@@ -582,7 +584,7 @@ index 00000000..91564304
 +pub mod get_known_value_union;
 diff --git b/TestModels/Union/runtimes/rust/src/operation/get_known_value_union.rs a/TestModels/Union/runtimes/rust/src/operation/get_known_value_union.rs
 new file mode 100644
-index 00000000..6deba10b
+index 00000000..16a7ab87
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/operation/get_known_value_union.rs
 @@ -0,0 +1,148 @@
@@ -611,7 +613,7 @@ index 00000000..6deba10b
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetKnownValueUnion(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_union_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_known_value_union::_get_known_value_union_output::from_dafny(
@@ -965,7 +967,7 @@ index 00000000..bff69f92
 +}
 diff --git b/TestModels/Union/runtimes/rust/src/operation/get_union.rs a/TestModels/Union/runtimes/rust/src/operation/get_union.rs
 new file mode 100644
-index 00000000..08f0de25
+index 00000000..d9f65f53
 --- /dev/null
 +++ a/TestModels/Union/runtimes/rust/src/operation/get_union.rs
 @@ -0,0 +1,145 @@
@@ -991,7 +993,7 @@ index 00000000..08f0de25
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetUnion(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_union_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_union::_get_union_output::from_dafny(

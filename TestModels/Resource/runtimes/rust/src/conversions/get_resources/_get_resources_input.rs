@@ -3,15 +3,15 @@
 pub fn to_dafny(
     value: crate::operation::get_resources::GetResourcesInput,
 ) -> ::std::rc::Rc<
-    ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
+    crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
 > {
     let dafny_value = match value.value {
-        Some(b) => ::simple_resources_dafny::_Wrappers_Compile::Option::Some { value:
+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value:
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
             },
-        None => ::simple_resources_dafny::_Wrappers_Compile::Option::None {},
+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput::GetResourcesInput {
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput::GetResourcesInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -19,12 +19,12 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
+        crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
     >,
 ) -> crate::operation::get_resources::GetResourcesInput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        ::simple_resources_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -33,7 +33,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.value().as_ref(),
-        ::simple_resources_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

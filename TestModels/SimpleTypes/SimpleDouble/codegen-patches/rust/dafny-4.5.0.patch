@@ -1,6 +1,6 @@
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..34c9f354
+index 00000000..7ea51cfb
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/client.rs
 @@ -0,0 +1,37 @@
@@ -10,7 +10,7 @@ index 00000000..34c9f354
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::ISimpleTypesDoubleClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::ISimpleTypesDoubleClient>
 +}
 +
 +impl Client {
@@ -20,12 +20,12 @@ index 00000000..34c9f354
 +        conf: crate::types::simple_double_config::SimpleDoubleConfig,
 +    ) -> Result<Self, BuildError> {
 +        let inner =
-+            ::simple_double_dafny::_simple_dtypes_dsmithydouble_dinternaldafny::_default::SimpleDouble(
++            crate::implementation_from_dafny::_simple_dtypes_dsmithydouble_dinternaldafny::_default::SimpleDouble(
 +                &crate::conversions::simple_double_config::_simple_double_config::to_dafny(conf),
 +            );
 +        if matches!(
 +            inner.as_ref(),
-+            ::simple_double_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -72,7 +72,7 @@ index 00000000..08430ee3
 +pub mod simple_double_config;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double.rs
 new file mode 100644
-index 00000000..9befae93
+index 00000000..713fb19e
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double.rs
 @@ -0,0 +1,33 @@
@@ -83,22 +83,22 @@ index 00000000..9befae93
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_double::GetDoubleError,
-+) -> ::std::rc::Rc<::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error>
 +{
 +    match value {
 +    crate::operation::get_double::GetDoubleError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::get_double::GetDoubleError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_double::GetDoubleError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -111,7 +111,7 @@ index 00000000..9befae93
 +pub mod _get_double_output;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_input.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_input.rs
 new file mode 100644
-index 00000000..28468826
+index 00000000..69b0e912
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_input.rs
 @@ -0,0 +1,47 @@
@@ -120,17 +120,17 @@ index 00000000..28468826
 +pub fn to_dafny(
 +    value: crate::operation::get_double::GetDoubleInput,
 +) -> ::std::rc::Rc<
-+    ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +            value: ::dafny_runtime::Sequence::ArraySequence {
 +                values: std::rc::Rc::new(f64::to_be_bytes(v).to_vec()),
 +            },
 +        },
-+        None => ::simple_double_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput::GetDoubleInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput::GetDoubleInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -138,12 +138,12 @@ index 00000000..28468826
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
 +    >,
 +) -> crate::operation::get_double::GetDoubleInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        let my_vec = dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
 +            &dafny_value.value().Extract(),
@@ -154,7 +154,7 @@ index 00000000..28468826
 +        ))
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_double_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -164,7 +164,7 @@ index 00000000..28468826
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_output.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_output.rs
 new file mode 100644
-index 00000000..ab69f6d4
+index 00000000..0dbe2a35
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/get_double/_get_double_output.rs
 @@ -0,0 +1,47 @@
@@ -173,17 +173,17 @@ index 00000000..ab69f6d4
 +pub fn to_dafny(
 +    value: crate::operation::get_double::GetDoubleOutput,
 +) -> ::std::rc::Rc<
-+    ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
++    crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => ::simple_double_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
 +            value: ::dafny_runtime::Sequence::ArraySequence {
 +                values: std::rc::Rc::new(f64::to_be_bytes(v).to_vec()),
 +            },
 +        },
-+        None => ::simple_double_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput::GetDoubleOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -191,12 +191,12 @@ index 00000000..ab69f6d4
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleOutput,
 +    >,
 +) -> crate::operation::get_double::GetDoubleOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_double_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        let my_vec = dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
 +            &dafny_value.value().Extract(),
@@ -207,7 +207,7 @@ index 00000000..ab69f6d4
 +        ))
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        ::simple_double_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -226,7 +226,7 @@ index 00000000..52a68a7b
 +pub mod _simple_double_config;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/simple_double_config/_simple_double_config.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/simple_double_config/_simple_double_config.rs
 new file mode 100644
-index 00000000..661abc78
+index 00000000..9f14ccbb
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/conversions/simple_double_config/_simple_double_config.rs
 @@ -0,0 +1,19 @@
@@ -236,15 +236,15 @@ index 00000000..661abc78
 +pub fn to_dafny(
 +    value: crate::types::simple_double_config::SimpleDoubleConfig,
 +) -> ::std::rc::Rc<
-+    ::simple_double_dafny::_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig,
++    crate::implementation_from_dafny::_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig,
 +> {
-+    ::std::rc::Rc::new(::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig::SimpleDoubleConfig {})
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig::SimpleDoubleConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig,
++        crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig,
 +    >,
 +) -> crate::types::simple_double_config::SimpleDoubleConfig {
 +    crate::types::simple_double_config::SimpleDoubleConfig {}
@@ -303,10 +303,10 @@ index 00000000..cce22d1c
 +}
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/lib.rs
 new file mode 100644
-index 00000000..fd5ed298
+index 00000000..94379fc0
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/lib.rs
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,19 @@
 +#![allow(deprecated)]
 +
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
@@ -322,6 +322,8 @@ index 00000000..fd5ed298
 +
 +mod conversions;
 +
++pub mod implementation_from_dafny;
++
 +pub use client::Client;
 +pub use types::simple_double_config::SimpleDoubleConfig;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation.rs
@@ -336,7 +338,7 @@ index 00000000..134175f8
 +pub mod get_double;
 diff --git b/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double.rs a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double.rs
 new file mode 100644
-index 00000000..4f053e7d
+index 00000000..d3b6744b
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleDouble/runtimes/rust/src/operation/get_double.rs
 @@ -0,0 +1,145 @@
@@ -362,7 +364,7 @@ index 00000000..4f053e7d
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetDouble(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_double_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_double::_get_double_output::from_dafny(

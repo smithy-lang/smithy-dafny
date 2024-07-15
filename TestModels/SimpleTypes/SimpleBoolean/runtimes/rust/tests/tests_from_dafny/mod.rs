@@ -1,6 +1,6 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
-use ::simple_boolean_dafny::*;
+use simple_boolean::implementation_from_dafny::*;
 use simple_boolean::*;
 mod _wrapped;
 

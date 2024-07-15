@@ -3,9 +3,9 @@
 pub fn to_dafny(
     value: crate::types::StructureListElement,
 ) -> ::std::rc::Rc<
-    ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
 > {
-    ::std::rc::Rc::new(::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
   stringValue: dafny_standard_library::conversion::ostring_to_dafny(&value.string_value),
   integerValue: dafny_standard_library::conversion::oint_to_dafny(value.integer_value),
 })
@@ -14,8 +14,8 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn to_dafny_plain(
     value: crate::types::StructureListElement,
-) -> ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement {
-    ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
+) -> crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement {
+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
   stringValue: dafny_standard_library::conversion::ostring_to_dafny(&value.string_value),
   integerValue: dafny_standard_library::conversion::oint_to_dafny(value.integer_value),
 }
@@ -24,12 +24,12 @@ pub fn to_dafny_plain(
 #[allow(dead_code)]
 pub fn option_to_dafny(
   value: Option<crate::types::StructureListElement>,
-) -> ::std::rc::Rc<simple_aggregate_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-  ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
+) -> ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
+  crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
 >>>{
     let inner = match value {
-        None => simple_aggregate_dafny::_Wrappers_Compile::Option::None {},
-        Some(x) => simple_aggregate_dafny::_Wrappers_Compile::Option::Some {
+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
             value: ::std::rc::Rc::new(to_dafny_plain(x)),
         },
     };
@@ -39,7 +39,7 @@ pub fn option_to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
     >,
 ) -> crate::types::StructureListElement {
     plain_from_dafny(&*dafny_value)
@@ -47,10 +47,10 @@ pub fn from_dafny(
 
 #[allow(dead_code)]
 pub fn plain_from_dafny(
-    dafny_value : &::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
+    dafny_value : &crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
 ) -> crate::types::StructureListElement {
     match dafny_value {
-    ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
       stringValue,
       integerValue,
     } =>
@@ -63,12 +63,12 @@ pub fn plain_from_dafny(
 
 #[allow(dead_code)]
 pub fn option_from_dafny(
-    dafny_value: ::std::rc::Rc<simple_aggregate_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-        ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
+    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
     >>>,
 ) -> Option<crate::types::StructureListElement> {
     match &*dafny_value {
-        simple_aggregate_dafny::_Wrappers_Compile::Option::Some { value } => {
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
             Some(plain_from_dafny(value))
         }
         _ => None,
