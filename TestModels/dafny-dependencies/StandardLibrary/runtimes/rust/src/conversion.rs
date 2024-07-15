@@ -128,7 +128,7 @@ pub fn option_from_dafny<T: ::dafny_runtime::DafnyType, TR>(
 }
 
 pub fn option_to_dafny<T: ::dafny_runtime::DafnyType, TR>(
-    input: Option<TR>,
+    input: &Option<TR>,
     converter: fn(&TR) -> T,
 ) -> ::std::rc::Rc<_Wrappers_Compile::Option<T>> {
     match input {
@@ -156,7 +156,7 @@ pub fn result_from_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::
 }
 
 pub fn result_to_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
-    input: Result<TR, ER>,
+    input: &Result<TR, ER>,
     converter_t: fn(&TR) -> T,
     converter_e: fn(&ER) -> E,
 ) -> ::std::rc::Rc<_Wrappers_Compile::Result<T, E>> {
