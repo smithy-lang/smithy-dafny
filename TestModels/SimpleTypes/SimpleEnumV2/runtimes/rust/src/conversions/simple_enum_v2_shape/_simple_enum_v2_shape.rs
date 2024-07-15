@@ -3,21 +3,21 @@
 
 pub fn to_dafny(
     value: &crate::types::simple_enum_v2_shape::SimpleEnumV2Shape,
-) -> ::simple_enum_v2_dafny::_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape {
+) -> crate::implementation_from_dafny::_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape {
     match value {
-      crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::FIRST => ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::FIRST {},
-      crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::SECOND => ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::SECOND {},
-      crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::THIRD => ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::THIRD {},
+      crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::FIRST => crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::FIRST {},
+      crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::SECOND => crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::SECOND {},
+      crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::THIRD => crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::THIRD {},
     }
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: &::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape,
+    dafny_value: &crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape,
 ) -> crate::types::simple_enum_v2_shape::SimpleEnumV2Shape {
     match dafny_value {
-    ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::FIRST {} => crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::FIRST,
-    ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::SECOND {} => crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::SECOND,
-    ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::THIRD {} => crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::THIRD,
+    crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::FIRST {} => crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::FIRST,
+    crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::SECOND {} => crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::SECOND,
+    crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::SimpleEnumV2Shape::THIRD {} => crate::types::simple_enum_v2_shape::SimpleEnumV2Shape::THIRD,
   }
 }
