@@ -4,7 +4,7 @@ use aws_smithy_types::error::operation::BuildError;
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResourcesClient>
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResourcesClient>
 }
 
 impl Client {
@@ -14,14 +14,14 @@ impl Client {
         conf: crate::types::simple_resources_config::SimpleResourcesConfig,
     ) -> Result<Self, BuildError> {
         let inner =
-            ::simple_resources_dafny::_simple_dresources_dinternaldafny::_default::SimpleResources(
+            crate::implementation_from_dafny::_simple_dresources_dinternaldafny::_default::SimpleResources(
                 &crate::conversions::simple_resources_config::_simple_resources_config::to_dafny(
                     conf,
                 ),
             );
         if matches!(
             inner.as_ref(),
-            ::simple_resources_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(
@@ -31,7 +31,7 @@ impl Client {
             ));
         }
         Ok(Self {
-            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::ISimpleResourcesClient + 'static)>>::upcast_to(inner.Extract()),
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
         })
     }
 }

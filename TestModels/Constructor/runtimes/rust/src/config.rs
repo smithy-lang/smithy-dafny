@@ -4,8 +4,13 @@
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Config {
-    behavior_version: ::std::option::Option<crate::config::BehaviorVersion>,
+    pub(crate) blob_value: Option<Vec<u8>>,
+    pub(crate) boolean_value: Option<bool>,
+    pub(crate) string_value: Option<String>,
+    pub(crate) integer_value: Option<i32>,
+    pub(crate) long_value: Option<i64>,
 }
+
 impl Config {
     /// Constructs a config builder.
     pub fn builder() -> Builder {
@@ -14,19 +19,31 @@ impl Config {
     /// Converts this config back into a builder so that it can be tweaked.
     pub fn to_builder(&self) -> Builder {
         Builder {
-            behavior_version: self.behavior_version.clone(),
+            blob_value: self.blob_value.clone(),
+            boolean_value: self.boolean_value,
+            string_value: self.string_value.clone(),
+            integer_value: self.integer_value,
+            long_value: self.long_value,
         }
     }
 }
 /// Builder for creating a `Config`.
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Builder {
-    pub(crate) behavior_version: ::std::option::Option<crate::config::BehaviorVersion>,
+    pub(crate) blob_value: Option<Vec<u8>>,
+    pub(crate) boolean_value: Option<bool>,
+    pub(crate) string_value: Option<String>,
+    pub(crate) integer_value: Option<i32>,
+    pub(crate) long_value: Option<i64>,
 }
 impl ::std::default::Default for Builder {
     fn default() -> Self {
         Self {
-            behavior_version: ::std::default::Default::default(),
+            blob_value: Some(vec![0]),
+            boolean_value: Some(false),
+            string_value: Some("".to_string()),
+            integer_value: Some(0),
+            long_value: Some(0),
         }
     }
 }
@@ -36,91 +53,65 @@ impl Builder {
         Self::default()
     }
 
-    /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
-    ///
-    /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
-    /// compatible. For example, a change which introduces new default timeouts or a new retry-mode for
-    /// all operations might be the ideal behavior but could break existing applications.
-    ///
-    /// # Examples
-    ///
-    /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
-    /// ```no_run
-    /// use stub::config::BehaviorVersion;
-    ///
-    /// let config = stub::Config::builder()
-    ///     .behavior_version(BehaviorVersion::latest())
-    ///     // ...
-    ///     .build();
-    /// let client = stub::Client::from_conf(config);
-    /// ```
-    ///
-    /// Customizing behavior major version:
-    /// ```no_run
-    /// use stub::config::BehaviorVersion;
-    ///
-    /// let config = stub::Config::builder()
-    ///     .behavior_version(BehaviorVersion::v2023_11_09())
-    ///     // ...
-    ///     .build();
-    /// let client = stub::Client::from_conf(config);
-    /// ```
-
-    pub fn behavior_version(mut self, behavior_version: crate::config::BehaviorVersion) -> Self {
-        self.set_behavior_version(Some(behavior_version));
+    pub fn blob_value(mut self, blob_value: Vec<u8>) -> Self {
+        self.set_blob_value(Some(blob_value));
         self
     }
 
-    /// Sets the [`behavior major version`](crate::config::BehaviorVersion).
-    ///
-    /// Over time, new best-practice behaviors are introduced. However, these behaviors might not be backwards
-    /// compatible. For example, a change which introduces new default timeouts or a new retry-mode for
-    /// all operations might be the ideal behavior but could break existing applications.
-    ///
-    /// # Examples
-    ///
-    /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
-    /// ```no_run
-    /// use stub::config::BehaviorVersion;
-    ///
-    /// let config = stub::Config::builder()
-    ///     .behavior_version(BehaviorVersion::latest())
-    ///     // ...
-    ///     .build();
-    /// let client = stub::Client::from_conf(config);
-    /// ```
-    ///
-    /// Customizing behavior major version:
-    /// ```no_run
-    /// use stub::config::BehaviorVersion;
-    ///
-    /// let config = stub::Config::builder()
-    ///     .behavior_version(BehaviorVersion::v2023_11_09())
-    ///     // ...
-    ///     .build();
-    /// let client = stub::Client::from_conf(config);
-    /// ```
-
-    pub fn set_behavior_version(
-        &mut self,
-        behavior_version: Option<crate::config::BehaviorVersion>,
-    ) -> &mut Self {
-        self.behavior_version = behavior_version;
+    pub fn set_blob_value(&mut self, blob_value: Option<Vec<u8>>) -> &mut Self {
+        self.blob_value = blob_value;
         self
     }
 
-    /// Convenience method to set the latest behavior major version
-    ///
-    /// This is equivalent to enabling the `behavior-version-latest` Cargo feature
-    pub fn behavior_version_latest(mut self) -> Self {
-        self.set_behavior_version(Some(crate::config::BehaviorVersion::latest()));
+    pub fn boolean_value(mut self, boolean_value: bool) -> Self {
+        self.set_boolean_value(Some(boolean_value));
         self
     }
+
+    pub fn set_boolean_value(&mut self, boolean_value: Option<bool>) -> &mut Self {
+        self.boolean_value = boolean_value;
+        self
+    }
+
+    pub fn string_value(mut self, string_value: String) -> Self {
+        self.set_string_value(Some(string_value));
+        self
+    }
+
+    pub fn set_string_value(&mut self, string_value: Option<String>) -> &mut Self {
+        self.string_value = string_value;
+        self
+    }
+
+    pub fn integer_value(mut self, integer_value: i32) -> Self {
+        self.set_integer_value(Some(integer_value));
+        self
+    }
+
+    pub fn set_integer_value(&mut self, integer_value: Option<i32>) -> &mut Self {
+        self.integer_value = integer_value;
+        self
+    }
+
+    pub fn long_value(mut self, long_value: i64) -> Self {
+        self.set_long_value(Some(long_value));
+        self
+    }
+
+    pub fn set_long_value(&mut self, long_value: Option<i64>) -> &mut Self {
+        self.long_value = long_value;
+        self
+    }
+
     /// Builds a [`Config`].
     #[allow(unused_mut)]
     pub fn build(mut self) -> Config {
         Config {
-            behavior_version: self.behavior_version,
+            blob_value: self.blob_value,
+            boolean_value: self.boolean_value,
+            string_value: self.string_value,
+            integer_value: self.integer_value,
+            long_value: self.long_value,
         }
     }
 }

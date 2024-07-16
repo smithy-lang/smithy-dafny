@@ -78,62 +78,99 @@ pub fn olong_from_dafny(input: ::std::rc::Rc<_Wrappers_Compile::Option<i64>>) ->
     }
 }
 
+pub fn blob_to_dafny(
+    input: &::aws_smithy_types::Blob,
+) -> ::dafny_runtime::Sequence<u8> {
+    ::dafny_runtime::Sequence::from_array(&input.clone().into_inner())
+}
+
 pub fn oblob_to_dafny(
-    input: &Option<Vec<u8>>,
+    input: &Option<::aws_smithy_types::Blob>,
 ) -> ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
     let dafny_value = match input {
         Some(b) => _Wrappers_Compile::Option::Some {
-            value: ::dafny_runtime::Sequence::from_array(&b),
+            value: blob_to_dafny(&b),
         },
         None => _Wrappers_Compile::Option::None {},
     };
     ::std::rc::Rc::new(dafny_value)
 }
 
+pub fn blob_from_dafny(
+    input: ::dafny_runtime::Sequence<u8>,
+) -> ::aws_smithy_types::Blob {
+    
+    ::aws_smithy_types::Blob::new(
+        ::std::rc::Rc::try_unwrap(input.to_array())
+            .unwrap_or_else(|rc| (*rc).clone()),
+    )
+}
+
 pub fn oblob_from_dafny(
     input: ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
-) -> Option<Vec<u8>> {
+) -> Option<::aws_smithy_types::Blob> {
     if matches!(input.as_ref(), _Wrappers_Compile::Option::Some { .. }) {
-        Some(
-            ::std::rc::Rc::try_unwrap(input.Extract().to_array())
-                .unwrap_or_else(|rc| (*rc).clone()),
-        )
+        Some(blob_from_dafny(input.Extract()))
     } else {
         None
     }
 }
 
-// A wrapper for an arbitrary Dafny value to implement std::error::Error,
-// since arbitrary Dafny values can be used as error values
-// (usually as the "error" value in a Result.Failure)
-pub struct DafnyError<T: ::dafny_runtime::DafnyType> {
-    value: T,
-}
 
-pub fn error_from_dafny<T: ::dafny_runtime::DafnyType>(
-    input: T
-) -> DafnyError<T> {
-    DafnyError { value: input }
-}
-
-impl<T: ::dafny_runtime::DafnyType> std::fmt::Display for DafnyError<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.value.fmt_print(f, false)
+pub fn option_from_dafny<T: ::dafny_runtime::DafnyType, TR>(
+    input: ::std::rc::Rc<_Wrappers_Compile::Option<T>>,
+    converter: fn(&T) -> TR,
+) -> Option<TR> {
+    match &*input {
+        _Wrappers_Compile::Option::Some { value } => Some(converter(value)),
+        _Wrappers_Compile::Option::None { } => None,
+        _Wrappers_Compile::Option::_PhantomVariant(_) => panic!(),
     }
 }
 
-impl<T: ::dafny_runtime::DafnyType> std::fmt::Debug for DafnyError<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.value.fmt_print(f, false)
+pub fn option_to_dafny<T: ::dafny_runtime::DafnyType, TR>(
+    input: &Option<TR>,
+    converter: fn(&TR) -> T,
+) -> ::std::rc::Rc<_Wrappers_Compile::Option<T>> {
+    match input {
+        Some(value) => ::std::rc::Rc::new(
+            _Wrappers_Compile::Option::Some {
+                value: converter(&value)
+            }
+        ),
+        None => ::std::rc::Rc::new(
+            _Wrappers_Compile::Option::None {}
+        ),
     }
 }
 
-impl<T: ::dafny_runtime::DafnyType> std::error::Error for DafnyError<T> {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
+pub fn result_from_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
+    input: ::std::rc::Rc<_Wrappers_Compile::Result<T, E>>,
+    converter_t: fn(&T) -> TR,
+    converter_e: fn(&E) -> ER,
+) -> Result<TR, ER> {
+    match &*input {
+        _Wrappers_Compile::Result::Success { value } => Ok(converter_t(value)),
+        _Wrappers_Compile::Result::Failure { error } => Err(converter_e(error)),
+        _Wrappers_Compile::Result::_PhantomVariant(_, _) => panic!(),
     }
+}
 
-    fn cause(&self) -> Option<&dyn std::error::Error> {
-        self.source()
+pub fn result_to_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
+    input: &Result<TR, ER>,
+    converter_t: fn(&TR) -> T,
+    converter_e: fn(&ER) -> E,
+) -> ::std::rc::Rc<_Wrappers_Compile::Result<T, E>> {
+    match input {
+        Ok(value) => ::std::rc::Rc::new(
+            _Wrappers_Compile::Result::Success {
+                value: converter_t(&value)
+            }
+        ),
+        Err(error) => ::std::rc::Rc::new(
+            _Wrappers_Compile::Result::Failure {
+                error: converter_e(&error)
+            }
+        ),
     }
 }

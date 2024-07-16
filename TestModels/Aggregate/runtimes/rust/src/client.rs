@@ -4,7 +4,7 @@ use aws_smithy_types::error::operation::BuildError;
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::ISimpleAggregateClient>
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::ISimpleAggregateClient>
 }
 
 impl Client {
@@ -16,14 +16,14 @@ impl Client {
         // If this service had any configuration properties,
         // they would need converting here too.
         let inner =
-            ::simple_aggregate_dafny::_simple_daggregate_dinternaldafny::_default::SimpleAggregate(
+            crate::implementation_from_dafny::_simple_daggregate_dinternaldafny::_default::SimpleAggregate(
                 &crate::conversions::simple_aggregate_config::_simple_aggregate_config::to_dafny(
                     conf,
                 ),
             );
         if matches!(
             inner.as_ref(),
-            ::simple_aggregate_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(
@@ -33,7 +33,7 @@ impl Client {
             ));
         }
         Ok(Self {
-            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_aggregate_dafny::r#_simple_daggregate_dinternaldafny_dtypes::ISimpleAggregateClient + 'static)>>::upcast_to(inner.Extract()),
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
         })
     }
 }

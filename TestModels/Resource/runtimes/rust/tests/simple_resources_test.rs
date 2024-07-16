@@ -57,7 +57,7 @@ pub fn checkMostNone(name: String, output: GetResourceDataOutput) {
 
 pub fn allSome() -> GetResourceDataInput {
     GetResourceDataInput::builder()
-        .blob_value(vec![1u8])
+        .blob_value(aws_smithy_types::Blob::new(vec![1u8]))
         .boolean_value(true)
         .string_value("Some".to_string())
         .integer_value(1)
@@ -68,7 +68,7 @@ pub fn allSome() -> GetResourceDataInput {
 
 pub fn checkSome(name: String, output: GetResourceDataOutput) {
     assert_eq!(Some(name + " Some"), *output.string_value());
-    assert_eq!(Some(vec![1u8]), *output.blob_value());
+    assert_eq!(Some(aws_smithy_types::Blob::new(vec![1u8])), *output.blob_value());
     assert_eq!(Some(true), output.boolean_value());
     assert_eq!(Some(1), output.integer_value());
     assert_eq!(Some(1), output.long_value());

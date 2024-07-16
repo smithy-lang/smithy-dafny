@@ -5,11 +5,11 @@ use std::any::Any;
 #[allow(dead_code)]
 pub fn to_dafny_error(
     value: crate::operation::get_enum_v2::GetEnumV2Error,
-) -> ::std::rc::Rc<::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error> {
+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error> {
     match value {
         crate::operation::get_enum_v2::GetEnumV2Error::Unhandled(unhandled) => ::std::rc::Rc::new(
-            ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque {
-                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
+            crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::Opaque {
+                obj: ::dafny_runtime::upcast_object()(
                     ::dafny_runtime::object::new(unhandled),
                 ),
             },
@@ -20,11 +20,11 @@ pub fn to_dafny_error(
 #[allow(dead_code)]
 pub fn from_dafny_error(
     dafny_value: ::std::rc::Rc<
-        ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error,
+        crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error,
     >,
 ) -> crate::operation::get_enum_v2::GetEnumV2Error {
     // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-    if matches!(&dafny_value.as_ref(), ::simple_enum_v2_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_denumv2_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
     let error_message = "TODO: can't get message yet";
     crate::operation::get_enum_v2::GetEnumV2Error::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
   } else {

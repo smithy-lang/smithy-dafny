@@ -21,10 +21,6 @@ public class LocalServiceWrappedNameResolver extends DotNetNameResolver {
     return "%sShim".formatted(getServiceName());
   }
 
-  private String getServiceName() {
-    return StringUtils.capitalize(getServiceShape().getId().getName());
-  }
-
   public String implForServiceClient() {
     return "%s.%s".formatted(super.namespaceForService(), clientForService());
   }

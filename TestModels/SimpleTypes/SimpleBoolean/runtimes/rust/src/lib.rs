@@ -13,5 +13,10 @@ pub mod operation;
 
 mod conversions;
 
+pub mod implementation_from_dafny;
+
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
+
 pub use client::Client;
 pub use types::simple_boolean_config::SimpleBooleanConfig;

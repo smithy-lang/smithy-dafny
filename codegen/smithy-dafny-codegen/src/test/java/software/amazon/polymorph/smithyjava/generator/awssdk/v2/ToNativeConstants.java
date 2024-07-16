@@ -97,11 +97,16 @@ public class ToNativeConstants {
     """
     package software.amazon.cryptography.services.kms.internaldafny;
 
+     import java.lang.Exception;
+     import java.lang.IllegalStateException;
+     import java.lang.RuntimeException;
      import software.amazon.awssdk.services.kms.KmsClient;
      import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
      import software.amazon.awssdk.services.kms.model.DoSomethingRequest;
      import software.amazon.awssdk.services.kms.model.DoSomethingResponse;
+     import software.amazon.awssdk.services.kms.model.KmsException;
      import software.amazon.cryptography.services.kms.internaldafny.types.Error_DependencyTimeoutException;
+     import software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque;
      import software.amazon.cryptography.services.kms.internaldafny.types.IKeyManagementServiceClient;
 
      public class ToNative {
@@ -132,6 +137,25 @@ public class ToNativeConstants {
        public static KmsClient KeyManagementService(IKeyManagementServiceClient dafnyValue) {
            return ((Shim) dafnyValue).impl();
        }
+
+       public static RuntimeException Error(Error_Opaque dafnyValue) {
+         // While the first two cases are logically identical,
+         // there is a semantic distinction.
+         // An un-modeled Service Error is different from a Java Heap Exhaustion error.
+         // In the future, Smithy-Dafny MAY allow for this distinction.
+         // Which would allow Dafny developers to treat the two differently.
+         if (dafnyValue.dtor_obj() instanceof KmsException) {
+           return (KmsException) dafnyValue.dtor_obj();
+         } else if (dafnyValue.dtor_obj() instanceof Exception) {
+           return (RuntimeException) dafnyValue.dtor_obj();
+         }
+         return new IllegalStateException(String.format(%s, dafnyValue));
+       }
      }
-    """.formatted(STRING_CONVERSION, STRING_CONVERSION, STRING_CONVERSION);
+    """.formatted(
+        STRING_CONVERSION,
+        STRING_CONVERSION,
+        STRING_CONVERSION,
+        "\"Unknown error thrown while calling AWS. %s\""
+      );
 }

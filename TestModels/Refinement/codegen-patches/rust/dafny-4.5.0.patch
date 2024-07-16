@@ -1,6 +1,6 @@
 diff --git b/TestModels/Refinement/runtimes/rust/src/client.rs a/TestModels/Refinement/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..d7e87890
+index 00000000..feeb912e
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/client.rs
 @@ -0,0 +1,40 @@
@@ -10,7 +10,7 @@ index 00000000..d7e87890
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ISimpleRefinementClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ISimpleRefinementClient>
 +}
 +
 +impl Client {
@@ -20,12 +20,12 @@ index 00000000..d7e87890
 +        conf: crate::types::simple_refinement_config::SimpleRefinementConfig,
 +    ) -> Result<Self, BuildError> {
 +        let inner =
-+            ::simple_refinement_dafny::_simple_drefinement_dinternaldafny::_default::SimpleRefinement(
++            crate::implementation_from_dafny::_simple_drefinement_dinternaldafny::_default::SimpleRefinement(
 +                &crate::conversions::simple_refinement_config::_simple_refinement_config::to_dafny(conf),
 +            );
 +        if matches!(
 +            inner.as_ref(),
-+            ::simple_refinement_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -35,7 +35,7 @@ index 00000000..d7e87890
 +            ));
 +        }
 +        Ok(Self {
-+            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ISimpleRefinementClient + 'static)>>::upcast_to(inner.Extract()),
++            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
 +        })
 +    }
 +}
@@ -143,7 +143,7 @@ index 00000000..54b3f0f2
 +pub mod simple_refinement_config;
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement.rs a/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement.rs
 new file mode 100644
-index 00000000..7d9afc33
+index 00000000..6a3ea7ea
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement.rs
 @@ -0,0 +1,32 @@
@@ -154,21 +154,21 @@ index 00000000..7d9afc33
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_refinement::GetRefinementError,
-+) -> ::std::rc::Rc<::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::get_refinement::GetRefinementError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::get_refinement::GetRefinementError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_refinement::GetRefinementError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -181,7 +181,7 @@ index 00000000..7d9afc33
 +pub mod _get_refinement_output;
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement/_get_refinement_input.rs a/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement/_get_refinement_input.rs
 new file mode 100644
-index 00000000..43e0f94d
+index 00000000..654df8a8
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement/_get_refinement_input.rs
 @@ -0,0 +1,52 @@
@@ -190,7 +190,7 @@ index 00000000..43e0f94d
 +pub fn to_dafny(
 +    value: crate::operation::get_refinement::GetRefinementInput,
 +) -> ::std::rc::Rc<
-+    ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementInput,
++    crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementInput,
 +> {
 +    let crate::operation::get_refinement::GetRefinementInput {
 +        required_string,
@@ -203,11 +203,11 @@ index 00000000..43e0f94d
 +        );
 +
 +    let optional_string = match optional_string {
-+        Some(s) => ::simple_refinement_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-+        None => ::simple_refinement_dafny::_Wrappers_Compile::Option::None {},
++        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
 +
-+    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementInput::GetRefinementInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementInput::GetRefinementInput {
 +        requiredString: required_string,
 +        optionalString: ::std::rc::Rc::new(optional_string),
 +  })
@@ -216,10 +216,10 @@ index 00000000..43e0f94d
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementInput,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementInput,
 +    >,
 +) -> crate::operation::get_refinement::GetRefinementInput {
-+    let ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementInput::GetRefinementInput { requiredString, optionalString } = dafny_value.as_ref();
++    let crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementInput::GetRefinementInput { requiredString, optionalString } = dafny_value.as_ref();
 +
 +    let required_string =
 +        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -227,9 +227,9 @@ index 00000000..43e0f94d
 +        );
 +
 +    let optional_string = match optionalString.as_ref() {
-+        simple_refinement_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
-+        simple_refinement_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(value)),
-+        simple_refinement_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(value)),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
 +    };
 +
 +    crate::operation::get_refinement::GetRefinementInput {
@@ -239,7 +239,7 @@ index 00000000..43e0f94d
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement/_get_refinement_output.rs a/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement/_get_refinement_output.rs
 new file mode 100644
-index 00000000..a190e228
+index 00000000..42278a8f
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/get_refinement/_get_refinement_output.rs
 @@ -0,0 +1,52 @@
@@ -248,7 +248,7 @@ index 00000000..a190e228
 +pub fn to_dafny(
 +    value: crate::operation::get_refinement::GetRefinementOutput,
 +) -> ::std::rc::Rc<
-+    ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput,
++    crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput,
 +> {
 +    let crate::operation::get_refinement::GetRefinementOutput {
 +        required_string,
@@ -261,11 +261,11 @@ index 00000000..a190e228
 +        );
 +
 +    let optional_string = match optional_string {
-+        Some(s) => ::simple_refinement_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-+        None => ::simple_refinement_dafny::_Wrappers_Compile::Option::None {},
++        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
 +
-+    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput::GetRefinementOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput::GetRefinementOutput {
 +        requiredString: required_string,
 +        optionalString: ::std::rc::Rc::new(optional_string),
 +  })
@@ -274,10 +274,10 @@ index 00000000..a190e228
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput,
 +    >,
 +) -> crate::operation::get_refinement::GetRefinementOutput {
-+    let ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput::GetRefinementOutput { requiredString, optionalString } = dafny_value.as_ref();
++    let crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput::GetRefinementOutput { requiredString, optionalString } = dafny_value.as_ref();
 +
 +    let required_string =
 +        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -285,9 +285,9 @@ index 00000000..a190e228
 +        );
 +
 +    let optional_string = match optionalString.as_ref() {
-+        simple_refinement_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
-+        simple_refinement_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
-+        simple_refinement_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
 +    };
 +
 +    crate::operation::get_refinement::GetRefinementOutput {
@@ -297,7 +297,7 @@ index 00000000..a190e228
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/only_input.rs a/TestModels/Refinement/runtimes/rust/src/conversions/only_input.rs
 new file mode 100644
-index 00000000..68745fe3
+index 00000000..ae52f851
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/only_input.rs
 @@ -0,0 +1,37 @@
@@ -308,11 +308,11 @@ index 00000000..68745fe3
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::only_input::OnlyInputError,
-+) -> ::std::rc::Rc<::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
 +    match value {
 +        crate::operation::only_input::OnlyInputError::Unhandled(unhandled) => ::std::rc::Rc::new(
-+            ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque {
-+                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
++            crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque {
++                obj: ::dafny_runtime::upcast_object()(
 +                    ::dafny_runtime::object::new(unhandled),
 +                ),
 +            },
@@ -323,11 +323,11 @@ index 00000000..68745fe3
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::only_input::OnlyInputError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::only_input::OnlyInputError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -340,7 +340,7 @@ index 00000000..68745fe3
 +pub mod _only_input_output;
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/only_input/_only_input_input.rs a/TestModels/Refinement/runtimes/rust/src/conversions/only_input/_only_input_input.rs
 new file mode 100644
-index 00000000..26477c26
+index 00000000..f472165b
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/only_input/_only_input_input.rs
 @@ -0,0 +1,37 @@
@@ -349,16 +349,16 @@ index 00000000..26477c26
 +pub fn to_dafny(
 +    value: crate::operation::only_input::OnlyInputInput,
 +) -> ::std::rc::Rc<
-+    ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyInputInput,
++    crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyInputInput,
 +> {
 +    let crate::operation::only_input::OnlyInputInput { value } = value;
 +
 +    let optional_string = match value {
-+        Some(s) => ::simple_refinement_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-+        None => ::simple_refinement_dafny::_Wrappers_Compile::Option::None {},
++        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
 +
-+    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyInputInput::OnlyInputInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyInputInput::OnlyInputInput {
 +        value: ::std::rc::Rc::new(optional_string)
 +  })
 +}
@@ -366,15 +366,15 @@ index 00000000..26477c26
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyInputInput,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyInputInput,
 +    >,
 +) -> crate::operation::only_input::OnlyInputInput {
-+    let ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyInputInput::OnlyInputInput { value } = dafny_value.as_ref();
++    let crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyInputInput::OnlyInputInput { value } = dafny_value.as_ref();
 +
 +    let optional_string = match value.as_ref() {
-+        simple_refinement_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
-+        simple_refinement_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
-+        simple_refinement_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
 +    };
 +
 +    crate::operation::only_input::OnlyInputInput {
@@ -397,7 +397,7 @@ index 00000000..24a58661
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/only_output.rs a/TestModels/Refinement/runtimes/rust/src/conversions/only_output.rs
 new file mode 100644
-index 00000000..2dfa7b01
+index 00000000..fa99f1e9
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/only_output.rs
 @@ -0,0 +1,37 @@
@@ -408,11 +408,11 @@ index 00000000..2dfa7b01
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::only_output::OnlyOutputError,
-+) -> ::std::rc::Rc<::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
 +    match value {
 +        crate::operation::only_output::OnlyOutputError::Unhandled(unhandled) => ::std::rc::Rc::new(
-+            ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque {
-+                obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(
++            crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque {
++                obj: ::dafny_runtime::upcast_object()(
 +                    ::dafny_runtime::object::new(unhandled),
 +                ),
 +            },
@@ -423,11 +423,11 @@ index 00000000..2dfa7b01
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::only_output::OnlyOutputError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::only_output::OnlyOutputError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -454,7 +454,7 @@ index 00000000..58e99a74
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/only_output/_only_output_output.rs a/TestModels/Refinement/runtimes/rust/src/conversions/only_output/_only_output_output.rs
 new file mode 100644
-index 00000000..1217ce39
+index 00000000..f71262a2
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/only_output/_only_output_output.rs
 @@ -0,0 +1,37 @@
@@ -463,16 +463,16 @@ index 00000000..1217ce39
 +pub fn to_dafny(
 +    value: crate::operation::only_output::OnlyOutputOutput,
 +) -> ::std::rc::Rc<
-+    ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput,
++    crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput,
 +> {
 +    let crate::operation::only_output::OnlyOutputOutput { value } = value;
 +
 +    let optional_string = match value {
-+        Some(s) => ::simple_refinement_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-+        None => ::simple_refinement_dafny::_Wrappers_Compile::Option::None {},
++        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
 +
-+    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput::OnlyOutputOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput::OnlyOutputOutput {
 +        value: ::std::rc::Rc::new(optional_string)
 +  })
 +}
@@ -480,15 +480,15 @@ index 00000000..1217ce39
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput,
 +    >,
 +) -> crate::operation::only_output::OnlyOutputOutput {
-+    let ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput::OnlyOutputOutput { value } = dafny_value.as_ref();
++    let crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::OnlyOutputOutput::OnlyOutputOutput { value } = dafny_value.as_ref();
 +
 +    let optional_string = match value.as_ref() {
-+        simple_refinement_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
-+        simple_refinement_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
-+        simple_refinement_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
 +    };
 +
 +    crate::operation::only_output::OnlyOutputOutput {
@@ -497,7 +497,7 @@ index 00000000..1217ce39
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation.rs a/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation.rs
 new file mode 100644
-index 00000000..e584f835
+index 00000000..39ef340e
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation.rs
 @@ -0,0 +1,32 @@
@@ -508,21 +508,21 @@ index 00000000..e584f835
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::readonly_operation::ReadonlyOperationError,
-+) -> ::std::rc::Rc<::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
 +    match value {
 +    crate::operation::readonly_operation::ReadonlyOperationError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn Any>>::upcast_to(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
 +    >,
 +) -> crate::operation::readonly_operation::ReadonlyOperationError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::readonly_operation::ReadonlyOperationError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -535,7 +535,7 @@ index 00000000..e584f835
 +pub mod _readonly_operation_output;
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation/_readonly_operation_input.rs a/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation/_readonly_operation_input.rs
 new file mode 100644
-index 00000000..c45759a2
+index 00000000..f5d78c82
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation/_readonly_operation_input.rs
 @@ -0,0 +1,52 @@
@@ -544,7 +544,7 @@ index 00000000..c45759a2
 +pub fn to_dafny(
 +    value: crate::operation::readonly_operation::ReadonlyOperationInput,
 +) -> ::std::rc::Rc<
-+    ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationInput,
++    crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationInput,
 +> {
 +    let crate::operation::readonly_operation::ReadonlyOperationInput {
 +        required_string,
@@ -557,11 +557,11 @@ index 00000000..c45759a2
 +        );
 +
 +    let optional_string = match optional_string {
-+        Some(s) => ::simple_refinement_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-+        None => ::simple_refinement_dafny::_Wrappers_Compile::Option::None {},
++        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
 +
-+    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationInput::ReadonlyOperationInput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationInput::ReadonlyOperationInput {
 +        requiredString: required_string,
 +        optionalString: ::std::rc::Rc::new(optional_string),
 +  })
@@ -570,10 +570,10 @@ index 00000000..c45759a2
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationInput,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationInput,
 +    >,
 +) -> crate::operation::readonly_operation::ReadonlyOperationInput {
-+    let ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationInput::ReadonlyOperationInput { requiredString, optionalString } = dafny_value.as_ref();
++    let crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationInput::ReadonlyOperationInput { requiredString, optionalString } = dafny_value.as_ref();
 +
 +    let required_string =
 +        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -581,9 +581,9 @@ index 00000000..c45759a2
 +        );
 +
 +    let optional_string = match optionalString.as_ref() {
-+        simple_refinement_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
-+        simple_refinement_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
-+        simple_refinement_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
 +    };
 +
 +    crate::operation::readonly_operation::ReadonlyOperationInput {
@@ -593,7 +593,7 @@ index 00000000..c45759a2
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation/_readonly_operation_output.rs a/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation/_readonly_operation_output.rs
 new file mode 100644
-index 00000000..11c748b3
+index 00000000..f666f156
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/readonly_operation/_readonly_operation_output.rs
 @@ -0,0 +1,52 @@
@@ -602,7 +602,7 @@ index 00000000..11c748b3
 +pub fn to_dafny(
 +    value: crate::operation::readonly_operation::ReadonlyOperationOutput,
 +) -> ::std::rc::Rc<
-+    ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationOutput,
++    crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationOutput,
 +> {
 +    let crate::operation::readonly_operation::ReadonlyOperationOutput {
 +        required_string,
@@ -615,11 +615,11 @@ index 00000000..11c748b3
 +        );
 +
 +    let optional_string = match optional_string {
-+        Some(s) => ::simple_refinement_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-+        None => ::simple_refinement_dafny::_Wrappers_Compile::Option::None {},
++        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
++        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
 +    };
 +
-+    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationOutput::ReadonlyOperationOutput {
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationOutput::ReadonlyOperationOutput {
 +        requiredString: required_string,
 +        optionalString: ::std::rc::Rc::new(optional_string),
 +  })
@@ -628,10 +628,10 @@ index 00000000..11c748b3
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationOutput,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationOutput,
 +    >,
 +) -> crate::operation::readonly_operation::ReadonlyOperationOutput {
-+    let ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationOutput::ReadonlyOperationOutput { requiredString, optionalString } = dafny_value.as_ref();
++    let crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::ReadonlyOperationOutput::ReadonlyOperationOutput { requiredString, optionalString } = dafny_value.as_ref();
 +
 +    let required_string =
 +        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -639,9 +639,9 @@ index 00000000..11c748b3
 +        );
 +
 +    let optional_string = match optionalString.as_ref() {
-+        simple_refinement_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
-+        simple_refinement_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
-+        simple_refinement_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
++        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
 +    };
 +
 +    crate::operation::readonly_operation::ReadonlyOperationOutput {
@@ -660,7 +660,7 @@ index 00000000..9d22fe48
 +pub mod _simple_refinement_config;
 diff --git b/TestModels/Refinement/runtimes/rust/src/conversions/simple_refinement_config/_simple_refinement_config.rs a/TestModels/Refinement/runtimes/rust/src/conversions/simple_refinement_config/_simple_refinement_config.rs
 new file mode 100644
-index 00000000..f0bb21fe
+index 00000000..fc750ac0
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/conversions/simple_refinement_config/_simple_refinement_config.rs
 @@ -0,0 +1,19 @@
@@ -670,15 +670,15 @@ index 00000000..f0bb21fe
 +pub fn to_dafny(
 +    value: crate::types::simple_refinement_config::SimpleRefinementConfig,
 +) -> ::std::rc::Rc<
-+    ::simple_refinement_dafny::_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig,
++    crate::implementation_from_dafny::_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig,
 +> {
-+    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig::SimpleRefinementConfig {})
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig::SimpleRefinementConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig,
++        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig,
 +    >,
 +) -> crate::types::simple_refinement_config::SimpleRefinementConfig {
 +    crate::types::simple_refinement_config::SimpleRefinementConfig {}
@@ -705,10 +705,10 @@ index 00000000..ec89cbec
 +pub(crate) mod sealed_unhandled;
 diff --git b/TestModels/Refinement/runtimes/rust/src/error/sealed_unhandled.rs a/TestModels/Refinement/runtimes/rust/src/error/sealed_unhandled.rs
 new file mode 100644
-index 00000000..9d21fbd6
+index 00000000..cce22d1c
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/error/sealed_unhandled.rs
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,26 @@
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +/// This struct is not intended to be used.
 +///
@@ -731,12 +731,16 @@ index 00000000..9d21fbd6
 +    pub(crate) source: ::aws_smithy_runtime_api::box_error::BoxError,
 +    pub(crate) meta: ::aws_smithy_types::error::metadata::ErrorMetadata,
 +}
++
++impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
++    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
++}
 diff --git b/TestModels/Refinement/runtimes/rust/src/lib.rs a/TestModels/Refinement/runtimes/rust/src/lib.rs
 new file mode 100644
-index 00000000..c584447b
+index 00000000..33ef356e
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/lib.rs
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,19 @@
 +#![allow(deprecated)]
 +
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
@@ -751,6 +755,8 @@ index 00000000..c584447b
 +pub mod operation;
 +
 +mod conversions;
++
++pub mod implementation_from_dafny;
 +
 +pub use client::Client;
 +pub use types::simple_refinement_config::SimpleRefinementConfig;
@@ -775,7 +781,7 @@ index 00000000..015f55f3
 +pub mod readonly_operation;
 diff --git b/TestModels/Refinement/runtimes/rust/src/operation/get_refinement.rs a/TestModels/Refinement/runtimes/rust/src/operation/get_refinement.rs
 new file mode 100644
-index 00000000..330ccb43
+index 00000000..4787b47b
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/operation/get_refinement.rs
 @@ -0,0 +1,147 @@
@@ -803,7 +809,7 @@ index 00000000..330ccb43
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetRefinement(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_refinement_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_refinement::_get_refinement_output::from_dafny(
@@ -1227,7 +1233,7 @@ index 00000000..8be68872
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/operation/only_input.rs a/TestModels/Refinement/runtimes/rust/src/operation/only_input.rs
 new file mode 100644
-index 00000000..a60312aa
+index 00000000..efc8308f
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/operation/only_input.rs
 @@ -0,0 +1,146 @@
@@ -1254,7 +1260,7 @@ index 00000000..a60312aa
 +            ::dafny_runtime::md!(client.dafny_client.clone()).OnlyInput(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_refinement_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::only_input::_only_input_output::from_dafny(
@@ -1538,7 +1544,7 @@ index 00000000..9148352c
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/operation/only_output.rs a/TestModels/Refinement/runtimes/rust/src/operation/only_output.rs
 new file mode 100644
-index 00000000..64df3fea
+index 00000000..c0e947f7
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/operation/only_output.rs
 @@ -0,0 +1,143 @@
@@ -1562,7 +1568,7 @@ index 00000000..64df3fea
 +        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).OnlyOutput();
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_refinement_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::only_output::_only_output_output::from_dafny(
@@ -1839,7 +1845,7 @@ index 00000000..890d49af
 +}
 diff --git b/TestModels/Refinement/runtimes/rust/src/operation/readonly_operation.rs a/TestModels/Refinement/runtimes/rust/src/operation/readonly_operation.rs
 new file mode 100644
-index 00000000..bb527baf
+index 00000000..5c941e61
 --- /dev/null
 +++ a/TestModels/Refinement/runtimes/rust/src/operation/readonly_operation.rs
 @@ -0,0 +1,147 @@
@@ -1867,7 +1873,7 @@ index 00000000..bb527baf
 +            ::dafny_runtime::md!(client.dafny_client.clone()).ReadonlyOperation(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            ::simple_refinement_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::readonly_operation::_readonly_operation_output::from_dafny(
