@@ -19,7 +19,6 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("AggregateReferences");
     DISABLED_TESTS.add("CodegenPatches");
     DISABLED_TESTS.add("Constraints");
-    DISABLED_TESTS.add("Constructor");
     DISABLED_TESTS.add("Dependencies");
     DISABLED_TESTS.add("Documentation");
     DISABLED_TESTS.add("Errors");
