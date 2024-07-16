@@ -4,18 +4,18 @@ use aws_smithy_types::error::operation::BuildError;
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::ISimpleDocumentationClient>
 }
 
 impl Client {
     /// Creates a new client from the service [`Config`](crate::Config).
     #[track_caller]
     pub fn from_conf(
-        conf: crate::types::simple_boolean_config::SimpleBooleanConfig,
+        conf: crate::types::simple_documentation_config::SimpleDocumentationConfig,
     ) -> Result<Self, BuildError> {
         let inner =
-            crate::implementation_from_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(
-                &crate::conversions::simple_boolean_config::_simple_boolean_config::to_dafny(conf),
+            crate::implementation_from_dafny::_simple_ddocumentation_dinternaldafny::_default::SimpleDocumentation(
+                &crate::conversions::simple_documentation_config::_simple_documentation_config::to_dafny(conf),
             );
         if matches!(
             inner.as_ref(),
@@ -29,9 +29,9 @@ impl Client {
             ));
         }
         Ok(Self {
-            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract())
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
         })
     }
 }
 
-mod get_boolean;
+mod get_thing;

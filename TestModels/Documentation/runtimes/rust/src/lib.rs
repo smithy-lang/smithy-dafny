@@ -19,4 +19,4 @@ pub mod implementation_from_dafny;
 pub mod wrapped;
 
 pub use client::Client;
-pub use types::simple_boolean_config::SimpleBooleanConfig;
+pub use types::simple_documentation_config::SimpleDocumentationConfig;
