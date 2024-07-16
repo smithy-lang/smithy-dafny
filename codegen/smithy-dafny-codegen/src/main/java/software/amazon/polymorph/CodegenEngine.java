@@ -687,7 +687,8 @@ public class CodegenEngine {
     }
 
     if (awsSdkStyle) {
-      Generator.handRolled(model, outputDir);
+      Generator generator = new Generator(model, serviceShape);
+      generator.handRolled(outputDir);
     }
 
     handlePatching(TargetLanguage.RUST, outputDir);

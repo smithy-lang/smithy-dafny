@@ -6,8 +6,10 @@ import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -48,6 +50,17 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
 
 public class Generator {
 
+    private final Model model;
+    private final ServiceShape service;
+    private final OperationIndex operationIndex;
+
+
+    public Generator(Model model, ServiceShape service) {
+        this.model = model;
+        this.service = service;
+        this.operationIndex = new OperationIndex(model);
+    }
+
     public static void usingSmithyRs(final Model model, final Path outputDir) {
         // Mock up a PluginContext for the benefit of smithy-rs libraries
         FileManifest fileManifest = FileManifest.create(outputDir);
@@ -85,8 +98,8 @@ public class Generator {
         new ClientCodegenVisitor(context, codegenDecorator).execute();
     }
 
-    public static void handRolled(final Model model, final Path outputDir) {
-        final var rustFiles = rustFiles(model);
+    public void handRolled(final Path outputDir) {
+        final var rustFiles = rustFiles();
         final LinkedHashMap<Path, TokenTree> tokenTreeMap = new LinkedHashMap<>();
         for (RustFile rustFile : rustFiles) {
             tokenTreeMap.put(rustFile.path(), rustFile.content());
@@ -94,18 +107,18 @@ public class Generator {
         IOUtils.writeTokenTreesIntoDir(tokenTreeMap, outputDir);
     }
 
-    private static Stream<StructureShape> allErrorShapes(final Model model, final ServiceShape service) {
+    private Stream<StructureShape> allErrorShapes() {
         return model.getOperationShapes().stream()
                 .flatMap(operationShape -> operationShape.getErrors().stream())
                 .distinct()
                 .map(errorShapeId -> model.expectShape(errorShapeId, StructureShape.class));
     }
 
-    private static Set<RustFile> rustFiles(final Model model) {
+    private Set<RustFile> rustFiles() {
         ServiceShape service = model.getServiceShapes().stream().findFirst().get();
 
         Set<RustFile> result = new HashSet<>();
-        result.addAll(allErrorShapes(model, service)
+        result.addAll(allErrorShapes()
                 .map(errorShape -> errorConversionModule(service, errorShape))
                 .collect(Collectors.toSet()));
 
@@ -114,22 +127,23 @@ public class Generator {
                 .collect(Collectors.toSet()));
 
         result.add(conversionsModuleFile(model, service));
-        result.addAll(allOperationConversionModules(model, service));
+        result.addAll(allOperationConversionModules());
+        result.addAll(allStructureConversionModules());
         result.add(conversionsErrorModule(model, service));
 
-        result.add(libFile(service));
+        result.add(libFile());
 
         return result;
     }
 
-    private static Set<RustFile> allOperationConversionModules(final Model model, final ServiceShape service) {
+    private Set<RustFile> allOperationConversionModules() {
         return service.getOperations().stream()
-                .map(shapeId -> operationConversionModules(model, service, model.expectShape(shapeId, OperationShape.class)))
+                .map(shapeId -> operationConversionModules(model.expectShape(shapeId, OperationShape.class)))
                 .flatMap(s -> s.stream())
                 .collect(Collectors.toSet());
     }
 
-    private static Set<RustFile> operationConversionModules(final Model model, final ServiceShape service, final OperationShape operationShape) {
+    private Set<RustFile> operationConversionModules(final OperationShape operationShape) {
         var operationModuleName = toSnakeCase(operationShape.getId().getName());
         var operationModuleContent = declarePubModules(Stream.of(
                 "_" + operationModuleName + "_request",
@@ -137,20 +151,20 @@ public class Generator {
         ));
         RustFile outerModule = new RustFile(Path.of("src", "conversions", operationModuleName + ".rs"), operationModuleContent);
 
-        RustFile requestModule = operationRequestConversionModule(model, service, operationShape);
+        RustFile requestModule = operationRequestConversionModule(operationShape);
 
         return Set.of(outerModule, requestModule);
     }
 
-    private static RustFile operationRequestConversionModule(final Model model, final ServiceShape service, final OperationShape operationShape) {
+    private RustFile operationRequestConversionModule(final OperationShape operationShape) {
         var operationModuleName = toSnakeCase(operationShape.getId().getName());
 
-        var toDafnyFunction = operationRequestToDafnyFunction(model, service, operationShape);
+        var toDafnyFunction = operationRequestToDafnyFunction(operationShape);
 
         return new RustFile(Path.of("src", "conversions", operationModuleName, "_" + operationModuleName + "_request.rs"), toDafnyFunction);
     }
 
-    private static TokenTree operationRequestToDafnyFunction(final Model model, final ServiceShape service, final OperationShape operationShape) {
+    private TokenTree operationRequestToDafnyFunction(final OperationShape operationShape) {
         StructureShape inputShape = model.expectShape(operationShape.getInputShape(), StructureShape.class);
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
@@ -162,12 +176,11 @@ public class Generator {
                 "operationName", operationName,
                 "structureName", structureName,
                 "snakeCaseOperationName", snakeCaseOperationName,
-                "dafnyTypesModuleName", dafnyTypesModuleName
+                "dafnyTypesModuleName", dafnyTypesModuleName,
+                "variants", variantsForStructure(inputShape).toString()
         );
 
-        String sdkTypeName = evalTemplate("$sdkCrate:L::types::$enumName:L", variables);
-
-        var prelude = TokenTree.of(evalTemplate("""
+        return TokenTree.of(evalTemplate("""
         #[allow(dead_code)]
         pub fn to_dafny(
             value: $sdkCrate:L::operation::$snakeCaseOperationName:L::$structureName:L
@@ -175,48 +188,77 @@ public class Generator {
             crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
         >{
             ::std::rc::Rc::new(crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
-
+                $variants:L
+            })
+        }
         """, variables));
+    }
 
-        var variants = TokenTree.of(inputShape.members()
+    private TokenTree variantsForStructure(Shape shape) {
+        return TokenTree.of(
+            shape.members()
                 .stream()
                 .map(m -> TokenTree.of(m.getMemberName()
                         + ": "
-                        + variantMemberForOperationRequest(model, m) + ","))
+                        + variantMemberForOperationRequest(m) + ","))
         ).lineSeparated();
-        final var postlude = TokenTree.of("""
-            })
-        }
-        """);
-
-        return TokenTree.of(prelude, variants, postlude);
     }
 
-    private static TokenTree variantMemberForOperationRequest(final Model model, final MemberShape member) {
+    private TokenTree variantMemberForOperationRequest(MemberShape member) {
         Shape targetShape = model.expectShape(member.getTarget());
         String snakeCaseMemberName = toSnakeCase(member.getMemberName());
-        return switch (targetShape.getType()) {
+        boolean isRequired = member.hasTrait(RequiredTrait.class);
+        return toDafny(targetShape, "value." + snakeCaseMemberName, true, !isRequired);
+    }
+
+    private TokenTree toDafny(final Shape shape, final String rustValue, boolean isRustOption, boolean isDafnyOption) {
+        return switch (shape.getType()) {
             case STRING -> {
-                if (targetShape.hasTrait(EnumTrait.class)) {
+                if (shape.hasTrait(EnumTrait.class)) {
+                    var enumShapeName = toSnakeCase(shape.toShapeId().getName());
                     yield TokenTree.of("""
-                    ::std::rc::Rc::new(match value.%s {
+                    ::std::rc::Rc::new(match %s {
                         Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x) },
                         None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
                     })
-                    """.formatted(snakeCaseMemberName, snakeCaseMemberName));
+                    """.formatted(rustValue, enumShapeName));
                 } else {
-                    if (member.hasTrait(RequiredTrait.class)) {
-                        yield TokenTree.of("dafny_standard_library::conversion::ostring_to_dafny(&value.%s).Extract()".formatted(snakeCaseMemberName));
+                    if (isRustOption) {
+                        var result = TokenTree.of("dafny_standard_library::conversion::ostring_to_dafny(&%s)".formatted(rustValue));
+                        if (!isDafnyOption) {
+                            result = TokenTree.of(result, TokenTree.of(".Extract()"));
+                        }
+                        yield result;
                     } else {
-                        yield TokenTree.of("dafny_standard_library::conversion::ostring_to_dafny(&value.%s)".formatted(snakeCaseMemberName));
+                        yield TokenTree.of("dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(%s)".formatted(rustValue));
                     }
                 }
+            }
+            case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_to_dafny(&%s)".formatted(rustValue));
+            case MAP -> {
+                MapShape mapShape = shape.asMapShape().get();
+                Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
+                Shape valueShape = model.expectShape(mapShape.getValue().getTarget());
+                yield TokenTree.of("""
+                
+                ::std::rc::Rc::new(match %s() {
+                    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+                        ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
+                            |k| %s,
+                            |v| %s,
+                        )
+                    },
+                    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+                })
+                """.formatted(rustValue,
+                              toDafny(keyShape, "k", false, false),
+                              toDafny(valueShape, "v", false, false)));
             }
             default -> TokenTree.of("todo!()");
         };
     }
 
-    private static RustFile libFile(final ServiceShape service) {
+    private RustFile libFile() {
         return new RustFile(Path.of("src", "lib.rs"),
                 TokenTree.of("""
                         mod client;
@@ -229,13 +271,13 @@ public class Generator {
 //        Set<>
 //    }
 
-    private static RustFile conversionsErrorModule(final Model model, final ServiceShape service) {
-        TokenTree content = declarePubModules(allErrorShapes(model, service)
+    private RustFile conversionsErrorModule(final Model model, final ServiceShape service) {
+        TokenTree content = declarePubModules(allErrorShapes()
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName())));
         return new RustFile(Path.of("src", "conversions", "error.rs"), content);
     }
 
-    private static RustFile conversionsModuleFile(final Model model, final ServiceShape service) {
+    private RustFile conversionsModuleFile(final Model model, final ServiceShape service) {
         Stream<String> operationModules = model.getOperationShapes()
                 .stream()
                 .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
@@ -256,13 +298,13 @@ public class Generator {
 
     }
 
-    private static TokenTree declarePubModules(Stream<String> moduleNames) {
+    private TokenTree declarePubModules(Stream<String> moduleNames) {
         return TokenTree.of(
             moduleNames.map(module -> TokenTree.of("pub mod " + module + ";\n")))
         .lineSeparated();
     }
 
-    private static RustFile errorConversionModule(final ServiceShape service, final Shape errorStructure) {
+    private RustFile errorConversionModule(final ServiceShape service, final Shape errorStructure) {
         String structureName = errorStructure.getId().getName();
         String snakeCaseName = toSnakeCase(structureName);
         Path path = Path.of("src", "conversions", "error", snakeCaseName + ".rs");
@@ -289,7 +331,44 @@ public class Generator {
         return new RustFile(path, TokenTree.of(evaluated));
     }
 
-    private static RustFile enumConversionModule(final ServiceShape service, final Shape enumShape) {
+    private Set<RustFile> allStructureConversionModules() {
+        return model.getStructureShapes().stream()
+                .filter(structureShape -> !operationIndex.isInputStructure(structureShape)
+                        && !operationIndex.isOutputStructure(structureShape)
+                        && !structureShape.hasTrait(Trait.class))
+                .map(this::structureConversionModule)
+                .collect(Collectors.toSet());
+    }
+
+    private RustFile structureConversionModule(final Shape structureShape) {
+        String structureName = structureShape.getId().getName();
+        String snakeCaseName = toSnakeCase(structureName);
+        Path path = Path.of("src", "conversions", snakeCaseName + ".rs");
+        String template = """
+        // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+        
+        #[allow(dead_code)]
+        pub fn to_dafny(
+            value: aws_sdk_$sdkId:L::types::$structureName:L,
+        ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L>{
+          ::std::rc::Rc::new(
+            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_d$sdkId:L_dinternaldafny_dtypes::$structureName:L::$structureName:L {
+                $variants:L
+            }
+          )
+        }
+        """;
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+        String evaluated = evalTemplate(template, Map.of(
+                "sdkId", sdkId,
+                "structureName", structureName,
+                "dafnyTypesModuleName", "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId),
+                "variants", variantsForStructure(structureShape).toString()
+        ));
+        return new RustFile(path, TokenTree.of(evaluated));
+    }
+
+    private RustFile enumConversionModule(final ServiceShape service, final Shape enumShape) {
         String enumName = enumShape.getId().getName();
         String snakeCaseName = toSnakeCase(enumName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
@@ -342,11 +421,11 @@ public class Generator {
         return new RustFile(path, TokenTree.of(prelude, branches, postlude));
     }
 
-    private static String rustEnumName(EnumDefinition ed) {
+    private String rustEnumName(EnumDefinition ed) {
         return toPascalCase(ed.getValue());
     }
 
-    private static String dafnyEnumName(EnumDefinition ed) {
+    private String dafnyEnumName(EnumDefinition ed) {
         return ed.getValue();
     }
 }
