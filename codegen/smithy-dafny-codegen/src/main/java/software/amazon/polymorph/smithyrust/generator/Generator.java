@@ -16,6 +16,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.rust.codegen.client.smithy.ClientCodegenVisitor;
 import software.amazon.smithy.rust.codegen.client.smithy.customizations.ClientCustomizations;
@@ -195,7 +196,22 @@ public class Generator {
         Shape targetShape = model.expectShape(member.getTarget());
         String snakeCaseMemberName = toSnakeCase(member.getMemberName());
         return switch (targetShape.getType()) {
-            case STRING -> TokenTree.of("dafny_standard_library::conversion::ostring_to_dafny(&value.%s)".formatted(snakeCaseMemberName));
+            case STRING -> {
+                if (targetShape.hasTrait(EnumTrait.class)) {
+                    yield TokenTree.of("""
+                    ::std::rc::Rc::new(match value.%s {
+                        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x) },
+                        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+                    })
+                    """.formatted(snakeCaseMemberName, snakeCaseMemberName));
+                } else {
+                    if (member.hasTrait(RequiredTrait.class)) {
+                        yield TokenTree.of("dafny_standard_library::conversion::ostring_to_dafny(&value.%s).Extract()".formatted(snakeCaseMemberName));
+                    } else {
+                        yield TokenTree.of("dafny_standard_library::conversion::ostring_to_dafny(&value.%s)".formatted(snakeCaseMemberName));
+                    }
+                }
+            }
             default -> TokenTree.of("todo!()");
         };
     }
