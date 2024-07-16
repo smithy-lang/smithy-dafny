@@ -1,4 +1,4 @@
-This directory is the code generation target for the SimpleStub model when targetting Rust.
+This directory is the code generation target for the Constructor model when targetting Rust.
 
 Like the other targets, the crate is a combination of the output of three different components:
 
@@ -8,7 +8,7 @@ Like the other targets, the crate is a combination of the output of three differ
 
 Most of the `smithy-rs` output is not modified,
 only trimmed down to cut out components that aren't relevant for Polymorph libraries.
-The main exception is `client.rs` and the operation builders such as `operation/get_stub.rs`,
+The main exception is `client.rs` and the operation builders such as `operation/get_constructor.rs`,
 which instantiate the underlying Dafny client implementation and invoke operations on it, respectively,
 instead of sending the operation value through an orchestrated plugin stack
 that eventually serializes it and sends it to a remote service endpoint.
