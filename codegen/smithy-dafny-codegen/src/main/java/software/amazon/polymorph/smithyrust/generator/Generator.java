@@ -8,8 +8,14 @@ import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
+import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.rust.codegen.client.smithy.ClientCodegenVisitor;
 import software.amazon.smithy.rust.codegen.client.smithy.customizations.ClientCustomizations;
 import software.amazon.smithy.rust.codegen.client.smithy.customizations.HttpAuthDecorator;
@@ -26,12 +32,16 @@ import software.amazon.smithy.rust.codegen.client.smithy.generators.client.Fluen
 import software.amazon.smithy.rust.codegen.client.smithy.generators.config.StalledStreamProtectionDecorator;
 
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
 public class Generator {
@@ -82,14 +92,88 @@ public class Generator {
         IOUtils.writeTokenTreesIntoDir(tokenTreeMap, outputDir);
     }
 
-    private static Set<RustFile> rustFiles(final Model model) {
-        ServiceShape service = model.getServiceShapes().stream().findFirst().get();
-
+    private static Stream<StructureShape> allErrorShapes(final Model model, final ServiceShape service) {
         return model.getOperationShapes().stream()
                 .flatMap(operationShape -> operationShape.getErrors().stream())
                 .distinct()
-                .map(errorShapeId -> errorConversionModule(service, model.expectShape(errorShapeId)))
+                .map(errorShapeId -> model.expectShape(errorShapeId, StructureShape.class));
+    }
+
+    private static Set<RustFile> rustFiles(final Model model) {
+        ServiceShape service = model.getServiceShapes().stream().findFirst().get();
+
+        Set<RustFile> result = new HashSet<>();
+        result.addAll(allErrorShapes(model, service)
+                .map(errorShape -> errorConversionModule(service, errorShape))
+                .collect(Collectors.toSet()));
+
+        result.addAll(model.getStringShapesWithTrait(EnumTrait.class).stream()
+                .map(enumShape -> enumConversionModule(service, enumShape))
+                .collect(Collectors.toSet()));
+
+        result.add(conversionsModuleFile(model, service));
+        result.add(conversionsErrorModule(model, service));
+
+        result.add(libFile(service));
+
+        return result;
+    }
+
+    private static Set<RustFile> allOperationConversionModules(final Model model, final ServiceShape service) {
+        return service.getOperations().stream()
+                .map(shapeId -> operationConversionModules(model, (OperationShape)model.expectShape(shapeId)))
+                .flatMap(s -> s.stream())
                 .collect(Collectors.toSet());
+    }
+
+    private static Set<RustFile> operationConversionModules(final Model model, final OperationShape operationShape) {
+        return new HashSet<>();
+    }
+
+    private static RustFile libFile(final ServiceShape service) {
+        return new RustFile(Path.of("src", "lib.rs"),
+                TokenTree.of("""
+                        mod client;
+                        mod conversions;
+                        pub mod implementation_from_dafny;
+                        """));
+    }
+
+//    private static RustFile clientModuleFile(final ServiceShape service) {
+//        Set<>
+//    }
+
+    private static RustFile conversionsErrorModule(final Model model, final ServiceShape service) {
+        TokenTree content = declarePubModules(allErrorShapes(model, service)
+                .map(structureShape -> toSnakeCase(structureShape.getId().getName())));
+        return new RustFile(Path.of("src", "conversions", "error.rs"), content);
+    }
+
+    private static RustFile conversionsModuleFile(final Model model, final ServiceShape service) {
+        Stream<String> operationModules = model.getOperationShapes()
+                .stream()
+                .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
+
+        Stream<String> structureModules = model.getStructureShapes()
+                .stream()
+                .filter(structureShape -> !structureShape.hasTrait(ErrorTrait.class) && !structureShape.hasTrait(Trait.class))
+                .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
+
+        Stream<String> enumModules = model.getStringShapesWithTrait(EnumTrait.class).stream()
+                .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
+
+        TokenTree content = declarePubModules(
+                Stream.of(operationModules, structureModules, enumModules, Stream.of("error"))
+                        .flatMap(s -> s));
+
+        return new RustFile(Path.of("src", "conversions.rs"), content);
+
+    }
+
+    private static TokenTree declarePubModules(Stream<String> moduleNames) {
+        return TokenTree.of(
+            moduleNames.map(module -> TokenTree.of("pub mod " + module + ";\n")))
+        .lineSeparated();
     }
 
     private static RustFile errorConversionModule(final ServiceShape service, final Shape errorStructure) {
@@ -101,21 +185,82 @@ public class Generator {
         
         #[allow(dead_code)]
         pub fn to_dafny(
-            value: $sdkCrate:L::types::error::$structureName:L,
+            value: aws_sdk_$sdkId:L::types::error::$structureName:L,
         ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>{
           ::std::rc::Rc::new(
-            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_d$sdkCrate:L_dinternaldafny_dtypes::Error::$structureName:L {
+            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_d$sdkId:L_dinternaldafny_dtypes::Error::$structureName:L {
               message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
             }
           )
         }
         """;
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String evaluated = IOUtils.evalTemplate(template, Map.of(
-                "sdkCrate", "aws_sdk_" + sdkId,
+        String evaluated = evalTemplate(template, Map.of(
+                "sdkId", sdkId,
                 "structureName", structureName,
                 "dafnyTypesModuleName", "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId)
         ));
         return new RustFile(path, TokenTree.of(evaluated));
+    }
+
+    private static RustFile enumConversionModule(final ServiceShape service, final Shape enumShape) {
+        String enumName = enumShape.getId().getName();
+        String snakeCaseName = toSnakeCase(enumName);
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        Map<String, String> variables = Map.of(
+                "sdkCrate", "aws_sdk_" + sdkId,
+                "enumName", enumName,
+                "dafnyTypesModuleName", dafnyTypesModuleName
+        );
+
+        Path path = Path.of("src", "conversions", snakeCaseName + ".rs");
+        String sdkTypeName = evalTemplate("$sdkCrate:L::types::$enumName:L", variables);
+
+        var prelude = TokenTree.of(evalTemplate("""
+        // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+        #[allow(dead_code)]
+         
+        pub fn to_dafny(
+            value: $sdkCrate:L::types::$enumName:L,
+        ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$enumName:L>{
+            ::std::rc::Rc::new(match value {
+
+        """, variables));
+
+        var branches = TokenTree.of(enumShape.expectTrait(EnumTrait.class).getValues()
+                .stream()
+                .map(e -> TokenTree.of(sdkTypeName
+                        + "::"
+                        + rustEnumName(e)
+                        + " => crate::implementation_from_dafny::r#"
+                        + dafnyTypesModuleName
+                        + "::"
+                        + enumName
+                        + "::"
+                        + dafnyEnumName(e)
+                        + " {},"))
+        ).lineSeparated();
+        final var postlude = TokenTree.of("""
+
+                // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
+                // so there's no way to succeed.
+                // See https://github.com/smithy-lang/smithy-dafny/issues/476.
+                // This could be handled more cleanly if conversion functions returned Results,
+                // but that would be a large and disruptive change to the overall code flow.
+                _ => panic!("Unknown enum variant: {}", value),
+            })
+        }
+        """);
+
+        return new RustFile(path, TokenTree.of(prelude, branches, postlude));
+    }
+
+    private static String rustEnumName(EnumDefinition ed) {
+        return toPascalCase(ed.getValue());
+    }
+
+    private static String dafnyEnumName(EnumDefinition ed) {
+        return ed.getValue();
     }
 }
