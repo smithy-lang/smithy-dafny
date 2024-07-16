@@ -83,15 +83,16 @@ ENABLE_EXTERN_PROCESSING?=
 verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
 verify:DAFNY_PROCESSES=$(shell echo $$(( ($(CORES) - 1 ) / ($(CORES) >= 3 ? 2 : 1))))
 verify:
-	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny \
-		-vcsCores:$(Z3_PROCESSES) \
-		-compile:0 \
-		-definiteAssignment:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-verificationLogger:csv \
-		-timeLimit:$(VERIFY_TIMEOUT) \
-		-rlimit:$(MAX_RESOURCE_COUNT) \
+	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny verify \
+		--cores $(Z3_PROCESSES) \
+		--unicode-char false \
+		--function-syntax 3 \
+		--log-format csv \
+		--verification-time-limit $(VERIFY_TIMEOUT) \
+		--resource-limit $(MAX_RESOURCE_COUNT) \
+		--allow-external-contracts \
+		--progress \
+		--allow-warnings \
 		$(DAFNY_OPTIONS) \
 		%
 
@@ -100,14 +101,15 @@ verify:
 # Use PROC to further scope the verification
 verify_single:
 	dafny \
-		-vcsCores:$(CORES) \
-		-compile:0 \
-		-definiteAssignment:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-verificationLogger:text \
-		-timeLimit:$(VERIFY_TIMEOUT) \
-		-rlimit:$(MAX_RESOURCE_COUNT) \
+		--cores $(CORES) \
+		--unicode-char false \
+		--function-syntax 3 \
+		--log-format text \
+		--verification-time-limit $(VERIFY_TIMEOUT) \
+		--resource-limit $(MAX_RESOURCE_COUNT) \
+		--allow-external-contracts \
+		--progress \
+		--allow-warnings \
 		$(DAFNY_OPTIONS) \
 		$(if ${PROC},-proc:*$(PROC)*,) \
 		$(FILE)
@@ -116,13 +118,15 @@ verify_single:
 verify_service:
 	@: $(if ${SERVICE},,$(error You must pass the SERVICE to generate for));
 	dafny \
-		-vcsCores:$(CORES) \
-		-compile:0 \
-		-definiteAssignment:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-verificationLogger:csv \
-		-timeLimit:$(VERIFY_TIMEOUT) \
+		--cores $(CORES) \
+		--unicode-char false \
+		--function-syntax 3 \
+		--log-format text \
+		--verification-time-limit $(VERIFY_TIMEOUT) \
+		--resource-limit $(MAX_RESOURCE_COUNT) \
+		--allow-external-contracts \
+		--progress \
+		--allow-warnings \
 		$(DAFNY_OPTIONS) \
 		`find ./dafny/$(SERVICE) -name '*.dfy'` \
 
