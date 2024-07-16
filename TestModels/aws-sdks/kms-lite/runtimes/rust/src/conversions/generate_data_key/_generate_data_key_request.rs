@@ -41,7 +41,7 @@ pub fn to_dafny(
             }
         ),
         Recipient: crate::conversions::recipient_info::option_to_dafny(value.recipient()),
-        DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
+        DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
     })
 }
 
