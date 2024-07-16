@@ -67,9 +67,7 @@ transpile_java: | transpile_implementation_java transpile_test_java
 # StandardLibrary as a dependency
 transpile_rust: | transpile_implementation_rust transpile_test_rust
 
-# Override the targets to relocate translated Rust code directly into the main crate,
-# instead of the dafny_impl sub-crate.
-# We also don't want to delete the src directory since we have an extern in there too.
+# Override this target to not insert a dependency on the standard library.
 _mv_implementation_rust:
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
