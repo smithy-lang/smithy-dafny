@@ -62,19 +62,19 @@ impl GetResourceDataFluentBuilder {
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn blob_value(mut self, input: impl ::std::convert::Into<Vec<u8>>) -> Self {
+    pub fn blob_value(mut self, input: impl ::std::convert::Into<aws_smithy_types::Blob>) -> Self {
         self.inner = self.inner.blob_value(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_blob_value(mut self, input: Option<Vec<u8>>) -> Self {
+    pub fn set_blob_value(mut self, input: Option<aws_smithy_types::Blob>) -> Self {
         self.inner = self.inner.set_blob_value(input);
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_blob_value(&self) -> &Option<Vec<u8>> {
+    pub fn get_blob_value(&self) -> &Option<aws_smithy_types::Blob> {
         self.inner.get_blob_value()
     }
 
