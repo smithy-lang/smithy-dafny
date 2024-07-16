@@ -90,7 +90,6 @@ verify:
 		--log-format csv \
 		--verification-time-limit $(VERIFY_TIMEOUT) \
 		--resource-limit $(MAX_RESOURCE_COUNT) \
-		--progress \
 		--allow-warnings \
 		$(DAFNY_OPTIONS) \
 		%
@@ -106,7 +105,6 @@ verify_single:
 		--log-format text \
 		--verification-time-limit $(VERIFY_TIMEOUT) \
 		--resource-limit $(MAX_RESOURCE_COUNT) \
-		--progress \
 		--allow-warnings \
 		$(DAFNY_OPTIONS) \
 		$(if ${PROC},-proc:*$(PROC)*,) \
@@ -122,7 +120,6 @@ verify_service:
 		--log-format text \
 		--verification-time-limit $(VERIFY_TIMEOUT) \
 		--resource-limit $(MAX_RESOURCE_COUNT) \
-		--progress \
 		--allow-warnings \
 		$(DAFNY_OPTIONS) \
 		`find ./dafny/$(SERVICE) -name '*.dfy'` \
