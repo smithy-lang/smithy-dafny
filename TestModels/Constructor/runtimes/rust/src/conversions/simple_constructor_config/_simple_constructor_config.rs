@@ -8,20 +8,22 @@ use dafny_standard_library::conversion::{
 pub fn to_dafny(
     config: crate::config::Config,
 ) -> ::std::rc::Rc<
-    ::constructor_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig,
-> {
+    crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig,
+>{
     ::std::rc::Rc::new(
-        ::constructor_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig::SimpleConstructorConfig { blobValue: blob_to_dafny(config.blob_value), booleanValue: obool_to_dafny(config.boolean_value), stringValue: ostring_to_dafny(&config.string_value), integerValue: oint_to_dafny(config.integer_value), longValue: olong_to_dafny(config.long_value) })
+        crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig::SimpleConstructorConfig { blobValue: blob_to_dafny(config.blob_value), booleanValue: obool_to_dafny(config.boolean_value), stringValue: ostring_to_dafny(&config.string_value), integerValue: oint_to_dafny(config.integer_value), longValue: olong_to_dafny(config.long_value) })
 }
 
 fn blob_to_dafny(
     value: ::std::option::Option<::std::vec::Vec<u8>>,
-) -> ::std::rc::Rc<::constructor_dafny::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
+) -> ::std::rc::Rc<
+    crate::implementation_from_dafny::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>,
+> {
     let v = match value {
-        Some(v) => ::constructor_dafny::_Wrappers_Compile::Option::Some {
+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
             value: ::dafny_runtime::Sequence::from_array(&v),
         },
-        None => ::constructor_dafny::_Wrappers_Compile::Option::None {},
+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
     };
 
     ::std::rc::Rc::new(v)
@@ -30,7 +32,7 @@ fn blob_to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     config: ::std::rc::Rc<
-        ::constructor_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig,
+        crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig,
     >,
 ) -> crate::config::Config {
     crate::config::Config {
@@ -44,62 +46,72 @@ pub fn from_dafny(
 
 fn blob_from_dafny(
     value: ::std::rc::Rc<
-        ::constructor_dafny::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>,
+        crate::implementation_from_dafny::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>,
     >,
 ) -> ::std::option::Option<::std::vec::Vec<u8>> {
     match value.as_ref() {
-        ::constructor_dafny::_Wrappers_Compile::Option::Some { value } => {
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
             Some(::std::rc::Rc::try_unwrap(value.to_array()).unwrap_or_else(|rc| (*rc).clone()))
         }
-        ::constructor_dafny::_Wrappers_Compile::Option::None {} => None,
-        constructor_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => None,
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => {
+            unreachable!()
+        }
     }
 }
 
 fn boolean_from_dafny(
-    value: ::std::rc::Rc<::constructor_dafny::_Wrappers_Compile::Option<bool>>,
+    value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<bool>>,
 ) -> ::std::option::Option<bool> {
     match value.as_ref() {
-        ::constructor_dafny::_Wrappers_Compile::Option::Some { value } => Some(*value),
-        ::constructor_dafny::_Wrappers_Compile::Option::None {} => None,
-        constructor_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => Some(*value),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => None,
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => {
+            unreachable!()
+        }
     }
 }
 
 fn string_from_dafny(
     value: ::std::rc::Rc<
-        ::constructor_dafny::_Wrappers_Compile::Option<
+        crate::implementation_from_dafny::_Wrappers_Compile::Option<
             ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
         >,
     >,
 ) -> ::std::option::Option<::std::string::String> {
     match value.as_ref() {
-        ::constructor_dafny::_Wrappers_Compile::Option::Some { value } => Some(
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => Some(
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
                 value,
             ),
         ),
-        ::constructor_dafny::_Wrappers_Compile::Option::None {} => None,
-        constructor_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => None,
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => {
+            unreachable!()
+        }
     }
 }
 
 fn integer_from_dafny(
-    value: ::std::rc::Rc<::constructor_dafny::_Wrappers_Compile::Option<i32>>,
+    value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<i32>>,
 ) -> ::std::option::Option<i32> {
     match value.as_ref() {
-        ::constructor_dafny::_Wrappers_Compile::Option::Some { value } => Some(*value),
-        ::constructor_dafny::_Wrappers_Compile::Option::None {} => None,
-        constructor_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => Some(*value),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => None,
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => {
+            unreachable!()
+        }
     }
 }
 
 fn long_from_dafny(
-    value: ::std::rc::Rc<::constructor_dafny::_Wrappers_Compile::Option<i64>>,
+    value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<i64>>,
 ) -> ::std::option::Option<i64> {
     match value.as_ref() {
-        ::constructor_dafny::_Wrappers_Compile::Option::Some { value } => Some(*value),
-        ::constructor_dafny::_Wrappers_Compile::Option::None {} => None,
-        constructor_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => Some(*value),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {} => None,
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => {
+            unreachable!()
+        }
     }
 }
