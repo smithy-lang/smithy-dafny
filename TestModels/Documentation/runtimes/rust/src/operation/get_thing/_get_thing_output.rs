@@ -3,58 +3,62 @@
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetThingOutput {
-    #[allow(missing_docs)] // documentation missing in model
-    pub value: ::std::option::Option<::std::primitive::bool>,
+    /// The thing that you just got.
+    pub thing: crate::types::Thing,
 }
-
 impl GetThingOutput {
-    #[allow(missing_docs)] // documentation missing in model
-    pub fn value(&self) -> ::std::option::Option<bool> {
-        self.value
+    /// The thing that you just got.
+    pub fn thing(&self) -> &crate::types::Thing {
+        &self.thing
     }
 }
-
 impl GetThingOutput {
-    /// Creates a new builder-style object to manufacture [`GetThingOutput`](crate::operation::operation::GetThingOutput).
+    /// Creates a new builder-style object to manufacture [`GetThingOutput`](crate::operation::get_thing::GetThingOutput).
     pub fn builder() -> crate::operation::get_thing::builders::GetThingOutputBuilder {
         crate::operation::get_thing::builders::GetThingOutputBuilder::default()
     }
 }
 
-/// A builder for [`GetThingOutput`](crate::operation::operation::GetThingOutput).
+/// A builder for [`GetThingOutput`](crate::operation::get_thing::GetThingOutput).
 #[non_exhaustive]
 #[derive(
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetThingOutputBuilder {
-    pub(crate) value: ::std::option::Option<::std::primitive::bool>,
+    pub(crate) thing: ::std::option::Option<crate::types::Thing>,
 }
-
 impl GetThingOutputBuilder {
-    #[allow(missing_docs)] // documentation missing in model
-    pub fn value(mut self, input: impl ::std::convert::Into<::std::primitive::bool>) -> Self {
-        self.value = ::std::option::Option::Some(input.into());
+    /// The thing that you just got.
+    /// This field is required.
+    pub fn thing(mut self, input: crate::types::Thing) -> Self {
+        self.thing = ::std::option::Option::Some(input);
         self
     }
-
-    #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(mut self, input: ::std::option::Option<::std::primitive::bool>) -> Self {
-        self.value = input;
+    /// The thing that you just got.
+    pub fn set_thing(mut self, input: ::std::option::Option<crate::types::Thing>) -> Self {
+        self.thing = input;
         self
     }
-
-    #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> &::std::option::Option<::std::primitive::bool> {
-        &self.value
+    /// The thing that you just got.
+    pub fn get_thing(&self) -> &::std::option::Option<crate::types::Thing> {
+        &self.thing
     }
-
-    /// Consumes the builder and constructs a [`GetThingOutput`](crate::operation::operation::GetThingOutput).
+    /// Consumes the builder and constructs a [`GetThingOutput`](crate::operation::get_thing::GetThingOutput).
+    /// This method will fail if any of the following fields are not set:
+    /// - [`thing`](crate::operation::get_thing::builders::GetThingOutputBuilder::thing)
     pub fn build(
         self,
     ) -> ::std::result::Result<
         crate::operation::get_thing::GetThingOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_thing::GetThingOutput { value: self.value })
+        ::std::result::Result::Ok(crate::operation::get_thing::GetThingOutput {
+            thing: self.thing.ok_or_else(|| {
+                ::aws_smithy_types::error::operation::BuildError::missing_field(
+                    "thing",
+                    "thing was not specified but it is required when building GetThingOutput",
+                )
+            })?,
+        })
     }
 }
