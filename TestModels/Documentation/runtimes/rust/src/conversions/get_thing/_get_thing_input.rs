@@ -9,8 +9,8 @@ pub fn to_dafny(
         Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
         None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput::GetThingInput {
-    value: ::std::rc::Rc::new(dafny_value)
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput::GetThingInput {        
+        name: ::std::rc::Rc::new(dafny_value),
   })
 }
 

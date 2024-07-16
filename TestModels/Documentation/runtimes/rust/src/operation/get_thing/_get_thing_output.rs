@@ -2,35 +2,35 @@
 #[allow(missing_docs)] // documentation missing in model
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-pub struct GetBooleanOutput {
+pub struct GetThingOutput {
     #[allow(missing_docs)] // documentation missing in model
     pub value: ::std::option::Option<::std::primitive::bool>,
 }
 
-impl GetBooleanOutput {
+impl GetThingOutput {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(&self) -> ::std::option::Option<bool> {
         self.value
     }
 }
 
-impl GetBooleanOutput {
-    /// Creates a new builder-style object to manufacture [`GetBooleanOutput`](crate::operation::operation::GetBooleanOutput).
-    pub fn builder() -> crate::operation::get_boolean::builders::GetBooleanOutputBuilder {
-        crate::operation::get_boolean::builders::GetBooleanOutputBuilder::default()
+impl GetThingOutput {
+    /// Creates a new builder-style object to manufacture [`GetThingOutput`](crate::operation::operation::GetThingOutput).
+    pub fn builder() -> crate::operation::get_thing::builders::GetThingOutputBuilder {
+        crate::operation::get_thing::builders::GetThingOutputBuilder::default()
     }
 }
 
-/// A builder for [`GetBooleanOutput`](crate::operation::operation::GetBooleanOutput).
+/// A builder for [`GetThingOutput`](crate::operation::operation::GetThingOutput).
 #[non_exhaustive]
 #[derive(
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
-pub struct GetBooleanOutputBuilder {
+pub struct GetThingOutputBuilder {
     pub(crate) value: ::std::option::Option<::std::primitive::bool>,
 }
 
-impl GetBooleanOutputBuilder {
+impl GetThingOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     pub fn value(mut self, input: impl ::std::convert::Into<::std::primitive::bool>) -> Self {
         self.value = ::std::option::Option::Some(input.into());
@@ -48,15 +48,13 @@ impl GetBooleanOutputBuilder {
         &self.value
     }
 
-    /// Consumes the builder and constructs a [`GetBooleanOutput`](crate::operation::operation::GetBooleanOutput).
+    /// Consumes the builder and constructs a [`GetThingOutput`](crate::operation::operation::GetThingOutput).
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_boolean::GetBooleanOutput,
+        crate::operation::get_thing::GetThingOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_boolean::GetBooleanOutput {
-            value: self.value,
-        })
+        ::std::result::Result::Ok(crate::operation::get_thing::GetThingOutput { value: self.value })
     }
 }

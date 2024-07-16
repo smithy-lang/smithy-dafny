@@ -80,7 +80,7 @@ impl crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_d
             ),
             Ok(client) => ::std::rc::Rc::new(
                 crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::get_thing::_get_boolean_output::to_dafny(client),
+                    value: crate::conversions::get_thing::_get_thing_output::to_dafny(client),
                 },
             ),
         }
