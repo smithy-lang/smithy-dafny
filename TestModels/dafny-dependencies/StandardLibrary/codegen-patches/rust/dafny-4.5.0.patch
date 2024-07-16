@@ -74,7 +74,7 @@ index 00000000..fb5e7bf9
 \ No newline at end of file
 diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs
 new file mode 100644
-index 00000000..8b20a995
+index 00000000..121bba59
 --- /dev/null
 +++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs
 @@ -0,0 +1,175 @@
@@ -110,9 +110,9 @@ index 00000000..8b20a995
 +    }
 +}
 +
-+pub fn obool_to_dafny(input: Option<bool>) -> ::std::rc::Rc<_Wrappers_Compile::Option<bool>> {
++pub fn obool_to_dafny(input: &Option<bool>) -> ::std::rc::Rc<_Wrappers_Compile::Option<bool>> {
 +    let dafny_value = match input {
-+        Some(b) => _Wrappers_Compile::Option::Some { value: b },
++        Some(b) => _Wrappers_Compile::Option::Some { value: *b },
 +        None => _Wrappers_Compile::Option::None {},
 +    };
 +    ::std::rc::Rc::new(dafny_value)
