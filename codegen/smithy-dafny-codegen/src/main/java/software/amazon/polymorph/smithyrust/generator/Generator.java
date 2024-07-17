@@ -609,7 +609,7 @@ public class Generator {
                                 })
                                 """.formatted(rustValue, enumShapeName));
                     } else {
-                        yield TokenTree.of("crate::conversions::%s::to_dafny(%s)".formatted(enumShapeName, rustValue));
+                        yield TokenTree.of("crate::conversions::%s::to_dafny(%s.clone())".formatted(enumShapeName, rustValue));
                     }
                 } else {
                     if (isRustOption) {
