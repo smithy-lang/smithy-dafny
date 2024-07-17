@@ -504,12 +504,16 @@ public class Generator {
                 ListShape listShape = shape.asListShape().get();
                 Shape memberShape = model.expectShape(listShape.getMember().getTarget());
                 if (!isDafnyOption) {
-                    yield TokenTree.of("""
+                    TokenTree result = TokenTree.of("""
                         ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(%s,
                             |e| %s,
                         )
                         """.formatted(dafnyValue,
                         fromDafny(memberShape, "e", false, false)));
+                    if (isRustOption) {
+                        result = TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+                    }
+                    yield result;
                 } else {
                     yield TokenTree.of("""
                         match (*%s).as_ref() {
