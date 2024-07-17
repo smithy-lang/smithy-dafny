@@ -649,14 +649,25 @@ public class Generator {
                 Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
                 Shape valueShape = model.expectShape(mapShape.getValue().getTarget());
                 if (!isDafnyOption) {
-                    yield TokenTree.of("""
-                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone(),
-                        |k| %s,
-                        |v| %s,
-                    )
-                    """.formatted(rustValue,
-                            toDafny(keyShape, "k", false, false),
-                            toDafny(valueShape, "v", false, false)));
+                    if (isRustOption) {
+                        yield TokenTree.of("""
+                                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone().unwrap(),
+                                    |k| %s,
+                                    |v| %s,
+                                )
+                                """.formatted(rustValue,
+                                toDafny(keyShape, "k", false, false),
+                                toDafny(valueShape, "v", false, false)));
+                    } else {
+                        yield TokenTree.of("""
+                                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone(),
+                                    |k| %s,
+                                    |v| %s,
+                                )
+                                """.formatted(rustValue,
+                                toDafny(keyShape, "k", false, false),
+                                toDafny(valueShape, "v", false, false)));
+                    }
                 } else {
                     yield TokenTree.of("""
                                                 
@@ -867,12 +878,16 @@ public class Generator {
         String snakeCaseStructureName = toSnakeCase(structureName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
         String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        // TODO-HACK: don't know why these structures build BuildErrors and not the rest...
+        String unwrapIfNeeded = (structureName.equals("KeysAndAttributes") || structureName.equals("Condition"))
+                ? ".unwrap()" : "";
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "structureName", structureName,
                 "snakeCaseStructureName", snakeCaseStructureName,
                 "dafnyTypesModuleName", dafnyTypesModuleName,
-                "fluentMemberSetters", fluentMemberSettersForStructure(structureShape).toString()
+                "fluentMemberSetters", fluentMemberSettersForStructure(structureShape).toString(),
+                "unwrapIfNeeded", unwrapIfNeeded
         );
 
         return TokenTree.of(evalTemplate("""
@@ -885,6 +900,7 @@ public class Generator {
             $sdkCrate:L::types::$structureName:L::builder()
                   $fluentMemberSetters:L
                   .build()
+                  $unwrapIfNeeded:L
         }
         """, variables));
     }
