@@ -22,8 +22,8 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- Count: todo!(),
- ScannedCount: todo!(),
+ Count: dafny_standard_library::conversion::oint_to_dafny(Some(value.count)),
+ ScannedCount: dafny_standard_library::conversion::oint_to_dafny(Some(value.scanned_count)),
  LastEvaluatedKey:
 ::std::rc::Rc::new(match &value.last_evaluated_key {
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :

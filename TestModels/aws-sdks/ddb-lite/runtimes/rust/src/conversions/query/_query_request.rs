@@ -24,7 +24,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- Limit: todo!(),
+ Limit: dafny_standard_library::conversion::oint_to_dafny(value.limit),
  ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(&value.consistent_read),
  KeyConditions:
 ::std::rc::Rc::new(match &value.key_conditions {
@@ -128,7 +128,7 @@ pub fn from_dafny(
     _ => None
 }
 )
- .set_limit(todo!())
+ .set_limit(dafny_standard_library::conversion::oint_from_dafny(dafny_value.Limit().clone()))
  .set_consistent_read(dafny_standard_library::conversion::obool_from_dafny(dafny_value.ConsistentRead().clone()))
  .set_key_conditions(match (*dafny_value.KeyConditions()).as_ref() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>

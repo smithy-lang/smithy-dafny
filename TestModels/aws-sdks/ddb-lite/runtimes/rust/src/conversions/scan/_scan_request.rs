@@ -19,7 +19,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- Limit: todo!(),
+ Limit: dafny_standard_library::conversion::oint_to_dafny(value.limit),
  Select: ::std::rc::Rc::new(match &value.select {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::select::to_dafny(x.clone()) },
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
@@ -59,8 +59,8 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
 })
 ,
- TotalSegments: todo!(),
- Segment: todo!(),
+ TotalSegments: dafny_standard_library::conversion::oint_to_dafny(value.total_segments),
+ Segment: dafny_standard_library::conversion::oint_to_dafny(value.segment),
  ProjectionExpression: dafny_standard_library::conversion::ostring_to_dafny(&value.projection_expression),
  FilterExpression: dafny_standard_library::conversion::ostring_to_dafny(&value.filter_expression),
  ExpressionAttributeNames:
@@ -109,7 +109,7 @@ pub fn from_dafny(
     _ => None
 }
 )
- .set_limit(todo!())
+ .set_limit(dafny_standard_library::conversion::oint_from_dafny(dafny_value.Limit().clone()))
  .set_select(match &**dafny_value.Select() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::select::from_dafny(value)
@@ -155,8 +155,8 @@ pub fn from_dafny(
     _ => None,
 }
 )
- .set_total_segments(todo!())
- .set_segment(todo!())
+ .set_total_segments(dafny_standard_library::conversion::oint_from_dafny(dafny_value.TotalSegments().clone()))
+ .set_segment(dafny_standard_library::conversion::oint_from_dafny(dafny_value.Segment().clone()))
  .set_projection_expression(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.ProjectionExpression().clone()))
  .set_filter_expression(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.FilterExpression().clone()))
  .set_expression_attribute_names(match (*dafny_value.ExpressionAttributeNames()).as_ref() {

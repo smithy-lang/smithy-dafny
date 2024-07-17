@@ -500,11 +500,32 @@ public class Generator {
                 }
             }
             case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_from_dafny(%s.clone())".formatted(dafnyValue));
+            case INTEGER -> {
+                if (isRustOption) {
+                    yield TokenTree.of("dafny_standard_library::conversion::oint_from_dafny(%s.clone())".formatted(dafnyValue));
+                } else {
+                    yield TokenTree.of(dafnyValue);
+                }
+            }
+            case LONG -> {
+                if (isRustOption) {
+                    yield TokenTree.of("dafny_standard_library::conversion::olong_from_dafny(%s.clone())".formatted(dafnyValue));
+                } else {
+                    yield TokenTree.of(dafnyValue);
+                }
+            }
             case DOUBLE -> {
                 if (isRustOption) {
                     yield TokenTree.of("dafny_standard_library::conversion::odouble_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else {
                     yield TokenTree.of("dafny_standard_library::conversion::double_from_dafny(&%s.clone())".formatted(dafnyValue));
+                }
+            }
+            case TIMESTAMP -> {
+                if (isRustOption) {
+                    yield TokenTree.of("dafny_standard_library::conversion::otimestamp_from_dafny(%s.clone())".formatted(dafnyValue));
+                } else {
+                    yield TokenTree.of("dafny_standard_library::conversion::timestamp_from_dafny(%s.clone())".formatted(dafnyValue));
                 }
             }
             case LIST -> {
@@ -590,7 +611,7 @@ public class Generator {
                     yield result;
                 }
             }
-            default -> TokenTree.of("todo!()");
+            default -> throw new IllegalArgumentException("Unsupported shape type: %s".formatted(shape.getType()));
         };
     }
 
@@ -598,8 +619,11 @@ public class Generator {
         Shape targetShape = model.expectShape(member.getTarget());
         String snakeCaseMemberName = toSnakeCase(member.getMemberName());
         boolean isRequired = member.hasTrait(RequiredTrait.class);
-        // TODO-HACK: can't figure this one out yet...
-        boolean isRustOption = !(parent.getId().getName().equals("Condition") && snakeCaseMemberName.equals("comparison_operator"));
+        boolean isRustOption =
+                // TODO-HACK: this might be DDB specific...
+                !(operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape())
+                // TODO-HACK: can't figure this one out yet...
+                && !(parent.getId().getName().equals("Condition") && snakeCaseMemberName.equals("comparison_operator"));
         return toDafny(targetShape, "value." + snakeCaseMemberName, isRustOption, !isRequired);
     }
 
@@ -631,6 +655,24 @@ public class Generator {
                 }
             }
             case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_to_dafny(&%s)".formatted(rustValue));
+            case INTEGER -> {
+                if (isDafnyOption) {
+                    if (isRustOption) {
+                        yield TokenTree.of("dafny_standard_library::conversion::oint_to_dafny(%s)".formatted(rustValue));
+                    } else {
+                        yield TokenTree.of("dafny_standard_library::conversion::oint_to_dafny(Some(%s))".formatted(rustValue));
+                    }
+                } else {
+                    yield TokenTree.of(rustValue);
+                }
+            }
+            case LONG -> {
+                if (isRustOption) {
+                    yield TokenTree.of("dafny_standard_library::conversion::olong_to_dafny(&%s)".formatted(rustValue));
+                } else {
+                    yield TokenTree.of(rustValue);
+                }
+            }
             case DOUBLE -> {
                 if (isRustOption) {
                     yield TokenTree.of("dafny_standard_library::conversion::odouble_to_dafny(&%s)".formatted(rustValue));
@@ -638,6 +680,14 @@ public class Generator {
                     yield TokenTree.of("dafny_standard_library::conversion::double_to_dafny(*%s)".formatted(rustValue));
                 }
             }
+            case TIMESTAMP -> {
+                if (isRustOption) {
+                    yield TokenTree.of("dafny_standard_library::conversion::otimestamp_to_dafny(&%s)".formatted(rustValue));
+                } else {
+                    yield TokenTree.of("dafny_standard_library::conversion::timestamp_to_dafny(&%s)".formatted(rustValue));
+                }
+            }
+
             case LIST -> {
                 ListShape listShape = shape.asListShape().get();
                 Shape memberShape = model.expectShape(listShape.getMember().getTarget());
@@ -718,7 +768,7 @@ public class Generator {
                             """.formatted(structureShapeName, rustValue));
                 }
             }
-            default -> TokenTree.of("todo!()");
+            default -> throw new IllegalArgumentException("Unsupported shape type: %s".formatted(shape.getType()));
         };
     }
 
