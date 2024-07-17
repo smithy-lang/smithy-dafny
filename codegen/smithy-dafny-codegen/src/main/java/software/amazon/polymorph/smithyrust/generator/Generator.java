@@ -14,12 +14,12 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
-import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.rust.codegen.client.smithy.ClientCodegenVisitor;
 import software.amazon.smithy.rust.codegen.client.smithy.customizations.ClientCustomizations;
 import software.amazon.smithy.rust.codegen.client.smithy.customizations.HttpAuthDecorator;
@@ -653,7 +653,7 @@ public class Generator {
 
         Stream<String> structureModules = model.getStructureShapes()
                 .stream()
-                .filter(structureShape -> !structureShape.hasTrait(ErrorTrait.class) && !structureShape.hasTrait(Trait.class))
+                .filter(this::isNormalStructure)
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
         Stream<String> enumModules = model.getStringShapesWithTrait(EnumTrait.class).stream()
@@ -701,11 +701,17 @@ public class Generator {
         return new RustFile(path, TokenTree.of(evaluated));
     }
 
+    private boolean isNormalStructure(StructureShape structureShape) {
+        return !operationIndex.isInputStructure(structureShape)
+                && !operationIndex.isOutputStructure(structureShape)
+                && !structureShape.hasTrait(ErrorTrait.class)
+                && !structureShape.hasTrait(ShapeId.from("smithy.api#trait"))
+                && structureShape.getId().getNamespace().equals(service.getId().getNamespace());
+    }
+
     private Set<RustFile> allStructureConversionModules() {
         return model.getStructureShapes().stream()
-                .filter(structureShape -> !operationIndex.isInputStructure(structureShape)
-                        && !operationIndex.isOutputStructure(structureShape)
-                        && !structureShape.hasTrait(Trait.class))
+                .filter(this::isNormalStructure)
                 .map(this::structureConversionModule)
                 .collect(Collectors.toSet());
     }
