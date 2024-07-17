@@ -9,7 +9,7 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::GetItemInput::GetItemInput {
         TableName: dafny_standard_library::conversion::ostring_to_dafny(&value.table_name) .Extract(),
- Key: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.key.unwrap(),
+ Key: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.key.clone().unwrap(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
     |v| todo!(),
 )

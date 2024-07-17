@@ -580,8 +580,8 @@ public class Generator {
                     var enumShapeName = toSnakeCase(shape.toShapeId().getName());
                     if (isRustOption) {
                         yield TokenTree.of("""
-                                ::std::rc::Rc::new(match %s {
-                                    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x) },
+                                ::std::rc::Rc::new(match &%s {
+                                    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
                                     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
                                 })
                                 """.formatted(rustValue, enumShapeName));
@@ -607,7 +607,7 @@ public class Generator {
                 Shape valueShape = model.expectShape(mapShape.getValue().getTarget());
                 if (!isDafnyOption) {
                     yield TokenTree.of("""
-                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.unwrap(),
+                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone().unwrap(),
                         |k| %s,
                         |v| %s,
                     )
@@ -635,7 +635,7 @@ public class Generator {
                 var structureShapeName = toSnakeCase(shape.getId().getName());
                 if (isRustOption) {
                     yield TokenTree.of("""
-                            ::std::rc::Rc::new(match %s {
+                            ::std::rc::Rc::new(match &%s {
                                 Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
                                 None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
                             })
@@ -834,7 +834,6 @@ public class Generator {
             $sdkCrate:L::types::$structureName:L::builder()
                   $fluentMemberSetters:L
                   .build()
-                  .unwrap()
         }
         """, variables));
     }

@@ -22,7 +22,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- ConsumedCapacity: ::std::rc::Rc::new(match value.consumed_capacity {
+ ConsumedCapacity: ::std::rc::Rc::new(match &value.consumed_capacity {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::consumed_capacity::to_dafny(&x) },
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
 })

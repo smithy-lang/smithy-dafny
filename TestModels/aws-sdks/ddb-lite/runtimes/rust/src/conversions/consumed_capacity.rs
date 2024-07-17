@@ -13,7 +13,7 @@ pub fn to_dafny(
  CapacityUnits: todo!(),
  ReadCapacityUnits: todo!(),
  WriteCapacityUnits: todo!(),
- Table: ::std::rc::Rc::new(match value.table {
+ Table: ::std::rc::Rc::new(match &value.table {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::capacity::to_dafny(&x) },
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
 })
