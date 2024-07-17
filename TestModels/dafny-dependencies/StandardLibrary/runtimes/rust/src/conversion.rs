@@ -153,6 +153,44 @@ pub fn odouble_from_dafny(
     }
 }
 
+pub fn timestamp_to_dafny(
+    input: ::aws_smithy_types::DateTime,
+) -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
+    ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&input.to_string())
+}
+
+pub fn otimestamp_to_dafny(
+    input: &Option<::aws_smithy_types::DateTime>,
+) -> ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
+    let dafny_value = match input {
+        Some(f) => _Wrappers_Compile::Option::Some {
+            value: timestamp_to_dafny(*f),
+        },
+        None => _Wrappers_Compile::Option::None {},
+    };
+    ::std::rc::Rc::new(dafny_value)
+}
+
+pub fn timestamp_from_dafny(
+    input: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+) -> ::aws_smithy_types::DateTime {
+    let s = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&input);
+    ::aws_smithy_types::DateTime::from_str(
+        &s,
+        aws_smithy_types::date_time::Format::DateTime,
+    ).unwrap()
+}
+
+pub fn otimestamp_from_dafny(
+    input: ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
+) -> Option<::aws_smithy_types::DateTime> {
+    if matches!(input.as_ref(), _Wrappers_Compile::Option::Some { .. }) {
+        Some(timestamp_from_dafny(input.Extract()))
+    } else {
+        None
+    }
+}
+
 pub fn option_from_dafny<T: ::dafny_runtime::DafnyType, TR>(
     input: ::std::rc::Rc<_Wrappers_Compile::Option<T>>,
     converter: fn(&T) -> TR,
