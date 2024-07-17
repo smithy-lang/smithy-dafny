@@ -3,18 +3,14 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretRequest
+    value: &aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretInput
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest,
 >{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest::DeriveSharedSecretRequest {
         KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id) .Extract(),
- KeyAgreementAlgorithm: ::std::rc::Rc::new(match &value.key_agreement_algorithm {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::key_agreement_algorithm_spec::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
-})
-,
- PublicKey: dafny_standard_library::conversion::oblob_to_dafny(&value.public_key),
+ KeyAgreementAlgorithm: crate::conversions::key_agreement_algorithm_spec::to_dafny(value.key_agreement_algorithm.clone().unwrap()),
+ PublicKey: dafny_standard_library::conversion::oblob_to_dafny(&value.public_key).Extract(),
  GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
@@ -42,7 +38,7 @@ pub fn from_dafny(
     client.derive_shared_secret()
           .set_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId()) ))
  .set_key_agreement_algorithm(Some( crate::conversions::key_agreement_algorithm_spec::from_dafny(dafny_value.KeyAgreementAlgorithm()) ))
- .set_public_key(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.PublicKey().clone()))
+ .set_public_key(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.PublicKey().clone())))
  .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
         Some(

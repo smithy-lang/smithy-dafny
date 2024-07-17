@@ -3,12 +3,12 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_kms::operation::decrypt::DecryptRequest
+    value: &aws_sdk_kms::operation::decrypt::DecryptInput
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest,
 >{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest::DecryptRequest {
-        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob),
+        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob).Extract(),
  EncryptionContext:
 ::std::rc::Rc::new(match &value.encryption_context {
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
@@ -51,7 +51,7 @@ pub fn from_dafny(
     client: aws_sdk_kms::Client,
 ) -> aws_sdk_kms::operation::decrypt::builders::DecryptFluentBuilder {
     client.decrypt()
-          .set_ciphertext_blob(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.CiphertextBlob().clone()))
+          .set_ciphertext_blob(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.CiphertextBlob().clone())))
  .set_encryption_context(match (*dafny_value.EncryptionContext()).as_ref() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
         Some(

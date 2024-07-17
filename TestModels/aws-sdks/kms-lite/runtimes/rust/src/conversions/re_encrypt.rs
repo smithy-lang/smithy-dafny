@@ -19,9 +19,9 @@ pub fn to_dafny_error(
             crate::conversions::error::not_found_exception::to_dafny(e.clone()),
          aws_sdk_kms::operation::re_encrypt::ReEncryptError::DisabledException(e) =>
             crate::conversions::error::disabled_exception::to_dafny(e.clone()),
-         aws_sdk_kms::operation::re_encrypt::ReEncryptError::KMSInternalException(e) =>
+         aws_sdk_kms::operation::re_encrypt::ReEncryptError::KmsInternalException(e) =>
             crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
-         aws_sdk_kms::operation::re_encrypt::ReEncryptError::KMSInvalidStateException(e) =>
+         aws_sdk_kms::operation::re_encrypt::ReEncryptError::KmsInvalidStateException(e) =>
             crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
          aws_sdk_kms::operation::re_encrypt::ReEncryptError::InvalidKeyUsageException(e) =>
             crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),

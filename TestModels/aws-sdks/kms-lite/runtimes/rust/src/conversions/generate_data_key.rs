@@ -19,9 +19,9 @@ pub fn to_dafny_error(
             crate::conversions::error::not_found_exception::to_dafny(e.clone()),
          aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::DisabledException(e) =>
             crate::conversions::error::disabled_exception::to_dafny(e.clone()),
-         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KMSInternalException(e) =>
+         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KmsInternalException(e) =>
             crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
-         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KMSInvalidStateException(e) =>
+         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KmsInvalidStateException(e) =>
             crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
          aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::InvalidKeyUsageException(e) =>
             crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),

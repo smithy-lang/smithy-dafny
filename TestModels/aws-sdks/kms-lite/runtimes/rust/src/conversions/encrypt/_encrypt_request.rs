@@ -3,13 +3,13 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_kms::operation::encrypt::EncryptRequest
+    value: &aws_sdk_kms::operation::encrypt::EncryptInput
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest,
 >{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest::EncryptRequest {
         KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id) .Extract(),
- Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext),
+ Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext).Extract(),
  EncryptionContext:
 ::std::rc::Rc::new(match &value.encryption_context {
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
@@ -47,7 +47,7 @@ pub fn from_dafny(
 ) -> aws_sdk_kms::operation::encrypt::builders::EncryptFluentBuilder {
     client.encrypt()
           .set_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId()) ))
- .set_plaintext(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.Plaintext().clone()))
+ .set_plaintext(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.Plaintext().clone())))
  .set_encryption_context(match (*dafny_value.EncryptionContext()).as_ref() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
