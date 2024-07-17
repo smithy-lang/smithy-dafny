@@ -137,7 +137,7 @@ pub fn odouble_to_dafny(
 }
 
 pub fn double_from_dafny(
-    input: ::dafny_runtime::Sequence<u8>,
+    input: &::dafny_runtime::Sequence<u8>,
 ) -> f64 {
     let v = ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(input, |x| *x);
     f64::from_be_bytes(v.try_into().expect("Error converting Sequence to f64"))
@@ -147,7 +147,7 @@ pub fn odouble_from_dafny(
     input: ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
 ) -> Option<f64> {
     if matches!(input.as_ref(), _Wrappers_Compile::Option::Some { .. }) {
-        Some(double_from_dafny(input.Extract()))
+        Some(double_from_dafny(&input.Extract()))
     } else {
         None
     }
