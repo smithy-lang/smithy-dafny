@@ -13,7 +13,7 @@ pub fn to_dafny(
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-            |v| ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(v,
+            |v| ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&v,
     |e| ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&e.clone(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
     |v| crate::conversions::attribute_value::to_dafny(&v)

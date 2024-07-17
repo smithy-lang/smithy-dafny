@@ -9,7 +9,7 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::KeysAndAttributes>{
   ::std::rc::Rc::new(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::KeysAndAttributes::KeysAndAttributes {
-        Keys: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(value.keys,
+        Keys: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.keys,
     |e| ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&e.clone(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
     |v| crate::conversions::attribute_value::to_dafny(&v)
@@ -49,7 +49,7 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::KeysAndAttributes {
     aws_sdk_dynamodb::types::KeysAndAttributes::builder()
-          .set_keys(::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(dafny_value.Keys(),
+          .set_keys(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(dafny_value.Keys(),
     |e| ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&e,
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
     |v| crate::conversions::attribute_value::from_dafny(v.clone())
@@ -57,7 +57,7 @@ pub fn from_dafny(
 )
 ,
 )
-)
+ ))
  .set_attributes_to_get(match (*dafny_value.AttributesToGet()).as_ref() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
         Some(

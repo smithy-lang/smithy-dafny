@@ -629,7 +629,7 @@ public class Generator {
                 Shape memberShape = model.expectShape(listShape.getMember().getTarget());
                 if (!isDafnyOption) {
                     yield TokenTree.of("""
-                            ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(%s,
+                            ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s,
                                 |e| %s,
                             )
                             """.formatted(rustValue,
