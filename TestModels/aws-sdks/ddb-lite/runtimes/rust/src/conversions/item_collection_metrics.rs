@@ -24,7 +24,7 @@ pub fn to_dafny(
  SizeEstimateRangeGB: ::std::rc::Rc::new(match &value.size_estimate_range_gb {
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| dafny_standard_library::conversion::double_to_dafny(&e),
+            |e| dafny_standard_library::conversion::double_to_dafny(*e),
         )
     },
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
@@ -55,7 +55,7 @@ pub fn from_dafny(
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| dafny_standard_library::conversion::double_from_dafny(e.clone()),
+                |e| dafny_standard_library::conversion::double_from_dafny(&e.clone()),
             )
         ),
     _ => None

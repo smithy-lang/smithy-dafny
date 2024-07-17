@@ -504,7 +504,7 @@ public class Generator {
                 if (isRustOption) {
                     yield TokenTree.of("dafny_standard_library::conversion::odouble_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else {
-                    yield TokenTree.of("dafny_standard_library::conversion::double_from_dafny(%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("dafny_standard_library::conversion::double_from_dafny(&%s.clone())".formatted(dafnyValue));
                 }
             }
             case LIST -> {
@@ -635,7 +635,7 @@ public class Generator {
                 if (isRustOption) {
                     yield TokenTree.of("dafny_standard_library::conversion::odouble_to_dafny(&%s)".formatted(rustValue));
                 } else {
-                    yield TokenTree.of("dafny_standard_library::conversion::double_to_dafny(&%s)".formatted(rustValue));
+                    yield TokenTree.of("dafny_standard_library::conversion::double_to_dafny(*%s)".formatted(rustValue));
                 }
             }
             case LIST -> {
