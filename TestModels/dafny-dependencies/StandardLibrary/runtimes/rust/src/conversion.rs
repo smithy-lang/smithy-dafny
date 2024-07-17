@@ -116,6 +116,43 @@ pub fn oblob_from_dafny(
     }
 }
 
+pub fn double_to_dafny(
+    input: f64,
+) -> ::dafny_runtime::Sequence<u8> {
+    ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(
+        &f64::to_be_bytes(input).to_vec(),
+        |x| *x)
+}
+
+pub fn odouble_to_dafny(
+    input: &Option<f64>,
+) -> ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
+    let dafny_value = match input {
+        Some(f) => _Wrappers_Compile::Option::Some {
+            value: double_to_dafny(*f),
+        },
+        None => _Wrappers_Compile::Option::None {},
+    };
+    ::std::rc::Rc::new(dafny_value)
+}
+
+pub fn double_from_dafny(
+    input: &::dafny_runtime::Sequence<u8>,
+) -> f64 {
+    let v = ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(input, |x| *x);
+    f64::from_be_bytes(v.try_into().expect("Error converting Sequence to f64"))
+}
+
+pub fn odouble_from_dafny(
+    input: ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
+) -> Option<f64> {
+    if matches!(input.as_ref(), _Wrappers_Compile::Option::Some { .. }) {
+        Some(double_from_dafny(&input.Extract()))
+    } else {
+        None
+    }
+}
+
 pub fn option_from_dafny<T: ::dafny_runtime::DafnyType, TR>(
     input: ::std::rc::Rc<_Wrappers_Compile::Option<T>>,
     converter: fn(&T) -> TR,
