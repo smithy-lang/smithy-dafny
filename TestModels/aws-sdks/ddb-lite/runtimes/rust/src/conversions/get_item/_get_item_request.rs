@@ -9,12 +9,21 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::GetItemInput::GetItemInput {
         TableName: dafny_standard_library::conversion::ostring_to_dafny(&value.table_name) .Extract(),
- Key: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.key.clone().unwrap(),
+ Key: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.key.clone(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-    |v| todo!(),
+    |v| crate::conversions::attribute_value::to_dafny(&v)
+,
 )
 ,
- AttributesToGet: todo!(),
+ AttributesToGet: ::std::rc::Rc::new(match &value.attributes_to_get {
+    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
+            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
+        )
+    },
+    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+})
+,
  ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(&value.consistent_read),
  ReturnConsumedCapacity: ::std::rc::Rc::new(match &value.return_consumed_capacity {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::return_consumed_capacity::to_dafny(x.clone()) },
@@ -46,10 +55,20 @@ pub fn from_dafny(
           .set_table_name(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.TableName()) ))
  .set_key(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&dafny_value.Key(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
-    |v| todo!(),
+    |v| crate::conversions::attribute_value::from_dafny(v.clone())
+,
 )
  ))
- .set_attributes_to_get(todo!())
+ .set_attributes_to_get(match (*dafny_value.AttributesToGet()).as_ref() {
+    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
+            )
+        ),
+    _ => None
+}
+)
  .set_consistent_read(dafny_standard_library::conversion::obool_from_dafny(dafny_value.ConsistentRead().clone()))
  .set_return_consumed_capacity(match &**dafny_value.ReturnConsumedCapacity() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(

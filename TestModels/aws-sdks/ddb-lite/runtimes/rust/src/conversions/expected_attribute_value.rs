@@ -9,14 +9,27 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ExpectedAttributeValue>{
   ::std::rc::Rc::new(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ExpectedAttributeValue::ExpectedAttributeValue {
-        Value: todo!(),
+        Value: ::std::rc::Rc::new(match &value.value {
+    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_value::to_dafny(&x) },
+    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+})
+,
  Exists: dafny_standard_library::conversion::obool_to_dafny(&value.exists),
  ComparisonOperator: ::std::rc::Rc::new(match &value.comparison_operator {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::comparison_operator::to_dafny(x.clone()) },
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
 })
 ,
- AttributeValueList: todo!(),
+ AttributeValueList: ::std::rc::Rc::new(match &value.attribute_value_list {
+    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
+            |e| crate::conversions::attribute_value::to_dafny(&e)
+,
+        )
+    },
+    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+})
+,
     }
   )
 } #[allow(dead_code)]
@@ -26,7 +39,12 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::ExpectedAttributeValue {
     aws_sdk_dynamodb::types::ExpectedAttributeValue::builder()
-          .set_value(todo!())
+          .set_value(match (*dafny_value.Value()).as_ref() {
+    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(crate::conversions::attribute_value::from_dafny(value.clone())),
+    _ => None,
+}
+)
  .set_exists(dafny_standard_library::conversion::obool_from_dafny(dafny_value.Exists().clone()))
  .set_comparison_operator(match &**dafny_value.ComparisonOperator() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
@@ -35,6 +53,16 @@ pub fn from_dafny(
     _ => None,
 }
 )
- .set_attribute_value_list(todo!())
+ .set_attribute_value_list(match (*dafny_value.AttributeValueList()).as_ref() {
+    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e| crate::conversions::attribute_value::from_dafny(e.clone())
+,
+            )
+        ),
+    _ => None
+}
+)
           .build()
 }

@@ -9,7 +9,11 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValueUpdate>{
   ::std::rc::Rc::new(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValueUpdate::AttributeValueUpdate {
-        Value: todo!(),
+        Value: ::std::rc::Rc::new(match &value.value {
+    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_value::to_dafny(&x) },
+    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+})
+,
  Action: ::std::rc::Rc::new(match &value.action {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_action::to_dafny(x.clone()) },
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
@@ -24,7 +28,12 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::AttributeValueUpdate {
     aws_sdk_dynamodb::types::AttributeValueUpdate::builder()
-          .set_value(todo!())
+          .set_value(match (*dafny_value.Value()).as_ref() {
+    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(crate::conversions::attribute_value::from_dafny(value.clone())),
+    _ => None,
+}
+)
  .set_action(match &**dafny_value.Action() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::attribute_action::from_dafny(value)

@@ -8,7 +8,20 @@ pub fn to_dafny(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::QueryOutput,
 >{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::QueryOutput::QueryOutput {
-        Items: todo!(),
+        Items: ::std::rc::Rc::new(match &value.items {
+    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
+            |e| ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&e.clone(),
+    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
+    |v| crate::conversions::attribute_value::to_dafny(&v)
+,
+)
+,
+        )
+    },
+    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+})
+,
  Count: todo!(),
  ScannedCount: todo!(),
  LastEvaluatedKey:
@@ -16,7 +29,8 @@ pub fn to_dafny(
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-            |v| todo!(),
+            |v| crate::conversions::attribute_value::to_dafny(&v)
+,
         )
     },
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}

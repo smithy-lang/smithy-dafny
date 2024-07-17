@@ -9,8 +9,17 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Condition>{
   ::std::rc::Rc::new(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Condition::Condition {
-        AttributeValueList: todo!(),
- ComparisonOperator: crate::conversions::comparison_operator::to_dafny(value.comparison_operator.clone())
+        AttributeValueList: ::std::rc::Rc::new(match &value.attribute_value_list {
+    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
+            |e| crate::conversions::attribute_value::to_dafny(&e)
+,
+        )
+    },
+    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+})
+,
+ ComparisonOperator: crate::conversions::comparison_operator::to_dafny(value.comparison_operator),
     }
   )
 } #[allow(dead_code)]
@@ -20,7 +29,17 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::Condition {
     aws_sdk_dynamodb::types::Condition::builder()
-          .set_attribute_value_list(todo!())
+          .set_attribute_value_list(match (*dafny_value.AttributeValueList()).as_ref() {
+    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e| crate::conversions::attribute_value::from_dafny(e.clone())
+,
+            )
+        ),
+    _ => None
+}
+)
  .set_comparison_operator(Some( crate::conversions::comparison_operator::from_dafny(dafny_value.ComparisonOperator()) ))
           .build()
           .unwrap()

@@ -9,6 +9,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -455,17 +456,7 @@ public class Generator {
                 .stream()
                 .map(m -> TokenTree.of(m.getMemberName()
                         + ": "
-                        + toDafnyVariantMemberForOperationRequest(m) + ","))
-        ).lineSeparated();
-    }
-
-    private TokenTree fromDafnyVariantsForStructure(Shape shape) {
-        return TokenTree.of(
-                shape.members()
-                        .stream()
-                        .map(m -> TokenTree.of(m.getMemberName()
-                                + ": "
-                                + toDafnyVariantMemberForOperationRequest(m) + ","))
+                        + toDafnyVariantMemberForOperationRequest(shape, m) + ","))
         ).lineSeparated();
     }
 
@@ -509,6 +500,31 @@ public class Generator {
                 }
             }
             case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_from_dafny(%s.clone())".formatted(dafnyValue));
+            case LIST -> {
+                ListShape listShape = shape.asListShape().get();
+                Shape memberShape = model.expectShape(listShape.getMember().getTarget());
+                if (!isDafnyOption) {
+                    yield TokenTree.of("""
+                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(%s,
+                            |e| %s,
+                        )
+                        """.formatted(dafnyValue,
+                        fromDafny(memberShape, "e", false, false)));
+                } else {
+                    yield TokenTree.of("""
+                        match (*%s).as_ref() {
+                            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                                Some(
+                                    ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                                        |e| %s,
+                                    )
+                                ),
+                            _ => None
+                        }
+                        """.formatted(dafnyValue,
+                        fromDafny(memberShape, "e", false, false)));
+                }
+            }
             case MAP -> {
                 MapShape mapShape = shape.asMapShape().get();
                 Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
@@ -567,11 +583,13 @@ public class Generator {
         };
     }
 
-    private TokenTree toDafnyVariantMemberForOperationRequest(MemberShape member) {
+    private TokenTree toDafnyVariantMemberForOperationRequest(Shape parent, MemberShape member) {
         Shape targetShape = model.expectShape(member.getTarget());
         String snakeCaseMemberName = toSnakeCase(member.getMemberName());
         boolean isRequired = member.hasTrait(RequiredTrait.class);
-        return toDafny(targetShape, "value." + snakeCaseMemberName, true, !isRequired);
+        // TODO-HACK: can't figure this one out yet...
+        boolean isRustOption = !(parent.getId().getName().equals("Condition") && snakeCaseMemberName.equals("comparison_operator"));
+        return toDafny(targetShape, "value." + snakeCaseMemberName, isRustOption, !isRequired);
     }
 
     private TokenTree toDafny(final Shape shape, final String rustValue, boolean isRustOption, boolean isDafnyOption) {
@@ -602,13 +620,37 @@ public class Generator {
                 }
             }
             case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_to_dafny(&%s)".formatted(rustValue));
+            case LIST -> {
+                ListShape listShape = shape.asListShape().get();
+                Shape memberShape = model.expectShape(listShape.getMember().getTarget());
+                if (!isDafnyOption) {
+                    yield TokenTree.of("""
+                            ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(%s,
+                                |e| %s,
+                            )
+                            """.formatted(rustValue,
+                                          toDafny(memberShape, "e", false, false)));
+                } else {
+                    yield TokenTree.of("""
+                            ::std::rc::Rc::new(match &%s {
+                                Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+                                    ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
+                                        |e| %s,
+                                    )
+                                },
+                                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+                            })
+                            """.formatted(rustValue,
+                                          toDafny(memberShape, "e", false, false)));
+                }
+            }
             case MAP -> {
                 MapShape mapShape = shape.asMapShape().get();
                 Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
                 Shape valueShape = model.expectShape(mapShape.getValue().getTarget());
                 if (!isDafnyOption) {
                     yield TokenTree.of("""
-                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone().unwrap(),
+                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone(),
                         |k| %s,
                         |v| %s,
                     )
@@ -717,12 +759,16 @@ public class Generator {
                 .stream()
                 .filter(this::isNormalStructure)
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
+        Stream<String> unionModules = model.getUnionShapes()
+                .stream()
+                .filter(this::isNormalUnion)
+                .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
         Stream<String> enumModules = model.getStringShapesWithTrait(EnumTrait.class).stream()
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
         TokenTree content = declarePubModules(
-                Stream.of(operationModules, structureModules, enumModules, Stream.of("error"))
+                Stream.of(operationModules, structureModules, unionModules, enumModules, Stream.of("error"))
                         .flatMap(s -> s));
 
         return new RustFile(Path.of("src", "conversions.rs"), content);
@@ -769,6 +815,10 @@ public class Generator {
                 && !structureShape.hasTrait(ErrorTrait.class)
                 && !structureShape.hasTrait(ShapeId.from("smithy.api#trait"))
                 && structureShape.getId().getNamespace().equals(service.getId().getNamespace());
+    }
+
+    private boolean isNormalUnion(UnionShape unionShape) {
+        return unionShape.getId().getNamespace().equals(service.getId().getNamespace());
     }
 
     private Set<RustFile> allStructureConversionModules() {

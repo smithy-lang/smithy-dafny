@@ -9,9 +9,10 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::PutItemInput::PutItemInput {
         TableName: dafny_standard_library::conversion::ostring_to_dafny(&value.table_name) .Extract(),
- Item: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.item.clone().unwrap(),
+ Item: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.item.clone(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-    |v| todo!(),
+    |v| crate::conversions::attribute_value::to_dafny(&v)
+,
 )
 ,
  Expected:
@@ -63,7 +64,8 @@ pub fn to_dafny(
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-            |v| todo!(),
+            |v| crate::conversions::attribute_value::to_dafny(&v)
+,
         )
     },
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
@@ -82,7 +84,8 @@ pub fn from_dafny(
           .set_table_name(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.TableName()) ))
  .set_item(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&dafny_value.Item(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
-    |v| todo!(),
+    |v| crate::conversions::attribute_value::from_dafny(v.clone())
+,
 )
  ))
  .set_expected(match (*dafny_value.Expected()).as_ref() {
@@ -142,7 +145,8 @@ pub fn from_dafny(
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
-                |v| todo!(),
+                |v| crate::conversions::attribute_value::from_dafny(v.clone())
+,
             )
         ),
     _ => None

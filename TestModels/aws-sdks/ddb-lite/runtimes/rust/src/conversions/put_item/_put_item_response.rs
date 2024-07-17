@@ -13,7 +13,8 @@ pub fn to_dafny(
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-            |v| todo!(),
+            |v| crate::conversions::attribute_value::to_dafny(&v)
+,
         )
     },
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
