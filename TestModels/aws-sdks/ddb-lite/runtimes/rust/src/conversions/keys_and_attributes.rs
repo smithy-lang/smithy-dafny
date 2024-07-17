@@ -49,4 +49,5 @@ pub fn from_dafny(
 }
 )
           .build()
+          .unwrap()
 }

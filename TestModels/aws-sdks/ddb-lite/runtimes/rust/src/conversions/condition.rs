@@ -10,11 +10,7 @@ pub fn to_dafny(
   ::std::rc::Rc::new(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Condition::Condition {
         AttributeValueList: todo!(),
- ComparisonOperator: ::std::rc::Rc::new(match &value.comparison_operator {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::comparison_operator::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
-})
-,
+ ComparisonOperator: crate::conversions::comparison_operator::to_dafny(value.comparison_operator.clone())
     }
   )
 } #[allow(dead_code)]
@@ -27,4 +23,5 @@ pub fn from_dafny(
           .set_attribute_value_list(todo!())
  .set_comparison_operator(Some( crate::conversions::comparison_operator::from_dafny(dafny_value.ComparisonOperator()) ))
           .build()
+          .unwrap()
 }
