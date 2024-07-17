@@ -478,14 +478,14 @@ public class Generator {
                     }
                     """.formatted(dafnyValue, enumShapeName));
                 } else {
-                    if (isRustOption) {
-                        var result = TokenTree.of("dafny_standard_library::conversion::ostring_from_dafny(&%s)".formatted(dafnyValue));
-                        if (!isDafnyOption) {
-                            result = TokenTree.of(result, TokenTree.of(".Extract()"));
+                    if (isDafnyOption) {
+                        yield TokenTree.of("dafny_standard_library::conversion::ostring_from_dafny(&%s)".formatted(dafnyValue));
+                    } else {
+                        TokenTree result = TokenTree.of("dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(%s)".formatted(dafnyValue));
+                        if (isRustOption) {
+                            result = TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
                         }
                         yield result;
-                    } else {
-                        yield TokenTree.of("dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(%s)".formatted(dafnyValue));
                     }
                 }
             }
