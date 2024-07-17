@@ -107,6 +107,113 @@ public class Generator {
         IOUtils.writeTokenTreesIntoDir(tokenTreeMap, outputDir);
     }
 
+    private RustFile clientModule() {
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId();
+        String clientName = "%sClient".formatted(sdkId);
+        String dafnyModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny".formatted(sdkId.toLowerCase());
+        String dafnyTypesModuleName = "%s_dtypes".formatted(dafnyModuleName);
+        Map<String, String> variables = Map.of(
+                "sdkId", sdkId.toLowerCase(),
+                "clientName", clientName,
+                "dafnyModuleName", dafnyModuleName,
+                "dafnyTypesModuleName", dafnyTypesModuleName
+        );
+
+        var preamble = TokenTree.of(evalTemplate("""
+        use crate::conversions;
+                        
+        struct Client {
+            inner: aws_sdk_$sdkId:L::Client,
+                        
+            rt: tokio::runtime::Runtime,
+        }
+                        
+        impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
+            ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
+        }
+                        
+        impl dafny_runtime::UpcastObject<dyn crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::I$clientName:L> for Client {
+          ::dafny_runtime::UpcastObjectFn!(dyn crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::I$clientName:L);
+        }
+        
+        impl crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::I$clientName:L
+          for Client {
+                        
+        """, variables));
+
+        var operations = TokenTree.of(
+                service.getOperations().stream()
+                        .map(id -> operationClientFunction(model.expectShape(id, OperationShape.class)))
+        ).lineSeparated();
+
+        var postamble = TokenTree.of(evalTemplate("""
+        }
+        
+        #[allow(non_snake_case)]
+        impl crate::implementation_from_dafny::r#$dafnyModuleName:L::_default {
+          pub fn $clientName:L() -> ::std::rc::Rc<
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+              ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::I$clientName:L>,
+              ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>
+              >
+            > {
+            let rt_result = tokio::runtime::Builder::new_current_thread()
+              .enable_all()
+              .build();
+            if rt_result.is_err() {
+              return conversions::error::to_opaque_error_result(rt_result.err());
+            }
+            let rt = rt_result.unwrap();
+        
+            let shared_config = rt.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+            let inner = aws_sdk_$sdkId:L::Client::new(&shared_config);
+            let client = Client { inner, rt };
+            let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
+            std::rc::Rc::new(crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+          }
+        }
+        """, variables));
+
+        return new RustFile(Path.of("src", "client.rs"),
+                TokenTree.of(preamble, operations, postamble));
+    }
+
+    private TokenTree operationClientFunction(final OperationShape operationShape) {
+        String operationName = operationShape.getId().getName();
+        String snakeCaseOperationName = toSnakeCase(operationName);
+        String inputShapeName = operationShape.getInputShape().getName();
+        String outputShapeName = operationShape.getOutputShape().getName();
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId();
+        String clientName = "%sClient".formatted(sdkId);
+        String dafnyModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny".formatted(sdkId.toLowerCase());
+        String dafnyTypesModuleName = "%s_dtypes".formatted(dafnyModuleName);
+        Map<String, String> variables = Map.of(
+                "operationName", operationName,
+                "snakeCaseOperationName", snakeCaseOperationName,
+                "inputShapeName", inputShapeName,
+                "outputShapeName", outputShapeName,
+                "sdkId", sdkId.toLowerCase(),
+                "clientName", clientName,
+                "dafnyModuleName", dafnyModuleName,
+                "dafnyTypesModuleName", dafnyTypesModuleName
+        );
+
+        return TokenTree.of(evalTemplate("""
+        fn $operationName:L(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$inputShapeName:L>) 
+          -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+            std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$outputShapeName:L>,
+            std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>
+          >
+        > {
+          let native_result =\s
+            self.rt.block_on(conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone(), self.inner.clone()).send());
+          dafny_standard_library::conversion::result_to_dafny(&native_result,\s
+            conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_response::to_dafny,
+            conversions::$snakeCaseOperationName:L::to_dafny_error)
+        }
+        """, variables));
+    }
+
     private Stream<StructureShape> allErrorShapes() {
         return model.getOperationShapes().stream()
                 .flatMap(operationShape -> operationShape.getErrors().stream())
@@ -118,6 +225,7 @@ public class Generator {
         ServiceShape service = model.getServiceShapes().stream().findFirst().get();
 
         Set<RustFile> result = new HashSet<>();
+        result.add(clientModule());
         result.addAll(allErrorShapes()
                 .map(errorShape -> errorConversionModule(service, errorShape))
                 .collect(Collectors.toSet()));
@@ -149,11 +257,75 @@ public class Generator {
                 "_" + operationModuleName + "_request",
                 "_" + operationModuleName + "_response"
         ));
-        RustFile outerModule = new RustFile(Path.of("src", "conversions", operationModuleName + ".rs"), operationModuleContent);
+
+        var errorToDafnyFunction = operationErrorToDafnyFunction(operationShape);
+
+        RustFile outerModule = new RustFile(Path.of("src", "conversions", operationModuleName + ".rs"),
+                TokenTree.of(operationModuleContent, errorToDafnyFunction));
 
         RustFile requestModule = operationRequestConversionModule(operationShape);
+        RustFile responseModule = operationResponseConversionModule(operationShape);
 
-        return Set.of(outerModule, requestModule);
+        return Set.of(outerModule, requestModule, responseModule);
+    }
+
+    private TokenTree operationErrorToDafnyFunction(final OperationShape operationShape) {
+        String operationName = operationShape.getId().getName();
+        String snakeCaseOperationName = toSnakeCase(operationName);
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+
+        TokenTree errorCases = TokenTree.of(operationShape.getErrors()
+                .stream()
+                .map(id -> errorVariantToDafny(operationShape, model.expectShape(id, StructureShape.class)))
+        ).lineSeparated();
+
+        Map<String, String> variables = Map.of(
+                "sdkCrate", "aws_sdk_" + sdkId,
+                "operationName", operationName,
+                "snakeCaseOperationName", snakeCaseOperationName,
+                "dafnyTypesModuleName", dafnyTypesModuleName,
+                "errorCases", errorCases.toString()
+        );
+
+        return TokenTree.of(evalTemplate("""
+        #[allow(dead_code)]
+        pub fn to_dafny_error(
+            value: &::aws_smithy_runtime_api::client::result::SdkError<
+                $sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LError,
+                ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
+            >,
+        ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error> {
+            match value {
+              $sdkCrate:L::error::SdkError::ServiceError(service_error) => match service_error.err() {
+                $errorCases:L
+                e => crate::conversions::error::to_opaque_error(e.to_string()),
+              },
+              _ => {
+                crate::conversions::error::to_opaque_error(value.to_string())
+              }
+           }
+        }
+                        
+        """, variables));
+    }
+
+    private TokenTree errorVariantToDafny(final OperationShape operationShape, final StructureShape errorShape) {
+        String operationName = operationShape.getId().getName();
+        String errorName = errorShape.getId().getName();
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+        Map<String, String> variables = Map.of(
+                "sdkId", sdkId,
+                "operationName", operationName,
+                "snakeCaseOperationName", toSnakeCase(operationName),
+                "errorName", errorName,
+                "snakeCaseErrorName", toSnakeCase(errorName)
+        );
+
+        return TokenTree.of(evalTemplate("""
+                aws_sdk_$sdkId:L::operation::$snakeCaseOperationName:L::$operationName:LError::$errorName:L(e) =>
+                    crate::conversions::error::$snakeCaseErrorName:L::to_dafny(e.clone()),
+        """, variables));
     }
 
     private RustFile operationRequestConversionModule(final OperationShape operationShape) {
@@ -178,6 +350,44 @@ public class Generator {
                 "snakeCaseOperationName", snakeCaseOperationName,
                 "dafnyTypesModuleName", dafnyTypesModuleName,
                 "variants", variantsForStructure(inputShape).toString()
+        );
+
+        return TokenTree.of(evalTemplate("""
+        #[allow(dead_code)]
+        pub fn to_dafny(
+            value: $sdkCrate:L::operation::$snakeCaseOperationName:L::$structureName:L
+        ) -> ::std::rc::Rc<
+            crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
+        >{
+            ::std::rc::Rc::new(crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+                $variants:L
+            })
+        }
+        """, variables));
+    }
+
+    private RustFile operationResponseConversionModule(final OperationShape operationShape) {
+        var operationModuleName = toSnakeCase(operationShape.getId().getName());
+
+        var toDafnyFunction = operationResponseToDafnyFunction(operationShape);
+
+        return new RustFile(Path.of("src", "conversions", operationModuleName, "_" + operationModuleName + "_response.rs"), toDafnyFunction);
+    }
+
+    private TokenTree operationResponseToDafnyFunction(final OperationShape operationShape) {
+        StructureShape outputShape = model.expectShape(operationShape.getOutputShape(), StructureShape.class);
+        String operationName = operationShape.getId().getName();
+        String snakeCaseOperationName = toSnakeCase(operationName);
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String structureName = outputShape.getId().getName();
+        Map<String, String> variables = Map.of(
+                "sdkCrate", "aws_sdk_" + sdkId,
+                "operationName", operationName,
+                "structureName", structureName,
+                "snakeCaseOperationName", snakeCaseOperationName,
+                "dafnyTypesModuleName", dafnyTypesModuleName,
+                "variants", variantsForStructure(outputShape).toString()
         );
 
         return TokenTree.of(evalTemplate("""
@@ -239,20 +449,31 @@ public class Generator {
                 MapShape mapShape = shape.asMapShape().get();
                 Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
                 Shape valueShape = model.expectShape(mapShape.getValue().getTarget());
-                yield TokenTree.of("""
-                
-                ::std::rc::Rc::new(match %s() {
-                    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
-                        ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-                            |k| %s,
-                            |v| %s,
-                        )
-                    },
-                    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
-                })
-                """.formatted(rustValue,
-                              toDafny(keyShape, "k", false, false),
-                              toDafny(valueShape, "v", false, false)));
+                if (!isDafnyOption) {
+                    yield TokenTree.of("""
+                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.unwrap(),
+                        |k| %s,
+                        |v| %s,
+                    )
+                    """.formatted(rustValue,
+                            toDafny(keyShape, "k", false, false),
+                            toDafny(valueShape, "v", false, false)));
+                } else {
+                    yield TokenTree.of("""
+                                                
+                            ::std::rc::Rc::new(match &%s {
+                                Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+                                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
+                                        |k| %s,
+                                        |v| %s,
+                                    )
+                                },
+                                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+                            })
+                            """.formatted(rustValue,
+                            toDafny(keyShape, "k", false, false),
+                            toDafny(valueShape, "v", false, false)));
+                }
             }
             default -> TokenTree.of("todo!()");
         };
@@ -267,14 +488,52 @@ public class Generator {
                         """));
     }
 
-//    private static RustFile clientModuleFile(final ServiceShape service) {
-//        Set<>
-//    }
-
     private RustFile conversionsErrorModule(final Model model, final ServiceShape service) {
-        TokenTree content = declarePubModules(allErrorShapes()
+        TokenTree modulesDeclarations = declarePubModules(allErrorShapes()
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName())));
-        return new RustFile(Path.of("src", "conversions", "error.rs"), content);
+
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+
+        Map<String, String> variables = Map.of(
+                "sdkCrate", "aws_sdk_" + sdkId,
+                "dafnyTypesModuleName", dafnyTypesModuleName
+        );
+        TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(evalTemplate(
+    """
+            /// Wraps up an arbitrary Rust Error value as a Dafny Error
+            pub fn to_opaque_error<E: 'static>(value: E) ->
+              ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>
+            {
+                let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> = ::dafny_runtime::Object(Some(
+                    ::std::rc::Rc::new(::std::cell::UnsafeCell::new(value)),
+                ));
+                ::std::rc::Rc::new(
+                crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error::Opaque {
+                    obj: error_obj,
+                },
+              )
+            }
+                                    
+            /// Wraps up an arbitrary Rust Error value as a Dafny Result<T, Error>.Failure
+            pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: 'static>(value: E) ->
+              ::std::rc::Rc<
+                dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result<
+                  T,
+                  ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>
+                >
+              >
+            {
+                ::std::rc::Rc::new(
+                    dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+                        error: to_opaque_error(value),
+                    },
+                )
+            }
+                                    
+            """, variables));
+        return new RustFile(Path.of("src", "conversions", "error.rs"),
+                TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions));
     }
 
     private RustFile conversionsModuleFile(final Model model, final ServiceShape service) {
@@ -317,7 +576,7 @@ public class Generator {
         ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>{
           ::std::rc::Rc::new(
             crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_d$sdkId:L_dinternaldafny_dtypes::Error::$structureName:L {
-              message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
+              $variants:L
             }
           )
         }
@@ -326,7 +585,8 @@ public class Generator {
         String evaluated = evalTemplate(template, Map.of(
                 "sdkId", sdkId,
                 "structureName", structureName,
-                "dafnyTypesModuleName", "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId)
+                "dafnyTypesModuleName", "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId),
+                "variants", variantsForStructure(errorStructure).toString()
         ));
         return new RustFile(path, TokenTree.of(evaluated));
     }
