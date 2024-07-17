@@ -19,7 +19,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- ComparisonOperator: crate::conversions::comparison_operator::to_dafny(value.comparison_operator),
+ ComparisonOperator: crate::conversions::comparison_operator::to_dafny(value.comparison_operator.clone()),
     }
   )
 } #[allow(dead_code)]

@@ -1,7 +1,9 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-pub mod query;
+pub mod batch_get_item;
+
+ pub mod get_item;
 
  pub mod put_item;
 
@@ -9,23 +11,21 @@ pub mod query;
 
  pub mod scan;
 
- pub mod get_item;
-
- pub mod batch_get_item;
+ pub mod query;
 
  pub mod attribute_value_update;
+
+ pub mod keys_and_attributes;
 
  pub mod item_collection_metrics;
 
  pub mod condition;
 
- pub mod keys_and_attributes;
-
  pub mod consumed_capacity;
 
- pub mod capacity;
-
  pub mod expected_attribute_value;
+
+ pub mod capacity;
 
  pub mod attribute_value;
 
