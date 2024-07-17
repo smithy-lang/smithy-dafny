@@ -41,4 +41,6 @@ pub mod batch_get_item;
 
  pub mod attribute_action;
 
+ pub mod attribute_value;
+
  pub mod error;
