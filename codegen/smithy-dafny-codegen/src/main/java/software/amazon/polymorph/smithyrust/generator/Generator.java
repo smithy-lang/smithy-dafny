@@ -332,8 +332,10 @@ public class Generator {
         var operationModuleName = toSnakeCase(operationShape.getId().getName());
 
         var toDafnyFunction = operationRequestToDafnyFunction(operationShape);
+        var fromDafnyFunction = operationRequestFromDafnyFunction(operationShape);
 
-        return new RustFile(Path.of("src", "conversions", operationModuleName, "_" + operationModuleName + "_request.rs"), toDafnyFunction);
+        return new RustFile(Path.of("src", "conversions", operationModuleName, "_" + operationModuleName + "_request.rs"),
+                TokenTree.of(toDafnyFunction, fromDafnyFunction).lineSeparated());
     }
 
     private TokenTree operationRequestToDafnyFunction(final OperationShape operationShape) {
@@ -364,6 +366,48 @@ public class Generator {
             })
         }
         """, variables));
+    }
+
+    private TokenTree operationRequestFromDafnyFunction(final OperationShape operationShape) {
+        StructureShape inputShape = model.expectShape(operationShape.getInputShape(), StructureShape.class);
+        String operationName = operationShape.getId().getName();
+        String snakeCaseOperationName = toSnakeCase(operationName);
+        String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String structureName = inputShape.getId().getName();
+        Map<String, String> variables = Map.of(
+                "sdkCrate", "aws_sdk_" + sdkId,
+                "operationName", operationName,
+                "structureName", structureName,
+                "snakeCaseOperationName", snakeCaseOperationName,
+                "dafnyTypesModuleName", dafnyTypesModuleName,
+                "fluentMemberSetters", fluentMemberSettersForStructure(inputShape).toString()
+        );
+
+        return TokenTree.of(evalTemplate("""
+        #[allow(dead_code)]
+        pub fn from_dafny(
+            dafny_value: ::std::rc::Rc<
+                crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
+            >,
+            client: $sdkCrate:L::Client,
+        ) -> $sdkCrate:L::operation::$snakeCaseOperationName:L::builders::$operationName:LFluentBuilder {
+            client.$snakeCaseOperationName:L()
+                  $fluentMemberSetters:L
+        }
+        """, variables));
+    }
+
+    private TokenTree fluentMemberSettersForStructure(Shape shape) {
+        return TokenTree.of(
+                shape.members()
+                        .stream()
+                        .map(m -> TokenTree.of("."
+                                + toSnakeCase(m.getMemberName())
+                                + "("
+                                + fromDafnyForMember(m)
+                                + ")"))
+        ).lineSeparated();
     }
 
     private RustFile operationResponseConversionModule(final OperationShape operationShape) {
@@ -412,6 +456,70 @@ public class Generator {
                         + ": "
                         + variantMemberForOperationRequest(m) + ","))
         ).lineSeparated();
+    }
+
+    private TokenTree fromDafnyForMember(MemberShape member) {
+        Shape targetShape = model.expectShape(member.getTarget());
+        boolean isRequired = member.hasTrait(RequiredTrait.class);
+        return fromDafny(targetShape, "dafny_value." + member.getMemberName() + "()", true, !isRequired);
+    }
+
+    private TokenTree fromDafny(final Shape shape, final String dafnyValue, boolean isRustOption, boolean isDafnyOption) {
+        return switch (shape.getType()) {
+            case STRING -> {
+                if (shape.hasTrait(EnumTrait.class)) {
+                    var enumShapeName = toSnakeCase(shape.toShapeId().getName());
+                    yield TokenTree.of("""
+                    ::std::rc::Rc::new(match %s {
+                        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::from_dafny(x) },
+                        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+                    })
+                    """.formatted(dafnyValue, enumShapeName));
+                } else {
+                    if (isRustOption) {
+                        var result = TokenTree.of("dafny_standard_library::conversion::ostring_from_dafny(&%s)".formatted(dafnyValue));
+                        if (!isDafnyOption) {
+                            result = TokenTree.of(result, TokenTree.of(".Extract()"));
+                        }
+                        yield result;
+                    } else {
+                        yield TokenTree.of("dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(%s)".formatted(dafnyValue));
+                    }
+                }
+            }
+            case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_from_dafny(&%s)".formatted(dafnyValue));
+            case MAP -> {
+                MapShape mapShape = shape.asMapShape().get();
+                Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
+                Shape valueShape = model.expectShape(mapShape.getValue().getTarget());
+                if (!isDafnyOption) {
+                    yield TokenTree.of("""
+                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.unwrap(),
+                        |k| %s,
+                        |v| %s,
+                    )
+                    """.formatted(dafnyValue,
+                            fromDafny(keyShape, "k", false, false),
+                            fromDafny(valueShape, "v", false, false)));
+                } else {
+                    yield TokenTree.of("""
+
+                            ::std::rc::Rc::new(match &%s {
+                                Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+                                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
+                                        |k| %s,
+                                        |v| %s,
+                                    )
+                                },
+                                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+                            })
+                            """.formatted(dafnyValue,
+                            toDafny(keyShape, "k", false, false),
+                            toDafny(valueShape, "v", false, false)));
+                }
+            }
+            default -> TokenTree.of("todo!()");
+        };
     }
 
     private TokenTree variantMemberForOperationRequest(MemberShape member) {
