@@ -357,7 +357,7 @@ public class Generator {
         return TokenTree.of(evalTemplate("""
         #[allow(dead_code)]
         pub fn to_dafny(
-            value: $sdkCrate:L::operation::$snakeCaseOperationName:L::$structureName:L
+            value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$structureName:L
         ) -> ::std::rc::Rc<
             crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
         >{
@@ -437,7 +437,7 @@ public class Generator {
         return TokenTree.of(evalTemplate("""
         #[allow(dead_code)]
         pub fn to_dafny(
-            value: $sdkCrate:L::operation::$snakeCaseOperationName:L::$structureName:L
+            value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$structureName:L
         ) -> ::std::rc::Rc<
             crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
         >{
@@ -479,7 +479,7 @@ public class Generator {
                     """.formatted(dafnyValue, enumShapeName));
                 } else {
                     if (isDafnyOption) {
-                        yield TokenTree.of("dafny_standard_library::conversion::ostring_from_dafny(&%s)".formatted(dafnyValue));
+                        yield TokenTree.of("dafny_standard_library::conversion::ostring_from_dafny(%s.clone())".formatted(dafnyValue));
                     } else {
                         TokenTree result = TokenTree.of("dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(%s)".formatted(dafnyValue));
                         if (isRustOption) {
@@ -489,7 +489,7 @@ public class Generator {
                     }
                 }
             }
-            case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_from_dafny(&%s)".formatted(dafnyValue));
+            case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_from_dafny(%s.clone())".formatted(dafnyValue));
             case MAP -> {
                 MapShape mapShape = shape.asMapShape().get();
                 Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
@@ -505,14 +505,15 @@ public class Generator {
                             fromDafny(valueShape, "v", false, false)));
                 } else {
                     yield TokenTree.of("""
-                            match &**%s {
-                                Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
-                                    ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(x,
-                                        |k| %s,
-                                        |v| %s,
-                                    )
-                                },
-                                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+                            match (*%s).as_ref() {
+                                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                                    Some(
+                                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
+                                            |k| %s,
+                                            |v| %s,
+                                        )
+                                    ),
+                                _ => None
                             }
                             """.formatted(dafnyValue,
                             fromDafny(keyShape, "k", false, false),
@@ -718,7 +719,7 @@ public class Generator {
         
         #[allow(dead_code)]
         pub fn to_dafny(
-            value: aws_sdk_$sdkId:L::types::$structureName:L,
+            value: &aws_sdk_$sdkId:L::types::$structureName:L,
         ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L>{
           ::std::rc::Rc::new(
             crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_d$sdkId:L_dinternaldafny_dtypes::$structureName:L::$structureName:L {
