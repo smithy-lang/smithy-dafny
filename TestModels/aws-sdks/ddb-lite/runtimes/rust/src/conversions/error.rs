@@ -1,21 +1,21 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-pub mod internal_server_error;
+pub mod conditional_check_failed_exception;
+
+ pub mod internal_server_error;
 
  pub mod invalid_endpoint_exception;
 
- pub mod resource_not_found_exception;
-
- pub mod request_limit_exceeded;
+ pub mod item_collection_size_limit_exceeded_exception;
 
  pub mod provisioned_throughput_exceeded_exception;
 
+ pub mod request_limit_exceeded;
+
+ pub mod resource_not_found_exception;
+
  pub mod transaction_conflict_exception;
-
- pub mod conditional_check_failed_exception;
-
- pub mod item_collection_size_limit_exceeded_exception;
  /// Wraps up an arbitrary Rust Error value as a Dafny Error
 pub fn to_opaque_error<E: 'static>(value: E) ->
   ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Error>

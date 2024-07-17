@@ -500,6 +500,13 @@ public class Generator {
                 }
             }
             case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_from_dafny(%s.clone())".formatted(dafnyValue));
+            case DOUBLE -> {
+                if (isRustOption) {
+                    yield TokenTree.of("dafny_standard_library::conversion::odouble_from_dafny(%s.clone())".formatted(dafnyValue));
+                } else {
+                    yield TokenTree.of("dafny_standard_library::conversion::double_from_dafny(%s.clone())".formatted(dafnyValue));
+                }
+            }
             case LIST -> {
                 ListShape listShape = shape.asListShape().get();
                 Shape memberShape = model.expectShape(listShape.getMember().getTarget());
@@ -624,6 +631,13 @@ public class Generator {
                 }
             }
             case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_to_dafny(&%s)".formatted(rustValue));
+            case DOUBLE -> {
+                if (isRustOption) {
+                    yield TokenTree.of("dafny_standard_library::conversion::odouble_to_dafny(&%s)".formatted(rustValue));
+                } else {
+                    yield TokenTree.of("dafny_standard_library::conversion::double_to_dafny(&%s)".formatted(rustValue));
+                }
+            }
             case LIST -> {
                 ListShape listShape = shape.asListShape().get();
                 Shape memberShape = model.expectShape(listShape.getMember().getTarget());
@@ -792,7 +806,7 @@ public class Generator {
 
     private TokenTree declarePubModules(Stream<String> moduleNames) {
         return TokenTree.of(
-            moduleNames.map(module -> TokenTree.of("pub mod " + module + ";\n")))
+            moduleNames.sorted().map(module -> TokenTree.of("pub mod " + module + ";\n")))
         .lineSeparated();
     }
 

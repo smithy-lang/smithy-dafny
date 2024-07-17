@@ -1,6 +1,5 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
-use ::ddb_lite::implementation_from_dafny::*;
 
 pub mod r#_TestDDBv2_Compile {
     pub struct _default {}

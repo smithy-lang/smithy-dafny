@@ -9,9 +9,9 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Capacity>{
   ::std::rc::Rc::new(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Capacity::Capacity {
-        ReadCapacityUnits: todo!(),
- WriteCapacityUnits: todo!(),
- CapacityUnits: todo!(),
+        ReadCapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.read_capacity_units),
+ WriteCapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.write_capacity_units),
+ CapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.capacity_units),
     }
   )
 } #[allow(dead_code)]
@@ -21,9 +21,9 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::Capacity {
     aws_sdk_dynamodb::types::Capacity::builder()
-          .set_read_capacity_units(todo!())
- .set_write_capacity_units(todo!())
- .set_capacity_units(todo!())
+          .set_read_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.ReadCapacityUnits().clone()))
+ .set_write_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.WriteCapacityUnits().clone()))
+ .set_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.CapacityUnits().clone()))
           .build()
 
 }

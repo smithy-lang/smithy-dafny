@@ -10,9 +10,9 @@ pub fn to_dafny(
   ::std::rc::Rc::new(
     crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ConsumedCapacity::ConsumedCapacity {
         TableName: dafny_standard_library::conversion::ostring_to_dafny(&value.table_name),
- CapacityUnits: todo!(),
- ReadCapacityUnits: todo!(),
- WriteCapacityUnits: todo!(),
+ CapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.capacity_units),
+ ReadCapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.read_capacity_units),
+ WriteCapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.write_capacity_units),
  Table: ::std::rc::Rc::new(match &value.table {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::capacity::to_dafny(&x) },
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
@@ -52,9 +52,9 @@ pub fn from_dafny(
 ) -> aws_sdk_dynamodb::types::ConsumedCapacity {
     aws_sdk_dynamodb::types::ConsumedCapacity::builder()
           .set_table_name(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.TableName().clone()))
- .set_capacity_units(todo!())
- .set_read_capacity_units(todo!())
- .set_write_capacity_units(todo!())
+ .set_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.CapacityUnits().clone()))
+ .set_read_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.ReadCapacityUnits().clone()))
+ .set_write_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.WriteCapacityUnits().clone()))
  .set_table(match (*dafny_value.Table()).as_ref() {
     crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
         Some(crate::conversions::capacity::from_dafny(value.clone())),
