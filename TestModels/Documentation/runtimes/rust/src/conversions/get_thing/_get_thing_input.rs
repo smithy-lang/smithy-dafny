@@ -5,12 +5,13 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput,
 > {
-    let dafny_value = match value.name {
-        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-    };
+    let name =
+        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
+            &value.name.unwrap(),
+        );
+
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput::GetThingInput {        
-        name: ::std::rc::Rc::new(dafny_value),
+        name,
   })
 }
 
@@ -20,18 +21,10 @@ pub fn from_dafny(
         crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput,
     >,
 ) -> crate::operation::get_thing::GetThingInput {
-    let name = if matches!(
-        dafny_value.name(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
-    ) {
-        Some(dafny_value.name().Extract())
-    } else if matches!(
-        dafny_value.name(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {}
-    ) {
-        None
-    } else {
-        panic!("Unreachable")
-    };
-    crate::operation::get_thing::GetThingInput { name }
+    let name =
+        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
+            &dafny_value.name(),
+        );
+
+    crate::operation::get_thing::GetThingInput { name: Some(name) }
 }

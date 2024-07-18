@@ -5,10 +5,16 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput,
 >{
-    let name = value.thing.name;
+    let name = ::std::rc::Rc::new(
+        dafny_standard_library::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
+            value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
+            &value.thing.name.unwrap(),
+        ),
+        },
+    );
 
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput::GetThingOutput {
-        thing: ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Thing::Thing {name}),
+        thing: ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Thing::Thing { name }),
   })
 }
 
@@ -16,20 +22,26 @@ pub fn to_dafny(
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput,
-    >,
+        >,
 ) -> crate::operation::get_thing::GetThingOutput {
-    let thing = if matches!(
-        dafny_value.thing().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
-    ) {
-        Some(dafny_value.thing().Extract())
-    } else if matches!(
-        dafny_value.thing().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {}
-    ) {
-        None
-    } else {
-        panic!("Unreachable")
+    let thing = match dafny_value.as_ref() {
+        crate::implementation_from_dafny::_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput::GetThingOutput { thing } => {
+            match thing.as_ref() {
+                crate::implementation_from_dafny::_simple_ddocumentation_dinternaldafny_dtypes::Thing::Thing { name } => {
+                    match name.as_ref() {
+                        dafny_standard_library::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => {
+                            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
+                                value,
+                            )
+                        },
+                        _ => unreachable!()
+                    }
+                },
+            }
+        },
     };
-    crate::operation::get_thing::GetThingOutput { thing }
+
+    crate::operation::get_thing::GetThingOutput {
+        thing: crate::types::Thing { name: Some(thing) },
+    }
 }
