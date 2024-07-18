@@ -56,17 +56,17 @@ impl GetThingFluentBuilder {
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn value(mut self, input: impl ::std::convert::Into<::std::primitive::bool>) -> Self {
-        self.inner = self.inner.value(input.into());
+    pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
+        self.inner = self.inner.name(input.into());
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_value(mut self, input: ::std::option::Option<::std::primitive::bool>) -> Self {
-        self.inner = self.inner.set_value(input);
+    pub fn set_value(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
+        self.inner = self.inner.set_name(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_value(&self) -> &::std::option::Option<::std::primitive::bool> {
-        self.inner.get_value()
+    pub fn get_value(&self) -> &::std::option::Option<::std::string::String> {
+        self.inner.get_name()
     }
 }

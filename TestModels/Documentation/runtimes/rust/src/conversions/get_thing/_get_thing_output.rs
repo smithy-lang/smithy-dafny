@@ -5,12 +5,10 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput,
 >{
-    let dafny_value = match value.thing {
-        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-    };
+    let name = value.thing.name;
+
     ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput::GetThingOutput {
-        thing: ::std::rc::Rc::new(dafny_value),
+        thing: ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Thing::Thing {name}),
   })
 }
 
@@ -26,8 +24,8 @@ pub fn from_dafny(
     ) {
         Some(dafny_value.thing().Extract())
     } else if matches!(
-        dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        dafny_value.thing().as_ref(),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {}
     ) {
         None
     } else {

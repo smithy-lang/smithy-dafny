@@ -5,7 +5,7 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput,
 > {
-    let dafny_value = match value.value {
+    let dafny_value = match value.name {
         Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
         None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
     };
@@ -20,18 +20,18 @@ pub fn from_dafny(
         crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput,
     >,
 ) -> crate::operation::get_thing::GetThingInput {
-    let value = if matches!(
-        dafny_value.value().as_ref(),
+    let name = if matches!(
+        dafny_value.name(),
         crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
-        Some(dafny_value.value().Extract())
+        Some(dafny_value.name().Extract())
     } else if matches!(
-        dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        dafny_value.name(),
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None {}
     ) {
         None
     } else {
         panic!("Unreachable")
     };
-    crate::operation::get_thing::GetThingInput { value }
+    crate::operation::get_thing::GetThingInput { name }
 }
