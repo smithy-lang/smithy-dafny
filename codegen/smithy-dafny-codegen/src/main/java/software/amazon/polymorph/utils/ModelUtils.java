@@ -34,7 +34,7 @@ public class ModelUtils {
   // The spec recommends a similar stricter definition for consistency (uppercase instead of title-case):
   // https://smithy.io/1.0/spec/core/constraint-traits.html?highlight=enum#enum-trait
   private static final Pattern ENUM_NAME_PATTERN = Pattern.compile(
-    "^[A-Z]+[A-Za-z_0-9]*$"
+    "^[A-Za-z_0-9]*$"
   );
 
   /**

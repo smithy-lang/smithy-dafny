@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -66,6 +67,10 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String blobShape(BlobShape shape) {
+    // if it's a streaming blob, read it first
+    if (shape.hasTrait(StreamingTrait.class)) {
+      return "Seq(" + dataSource + ".read())";
+    }
     writer.addStdlibImport("_dafny", "Seq");
     return "Seq(" + dataSource + ")";
   }
