@@ -546,8 +546,6 @@ transpile_dependencies_test_rust: LANG=rust
 transpile_dependencies_test_rust: transpile_dependencies_test
 
 _mv_implementation_rust:
-	rm -rf runtimes/rust/dafny_impl/src
-	mkdir -p runtimes/rust/dafny_impl/src
 	mkdir -p runtimes/rust/src
 # TODO: Currently need to insert an import of the the StandardLibrary.
 	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
