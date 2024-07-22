@@ -13,8 +13,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithyjava.BuildMethod;
@@ -23,8 +21,8 @@ import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
 public class ServiceShim extends ShimLibrary {
@@ -62,9 +60,7 @@ public class ServiceShim extends ShimLibrary {
       shimArgs,
       Collections.emptyList()
     );
-    targetShape
-      .getTrait(JavaDocTrait.class)
-      .map(docTrait -> spec.addJavadoc(docTrait.getValue()));
+    ModelUtils.getDocumentationOrJavadoc(targetShape).map(spec::addJavadoc);
     spec
       .addType(builderSpecs.builderInterface())
       .addType(

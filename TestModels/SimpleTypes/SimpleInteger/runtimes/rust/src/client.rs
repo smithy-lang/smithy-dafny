@@ -2,32 +2,24 @@
 
 use aws_smithy_types::error::operation::BuildError;
 
-#[derive(Debug)]
-pub(crate) struct Handle {
-    pub(crate) conf: crate::Config,
-    pub(crate) inner: ::dafny_runtime::Object<dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient>
-}
-
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    handle: ::std::sync::Arc<Handle>,
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient>
 }
 
 impl Client {
     /// Creates a new client from the service [`Config`](crate::Config).
     #[track_caller]
-    pub fn from_conf(conf: crate::Config) -> Result<Self, BuildError> {
-        // If this service had any configuration properties,
-        // they would need converting here too.
-        let inner_config = ::std::rc::Rc::new(
-            ::simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny::_default::DefaultSimpleIntegerConfig());
+    pub fn from_conf(
+        conf: crate::types::simple_integer_config::SimpleIntegerConfig,
+    ) -> Result<Self, BuildError> {
         let inner =
-            ::simple_integer_dafny::_simple_dtypes_dinteger_dinternaldafny::_default::SimpleInteger(
-                &inner_config,
+            crate::implementation_from_dafny::_simple_dtypes_dinteger_dinternaldafny::_default::SimpleInteger(
+                &crate::conversions::simple_integer_config::_simple_integer_config::to_dafny(conf),
             );
         if matches!(
             inner.as_ref(),
-            ::simple_integer_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(
@@ -36,18 +28,9 @@ impl Client {
                     .build(),
             ));
         }
-        let handle = Handle {
-            conf: conf.clone(),
-            inner: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient + 'static)>>::upcast_to(inner.Extract()),
-        };
         Ok(Self {
-            handle: ::std::sync::Arc::new(handle),
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
         })
-    }
-
-    /// Returns the client's configuration.
-    pub fn config(&self) -> &crate::Config {
-        &self.handle.conf
     }
 }
 

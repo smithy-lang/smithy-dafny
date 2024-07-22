@@ -8,7 +8,11 @@ on:
 
 jobs:
   gradle-build-smithy-dafny:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-12]
+    runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -37,24 +41,6 @@ jobs:
           arguments: :smithy-dafny-codegen:test
           build-root-directory: codegen
 
-      # Required for building the SQS model
-      - name: Locally cache smithy-dafny-codegen
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: :smithy-dafny-codegen:publishToMavenLocal
-          build-root-directory: codegen
-
-      - name: Sanity-check SQS test model via plugin
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: build --info
-          build-root-directory: TestModels/aws-sdks/sqs
-
-      - name: Execute codegen build
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: build
-          build-root-directory: codegen
-
       - name: not-grep
+        if: matrix.os == 'ubuntu-latest'
         uses: mattsb42-meta/not-grep@1.0.0

@@ -9,18 +9,17 @@ impl GetBlob {
         Self
     }
     pub(crate) async fn send(
-        handle: &crate::client::Handle,
+        client: &crate::client::Client,
         input: crate::operation::get_blob::GetBlobInput,
     ) -> ::std::result::Result<
         crate::operation::get_blob::GetBlobOutput,
         crate::operation::get_blob::GetBlobError,
     > {
         let inner_input = crate::conversions::get_blob::_get_blob_input::to_dafny(input);
-        let inner_result =
-            ::dafny_runtime::md!(handle.inner.clone()).GetBlob(&inner_input);
+        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetBlob(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_blob_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(crate::conversions::get_blob::_get_blob_output::from_dafny(
                 inner_result.value().clone(),

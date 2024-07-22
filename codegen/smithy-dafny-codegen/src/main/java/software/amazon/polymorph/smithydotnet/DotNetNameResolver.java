@@ -1144,6 +1144,10 @@ public class DotNetNameResolver {
     return serviceShape;
   }
 
+  public String getServiceName() {
+    return StringUtils.capitalize(getServiceShape().getId().getName());
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == this) return true;

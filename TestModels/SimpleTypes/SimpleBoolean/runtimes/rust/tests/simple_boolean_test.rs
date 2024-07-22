@@ -1,4 +1,8 @@
 use simple_boolean::*;
+
+
+mod tests_from_dafny;
+
 /*
     method{:test} GetBooleanTrue(){
         var client :- expect SimpleBoolean.SimpleBoolean();
@@ -47,6 +51,11 @@ async fn test_get_boolean_false() {
 }
 
 pub fn client() -> Client {
-    let config = Config::builder().build();
+    let config = SimpleBooleanConfig::builder().build().unwrap();
     Client::from_conf(config).unwrap()
+}
+
+#[test]
+fn dafny_tests() {
+    crate::tests_from_dafny::_module::_default::_Test__Main_()
 }
