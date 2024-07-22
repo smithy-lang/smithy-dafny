@@ -180,12 +180,6 @@ _transpile_implementation_all: transpile_implementation
 # If this variable is not provided, assume the project does not have `replaceable` modules,
 #   and look for `Index.dfy` in the `src/` directory.
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
-transpile_implementation:
-	ifeq ($(TARGET), py)
-		COMPILE_SUFFIX_OPTION := -compileSuffix:0
-	else
-		COMPILE_SUFFIX_OPTION := -compileSuffix:1
-	endif
 # At this time it is *significatly* faster
 # to give Dafny a single file
 # that includes everything
@@ -233,14 +227,7 @@ _transpile_test_all: transpile_test
 
 # `find` looks for tests in either V1 or V2-styled project directories (single vs. multiple model files).
 transpile_test:
-	ifeq ($(TARGET), py)
-		COMPILE_SUFFIX_OPTION := -compileSuffix:0
-	else
-		COMPILE_SUFFIX_OPTION := -compileSuffix:1
-	endif
-transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-<<<<<<< HEAD
 		translate $(TARGET) \
 		--stdin \
 		--no-verify \
@@ -622,7 +609,6 @@ transpile_python: | transpile_dependencies_python transpile_implementation_pytho
 
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
-transpile_implementation_python: COMPILE_SUFFIX_OPTION=
 transpile_implementation_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_implementation_python: TRANSPILE_MODULE_NAME=--python-module-name=$(PYTHON_MODULE_NAME).internaldafny.generated
 transpile_implementation_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
@@ -630,7 +616,6 @@ transpile_implementation_python: _transpile_implementation_all _mv_implementatio
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/dafny_test
-transpile_test_python: COMPILE_SUFFIX_OPTION=
 transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
 transpile_test_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
