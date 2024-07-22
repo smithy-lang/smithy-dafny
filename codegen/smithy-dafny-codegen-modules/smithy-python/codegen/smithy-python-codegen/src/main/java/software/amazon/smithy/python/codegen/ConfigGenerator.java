@@ -235,7 +235,6 @@ public class ConfigGenerator implements Runnable {
             writer.writeInline("Interceptor[$T, $T, Any, Any]", input, output);
             if (iter.hasNext()) {
                 writer.writeInline(", ");
-<<<<<<< HEAD
             }
         }
 
@@ -243,16 +242,6 @@ public class ConfigGenerator implements Runnable {
     }
 
     protected void generateConfig(GenerationContext context, PythonWriter writer) {
-=======
-            } else {
-                writer.writeInline("]");
-            }
-        }
-        writer.write("");
-    }
-
-    private void generateConfig(GenerationContext context, PythonWriter writer) {
->>>>>>> 361c2882 (chore: add Smithy-Python@06eb6b1 (#377))
         var symbol = CodegenUtils.getConfigSymbol(context.settings());
 
         // Initialize the list of config properties with our base properties. Here a new
