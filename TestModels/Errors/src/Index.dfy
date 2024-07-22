@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleErrorsImpl.dfy"
 
-module {:extern "simple.errors.internaldafny" } SimpleErrors refines AbstractSimpleErrorsService {
+module SimpleErrors refines AbstractSimpleErrorsService {
   import Operations = SimpleErrorsImpl
 
   function method DefaultSimpleErrorsConfig(): SimpleErrorsConfig {

@@ -45,6 +45,9 @@ dependencies {
     implementation("software.amazon.awssdk:codegen:2.20.26")
     implementation("com.squareup:javapoet:1.13.0")
 
+    // Smithy-Python
+    implementation(project(":smithy-python-codegen"))
+
     // Used for parsing-based tests
     testImplementation("org.antlr:antlr4:4.9.2")
 }

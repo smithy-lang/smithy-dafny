@@ -102,6 +102,7 @@ class DafnyClientCodegenPluginSettings {
           case "DOTNET", "CSHARP", "CS" -> Stream.of(
             CodegenEngine.TargetLanguage.DOTNET
           );
+          case "PYTHON" -> Stream.of(CodegenEngine.TargetLanguage.PYTHON);
           case "DAFNY" -> {
             LOGGER.error(
               "Dafny code is always generated, and shouldn't be specified explicitly"
@@ -163,26 +164,26 @@ class DafnyClientCodegenPluginSettings {
     );
   }
 
-  /**
-   * Traverses up from the given start path,
-   * searching for a "smithy-build.json" file and returning its path if found.
-   */
-  private static Optional<Path> findSmithyBuildJson(final Path start) {
-    if (start == null || !start.isAbsolute()) {
-      throw new IllegalArgumentException(
-        "Start path must be non-null and absolute"
-      );
-    }
-    Path cursor = start.normalize();
-    final Path root = cursor.getRoot();
-    // Shouldn't need to traverse more than 100 levels... but don't hang forever
-    for (int i = 0; !root.equals(cursor) && i < 100; i++) {
-      final Path config = cursor.resolve("smithy-build.json");
-      if (Files.exists(config)) {
-        return Optional.of(config);
-      }
-      cursor = cursor.getParent();
-    }
-    return Optional.empty();
+    /**
+     * Traverses up from the given start path,
+     * searching for a "smithy-build.json" file and returning its path if found.
+     */
+    private static Optional<Path> findSmithyBuildJson(final Path start) {
+        if (start == null || !start.isAbsolute()) {
+            throw new IllegalArgumentException(
+                    "Start path must be non-null and absolute"
+            );
+        }
+        Path cursor = start.normalize();
+        final Path root = cursor.getRoot();
+        // Shouldn't need to traverse more than 100 levels... but don't hang forever
+        for (int i = 0; !root.equals(cursor) && i < 100; i++) {
+          final Path config = cursor.resolve("smithy-build.json");
+          if (Files.exists(config)) {
+            return Optional.of(config);
+          }
+          cursor = cursor.getParent();
+        }
+        return Optional.empty();
   }
 }

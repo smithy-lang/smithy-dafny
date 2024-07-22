@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleConstructorImpl.dfy"
 
-module {:extern "simple.constructor.internaldafny" } SimpleConstructor refines AbstractSimpleConstructorService {
+module SimpleConstructor refines AbstractSimpleConstructorService {
     import Operations = SimpleConstructorImpl
 
     function method DefaultSimpleConstructorConfig(): SimpleConstructorConfig {
