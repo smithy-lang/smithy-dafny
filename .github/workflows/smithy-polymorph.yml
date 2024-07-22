@@ -8,7 +8,11 @@ on:
 
 jobs:
   gradle-build-smithy-dafny:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-12]
+    runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -40,6 +44,7 @@ jobs:
           arguments: :smithy-dafny-codegen:test
           build-root-directory: codegen
 
+<<<<<<< HEAD
       # Required for building the SQS model
       - name: Locally cache smithy-dafny-codegen
         uses: gradle/gradle-build-action@v2
@@ -67,5 +72,8 @@ jobs:
           arguments: build
           build-root-directory: codegen
 
+=======
+>>>>>>> main-1.x
       - name: not-grep
+        if: matrix.os == 'ubuntu-latest'
         uses: mattsb42-meta/not-grep@1.0.0

@@ -40,7 +40,9 @@ public record DafnyNameResolver(
       //            Map.entry(ShapeType.SHORT, "int16"),
       Map.entry(ShapeType.INTEGER, "int32"),
       Map.entry(ShapeType.LONG, "int64"),
-      Map.entry(ShapeType.DOUBLE, "seq<uint8>")
+      Map.entry(ShapeType.DOUBLE, "seq<uint8>"),
+      // TODO create/use better timestamp type in Dafny libraries
+      Map.entry(ShapeType.TIMESTAMP, "string")
     );
 
   public static String nameForService(final ServiceShape serviceShape) {

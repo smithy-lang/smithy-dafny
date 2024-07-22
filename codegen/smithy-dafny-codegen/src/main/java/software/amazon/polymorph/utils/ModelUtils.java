@@ -9,7 +9,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
@@ -21,11 +20,12 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.model.transform.ModelTransformer;
-import software.amazon.smithy.utils.StringUtils;
 
 public class ModelUtils {
 
@@ -655,4 +655,11 @@ public class ModelUtils {
         }
         return builder;
     }
+
+  public static Optional<String> getDocumentationOrJavadoc(Shape shape) {
+    return shape
+      .getTrait(DocumentationTrait.class)
+      .map(StringTrait::getValue)
+      .or(() -> shape.getTrait(JavaDocTrait.class).map(StringTrait::getValue));
+  }
 }

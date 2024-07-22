@@ -8,6 +8,6 @@ impl super::Client {
     ///   - [`value(Option<Long>)`](crate::operation::get_long::GetLongOutput::value): (undocumented)
     /// - On failure, responds with [`SdkError<GetLongError>`](crate::operation::get_long::GetLongError)
     pub fn get_long(&self) -> crate::operation::get_long::builders::GetLongFluentBuilder {
-        crate::operation::get_long::builders::GetLongFluentBuilder::new(self.handle.clone())
+        crate::operation::get_long::builders::GetLongFluentBuilder::new(self.clone())
     }
 }

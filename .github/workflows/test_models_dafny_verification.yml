@@ -8,65 +8,29 @@ on:
         description: "The Dafny version to run"
         required: true
         type: string
+      num_shards:
+        required: false
+        type: number
+        default: 10
 
 jobs:
+  populate-matrix-dimensions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Populate shard list
+        id: populate-shard-list
+        run: echo "shard-list=[`seq -s , 1 ${{ inputs.num_shards }}`]" >> $GITHUB_OUTPUT
+    outputs:
+      shard-list: ${{ steps.populate-shard-list.outputs.shard-list }}
   verification:
+    needs: populate-matrix-dimensions
     strategy:
       fail-fast: false
       matrix:
         dafny-version:
           - ${{ inputs.dafny }}
-        library: [
-            TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
-            TestModels/Aggregate,
-            TestModels/AggregateReferences,
-            TestModels/CodegenPatches,
-            TestModels/Constraints,
-            TestModels/Constructor,
-            TestModels/Dependencies,
-            TestModels/Errors,
-            TestModels/Extendable,
-            TestModels/Extern,
-            # TestModels/LanguageSpecificLogic, # requires >4.4.0
-            TestModels/LocalService,
-            TestModels/MultipleModels,
-            TestModels/Refinement,
-            TestModels/Resource,
-            # TestModels/SimpleTypes/BigDecimal,
-            # TestModels/SimpleTypes/BigInteger,
-            TestModels/SimpleTypes/SimpleBlob,
-            TestModels/SimpleTypes/SimpleBoolean,
-            # TestModels/SimpleTypes/SimpleByte,
-            TestModels/SimpleTypes/SimpleDouble,
-            TestModels/SimpleTypes/SimpleEnum,
-            TestModels/SimpleTypes/SimpleEnumV2,
-            # TestModels/SimpleTypes/SimpleFloat,
-            TestModels/SimpleTypes/SimpleInteger,
-            TestModels/SimpleTypes/SimpleLong,
-            # TestModels/SimpleTypes/SimpleShort,
-            TestModels/SimpleTypes/SimpleString,
-            # TestModels/SimpleTypes/SimpleTimestamp,
-            TestModels/Union,
-            TestModels/aws-sdks/ddb,
-            TestModels/aws-sdks/kms,
-            TestModels/aws-sdks/sqs-via-cli,
-          ]
+        shard: ${{ fromJson(needs.populate-matrix-dimensions.outputs.shard-list) }}
         os: [ubuntu-latest]
-        include:
-          # One-offs until TestModels migrate to 4.4.0
-          - library: TestModels/LanguageSpecificLogic
-            dafny-version: 4.4.0
-            os: ubuntu-latest
-          - library: TestModels/Extendable
-            dafny-version: 4.4.0
-            os: ubuntu-latest
-        exclude:
-          # This model tickles a tricky Dafny verification regression fixed in 4.4
-          # https://github.com/dafny-lang/dafny/pull/4800
-          - dafny-version: 4.2.0
-            library: TestModels/Extendable
-          - dafny-version: 4.3.0
-            library: TestModels/Extendable
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -93,19 +57,23 @@ jobs:
         with:
           dafny-version: ${{ matrix.dafny-version }}
 
-      - name: Generate Polymorph Wrapper Dafny code
-        working-directory: ./${{ matrix.library }}
-        run: |
-          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+      - name: Setup Java 17 for codegen
+        uses: actions/setup-java@v3
+        with:
+          distribution: "corretto"
+          java-version: "17"
 
-      - name: Verify ${{ matrix.library }} Dafny code
-        working-directory: ./${{ matrix.library }}
-        run: |
-          # This works because `node` is installed by default on GHA runners
-          CORES=$(node -e 'console.log(os.cpus().length)')
-          make verify CORES=$CORES
+      - name: Install smithy-dafny-codegen locally
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :smithy-dafny-codegen:pTML
+          build-root-directory: codegen
 
-      - name: Check solver resource use
-        working-directory: ./${{ matrix.library }}
-        run: |
-          make dafny-reportgenerator
+      - name: Execute smithy-dafny-codegen-test tests
+        uses: gradle/gradle-build-action@v2
+        env:
+          JUNIT_SHARD: ${{ matrix.shard }}
+          JUNIT_SHARD_COUNT: ${{ inputs.num_shards }}
+        with:
+          arguments: :smithy-dafny-codegen-test:test --tests '*smithydafny*' --info
+          build-root-directory: codegen

@@ -9,3 +9,7 @@
 /codegen/smithy-dafny-codegen/bin
 /codegen/smithy-dafny-codegen-cli/bin
 /smithy-dafny-conversion/bin
+
+.project
+.classpath
+.settings

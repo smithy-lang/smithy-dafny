@@ -39,7 +39,7 @@ VERIFY_TIMEOUT := 100
 
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
-LIBRARY_ROOT := $(PWD)
+LIBRARY_ROOT := $(shell pwd)
 # Smithy Dafny code gen needs to know
 # where the smithy model is.
 # This is generally in the same directory as the library.
@@ -240,6 +240,7 @@ transpile_test:
 	endif
 transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+<<<<<<< HEAD
 		translate $(TARGET) \
 		--stdin \
 		--no-verify \
@@ -260,6 +261,10 @@ transpile_test:
 transpile_dependencies:
 	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG), )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(PROJECT_DEPENDENCIES))
+
+transpile_dependencies_test:
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_test_$(LANG), )
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_test_$(LANG);, $(PROJECT_DEPENDENCIES))
 
 ########################## Code-Gen targets
 
@@ -305,11 +310,13 @@ _polymorph_wrapped:
 	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
+	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
 	$(OUTPUT_PYTHON_WRAPPED) \
 	$(MODULE_NAME) \
+	$(OUTPUT_RUST_WRAPPED) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -384,6 +391,8 @@ polymorph_dotnet:
 
 _polymorph_dotnet: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+_polymorph_dotnet: INPUT_DAFNY=\
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project
@@ -400,6 +409,8 @@ polymorph_java:
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
+_polymorph_java: INPUT_DAFNY=\
+	--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_java: _polymorph
 
 # Generates python code for all namespaces in this project
@@ -540,10 +551,11 @@ test_java:
 
 ########################## Rust targets
 
-# TODO: Dafny test transpilation needs manual patching to work too,
-# which isn't a high priority at this stage,
-# so don't include transpile_test_rust for now.
-transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
+# Note that transpile_dependencies_test_rust is necessary
+# only because we are patching test code in the StandardLibrary,
+# so we don't transpile that code then the recursive call to polymorph_rust
+# on the StandardLibrary will fail because the patch does not apply.
+transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust transpile_dependencies_test_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
@@ -565,19 +577,22 @@ transpile_test_rust: _transpile_test_all _mv_test_rust
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
+transpile_dependencies_test_rust: LANG=rust
+transpile_dependencies_test_rust: transpile_dependencies_test
+
 _mv_implementation_rust:
 	rm -rf runtimes/rust/dafny_impl/src
 	mkdir -p runtimes/rust/dafny_impl/src
 # TODO: Currently need to insert an import of the the StandardLibrary.
 	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
-	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
-	rustfmt runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs
+	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
-	rm -rf runtimes/rust/dafny_impl/tests
-	mkdir -p runtimes/rust/dafny_impl/tests
-	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
-	rustfmt runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
+	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
+	mkdir -p runtimes/rust/tests/tests_from_dafny
+	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny/mod.rs
+	rustfmt runtimes/rust/tests/tests_from_dafny/mod.rs
 	rm -rf tests_from_dafny-rust
 
 build_rust:
@@ -586,7 +601,7 @@ build_rust:
 
 test_rust:
 	cd runtimes/rust; \
-	cargo test
+	cargo test -- --nocapture
 
 ########################## Cleanup targets
 
