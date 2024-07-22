@@ -1,6 +1,6 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
-use ::dafny_standard_library::implementation_from_dafny::*;
+use dafny_standard_library::implementation_from_dafny::*;
 
 pub mod r#_TestUTF8_Compile {
     pub struct _default {}
