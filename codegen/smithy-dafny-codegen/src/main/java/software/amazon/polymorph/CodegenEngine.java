@@ -508,10 +508,10 @@ public class CodegenEngine {
 
       if (Files.exists(patchFilesForLanguage)) {
         List<Pair<DafnyVersion, Path>> sortedPatchFiles = Files
-            .list(patchFilesForLanguage)
-            .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
-            .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
-            .toList();
+          .list(patchFilesForLanguage)
+          .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
+          .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
+          .toList();
         for (Pair<DafnyVersion, Path> patchFilePair : sortedPatchFiles) {
           if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
             Path patchFile = patchFilePair.getValue();
