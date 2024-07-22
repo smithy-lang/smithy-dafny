@@ -27,14 +27,6 @@ import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.validation.ValidatedResult;
 import software.amazon.smithy.model.validation.ValidationEvent;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public class CodegenCli {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(
@@ -119,7 +111,7 @@ public class CodegenCli {
       .withLibraryRoot(cliArguments.libraryRoot)
       .withServiceModel(serviceModel)
       .withDependentModelPaths(cliArguments.dependentModelPaths)
-      .withDependencyModuleNames(cliArguments.dependencyModuleNames)
+      .withDependencyLibraryNames(cliArguments.dependencyLibraryNames)
       .withNamespace(cliArguments.namespace)
       .withTargetLangOutputDirs(outputDirs)
       .withTargetLangTestOutputDirs(testOutputDirs)
@@ -134,7 +126,7 @@ public class CodegenCli {
     cliArguments.includeDafnyFile.ifPresent(
       engineBuilder::withIncludeDafnyFile
     );
-    cliArguments.moduleName.ifPresent(engineBuilder::withModuleName);
+    cliArguments.libraryName.ifPresent(engineBuilder::withLibraryName);
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
     final CodegenEngine engine = engineBuilder.build();
     engine.run();
@@ -323,9 +315,9 @@ public class CodegenCli {
     Path libraryRoot,
     Path modelPath,
     Path[] dependentModelPaths,
-    Map<String, String> dependencyModuleNames,
+    Map<String, String> dependencyLibraryNames,
     String namespace,
-    Optional<String> moduleName,
+    Optional<String> libraryName,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
     Optional<Path> testOutputJavaDir,
@@ -367,7 +359,7 @@ public class CodegenCli {
       // ex. `dependency-module-name=aws.cryptography.materialproviders=aws_cryptographic_materialproviders`
       // maps the Smithy namespace `aws.cryptography.materialproviders` to a module name `aws_cryptographic_materialproviders`
       // via a map key of "aws.cryptography.materialproviders" and a value of "aws_cryptographic_materialproviders"
-      final Map<String, String> dependencyNamespacesToModuleNamesMap =
+      final Map<String, String> dependencyNamespacesToLibraryNamesMap =
               commandLine.hasOption("dependency-module-name")
                       ? Arrays.stream(commandLine.getOptionValues("dmn"))
                       .map(s -> s.split("="))
@@ -376,7 +368,7 @@ public class CodegenCli {
 
       final String namespace = commandLine.getOptionValue('n');
 
-      final Optional<String> moduleName = Optional.ofNullable(commandLine.getOptionValue("module-name"));
+      final Optional<String> libraryName = Optional.ofNullable(commandLine.getOptionValue("module-name"));
 
       Optional<Path> outputDafnyDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dafny"))
@@ -458,9 +450,9 @@ public class CodegenCli {
           libraryRoot,
           modelPath,
           dependentModelPaths,
-          dependencyNamespacesToModuleNamesMap,
+          dependencyNamespacesToLibraryNamesMap,
           namespace,
-          moduleName,
+          libraryName,
           outputDotnetDir,
           outputJavaDir,
           testOutputJavaDir,
