@@ -867,13 +867,13 @@ index 00000000..71509248
 +    }
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
-index ce6d90a2..3304d282 100644
+index 790913c3..3304d282 100644
 --- b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
-@@ -1,5 +1,8 @@
+@@ -1,6 +1,8 @@
  #![allow(warnings, unconditional_panic)]
  #![allow(nonstandard_style)]
-+use simple_boolean::implementation_from_dafny::*;
+ use simple_boolean::implementation_from_dafny::*;
 +use simple_boolean::*;
 +mod _wrapped;
  
