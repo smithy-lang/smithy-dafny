@@ -1198,44 +1198,4 @@ public class CodegenEngine {
         .collect(Collectors.joining("\n"));
     }
   }
-
-  public enum GenerationAspect {
-    PROJECT_FILES {
-      @Override
-      public String description() {
-        return "Project configuration files";
-      }
-    },
-
-    CLIENT_CONSTRUCTORS {
-      @Override
-      public String description() {
-        return "Top-level client constructor code";
-      }
-    },
-
-    IMPL_STUB {
-      @Override
-      public String description() {
-        return "Local service implementation/testing stubs";
-      }
-    };
-
-    public static GenerationAspect fromOption(String option) {
-      return GenerationAspect.valueOf(option.replace("-", "_").toUpperCase());
-    }
-
-    public String toOption() {
-      return toString().replace("_", "-").toLowerCase();
-    }
-
-    public abstract String description();
-
-    public static String helpText() {
-      return Arrays
-        .stream(values())
-        .map(aspect -> aspect.toOption() + " - " + aspect.description())
-        .collect(Collectors.joining("\n"));
-    }
-  }
 }
