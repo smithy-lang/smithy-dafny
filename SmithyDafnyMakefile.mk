@@ -240,7 +240,6 @@ transpile_test:
 	endif
 transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-<<<<<<< HEAD
 		translate $(TARGET) \
 		--stdin \
 		--no-verify \
@@ -622,7 +621,6 @@ transpile_python: | transpile_dependencies_python transpile_implementation_pytho
 
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
-transpile_implementation_python: COMPILE_SUFFIX_OPTION=
 transpile_implementation_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_implementation_python: TRANSPILE_MODULE_NAME=--python-module-name=$(PYTHON_MODULE_NAME).internaldafny.generated
 transpile_implementation_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
@@ -630,7 +628,6 @@ transpile_implementation_python: _transpile_implementation_all _mv_implementatio
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/dafny_test
-transpile_test_python: COMPILE_SUFFIX_OPTION=
 transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
 transpile_test_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)

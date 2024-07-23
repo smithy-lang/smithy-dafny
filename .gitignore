@@ -3,7 +3,6 @@
 /.history
 /.smithy.lsp.log
 *.pyc
-*/**/.idea
 
 */**/.idea
 /codegen/smithy-dafny-codegen/bin
@@ -13,3 +12,4 @@
 .project
 .classpath
 .settings
+.class
