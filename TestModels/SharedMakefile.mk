@@ -71,7 +71,7 @@ _polymorph_dotnet: OUTPUT_DOTNET_WRAPPED=\
 _polymorph_dotnet: _polymorph_wrapped
 
 _polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-_polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
+_polymorph_python: MODULE_NAME=--library-name $(PYTHON_MODULE_NAME)
 _polymorph_python: _polymorph
 _polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 _polymorph_python: _polymorph_wrapped

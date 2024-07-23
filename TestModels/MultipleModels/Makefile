@@ -33,7 +33,7 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 PYTHON_MODULE_NAME=multiple_models
 
 PYTHON_DEPENDENCY_MODULE_NAMES := \
-	--dependency-module-name=simple.multiplemodels.dependencyproject=multiple_models
+	--dependency-library-name=simple.multiplemodels.dependencyproject=multiple_models
 
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr

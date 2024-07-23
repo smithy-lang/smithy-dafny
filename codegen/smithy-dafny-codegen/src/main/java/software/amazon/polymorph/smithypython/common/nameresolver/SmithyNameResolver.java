@@ -284,7 +284,7 @@ public class SmithyNameResolver {
       // In the case of a wrappedLocalService shim in a different namespace,
       // the default modulename should not be used,
       // and we need a mechanism to override the default modulename.
-      // If the smithy.api namespace has a dependency-module-name mapping, use that.
+      // If the smithy.api namespace has a dependency-library-name mapping, use that.
       try {
         pythonModuleName = getPythonModuleNameForSmithyNamespace(smithyNamespace);
       } catch (IllegalArgumentException e) {

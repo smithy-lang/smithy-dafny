@@ -45,10 +45,10 @@ clean: _clean
 PYTHON_MODULE_NAME=simple_dependencies
 
 PYTHON_DEPENDENCY_MODULE_NAMES := \
-	--dependency-module-name=simple.resources=simple_resources \
-	--dependency-module-name=simple.errors=simple_errors \
-	--dependency-module-name=simple.extendable.resources=simple_extendable_resources \
-	--dependency-module-name=simple.constraints=simple_constraints
+	--dependency-library-name=simple.resources=simple_resources \
+	--dependency-library-name=simple.errors=simple_errors \
+	--dependency-library-name=simple.extendable.resources=simple_extendable_resources \
+	--dependency-library-name=simple.constraints=simple_constraints
 
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr \
