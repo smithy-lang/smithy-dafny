@@ -336,11 +336,11 @@ module WrappedSimpleConstraintsTest {
 
     input := input.(NonEmptyList := Some(ForceNonEmptyList(["1","2","3","4","5","6","7","8","9","0","MoreThentenChar"])));
     ret := client.GetConstraints(input := input);
-    expect ret.Success?;
+    expect ret.Failure?;
 
     input := input.(NonEmptyList := Some(ForceNonEmptyList(["1","2","3","4","5","6","7","8","9","0","a","MoreThentenChar"])));
     ret := client.GetConstraints(input := input);
-    expect ret.Success?;
+    expect ret.Failure?;
   }
 
   // @length(max: 10)
