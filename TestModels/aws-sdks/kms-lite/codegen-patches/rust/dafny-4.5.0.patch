@@ -1,9 +1,12 @@
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/client.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..b0091d98
+index 00000000..9253f806
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/client.rs
-@@ -0,0 +1,88 @@
+@@ -0,0 +1,129 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +use crate::conversions;
 +
 +struct Client {
@@ -22,52 +25,90 @@ index 00000000..b0091d98
 +
 +impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient
 +  for Client {
-+    fn Decrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-+      let native_result = 
-+        self.rt.block_on(conversions::decrypt::_decrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
-+      dafny_standard_library::conversion::result_to_dafny(&native_result,
-+        conversions::decrypt::_decrypt_response::to_dafny,
-+        conversions::decrypt::to_dafny_error)
-+    }
-+  
-+    fn Encrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-+      let native_result = 
-+        self.rt.block_on(conversions::encrypt::_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
-+      dafny_standard_library::conversion::result_to_dafny(&native_result,
-+        conversions::encrypt::_encrypt_response::to_dafny,
-+        conversions::encrypt::to_dafny_error)
-+    }
-+  
-+    fn GenerateDataKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-+      let native_result = 
-+        self.rt.block_on(conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone(), self.inner.clone()).send());
-+      dafny_standard_library::conversion::result_to_dafny(&native_result, 
-+        conversions::generate_data_key::_generate_data_key_response::to_dafny,
-+        conversions::generate_data_key::to_dafny_error)
-+    }
-+  
-+    fn GenerateDataKeyWithoutPlaintext(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-+      let native_result = 
-+        self.rt.block_on(conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_request::from_dafny(input.clone(), self.inner.clone()).send());
-+      dafny_standard_library::conversion::result_to_dafny(&native_result, 
-+        conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_response::to_dafny,
-+        conversions::generate_data_key_without_plaintext::to_dafny_error)
-+    }
-+
-+    // Leaving untested operations out for now
-+  
-+    fn DeriveSharedSecret(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-+      todo!()
-+    }
-+
-+    fn GetPublicKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-+      todo!()
-+    }
-+  
-+    fn ReEncrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-+      todo!()
-+    }
-+  }
++ fn Decrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest>)
++  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse>,
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
++  >
++> {
++  let native_result =
++    self.rt.block_on(conversions::decrypt::_decrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
++  dafny_standard_library::conversion::result_to_dafny(&native_result,
++    conversions::decrypt::_decrypt_response::to_dafny,
++    conversions::decrypt::to_dafny_error)
++}
++ fn DeriveSharedSecret(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest>)
++  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretResponse>,
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
++  >
++> {
++  let native_result =
++    self.rt.block_on(conversions::derive_shared_secret::_derive_shared_secret_request::from_dafny(input.clone(), self.inner.clone()).send());
++  dafny_standard_library::conversion::result_to_dafny(&native_result,
++    conversions::derive_shared_secret::_derive_shared_secret_response::to_dafny,
++    conversions::derive_shared_secret::to_dafny_error)
++}
++ fn Encrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest>)
++  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptResponse>,
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
++  >
++> {
++  let native_result =
++    self.rt.block_on(conversions::encrypt::_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
++  dafny_standard_library::conversion::result_to_dafny(&native_result,
++    conversions::encrypt::_encrypt_response::to_dafny,
++    conversions::encrypt::to_dafny_error)
++}
++ fn GenerateDataKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest>)
++  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse>,
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
++  >
++> {
++  let native_result =
++    self.rt.block_on(conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone(), self.inner.clone()).send());
++  dafny_standard_library::conversion::result_to_dafny(&native_result,
++    conversions::generate_data_key::_generate_data_key_response::to_dafny,
++    conversions::generate_data_key::to_dafny_error)
++}
++ fn GenerateDataKeyWithoutPlaintext(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest>)
++  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextResponse>,
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
++  >
++> {
++  let native_result =
++    self.rt.block_on(conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_request::from_dafny(input.clone(), self.inner.clone()).send());
++  dafny_standard_library::conversion::result_to_dafny(&native_result,
++    conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_response::to_dafny,
++    conversions::generate_data_key_without_plaintext::to_dafny_error)
++}
++ fn GetPublicKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyRequest>)
++  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyResponse>,
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
++  >
++> {
++  let native_result =
++    self.rt.block_on(conversions::get_public_key::_get_public_key_request::from_dafny(input.clone(), self.inner.clone()).send());
++  dafny_standard_library::conversion::result_to_dafny(&native_result,
++    conversions::get_public_key::_get_public_key_response::to_dafny,
++    conversions::get_public_key::to_dafny_error)
++}
++ fn ReEncrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest>)
++  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptResponse>,
++    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
++  >
++> {
++  let native_result =
++    self.rt.block_on(conversions::re_encrypt::_re_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
++  dafny_standard_library::conversion::result_to_dafny(&native_result,
++    conversions::re_encrypt::_re_encrypt_response::to_dafny,
++    conversions::re_encrypt::to_dafny_error)
++} }
 +
 +#[allow(non_snake_case)]
 +impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny::_default {
@@ -94,446 +135,681 @@ index 00000000..b0091d98
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions.rs
 new file mode 100644
-index 00000000..8f8fb189
+index 00000000..cdf993a2
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions.rs
-@@ -0,0 +1,19 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+@@ -0,0 +1,38 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++pub mod customer_master_key_spec;
 +
-+pub mod generate_data_key;
++ pub mod data_key_spec;
 +
-+pub mod generate_data_key_without_plaintext;
++ pub mod decrypt;
 +
-+pub mod encrypt;
++ pub mod derive_shared_secret;
 +
-+pub mod decrypt;
++ pub mod encrypt;
 +
-+pub mod data_key_spec;
++ pub mod encryption_algorithm_spec;
 +
-+pub mod recipient_info;
++ pub mod error;
 +
-+pub mod key_encryption_mechanism;
++ pub mod generate_data_key;
 +
-+pub mod encryption_algorithm_spec;
++ pub mod generate_data_key_without_plaintext;
 +
-+pub mod error;
++ pub mod get_public_key;
++
++ pub mod key_agreement_algorithm_spec;
++
++ pub mod key_encryption_mechanism;
++
++ pub mod key_spec;
++
++ pub mod key_usage_type;
++
++ pub mod origin_type;
++
++ pub mod re_encrypt;
++
++ pub mod recipient_info;
++
++ pub mod signing_algorithm_spec;
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/customer_master_key_spec.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/customer_master_key_spec.rs
+new file mode 100644
+index 00000000..c5924e94
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/customer_master_key_spec.rs
+@@ -0,0 +1,50 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++
++pub fn to_dafny(
++    value: aws_sdk_kms::types::CustomerMasterKeySpec,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec>{
++    ::std::rc::Rc::new(match value {
++ aws_sdk_kms::types::CustomerMasterKeySpec::Rsa2048 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::RSA_2048 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::Rsa3072 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::RSA_3072 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::Rsa4096 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::RSA_4096 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::EccNistP256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::ECC_NIST_P256 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::EccNistP384 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::ECC_NIST_P384 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::EccNistP521 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::ECC_NIST_P521 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::EccSecgP256K1 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::ECC_SECG_P256K1 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::SymmetricDefault => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::SYMMETRIC_DEFAULT {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::Hmac224 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::HMAC_224 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::Hmac256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::HMAC_256 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::Hmac384 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::HMAC_384 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::Hmac512 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::HMAC_512 {},
++ aws_sdk_kms::types::CustomerMasterKeySpec::Sm2 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::SM2 {},
++        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
++        // so there's no way to succeed.
++        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
++        // This could be handled more cleanly if conversion functions returned Results,
++        // but that would be a large and disruptive change to the overall code flow.
++        _ => panic!("Unknown enum variant: {}", value),
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec,
++) -> aws_sdk_kms::types::CustomerMasterKeySpec {
++    match dafny_value {
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::RSA_2048 {} => aws_sdk_kms::types::CustomerMasterKeySpec::Rsa2048,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::RSA_3072 {} => aws_sdk_kms::types::CustomerMasterKeySpec::Rsa3072,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::RSA_4096 {} => aws_sdk_kms::types::CustomerMasterKeySpec::Rsa4096,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::ECC_NIST_P256 {} => aws_sdk_kms::types::CustomerMasterKeySpec::EccNistP256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::ECC_NIST_P384 {} => aws_sdk_kms::types::CustomerMasterKeySpec::EccNistP384,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::ECC_NIST_P521 {} => aws_sdk_kms::types::CustomerMasterKeySpec::EccNistP521,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::ECC_SECG_P256K1 {} => aws_sdk_kms::types::CustomerMasterKeySpec::EccSecgP256K1,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::SYMMETRIC_DEFAULT {} => aws_sdk_kms::types::CustomerMasterKeySpec::SymmetricDefault,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::HMAC_224 {} => aws_sdk_kms::types::CustomerMasterKeySpec::Hmac224,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::HMAC_256 {} => aws_sdk_kms::types::CustomerMasterKeySpec::Hmac256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::HMAC_384 {} => aws_sdk_kms::types::CustomerMasterKeySpec::Hmac384,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::HMAC_512 {} => aws_sdk_kms::types::CustomerMasterKeySpec::Hmac512,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::CustomerMasterKeySpec::SM2 {} => aws_sdk_kms::types::CustomerMasterKeySpec::Sm2,
++    }
++}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/data_key_spec.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/data_key_spec.rs
 new file mode 100644
-index 00000000..24905032
+index 00000000..c2cb30c2
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/data_key_spec.rs
-@@ -0,0 +1,22 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+@@ -0,0 +1,28 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +
 +pub fn to_dafny(
 +    value: aws_sdk_kms::types::DataKeySpec,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec>{
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec>{
 +    ::std::rc::Rc::new(match value {
-+      aws_sdk_kms::types::DataKeySpec::Aes128 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_128 {},
-+      aws_sdk_kms::types::DataKeySpec::Aes256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_256 {},
-+      _ => panic!()
++ aws_sdk_kms::types::DataKeySpec::Aes256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_256 {},
++ aws_sdk_kms::types::DataKeySpec::Aes128 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_128 {},
++        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
++        // so there's no way to succeed.
++        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
++        // This could be handled more cleanly if conversion functions returned Results,
++        // but that would be a large and disruptive change to the overall code flow.
++        _ => panic!("Unknown enum variant: {}", value),
 +    })
 +}
-+
-+#[allow(dead_code)]
++ #[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec,
 +) -> aws_sdk_kms::types::DataKeySpec {
 +    match dafny_value {
-+      crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_128 {} => aws_sdk_kms::types::DataKeySpec::Aes128,
-+      crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_256 {} => aws_sdk_kms::types::DataKeySpec::Aes256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_256 {} => aws_sdk_kms::types::DataKeySpec::Aes256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_128 {} => aws_sdk_kms::types::DataKeySpec::Aes128,
 +    }
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt.rs
 new file mode 100644
-index 00000000..68c7b13f
+index 00000000..424cc7a4
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt.rs
-@@ -0,0 +1,45 @@
+@@ -0,0 +1,44 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +pub mod _decrypt_request;
 +
-+pub mod _decrypt_response;
-+
-+use aws_sdk_kms::error::SdkError;
-+use crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::*;
-+
-+#[allow(dead_code)]
++ pub mod _decrypt_response;
++ #[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: &::aws_smithy_runtime_api::client::result::SdkError<
 +        aws_sdk_kms::operation::decrypt::DecryptError,
 +        ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
 +    >,
-+) -> ::std::rc::Rc<Error> {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error> {
 +    match value {
-+        SdkError::ServiceError(service_error) => match service_error.err() {
-+            aws_sdk_kms::operation::decrypt::DecryptError::DependencyTimeoutException(e) =>
-+                crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::DisabledException(e) =>
-+                crate::conversions::error::disabled_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::DryRunOperationException(e) =>
-+                crate::conversions::error::dry_run_operation_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::IncorrectKeyException(e) =>
-+                crate::conversions::error::incorrect_key_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::InvalidCiphertextException(e) =>
-+                crate::conversions::error::invalid_ciphertext_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::InvalidGrantTokenException(e) =>
-+                crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::InvalidKeyUsageException(e) =>
-+                crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::KeyUnavailableException(e) =>
-+                crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::KmsInternalException(e) =>
-+                crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::KmsInvalidStateException(e) =>
-+                crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
-+            aws_sdk_kms::operation::decrypt::DecryptError::NotFoundException(e) =>
-+                crate::conversions::error::not_found_exception::to_dafny(e.clone()),
-+            e => crate::conversions::error::to_opaque_error(e.to_string()),
-+        },
-+        _ => {
-+            crate::conversions::error::to_opaque_error(value.to_string())
-+        }
-+    }
++      aws_sdk_kms::error::SdkError::ServiceError(service_error) => match service_error.err() {
++                aws_sdk_kms::operation::decrypt::DecryptError::DryRunOperationException(e) =>
++            crate::conversions::error::dry_run_operation_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::NotFoundException(e) =>
++            crate::conversions::error::not_found_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::DisabledException(e) =>
++            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::KmsInternalException(e) =>
++            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::KmsInvalidStateException(e) =>
++            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::InvalidKeyUsageException(e) =>
++            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::KeyUnavailableException(e) =>
++            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::InvalidCiphertextException(e) =>
++            crate::conversions::error::invalid_ciphertext_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::DependencyTimeoutException(e) =>
++            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::InvalidGrantTokenException(e) =>
++            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::decrypt::DecryptError::IncorrectKeyException(e) =>
++            crate::conversions::error::incorrect_key_exception::to_dafny(e.clone()),
++        e => crate::conversions::error::to_opaque_error(e.to_string()),
++      },
++      _ => {
++        crate::conversions::error::to_opaque_error(value.to_string())
++      }
++   }
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_request.rs
 new file mode 100644
-index 00000000..7bf5704d
+index 00000000..60019386
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_request.rs
-@@ -0,0 +1,88 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+@@ -0,0 +1,91 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +pub fn to_dafny(
-+    value: aws_sdk_kms::operation::decrypt::DecryptInput
++    value: &aws_sdk_kms::operation::decrypt::DecryptInput
 +) -> ::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest,
 +>{
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest::DecryptRequest  {
-+        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob).Extract(), 
-+        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
-+        EncryptionContext: 
-+        ::std::rc::Rc::new(match value.encryption_context() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
-+                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-+                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-+                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
-+                )
-+            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
-+        }),
-+        GrantTokens:
-+        ::std::rc::Rc::new(
-+            // Have to clone or else this becomes a borrow that can interfere with other branches
-+            match value.grant_tokens.clone() {
-+                Some(val) =>
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
-+                        value : ::dafny_runtime::Sequence::from_array(
-+                            &val.iter().map(|x|
-+                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(x))
-+                                .collect()
-+                        )
-+                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
-+            }
-+        ),
-+        Recipient: crate::conversions::recipient_info::option_to_dafny(value.recipient()),
-+        DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
-+        EncryptionAlgorithm: ::std::rc::Rc::new(match value.encryption_algorithm {
-+            Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x) },
-+            None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
-+        })
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest::DecryptRequest {
++        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob).Extract(),
++ EncryptionContext:
++::std::rc::Rc::new(match &value.encryption_context {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
++            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
++            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
++ EncryptionAlgorithm: ::std::rc::Rc::new(match &value.encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ Recipient: ::std::rc::Rc::new(match &value.recipient {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(&x) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
 +    })
 +}
-+
-+#[allow(dead_code)]
++ #[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest,
++        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest,
 +    >,
 +    client: aws_sdk_kms::Client,
 +) -> aws_sdk_kms::operation::decrypt::builders::DecryptFluentBuilder {
 +    client.decrypt()
-+        .set_ciphertext_blob(Some(
-+            dafny_standard_library::conversion::blob_from_dafny(dafny_value.CiphertextBlob().clone())))
-+        .set_key_id(
-+            dafny_standard_library::conversion::ostring_from_dafny(dafny_value.KeyId().clone()),
-+        )
-+        .set_encryption_context( match (*dafny_value.EncryptionContext()).as_ref() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
-+                    )
-+                ),
-+            _ => None
-+        })
-+        .set_grant_tokens(match  &**dafny_value.GrantTokens() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, 
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string)
-+                ),
-+            _ => None
-+        })
-+        .set_recipient(match  &**dafny_value.Recipient() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    crate::conversions::recipient_info::from_dafny(value.clone())
-+                ),
-+            _ => None
-+        })
-+        .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
-+        .set_encryption_algorithm(
-+            dafny_standard_library::conversion::option_from_dafny(
-+                dafny_value.EncryptionAlgorithm().clone(), 
-+                |x| crate::conversions::encryption_algorithm_spec::from_dafny(x)))
++          .set_ciphertext_blob(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.CiphertextBlob().clone())))
++ .set_encryption_context(match (*dafny_value.EncryptionContext()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
++                |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
++                |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(v),
++            )
++        ),
++    _ => None
++}
++)
++ .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
++                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
++            )
++        ),
++    _ => None
++}
++)
++ .set_key_id(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.KeyId().clone()))
++ .set_encryption_algorithm(match &**dafny_value.EncryptionAlgorithm() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
++        crate::conversions::encryption_algorithm_spec::from_dafny(value)
++    ),
++    _ => None,
++}
++)
++ .set_recipient(match (*dafny_value.Recipient()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(crate::conversions::recipient_info::from_dafny(value.clone())),
++    _ => None,
++}
++)
++ .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_response.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_response.rs
 new file mode 100644
-index 00000000..bc89ab27
+index 00000000..5414173b
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_response.rs
-@@ -0,0 +1,17 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+@@ -0,0 +1,20 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: &aws_sdk_kms::operation::decrypt::DecryptOutput
 +) -> ::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse,
-+> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse::DecryptResponse { 
-+      Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext),
-+      KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
-+      CiphertextForRecipient: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_for_recipient),
-+      EncryptionAlgorithm: dafny_standard_library::conversion::option_to_dafny(&value.encryption_algorithm,
-+        |x| crate::conversions::encryption_algorithm_spec::to_dafny(x.clone())),
++>{
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse::DecryptResponse {
++        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
++ Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext),
++ EncryptionAlgorithm: ::std::rc::Rc::new(match &value.encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ CiphertextForRecipient: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_for_recipient),
 +    })
 +}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret.rs
+new file mode 100644
+index 00000000..cca3e721
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret.rs
+@@ -0,0 +1,40 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++pub mod _derive_shared_secret_request;
 +
-+// from_dafny ommitted to save time until we get to actual code generation
++ pub mod _derive_shared_secret_response;
++ #[allow(dead_code)]
++pub fn to_dafny_error(
++    value: &::aws_smithy_runtime_api::client::result::SdkError<
++        aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError,
++        ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
++    >,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error> {
++    match value {
++      aws_sdk_kms::error::SdkError::ServiceError(service_error) => match service_error.err() {
++                aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::DryRunOperationException(e) =>
++            crate::conversions::error::dry_run_operation_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::NotFoundException(e) =>
++            crate::conversions::error::not_found_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::DisabledException(e) =>
++            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::KmsInternalException(e) =>
++            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::KmsInvalidStateException(e) =>
++            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::InvalidKeyUsageException(e) =>
++            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::KeyUnavailableException(e) =>
++            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::DependencyTimeoutException(e) =>
++            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretError::InvalidGrantTokenException(e) =>
++            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
++        e => crate::conversions::error::to_opaque_error(e.to_string()),
++      },
++      _ => {
++        crate::conversions::error::to_opaque_error(value.to_string())
++      }
++   }
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_request.rs
+new file mode 100644
+index 00000000..221579fb
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_request.rs
+@@ -0,0 +1,59 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: &aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretInput
++) -> ::std::rc::Rc<
++    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest,
++>{
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest::DeriveSharedSecretRequest {
++        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id) .Extract(),
++ KeyAgreementAlgorithm: crate::conversions::key_agreement_algorithm_spec::to_dafny(value.key_agreement_algorithm.clone().unwrap()),
++ PublicKey: dafny_standard_library::conversion::oblob_to_dafny(&value.public_key).Extract(),
++ GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
++ Recipient: ::std::rc::Rc::new(match &value.recipient {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(&x) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<
++        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest,
++    >,
++    client: aws_sdk_kms::Client,
++) -> aws_sdk_kms::operation::derive_shared_secret::builders::DeriveSharedSecretFluentBuilder {
++    client.derive_shared_secret()
++          .set_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId()) ))
++ .set_key_agreement_algorithm(Some( crate::conversions::key_agreement_algorithm_spec::from_dafny(dafny_value.KeyAgreementAlgorithm()) ))
++ .set_public_key(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.PublicKey().clone())))
++ .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
++                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
++            )
++        ),
++    _ => None
++}
++)
++ .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
++ .set_recipient(match (*dafny_value.Recipient()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(crate::conversions::recipient_info::from_dafny(value.clone())),
++    _ => None,
++}
++)
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_response.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_response.rs
+new file mode 100644
+index 00000000..c92d6db0
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_response.rs
+@@ -0,0 +1,25 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: &aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretOutput
++) -> ::std::rc::Rc<
++    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretResponse,
++>{
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretResponse::DeriveSharedSecretResponse {
++        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
++ SharedSecret: dafny_standard_library::conversion::oblob_to_dafny(&value.shared_secret),
++ CiphertextForRecipient: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_for_recipient),
++ KeyAgreementAlgorithm: ::std::rc::Rc::new(match &value.key_agreement_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::key_agreement_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ KeyOrigin: ::std::rc::Rc::new(match &value.key_origin {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::origin_type::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++    })
++}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt.rs
 new file mode 100644
-index 00000000..3620a36f
+index 00000000..758b03da
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt.rs
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,40 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +pub mod _encrypt_request;
 +
-+pub mod _encrypt_response;
-+
-+use aws_sdk_kms::error::SdkError;
-+use crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::*;
-+
-+#[allow(dead_code)]
++ pub mod _encrypt_response;
++ #[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: &::aws_smithy_runtime_api::client::result::SdkError<
 +        aws_sdk_kms::operation::encrypt::EncryptError,
 +        ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
 +    >,
-+) -> ::std::rc::Rc<Error> {
-+  match value {
-+    SdkError::ServiceError(service_error) => match service_error.err() {
-+        aws_sdk_kms::operation::encrypt::EncryptError::DependencyTimeoutException(e) =>
-+            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::encrypt::EncryptError::DisabledException(e) =>
-+            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::encrypt::EncryptError::DryRunOperationException(e) =>
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error> {
++    match value {
++      aws_sdk_kms::error::SdkError::ServiceError(service_error) => match service_error.err() {
++                aws_sdk_kms::operation::encrypt::EncryptError::DryRunOperationException(e) =>
 +            crate::conversions::error::dry_run_operation_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::encrypt::EncryptError::InvalidGrantTokenException(e) =>
-+            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::encrypt::EncryptError::InvalidKeyUsageException(e) =>
-+            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::encrypt::EncryptError::KeyUnavailableException(e) =>
-+            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::encrypt::EncryptError::KmsInternalException(e) =>
-+            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::encrypt::EncryptError::KmsInvalidStateException(e) =>
-+            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::encrypt::EncryptError::NotFoundException(e) =>
++         aws_sdk_kms::operation::encrypt::EncryptError::NotFoundException(e) =>
 +            crate::conversions::error::not_found_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::encrypt::EncryptError::DisabledException(e) =>
++            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::encrypt::EncryptError::KmsInternalException(e) =>
++            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::encrypt::EncryptError::KmsInvalidStateException(e) =>
++            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::encrypt::EncryptError::InvalidKeyUsageException(e) =>
++            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::encrypt::EncryptError::KeyUnavailableException(e) =>
++            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::encrypt::EncryptError::DependencyTimeoutException(e) =>
++            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::encrypt::EncryptError::InvalidGrantTokenException(e) =>
++            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
 +        e => crate::conversions::error::to_opaque_error(e.to_string()),
-+    },
-+    _ => {
++      },
++      _ => {
 +        crate::conversions::error::to_opaque_error(value.to_string())
-+    }
-+  }
++      }
++   }
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_request.rs
 new file mode 100644
-index 00000000..936569ca
+index 00000000..3b96bcb1
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_request.rs
-@@ -0,0 +1,79 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.EncryptInput
+@@ -0,0 +1,80 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +pub fn to_dafny(
-+    value: aws_sdk_kms::operation::encrypt::EncryptInput
++    value: &aws_sdk_kms::operation::encrypt::EncryptInput
 +) -> ::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest,
 +>{
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest::EncryptRequest  {
-+        Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext).Extract(),
-+        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id).Extract(),
-+        EncryptionContext: 
-+        ::std::rc::Rc::new(match value.encryption_context() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
-+                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-+                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-+                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
-+                )
-+            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
-+        }),
-+        GrantTokens:
-+        ::std::rc::Rc::new(
-+            // Have to clone or else this becomes a borrow that can interfere with other branches
-+            match value.grant_tokens.clone() {
-+                Some(val) =>
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
-+                        value : ::dafny_runtime::Sequence::from_array(
-+                            &val.iter().map(|x|
-+                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(x))
-+                                .collect()
-+                        )
-+                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
-+            }
-+        ),
-+        DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
-+        EncryptionAlgorithm: ::std::rc::Rc::new(match value.encryption_algorithm {
-+            Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x) },
-+            None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
-+        })
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest::EncryptRequest {
++        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id) .Extract(),
++ Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext).Extract(),
++ EncryptionContext:
++::std::rc::Rc::new(match &value.encryption_context {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
++            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
++            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ EncryptionAlgorithm: ::std::rc::Rc::new(match &value.encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
 +    })
 +}
-+
-+#[allow(dead_code)]
++ #[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest,
++        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest,
 +    >,
 +    client: aws_sdk_kms::Client,
 +) -> aws_sdk_kms::operation::encrypt::builders::EncryptFluentBuilder {
 +    client.encrypt()
-+        .set_plaintext(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.Plaintext().clone())))
-+        .set_key_id(Some(
-+            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId())),
-+        )
-+        .set_encryption_context( match (*dafny_value.EncryptionContext()).as_ref() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
-+                    )
-+                ),
-+            _ => None
-+        })
-+        .set_grant_tokens(match  &**dafny_value.GrantTokens() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, 
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string)
-+                ),
-+            _ => None
-+        })
-+        .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
-+        .set_encryption_algorithm(
-+            dafny_standard_library::conversion::option_from_dafny(
-+                dafny_value.EncryptionAlgorithm().clone(), 
-+                |x| crate::conversions::encryption_algorithm_spec::from_dafny(x)))
++          .set_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId()) ))
++ .set_plaintext(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.Plaintext().clone())))
++ .set_encryption_context(match (*dafny_value.EncryptionContext()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
++                |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
++                |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(v),
++            )
++        ),
++    _ => None
++}
++)
++ .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
++                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
++            )
++        ),
++    _ => None
++}
++)
++ .set_encryption_algorithm(match &**dafny_value.EncryptionAlgorithm() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
++        crate::conversions::encryption_algorithm_spec::from_dafny(value)
++    ),
++    _ => None,
++}
++)
++ .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_response.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_response.rs
 new file mode 100644
-index 00000000..9a5c55dc
+index 00000000..a9291b08
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_response.rs
-@@ -0,0 +1,16 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+@@ -0,0 +1,19 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: &aws_sdk_kms::operation::encrypt::EncryptOutput
 +) -> ::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptResponse,
 +>{
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptResponse::EncryptResponse { 
-+      CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob),
-+      KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
-+      EncryptionAlgorithm: dafny_standard_library::conversion::option_to_dafny(&value.encryption_algorithm,
-+        |x| crate::conversions::encryption_algorithm_spec::to_dafny(x.clone())),
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptResponse::EncryptResponse {
++        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob),
++ KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
++ EncryptionAlgorithm: ::std::rc::Rc::new(match &value.encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
 +    })
 +}
-+
-+// from_dafny ommitted to save time until we get to actual code generation
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encryption_algorithm_spec.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encryption_algorithm_spec.rs
 new file mode 100644
-index 00000000..304f1ac0
+index 00000000..0baf3d66
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encryption_algorithm_spec.rs
-@@ -0,0 +1,32 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+@@ -0,0 +1,30 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +
 +pub fn to_dafny(
 +    value: aws_sdk_kms::types::EncryptionAlgorithmSpec,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec>{
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec>{
 +    ::std::rc::Rc::new(match value {
-+        aws_sdk_kms::types::EncryptionAlgorithmSpec::RsaesOaepSha1 => 
-+          crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::RSAES_OAEP_SHA_1 {  },
-+        aws_sdk_kms::types::EncryptionAlgorithmSpec::RsaesOaepSha256 => 
-+          crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::RSAES_OAEP_SHA_256 {  },
-+        aws_sdk_kms::types::EncryptionAlgorithmSpec::SymmetricDefault => 
-+          crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::SYMMETRIC_DEFAULT {  },
++ aws_sdk_kms::types::EncryptionAlgorithmSpec::SymmetricDefault => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::SYMMETRIC_DEFAULT {},
++ aws_sdk_kms::types::EncryptionAlgorithmSpec::RsaesOaepSha1 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::RSAES_OAEP_SHA_1 {},
++ aws_sdk_kms::types::EncryptionAlgorithmSpec::RsaesOaepSha256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::RSAES_OAEP_SHA_256 {},
 +        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
 +        // so there's no way to succeed.
 +        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
 +        // This could be handled more cleanly if conversion functions returned Results,
-+        // but that would be a large and disruptie change to the overall code flow.
++        // but that would be a large and disruptive change to the overall code flow.
 +        _ => panic!("Unknown enum variant: {}", value),
 +    })
 +}
-+
-+#[allow(dead_code)]
++ #[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec,
 +) -> aws_sdk_kms::types::EncryptionAlgorithmSpec {
 +    match dafny_value {
-+        crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::SYMMETRIC_DEFAULT {  } => aws_sdk_kms::types::EncryptionAlgorithmSpec::SymmetricDefault,
-+        crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::RSAES_OAEP_SHA_1 {  } => aws_sdk_kms::types::EncryptionAlgorithmSpec::RsaesOaepSha1,
-+        crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::RSAES_OAEP_SHA_256 {  } => aws_sdk_kms::types::EncryptionAlgorithmSpec::RsaesOaepSha256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::SYMMETRIC_DEFAULT {} => aws_sdk_kms::types::EncryptionAlgorithmSpec::SymmetricDefault,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::RSAES_OAEP_SHA_1 {} => aws_sdk_kms::types::EncryptionAlgorithmSpec::RsaesOaepSha1,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptionAlgorithmSpec::RSAES_OAEP_SHA_256 {} => aws_sdk_kms::types::EncryptionAlgorithmSpec::RsaesOaepSha256,
 +    }
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error.rs
 new file mode 100644
-index 00000000..d844a1c7
+index 00000000..98af207a
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error.rs
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,57 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +pub mod dependency_timeout_exception;
 +
-+pub mod disabled_exception;
++ pub mod disabled_exception;
 +
-+pub mod dry_run_operation_exception;
++ pub mod dry_run_operation_exception;
 +
-+pub mod incorrect_key_exception;
++ pub mod incorrect_key_exception;
 +
-+pub mod invalid_ciphertext_exception;
++ pub mod invalid_arn_exception;
 +
-+pub mod invalid_grant_token_exception;
++ pub mod invalid_ciphertext_exception;
 +
-+pub mod invalid_key_usage_exception;
++ pub mod invalid_grant_token_exception;
 +
-+pub mod key_unavailable_exception;
++ pub mod invalid_key_usage_exception;
 +
-+pub mod kms_internal_exception;
++ pub mod key_unavailable_exception;
 +
-+pub mod kms_invalid_state_exception;
++ pub mod kms_internal_exception;
 +
-+pub mod not_found_exception;
++ pub mod kms_invalid_state_exception;
 +
-+/// Wraps up an arbitrary Rust Error value as a Dafny Error
++ pub mod not_found_exception;
++
++ pub mod unsupported_operation_exception;
++ /// Wraps up an arbitrary Rust Error value as a Dafny Error
 +pub fn to_opaque_error<E: 'static>(value: E) ->
 +  ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
 +{
@@ -564,10 +840,13 @@ index 00000000..d844a1c7
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/dependency_timeout_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/dependency_timeout_exception.rs
 new file mode 100644
-index 00000000..b2d7d133
+index 00000000..27622b60
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/dependency_timeout_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -576,16 +855,19 @@ index 00000000..b2d7d133
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::DependencyTimeoutException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/disabled_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/disabled_exception.rs
 new file mode 100644
-index 00000000..14c5e6a7
+index 00000000..4c99df8a
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/disabled_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -594,16 +876,19 @@ index 00000000..14c5e6a7
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::DisabledException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/dry_run_operation_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/dry_run_operation_exception.rs
 new file mode 100644
-index 00000000..99206d5b
+index 00000000..37e6885a
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/dry_run_operation_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -612,16 +897,19 @@ index 00000000..99206d5b
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::DryRunOperationException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/incorrect_key_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/incorrect_key_exception.rs
 new file mode 100644
-index 00000000..42175b79
+index 00000000..837904e0
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/incorrect_key_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -630,16 +918,40 @@ index 00000000..42175b79
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::IncorrectKeyException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
++    }
++  )
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_arn_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_arn_exception.rs
+new file mode 100644
+index 00000000..00b46bad
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_arn_exception.rs
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: aws_sdk_kms::types::error::InvalidArnException,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
++  ::std::rc::Rc::new(
++    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::InvalidArnException {
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_ciphertext_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_ciphertext_exception.rs
 new file mode 100644
-index 00000000..67a392ec
+index 00000000..cfae01d6
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_ciphertext_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -648,16 +960,19 @@ index 00000000..67a392ec
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::InvalidCiphertextException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_grant_token_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_grant_token_exception.rs
 new file mode 100644
-index 00000000..7f3ca6f0
+index 00000000..8415fefc
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_grant_token_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -666,16 +981,19 @@ index 00000000..7f3ca6f0
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::InvalidGrantTokenException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_key_usage_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_key_usage_exception.rs
 new file mode 100644
-index 00000000..b0f2bf08
+index 00000000..5e8ef5e0
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/invalid_key_usage_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -684,16 +1002,19 @@ index 00000000..b0f2bf08
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::InvalidKeyUsageException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/key_unavailable_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/key_unavailable_exception.rs
 new file mode 100644
-index 00000000..e38fa034
+index 00000000..710cc94e
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/key_unavailable_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -702,16 +1023,19 @@ index 00000000..e38fa034
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::KeyUnavailableException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/kms_internal_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/kms_internal_exception.rs
 new file mode 100644
-index 00000000..23938932
+index 00000000..65b51006
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/kms_internal_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -720,16 +1044,19 @@ index 00000000..23938932
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::KMSInternalException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/kms_invalid_state_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/kms_invalid_state_exception.rs
 new file mode 100644
-index 00000000..1f9c6404
+index 00000000..cebe8caa
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/kms_invalid_state_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -738,16 +1065,19 @@ index 00000000..1f9c6404
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::KMSInvalidStateException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/not_found_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/not_found_exception.rs
 new file mode 100644
-index 00000000..2956e9dc
+index 00000000..485297e6
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/not_found_exception.rs
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +
 +#[allow(dead_code)]
@@ -756,111 +1086,129 @@ index 00000000..2956e9dc
 +) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
 +  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::NotFoundException {
-+      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
++    }
++  )
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/unsupported_operation_exception.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/unsupported_operation_exception.rs
+new file mode 100644
+index 00000000..dd117547
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/error/unsupported_operation_exception.rs
+@@ -0,0 +1,15 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: aws_sdk_kms::types::error::UnsupportedOperationException,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
++  ::std::rc::Rc::new(
++    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::UnsupportedOperationException {
++      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
 +    }
 +  )
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key.rs
 new file mode 100644
-index 00000000..e0fd2ad0
+index 00000000..4bd19cdc
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key.rs
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,40 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +pub mod _generate_data_key_request;
 +
-+pub mod _generate_data_key_response;
-+
-+use aws_sdk_kms::error::SdkError;
-+use crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::*;
-+
-+#[allow(dead_code)]
++ pub mod _generate_data_key_response;
++ #[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: &::aws_smithy_runtime_api::client::result::SdkError<
 +        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError,
 +        ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
 +    >,
-+) -> ::std::rc::Rc<Error> {
-+  match value {
-+    SdkError::ServiceError(service_error) => match service_error.err() {
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::DependencyTimeoutException(e) =>
-+            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::DisabledException(e) =>
-+            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::DryRunOperationException(e) =>
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error> {
++    match value {
++      aws_sdk_kms::error::SdkError::ServiceError(service_error) => match service_error.err() {
++                aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::DryRunOperationException(e) =>
 +            crate::conversions::error::dry_run_operation_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::InvalidGrantTokenException(e) =>
-+            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::InvalidKeyUsageException(e) =>
-+            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KeyUnavailableException(e) =>
-+            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KmsInternalException(e) =>
-+            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KmsInvalidStateException(e) =>
-+            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::NotFoundException(e) =>
++         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::NotFoundException(e) =>
 +            crate::conversions::error::not_found_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::DisabledException(e) =>
++            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KmsInternalException(e) =>
++            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KmsInvalidStateException(e) =>
++            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::InvalidKeyUsageException(e) =>
++            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::KeyUnavailableException(e) =>
++            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::DependencyTimeoutException(e) =>
++            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key::GenerateDataKeyError::InvalidGrantTokenException(e) =>
++            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
 +        e => crate::conversions::error::to_opaque_error(e.to_string()),
-+    },
-+    _ => {
++      },
++      _ => {
 +        crate::conversions::error::to_opaque_error(value.to_string())
-+    }
-+  }
++      }
++   }
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_request.rs
 new file mode 100644
-index 00000000..e49a3e41
+index 00000000..49cdfa45
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_request.rs
-@@ -0,0 +1,95 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+@@ -0,0 +1,91 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +pub fn to_dafny(
-+    value: aws_sdk_kms::operation::generate_data_key::GenerateDataKeyInput
++    value: &aws_sdk_kms::operation::generate_data_key::GenerateDataKeyInput
 +) -> ::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest,
 +>{
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest::GenerateDataKeyRequest  {
-+        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id).Extract(),
-+        EncryptionContext: 
-+        ::std::rc::Rc::new(match value.encryption_context() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
-+                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-+                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-+                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
-+                )
-+            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
-+        }),
-+        NumberOfBytes: dafny_standard_library::conversion::oint_to_dafny(value.number_of_bytes),
-+        KeySpec: 
-+        ::std::rc::Rc::new(match value.key_spec() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { 
-+                value: crate::conversions::data_key_spec::to_dafny(x.clone())
-+            },
-+            _ => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
-+        }),
-+        GrantTokens:
-+        ::std::rc::Rc::new(
-+            // Have to clone or else this becomes a borrow that can interfere with other branches
-+            match value.grant_tokens.clone() {
-+                Some(val) =>
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
-+                        value : ::dafny_runtime::Sequence::from_array(
-+                            &val.iter().map(|x|
-+                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(x))
-+                                .collect()
-+                        )
-+                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
-+            }
-+        ),
-+        Recipient: crate::conversions::recipient_info::option_to_dafny(value.recipient()),
-+        DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest::GenerateDataKeyRequest {
++        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id) .Extract(),
++ EncryptionContext:
++::std::rc::Rc::new(match &value.encryption_context {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
++            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
++            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ NumberOfBytes: dafny_standard_library::conversion::oint_to_dafny(value.number_of_bytes),
++ KeySpec: ::std::rc::Rc::new(match &value.key_spec {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::data_key_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ Recipient: ::std::rc::Rc::new(match &value.recipient {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(&x) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
 +    })
 +}
-+
-+#[allow(dead_code)]
++ #[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
 +        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest,
@@ -868,372 +1216,877 @@ index 00000000..e49a3e41
 +    client: aws_sdk_kms::Client,
 +) -> aws_sdk_kms::operation::generate_data_key::builders::GenerateDataKeyFluentBuilder {
 +    client.generate_data_key()
-+        .set_key_id(Some(
-+            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
-+                dafny_value.KeyId(),
-+            ),
-+        ))
-+        .set_encryption_context( match (*dafny_value.EncryptionContext()).as_ref() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
-+                    )
-+                ),
-+            _ => None
-+        })
-+        .set_number_of_bytes(dafny_standard_library::conversion::oint_from_dafny(dafny_value.NumberOfBytes().clone()))
-+        .set_key_spec(match  &**dafny_value.KeySpec() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    crate::conversions::data_key_spec::from_dafny(value)
-+                ),
-+            _ => None
-+        })
-+        .set_grant_tokens(match  &**dafny_value.GrantTokens() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, 
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string)
-+                ),
-+            _ => None
-+        })
-+        .set_recipient(match  &**dafny_value.Recipient() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    crate::conversions::recipient_info::from_dafny(value.clone())
-+                ),
-+            _ => None
-+        })
-+        .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
++          .set_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId()) ))
++ .set_encryption_context(match (*dafny_value.EncryptionContext()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
++                |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
++                |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(v),
++            )
++        ),
++    _ => None
++}
++)
++ .set_number_of_bytes(dafny_standard_library::conversion::oint_from_dafny(dafny_value.NumberOfBytes().clone()))
++ .set_key_spec(match &**dafny_value.KeySpec() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
++        crate::conversions::data_key_spec::from_dafny(value)
++    ),
++    _ => None,
++}
++)
++ .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
++                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
++            )
++        ),
++    _ => None
++}
++)
++ .set_recipient(match (*dafny_value.Recipient()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(crate::conversions::recipient_info::from_dafny(value.clone())),
++    _ => None,
++}
++)
++ .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_response.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_response.rs
 new file mode 100644
-index 00000000..d406550d
+index 00000000..a5474669
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_response.rs
 @@ -0,0 +1,16 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: &aws_sdk_kms::operation::generate_data_key::GenerateDataKeyOutput
 +) -> ::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse,
 +>{
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse::GenerateDataKeyResponse { 
-+      CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob), 
-+      Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext),
-+      KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
-+      CiphertextForRecipient: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_for_recipient),
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse::GenerateDataKeyResponse {
++        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob),
++ Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext),
++ KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
++ CiphertextForRecipient: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_for_recipient),
 +    })
 +}
-+
-+// from_dafny ommitted to save time until we get to actual code generation
-\ No newline at end of file
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext.rs
 new file mode 100644
-index 00000000..e9ea4318
+index 00000000..b53b06a9
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext.rs
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,40 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +pub mod _generate_data_key_without_plaintext_request;
 +
-+pub mod _generate_data_key_without_plaintext_response;
-+
-+use aws_sdk_kms::error::SdkError;
-+use crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::*;
-+
-+#[allow(dead_code)]
++ pub mod _generate_data_key_without_plaintext_response;
++ #[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: &::aws_smithy_runtime_api::client::result::SdkError<
-+      aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError,
-+      ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-+  >,
-+) -> ::std::rc::Rc<Error> {
-+  match value {
-+    SdkError::ServiceError(service_error) => match service_error.err() {
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DependencyTimeoutException(e) =>
-+            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DisabledException(e) =>
-+            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DryRunOperationException(e) =>
++        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError,
++        ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
++    >,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error> {
++    match value {
++      aws_sdk_kms::error::SdkError::ServiceError(service_error) => match service_error.err() {
++                aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DryRunOperationException(e) =>
 +            crate::conversions::error::dry_run_operation_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::InvalidGrantTokenException(e) =>
-+            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::InvalidKeyUsageException(e) =>
-+            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KeyUnavailableException(e) =>
-+            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KmsInternalException(e) =>
-+            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KmsInvalidStateException(e) =>
-+            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
-+        aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::NotFoundException(e) =>
++         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::NotFoundException(e) =>
 +            crate::conversions::error::not_found_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DisabledException(e) =>
++            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KmsInternalException(e) =>
++            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KmsInvalidStateException(e) =>
++            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::InvalidKeyUsageException(e) =>
++            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::KeyUnavailableException(e) =>
++            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DependencyTimeoutException(e) =>
++            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::InvalidGrantTokenException(e) =>
++            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
 +        e => crate::conversions::error::to_opaque_error(e.to_string()),
-+    },
-+    _ => {
++      },
++      _ => {
 +        crate::conversions::error::to_opaque_error(value.to_string())
-+    }
-+  }
++      }
++   }
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_request.rs
 new file mode 100644
-index 00000000..6bda4aa0
+index 00000000..8f9d198f
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_request.rs
-@@ -0,0 +1,87 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
+@@ -0,0 +1,80 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +pub fn to_dafny(
-+    value: aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextInput
++    value: &aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextInput
 +) -> ::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest,
 +>{
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest::GenerateDataKeyWithoutPlaintextRequest  {
-+        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id).Extract(),
-+        EncryptionContext: 
-+        ::std::rc::Rc::new(match value.encryption_context() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
-+                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-+                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-+                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
-+                )
-+            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
-+        }),
-+        NumberOfBytes: dafny_standard_library::conversion::oint_to_dafny(value.number_of_bytes),
-+        KeySpec: 
-+        ::std::rc::Rc::new(match value.key_spec() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { 
-+                value: crate::conversions::data_key_spec::to_dafny(x.clone())
-+            },
-+            _ => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
-+        }),
-+        GrantTokens:
-+        ::std::rc::Rc::new(
-+            // Have to clone or else this becomes a borrow that can interfere with other branches
-+            match value.grant_tokens.clone() {
-+                Some(val) =>
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
-+                        value : ::dafny_runtime::Sequence::from_array(
-+                            &val.iter().map(|x|
-+                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(x))
-+                                .collect()
-+                        )
-+                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
-+            }
-+        ),
-+        DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest::GenerateDataKeyWithoutPlaintextRequest {
++        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id) .Extract(),
++ EncryptionContext:
++::std::rc::Rc::new(match &value.encryption_context {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
++            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
++            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ KeySpec: ::std::rc::Rc::new(match &value.key_spec {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::data_key_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ NumberOfBytes: dafny_standard_library::conversion::oint_to_dafny(value.number_of_bytes),
++ GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
 +    })
 +}
-+
-+#[allow(dead_code)]
++ #[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
 +        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest,
 +    >,
-+    client: aws_sdk_kms::Client
-+) -> aws_sdk_kms::operation::generate_data_key_without_plaintext::builders::GenerateDataKeyWithoutPlaintextFluentBuilder{
++    client: aws_sdk_kms::Client,
++) -> aws_sdk_kms::operation::generate_data_key_without_plaintext::builders::GenerateDataKeyWithoutPlaintextFluentBuilder {
 +    client.generate_data_key_without_plaintext()
-+        .set_key_id(Some(
-+            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
-+                dafny_value.KeyId(),
-+            ),
-+        ))
-+        .set_encryption_context( match (*dafny_value.EncryptionContext()).as_ref() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
-+                    )
-+                ),
-+            _ => None
-+        })
-+        .set_number_of_bytes(dafny_standard_library::conversion::oint_from_dafny(dafny_value.NumberOfBytes().clone()))
-+        .set_key_spec(match  &**dafny_value.KeySpec() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    crate::conversions::data_key_spec::from_dafny(value)
-+                ),
-+            _ => None
-+        })
-+        .set_grant_tokens(match  &**dafny_value.GrantTokens() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
-+                Some(
-+                    ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, 
-+                        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string)
-+                ),
-+            _ => None
-+        })
-+        .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
++          .set_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId()) ))
++ .set_encryption_context(match (*dafny_value.EncryptionContext()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
++                |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
++                |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(v),
++            )
++        ),
++    _ => None
++}
++)
++ .set_key_spec(match &**dafny_value.KeySpec() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
++        crate::conversions::data_key_spec::from_dafny(value)
++    ),
++    _ => None,
++}
++)
++ .set_number_of_bytes(dafny_standard_library::conversion::oint_from_dafny(dafny_value.NumberOfBytes().clone()))
++ .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
++                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
++            )
++        ),
++    _ => None
++}
++)
++ .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_response.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_response.rs
 new file mode 100644
-index 00000000..ed879b5c
+index 00000000..d802ae40
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_response.rs
 @@ -0,0 +1,14 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: &aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextOutput
 +) -> ::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextResponse,
 +>{
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextResponse::GenerateDataKeyWithoutPlaintextResponse { 
-+      CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob), 
-+      KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextResponse::GenerateDataKeyWithoutPlaintextResponse {
++        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob),
++ KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
 +    })
 +}
-+
-+// from_dafny ommitted to save time until we get to actual code generation
-diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_encryption_mechanism.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_encryption_mechanism.rs
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key.rs
 new file mode 100644
-index 00000000..220034fd
+index 00000000..f0a8eb99
 --- /dev/null
-+++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_encryption_mechanism.rs
-@@ -0,0 +1,25 @@
-+// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key.rs
+@@ -0,0 +1,42 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++pub mod _get_public_key_request;
++
++ pub mod _get_public_key_response;
++ #[allow(dead_code)]
++pub fn to_dafny_error(
++    value: &::aws_smithy_runtime_api::client::result::SdkError<
++        aws_sdk_kms::operation::get_public_key::GetPublicKeyError,
++        ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
++    >,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error> {
++    match value {
++      aws_sdk_kms::error::SdkError::ServiceError(service_error) => match service_error.err() {
++                aws_sdk_kms::operation::get_public_key::GetPublicKeyError::NotFoundException(e) =>
++            crate::conversions::error::not_found_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::DisabledException(e) =>
++            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::InvalidArnException(e) =>
++            crate::conversions::error::invalid_arn_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::UnsupportedOperationException(e) =>
++            crate::conversions::error::unsupported_operation_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::KmsInternalException(e) =>
++            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::KmsInvalidStateException(e) =>
++            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::InvalidKeyUsageException(e) =>
++            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::KeyUnavailableException(e) =>
++            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::DependencyTimeoutException(e) =>
++            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::get_public_key::GetPublicKeyError::InvalidGrantTokenException(e) =>
++            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
++        e => crate::conversions::error::to_opaque_error(e.to_string()),
++      },
++      _ => {
++        crate::conversions::error::to_opaque_error(value.to_string())
++      }
++   }
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key/_get_public_key_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key/_get_public_key_request.rs
+new file mode 100644
+index 00000000..20f7092e
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key/_get_public_key_request.rs
+@@ -0,0 +1,42 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: &aws_sdk_kms::operation::get_public_key::GetPublicKeyInput
++) -> ::std::rc::Rc<
++    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyRequest,
++>{
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyRequest::GetPublicKeyRequest {
++        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id) .Extract(),
++ GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<
++        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyRequest,
++    >,
++    client: aws_sdk_kms::Client,
++) -> aws_sdk_kms::operation::get_public_key::builders::GetPublicKeyFluentBuilder {
++    client.get_public_key()
++          .set_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId()) ))
++ .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
++                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
++            )
++        ),
++    _ => None
++}
++)
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key/_get_public_key_response.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key/_get_public_key_response.rs
+new file mode 100644
+index 00000000..a3bdaee6
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/get_public_key/_get_public_key_response.rs
+@@ -0,0 +1,56 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: &aws_sdk_kms::operation::get_public_key::GetPublicKeyOutput
++) -> ::std::rc::Rc<
++    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyResponse,
++>{
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyResponse::GetPublicKeyResponse {
++        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
++ PublicKey: dafny_standard_library::conversion::oblob_to_dafny(&value.public_key),
++ CustomerMasterKeySpec: ::std::rc::Rc::new(match &value.customer_master_key_spec {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::customer_master_key_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ KeySpec: ::std::rc::Rc::new(match &value.key_spec {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::key_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ KeyUsage: ::std::rc::Rc::new(match &value.key_usage {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::key_usage_type::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ EncryptionAlgorithms: ::std::rc::Rc::new(match &value.encryption_algorithms {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| crate::conversions::encryption_algorithm_spec::to_dafny(e.clone()),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ SigningAlgorithms: ::std::rc::Rc::new(match &value.signing_algorithms {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| crate::conversions::signing_algorithm_spec::to_dafny(e.clone()),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ KeyAgreementAlgorithms: ::std::rc::Rc::new(match &value.key_agreement_algorithms {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| crate::conversions::key_agreement_algorithm_spec::to_dafny(e.clone()),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++    })
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_agreement_algorithm_spec.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_agreement_algorithm_spec.rs
+new file mode 100644
+index 00000000..ce1fd90a
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_agreement_algorithm_spec.rs
+@@ -0,0 +1,26 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
 +
 +pub fn to_dafny(
-+    value: aws_sdk_kms::types::KeyEncryptionMechanism,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyEncryptionMechanism>{
-+    match value {
-+        aws_sdk_kms::types::KeyEncryptionMechanism::RsaesOaepSha256 => ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyEncryptionMechanism::RSAES_OAEP_SHA_256 {}),
++    value: aws_sdk_kms::types::KeyAgreementAlgorithmSpec,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyAgreementAlgorithmSpec>{
++    ::std::rc::Rc::new(match value {
++ aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyAgreementAlgorithmSpec::ECDH {},
 +        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
 +        // so there's no way to succeed.
 +        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
 +        // This could be handled more cleanly if conversion functions returned Results,
-+        // but that would be a large and disruptie change to the overall code flow.
++        // but that would be a large and disruptive change to the overall code flow.
 +        _ => panic!("Unknown enum variant: {}", value),
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyAgreementAlgorithmSpec,
++) -> aws_sdk_kms::types::KeyAgreementAlgorithmSpec {
++    match dafny_value {
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyAgreementAlgorithmSpec::ECDH {} => aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh,
 +    }
 +}
-+
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_encryption_mechanism.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_encryption_mechanism.rs
+new file mode 100644
+index 00000000..0f148b6e
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_encryption_mechanism.rs
+@@ -0,0 +1,26 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
++
++pub fn to_dafny(
++    value: aws_sdk_kms::types::KeyEncryptionMechanism,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyEncryptionMechanism>{
++    ::std::rc::Rc::new(match value {
++ aws_sdk_kms::types::KeyEncryptionMechanism::RsaesOaepSha256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyEncryptionMechanism::RSAES_OAEP_SHA_256 {},
++        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
++        // so there's no way to succeed.
++        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
++        // This could be handled more cleanly if conversion functions returned Results,
++        // but that would be a large and disruptive change to the overall code flow.
++        _ => panic!("Unknown enum variant: {}", value),
++    })
++}
++ #[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyEncryptionMechanism,
 +) -> aws_sdk_kms::types::KeyEncryptionMechanism {
 +    match dafny_value {
-+        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyEncryptionMechanism::RSAES_OAEP_SHA_256 {} => aws_sdk_kms::types::KeyEncryptionMechanism::RsaesOaepSha256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyEncryptionMechanism::RSAES_OAEP_SHA_256 {} => aws_sdk_kms::types::KeyEncryptionMechanism::RsaesOaepSha256,
 +    }
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_spec.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_spec.rs
+new file mode 100644
+index 00000000..e18a7e0f
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_spec.rs
+@@ -0,0 +1,50 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++
++pub fn to_dafny(
++    value: aws_sdk_kms::types::KeySpec,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec>{
++    ::std::rc::Rc::new(match value {
++ aws_sdk_kms::types::KeySpec::Rsa2048 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::RSA_2048 {},
++ aws_sdk_kms::types::KeySpec::Rsa3072 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::RSA_3072 {},
++ aws_sdk_kms::types::KeySpec::Rsa4096 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::RSA_4096 {},
++ aws_sdk_kms::types::KeySpec::EccNistP256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::ECC_NIST_P256 {},
++ aws_sdk_kms::types::KeySpec::EccNistP384 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::ECC_NIST_P384 {},
++ aws_sdk_kms::types::KeySpec::EccNistP521 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::ECC_NIST_P521 {},
++ aws_sdk_kms::types::KeySpec::EccSecgP256K1 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::ECC_SECG_P256K1 {},
++ aws_sdk_kms::types::KeySpec::SymmetricDefault => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::SYMMETRIC_DEFAULT {},
++ aws_sdk_kms::types::KeySpec::Hmac224 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::HMAC_224 {},
++ aws_sdk_kms::types::KeySpec::Hmac256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::HMAC_256 {},
++ aws_sdk_kms::types::KeySpec::Hmac384 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::HMAC_384 {},
++ aws_sdk_kms::types::KeySpec::Hmac512 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::HMAC_512 {},
++ aws_sdk_kms::types::KeySpec::Sm2 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::SM2 {},
++        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
++        // so there's no way to succeed.
++        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
++        // This could be handled more cleanly if conversion functions returned Results,
++        // but that would be a large and disruptive change to the overall code flow.
++        _ => panic!("Unknown enum variant: {}", value),
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec,
++) -> aws_sdk_kms::types::KeySpec {
++    match dafny_value {
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::RSA_2048 {} => aws_sdk_kms::types::KeySpec::Rsa2048,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::RSA_3072 {} => aws_sdk_kms::types::KeySpec::Rsa3072,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::RSA_4096 {} => aws_sdk_kms::types::KeySpec::Rsa4096,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::ECC_NIST_P256 {} => aws_sdk_kms::types::KeySpec::EccNistP256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::ECC_NIST_P384 {} => aws_sdk_kms::types::KeySpec::EccNistP384,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::ECC_NIST_P521 {} => aws_sdk_kms::types::KeySpec::EccNistP521,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::ECC_SECG_P256K1 {} => aws_sdk_kms::types::KeySpec::EccSecgP256K1,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::SYMMETRIC_DEFAULT {} => aws_sdk_kms::types::KeySpec::SymmetricDefault,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::HMAC_224 {} => aws_sdk_kms::types::KeySpec::Hmac224,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::HMAC_256 {} => aws_sdk_kms::types::KeySpec::Hmac256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::HMAC_384 {} => aws_sdk_kms::types::KeySpec::Hmac384,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::HMAC_512 {} => aws_sdk_kms::types::KeySpec::Hmac512,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeySpec::SM2 {} => aws_sdk_kms::types::KeySpec::Sm2,
++    }
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_usage_type.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_usage_type.rs
+new file mode 100644
+index 00000000..6c751ea7
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/key_usage_type.rs
+@@ -0,0 +1,32 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++
++pub fn to_dafny(
++    value: aws_sdk_kms::types::KeyUsageType,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType>{
++    ::std::rc::Rc::new(match value {
++ aws_sdk_kms::types::KeyUsageType::SignVerify => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType::SIGN_VERIFY {},
++ aws_sdk_kms::types::KeyUsageType::EncryptDecrypt => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType::ENCRYPT_DECRYPT {},
++ aws_sdk_kms::types::KeyUsageType::GenerateVerifyMac => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType::GENERATE_VERIFY_MAC {},
++ aws_sdk_kms::types::KeyUsageType::KeyAgreement => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType::KEY_AGREEMENT {},
++        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
++        // so there's no way to succeed.
++        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
++        // This could be handled more cleanly if conversion functions returned Results,
++        // but that would be a large and disruptive change to the overall code flow.
++        _ => panic!("Unknown enum variant: {}", value),
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType,
++) -> aws_sdk_kms::types::KeyUsageType {
++    match dafny_value {
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType::SIGN_VERIFY {} => aws_sdk_kms::types::KeyUsageType::SignVerify,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType::ENCRYPT_DECRYPT {} => aws_sdk_kms::types::KeyUsageType::EncryptDecrypt,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType::GENERATE_VERIFY_MAC {} => aws_sdk_kms::types::KeyUsageType::GenerateVerifyMac,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyUsageType::KEY_AGREEMENT {} => aws_sdk_kms::types::KeyUsageType::KeyAgreement,
++    }
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/origin_type.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/origin_type.rs
+new file mode 100644
+index 00000000..e39ac9a6
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/origin_type.rs
+@@ -0,0 +1,32 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++
++pub fn to_dafny(
++    value: aws_sdk_kms::types::OriginType,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType>{
++    ::std::rc::Rc::new(match value {
++ aws_sdk_kms::types::OriginType::AwsKms => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::AWS_KMS {},
++ aws_sdk_kms::types::OriginType::External => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::EXTERNAL {},
++ aws_sdk_kms::types::OriginType::AwsCloudhsm => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::AWS_CLOUDHSM {},
++ aws_sdk_kms::types::OriginType::ExternalKeyStore => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::EXTERNAL_KEY_STORE {},
++        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
++        // so there's no way to succeed.
++        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
++        // This could be handled more cleanly if conversion functions returned Results,
++        // but that would be a large and disruptive change to the overall code flow.
++        _ => panic!("Unknown enum variant: {}", value),
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType,
++) -> aws_sdk_kms::types::OriginType {
++    match dafny_value {
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::AWS_KMS {} => aws_sdk_kms::types::OriginType::AwsKms,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::EXTERNAL {} => aws_sdk_kms::types::OriginType::External,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::AWS_CLOUDHSM {} => aws_sdk_kms::types::OriginType::AwsCloudhsm,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::EXTERNAL_KEY_STORE {} => aws_sdk_kms::types::OriginType::ExternalKeyStore,
++    }
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt.rs
+new file mode 100644
+index 00000000..ed5f837a
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt.rs
+@@ -0,0 +1,44 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++pub mod _re_encrypt_request;
++
++ pub mod _re_encrypt_response;
++ #[allow(dead_code)]
++pub fn to_dafny_error(
++    value: &::aws_smithy_runtime_api::client::result::SdkError<
++        aws_sdk_kms::operation::re_encrypt::ReEncryptError,
++        ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
++    >,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error> {
++    match value {
++      aws_sdk_kms::error::SdkError::ServiceError(service_error) => match service_error.err() {
++                aws_sdk_kms::operation::re_encrypt::ReEncryptError::DryRunOperationException(e) =>
++            crate::conversions::error::dry_run_operation_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::NotFoundException(e) =>
++            crate::conversions::error::not_found_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::DisabledException(e) =>
++            crate::conversions::error::disabled_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::KmsInternalException(e) =>
++            crate::conversions::error::kms_internal_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::KmsInvalidStateException(e) =>
++            crate::conversions::error::kms_invalid_state_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::InvalidKeyUsageException(e) =>
++            crate::conversions::error::invalid_key_usage_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::KeyUnavailableException(e) =>
++            crate::conversions::error::key_unavailable_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::InvalidCiphertextException(e) =>
++            crate::conversions::error::invalid_ciphertext_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::DependencyTimeoutException(e) =>
++            crate::conversions::error::dependency_timeout_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::InvalidGrantTokenException(e) =>
++            crate::conversions::error::invalid_grant_token_exception::to_dafny(e.clone()),
++         aws_sdk_kms::operation::re_encrypt::ReEncryptError::IncorrectKeyException(e) =>
++            crate::conversions::error::incorrect_key_exception::to_dafny(e.clone()),
++        e => crate::conversions::error::to_opaque_error(e.to_string()),
++      },
++      _ => {
++        crate::conversions::error::to_opaque_error(value.to_string())
++      }
++   }
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_request.rs
+new file mode 100644
+index 00000000..c1e3c3ac
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_request.rs
+@@ -0,0 +1,116 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: &aws_sdk_kms::operation::re_encrypt::ReEncryptInput
++) -> ::std::rc::Rc<
++    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest,
++>{
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest::ReEncryptRequest {
++        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob).Extract(),
++ SourceEncryptionContext:
++::std::rc::Rc::new(match &value.source_encryption_context {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
++            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
++            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ SourceKeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.source_key_id),
++ DestinationKeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.destination_key_id) .Extract(),
++ DestinationEncryptionContext:
++::std::rc::Rc::new(match &value.destination_encryption_context {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
++            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
++            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ SourceEncryptionAlgorithm: ::std::rc::Rc::new(match &value.source_encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ DestinationEncryptionAlgorithm: ::std::rc::Rc::new(match &value.destination_encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
++    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++        ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
++            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
++        )
++    },
++    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++})
++,
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: ::std::rc::Rc<
++        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest,
++    >,
++    client: aws_sdk_kms::Client,
++) -> aws_sdk_kms::operation::re_encrypt::builders::ReEncryptFluentBuilder {
++    client.re_encrypt()
++          .set_ciphertext_blob(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.CiphertextBlob().clone())))
++ .set_source_encryption_context(match (*dafny_value.SourceEncryptionContext()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
++                |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
++                |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(v),
++            )
++        ),
++    _ => None
++}
++)
++ .set_source_key_id(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.SourceKeyId().clone()))
++ .set_destination_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.DestinationKeyId()) ))
++ .set_destination_encryption_context(match (*dafny_value.DestinationEncryptionContext()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
++                |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
++                |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(v),
++            )
++        ),
++    _ => None
++}
++)
++ .set_source_encryption_algorithm(match &**dafny_value.SourceEncryptionAlgorithm() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
++        crate::conversions::encryption_algorithm_spec::from_dafny(value)
++    ),
++    _ => None,
++}
++)
++ .set_destination_encryption_algorithm(match &**dafny_value.DestinationEncryptionAlgorithm() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
++        crate::conversions::encryption_algorithm_spec::from_dafny(value)
++    ),
++    _ => None,
++}
++)
++ .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++        Some(
++            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
++                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
++            )
++        ),
++    _ => None
++}
++)
++ .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
++}
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_response.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_response.rs
+new file mode 100644
+index 00000000..083c54a9
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_response.rs
+@@ -0,0 +1,25 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
++#[allow(dead_code)]
++pub fn to_dafny(
++    value: &aws_sdk_kms::operation::re_encrypt::ReEncryptOutput
++) -> ::std::rc::Rc<
++    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptResponse,
++>{
++    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptResponse::ReEncryptResponse {
++        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob),
++ SourceKeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.source_key_id),
++ KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
++ SourceEncryptionAlgorithm: ::std::rc::Rc::new(match &value.source_encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ DestinationEncryptionAlgorithm: ::std::rc::Rc::new(match &value.destination_encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++    })
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/recipient_info.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/recipient_info.rs
 new file mode 100644
-index 00000000..0b6d290b
+index 00000000..ebbddcc4
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/recipient_info.rs
-@@ -0,0 +1,89 @@
-+use aws_sdk_kms::types::KeyEncryptionMechanism;
-+
+@@ -0,0 +1,37 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++
 +#[allow(dead_code)]
 +pub fn to_dafny(
-+    value: aws_sdk_kms::types::RecipientInfo,
-+) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
-+>{
-+    ::std::rc::Rc::new(to_dafny_plain(&value))
-+}
-+
-+pub fn to_dafny_plain(
 +    value: &aws_sdk_kms::types::RecipientInfo,
-+) -> crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo {
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo>{
++  ::std::rc::Rc::new(
 +    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo::RecipientInfo {
-+        AttestationDocument: dafny_standard_library::conversion::oblob_to_dafny(&value.attestation_document),
-+        KeyEncryptionAlgorithm: dafny_standard_library::conversion::option_to_dafny(&value.key_encryption_algorithm, 
-+            |x| crate::conversions::key_encryption_mechanism::to_dafny(x.clone()))
++        KeyEncryptionAlgorithm: ::std::rc::Rc::new(match &value.key_encryption_algorithm {
++    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::key_encryption_mechanism::to_dafny(x.clone()) },
++    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
++})
++,
++ AttestationDocument: dafny_standard_library::conversion::oblob_to_dafny(&value.attestation_document),
 +    }
-+}
-+
-+pub fn option_to_dafny(
-+    value: Option<&aws_sdk_kms::types::RecipientInfo>,
-+) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::_Wrappers_Compile::Option<
-+        ::std::rc::Rc<
-+            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
-+        >,
-+    >,
-+>{
-+    let inner = match value {
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-+        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
-+            value: ::std::rc::Rc::new(to_dafny_plain(x)),
-+        },
-+    };
-+    ::std::rc::Rc::new(inner)
-+}
-+
-+#[allow(dead_code)]
++  )
++} #[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
 +        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
 +    >,
 +) -> aws_sdk_kms::types::RecipientInfo {
 +    aws_sdk_kms::types::RecipientInfo::builder()
-+        .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(
-+            dafny_value.AttestationDocument().clone(),
-+        ))
-+        .set_key_encryption_algorithm(match &**dafny_value.KeyEncryptionAlgorithm() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
-+                crate::conversions::key_encryption_mechanism::from_dafny(value),
-+            ),
-+            _ => None,
-+        })
-+        .build()
++          .set_key_encryption_algorithm(match &**dafny_value.KeyEncryptionAlgorithm() {
++    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
++        crate::conversions::key_encryption_mechanism::from_dafny(value)
++    ),
++    _ => None,
 +}
++)
++ .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.AttestationDocument().clone()))
++          .build()
 +
-+#[allow(dead_code)]
-+pub fn plain_from_dafny(
-+    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
-+) -> aws_sdk_kms::types::RecipientInfo {
-+    aws_sdk_kms::types::RecipientInfo::builder()
-+        .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(
-+            dafny_value.AttestationDocument().clone(),
-+        ))
-+        .set_key_encryption_algorithm(match &**dafny_value.KeyEncryptionAlgorithm() {
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
-+                crate::conversions::key_encryption_mechanism::from_dafny(value),
-+            ),
-+            _ => None,
-+        })
-+        .build()
 +}
-+
+diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/signing_algorithm_spec.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/signing_algorithm_spec.rs
+new file mode 100644
+index 00000000..5f4df8f1
+--- /dev/null
++++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/signing_algorithm_spec.rs
+@@ -0,0 +1,44 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +#[allow(dead_code)]
-+pub fn option_from_dafny(
-+    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
-+    >>>,
-+) -> Option<aws_sdk_kms::types::RecipientInfo> {
-+    match &*dafny_value {
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
-+            Some(plain_from_dafny(value))
-+        }
-+        _ => None,
++
++pub fn to_dafny(
++    value: aws_sdk_kms::types::SigningAlgorithmSpec,
++) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec>{
++    ::std::rc::Rc::new(match value {
++ aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PSS_SHA_256 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha384 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PSS_SHA_384 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha512 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PSS_SHA_512 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_256 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha384 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_384 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha512 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_512 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::ECDSA_SHA_256 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha384 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::ECDSA_SHA_384 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha512 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::ECDSA_SHA_512 {},
++ aws_sdk_kms::types::SigningAlgorithmSpec::Sm2Dsa => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::SM2DSA {},
++        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
++        // so there's no way to succeed.
++        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
++        // This could be handled more cleanly if conversion functions returned Results,
++        // but that would be a large and disruptive change to the overall code flow.
++        _ => panic!("Unknown enum variant: {}", value),
++    })
++}
++ #[allow(dead_code)]
++pub fn from_dafny(
++    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec,
++) -> aws_sdk_kms::types::SigningAlgorithmSpec {
++    match dafny_value {
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PSS_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PSS_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha384,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PSS_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha512,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha384,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha512,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::ECDSA_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha256,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::ECDSA_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha384,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::ECDSA_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha512,
++ crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::SigningAlgorithmSpec::SM2DSA {} => aws_sdk_kms::types::SigningAlgorithmSpec::Sm2Dsa,
 +    }
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/lib.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/lib.rs
 new file mode 100644
-index 00000000..b5e77f9a
+index 00000000..4379c56b
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/lib.rs
-@@ -0,0 +1,3 @@
+@@ -0,0 +1,6 @@
++// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
++// SPDX-License-Identifier: Apache-2.0
++// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 +mod client;
 +mod conversions;
 +pub mod implementation_from_dafny;
-diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/tests/tests_from_dafny/mod.rs
-index 1864a86b..f061a809 100644
---- b/TestModels/aws-sdks/kms-lite/runtimes/rust/tests/tests_from_dafny/mod.rs
-+++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/tests/tests_from_dafny/mod.rs
-@@ -1,5 +1,6 @@
- #![allow(warnings, unconditional_panic)]
- #![allow(nonstandard_style)]
-+use ::kms_lite::implementation_from_dafny::*;
- 
- pub mod r#_TestComAmazonawsKms_Compile {
-     pub struct _default {}
