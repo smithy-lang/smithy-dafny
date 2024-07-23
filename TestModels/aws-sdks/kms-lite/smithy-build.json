@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "projections": {
+    "operation-subset": {
+      "transforms": [
+        {
+          "name": "excludeShapesBySelector",
+          "args": {
+            "selector": "operation :not([id|name = GenerateDataKey, Encrypt, Decrypt, GenerateDataKeyWithoutPlaintext, ReEncrypt, DeriveSharedSecret, GetPublicKey])"
+          }
+        },
+        {
+          "name": "removeUnusedShapes",
+          "args": {}
+        }
+      ]
+    }
+  },
+  "plugins": {
+    "dafny-client-codegen": {
+      "edition": "2023",
+      "service": "com.amazonaws.kms#TrentService",
+      "dafnyVersion": "${DAFNY_VERSION}",
+      "targetLanguages": ["java", "dotnet"],
+      "includeDafnyFile": "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
+    }
+  }
+}

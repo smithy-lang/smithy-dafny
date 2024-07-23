@@ -11,7 +11,7 @@ impl super::Client {
         &self,
     ) -> crate::operation::get_string_known_value::builders::GetStringKnownValueFluentBuilder {
         crate::operation::get_string_known_value::builders::GetStringKnownValueFluentBuilder::new(
-            self.handle.clone(),
+            self.clone(),
         )
     }
 }

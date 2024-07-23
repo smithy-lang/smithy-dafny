@@ -55,13 +55,26 @@ _polymorph_dafny: _polymorph_wrapped
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
+_polymorph_java: INPUT_DAFNY=\
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_java: _polymorph
 _polymorph_java: OUTPUT_JAVA_WRAPPED=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_java: _polymorph_wrapped
 
 _polymorph_dotnet: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+_polymorph_dotnet: INPUT_DAFNY=\
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dotnet: _polymorph
 _polymorph_dotnet: OUTPUT_DOTNET_WRAPPED=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
 _polymorph_dotnet: _polymorph_wrapped
+
+_polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+_polymorph_rust: INPUT_DAFNY=\
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+_polymorph_rust: _polymorph
+# TODO: This doesn't yet work for Rust because we are patching transpiled code,
+# so this target will complain about "patch does not apply" because it was already applied.
+# _polymorph_rust: OUTPUT_RUST_WRAPPED=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+# _polymorph_rust: _polymorph_wrapped
