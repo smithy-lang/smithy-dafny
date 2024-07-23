@@ -1,5 +1,6 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
+use simple_resources::implementation_from_dafny::*;
 
 pub mod r#_Helpers_Compile {
     pub struct _default {}

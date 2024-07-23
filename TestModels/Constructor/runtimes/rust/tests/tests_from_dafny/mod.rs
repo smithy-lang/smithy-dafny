@@ -1,5 +1,6 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
+use constructor::implementation_from_dafny::*;
 
 pub mod r#_simple_dconstructor_dinternaldafny_dwrapped {
     pub struct _default {}
