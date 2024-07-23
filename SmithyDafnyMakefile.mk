@@ -546,17 +546,21 @@ transpile_dependencies_test_rust: LANG=rust
 transpile_dependencies_test_rust: transpile_dependencies_test
 
 _mv_implementation_rust:
-	rm -rf runtimes/rust/dafny_impl/src
-	mkdir -p runtimes/rust/dafny_impl/src
+	mkdir -p runtimes/rust/src
 # TODO: Currently need to insert an import of the the StandardLibrary.
+# See https://github.com/dafny-lang/dafny/issues/5641
 	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
 	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
+_mv_test_rust: RUST_CRATE_NAME=$(shell grep -Eo "name = (.*)" runtimes/rust/Cargo.toml | sed -e 's/^name.*= "//' -e 's/"$$//')
 _mv_test_rust:
 	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
 	mkdir -p runtimes/rust/tests/tests_from_dafny
-	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny/mod.rs
+# TODO: Currently need to insert an import of source crate.
+# https://github.com/dafny-lang/dafny/issues/5641
+	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'use ::$(RUST_CRATE_NAME)::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
+	  < tests_from_dafny-rust/src/tests_from_dafny.rs > runtimes/rust/tests/tests_from_dafny/mod.rs
 	rustfmt runtimes/rust/tests/tests_from_dafny/mod.rs
 	rm -rf tests_from_dafny-rust
 

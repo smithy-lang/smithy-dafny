@@ -1,6 +1,6 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
-use ::kms_lite::implementation_from_dafny::*;
+use kms_lite::implementation_from_dafny::*;
 
 pub mod r#_TestComAmazonawsKms_Compile {
     pub struct _default {}

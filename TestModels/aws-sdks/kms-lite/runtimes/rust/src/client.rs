@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 use crate::conversions;
 
 struct Client {
@@ -16,52 +19,90 @@ impl dafny_runtime::UpcastObject<dyn crate::implementation_from_dafny::r#_softwa
 
 impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::IKMSClient
   for Client {
-    fn Decrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-      let native_result = 
-        self.rt.block_on(conversions::decrypt::_decrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
-      dafny_standard_library::conversion::result_to_dafny(&native_result,
-        conversions::decrypt::_decrypt_response::to_dafny,
-        conversions::decrypt::to_dafny_error)
-    }
-  
-    fn Encrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-      let native_result = 
-        self.rt.block_on(conversions::encrypt::_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
-      dafny_standard_library::conversion::result_to_dafny(&native_result,
-        conversions::encrypt::_encrypt_response::to_dafny,
-        conversions::encrypt::to_dafny_error)
-    }
-  
-    fn GenerateDataKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-      let native_result = 
-        self.rt.block_on(conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone(), self.inner.clone()).send());
-      dafny_standard_library::conversion::result_to_dafny(&native_result, 
-        conversions::generate_data_key::_generate_data_key_response::to_dafny,
-        conversions::generate_data_key::to_dafny_error)
-    }
-  
-    fn GenerateDataKeyWithoutPlaintext(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-      let native_result = 
-        self.rt.block_on(conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_request::from_dafny(input.clone(), self.inner.clone()).send());
-      dafny_standard_library::conversion::result_to_dafny(&native_result, 
-        conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_response::to_dafny,
-        conversions::generate_data_key_without_plaintext::to_dafny_error)
-    }
-
-    // Leaving untested operations out for now
-  
-    fn DeriveSharedSecret(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-      todo!()
-    }
-
-    fn GetPublicKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-      todo!()
-    }
-  
-    fn ReEncrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest>) -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptResponse>, std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>>> {
-      todo!()
-    }
-  }
+ fn Decrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptRequest>)
+  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse>,
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::decrypt::_decrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
+  dafny_standard_library::conversion::result_to_dafny(&native_result,
+    conversions::decrypt::_decrypt_response::to_dafny,
+    conversions::decrypt::to_dafny_error)
+}
+ fn DeriveSharedSecret(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretRequest>)
+  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DeriveSharedSecretResponse>,
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::derive_shared_secret::_derive_shared_secret_request::from_dafny(input.clone(), self.inner.clone()).send());
+  dafny_standard_library::conversion::result_to_dafny(&native_result,
+    conversions::derive_shared_secret::_derive_shared_secret_response::to_dafny,
+    conversions::derive_shared_secret::to_dafny_error)
+}
+ fn Encrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptRequest>)
+  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::EncryptResponse>,
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::encrypt::_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
+  dafny_standard_library::conversion::result_to_dafny(&native_result,
+    conversions::encrypt::_encrypt_response::to_dafny,
+    conversions::encrypt::to_dafny_error)
+}
+ fn GenerateDataKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyRequest>)
+  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse>,
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone(), self.inner.clone()).send());
+  dafny_standard_library::conversion::result_to_dafny(&native_result,
+    conversions::generate_data_key::_generate_data_key_response::to_dafny,
+    conversions::generate_data_key::to_dafny_error)
+}
+ fn GenerateDataKeyWithoutPlaintext(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextRequest>)
+  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyWithoutPlaintextResponse>,
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_request::from_dafny(input.clone(), self.inner.clone()).send());
+  dafny_standard_library::conversion::result_to_dafny(&native_result,
+    conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_response::to_dafny,
+    conversions::generate_data_key_without_plaintext::to_dafny_error)
+}
+ fn GetPublicKey(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyRequest>)
+  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GetPublicKeyResponse>,
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::get_public_key::_get_public_key_request::from_dafny(input.clone(), self.inner.clone()).send());
+  dafny_standard_library::conversion::result_to_dafny(&native_result,
+    conversions::get_public_key::_get_public_key_response::to_dafny,
+    conversions::get_public_key::to_dafny_error)
+}
+ fn ReEncrypt(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest>)
+  -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptResponse>,
+    std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::re_encrypt::_re_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
+  dafny_standard_library::conversion::result_to_dafny(&native_result,
+    conversions::re_encrypt::_re_encrypt_response::to_dafny,
+    conversions::re_encrypt::to_dafny_error)
+} }
 
 #[allow(non_snake_case)]
 impl crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny::_default {
