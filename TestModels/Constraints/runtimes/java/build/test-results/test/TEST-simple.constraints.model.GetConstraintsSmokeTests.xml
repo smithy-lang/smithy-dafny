@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="simple.constraints.model.GetConstraintsSmokeTests" tests="2" skipped="0" failures="0" errors="0" timestamp="2024-07-23T18:26:19" hostname="bcd074aae394" time="0.025">
-  <properties/>
-  <testcase name="GetConstraintsFailure" classname="simple.constraints.model.GetConstraintsSmokeTests" time="0.009"/>
-  <testcase name="GetConstraintsSuccess" classname="simple.constraints.model.GetConstraintsSmokeTests" time="0.015"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
