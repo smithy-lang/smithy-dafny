@@ -334,11 +334,11 @@ module WrappedSimpleConstraintsTest {
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
 
-    input := input.(NonEmptyList := Some(ForceNonEmptyList(["1","2","3","4","5","6","7","8","9","0"])));
+    input := input.(NonEmptyList := Some(ForceNonEmptyList(["1","2","3","4","5","6","7","8","9","0","MoreThentenChar"])));
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
 
-    input := input.(NonEmptyList := Some(ForceNonEmptyList(["1","2","3","4","5","6","7","8","9","0","a"])));
+    input := input.(NonEmptyList := Some(ForceNonEmptyList(["1","2","3","4","5","6","7","8","9","0","a","MoreThentenChar"])));
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
   }
@@ -402,7 +402,7 @@ module WrappedSimpleConstraintsTest {
     var ret := client.GetConstraints(input := input);
     expect ret.Failure?;
 
-    input := input.(NonEmptyMap := Some(ForceNonEmptyMap(map["1" := "a"])));
+    input := input.(NonEmptyMap := Some(ForceNonEmptyMap(map["01234567890" := "a"])));
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
 

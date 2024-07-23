@@ -88,7 +88,7 @@ list MyList {
 
 @length(min: 1)
 list NonEmptyList {
-  member: String
+  member: MyString
 }
 
 @length(max: 10)
@@ -98,7 +98,7 @@ list ListLessThanOrEqualToTen {
 
 @length(min: 1, max: 10)
 map MyMap {
-  key: String,
+  key: MyString,
   value: String,
 }
 
