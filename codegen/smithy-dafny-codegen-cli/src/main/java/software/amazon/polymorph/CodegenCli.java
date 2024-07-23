@@ -6,10 +6,12 @@ package software.amazon.polymorph;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -118,7 +120,8 @@ public class CodegenCli {
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
       .withLocalServiceTest(cliArguments.localServiceTest)
       .withDafnyVersion(cliArguments.dafnyVersion)
-      .withUpdatePatchFiles(cliArguments.updatePatchFiles);
+      .withUpdatePatchFiles(cliArguments.updatePatchFiles)
+      .withGenerationAspects(cliArguments.generationAspects);
     cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
     cliArguments.javaAwsSdkVersion.ifPresent(
       engineBuilder::withJavaAwsSdkVersion
@@ -167,8 +170,8 @@ public class CodegenCli {
       .addOption(
         Option
           .builder("dmn")
-          .longOpt("dependency-module-name")
-          .desc("directory for dependent model file[s] (.smithy format)")
+          .longOpt("dependency-library-name")
+          .desc("namespace-to-library-name map entry for a dependency namespace")
           .hasArg()
           .build()
       )
@@ -183,9 +186,9 @@ public class CodegenCli {
       )
       .addOption(
         Option
-          .builder("mn")
-          .longOpt("module-name")
-          .desc("if generating for a language that uses modules (go, python), the name of the module")
+          .builder("ln")
+          .longOpt("library-name")
+          .desc("if generating for a language that uses library names (go, python), the name of the library")
           .hasArg()
           .build()
       )
@@ -304,6 +307,18 @@ public class CodegenCli {
             "<optional> update patch files in <patch-files-dir> instead of applying them"
           )
           .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("generate")
+          .desc(
+            "<optional> optional aspects to generate. Available aspects:\n" +
+            CodegenEngine.GenerationAspect.helpText()
+          )
+          .hasArgs()
+          .valueSeparator(',')
+          .build()
       );
   }
 
@@ -331,7 +346,8 @@ public class CodegenCli {
     boolean awsSdkStyle,
     boolean localServiceTest,
     Optional<Path> patchFilesDir,
-    boolean updatePatchFiles
+    boolean updatePatchFiles,
+    Set<CodegenEngine.GenerationAspect> generationAspects
   ) {
     /**
      * @param args arguments to parse
@@ -356,11 +372,11 @@ public class CodegenCli {
         .toArray(Path[]::new);
 
       // Maps a Smithy namespace to its module name
-      // ex. `dependency-module-name=aws.cryptography.materialproviders=aws_cryptographic_materialproviders`
+      // ex. `dependency-library-name=aws.cryptography.materialproviders=aws_cryptographic_materialproviders`
       // maps the Smithy namespace `aws.cryptography.materialproviders` to a module name `aws_cryptographic_materialproviders`
       // via a map key of "aws.cryptography.materialproviders" and a value of "aws_cryptographic_materialproviders"
       final Map<String, String> dependencyNamespacesToLibraryNamesMap =
-              commandLine.hasOption("dependency-module-name")
+              commandLine.hasOption("dependency-library-name")
                       ? Arrays.stream(commandLine.getOptionValues("dmn"))
                       .map(s -> s.split("="))
                       .collect(Collectors.toMap(i -> i[0], i -> i[1]))
@@ -368,7 +384,7 @@ public class CodegenCli {
 
       final String namespace = commandLine.getOptionValue('n');
 
-      final Optional<String> libraryName = Optional.ofNullable(commandLine.getOptionValue("module-name"));
+      final Optional<String> libraryName = Optional.ofNullable(commandLine.getOptionValue("library-name"));
 
       Optional<Path> outputDafnyDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dafny"))
@@ -432,11 +448,9 @@ public class CodegenCli {
         .ofNullable(commandLine.getOptionValue("properties-file"))
         .map(Paths::get);
 
-      Optional<Path> includeDafnyFile = Optional.empty();
-      if (outputDafnyDir.isPresent()) {
-        includeDafnyFile =
-          Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
-      }
+      Optional<Path> includeDafnyFile = Optional
+        .ofNullable(commandLine.getOptionValue("include-dafny"))
+        .map(Paths::get);
 
       Optional<Path> patchFilesDir = Optional
         .ofNullable(commandLine.getOptionValue("patch-files-dir"))
@@ -444,6 +458,14 @@ public class CodegenCli {
       final boolean updatePatchFiles = commandLine.hasOption(
         "update-patch-files"
       );
+
+      final String[] generationAspectOptions = Optional
+        .ofNullable(commandLine.getOptionValues("generate"))
+        .orElse(new String[0]);
+      final Set<CodegenEngine.GenerationAspect> generationAspects = Arrays
+        .stream(generationAspectOptions)
+        .map(CodegenEngine.GenerationAspect::fromOption)
+        .collect(Collectors.toSet());
 
       return Optional.of(
         new CliArguments(
@@ -466,7 +488,8 @@ public class CodegenCli {
           awsSdkStyle,
           localServiceTest,
           patchFilesDir,
-          updatePatchFiles
+          updatePatchFiles,
+          generationAspects
         )
       );
     }
