@@ -77,18 +77,18 @@ jobs:
         with:
           distribution: "corretto"
           java-version: "17"
-          
+
       - name: Install smithy-rs/codegen-core locally
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :smithy-dafny-codegen:pTML
-          build-root-directory: smithy-dafny-codegen-modules/smithy-rs/codegen-core
+          arguments: :codegen-core:pTML
+          build-root-directory: smithy-dafny-codegen-modules/smithy-rs
 
       - name: Install smithy-rs/codegen-client locally
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :smithy-dafny-codegen:pTML
-          build-root-directory: smithy-dafny-codegen-modules/smithy-rs/codegen-client
+          arguments: :codegen-client:pTML
+          build-root-directory: smithy-dafny-codegen-modules/smithy-rs
   
       - name: Install smithy-dafny-codegen locally
         uses: gradle/gradle-build-action@v2
