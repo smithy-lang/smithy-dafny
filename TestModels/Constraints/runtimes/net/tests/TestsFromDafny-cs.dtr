@@ -1,0 +1,7 @@
+file_format_version = "1.0"
+dafny_version = "4.6.0.0"
+[options_by_module.Helpers]
+[options_by_module.SimpleConstraintsImplTest]
+[options_by_module.WrappedAbstractSimpleConstraintsService]
+[options_by_module.WrappedSimpleConstraintsService]
+[options_by_module.WrappedSimpleConstraintsTest]
