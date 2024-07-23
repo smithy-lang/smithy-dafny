@@ -169,7 +169,7 @@ public class CodegenCli {
       )
       .addOption(
         Option
-          .builder("dmn")
+          .builder("dln")
           .longOpt("dependency-library-name")
           .desc("namespace-to-library-name map entry for a dependency namespace")
           .hasArg()
@@ -377,7 +377,7 @@ public class CodegenCli {
       // via a map key of "aws.cryptography.materialproviders" and a value of "aws_cryptographic_materialproviders"
       final Map<String, String> dependencyNamespacesToLibraryNamesMap =
               commandLine.hasOption("dependency-library-name")
-                      ? Arrays.stream(commandLine.getOptionValues("dmn"))
+                      ? Arrays.stream(commandLine.getOptionValues("dln"))
                       .map(s -> s.split("="))
                       .collect(Collectors.toMap(i -> i[0], i -> i[1]))
                       : new HashMap<>();
