@@ -11,6 +11,7 @@ import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.DocumentationTrait;
@@ -44,7 +45,9 @@ public class ReferencesFileWriter implements CustomFileWriter {
       ResourceShape resourceShape, GenerationContext codegenContext, PythonWriter writer) {
     if (shouldGenerateResourceForShape(resourceShape, codegenContext)) {
       generatedResourceShapes.add(resourceShape.getId());
-      generateResourceInterface(resourceShape, codegenContext, writer);
+      if (resourceShape.hasTrait(ExtendableTrait.class)) {
+          generateResourceInterface(resourceShape, codegenContext, writer);
+      }
       generateResourceImplementation(resourceShape, codegenContext, writer);
     }
   }
@@ -120,7 +123,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
     // Write implementation for resource shape
     writer.write(
         """
-        class $1L(I$1L):
+        class $1L$6L:
             ${5C|}
             _impl: $2L
 
@@ -138,7 +141,13 @@ public class ReferencesFileWriter implements CustomFileWriter {
         writer.consumer(
             w -> generateSmithyOperationFunctionDefinitionForResource(context, resourceShape, w)),
         writer.consumer(w -> generateDictConvertersForResource(resourceShape, w)),
-        writer.consumer(w -> writeDocsForResourceOrInterfaceClass(w, resourceShape, context)));
+        writer.consumer(w -> writeDocsForResourceOrInterfaceClass(w, resourceShape, context)),
+        // Only extend interface if extendable;
+        // otherwise doesn't extend anything
+        resourceShape.hasTrait(ExtendableTrait.class)
+            ? "(I%1$s)".formatted(resourceShape.getId().getName())
+            : ""
+    );
   }
 
   /**
@@ -263,14 +272,11 @@ public class ReferencesFileWriter implements CustomFileWriter {
           throw new IllegalArgumentException(
                   "Only 1 service-modelled error per service supported");
       }
-      String defaultWrappingError =
-          !serviceShape.getErrors().isEmpty()
-              ? DafnyNameResolver.getDafnyTypeForError(serviceDependencyErrors.get(0))
-              : "Error";
 
-      writer.addStdlibImport(
-          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape, codegenContext),
-          defaultWrappingError);
+        writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+            serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors",
+      "_smithy_error_to_dafny_error"
+        );
 
       writer.openBlock(
           "def $L(self, dafny_input: '$L') -> '$L':",
@@ -295,9 +301,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
                             )
                             return Wrappers.Result_Success(dafny_output)
                         except Exception as e:
-                            error = $L(
-                                message=str(e)
-                            )
+                            error = _smithy_error_to_dafny_error(e)
                             return Wrappers.Result_Failure(error)
                         """,
                 SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
@@ -310,8 +314,8 @@ public class ReferencesFileWriter implements CustomFileWriter {
                         targetShapeOutput.getId().getNamespace(), codegenContext)
                     + ".smithy_to_dafny."
                     + SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(
-                        targetShapeOutput, codegenContext),
-                defaultWrappingError);
+                        targetShapeOutput, codegenContext)
+                );
             writer.addStdlibImport("standard_library.internaldafny.generated", "Wrappers");
           });
     }
@@ -373,7 +377,6 @@ public class ReferencesFileWriter implements CustomFileWriter {
                 "if dafny_output.IsFailure():",
                 "",
                 () -> {
-                  writer.addStdlibImport("asyncio");
                   // Import inline to avoid circular dependency
                   writer.write(
                       "from $L import $L as $L",
@@ -389,7 +392,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
                               targetShapeOutput.getId().getNamespace())
                           + "_deserialize_error");
                   writer.write(
-                      "raise asyncio.run($L(dafny_output.error))",
+                      "raise $L(dafny_output.error)",
                       SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                               targetShapeOutput.getId().getNamespace())
                           + "_deserialize_error");

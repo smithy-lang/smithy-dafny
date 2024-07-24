@@ -17,4 +17,11 @@ SERVICE_DEPS_SimpleString :=
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
-# DEPENDENT-MODELS:= 
+# DEPENDENT-MODELS:=
+
+# Python
+
+PYTHON_MODULE_NAME=simple_types_smithystring
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr

@@ -6,7 +6,7 @@ using language.specific.logic.internaldafny.types;
 using Language.Specific.Logic;
 using Wrappers_Compile;
 
-namespace NetLanguageSpecificLogicImpl_Compile
+namespace LanguageSpecificLogicImpl_Compile
 {
   public partial class __default
   {
@@ -16,7 +16,7 @@ namespace NetLanguageSpecificLogicImpl_Compile
         language.specific.logic.internaldafny.types._IError
       >
       GetNetRuntimeVersion (
-        NetLanguageSpecificLogicImpl_Compile._IConfig config
+        LanguageSpecificLogicImpl_Compile._IConfig config
       ) {
         return Wrappers_Compile.Result<
           Dafny.ISequence<char>,
