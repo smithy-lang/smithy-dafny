@@ -20,7 +20,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
+ DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
  Recipient: ::std::rc::Rc::new(match &value.recipient {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(&x) },
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }

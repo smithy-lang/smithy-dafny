@@ -27,7 +27,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(&value.consistent_read),
+ ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(value.consistent_read),
  ProjectionExpression: dafny_standard_library::conversion::ostring_to_dafny(&value.projection_expression),
  ExpressionAttributeNames:
 ::std::rc::Rc::new(match &value.expression_attribute_names {

@@ -30,9 +30,9 @@ pub fn ostring_from_dafny(
     }
 }
 
-pub fn obool_to_dafny(input: &Option<bool>) -> ::std::rc::Rc<_Wrappers_Compile::Option<bool>> {
+pub fn obool_to_dafny(input: Option<bool>) -> ::std::rc::Rc<_Wrappers_Compile::Option<bool>> {
     let dafny_value = match input {
-        Some(b) => _Wrappers_Compile::Option::Some { value: *b },
+        Some(b) => _Wrappers_Compile::Option::Some { value: b },
         None => _Wrappers_Compile::Option::None {},
     };
     ::std::rc::Rc::new(dafny_value)

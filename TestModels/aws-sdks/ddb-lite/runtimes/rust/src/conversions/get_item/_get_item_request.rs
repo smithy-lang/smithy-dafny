@@ -24,7 +24,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(&value.consistent_read),
+ ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(value.consistent_read),
  ReturnConsumedCapacity: ::std::rc::Rc::new(match &value.return_consumed_capacity {
     Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::return_consumed_capacity::to_dafny(x.clone()) },
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }

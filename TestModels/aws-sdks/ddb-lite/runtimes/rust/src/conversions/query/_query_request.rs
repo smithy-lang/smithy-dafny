@@ -25,7 +25,7 @@ pub fn to_dafny(
 })
 ,
  Limit: dafny_standard_library::conversion::oint_to_dafny(value.limit),
- ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(&value.consistent_read),
+ ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(value.consistent_read),
  KeyConditions:
 ::std::rc::Rc::new(match &value.key_conditions {
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
@@ -55,7 +55,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
 })
 ,
- ScanIndexForward: dafny_standard_library::conversion::obool_to_dafny(&value.scan_index_forward),
+ ScanIndexForward: dafny_standard_library::conversion::obool_to_dafny(value.scan_index_forward),
  ExclusiveStartKey:
 ::std::rc::Rc::new(match &value.exclusive_start_key {
     Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :

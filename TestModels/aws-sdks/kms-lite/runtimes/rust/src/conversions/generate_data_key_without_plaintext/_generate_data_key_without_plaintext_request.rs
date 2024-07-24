@@ -35,7 +35,7 @@ pub fn to_dafny(
     None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 })
 ,
- DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
+ DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
     })
 }
  #[allow(dead_code)]
