@@ -188,7 +188,7 @@ public class CodegenCli {
         Option
           .builder("ln")
           .longOpt("library-name")
-          .desc("if generating for a language that uses library names (go, python), the name of the library")
+          .desc("if generating for a language that uses library names (go, python), the name of the library in that language")
           .hasArg()
           .build()
       )
