@@ -19,7 +19,7 @@ impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
 impl Client {
   pub fn from_conf(config: &::std::rc::Rc<
     crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
-  >) -> 
+  >) ->
 ::std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
   ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
   ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>

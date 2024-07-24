@@ -99,7 +99,7 @@ pub fn oblob_to_dafny(
 pub fn blob_from_dafny(
     input: ::dafny_runtime::Sequence<u8>,
 ) -> ::aws_smithy_types::Blob {
-    
+
     ::aws_smithy_types::Blob::new(
         ::std::rc::Rc::try_unwrap(input.to_array())
             .unwrap_or_else(|rc| (*rc).clone()),

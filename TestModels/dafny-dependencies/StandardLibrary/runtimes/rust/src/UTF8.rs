@@ -5,7 +5,7 @@ pub mod UTF8 {
   use crate::implementation_from_dafny::r#_Wrappers_Compile;
   use crate::implementation_from_dafny::UTF8;
 
-  
+
   impl crate::implementation_from_dafny::UTF8::_default {
     pub fn Encode(s: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>) -> ::std::rc::Rc<r#_Wrappers_Compile::Result<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
       let v = s.to_array();
@@ -13,7 +13,7 @@ pub mod UTF8 {
       // Use of .encode_utf8 method.
       let mut surrogate: Option<u16> = None;
       for c in v.iter() {
-        let s = 
+        let s =
           if let Some(s) = surrogate {
             String::from_utf16(&[s, c.0])
           } else {
@@ -29,7 +29,7 @@ pub mod UTF8 {
             if 0xD800 <= c.0 && c.0 <= 0xDFFF {
               surrogate = Some(c.0);
               continue;
-            } 
+            }
             return ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Failure {
               error: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
                 &e.to_string())
