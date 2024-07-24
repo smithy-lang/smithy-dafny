@@ -340,14 +340,3 @@ index 00000000..12cdf221
 +pub mod conversion;
 +pub mod implementation_from_dafny;
 \ No newline at end of file
-diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/tests/tests_from_dafny/mod.rs
-index 20caf2dd..c4a1c20f 100644
---- b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/tests/tests_from_dafny/mod.rs
-+++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/tests/tests_from_dafny/mod.rs
-@@ -1,5 +1,6 @@
- #![allow(warnings, unconditional_panic)]
- #![allow(nonstandard_style)]
-+use ::dafny_standard_library::implementation_from_dafny::*;
- 
- pub mod r#_TestUTF8_Compile {
-     pub struct _default {}
