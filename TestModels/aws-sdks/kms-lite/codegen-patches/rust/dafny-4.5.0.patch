@@ -319,7 +319,7 @@ index 00000000..424cc7a4
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_request.rs
 new file mode 100644
-index 00000000..60019386
+index 00000000..db5ac2e7
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/decrypt/_decrypt_request.rs
 @@ -0,0 +1,91 @@
@@ -365,7 +365,7 @@ index 00000000..60019386
 +    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
 +})
 +,
-+ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
 +    })
 +}
 + #[allow(dead_code)]
@@ -488,7 +488,7 @@ index 00000000..cca3e721
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_request.rs
 new file mode 100644
-index 00000000..221579fb
+index 00000000..4de00012
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/derive_shared_secret/_derive_shared_secret_request.rs
 @@ -0,0 +1,59 @@
@@ -514,7 +514,7 @@ index 00000000..221579fb
 +    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 +})
 +,
-+ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
 + Recipient: ::std::rc::Rc::new(match &value.recipient {
 +    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(&x) },
 +    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
@@ -630,7 +630,7 @@ index 00000000..758b03da
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_request.rs
 new file mode 100644
-index 00000000..3b96bcb1
+index 00000000..f7b055ef
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/encrypt/_encrypt_request.rs
 @@ -0,0 +1,80 @@
@@ -671,7 +671,7 @@ index 00000000..3b96bcb1
 +    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
 +})
 +,
-+ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
 +    })
 +}
 + #[allow(dead_code)]
@@ -1159,7 +1159,7 @@ index 00000000..4bd19cdc
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_request.rs
 new file mode 100644
-index 00000000..49cdfa45
+index 00000000..7973a1a7
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key/_generate_data_key_request.rs
 @@ -0,0 +1,91 @@
@@ -1205,7 +1205,7 @@ index 00000000..49cdfa45
 +    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
 +})
 +,
-+ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
 +    })
 +}
 + #[allow(dead_code)]
@@ -1324,7 +1324,7 @@ index 00000000..b53b06a9
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_request.rs
 new file mode 100644
-index 00000000..8f9d198f
+index 00000000..b61c1ced
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/generate_data_key_without_plaintext/_generate_data_key_without_plaintext_request.rs
 @@ -0,0 +1,80 @@
@@ -1365,7 +1365,7 @@ index 00000000..8f9d198f
 +    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 +})
 +,
-+ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
 +    })
 +}
 + #[allow(dead_code)]
@@ -1834,7 +1834,7 @@ index 00000000..ed5f837a
 +}
 diff --git b/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_request.rs a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_request.rs
 new file mode 100644
-index 00000000..c1e3c3ac
+index 00000000..6bea96b9
 --- /dev/null
 +++ a/TestModels/aws-sdks/kms-lite/runtimes/rust/src/conversions/re_encrypt/_re_encrypt_request.rs
 @@ -0,0 +1,116 @@
@@ -1892,7 +1892,7 @@ index 00000000..c1e3c3ac
 +    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
 +})
 +,
-+ DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
++ DryRun: dafny_standard_library::conversion::obool_to_dafny(value.dry_run),
 +    })
 +}
 + #[allow(dead_code)]
