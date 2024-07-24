@@ -12,7 +12,7 @@ pub fn to_dafny(
     crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig,
 >{
     ::std::rc::Rc::new(
-        crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig::SimpleConstructorConfig { blobValue: blob_to_dafny(config.blob_value), booleanValue: obool_to_dafny(&config.boolean_value), stringValue: ostring_to_dafny(&config.string_value), integerValue: oint_to_dafny(config.integer_value), longValue: olong_to_dafny(config.long_value) })
+        crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::SimpleConstructorConfig::SimpleConstructorConfig { blobValue: blob_to_dafny(config.blob_value), booleanValue: obool_to_dafny(config.boolean_value), stringValue: ostring_to_dafny(&config.string_value), integerValue: oint_to_dafny(config.integer_value), longValue: olong_to_dafny(config.long_value) })
 }
 
 fn blob_to_dafny(
