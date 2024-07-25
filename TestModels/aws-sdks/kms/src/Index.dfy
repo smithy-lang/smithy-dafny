@@ -3,7 +3,7 @@
 
 include "../Model/ComAmazonawsKmsTypes.dfy"
 
-module Com_Amazonaws_Kms refines AbstractComAmazonawsKmsService {
+module Com.Amazonaws.Kms refines AbstractComAmazonawsKmsService {
 
   function method DefaultKMSClientConfigType() : KMSClientConfigType {
     KMSClientConfigType
