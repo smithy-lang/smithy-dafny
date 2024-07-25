@@ -8,23 +8,15 @@ which will execute the `__main__.py` file in the `dafny` directory.
 
 import sys
 
+# Dafny-generated tests are not compiled as a package
+# and require adding Dafny-generated test code to PYTHONPATH.
+# These files are only on PYTHONPATH for tests executed from this file.
 
 internaldafny_dir = '/'.join(__file__.split("/")[:-1])
 
 sys.path.append(internaldafny_dir + "/extern")
 sys.path.append(internaldafny_dir + "/generated")
 
-if "module_" not in sys.modules:
-  import module_
-  sys.modules["module_"] = module_
-
-# Import modules required for Dafny-generated tests.
-# This is not generated; these must be manually added.
-
-import standard_library
-
-# End import modules required for Dafny-generated tests
 
 def test_dafny():
-  # Dafny tests are executed when importing `internaldafny_test_executor`
-  import internaldafny_test_executor
+  from .generated import __main__
