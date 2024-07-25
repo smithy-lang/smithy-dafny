@@ -18,7 +18,7 @@ sys.path.append(internaldafny_dir + "/extern")
 sys.path.append(internaldafny_dir + "/generated")
 
 # Initialize extern for test
-from .extern import wrapped_simple_extendable_resources
+from . import extern
 
 def test_dafny():
   from .generated import __main__
