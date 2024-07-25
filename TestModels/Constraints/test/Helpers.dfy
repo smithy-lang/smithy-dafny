@@ -31,11 +31,13 @@ module Helpers {
       NonEmptyBlob := Some( [0, 1, 0, 1]),
       BlobLessThanOrEqualToTen := Some([0, 1, 0, 1]),
       MyList := Some(["00", "11"]),
-      NonEmptyList := Some(["MoreThentenChar", "11"]),
+      NonEmptyList := Some(["00", "11"]),
       ListLessThanOrEqualToTen := Some(["00", "11"]),
-      MyMap := Some(map["01234567890" := "1", "2" := "3"]),
+      ListWithConstraint := Some(["0", "123", "MaxTenChar"]),
+      MyMap := Some(map["0" := "1", "2" := "3"]),
       NonEmptyMap := Some(map["0" := "1", "2" := "3"]),
       MapLessThanOrEqualToTen := Some(map["0" := "1", "2" := "3"]),
+      MapWithConstraint := Some(map["0" := "1", "123" := "345", "MaxTenChar" := "0123456789"]),
       // Alphabetic := Some("alphabetic"),
       OneToTen := Some(3),
       myTenToTen := Some(3),
@@ -163,6 +165,13 @@ module Helpers {
     myListLessThanOrEqualToTen
   }
 
+  function method ForceListWithConstraint(value : seq<string> ) : ListWithConstraint
+  {
+    assume {:axiom} IsValid_ListWithConstraint(value);
+    var myListWithConstraint: ListWithConstraint := value;
+    myListWithConstraint
+  }
+
   function method ForceMyMap(value : map<string, string>) : MyMap
   {
     assume {:axiom} IsValid_MyMap(value);
@@ -182,6 +191,13 @@ module Helpers {
     assume {:axiom} IsValid_MapLessThanOrEqualToTen(value);
     var myMapLessThanOrEqualToTen: MapLessThanOrEqualToTen := value;
     myMapLessThanOrEqualToTen
+  }
+
+  function method ForceMapWithConstraint(value : map<string, string> ) : MapWithConstraint
+  {
+    assume {:axiom} IsValid_MapWithConstraint(value);
+    var myMapWithConstraint: MapWithConstraint := value;
+    myMapWithConstraint
   }
 
   function method ForceGreaterThanOne(value : int) : GreaterThanOne

@@ -367,6 +367,29 @@ module WrappedSimpleConstraintsTest {
     expect ret.Failure?;
   }
 
+  method TestGetConstraintWithListWithConstraint(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(ListLessThanOrEqualToTen := Some(ForceListWithConstraint([])));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(ListLessThanOrEqualToTen := Some(ForceListWithConstraint(["1"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(ListLessThanOrEqualToTen := Some(ForceListWithConstraint(["0", "1", "0123456789"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(ListLessThanOrEqualToTen := Some(ForceListWithConstraint(["0", "1", "MoreThen10Character"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+  }
+
   // @length(min: 1, max: 10)
   method TestGetConstraintWithMyMap(client: ISimpleConstraintsClient)
     requires client.ValidState()
@@ -435,6 +458,29 @@ module WrappedSimpleConstraintsTest {
     expect ret.Success?;
 
     input := input.(MapLessThanOrEqualToTen := Some(ForceMapLessThanOrEqualToTen(map["1" := "a", "2" := "a", "3" := "a", "4" := "a", "5" := "a", "6" := "a", "7" := "a", "8" := "a", "9" := "a", "0" := "a", "a" := "a"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+  }
+
+  method TestGetConstraintWithMapWithConstraint(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(ListLessThanOrEqualToTen := Some(ForceMapWithConstraint(map[])));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(ListLessThanOrEqualToTen := Some(ForceMapWithConstraint(map["1" := "a"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(ListLessThanOrEqualToTen := Some(ForceMapWithConstraint(map["0123456789" := "a", "b" := "abcdefghij", "IamAtTenCh" := "Metooooooo"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(ListLessThanOrEqualToTen := Some(ForceMapWithConstraint(map["0123456789012" := "a", "b" := "abcdefghijklm", "IamAtMoreThenTenCh" := "Metooooooooooo"])));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
   }

@@ -88,7 +88,7 @@ list MyList {
 
 @length(min: 1)
 list NonEmptyList {
-  member: MyString
+  member: String
 }
 
 @length(max: 10)
@@ -97,8 +97,13 @@ list ListLessThanOrEqualToTen {
 }
 
 @length(min: 1, max: 10)
+list ListWithConstraint {
+  member: MyString
+}
+
+@length(min: 1, max: 10)
 map MyMap {
-  key: MyString,
+  key: String,
   value: String,
 }
 
@@ -112,6 +117,11 @@ map NonEmptyMap {
 map MapLessThanOrEqualToTen {
   key: String,
   value: String,
+}
+
+map MapWithConstraint {
+  key: MyString,
+  value: MyString,
 }
 
 // we don't do patterns yet
@@ -156,9 +166,11 @@ structure GetConstraintsInput {
   MyList: MyList,
   NonEmptyList: NonEmptyList,
   ListLessThanOrEqualToTen: ListLessThanOrEqualToTen,
+  ListWithConstraint: ListWithConstraint,
   MyMap: MyMap,
   NonEmptyMap: NonEmptyMap,
   MapLessThanOrEqualToTen: MapLessThanOrEqualToTen,
+  MapWithConstraint : MapWithConstraint,
   // Alphabetic: Alphabetic,
   OneToTen: OneToTen,
   myTenToTen: TenToTen,
@@ -180,9 +192,11 @@ structure GetConstraintsOutput {
   MyList: MyList,
   NonEmptyList: NonEmptyList,
   ListLessThanOrEqualToTen: ListLessThanOrEqualToTen,
+  ListWithConstraint: ListWithConstraint,
   MyMap: MyMap,
   NonEmptyMap: NonEmptyMap,
   MapLessThanOrEqualToTen: MapLessThanOrEqualToTen,
+  MapWithConstraint : MapWithConstraint,
   // Alphabetic: Alphabetic,
   OneToTen: OneToTen,
   thatTenToTen: TenToTen,
