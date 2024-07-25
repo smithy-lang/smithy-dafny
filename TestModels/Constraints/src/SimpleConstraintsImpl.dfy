@@ -37,7 +37,8 @@ module SimpleConstraintsImpl refines AbstractSimpleConstraintsOperations  {
       // MyUniqueList := input.MyUniqueList,
       // MyComplexUniqueList := input.MyComplexUniqueList,
       MyUtf8Bytes := input.MyUtf8Bytes,
-      MyListOfUtf8Bytes := input.MyListOfUtf8Bytes
+      MyListOfUtf8Bytes := input.MyListOfUtf8Bytes,
+      MyUnionWithConstraint := input.MyUnionWithConstraint
     );
 
     return Success(res);
