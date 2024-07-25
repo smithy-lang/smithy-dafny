@@ -6,8 +6,8 @@ from boto3.session import Session
 
 from standard_library.internaldafny.generated.Wrappers import Option_Some
 from com_amazonaws_kms.smithygenerated.com_amazonaws_kms.shim import KMSClientShim
-from com_amazonaws_kms.internaldafny.generated.Com__Amazonaws__Kms import *
-import com_amazonaws_kms.internaldafny.generated.Com__Amazonaws__Kms
+from com_amazonaws_kms.internaldafny.generated.Com_Amazonaws_Kms import *
+import com_amazonaws_kms.internaldafny.generated.Com_Amazonaws_Kms
 
 
 # Persist this across calls; this doesn't change
@@ -20,7 +20,7 @@ def get_available_aws_regions():
     available_aws_regions = Session().get_available_regions("kms")
     return available_aws_regions
 
-class default__(com_amazonaws_kms.internaldafny.generated.Com__Amazonaws__Kms.default__):
+class default__(com_amazonaws_kms.internaldafny.generated.Com_Amazonaws_Kms.default__):
     @staticmethod
     def KMSClient(boto_client = None, region = None):
         if boto_client is None:
@@ -57,4 +57,4 @@ class default__(com_amazonaws_kms.internaldafny.generated.Com__Amazonaws__Kms.de
         client_region_name = client._impl.meta.region_name
         return Option_Some(region.VerbatimString(False) == client_region_name)
 
-com_amazonaws_kms.internaldafny.generated.Com__Amazonaws__Kms.default__ = default__
+com_amazonaws_kms.internaldafny.generated.Com_Amazonaws_Kms.default__ = default__
