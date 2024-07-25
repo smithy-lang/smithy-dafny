@@ -376,19 +376,15 @@ module WrappedSimpleConstraintsTest {
     ensures client.ValidState()
   {
     var input := GetValidInput();
-    input := input.(ListLessThanOrEqualToTen := Some(ForceListWithConstraint([])));
+    input := input.(ListWithConstraint := Some(ForceListWithConstraint(["1"])));
     var ret := client.GetConstraints(input := input);
     expect ret.Success?;
 
-    input := input.(ListLessThanOrEqualToTen := Some(ForceListWithConstraint(["1"])));
+    input := input.(ListWithConstraint := Some(ForceListWithConstraint(["0", "1", "0123456789"])));
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
 
-    input := input.(ListLessThanOrEqualToTen := Some(ForceListWithConstraint(["0", "1", "0123456789"])));
-    ret := client.GetConstraints(input := input);
-    expect ret.Success?;
-
-    input := input.(ListLessThanOrEqualToTen := Some(ForceListWithConstraint(["0", "1", "MoreThen10Character"])));
+    input := input.(ListWithConstraint := Some(ForceListWithConstraint(["0", "1", "MoreThen10Character"])));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
   }
