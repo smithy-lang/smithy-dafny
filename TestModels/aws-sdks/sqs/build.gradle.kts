@@ -17,6 +17,7 @@ dependencies {
 
     // Must be built and published to the local Maven repo
     implementation("software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0")
+    implementation("software.amazon.smithy.python:smithy-python-codegen:0.1.0")
 }
 
 tasks.register("polymorphDafny") {
