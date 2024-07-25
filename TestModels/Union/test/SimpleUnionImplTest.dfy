@@ -18,13 +18,12 @@ module SimpleUnionImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-        var ret := client.GetUnion(GetUnionInput(union := Some(IntegerValue(100))));
+        var ret :- expect client.GetUnion(GetUnionInput(union := Some(IntegerValue(100))));
 
-        expect ret.Failure?
-        // expect ret.union.Some?;
-        // expect ret.union.value.IntegerValue?;
-        // expect ret.union.value.IntegerValue == 100;
-        // expect ret.union.value.StringValue? == false;
+        expect ret.union.Some?;
+        expect ret.union.value.IntegerValue?;
+        expect ret.union.value.IntegerValue == 100;
+        expect ret.union.value.StringValue? == false;
     }
 
     method TestMyUnionString(client: ISimpleUnionClient)

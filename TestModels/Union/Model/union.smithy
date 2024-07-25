@@ -26,11 +26,8 @@ structure GetUnionOutput {
     union: MyUnion
 }
 
-@range(min: 1, max: 10)
-integer OneToTen
-
 union MyUnion {
-    IntegerValue: OneToTen,
+    IntegerValue: Integer,
     StringValue: String
 }
 
