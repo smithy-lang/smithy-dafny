@@ -15,10 +15,6 @@ class default__(WrappedSimpleDependenciesService.default__):
 
     @staticmethod
     def WrappedSimpleDependencies(config):
-#         wrapped_config = dafny_config_to_smithy_config(config)
-#         impl = SimpleDependencies(wrapped_config)
-#         wrapped_client = SimpleDependenciesShim(impl)
-#         return Wrappers.Result_Success(wrapped_client)
         # Use an alternate internal-Dafny constructor to create the Dafny client, then pass that directly into the Smithy client
         dafny_client = DafnySimpleDependencies.default__.SimpleDependencies(config).value
         impl = SimpleDependencies(dafny_client=dafny_client)

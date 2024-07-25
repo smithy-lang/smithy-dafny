@@ -35,16 +35,3 @@ class my_NativeResourceFactory:
     native_underlying_resource = dafny_to_smithy.simple_extendable_resources_ExtendableResourceReference(dafny_resource)
     native_resource = default__(native_underlying_resource)
     return native_resource
-
-
-# TODO-Python-PYTHONPATH: Remove import and try/catch, only needed for path issues
-# Problem: simple_extendable_resources_internaldafny_nativeresourcefactory is only built in tests,
-#   but SimpleDependencies relies on this current file,
-#   and ExtendableResource's tests are not built for another file's src.
-# Workaround: Only import if able.
-# Fix: Remove PYTHONPATH workaround.
-try:
-  import NativeResourceFactory
-  NativeResourceFactory.default__ = my_NativeResourceFactory
-except ModuleNotFoundError:
-  pass

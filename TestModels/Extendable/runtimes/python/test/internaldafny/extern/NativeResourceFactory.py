@@ -1,0 +1,4 @@
+import NativeResourceFactory
+import simple_extendable_resources.internaldafny.extern.native_resource
+
+NativeResourceFactory.default__ = simple_extendable_resources.internaldafny.extern.native_resource.my_NativeResourceFactory
