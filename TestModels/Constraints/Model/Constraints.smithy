@@ -119,6 +119,7 @@ map MapLessThanOrEqualToTen {
   value: String,
 }
 
+@length(min: 1, max: 10)
 map MapWithConstraint {
   key: MyString,
   value: MyString,
