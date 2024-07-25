@@ -46,7 +46,8 @@ module Helpers {
       // MyUniqueList := Some(["one", "two"]),
       // MyComplexUniqueList := Some(myComplexUniqueList),
       MyUtf8Bytes := Some(PROVIDER_ID),
-      MyListOfUtf8Bytes := Some([PROVIDER_ID, PROVIDER_ID])
+      MyListOfUtf8Bytes := Some([PROVIDER_ID, PROVIDER_ID]),
+      MyUnionWithConstraint := Some(IntegerValue(1))
     )
   }
 

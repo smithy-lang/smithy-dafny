@@ -181,6 +181,7 @@ structure GetConstraintsInput {
   // MyComplexUniqueList: MyComplexUniqueList,
   MyUtf8Bytes: Utf8Bytes,
   MyListOfUtf8Bytes: ListOfUtf8Bytes,
+  MyUnionWithConstraint: UnionWithConstraint
 }
 
 structure GetConstraintsOutput {
@@ -207,6 +208,12 @@ structure GetConstraintsOutput {
   // MyComplexUniqueList: MyComplexUniqueList,
   MyUtf8Bytes: Utf8Bytes,
   MyListOfUtf8Bytes: ListOfUtf8Bytes,
+  MyUnionWithConstraint: UnionWithConstraint
+}
+
+union UnionWithConstraint {
+  IntegerValue: OneToTen,
+  StringValue: MyString
 }
 
 // See Comment in traits.smithy
