@@ -5,6 +5,8 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
+NAMESPACE=com.amazonaws.kms
+
 PROJECT_SERVICES := \
 	ComAmazonawsKms\
 

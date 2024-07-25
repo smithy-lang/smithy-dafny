@@ -4,7 +4,7 @@
 include "../src/Index.dfy"
 
 module TestComAmazonawsKms {
-  import Kms = Com_Amazonaws_Kms
+  import Com.Amazonaws.Kms
   import opened StandardLibrary.UInt
   import opened Wrappers
 
