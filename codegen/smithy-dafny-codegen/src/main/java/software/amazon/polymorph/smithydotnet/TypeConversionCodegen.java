@@ -788,20 +788,6 @@ public class TypeConversionCodegen {
       TO_DAFNY
     );
 
-    if (!nameResolver.memberShapeIsOptional(memberShape)) {
-      final TokenTree fromDafnyBody = Token.of(
-        "return %s(value);".formatted(targetFromDafnyConverterName)
-      );
-      final TokenTree toDafnyBody = Token.of(
-        "return %s(value);".formatted(targetToDafnyConverterName)
-      );
-      return buildConverterFromMethodBodies(
-        memberShape,
-        fromDafnyBody,
-        toDafnyBody
-      );
-    }
-
     String cSharpTypeUnModified;
     if (
       StringUtils.equals(
@@ -817,6 +803,20 @@ public class TypeConversionCodegen {
     if (cSharpTypeUnModified.endsWith("?")) {
       cSharpTypeUnModified =
         cSharpTypeUnModified.substring(0, (cSharpTypeUnModified.length() - 1));
+    }
+
+    if (!nameResolver.memberShapeIsOptional(memberShape)) {
+      final TokenTree fromDafnyBody = Token.of(
+              "return %s(value);".formatted(targetFromDafnyConverterName)
+      );
+      final TokenTree toDafnyBody = Token.of(
+              "return %s((%s)value);".formatted(targetToDafnyConverterName, cSharpTypeUnModified)
+      );
+      return buildConverterFromMethodBodies(
+              memberShape,
+              fromDafnyBody,
+              toDafnyBody
+      );
     }
 
     final String cSharpType = cSharpTypeUnModified;
@@ -891,6 +891,7 @@ public class TypeConversionCodegen {
           .map(memberShape -> {
             final String propertyName =
               nameResolver.classPropertyForStructureMember(memberShape);
+            final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
             final String memberFromDafnyConverterName = typeConverterForShape(
               memberShape.getId(),
               FROM_DAFNY
@@ -921,8 +922,9 @@ public class TypeConversionCodegen {
               .append(
                 TokenTree
                   .of(
-                    "converted.%s = %s(concrete.dtor_%s);".formatted(
+                    "converted.%s = (%s)(%s(concrete.dtor_%s));".formatted(
                         propertyName,
+                        propertyType,
                         memberFromDafnyConverterName,
                         destructorValue
                       ),
