@@ -807,15 +807,18 @@ public class TypeConversionCodegen {
 
     if (!nameResolver.memberShapeIsOptional(memberShape)) {
       final TokenTree fromDafnyBody = Token.of(
-              "return %s(value);".formatted(targetFromDafnyConverterName)
+        "return %s(value);".formatted(targetFromDafnyConverterName)
       );
       final TokenTree toDafnyBody = Token.of(
-              "return %s((%s)value);".formatted(targetToDafnyConverterName, cSharpTypeUnModified)
+        "return %s((%s)value);".formatted(
+            targetToDafnyConverterName,
+            cSharpTypeUnModified
+          )
       );
       return buildConverterFromMethodBodies(
-              memberShape,
-              fromDafnyBody,
-              toDafnyBody
+        memberShape,
+        fromDafnyBody,
+        toDafnyBody
       );
     }
 
@@ -891,7 +894,8 @@ public class TypeConversionCodegen {
           .map(memberShape -> {
             final String propertyName =
               nameResolver.classPropertyForStructureMember(memberShape);
-            final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
+            final String propertyType =
+              nameResolver.classPropertyTypeForStructureMember(memberShape);
             final String memberFromDafnyConverterName = typeConverterForShape(
               memberShape.getId(),
               FROM_DAFNY

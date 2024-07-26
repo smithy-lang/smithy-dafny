@@ -143,7 +143,13 @@ public class Native extends NameResolver {
 
     return switch (shape.getType()) {
       // All primitives are boxed for safety, even if @required
-      case BOOLEAN, BYTE, SHORT, INTEGER, LONG, FLOAT, DOUBLE -> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
+      case BOOLEAN,
+        BYTE,
+        SHORT,
+        INTEGER,
+        LONG,
+        FLOAT,
+        DOUBLE -> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
       // For supported simple shapes, just map to native types
       case BLOB,
         TIMESTAMP,
