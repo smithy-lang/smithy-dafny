@@ -18,7 +18,7 @@ impl SimpleResourceReference {
 pub struct SimpleResourceReferenceBuilder {}
 impl SimpleResourceReferenceBuilder {
     /// Consumes the builder and constructs a [`SimpleResourceReference`](crate::types::SimpleResourceReference).
-    pub fn build(self) -> crate::types::SimpleResourceReference {
-        crate::types::SimpleResourceReference {}
+    pub fn build(self) -> crate::SimpleResourceReference {
+        crate::SimpleResourceReference {}
     }
 }

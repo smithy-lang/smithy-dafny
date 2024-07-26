@@ -4,7 +4,7 @@ use aws_smithy_types::error::operation::BuildError;
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::ISimpleTypesBooleanClient>
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient>
 }
 
 impl Client {
@@ -14,7 +14,7 @@ impl Client {
         conf: crate::types::simple_positional_config::SimplePositionalConfig,
     ) -> Result<Self, BuildError> {
         let inner =
-            crate::implementation_from_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(
+            crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::_default::SimpleBoolean(
                 &crate::conversions::simple_positional_config::_simple_positional_config::to_dafny(conf),
             );
         if matches!(
@@ -34,4 +34,5 @@ impl Client {
     }
 }
 
-mod get_boolean;
+mod get_resource;
+mod get_resource_positional;

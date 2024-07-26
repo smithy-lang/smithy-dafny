@@ -4,11 +4,11 @@
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetResourcePositionalOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub output: crate::types::SimpleResourceReference,
+    pub output: crate::SimpleResourceReference,
 }
 impl GetResourcePositionalOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn output(&self) -> &crate::types::SimpleResourceReference {
+    pub fn output(&self) -> &crate::SimpleResourceReference {
         &self.output
     }
 }
@@ -27,25 +27,25 @@ impl GetResourcePositionalOutput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetResourcePositionalOutputBuilder {
-    pub(crate) output: ::std::option::Option<crate::types::SimpleResourceReference>,
+    pub(crate) output: ::std::option::Option<crate::SimpleResourceReference>,
 }
 impl GetResourcePositionalOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
     /// This field is required.
-    pub fn output(mut self, input: crate::types::SimpleResourceReference) -> Self {
+    pub fn output(mut self, input: crate::SimpleResourceReference) -> Self {
         self.output = ::std::option::Option::Some(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
     pub fn set_output(
         mut self,
-        input: ::std::option::Option<crate::types::SimpleResourceReference>,
+        input: ::std::option::Option<crate::SimpleResourceReference>,
     ) -> Self {
         self.output = input;
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_output(&self) -> &::std::option::Option<crate::types::SimpleResourceReference> {
+    pub fn get_output(&self) -> &::std::option::Option<crate::SimpleResourceReference> {
         &self.output
     }
     /// Consumes the builder and constructs a [`GetResourcePositionalOutput`](crate::operation::get_resource_positional::GetResourcePositionalOutput).

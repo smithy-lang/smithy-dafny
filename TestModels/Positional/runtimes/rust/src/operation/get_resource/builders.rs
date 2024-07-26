@@ -10,10 +10,7 @@ impl crate::operation::get_resource::builders::GetResourceInputBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::get_resource::GetResourceOutput,
-        ::aws_smithy_runtime_api::client::result::SdkError<
-            crate::operation::get_resource::GetResourceError,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >,
+        crate::operation::get_resource::GetResourceError,
     > {
         let mut fluent_builder = client.get_resource();
         fluent_builder.inner = self;
@@ -24,35 +21,16 @@ impl crate::operation::get_resource::builders::GetResourceInputBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetResourceFluentBuilder {
-    handle: ::std::sync::Arc<crate::client::Handle>,
+    client: crate::Client,
     inner: crate::operation::get_resource::builders::GetResourceInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
 }
-impl
-    crate::client::customize::internal::CustomizableSend<
-        crate::operation::get_resource::GetResourceOutput,
-        crate::operation::get_resource::GetResourceError,
-    > for GetResourceFluentBuilder
-{
-    fn send(
-        self,
-        config_override: crate::config::Builder,
-    ) -> crate::client::customize::internal::BoxFuture<
-        crate::client::customize::internal::SendResult<
-            crate::operation::get_resource::GetResourceOutput,
-            crate::operation::get_resource::GetResourceError,
-        >,
-    > {
-        ::std::boxed::Box::pin(async move { self.config_override(config_override).send().await })
-    }
-}
+
 impl GetResourceFluentBuilder {
     /// Creates a new `GetResourceFluentBuilder`.
-    pub(crate) fn new(handle: ::std::sync::Arc<crate::client::Handle>) -> Self {
+    pub(crate) fn new(client: crate::client::Client) -> Self {
         Self {
-            handle,
+            client,
             inner: ::std::default::Default::default(),
-            config_override: ::std::option::Option::None,
         }
     }
     /// Access the GetResource as a reference.
@@ -71,49 +49,20 @@ impl GetResourceFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::get_resource::GetResourceOutput,
-        ::aws_smithy_runtime_api::client::result::SdkError<
-            crate::operation::get_resource::GetResourceError,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >,
+        crate::operation::get_resource::GetResourceError,
     > {
         let input = self
             .inner
             .build()
-            .map_err(::aws_smithy_runtime_api::client::result::SdkError::construction_failure)?;
-        let runtime_plugins =
-            crate::operation::get_resource::GetResource::operation_runtime_plugins(
-                self.handle.runtime_plugins.clone(),
-                &self.handle.conf,
-                self.config_override,
-            );
-        crate::operation::get_resource::GetResource::orchestrate(&runtime_plugins, input).await
+            // Using unhandled since GetResource doesn't declare any validation,
+            // and smithy-rs seems to not generate a ValidationError case unless there is
+            // (but isn't that a backwards compatibility problem for output structures?)
+            // Vanilla smithy-rs uses SdkError::construction_failure,
+            // but we aren't using SdkError.
+            .map_err(crate::operation::get_resource::GetResourceError::unhandled)?;
+        crate::operation::get_resource::GetResource::send(&self.client, input).await
     }
 
-    /// Consumes this builder, creating a customizable operation that can be modified before being sent.
-    pub fn customize(
-        self,
-    ) -> crate::client::customize::CustomizableOperation<
-        crate::operation::get_resource::GetResourceOutput,
-        crate::operation::get_resource::GetResourceError,
-        Self,
-    > {
-        crate::client::customize::CustomizableOperation::new(self)
-    }
-    pub(crate) fn config_override(
-        mut self,
-        config_override: impl ::std::convert::Into<crate::config::Builder>,
-    ) -> Self {
-        self.set_config_override(::std::option::Option::Some(config_override.into()));
-        self
-    }
-
-    pub(crate) fn set_config_override(
-        &mut self,
-        config_override: ::std::option::Option<crate::config::Builder>,
-    ) -> &mut Self {
-        self.config_override = config_override;
-        self
-    }
     #[allow(missing_docs)] // documentation missing in model
     pub fn name(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.inner = self.inner.name(input.into());

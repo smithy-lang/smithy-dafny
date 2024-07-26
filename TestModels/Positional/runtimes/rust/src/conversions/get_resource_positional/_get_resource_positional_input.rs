@@ -3,7 +3,7 @@
 pub fn to_dafny(
     value: crate::operation::get_resource_positional::GetResourcePositionalInput,
 ) -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
-    let dafny_value = match value.value {
+    let dafny_value = match value.name {
         Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
         None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
     };
