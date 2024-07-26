@@ -14,7 +14,7 @@ impl Client {
         conf: crate::types::simple_positional_config::SimplePositionalConfig,
     ) -> Result<Self, BuildError> {
         let inner =
-            crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::_default::SimpleBoolean(
+            crate::implementation_from_dafny::_simple_dpositional_dinternaldafny::_default::SimplePositional(
                 &crate::conversions::simple_positional_config::_simple_positional_config::to_dafny(conf),
             );
         if matches!(
