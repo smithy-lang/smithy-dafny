@@ -10,10 +10,7 @@ impl crate::operation::get_resource_positional::builders::GetResourcePositionalI
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::get_resource_positional::GetResourcePositionalOutput,
-        ::aws_smithy_runtime_api::client::result::SdkError<
-            crate::operation::get_resource_positional::GetResourcePositionalError,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >,
+        crate::operation::get_resource_positional::GetResourcePositionalError,
     > {
         let mut fluent_builder = client.get_resource_positional();
         fluent_builder.inner = self;
@@ -55,25 +52,21 @@ impl GetResourcePositionalFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::get_resource_positional::GetResourcePositionalOutput,
-        ::aws_smithy_runtime_api::client::result::SdkError<
-            crate::operation::get_resource_positional::GetResourcePositionalError,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >,
+        crate::operation::get_resource_positional::GetResourcePositionalError,
     > {
         let input = self
             .inner
             .build()
-            .map_err(::aws_smithy_runtime_api::client::result::SdkError::construction_failure)?;
-        let runtime_plugins = crate::operation::get_resource_positional::GetResourcePositional::operation_runtime_plugins(
-            self.handle.runtime_plugins.clone(),
-            &self.handle.conf,
-            self.config_override,
-        );
-        crate::operation::get_resource_positional::GetResourcePositional::orchestrate(
-            &runtime_plugins,
-            input,
-        )
-        .await
+            // Using unhandled since GetResourcePositional doesn't declare any validation,
+            // and smithy-rs seems to not generate a ValidationError case unless there is
+            // (but isn't that a backwards compatibility problem for output structures?)
+            // Vanilla smithy-rs uses SdkError::construction_failure,
+            // but we aren't using SdkError.
+            .map_err(
+                crate::operation::get_resource_positional::GetResourcePositionalError::unhandled,
+            )?;
+        crate::operation::get_resource_positional::GetResourcePositional::send(&self.client, input)
+            .await
     }
 
     #[allow(missing_docs)] // documentation missing in model

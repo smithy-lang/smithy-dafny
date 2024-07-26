@@ -5,33 +5,23 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<
     crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput,
 >{
-    let dafny_value = match value.value {
-        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-    };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput::GetResourcePositionalOutput {
-    value: ::std::rc::Rc::new(dafny_value)
-  })
+    let output = dafny_runtime::Object(todo!());
+
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput::GetResourceOutput { output })
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput,
+    _dafny_value: ::std::rc::Rc<
+    crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+        ::dafny_runtime::Object<
+            dyn crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource,
+            >,
+        ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+        >
     >,
 ) -> crate::operation::get_resource_positional::GetResourcePositionalOutput {
-    let value = if matches!(
-        dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
-    ) {
-        Some(dafny_value.value().Extract())
-    } else if matches!(
-        dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
-    ) {
-        None
-    } else {
-        panic!("Unreachable")
-    };
+    let output = crate::SimpleResourceReference {};
+
     crate::operation::get_resource_positional::GetResourcePositionalOutput { output }
 }
