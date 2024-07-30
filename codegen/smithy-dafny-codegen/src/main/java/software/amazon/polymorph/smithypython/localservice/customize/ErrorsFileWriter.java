@@ -335,12 +335,20 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     """,
                 DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
         writer.addStdlibImport("_dafny");
-        // Add service-specific OpaqueError
+        // Service-specific OpaqueError; we know it has obj
         writer.write(
                 """
                     if isinstance(e, OpaqueError):
                         return $L.Error_Opaque(obj=e.obj)
                     """,
+                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
+        writer.addStdlibImport(DafnyNameResolver.getDafnyGeneratedPathForSmithyNamespace(serviceShape.getId().getNamespace()));
+        // Nothing found, we know nothing about this error. Cast as opaque
+        writer.write(
+                """
+                else:
+                    return $L.Error_Opaque(obj=e)
+                """,
                 DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
         writer.addStdlibImport(DafnyNameResolver.getDafnyGeneratedPathForSmithyNamespace(serviceShape.getId().getNamespace()));
     }

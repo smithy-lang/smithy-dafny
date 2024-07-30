@@ -2,22 +2,20 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import static java.lang.String.format;
 
-import java.time.ZonedDateTime;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
+import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.NullableIndex;
-import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.*;
-import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
@@ -420,7 +418,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    * @param memberName
    */
   protected void writeInitMethodAssignerForRequiredMember(MemberShape member, String memberName) {
-    writeInitMethodConstraintsChecksForMember(member, memberName);
+    ConstraintUtils.writeInitMethodConstraintsChecksForMember(writer, model, member, memberName);
     writer.write("self.$1L = $1L", memberName);
   }
 
@@ -431,139 +429,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    * @param memberName
    */
   protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
-    writeInitMethodConstraintsChecksForMember(member, memberName);
+    ConstraintUtils.writeInitMethodConstraintsChecksForMember(writer, model, member, memberName);
     writer.write(
         "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
-  }
-
-  /**
-   * Write checks for supported constraint traits.
-   * Currently, {@link RangeTrait} and {@link LengthTrait} are supported.
-   * @param member
-   * @param memberName
-   */
-  protected void writeInitMethodConstraintsChecksForMember(MemberShape member, String memberName) {
-    // RangeTrait
-    Shape targetShape = model.expectShape(member.getTarget());
-    if (targetShape.hasTrait(RangeTrait.class)) {
-      RangeTrait rangeTrait = targetShape.getTrait(RangeTrait.class).get();
-      if (rangeTrait.getMin().isPresent()) {
-        writeRangeTraitMinCheckForMember(member, memberName, rangeTrait);
-      }
-      if (rangeTrait.getMax().isPresent()) {
-        writeRangeTraitMaxCheckForMember(member, memberName, rangeTrait);
-      }
-    }
-
-    // LengthTrait
-    if (targetShape.hasTrait(LengthTrait.class)) {
-      LengthTrait lengthTrait = targetShape.getTrait(LengthTrait.class).get();
-      if (lengthTrait.getMin().isPresent()) {
-        writeLengthTraitMinCheckForMember(memberName, lengthTrait);
-      }
-      if (lengthTrait.getMax().isPresent()) {
-        writeLengthTraitMaxCheckForMember(memberName, lengthTrait);
-      }
-    }
-  }
-
-  /**
-   * Write validation for {@link LengthTrait} min value. Called from __init__.
-   *
-   * @param memberName
-   * @param lengthTrait
-   */
-  protected void writeLengthTraitMinCheckForMember(String memberName, LengthTrait lengthTrait) {
-    String min = ConstrainTraitUtils.LengthTraitUtils.min(lengthTrait);
-    writer.openBlock(
-        "if ($1L is not None) and (len($1L) < $2L):",
-        "",
-        memberName,
-        min,
-        () -> {
-          writer.write(
-              """
-                    raise ValueError("The size of $1L must be greater than or equal to $2L")
-                    """,
-              memberName,
-              min);
-        });
-  }
-
-  /**
-   * Write validation for {@link LengthTrait} max value. Called from __init__.
-   *
-   * @param memberName
-   * @param lengthTrait
-   */
-  protected void writeLengthTraitMaxCheckForMember(String memberName, LengthTrait lengthTrait) {
-    String max = ConstrainTraitUtils.LengthTraitUtils.max(lengthTrait);
-    writer.openBlock(
-        "if ($1L is not None) and (len($1L) > $2L):",
-        "",
-        memberName,
-        max,
-        () -> {
-          writer.write(
-              """
-                    raise ValueError("The size of $1L must be less than or equal to $2L")
-                    """,
-              memberName,
-              max);
-        });
-  }
-
-  /**
-   * Write validation for {@link RangeTrait} min value. Called from __init__.
-   *
-   * @param member
-   * @param memberName
-   * @param rangeTrait
-   */
-  protected void writeRangeTraitMinCheckForMember(
-      MemberShape member, String memberName, RangeTrait rangeTrait) {
-    String min =
-        ConstrainTraitUtils.RangeTraitUtils.minAsShapeType(
-            model.expectShape(member.getTarget()), rangeTrait);
-    writer.openBlock(
-        "if ($1L is not None) and ($1L < $2L):",
-        "",
-        memberName,
-        min,
-        () -> {
-          writer.write(
-              """
-                    raise ValueError("$1L must be greater than or equal to $2L")
-                    """,
-              memberName,
-              min);
-        });
-  }
-
-  /**
-   * Write validation for {@link RangeTrait} max value. Called from __init__.
-   *
-   * @param member
-   * @param memberName
-   * @param rangeTrait
-   */
-  protected void writeRangeTraitMaxCheckForMember(
-      MemberShape member, String memberName, RangeTrait rangeTrait) {
-    String max =
-        ConstrainTraitUtils.RangeTraitUtils.maxAsShapeType(
-            model.expectShape(member.getTarget()), rangeTrait);
-    writer.openBlock(
-        "if ($1L is not None) and ($1L > $2L):",
-        "",
-        memberName,
-        max,
-        () -> {
-          writer.write(
-              """
-                    raise ValueError("$1L must be less than or equal to $2L")
-                    """,
-              memberName,
-              max);
-        });
   }
 }
