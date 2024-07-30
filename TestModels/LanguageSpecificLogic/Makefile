@@ -17,6 +17,8 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # Projects using replaceable modules must explicitly define these values.
 NET_SRC_INDEX=src/replaces/net
 NET_TEST_INDEX=test/replaces/net
+RUST_SRC_INDEX=src/replaces/rust
+RUST_TEST_INDEX=test/replaces/rust
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
