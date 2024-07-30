@@ -27,8 +27,16 @@ _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
 _polymorph_wrapped_java: ;
+_polymorph_wrapped_python: ;
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+
+# Python
+
+PYTHON_MODULE_NAME=com_amazonaws_kms
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
