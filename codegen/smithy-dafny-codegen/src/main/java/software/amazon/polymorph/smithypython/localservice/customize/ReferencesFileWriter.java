@@ -275,7 +275,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
 
         writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
             serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors",
-      "_smithy_error_to_dafny_error"
+            "_smithy_error_to_dafny_error"
         );
 
       writer.openBlock(

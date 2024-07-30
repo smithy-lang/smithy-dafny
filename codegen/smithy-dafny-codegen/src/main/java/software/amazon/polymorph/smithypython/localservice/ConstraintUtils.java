@@ -52,8 +52,8 @@ public class ConstraintUtils {
         () -> {
           writer.write(
               """
-                  raise ValueError("The size of $1L must be greater than or equal to $2L")
-                  """,
+              raise ValueError("The size of $1L must be greater than or equal to $2L")
+              """,
               memberName,
               min);
         });
@@ -76,8 +76,8 @@ public class ConstraintUtils {
         () -> {
           writer.write(
               """
-                      raise ValueError("The size of $1L must be less than or equal to $2L")
-                      """,
+              raise ValueError("The size of $1L must be less than or equal to $2L")
+              """,
               memberName,
               max);
         });
@@ -107,8 +107,8 @@ public class ConstraintUtils {
         () -> {
           writer.write(
               """
-                      raise ValueError("$1L must be greater than or equal to $2L")
-                      """,
+              raise ValueError("$1L must be greater than or equal to $2L")
+              """,
               memberName,
               min);
         });
@@ -138,8 +138,8 @@ public class ConstraintUtils {
         () -> {
           writer.write(
               """
-                      raise ValueError("$1L must be less than or equal to $2L")
-                      """,
+              raise ValueError("$1L must be less than or equal to $2L")
+              """,
               memberName,
               max);
         });
