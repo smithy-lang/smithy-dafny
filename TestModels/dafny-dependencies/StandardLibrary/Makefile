@@ -72,21 +72,6 @@ transpile_java: | transpile_implementation_java transpile_test_java
 # StandardLibrary as a dependency
 transpile_python: | transpile_implementation_python transpile_test_python
 
-# Hacky workaround until Dafny supports per-language extern names.
-# Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
-# This is flawed logic and should be removed, but is a reasonable band-aid for now.
-# TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
-# This may require new Smithy-Dafny logic to generate Pythonic extern names.
-_python_underscore_extern_names:
-	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/\./_/g' {} \;
-	echo "Skipping Model modification for StandardLibrary"
-	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/\./_/g' {} \;
-
-_python_revert_underscore_extern_names:
-	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/_/\./g' {} \;
-	echo "Skipping Model modification for StandardLibrary"
-	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/_/\./g' {} \;
-
 ########################## Rust targets
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
@@ -116,16 +101,6 @@ transpile_implementation:
 		--allow-warnings \
 		--output $(OUT) \
 		$(TRANSPILE_MODULE_NAME)
-
-build_implementation:
-	dafny build \
-		-t:$(TARGET) \
-		./src/Index.dfy \
-		-o $(OUT) \
-		--quantifier-syntax:3 \
-		--function-syntax:3 \
-		--optimize-erasable-datatype-wrapper:false \
-		./src/Index.dfy
 
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
