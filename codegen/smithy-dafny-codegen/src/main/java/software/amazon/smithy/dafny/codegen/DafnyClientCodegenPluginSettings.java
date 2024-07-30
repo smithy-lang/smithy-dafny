@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.ShapeId;

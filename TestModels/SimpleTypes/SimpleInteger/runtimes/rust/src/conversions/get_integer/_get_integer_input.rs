@@ -3,15 +3,13 @@
 pub fn to_dafny(
     value: crate::operation::get_integer::GetIntegerInput,
 ) -> ::std::rc::Rc<
-    ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
+    crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
 > {
     let dafny_value = match value.value {
-        Some(v) => ::simple_integer_dafny::_Wrappers_Compile::Option::Some {
-            value: v,
-        },
-        None => ::simple_integer_dafny::_Wrappers_Compile::Option::None {},
+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: v },
+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput::GetIntegerInput {
+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput::GetIntegerInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -19,17 +17,17 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_integer_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
+        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
     >,
 ) -> crate::operation::get_integer::GetIntegerInput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        ::simple_integer_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(dafny_value.value().Extract())
     } else if matches!(
         dafny_value.value().as_ref(),
-        ::simple_integer_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

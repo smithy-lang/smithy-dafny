@@ -1,0 +1,5 @@
+# Mostly generated for this test model (using --generate)
+runtimes/java/src
+runtimes/net/Extern
+runtimes/net/tests
+

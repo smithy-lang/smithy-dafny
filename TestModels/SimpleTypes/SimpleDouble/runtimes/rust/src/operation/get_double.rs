@@ -9,7 +9,7 @@ impl GetDouble {
         Self
     }
     pub(crate) async fn send(
-        handle: &crate::client::Handle,
+        client: &crate::client::Client,
         input: crate::operation::get_double::GetDoubleInput,
     ) -> ::std::result::Result<
         crate::operation::get_double::GetDoubleOutput,
@@ -17,14 +17,16 @@ impl GetDouble {
     > {
         let inner_input = crate::conversions::get_double::_get_double_input::to_dafny(input);
         let inner_result =
-            ::dafny_runtime::md!(handle.inner.clone()).GetDouble(&inner_input);
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetDouble(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_double_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
         ) {
-            Ok(crate::conversions::get_double::_get_double_output::from_dafny(
-                inner_result.value().clone(),
-            ))
+            Ok(
+                crate::conversions::get_double::_get_double_output::from_dafny(
+                    inner_result.value().clone(),
+                ),
+            )
         } else {
             Err(crate::conversions::get_double::from_dafny_error(
                 inner_result.error().clone(),

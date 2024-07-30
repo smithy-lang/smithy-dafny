@@ -9,9 +9,10 @@ impl super::Client {
     /// - On failure, responds with [`SdkError<GetIntegerError>`](crate::operation::get_integer_known_value::GetIntegerError)
     pub fn get_integer_known_value(
         &self,
-    ) -> crate::operation::get_integer_known_value::builders::GetIntegerKnownValueFluentBuilder {
+    ) -> crate::operation::get_integer_known_value::builders::GetIntegerKnownValueFluentBuilder
+    {
         crate::operation::get_integer_known_value::builders::GetIntegerKnownValueFluentBuilder::new(
-            self.handle.clone(),
+            self.clone(),
         )
     }
 }

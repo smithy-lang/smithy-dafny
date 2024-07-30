@@ -2,3 +2,5 @@
 pub mod get_blob;
 
 pub mod get_blob_known_value;
+
+pub mod simple_blob_config;

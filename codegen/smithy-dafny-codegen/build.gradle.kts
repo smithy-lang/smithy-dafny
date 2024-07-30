@@ -35,6 +35,8 @@ dependencies {
     // See https://github.com/smithy-lang/smithy-dafny/issues/184#issuecomment-2105109715
     implementation("software.amazon.smithy:smithy-smoke-test-traits:1.49.0")
 
+    implementation("org.commonmark:commonmark:0.22.0")
+
     implementation("com.google.guava:guava:30.1-jre")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.slf4j:slf4j-simple:1.7.32")

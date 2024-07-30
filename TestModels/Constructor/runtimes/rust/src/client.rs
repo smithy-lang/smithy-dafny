@@ -2,30 +2,22 @@
 
 use aws_smithy_types::error::operation::BuildError;
 
-#[derive(Debug)]
-pub(crate) struct Handle {
-    pub(crate) conf: crate::Config,
-    pub(crate) inner:
-        ::dafny_runtime::Object<dyn ::stub_dafny::r#_stub_dinternaldafny_dtypes::IStubClient>,
-}
-
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    handle: ::std::sync::Arc<Handle>,
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::ISimpleConstructorClient>,
 }
 
 impl Client {
     /// Creates a new client from the service [`Config`](crate::Config).
     #[track_caller]
     pub fn from_conf(conf: crate::Config) -> Result<Self, BuildError> {
-        // If this service had any configuration properties,
-        // they would need converting here too.
-        let inner_config =
-            ::std::rc::Rc::new(::stub_dafny::_stub_dinternaldafny::_default::DefaultStubConfig());
-        let inner = ::stub_dafny::_stub_dinternaldafny::_default::Stub(&inner_config);
+        let inner =
+            crate::implementation_from_dafny::r#_simple_dconstructor_dinternaldafny::_default::SimpleConstructor(
+                &crate::conversions::simple_constructor_config::_simple_constructor_config::to_dafny(conf),
+            );
         if matches!(
             inner.as_ref(),
-            ::stub_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(
@@ -34,23 +26,11 @@ impl Client {
                     .build(),
             ));
         }
-        let handle = Handle {
-            conf: conf.clone(),
-            inner: ::dafny_runtime::UpcastTo::<
-                dafny_runtime::Object<
-                    (dyn ::stub_dafny::r#_stub_dinternaldafny_dtypes::IStubClient + 'static),
-                >,
-            >::upcast_to(inner.Extract()),
-        };
-        Ok(Self {
-            handle: ::std::sync::Arc::new(handle),
-        })
-    }
 
-    /// Returns the client's configuration.
-    pub fn config(&self) -> &crate::Config {
-        &self.handle.conf
+        Ok(Self {
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
+        })
     }
 }
 
-mod get_stub;
+mod get_constructor;
