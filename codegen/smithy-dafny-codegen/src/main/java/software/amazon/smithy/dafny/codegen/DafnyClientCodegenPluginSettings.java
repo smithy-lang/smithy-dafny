@@ -170,7 +170,9 @@ class DafnyClientCodegenPluginSettings {
    */
   private static Optional<Path> findSmithyBuildJson(final Path start) {
     if (start == null || !start.isAbsolute()) {
-      throw new IllegalArgumentException("Start path must be non-null and absolute");
+      throw new IllegalArgumentException(
+        "Start path must be non-null and absolute"
+      );
     }
     Path cursor = start.normalize();
     final Path root = cursor.getRoot();
