@@ -1,0 +1,14 @@
+file_format_version = "1.0"
+dafny_version = "4.6.0.0"
+[options_by_module.SimplePositionalTypes]
+go-module-name = "github.com/Smithy-dafny/TestModels/Positional"
+[options_by_module.AbstractSimplePositionalOperations]
+go-module-name = "github.com/Smithy-dafny/TestModels/Positional"
+[options_by_module.AbstractSimplePositionalService]
+go-module-name = "github.com/Smithy-dafny/TestModels/Positional"
+[options_by_module.SimpleResource]
+go-module-name = "github.com/Smithy-dafny/TestModels/Positional"
+[options_by_module.SimplePositionalImpl]
+go-module-name = "github.com/Smithy-dafny/TestModels/Positional"
+[options_by_module.SimplePositional]
+go-module-name = "github.com/Smithy-dafny/TestModels/Positional"
