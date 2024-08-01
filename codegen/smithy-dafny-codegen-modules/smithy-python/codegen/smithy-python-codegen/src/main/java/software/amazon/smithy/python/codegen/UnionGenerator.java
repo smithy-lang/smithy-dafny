@@ -29,11 +29,11 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Renders unions.
  */
-public class UnionGenerator implements Runnable {
+public final class UnionGenerator implements Runnable {
 
-    protected final Model model;
+    private final Model model;
     private final SymbolProvider symbolProvider;
-    protected final PythonWriter writer;
+    private final PythonWriter writer;
     private final UnionShape shape;
     private final Set<Shape> recursiveShapes;
 
@@ -49,10 +49,6 @@ public class UnionGenerator implements Runnable {
         this.writer = writer;
         this.shape = shape;
         this.recursiveShapes = recursiveShapes;
-    }
-
-    protected void writeInitMethodConstraintsChecksForMember(MemberShape member, String memberName) {
-        // Stub method that can be overridden by other codegens.
     }
 
     @Override
@@ -74,7 +70,6 @@ public class UnionGenerator implements Runnable {
                     writer.writeDocs(trait.getValue());
                 });
                 writer.openBlock("def __init__(self, value: $T):", "", targetSymbol, () -> {
-                    writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
                     writer.write("self.value = value");
                 });
 

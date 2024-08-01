@@ -59,7 +59,7 @@ public class DafnyAwsSdkProtocolTrait extends AbstractTrait
     return builder().sourceLocation(getSourceLocation());
   }
 
-  /** Builder for {@link DafnyAwsSdkProtocolTrait}. */
+  /** Builder for {@link MutableLocalStateTrait}. */
   public static final class Builder
       extends AbstractTraitBuilder<DafnyAwsSdkProtocolTrait, DafnyAwsSdkProtocolTrait.Builder> {
 
@@ -72,6 +72,6 @@ public class DafnyAwsSdkProtocolTrait extends AbstractTrait
   }
 
   public static Shape getDefinition() {
-    return StructureShape.builder().id(DafnyAwsSdkProtocolTrait.ID).build();
+    return StructureShape.builder().id(MutableLocalStateTrait.ID).build();
   }
 }

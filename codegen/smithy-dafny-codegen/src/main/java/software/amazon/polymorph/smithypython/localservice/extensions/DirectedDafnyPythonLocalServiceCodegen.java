@@ -292,8 +292,8 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
           .useShapeWriter(
               directive.shape(),
               writer -> {
-                  DafnyPythonLocalServiceUnionGenerator generator =
-                    new DafnyPythonLocalServiceUnionGenerator(
+                UnionGenerator generator =
+                    new UnionGenerator(
                         directive.model(),
                         directive.symbolProvider(),
                         writer,

@@ -1,6 +1,3 @@
-// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: Apache-2.0
-
 package software.amazon.polymorph.smithypython.wrappedlocalservice.extensions;
 
 import static java.lang.String.format;

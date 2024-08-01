@@ -39,6 +39,9 @@ final class SetupGenerator {
             PythonSettings settings,
             GenerationContext context
     ) {
+        var dependencies = SymbolDependency.gatherDependencies(context.writerDelegator().getDependencies().stream());
+        writePyproject(settings, context.writerDelegator(), dependencies);
+        writeReadme(settings, context);
     }
 
     /**

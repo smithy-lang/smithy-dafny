@@ -414,7 +414,7 @@ polymorph_python:
 
 _polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 # Defined per-Makefile
-_polymorph_python: MODULE_NAME=--library-name $(PYTHON_MODULE_NAME)
+_polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
 # Defined per-Makefile
 _polymorph_python: DEPENDENCY_MODULE_NAMES=$(PYTHON_DEPENDENCY_MODULE_NAMES)
 _polymorph_python: _polymorph

@@ -123,6 +123,27 @@ public class ShimFileWriter implements CustomFileWriter {
                     ShapeVisitorResolver.getToNativeShapeVisitorForShape(
                         targetShapeInput, codegenContext, "input", writer));
 
+            // Generate code that:
+            // 1) "unwraps" the request (converts from the Dafny type to the Smithy type),
+            // 2) calls Smithy client,
+            // 3) wraps Smithy failures as Dafny failures
+            writer.write(
+                """
+              smithy_client_request: $L.$L = $L
+              try:
+                  smithy_client_response = self._impl.$L(smithy_client_request)
+              except ServiceError as e:
+                  return Wrappers.Result_Failure(_smithy_error_to_dafny_error(e))
+
+              """,
+                SmithyNameResolver.getSmithyGeneratedModelLocationForShape(inputShape, codegenContext),
+                inputShape.getName(),
+                input,
+                codegenContext.symbolProvider().toSymbol(operationShape).getName());
+
+            writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                    serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "_smithy_error_to_dafny_error");
+
             Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
             // Generate code that converts the output from Smithy type to the corresponding Dafny
             // type.
@@ -130,32 +151,16 @@ public class ShimFileWriter implements CustomFileWriter {
             // current position.
             String output =
                 targetShape.accept(
-                      ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
-                          targetShape, codegenContext, "smithy_client_response", writer));
+                    ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
+                        targetShape, codegenContext, "smithy_client_response", writer));
 
-            // Generate code that:
-            // 1) "unwraps" the request (converts from the Dafny type to the Smithy type),
-            // 2) calls Smithy client,
-            // 3) wraps Smithy failures as Dafny failures
+            // Generate code that wraps Smithy success shapes as Dafny success shapes
             writer.write(
-              """
-              try:
-                  smithy_client_request: $L.$L = $L
-                  smithy_client_response = self._impl.$L(smithy_client_request)
-                  return Wrappers.Result_Success($L)
-              except Exception as e:
-                  return Wrappers.Result_Failure(_smithy_error_to_dafny_error(e))
-              """,
-                SmithyNameResolver.getSmithyGeneratedModelLocationForShape(inputShape, codegenContext),
-                inputShape.getName(),
-                input,
-                codegenContext.symbolProvider().toSymbol(operationShape).getName(),
-                SmithyNameResolver.isUnitShape(outputShape) ? "None" : output
-            );
-
-            writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                    serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors", "_smithy_error_to_dafny_error");
-        });
+                """
+                return Wrappers.Result_Success($L)
+                """,
+                SmithyNameResolver.isUnitShape(outputShape) ? "None" : output);
+          });
     }
   }
 }

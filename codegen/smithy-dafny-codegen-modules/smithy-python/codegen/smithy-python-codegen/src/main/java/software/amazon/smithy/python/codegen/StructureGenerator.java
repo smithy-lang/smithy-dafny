@@ -244,7 +244,7 @@ public class StructureGenerator implements Runnable {
     }
 
 
-    protected boolean isOptionalDefault(MemberShape member) {
+    private boolean isOptionalDefault(MemberShape member) {
         // If a member with a default value isn't required, it's optional.
         // see: https://smithy.io/2.0/spec/type-refinement-traits.html#smithy-api-default-trait
         var target = model.expectShape(member.getTarget());
