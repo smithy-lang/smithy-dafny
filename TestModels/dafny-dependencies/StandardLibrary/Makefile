@@ -100,7 +100,7 @@ transpile_implementation:
 		--function-syntax:3 \
 		--allow-warnings \
 		--output $(OUT) \
-        $(DAFNY_OPTIONS) \
+		$(DAFNY_OPTIONS) \
 		$(TRANSPILE_MODULE_NAME)
 
 # Override SharedMakefile's build_java to not install
