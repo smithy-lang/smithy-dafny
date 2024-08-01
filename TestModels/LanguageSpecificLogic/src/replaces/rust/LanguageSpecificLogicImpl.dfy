@@ -26,7 +26,7 @@ module RustLanguageSpecificLogicImpl replaces LanguageSpecificLogicImpl  {
     //   the interface for this method on the Smithy model.
     // Instead, we define the `AllRuntimesMethod` which IS a Smithy operation
     //   and call this method from there.
-    method {:extern "GetRustRuntimeVersion" } GetRuntimeInformationRustExternMethod(config: InternalConfig)
+    method {:extern "GetRustRuntimeVersion"} GetRuntimeInformationRustExternMethod(config: InternalConfig)
         returns (output: Result<string, Error>)
         ensures output.Success? ==> output.value != ""
 }

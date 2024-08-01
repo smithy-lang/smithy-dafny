@@ -15,5 +15,10 @@ mod conversions;
 
 pub mod implementation_from_dafny;
 
+mod externs;
+
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
+
 pub use client::Client;
 pub use types::language_specific_logic_config::LanguageSpecificLogicConfig;

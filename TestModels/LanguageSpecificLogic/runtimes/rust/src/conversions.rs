@@ -2,3 +2,5 @@
 pub mod get_runtime_information;
 
 pub mod language_specific_logic_config;
+
+pub(crate) mod error;
