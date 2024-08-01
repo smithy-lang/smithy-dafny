@@ -12,7 +12,7 @@ include = ["**/internaldafny/generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-DafnyRuntimePython = "^4.4.0"
+DafnyRuntimePython = "^4.7.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
