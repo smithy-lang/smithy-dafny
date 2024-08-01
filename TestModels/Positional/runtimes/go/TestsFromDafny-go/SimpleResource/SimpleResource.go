@@ -4,6 +4,7 @@
 package SimpleResource
 
 import (
+	"fmt"
 	os "os"
 
 	simplepositionalinternaldafnytypes "github.com/Smithy-dafny/TestModels/Positional/simplepositionalinternaldafnytypes"
@@ -51,7 +52,8 @@ func (_this *SimpleResource) EqualsGeneric(x interface{}) bool {
 	return ok && _this.Equals(other)
 }
 
-func (*SimpleResource) String() string {
+func (_this *SimpleResource) String() string {
+	fmt.Println(_this._name)
 	return "SimpleResource.SimpleResource"
 }
 

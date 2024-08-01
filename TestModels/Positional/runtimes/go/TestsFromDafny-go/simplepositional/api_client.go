@@ -4,10 +4,15 @@ package simplepositional
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+
+	SimpleResources "github.com/Smithy-dafny/TestModels/Positional/SimpleResource"
 
 	"github.com/Smithy-dafny/TestModels/Positional/simplepositionalinternaldafny"
 	"github.com/Smithy-dafny/TestModels/Positional/simplepositionalinternaldafnytypes"
 	"github.com/Smithy-dafny/TestModels/Positional/simplepositionaltypes"
+	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
 )
 
 type Client struct {
@@ -45,7 +50,8 @@ func (client *Client) GetResource(ctx context.Context, params simplepositionalty
 
 }
 
-func (client *Client) GetResourcePositional(ctx context.Context, params simplepositionaltypes.GetResourcePositionalInput) (*simplepositionaltypes.GetResourcePositionalOutput, error) {
+func (client *Client) GetResourcePositional(ctx context.Context, params simplepositionaltypes.GetResourcePositionalInput) (*SimpleResources.SimpleResource, error) {
+	
 	err := params.Validate()
 	if err != nil {
 		opaqueErr := &simplepositionaltypes.OpaqueError{
@@ -53,14 +59,15 @@ func (client *Client) GetResourcePositional(ctx context.Context, params simplepo
 		}
 		return nil, opaqueErr
 	}
-	var dafny_request simplepositionalinternaldafnytypes.GetResourcePositionalInput = GetResourcePositionalInput_ToDafny(params)
+	var dafny_request dafny.Sequence = GetResourcePositionalInput_ToDafny(params)
 	var dafny_response = client.DafnyClient.GetResourcePositional(dafny_request)
-
+	
 	if dafny_response.Is_Failure() {
 		err := dafny_response.Dtor_error().(simplepositionalinternaldafnytypes.Error)
 		return nil, Error_FromDafny(err)
 	}
-	var native_response = GetResourcePositionalOutput_FromDafny(dafny_response.Extract().(simplepositionalinternaldafnytypes.GetResourcePositionalOutput))
-	return &native_response, nil
+	fmt.Println(reflect.TypeOf(dafny_response.Extract()))
+	var native_response = dafny_response.Extract().(*SimpleResources.SimpleResource)
+	return native_response, nil
 
 }

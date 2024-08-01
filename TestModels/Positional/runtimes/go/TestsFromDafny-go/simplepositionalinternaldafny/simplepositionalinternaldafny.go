@@ -4,6 +4,7 @@
 package simplepositionalinternaldafny
 
 import (
+	"fmt"
 	os "os"
 
 	SimplePositionalImpl "github.com/Smithy-dafny/TestModels/Positional/SimplePositionalImpl"
@@ -154,6 +155,18 @@ func (_this *SimplePositionalClient) GetResource(input simplepositionalinternald
 		output = _out2
 		return output
 	}
+}
+
+// recover function to handle panic
+func handlePanic() {
+
+	// detect if panic occurs or not
+	a := recover()
+
+	if a != nil {
+		fmt.Println("RECOVERED IN INTERNAL DAFNY", a)
+	}
+
 }
 func (_this *SimplePositionalClient) GetResourcePositional(input _dafny.Sequence) Wrappers.Result {
 	{

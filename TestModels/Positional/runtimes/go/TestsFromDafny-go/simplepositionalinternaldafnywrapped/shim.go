@@ -4,9 +4,10 @@ package simplepositionalinternaldafnywrapped
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/Smithy-dafny/TestModels/Positional/simplepositional"
 	"github.com/Smithy-dafny/TestModels/Positional/simplepositionalinternaldafnytypes"
+	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 )
 
@@ -33,11 +34,26 @@ func (shim *Shim) GetResource(input simplepositionalinternaldafnytypes.GetResour
 	return Wrappers.Companion_Result_.Create_Success_(simplepositional.GetResourceOutput_ToDafny(*native_response))
 }
 
-func (shim *Shim) GetResourcePositional(input simplepositionalinternaldafnytypes.GetResourcePositionalInput) Wrappers.Result {
+// recover function to handle panic
+func handlePanic() {
+
+	// detect if panic occurs or not
+	a := recover()
+  
+	if a != nil {
+	  fmt.Println("RECOVER IN SHIM", a)
+	}
+  
+  }
+
+func (shim *Shim) GetResourcePositional(input dafny.Sequence) Wrappers.Result {
+	defer handlePanic()
+	
 	var native_request = simplepositional.GetResourcePositionalInput_FromDafny(input)
 	var native_response, native_error = shim.client.GetResourcePositional(context.Background(), native_request)
+	fmt.Println(native_response)
 	if native_error != nil {
 		return Wrappers.Companion_Result_.Create_Failure_(simplepositional.Error_ToDafny(native_error))
 	}
-	return Wrappers.Companion_Result_.Create_Success_(simplepositional.GetResourcePositionalOutput_ToDafny(*native_response))
+	return Wrappers.Companion_Result_.Create_Success_(native_response)
 }

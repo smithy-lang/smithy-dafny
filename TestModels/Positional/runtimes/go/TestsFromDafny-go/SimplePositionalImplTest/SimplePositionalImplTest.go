@@ -4,6 +4,7 @@
 package SimplePositionalImplTest
 
 import (
+	"fmt"
 	os "os"
 
 	SimplePositionalImpl "github.com/Smithy-dafny/TestModels/Positional/SimplePositionalImpl"
@@ -103,7 +104,20 @@ func (_static *CompanionStruct_Default___) TestGetResource(client simpleposition
 		panic("test/SimplePositionalImplTest.dfy(30,8): " + (_dafny.SeqOfString("expectation violation")).String())
 	}
 }
+
+// recover function to handle panic
+func handlePanic() {
+
+	// detect if panic occurs or not
+	a := recover()
+
+	if a != nil {
+		fmt.Println("RECOVER impl test", a)
+	}
+
+}
 func (_static *CompanionStruct_Default___) TestGetResourcePositional(client simplepositionalinternaldafnytypes.ISimplePositionalClient) {
+	defer handlePanic()
 	var _11_input _dafny.Sequence
 	_ = _11_input
 	_11_input = _dafny.SeqOfString("TestPositional")
@@ -125,12 +139,14 @@ func (_static *CompanionStruct_Default___) TestGetResourcePositional(client simp
 	_ = _15_valueOrError1
 	var _out7 Wrappers.Result
 	_ = _out7
+
 	_out7 = (_12_resource).GetName(simplepositionalinternaldafnytypes.Companion_GetNameInput_.Create_GetNameInput_())
 	_15_valueOrError1 = _out7
 	if !(!((_15_valueOrError1).IsFailure())) {
 		panic("test/SimplePositionalImplTest.dfy(40,29): " + (_15_valueOrError1).String())
 	}
 	_14_getNameOutput = (_15_valueOrError1).Extract().(simplepositionalinternaldafnytypes.GetNameOutput)
+
 	if !(_dafny.Companion_Sequence_.Equal((_14_getNameOutput).Dtor_name(), _dafny.SeqOfString("TestPositional"))) {
 		panic("test/SimplePositionalImplTest.dfy(41,8): " + (_dafny.SeqOfString("expectation violation")).String())
 	}

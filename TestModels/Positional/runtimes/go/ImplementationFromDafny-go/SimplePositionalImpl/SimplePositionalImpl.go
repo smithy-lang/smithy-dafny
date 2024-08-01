@@ -4,6 +4,7 @@
 package SimplePositionalImpl
 
 import (
+	"fmt"
 	os "os"
 
 	SimpleResource "github.com/Smithy-dafny/TestModels/Positional/SimpleResource"
@@ -77,7 +78,20 @@ func (_static *CompanionStruct_Default___) GetResource(config Config, input simp
 	return output
 	return output
 }
+
+// recover function to handle panic
+func handlePanic() {
+
+	// detect if panic occurs or not
+	a := recover()
+
+	if a != nil {
+		fmt.Println("RECOVER Simple Positional Impl", a)
+	}
+
+}
 func (_static *CompanionStruct_Default___) GetResourcePositional(config Config, input _dafny.Sequence) Wrappers.Result {
+	defer handlePanic()
 	var output Wrappers.Result = Wrappers.Result{}
 	_ = output
 	var _3_resource *SimpleResource.SimpleResource

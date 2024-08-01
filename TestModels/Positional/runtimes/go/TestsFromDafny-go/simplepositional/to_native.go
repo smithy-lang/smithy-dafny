@@ -33,14 +33,14 @@ func GetResourceOutput_FromDafny(dafnyOutput simplepositionalinternaldafnytypes.
 
 }
 
-func GetResourcePositionalInput_FromDafny(dafnyInput simplepositionalinternaldafnytypes.GetResourcePositionalInput) simplepositionaltypes.GetResourcePositionalInput {
+func GetResourcePositionalInput_FromDafny(dafnyInput dafny.Sequence) simplepositionaltypes.GetResourcePositionalInput {
 
 	return simplepositionaltypes.GetResourcePositionalInput{Name: func() *string {
 		var s string
-		if dafnyInput.Dtor_name() == nil {
+		if dafnyInput == nil {
 			return nil
 		}
-		for i := dafny.Iterate(dafnyInput.Dtor_name()); ; {
+		for i := dafny.Iterate(dafnyInput); ; {
 			val, ok := i()
 			if !ok {
 				return &[]string{s}[0]
@@ -49,12 +49,6 @@ func GetResourcePositionalInput_FromDafny(dafnyInput simplepositionalinternaldaf
 			}
 		}
 	}()}
-
-}
-
-func GetResourcePositionalOutput_FromDafny(dafnyOutput simplepositionalinternaldafnytypes.GetResourcePositionalOutput) simplepositionaltypes.GetResourcePositionalOutput {
-
-	return simplepositionaltypes.GetResourcePositionalOutput{Output: SimpleResource_FromDafny(dafnyOutput.Dtor_output())}
 
 }
 

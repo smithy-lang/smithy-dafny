@@ -4,6 +4,7 @@
 package SimpleResource
 
 import (
+	"fmt"
 	os "os"
 
 	simplepositionalinternaldafnytypes "github.com/Smithy-dafny/TestModels/Positional/simplepositionalinternaldafnytypes"
@@ -51,8 +52,9 @@ func (_this *SimpleResource) EqualsGeneric(x interface{}) bool {
 	return ok && _this.Equals(other)
 }
 
-func (*SimpleResource) String() string {
-	return "SimpleResource.SimpleResource"
+func (_this *SimpleResource) String() string {
+	fmt.Println(_this._name)
+	return "_this._name"
 }
 
 func Type_SimpleResource_() _dafny.TypeDescriptor {
@@ -67,7 +69,8 @@ func (_this type_SimpleResource_) Default() interface{} {
 }
 
 func (_this type_SimpleResource_) String() string {
-	return "SimpleResource.SimpleResource"
+
+	return "SimpleResource.SimpleResource yo"
 }
 func (_this *SimpleResource) ParentTraits_() []*_dafny.TraitID {
 	return [](*_dafny.TraitID){simplepositionalinternaldafnytypes.Companion_ISimpleResource_.TraitID_}

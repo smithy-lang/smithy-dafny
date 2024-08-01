@@ -31,26 +31,12 @@ func GetResourceOutput_ToDafny(nativeOutput simplepositionaltypes.GetResourceOut
 
 }
 
-func GetResourcePositionalInput_ToDafny(nativeInput simplepositionaltypes.GetResourcePositionalInput) simplepositionalinternaldafnytypes.GetResourcePositionalInput {
-
-	return func() simplepositionalinternaldafnytypes.GetResourcePositionalInput {
-
-		return simplepositionalinternaldafnytypes.Companion_GetResourcePositionalInput_.Create_GetResourcePositionalInput_(func() dafny.Sequence {
+func GetResourcePositionalInput_ToDafny(nativeInput simplepositionaltypes.GetResourcePositionalInput) dafny.Sequence {
 			if nativeInput.Name == nil {
 				return nil
 			}
 			return dafny.SeqOfChars([]dafny.Char(*nativeInput.Name)...)
-		}())
-	}()
-
-}
-
-func GetResourcePositionalOutput_ToDafny(nativeOutput simplepositionaltypes.GetResourcePositionalOutput) simplepositionalinternaldafnytypes.GetResourcePositionalOutput {
-
-	return func() simplepositionalinternaldafnytypes.GetResourcePositionalOutput {
-
-		return simplepositionalinternaldafnytypes.Companion_GetResourcePositionalOutput_.Create_GetResourcePositionalOutput_(SimpleResource_ToDafny(nativeOutput.Output))
-	}()
+		
 
 }
 
