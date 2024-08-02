@@ -346,9 +346,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
         // Nothing found, we know nothing about this error. Cast as opaque
         writer.write(
                 """
-                    else:
-                        return $L.Error_Opaque(obj=e)
-                    """,
+                else:
+                    return $L.Error_Opaque(obj=e)
+                """,
                 DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
         writer.addStdlibImport(DafnyNameResolver.getDafnyGeneratedPathForSmithyNamespace(serviceShape.getId().getNamespace()));
     }
