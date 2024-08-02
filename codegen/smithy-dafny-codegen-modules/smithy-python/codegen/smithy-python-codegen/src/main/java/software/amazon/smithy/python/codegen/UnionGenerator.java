@@ -56,7 +56,7 @@ public class UnionGenerator implements Runnable {
     }
 
     protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
-        writer.openBlock("def __init__(self, value: '$T'):",
+        writer.openBlock("def __init__(self, value: $T):",
             "",
             targetShape.isStructureShape() || targetShape.isUnionShape()
                 ? "'%1$s'".formatted(targetSymbol)
