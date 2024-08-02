@@ -12,7 +12,7 @@ include = ["**/smithygenerated/**/*.py", "**/internaldafny/generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-DafnyRuntimePython = "^4.4.0"
+DafnyRuntimePython = "^4.7.0"
 # TODO: Depend on PyPi once Smithy-Python publishes their Python package there
 smithy-python = { path = "../../../../codegen/smithy-dafny-codegen-modules/smithy-python/python-packages/smithy-python", develop = false}
 
