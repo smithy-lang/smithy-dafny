@@ -26,7 +26,7 @@ import java.util.Map;
  * from the PythonClientCodegenPlugin by not calling `runner.performDefaultCodegenTransforms()` and
  * `runner.createDedicatedInputsAndOutputs()`. These methods transform the model in ways such that the
  * model does not align with the generated Dafny code. This Plugin also attaches a
- * DafnyAwsSdkProtocolTrait to the ServiceShape provided in settings. AWS SDKs do not consistently
+ * {@link DafnyAwsSdkProtocolTrait} to the ServiceShape provided in settings. AWS SDKs do not consistently
  * label a protocol, and Smithy-Python requires that a protocol is assigned. Rather than declare
  * that we are using some protocol (e.g. `restJson1`) then not use that in practice, it is more
  * proper to define some custom protocol and use that.
@@ -67,10 +67,10 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
 
   @Override
   public void execute(PluginContext context) {
-    CodegenDirector<PythonWriter, PythonIntegration, GenerationContext, PythonSettings> runner =
+    final CodegenDirector<PythonWriter, PythonIntegration, GenerationContext, PythonSettings> runner =
         new CodegenDirector<>();
 
-    PythonSettings settings = PythonSettings.from(context.getSettings());
+    final PythonSettings settings = PythonSettings.from(context.getSettings());
     settings.setProtocol(DafnyAwsSdkProtocolTrait.ID);
     runner.settings(settings);
     runner.directedCodegen(new DirectedDafnyPythonAwsSdkCodegen());
@@ -81,7 +81,7 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
 
     // Add a DafnyAwsSdkProtocolTrait to the service as a contextual indicator highlighting
     //   that the DafnyPythonAwsSdk protocol should be used.
-    ServiceShape serviceShape =
+    final ServiceShape serviceShape =
         context.getModel().expectShape(settings.getService()).asServiceShape().get();
     runner.model(addAwsSdkProtocolTrait(context.getModel(), serviceShape));
 
