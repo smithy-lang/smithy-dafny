@@ -55,6 +55,18 @@ public class UnionGenerator implements Runnable {
         // Stub method that can be overridden by other codegens.
     }
 
+    protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
+        writer.openBlock("def __init__(self, value: '$T'):",
+            "",
+            targetShape.isStructureShape() || targetShape.isUnionShape()
+                ? "'%1$s'".formatted(targetSymbol)
+                : "%1$s".formatted(targetSymbol),
+            () -> {
+            writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
+            writer.write("self.value = value");
+        });
+    }
+
     @Override
     public void run() {
         var parentName = symbolProvider.toSymbol(shape).getName();
@@ -73,10 +85,8 @@ public class UnionGenerator implements Runnable {
                 member.getMemberTrait(model, DocumentationTrait.class).ifPresent(trait -> {
                     writer.writeDocs(trait.getValue());
                 });
-                writer.openBlock("def __init__(self, value: $T):", "", targetSymbol, () -> {
-                    writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
-                    writer.write("self.value = value");
-                });
+
+                writeInitMethodForMember(member, memberSymbol, target, targetSymbol);
 
                 writer.openBlock("def as_dict(self) -> Dict[str, Any]:", "", () -> {
                     if (target.isStructureShape() || target.isUnionShape()) {
