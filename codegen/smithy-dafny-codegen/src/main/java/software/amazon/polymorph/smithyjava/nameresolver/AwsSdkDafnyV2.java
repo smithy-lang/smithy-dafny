@@ -9,6 +9,7 @@ import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
+import software.amazon.awssdk.utils.internal.CodegenNamingUtils;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
@@ -118,7 +119,7 @@ public class AwsSdkDafnyV2 extends Dafny {
     return CodeBlock.of(
       "$L.$L()",
       variableName,
-      uncapitalize(memberShape.getMemberName())
+      CodegenNamingUtils.lowercaseFirstChar(CodegenNamingUtils.pascalCase(memberShape.getMemberName()))
     );
   }
 
