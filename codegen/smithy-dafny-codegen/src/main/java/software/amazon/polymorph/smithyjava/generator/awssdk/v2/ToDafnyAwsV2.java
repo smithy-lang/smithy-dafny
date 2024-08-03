@@ -546,7 +546,7 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     ParameterSpec parameterSpec = ParameterSpec
       .builder(
-        subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()),
+        subject.nativeNameResolver.typeForShape(shape.getId()),
         "nativeValue"
       )
       .build();
