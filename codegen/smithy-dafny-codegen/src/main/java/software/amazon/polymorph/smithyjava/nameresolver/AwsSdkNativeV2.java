@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import software.amazon.awssdk.codegen.internal.Utils;
 import software.amazon.awssdk.codegen.model.service.ServiceModel;
 import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
 import software.amazon.awssdk.utils.internal.CodegenNamingUtils;
@@ -261,7 +263,7 @@ public class AwsSdkNativeV2 extends Native {
       return CodeBlock.of("$L", shape.getMemberName().toLowerCase());
     }
 
-    return CodeBlock.of("$L", CodegenNamingUtils.lowercaseFirstChar(CodegenNamingUtils.pascalCase(shape.getMemberName())));
+    return CodeBlock.of("$L", Utils.unCapitalize(shape.getMemberName()));
   }
 
   public ClassName classNameForAwsSdkShape(final Shape shape) {
