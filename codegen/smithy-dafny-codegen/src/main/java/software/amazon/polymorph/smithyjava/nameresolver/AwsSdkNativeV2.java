@@ -286,26 +286,26 @@ public class AwsSdkNativeV2 extends Native {
               CodegenNamingUtils.pascalCase(shape.getId().getName())
       );
     }
-
-    if (smithyName.simpleName().endsWith("Input")) {
-      return ClassName.get(
-        smithyName.packageName(),
-        smithyName
-          .simpleName()
-          .substring(0, smithyName.simpleName().lastIndexOf("Input")) +
-        "Request"
-      );
-    }
-
-    if (smithyName.simpleName().endsWith("Output")) {
-      return ClassName.get(
-        smithyName.packageName(),
-        smithyName
-          .simpleName()
-          .substring(0, smithyName.simpleName().lastIndexOf("Output")) +
-        "Response"
-      );
-    }
+//
+//    if (smithyName.simpleName().endsWith("Input")) {
+//      return ClassName.get(
+//        smithyName.packageName(),
+//        smithyName
+//          .simpleName()
+//          .substring(0, smithyName.simpleName().lastIndexOf("Input")) +
+//        "Request"
+//      );
+//    }
+//
+//    if (smithyName.simpleName().endsWith("Output")) {
+//      return ClassName.get(
+//        smithyName.packageName(),
+//        smithyName
+//          .simpleName()
+//          .substring(0, smithyName.simpleName().lastIndexOf("Output")) +
+//        "Response"
+//      );
+//    }
 
     if (shape.hasTrait(ErrorTrait.class)) {
       if (smithyName.simpleName().contains("KMS")) {
