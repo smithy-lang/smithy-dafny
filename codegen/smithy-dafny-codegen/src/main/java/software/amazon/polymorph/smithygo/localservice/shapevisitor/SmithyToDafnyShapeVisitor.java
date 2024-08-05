@@ -6,6 +6,7 @@ import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -164,15 +165,24 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         if (isPointerType) {
             nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
         }
-        var goCodeBlock = """
+        String goCodeBlock = "";
+        String fieldSeparator = ",";
+        if (!shape.hasTrait(PositionalTrait.class)){
+            builder.append("%1$s(".formatted(companionStruct));
+            goCodeBlock = """
                 func () %s {
                     %s
                     return %s
                 }()""";
-
-
-        builder.append("%1$s(".formatted(companionStruct));
-        String fieldSeparator = ",";
+        }
+        else {
+            // Positional trait can only have one variable.
+            fieldSeparator = "";
+            // Don't unwrap position trait shape
+            goCodeBlock = """
+                    %s
+            """;
+        }
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
             final var memberName = memberShapeEntry.getKey();
             final var memberShape = memberShapeEntry.getValue();
@@ -184,8 +194,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                             )), fieldSeparator
             ));
         }
-
-
+        if (shape.hasTrait(PositionalTrait.class)){
+            return goCodeBlock.formatted(builder.toString());
+        }
         return goCodeBlock.formatted(returnType, nilCheck, someWrapIfRequired.formatted(builder.append(")").toString()));
     }
 
