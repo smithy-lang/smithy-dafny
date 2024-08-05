@@ -142,7 +142,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
             final String DtorConversion; 
-            System.out.println(shape.hasTrait(PositionalTrait.class));
             if (!shape.hasTrait(PositionalTrait.class)) {
                 DtorConversion = ".Dtor_%s()".formatted(memberName);
             } else {
