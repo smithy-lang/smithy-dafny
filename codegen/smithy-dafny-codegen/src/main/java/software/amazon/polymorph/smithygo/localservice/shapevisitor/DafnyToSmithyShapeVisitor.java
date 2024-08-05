@@ -6,6 +6,7 @@ import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -140,9 +141,17 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberName = memberShapeEntry.getKey();
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
+            final String DtorConversion; 
+            System.out.println(shape.hasTrait(PositionalTrait.class));
+            if (!shape.hasTrait(PositionalTrait.class)) {
+                DtorConversion = ".Dtor_%s()".formatted(memberName);
+            } else {
+                // Shapes with PositionalTrait already gets input unwrapped so no conversion needed.
+                DtorConversion = "";
+            }
             //TODO: Is it ever possible for structure to be nil?
             final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
-                                                                       ".Dtor_%s()".formatted(memberName),
+                                                                       DtorConversion,
                                                                        memberShape.isOptional() ? ".UnwrapOr(nil)" : "",
                                                                        memberShape.isOptional() && targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class) ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
                 builder.append("%1$s: %2$s%3$s,".formatted(
