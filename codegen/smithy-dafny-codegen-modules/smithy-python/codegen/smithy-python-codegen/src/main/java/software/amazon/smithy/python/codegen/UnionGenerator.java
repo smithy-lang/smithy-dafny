@@ -63,8 +63,8 @@ public class UnionGenerator implements Runnable {
             "",
             targetSymbol,
             () -> {
-            writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
-            writer.write("self.value = value");
+                writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
+                writer.write("self.value = value");
         });
     }
 
