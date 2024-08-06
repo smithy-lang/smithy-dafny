@@ -26,6 +26,8 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.utils.StringUtils;
 
+import static java.lang.String.format;
+
 /**
  * Renders unions.
  */
@@ -56,13 +58,10 @@ public class UnionGenerator implements Runnable {
     }
 
     protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
-        writer.openBlock("def __init__(self, value: '$L'):".formatted(
-                targetShape.isStructureShape() || targetShape.isUnionShape()
-                ? "'$T'"
-                : "$T"
-            ),
+        String formatString = format("def __init__(self, value: %s):", getTargetFormat(member));
+        writer.openBlock(formatString,
             "",
-            targetSymbol.getNamespace() + "." + targetSymbol.getName(),
+            targetSymbol,
             () -> {
             writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
             writer.write("self.value = value");
@@ -171,6 +170,17 @@ public class UnionGenerator implements Runnable {
         writer.write("$L = Union[$L]", parentName, String.join(", ", memberNames));
 
         writeGlobalFromDict();
+    }
+
+    private String getTargetFormat(MemberShape member) {
+        Shape target = model.expectShape(member.getTarget());
+        // Recursive shapes may be referenced before they're defined even with
+        // a topological sort. So forward references need to be used when
+        // referencing them.
+        if (recursiveShapes.contains(target)) {
+            return "'$T'";
+        }
+        return "$T";
     }
 
     private void writeGlobalFromDict() {
