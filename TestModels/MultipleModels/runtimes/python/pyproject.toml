@@ -16,7 +16,7 @@ python = "^3.11.0"
 smithy-python = { path = "../../../../codegen/smithy-dafny-codegen-modules/smithy-python/python-packages/smithy-python", develop = false}
 
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
-DafnyRuntimePython = "^4.4.0"
+DafnyRuntimePython = "^4.7.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

@@ -26,6 +26,8 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.utils.StringUtils;
 
+import static java.lang.String.format;
+
 /**
  * Renders unions.
  */
@@ -55,6 +57,17 @@ public class UnionGenerator implements Runnable {
         // Stub method that can be overridden by other codegens.
     }
 
+    protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
+        String formatString = format("def __init__(self, value: %s):", getTargetFormat(member));
+        writer.openBlock(formatString,
+            "",
+            targetSymbol,
+            () -> {
+                writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
+                writer.write("self.value = value");
+        });
+    }
+
     @Override
     public void run() {
         var parentName = symbolProvider.toSymbol(shape).getName();
@@ -73,10 +86,8 @@ public class UnionGenerator implements Runnable {
                 member.getMemberTrait(model, DocumentationTrait.class).ifPresent(trait -> {
                     writer.writeDocs(trait.getValue());
                 });
-                writer.openBlock("def __init__(self, value: $T):", "", targetSymbol, () -> {
-                    writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
-                    writer.write("self.value = value");
-                });
+
+                writeInitMethodForMember(member, memberSymbol, target, targetSymbol);
 
                 writer.openBlock("def as_dict(self) -> Dict[str, Any]:", "", () -> {
                     if (target.isStructureShape() || target.isUnionShape()) {
@@ -159,6 +170,17 @@ public class UnionGenerator implements Runnable {
         writer.write("$L = Union[$L]", parentName, String.join(", ", memberNames));
 
         writeGlobalFromDict();
+    }
+
+    private String getTargetFormat(MemberShape member) {
+        Shape target = model.expectShape(member.getTarget());
+        // Recursive shapes may be referenced before they're defined even with
+        // a topological sort. So forward references need to be used when
+        // referencing them.
+        if (recursiveShapes.contains(target)) {
+            return "'$T'";
+        }
+        return "$T";
     }
 
     private void writeGlobalFromDict() {
