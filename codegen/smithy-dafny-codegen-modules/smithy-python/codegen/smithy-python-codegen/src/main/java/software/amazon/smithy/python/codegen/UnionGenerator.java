@@ -56,13 +56,13 @@ public class UnionGenerator implements Runnable {
     }
 
     protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
-        writer.openBlock("def __init__(self, value: %1$s):".formatted(
+        writer.openBlock("def __init__(self, value: '$L'):".formatted(
                 targetShape.isStructureShape() || targetShape.isUnionShape()
                 ? "'$T'"
                 : "$T"
             ),
             "",
-            targetSymbol,
+            targetSymbol.getNamespace() + "." + targetSymbol.getName(),
             () -> {
             writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
             writer.write("self.value = value");
