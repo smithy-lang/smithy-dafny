@@ -274,38 +274,28 @@ public class AwsSdkNativeV2 extends Native {
     );
 
     if (operationIndex.isInputStructure(shape)) {
+      var operations = operationIndex.getInputBindings(shape);
+      if (operations.size() > 1) {
+        throw new IllegalArgumentException("Structures bound to more than one operation as input are not supported: " + shape);
+      }
+      var operation = operations.stream().findFirst().get();
       return ClassName.get(
-          defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
-          CodegenNamingUtils.pascalCase(shape.getId().getName())
+              smithyName.packageName(),
+              CodegenNamingUtils.pascalCase(operation.getId().getName()) + "Request"
       );
     }
 
     if (operationIndex.isOutputStructure(shape)) {
+      var operations = operationIndex.getOutputBindings(shape);
+      if (operations.size() > 1) {
+        throw new IllegalArgumentException("Structures bound to more than one operation as output are not supported: " + shape);
+      }
+      var operation = operations.stream().findFirst().get();
       return ClassName.get(
-              defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
-              CodegenNamingUtils.pascalCase(shape.getId().getName())
+          smithyName.packageName(),
+          CodegenNamingUtils.pascalCase(operation.getId().getName()) + "Response"
       );
     }
-//
-//    if (smithyName.simpleName().endsWith("Input")) {
-//      return ClassName.get(
-//        smithyName.packageName(),
-//        smithyName
-//          .simpleName()
-//          .substring(0, smithyName.simpleName().lastIndexOf("Input")) +
-//        "Request"
-//      );
-//    }
-//
-//    if (smithyName.simpleName().endsWith("Output")) {
-//      return ClassName.get(
-//        smithyName.packageName(),
-//        smithyName
-//          .simpleName()
-//          .substring(0, smithyName.simpleName().lastIndexOf("Output")) +
-//        "Response"
-//      );
-//    }
 
     if (shape.hasTrait(ErrorTrait.class)) {
       if (smithyName.simpleName().contains("KMS")) {
