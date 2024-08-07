@@ -53,7 +53,7 @@ public class SmithyNameResolver {
     }
 
     public static String getSmithyTypeAws(final Shape shape, final Symbol symbol, boolean subtype) {
-        if(symbol.getNamespace().contains("smithy.")) {
+        if(symbol.getNamespace().contains("smithy.") || symbol.getName().contains("string")) {
             return symbol.getName();
         }
         return SmithyNameResolver.smithyTypesNamespaceAws(shape, subtype).concat(DOT).concat(symbol.getName());
