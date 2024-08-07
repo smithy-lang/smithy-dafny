@@ -126,7 +126,7 @@ public class AwsSdkNativeV2 extends Native {
     return ClassName.get(
       packageNameForAwsSdkV2Shape(shape),
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(awsServiceSmithyNamespace,
-              shape.expectTrait(ServiceTrait.class).getSdkId() + "Client")
+              sdkId(shape) + "Client")
     );
   }
 
@@ -367,6 +367,12 @@ public class AwsSdkNativeV2 extends Native {
     return this.awsSDKNaming.getEnumValueName(enumValueName);
   }
 
+  private static String sdkId(ServiceShape serviceShape) {
+    return serviceShape.getTrait(ServiceTrait.class)
+                .map(serviceTrait -> serviceTrait.getSdkId())
+                .orElse(serviceShape.getId().getName());
+  }
+
   /**
    * Returns the TypeName for an AWS Service's Client Interface.
    */
@@ -380,7 +386,7 @@ public class AwsSdkNativeV2 extends Native {
       packageName,
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
         serviceShape.getId().getNamespace(),
-              shape.expectTrait(ServiceTrait.class).getSdkId() + "Client"
+              sdkId(serviceShape) + "Client"
       )
     );
   }
@@ -396,7 +402,7 @@ public class AwsSdkNativeV2 extends Native {
       modelPackage,
       AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.getOrDefault(
         serviceShape.getId().getNamespace(),
-        serviceShape.expectTrait(ServiceTrait.class).getSdkId() + "Exception"
+        sdkId(serviceShape) + "Exception"
       )
     );
   }
