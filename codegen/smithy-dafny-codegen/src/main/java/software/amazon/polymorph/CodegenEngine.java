@@ -742,8 +742,7 @@ public class CodegenEngine {
           if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
             Path patchFile = patchFilePair.getValue();
             LOGGER.info("Applying patch file {}", patchFile);
-            String output = runCommand(libraryRoot, "git", "apply", "-v", patchFile.toString());
-            LOGGER.info(output);
+            runCommand(libraryRoot, "git", "apply", patchFile.toString());
             return;
           }
         }
