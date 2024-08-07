@@ -134,5 +134,8 @@ public abstract class TestModelTest {
         output
       );
     }
+
+    // TODO-HACK
+    System.err.println(output);
   }
 }
