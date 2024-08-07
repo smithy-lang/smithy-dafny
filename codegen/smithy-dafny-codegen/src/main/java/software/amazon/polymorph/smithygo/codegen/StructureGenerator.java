@@ -112,6 +112,7 @@ public final class StructureGenerator implements Runnable {
 
                     if (targetShape.hasTrait(ReferenceTrait.class)) {
                         memberSymbol = memberSymbol.getProperty("Referred", Symbol.class).get();
+                        
                         var refShape = targetShape.expectTrait(ReferenceTrait.class);
                         if (refShape.isService()) {
                             namespace = SmithyNameResolver.shapeNamespace(model.expectShape(refShape.getReferentId()));
@@ -124,9 +125,14 @@ public final class StructureGenerator implements Runnable {
                             writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(targetShape.toShapeId().getNamespace()), namespace);
                         }
                     }
-
+                    
+                    System.out.println(memberSymbol);
                     writer.write("$L $P", memberName, memberSymbol);
-
+                    System.out.println("""
+                        \n\n\n
+                        >>>>
+                        %s
+                    """.formatted(writer));
                 });
         writer.closeBlock("}").write("");
         renderValidator(symbol, sortedMembers, isInputStructure);

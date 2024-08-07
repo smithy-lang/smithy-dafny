@@ -1,8 +1,10 @@
 package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.polymorph.traits.ReferenceTrait;
 
 import java.util.Map;
 
@@ -31,6 +33,10 @@ public class SmithyNameResolver {
     }
 
     public static String smithyTypesNamespace(final Shape shape) {
+        // if (shape.isResourceShape()) {   
+        //     // TypesNamespace for resources are in ShapeName        
+        //     return shape.getId().getName();
+        // }
         return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase().concat("types");
     }
 
@@ -48,6 +54,10 @@ public class SmithyNameResolver {
     public static String getSmithyType(final Shape shape, final Symbol symbol) {
         if(symbol.getNamespace().contains("smithy.")) {
             return symbol.getName();
+        }
+        else if (shape.isResourceShape()) {   
+            // Symbol for resources are found in ShapeName.ShapeName         
+            return SmithyNameResolver.smithyTypesNamespace(shape).concat(DOT).concat(shape.getId().getName());
         }
         return SmithyNameResolver.smithyTypesNamespace(shape).concat(DOT).concat(symbol.getName());
     }
@@ -89,5 +99,9 @@ public class SmithyNameResolver {
     public static String getFromDafnyMethodName(final Shape shape, final String disambiguator) {
         final var methodName = shape.getId().getName().concat("_FromDafny");
         return SmithyNameResolver.shapeNamespace(shape).concat(DOT).concat(methodName);
+    }
+
+    public static String getNativeTypeForShape (final Shape shape) {
+        return "Dummy";
     }
 }
