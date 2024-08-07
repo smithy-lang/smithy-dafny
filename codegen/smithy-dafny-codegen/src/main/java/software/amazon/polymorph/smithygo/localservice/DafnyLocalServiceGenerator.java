@@ -267,7 +267,8 @@ public class DafnyLocalServiceGenerator implements Runnable {
                 final var operationShape = model.expectShape(operation, OperationShape.class);
                 final var inputShape = model.expectShape(operationShape.getInputShape());
                 final var outputShape = model.expectShape(operationShape.getOutputShape());
-                final var inputType = inputShape.hasTrait(UnitTypeTrait.class) ? ""
+                // this is maybe because positional trait can change this
+                final var maybeInputType = inputShape.hasTrait(UnitTypeTrait.class) ? ""
                                                                                : "input %s".formatted(DafnyNameResolver.getDafnyType(inputShape, symbolProvider.toSymbol(inputShape)));
 
                 final var typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? ""
@@ -277,13 +278,24 @@ public class DafnyLocalServiceGenerator implements Runnable {
                                                                                            inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", native_request");
 
                 String clientResponse, returnResponse;
+                final String inputType;
                 if (outputShape.hasTrait(UnitTypeTrait.class)) {
                     clientResponse = "var native_error";
                     returnResponse = "dafny.TupleOf()";
                     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+                    inputType = maybeInputType;
                 } else {
+                    if (inputShape.hasTrait(PositionalTrait.class)) {
+                        // TODO: get dafny.Sequence from name resolver
+                        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+                        inputType = "input %s".formatted("dafny.Sequence");
+                        returnResponse = "(native_response)";
+                    }
+                    else {
+                        inputType = maybeInputType;
+                        returnResponse = "%s(*native_response)".formatted(SmithyNameResolver.getToDafnyMethodName(outputShape, ""));
+                    }
                     clientResponse = "var native_response, native_error";
-                    returnResponse = "%s(*native_response)".formatted(SmithyNameResolver.getToDafnyMethodName(outputShape, ""));
                 }
 
                 writer.write("""
