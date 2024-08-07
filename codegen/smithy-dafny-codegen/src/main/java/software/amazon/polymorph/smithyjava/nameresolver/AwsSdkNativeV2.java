@@ -152,7 +152,7 @@ public class AwsSdkNativeV2 extends Native {
     final Shape shape = model.expectShape(shapeId);
 
     if (shape.hasTrait(EnumTrait.class)) {
-      if (shapeRequiresTypeConversionFromStringToStructure(shapeId)) {
+      if (true || shapeRequiresTypeConversionFromStringToStructure(shapeId)) {
         return classForEnum(shape);
       }
 
