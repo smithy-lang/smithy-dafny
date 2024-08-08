@@ -748,3 +748,29 @@ index 00000000..cc29162a
 +        }
 +    }
 +}
+diff --git b/TestModels/LanguageSpecificLogic/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/LanguageSpecificLogic/runtimes/rust/tests/tests_from_dafny/mod.rs
+index 4a50adf2..0f4f4f9f 100644
+--- b/TestModels/LanguageSpecificLogic/runtimes/rust/tests/tests_from_dafny/mod.rs
++++ a/TestModels/LanguageSpecificLogic/runtimes/rust/tests/tests_from_dafny/mod.rs
+@@ -1,6 +1,10 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ 
++use language_specific_logic::implementation_from_dafny::*;
++use language_specific_logic::*;
++mod _wrapped;
++
+ pub mod r#_language_dspecific_dlogic_dinternaldafny_dwrapped {
+     pub struct _default {}
+ 
+@@ -80,10 +84,6 @@ pub mod r#_LanguageSpecificLogicImplTest_Compile {
+                 "{}",
+                 ::dafny_runtime::DafnyPrintWrapper(output.read().value().runtime())
+             );
+-            print!(
+-                "{}",
+-                ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of("\n"))
+-            );
+             return ();
+         }
+         pub fn AllLanguageTests() -> () {
