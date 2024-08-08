@@ -155,7 +155,10 @@ clean-dafny-report:
 # For each index file listed in the project Makefile's PROJECT_INDEX variable,
 #   append a `-library:TestModels/$(PROJECT_INDEX) to the transpiliation target
 _transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+_transpile_implementation_all: TRANSPILE_INPUT=$(patsubst %, -input:%, $(RUST_SOURCE_FILES))
 _transpile_implementation_all: transpile_implementation
+	echo "RUST_SOURCE_FILES"
+	echo $(RUST_SOURCE_FILES)
 
 # The `$(OUT)` and $(TARGET) variables are problematic.
 # Ideally they are different for every target call.
@@ -203,7 +206,8 @@ transpile_implementation:
 		-out $(OUT) \
 		$(DAFNY_OPTIONS) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-		$(TRANSPILE_DEPENDENCIES)
+		$(TRANSPILE_DEPENDENCIES) \
+		$(RUST_SOURCE_FILES)
 
 # If the project under transpilation uses `replaceable` modules,
 #   it MUST define a SRC_INDEX variable per language.
@@ -528,7 +532,13 @@ transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
+# Rust only supports shoving all code into a single crate,
+# so we override things to not pass any `--library` options.
+transpile_implementation_rust: STD_LIBRARY=
+transpile_implementation_rust: PROJECT_INDEX=
 transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
+	echo "RUST_SOURCE_FILES"
+	echo $(RUST_SOURCE_FILES)
 
 transpile_test_rust: TARGET=rs
 transpile_test_rust: OUT=tests_from_dafny
@@ -537,6 +547,10 @@ transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_test_rust: DAFNY_OPTIONS=-emitUncompilableCode
+# Rust only supports shoving all code into a single crate,
+# so we override things to not pass any `--library` options.
+transpile_test_rust: STD_LIBRARY=
+transpile_test_rust: PROJECT_INDEX=
 transpile_test_rust: _transpile_test_all _mv_test_rust
 
 transpile_dependencies_rust: LANG=rust
@@ -548,10 +562,8 @@ transpile_dependencies_test_rust: transpile_dependencies_test
 _mv_implementation_rust:
 	rm -rf runtimes/rust/dafny_impl/src
 	mkdir -p runtimes/rust/dafny_impl/src
-# TODO: Currently need to insert an import of the the StandardLibrary.
-	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
-	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs
-	rustfmt runtimes/rust/src/implementation_from_dafny.rs
+	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	rustfmt runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
 	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
