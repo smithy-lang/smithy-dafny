@@ -155,10 +155,7 @@ clean-dafny-report:
 # For each index file listed in the project Makefile's PROJECT_INDEX variable,
 #   append a `-library:TestModels/$(PROJECT_INDEX) to the transpiliation target
 _transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
-_transpile_implementation_all: TRANSPILE_INPUT=$(patsubst %, -input:%, $(RUST_SOURCE_FILES))
 _transpile_implementation_all: transpile_implementation
-	echo "RUST_SOURCE_FILES"
-	echo $(RUST_SOURCE_FILES)
 
 # The `$(OUT)` and $(TARGET) variables are problematic.
 # Ideally they are different for every target call.
@@ -206,8 +203,7 @@ transpile_implementation:
 		-out $(OUT) \
 		$(DAFNY_OPTIONS) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-		$(TRANSPILE_DEPENDENCIES) \
-		$(RUST_SOURCE_FILES)
+		$(TRANSPILE_DEPENDENCIES)
 
 # If the project under transpilation uses `replaceable` modules,
 #   it MUST define a SRC_INDEX variable per language.
@@ -537,8 +533,6 @@ transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
 transpile_implementation_rust: STD_LIBRARY=
 transpile_implementation_rust: PROJECT_INDEX=
 transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
-	echo "RUST_SOURCE_FILES"
-	echo $(RUST_SOURCE_FILES)
 
 transpile_test_rust: TARGET=rs
 transpile_test_rust: OUT=tests_from_dafny
