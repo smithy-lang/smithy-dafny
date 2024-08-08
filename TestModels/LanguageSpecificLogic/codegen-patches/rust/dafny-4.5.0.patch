@@ -75,12 +75,12 @@ index 00000000..1f370a9b
 +pub(crate) mod error;
 diff --git b/TestModels/LanguageSpecificLogic/runtimes/rust/src/conversions/error.rs a/TestModels/LanguageSpecificLogic/runtimes/rust/src/conversions/error.rs
 new file mode 100644
-index 00000000..1ceea5d0
+index 00000000..65f1d853
 --- /dev/null
 +++ a/TestModels/LanguageSpecificLogic/runtimes/rust/src/conversions/error.rs
 @@ -0,0 +1,30 @@
 +/// Wraps up an arbitrary Rust Error value as a Dafny Error
-+pub fn to_opaque_error<E: std::error::Error + 'static>(value: E) -> 
++pub fn to_opaque_error<E: std::error::Error + 'static>(value: E) ->
 +  ::std::rc::Rc<crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::Error>
 +{
 +  let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> =
@@ -95,7 +95,7 @@ index 00000000..1ceea5d0
 +}
 +
 +/// Wraps up an arbitrary Rust Error value as a Dafny Result<T, Error>.Failure
-+pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: std::error::Error + 'static>(value: E) -> 
++pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: std::error::Error + 'static>(value: E) ->
 +  ::std::rc::Rc<
 +    dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result<
 +      T,
@@ -661,7 +661,7 @@ index 00000000..b9babe5b
 +pub mod client;
 diff --git b/TestModels/LanguageSpecificLogic/runtimes/rust/src/wrapped/client.rs a/TestModels/LanguageSpecificLogic/runtimes/rust/src/wrapped/client.rs
 new file mode 100644
-index 00000000..6b9a8f55
+index 00000000..cc29162a
 --- /dev/null
 +++ a/TestModels/LanguageSpecificLogic/runtimes/rust/src/wrapped/client.rs
 @@ -0,0 +1,83 @@
@@ -686,7 +686,7 @@ index 00000000..6b9a8f55
 +impl Client {
 +  pub fn from_conf(config: &::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::LanguageSpecificLogicConfig,
-+  >) -> 
++  >) ->
 +::std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
 +  ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::ILanguageSpecificLogicClient>,
 +  ::std::rc::Rc<crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::Error>
@@ -748,29 +748,3 @@ index 00000000..6b9a8f55
 +        }
 +    }
 +}
-diff --git b/TestModels/LanguageSpecificLogic/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/LanguageSpecificLogic/runtimes/rust/tests/tests_from_dafny/mod.rs
-index 4a50adf2..0f4f4f9f 100644
---- b/TestModels/LanguageSpecificLogic/runtimes/rust/tests/tests_from_dafny/mod.rs
-+++ a/TestModels/LanguageSpecificLogic/runtimes/rust/tests/tests_from_dafny/mod.rs
-@@ -1,6 +1,10 @@
- #![allow(warnings, unconditional_panic)]
- #![allow(nonstandard_style)]
- 
-+use language_specific_logic::implementation_from_dafny::*;
-+use language_specific_logic::*;
-+mod _wrapped;
-+
- pub mod r#_language_dspecific_dlogic_dinternaldafny_dwrapped {
-     pub struct _default {}
- 
-@@ -80,10 +84,6 @@ pub mod r#_LanguageSpecificLogicImplTest_Compile {
-                 "{}",
-                 ::dafny_runtime::DafnyPrintWrapper(output.read().value().runtime())
-             );
--            print!(
--                "{}",
--                ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of("\n"))
--            );
-             return ();
-         }
-         pub fn AllLanguageTests() -> () {
