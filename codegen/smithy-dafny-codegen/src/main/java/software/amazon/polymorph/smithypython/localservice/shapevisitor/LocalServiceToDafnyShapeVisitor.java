@@ -29,9 +29,10 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+
+import static software.amazon.polymorph.CodegenConstants.DAFNY_DATETIME_STRING_FORMAT;
 
 /**
  * ShapeVisitor that should be dispatched from a shape
@@ -274,8 +275,11 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      // TODO-Python: This lets code generate, but will fail when code uses it
-      return "TypeError(\"TimestampShape not supported\")";
+      writer.addStdlibImport("_dafny");
+      return "_dafny.Seq(%1$s.strftime(\"%2$s\"))".formatted(
+              dataSource,
+              DAFNY_DATETIME_STRING_FORMAT
+      );
     }
 
     @Override

@@ -21,3 +21,10 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 
 POLYMORPH_OPTIONS=--generate client-constructors,project-files
+
+# Python
+
+PYTHON_MODULE_NAME=simple_types_timestamp
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr

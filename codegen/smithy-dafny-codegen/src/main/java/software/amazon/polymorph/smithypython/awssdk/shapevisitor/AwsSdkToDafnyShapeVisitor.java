@@ -32,6 +32,8 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
+import static software.amazon.polymorph.CodegenConstants.DAFNY_DATETIME_STRING_FORMAT;
+
 /**
  * ShapeVisitor that should be dispatched from a shape to generate code that maps a AWS SDK
  * kwarg-indexed dictionary to the corresponding Dafny shape's internal attributes.
@@ -243,12 +245,11 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String timestampShape(TimestampShape shape) {
-    // TODO-Python: This lets code generate, but will fail when code uses it.
-    // This is currently not needed for the Crypto Tools ESDK.
-    // The ESDK's integration with the MPL does not call any DDB/KMS APIs that use TimestampShapes.
-    // However, this is needed for the Crypto Tools DBESDK, which does call APIs that use TimestampShapes.
-    // This will need to be implemented as part of DBESDK, or some other use case.
-    return "TypeError(\"TimestampShape not supported\")";
+    writer.addStdlibImport("_dafny");
+    return "_dafny.Seq(%1$s.strftime(\"%2$s\"))".formatted(
+            dataSource,
+            DAFNY_DATETIME_STRING_FORMAT
+    );
   }
 
   @Override
