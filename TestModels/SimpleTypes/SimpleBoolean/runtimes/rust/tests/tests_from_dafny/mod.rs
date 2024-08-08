@@ -1,115 +1,118 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
-use simple_boolean::implementation_from_dafny::*;
-use simple_boolean::*;
-mod _wrapped;
 
-pub mod r#_simple_dtypes_dboolean_dinternaldafny_dwrapped {
-    pub struct _default {}
+pub mod simple {
+    pub mod types {
+        pub mod boolean {
+            pub mod internaldafny {
+                pub mod wrapped {
+                    pub struct _default {}
 
-    impl _default {
-        pub fn _allocate_object() -> ::dafny_runtime::Object<Self> {
-            ::dafny_runtime::allocate_object::<Self>()
+                    impl _default {
+                        pub fn WrappedDefaultSimpleBooleanConfig() -> ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::SimpleBooleanConfig>{
+                            ::std::rc::Rc::new(crate::simple::types::boolean::internaldafny::types::SimpleBooleanConfig::SimpleBooleanConfig {})
+                        }
+                    }
+                }
+            }
         }
-        pub fn WrappedDefaultSimpleBooleanConfig() -> ::std::rc::Rc<
-            super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
-        > {
-            ::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig::SimpleBooleanConfig {})
-        }
-    }
-
-    impl ::dafny_runtime::UpcastObject<dyn::std::any::Any>
-        for super::r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default
-    {
-        ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
     }
 }
 pub mod r#_SimpleBooleanImplTest_Compile {
     pub struct _default {}
 
     impl _default {
-        pub fn _allocate_object() -> ::dafny_runtime::Object<Self> {
-            ::dafny_runtime::allocate_object::<Self>()
-        }
         pub fn GetBooleanTrue() -> () {
             let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
-                    super::r#_Wrappers_Compile::Result<
+                    crate::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                            crate::simple::types::boolean::internaldafny::SimpleBooleanClient,
                         >,
-                        ::std::rc::Rc<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
-                        >,
+                        ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
             let mut _out0 = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
-                    super::r#_Wrappers_Compile::Result<
+                    crate::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                            crate::simple::types::boolean::internaldafny::SimpleBooleanClient,
                         >,
-                        ::std::rc::Rc<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
-                        >,
+                        ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
-            _out0 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(&super::r#_simple_dtypes_dboolean_dinternaldafny::_default::DefaultSimpleBooleanConfig()));
+            _out0 = ::dafny_runtime::MaybePlacebo::from(crate::simple::types::boolean::internaldafny::_default::SimpleBoolean(&crate::simple::types::boolean::internaldafny::_default::DefaultSimpleBooleanConfig()));
             valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out0.read());
             if !(!valueOrError0.read().IsFailure()) {
                 panic!("Halt")
             };
             let mut client: ::dafny_runtime::Object<
-                super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                crate::simple::types::boolean::internaldafny::SimpleBooleanClient,
             > = valueOrError0.read().Extract();
-            super::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanTrue(&::dafny_runtime::upcast_object::<super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient, dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>()(client.clone()));
+            crate::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanTrue(&::dafny_runtime::upcast_object::<crate::simple::types::boolean::internaldafny::SimpleBooleanClient, dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>()(client.clone()));
             return ();
         }
         pub fn GetBooleanFalse() -> () {
             let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
-                    super::r#_Wrappers_Compile::Result<
+                    crate::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                            crate::simple::types::boolean::internaldafny::SimpleBooleanClient,
                         >,
-                        ::std::rc::Rc<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
-                        >,
+                        ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
             let mut _out1 = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
-                    super::r#_Wrappers_Compile::Result<
+                    crate::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                            crate::simple::types::boolean::internaldafny::SimpleBooleanClient,
                         >,
-                        ::std::rc::Rc<
-                            super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
-                        >,
+                        ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
-            _out1 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(&super::r#_simple_dtypes_dboolean_dinternaldafny::_default::DefaultSimpleBooleanConfig()));
+            _out1 = ::dafny_runtime::MaybePlacebo::from(crate::simple::types::boolean::internaldafny::_default::SimpleBoolean(&crate::simple::types::boolean::internaldafny::_default::DefaultSimpleBooleanConfig()));
             valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out1.read());
             if !(!valueOrError0.read().IsFailure()) {
                 panic!("Halt")
             };
             let mut client: ::dafny_runtime::Object<
-                super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient,
+                crate::simple::types::boolean::internaldafny::SimpleBooleanClient,
             > = valueOrError0.read().Extract();
-            super::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanFalse(&::dafny_runtime::upcast_object::<super::r#_simple_dtypes_dboolean_dinternaldafny::SimpleBooleanClient, dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>()(client.clone()));
+            crate::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanFalse(&::dafny_runtime::upcast_object::<crate::simple::types::boolean::internaldafny::SimpleBooleanClient, dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>()(client.clone()));
             return ();
         }
         pub fn TestGetBooleanTrue(
-            client: &::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
+            client: &::dafny_runtime::Object<
+                dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient,
+            >,
         ) -> () {
-            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            let mut _out2 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            _out2 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient::GetBoolean(::dafny_runtime::md!(client.clone()), &::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput::GetBooleanInput {
-                value: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::Some {
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<
+                ::std::rc::Rc<
+                    crate::r#_Wrappers_Compile::Result<
+                        ::std::rc::Rc<
+                            crate::simple::types::boolean::internaldafny::types::GetBooleanOutput,
+                        >,
+                        ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>,
+                    >,
+                >,
+            >::new();
+            let mut _out2 = ::dafny_runtime::MaybePlacebo::<
+                ::std::rc::Rc<
+                    crate::r#_Wrappers_Compile::Result<
+                        ::std::rc::Rc<
+                            crate::simple::types::boolean::internaldafny::types::GetBooleanOutput,
+                        >,
+                        ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>,
+                    >,
+                >,
+            >::new();
+            _out2 = ::dafny_runtime::MaybePlacebo::from(crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient::GetBoolean(::dafny_runtime::md!(client.clone()), &::std::rc::Rc::new(crate::simple::types::boolean::internaldafny::types::GetBooleanInput::GetBooleanInput {
+                value: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::Some {
                       value: true
                     })
               })));
@@ -118,21 +121,57 @@ pub mod r#_SimpleBooleanImplTest_Compile {
                 panic!("Halt")
             };
             let mut ret: ::std::rc::Rc<
-                super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
+                crate::simple::types::boolean::internaldafny::types::GetBooleanOutput,
             > = valueOrError0.read().Extract();
-            if !(ret.value().UnwrapOr(&false) == true) {
+            let mut _e00: bool = ret.value().UnwrapOr(&false);
+            let mut _e10: bool = true;
+            if !(_e00 == _e10) {
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Left:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e00));
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Right:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e10));
                 panic!("Halt")
             };
             print!("{}", ::dafny_runtime::DafnyPrintWrapper(&ret));
             return ();
         }
         pub fn TestGetBooleanFalse(
-            client: &::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
+            client: &::dafny_runtime::Object<
+                dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient,
+            >,
         ) -> () {
-            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            let mut _out3 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            _out3 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient::GetBoolean(::dafny_runtime::md!(client.clone()), &::std::rc::Rc::new(super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput::GetBooleanInput {
-                value: ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<bool>::Some {
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<
+                ::std::rc::Rc<
+                    crate::r#_Wrappers_Compile::Result<
+                        ::std::rc::Rc<
+                            crate::simple::types::boolean::internaldafny::types::GetBooleanOutput,
+                        >,
+                        ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>,
+                    >,
+                >,
+            >::new();
+            let mut _out3 = ::dafny_runtime::MaybePlacebo::<
+                ::std::rc::Rc<
+                    crate::r#_Wrappers_Compile::Result<
+                        ::std::rc::Rc<
+                            crate::simple::types::boolean::internaldafny::types::GetBooleanOutput,
+                        >,
+                        ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>,
+                    >,
+                >,
+            >::new();
+            _out3 = ::dafny_runtime::MaybePlacebo::from(crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient::GetBoolean(::dafny_runtime::md!(client.clone()), &::std::rc::Rc::new(crate::simple::types::boolean::internaldafny::types::GetBooleanInput::GetBooleanInput {
+                value: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::Some {
                       value: false
                     })
               })));
@@ -141,68 +180,70 @@ pub mod r#_SimpleBooleanImplTest_Compile {
                 panic!("Halt")
             };
             let mut ret: ::std::rc::Rc<
-                super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
+                crate::simple::types::boolean::internaldafny::types::GetBooleanOutput,
             > = valueOrError0.read().Extract();
-            if !(ret.value().UnwrapOr(&true) == false) {
+            let mut _e01: bool = ret.value().UnwrapOr(&true);
+            let mut _e11: bool = false;
+            if !(_e01 == _e11) {
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Left:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e01));
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Right:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e11));
                 panic!("Halt")
             };
             print!("{}", ::dafny_runtime::DafnyPrintWrapper(&ret));
             return ();
         }
     }
-
-    impl ::dafny_runtime::UpcastObject<dyn::std::any::Any>
-        for super::r#_SimpleBooleanImplTest_Compile::_default
-    {
-        ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
-    }
 }
 pub mod r#_WrappedSimpleTypesBooleanTest_Compile {
     pub struct _default {}
 
     impl _default {
-        pub fn _allocate_object() -> ::dafny_runtime::Object<Self> {
-            ::dafny_runtime::allocate_object::<Self>()
-        }
         pub fn GetBooleanTrue() -> () {
-            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            let mut _out4 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            _out4 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default::WrappedSimpleBoolean(&super::r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default::WrappedDefaultSimpleBooleanConfig()));
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>, ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>>>>::new();
+            let mut _out4 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>, ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>>>>::new();
+            _out4 = ::dafny_runtime::MaybePlacebo::from(crate::simple::types::boolean::internaldafny::wrapped::_default::WrappedSimpleBoolean(&crate::simple::types::boolean::internaldafny::wrapped::_default::WrappedDefaultSimpleBooleanConfig()));
             valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out4.read());
             if !(!valueOrError0.read().IsFailure()) {
                 panic!("Halt")
             };
-            let mut client: ::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient> = valueOrError0.read().Extract();
-            super::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanTrue(&client);
+            let mut client: ::dafny_runtime::Object<
+                dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient,
+            > = valueOrError0.read().Extract();
+            crate::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanTrue(&client);
             return ();
         }
         pub fn GetBooleanFalse() -> () {
-            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            let mut _out5 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>, ::std::rc::Rc<super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>>>>::new();
-            _out5 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default::WrappedSimpleBoolean(&super::r#_simple_dtypes_dboolean_dinternaldafny_dwrapped::_default::WrappedDefaultSimpleBooleanConfig()));
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>, ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>>>>::new();
+            let mut _out5 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>, ::std::rc::Rc<crate::simple::types::boolean::internaldafny::types::Error>>>>::new();
+            _out5 = ::dafny_runtime::MaybePlacebo::from(crate::simple::types::boolean::internaldafny::wrapped::_default::WrappedSimpleBoolean(&crate::simple::types::boolean::internaldafny::wrapped::_default::WrappedDefaultSimpleBooleanConfig()));
             valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out5.read());
             if !(!valueOrError0.read().IsFailure()) {
                 panic!("Halt")
             };
-            let mut client: ::dafny_runtime::Object<dyn super::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient> = valueOrError0.read().Extract();
-            super::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanFalse(&client);
+            let mut client: ::dafny_runtime::Object<
+                dyn crate::simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient,
+            > = valueOrError0.read().Extract();
+            crate::r#_SimpleBooleanImplTest_Compile::_default::TestGetBooleanFalse(&client);
             return ();
         }
-    }
-
-    impl ::dafny_runtime::UpcastObject<dyn::std::any::Any>
-        for super::r#_WrappedSimpleTypesBooleanTest_Compile::_default
-    {
-        ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
     }
 }
 pub mod _module {
     pub struct _default {}
 
     impl _default {
-        pub fn _allocate_object() -> ::dafny_runtime::Object<Self> {
-            ::dafny_runtime::allocate_object::<Self>()
-        }
         pub fn _Test__Main_() -> () {
             let mut success: bool = true;
             print!(
@@ -211,7 +252,7 @@ pub mod _module {
                     r#"SimpleBooleanImplTest.GetBooleanTrue: "#
                 ))
             );
-            super::r#_SimpleBooleanImplTest_Compile::_default::GetBooleanTrue();
+            crate::r#_SimpleBooleanImplTest_Compile::_default::GetBooleanTrue();
             print!(
                 "{}",
                 ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
@@ -225,7 +266,7 @@ pub mod _module {
                     r#"SimpleBooleanImplTest.GetBooleanFalse: "#
                 ))
             );
-            super::r#_SimpleBooleanImplTest_Compile::_default::GetBooleanFalse();
+            crate::r#_SimpleBooleanImplTest_Compile::_default::GetBooleanFalse();
             print!(
                 "{}",
                 ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
@@ -239,7 +280,7 @@ pub mod _module {
                     r#"WrappedSimpleTypesBooleanTest.GetBooleanTrue: "#
                 ))
             );
-            super::r#_WrappedSimpleTypesBooleanTest_Compile::_default::GetBooleanTrue();
+            crate::r#_WrappedSimpleTypesBooleanTest_Compile::_default::GetBooleanTrue();
             print!(
                 "{}",
                 ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
@@ -253,7 +294,7 @@ pub mod _module {
                     r#"WrappedSimpleTypesBooleanTest.GetBooleanFalse: "#
                 ))
             );
-            super::r#_WrappedSimpleTypesBooleanTest_Compile::_default::GetBooleanFalse();
+            crate::r#_WrappedSimpleTypesBooleanTest_Compile::_default::GetBooleanFalse();
             print!(
                 "{}",
                 ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
@@ -266,10 +307,6 @@ pub mod _module {
             };
             return ();
         }
-    }
-
-    impl ::dafny_runtime::UpcastObject<dyn::std::any::Any> for super::_module::_default {
-        ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
     }
 }
 fn main() {
