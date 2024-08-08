@@ -23,6 +23,6 @@ module RustLanguageSpecificLogicImplTest replaces LanguageSpecificLogicImplTest 
 
         // We should ONLY see printed values like "Rust language: Rust".
         // We should ALSO see printed values like "Generic language: Rust" from the `replaceable` tests.
-        print "Rust language: ", output.value.language, "; Rust runtime: ", output.value.runtime;
+        print "Rust language: ", output.value.language, "; Rust runtime: ", output.value.runtime, "\n";
     }
 }
