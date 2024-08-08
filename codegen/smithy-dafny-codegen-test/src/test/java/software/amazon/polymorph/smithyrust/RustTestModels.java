@@ -24,7 +24,6 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("Errors");
     DISABLED_TESTS.add("Extendable");
     DISABLED_TESTS.add("Extern");
-    DISABLED_TESTS.add("LanguageSpecificLogic");
     DISABLED_TESTS.add("LocalService");
     DISABLED_TESTS.add("MultipleModels");
     DISABLED_TESTS.add("Positional");
