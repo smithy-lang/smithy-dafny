@@ -246,10 +246,8 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String timestampShape(TimestampShape shape) {
     writer.addStdlibImport("_dafny");
-    writer.addStdlibImport("datetime", "timezone");
-    return "_dafny.Seq(%1$s.astimezone(timezone.utc).strftime(\"%2$s\"))".formatted(
-            dataSource,
-            BOTO3_TIMESTAMP_STRING_FORMAT
+    return "_dafny.Seq(%1$s.isoformat())".formatted(
+            dataSource
     );
   }
 

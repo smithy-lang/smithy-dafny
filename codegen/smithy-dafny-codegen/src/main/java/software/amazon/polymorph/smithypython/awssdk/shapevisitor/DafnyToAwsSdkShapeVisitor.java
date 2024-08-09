@@ -233,9 +233,8 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String timestampShape(TimestampShape shape) {
     writer.addStdlibImport("datetime", "datetime");
-    return "datetime.strptime(%1$s.VerbatimString(False), \"%2$s\")".formatted(
-            dataSource,
-            BOTO3_TIMESTAMP_STRING_FORMAT
+    return "datetime.fromisoformat(%1$s.VerbatimString(False))".formatted(
+            dataSource
     );
   }
 
