@@ -112,8 +112,8 @@ public class Generator {
     private RustFile clientModule() {
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId();
         String clientName = "%sClient".formatted(sdkId);
-        String dafnyModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny".formatted(sdkId.toLowerCase());
-        String dafnyTypesModuleName = "%s_dtypes".formatted(dafnyModuleName);
+        String dafnyModuleName = "software::amazon::cryptography::services::%s::internaldafny".formatted(sdkId.toLowerCase());
+        String dafnyTypesModuleName = "%s::types".formatted(dafnyModuleName);
         Map<String, String> variables = Map.of(
                 "sdkId", sdkId.toLowerCase(),
                 "clientName", clientName,
@@ -187,8 +187,8 @@ public class Generator {
         String outputShapeName = operationShape.getOutputShape().getName();
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId();
         String clientName = "%sClient".formatted(sdkId);
-        String dafnyModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny".formatted(sdkId.toLowerCase());
-        String dafnyTypesModuleName = "%s_dtypes".formatted(dafnyModuleName);
+        String dafnyModuleName = "software::amazon::cryptography::services::%s::internaldafny".formatted(sdkId.toLowerCase());
+        String dafnyTypesModuleName = "%s::types".formatted(dafnyModuleName);
         Map<String, String> variables = Map.of(
                 "operationName", operationName,
                 "snakeCaseOperationName", snakeCaseOperationName,
@@ -275,7 +275,7 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
 
         TokenTree errorCases = TokenTree.of(operationShape.getErrors()
                 .stream()
@@ -345,7 +345,7 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
         String structureName = inputShape.getId().getName();
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
@@ -375,7 +375,7 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
         String structureName = inputShape.getId().getName();
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
@@ -425,7 +425,7 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
         String structureName = outputShape.getId().getName();
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
@@ -805,7 +805,7 @@ public class Generator {
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName())));
 
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
 
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
@@ -903,7 +903,7 @@ public class Generator {
                 "sdkId", sdkId,
                 "structureName", structureName,
                 "pascalCaseName", pascalCaseName,
-                "dafnyTypesModuleName", "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId),
+                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId),
                 "variants", toDafnyVariantsForStructure(errorStructure).toString()
         ));
         return new RustFile(path, TokenTree.of(evaluated));
@@ -956,7 +956,7 @@ public class Generator {
         String evaluated = evalTemplate(template, Map.of(
                 "sdkId", sdkId,
                 "structureName", structureName,
-                "dafnyTypesModuleName", "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId),
+                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId),
                 "variants", toDafnyVariantsForStructure(structureShape).toString()
         ));
         return TokenTree.of(evaluated);
@@ -966,7 +966,7 @@ public class Generator {
         String structureName = structureShape.getId().getName();
         String snakeCaseStructureName = toSnakeCase(structureName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
         // TODO-HACK: don't know why these structures build BuildErrors and not the rest...
         String unwrapIfNeeded = (structureName.equals("KeysAndAttributes") || structureName.equals("Condition"))
                 ? ".unwrap()" : "";
@@ -1015,7 +1015,7 @@ public class Generator {
         String evaluated = evalTemplate(template, Map.of(
                 "sdkId", sdkId,
                 "structureName", structureName,
-                "dafnyTypesModuleName", "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId),
+                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId),
                 "variants", toDafnyVariantsForStructure(unionShape).toString()
         ));
         return TokenTree.of(evaluated);
@@ -1025,7 +1025,7 @@ public class Generator {
         String structureName = unionShape.getId().getName();
         String snakeCaseStructureName = toSnakeCase(structureName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "structureName", structureName,
@@ -1060,7 +1060,7 @@ public class Generator {
     private TokenTree enumToDafnyFunction(final Shape enumShape) {
         String enumName = enumShape.getId().getName();
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "enumName", enumName,
@@ -1110,7 +1110,7 @@ public class Generator {
     private TokenTree enumFromDafnyFunction(final Shape enumShape) {
         String enumName = enumShape.getId().getName();
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "_software_damazon_dcryptography_dservices_d%s_dinternaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "enumName", enumName,
