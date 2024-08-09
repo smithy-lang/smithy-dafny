@@ -243,12 +243,10 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String timestampShape(TimestampShape shape) {
-    // TODO-Python: This lets code generate, but will fail when code uses it.
-    // This is currently not needed for the Crypto Tools ESDK.
-    // The ESDK's integration with the MPL does not call any DDB/KMS APIs that use TimestampShapes.
-    // However, this is needed for the Crypto Tools DBESDK, which does call APIs that use TimestampShapes.
-    // This will need to be implemented as part of DBESDK, or some other use case.
-    return "TypeError(\"TimestampShape not supported\")";
+    writer.addStdlibImport("_dafny");
+    return "_dafny.Seq(%1$s.isoformat())".formatted(
+      dataSource
+    );
   }
 
   @Override

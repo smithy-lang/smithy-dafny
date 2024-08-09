@@ -29,7 +29,6 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -274,8 +273,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      // TODO-Python: This lets code generate, but will fail when code uses it
-      return "TypeError(\"TimestampShape not supported\")";
+      throw new UnsupportedOperationException("TimestampShape from within a LocalService not supported");
     }
 
     @Override
