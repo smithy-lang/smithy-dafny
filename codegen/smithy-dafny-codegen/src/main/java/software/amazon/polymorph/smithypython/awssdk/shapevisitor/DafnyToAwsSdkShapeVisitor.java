@@ -232,7 +232,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   public String timestampShape(TimestampShape shape) {
     writer.addStdlibImport("datetime", "datetime");
     return "datetime.fromisoformat(%1$s.VerbatimString(False))".formatted(
-            dataSource
+      dataSource
     );
   }
 

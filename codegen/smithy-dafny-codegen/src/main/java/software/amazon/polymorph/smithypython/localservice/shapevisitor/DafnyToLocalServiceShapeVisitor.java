@@ -270,10 +270,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
 
   @Override
   public String timestampShape(TimestampShape shape) {
-    writer.addStdlibImport("datetime", "datetime");
-    return "datetime.fromisoformat(%1$s.VerbatimString(False))".formatted(
-            dataSource
-    );
+    throw new UnsupportedOperationException("TimestampShape from within a LocalService not supported");
   }
 
   @Override

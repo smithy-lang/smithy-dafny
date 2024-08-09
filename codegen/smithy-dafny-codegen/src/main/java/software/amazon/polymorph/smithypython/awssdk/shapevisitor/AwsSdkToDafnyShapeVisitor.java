@@ -245,7 +245,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   public String timestampShape(TimestampShape shape) {
     writer.addStdlibImport("_dafny");
     return "_dafny.Seq(%1$s.isoformat())".formatted(
-            dataSource
+      dataSource
     );
   }
 
