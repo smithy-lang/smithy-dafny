@@ -520,47 +520,49 @@ test_java:
 # only because we are patching test code in the StandardLibrary,
 # so we don't transpile that code then the recursive call to polymorph_rust
 # on the StandardLibrary will fail because the patch does not apply.
-transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust transpile_dependencies_test_rust
+transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
-transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_implementation_rust: SRC_INDEX=test
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
-transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
+# Rust only supports shoving all code into a single crate,
+# so we override things to not pass any `--library` options.
+transpile_implementation_rust: STD_LIBRARY=
+transpile_implementation_rust: PROJECT_INDEX=
+transpile_implementation_rust: transpile_implementation_and_tests_rust _mv_implementation_rust
 
-transpile_test_rust: TARGET=rs
-transpile_test_rust: OUT=tests_from_dafny
-transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
-transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
-# The Dafny Rust code generator is not complete yet,
-# so we want to emit code even if there are unsupported features in the input.
-transpile_test_rust: DAFNY_OPTIONS=-emitUncompilableCode
-transpile_test_rust: _transpile_test_all _mv_test_rust
+transpile_implementation_and_tests_rust:
+	find ./dafny/**/$(SRC_INDEX)/ ./$(SRC_INDEX)/ -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+		-stdin \
+		-noVerify \
+		-vcsCores:$(CORES) \
+		-compileTarget:$(TARGET) \
+		-spillTargetCode:3 \
+		-compile:0 \
+		-optimizeErasableDatatypeWrapper:0 \
+		-compileSuffix:1 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-useRuntimeLib \
+		-out $(OUT) \
+		$(DAFNY_OPTIONS)
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
-transpile_dependencies_test_rust: LANG=rust
-transpile_dependencies_test_rust: transpile_dependencies_test
-
 _mv_implementation_rust:
 	mkdir -p runtimes/rust/src
-# TODO: Currently need to insert an import of the the StandardLibrary.
-# See https://github.com/dafny-lang/dafny/issues/5641
-	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
-	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs
+	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 _mv_test_rust: RUST_CRATE_NAME=$(shell grep -Eo "name = (.*)" runtimes/rust/Cargo.toml | sed -e 's/^name.*= "//' -e 's/"$$//')
 _mv_test_rust:
 	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
 	mkdir -p runtimes/rust/tests/tests_from_dafny
-# TODO: Currently need to insert an import of source crate.
-# https://github.com/dafny-lang/dafny/issues/5641
-	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'use ::$(RUST_CRATE_NAME)::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
-	  < tests_from_dafny-rust/src/tests_from_dafny.rs > runtimes/rust/tests/tests_from_dafny/mod.rs
+	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny/mod.rs
 	rustfmt runtimes/rust/tests/tests_from_dafny/mod.rs
 	rm -rf tests_from_dafny-rust
 
