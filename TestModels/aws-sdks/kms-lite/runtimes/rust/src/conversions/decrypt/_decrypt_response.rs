@@ -5,16 +5,16 @@
 pub fn to_dafny(
     value: &aws_sdk_kms::operation::decrypt::DecryptOutput
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse,
+    crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptResponse,
 >{
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DecryptResponse::DecryptResponse {
-        KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
- Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext),
+    ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptResponse::DecryptResponse {
+        KeyId: crate::standard_library_conversions::ostring_to_dafny(&value.key_id),
+ Plaintext: crate::standard_library_conversions::oblob_to_dafny(&value.plaintext),
  EncryptionAlgorithm: ::std::rc::Rc::new(match &value.encryption_algorithm {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
- CiphertextForRecipient: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_for_recipient),
+ CiphertextForRecipient: crate::standard_library_conversions::oblob_to_dafny(&value.ciphertext_for_recipient),
     })
 }

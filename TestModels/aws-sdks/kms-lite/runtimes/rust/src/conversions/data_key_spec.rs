@@ -5,10 +5,10 @@
 
 pub fn to_dafny(
     value: aws_sdk_kms::types::DataKeySpec,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec>{
     ::std::rc::Rc::new(match value {
- aws_sdk_kms::types::DataKeySpec::Aes256 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_256 {},
- aws_sdk_kms::types::DataKeySpec::Aes128 => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_128 {},
+ aws_sdk_kms::types::DataKeySpec::Aes256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_256 {},
+ aws_sdk_kms::types::DataKeySpec::Aes128 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_128 {},
         // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
         // so there's no way to succeed.
         // See https://github.com/smithy-lang/smithy-dafny/issues/476.
@@ -19,10 +19,10 @@ pub fn to_dafny(
 }
  #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec,
+    dafny_value: &crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec,
 ) -> aws_sdk_kms::types::DataKeySpec {
     match dafny_value {
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_256 {} => aws_sdk_kms::types::DataKeySpec::Aes256,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::DataKeySpec::AES_128 {} => aws_sdk_kms::types::DataKeySpec::Aes128,
+ crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_256 {} => aws_sdk_kms::types::DataKeySpec::Aes256,
+ crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_128 {} => aws_sdk_kms::types::DataKeySpec::Aes128,
     }
 }

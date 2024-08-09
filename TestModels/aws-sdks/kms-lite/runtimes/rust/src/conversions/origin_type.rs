@@ -5,12 +5,12 @@
 
 pub fn to_dafny(
     value: aws_sdk_kms::types::OriginType,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType>{
     ::std::rc::Rc::new(match value {
- aws_sdk_kms::types::OriginType::AwsKms => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::AWS_KMS {},
- aws_sdk_kms::types::OriginType::External => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::EXTERNAL {},
- aws_sdk_kms::types::OriginType::AwsCloudhsm => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::AWS_CLOUDHSM {},
- aws_sdk_kms::types::OriginType::ExternalKeyStore => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::EXTERNAL_KEY_STORE {},
+ aws_sdk_kms::types::OriginType::AwsKms => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType::AWS_KMS {},
+ aws_sdk_kms::types::OriginType::External => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType::EXTERNAL {},
+ aws_sdk_kms::types::OriginType::AwsCloudhsm => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType::AWS_CLOUDHSM {},
+ aws_sdk_kms::types::OriginType::ExternalKeyStore => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType::EXTERNAL_KEY_STORE {},
         // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
         // so there's no way to succeed.
         // See https://github.com/smithy-lang/smithy-dafny/issues/476.
@@ -21,12 +21,12 @@ pub fn to_dafny(
 }
  #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType,
+    dafny_value: &crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType,
 ) -> aws_sdk_kms::types::OriginType {
     match dafny_value {
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::AWS_KMS {} => aws_sdk_kms::types::OriginType::AwsKms,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::EXTERNAL {} => aws_sdk_kms::types::OriginType::External,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::AWS_CLOUDHSM {} => aws_sdk_kms::types::OriginType::AwsCloudhsm,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::OriginType::EXTERNAL_KEY_STORE {} => aws_sdk_kms::types::OriginType::ExternalKeyStore,
+ crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType::AWS_KMS {} => aws_sdk_kms::types::OriginType::AwsKms,
+ crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType::EXTERNAL {} => aws_sdk_kms::types::OriginType::External,
+ crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType::AWS_CLOUDHSM {} => aws_sdk_kms::types::OriginType::AwsCloudhsm,
+ crate::r#software::amazon::cryptography::services::kms::internaldafny::types::OriginType::EXTERNAL_KEY_STORE {} => aws_sdk_kms::types::OriginType::ExternalKeyStore,
     }
 }

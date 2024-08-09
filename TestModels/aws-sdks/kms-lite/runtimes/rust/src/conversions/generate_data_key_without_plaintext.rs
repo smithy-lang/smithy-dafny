@@ -10,7 +10,7 @@ pub fn to_dafny_error(
         aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError,
         ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
     >,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error> {
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error> {
     match value {
       aws_sdk_kms::error::SdkError::ServiceError(service_error) => match service_error.err() {
                 aws_sdk_kms::operation::generate_data_key_without_plaintext::GenerateDataKeyWithoutPlaintextError::DryRunOperationException(e) =>
