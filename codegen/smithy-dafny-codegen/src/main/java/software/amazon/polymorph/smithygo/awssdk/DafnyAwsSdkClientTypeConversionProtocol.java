@@ -294,13 +294,13 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                                                 }
                                                 """, DafnyNameResolver.dafnyTypesNamespace(serviceShape),
                                         writer.consumer(w -> {
-                                            for (var error : serviceShape.getErrors()) {
+                                            for (var error : errorShapes) {
                                                 w.write("""
-                                                                  case $L:
-                                                                      return $L(err.($L))
-                                                                """, SmithyNameResolver.getSmithyTypeAws(awsNormalizedModel.expectShape(error), context.symbolProvider().toSymbol(awsNormalizedModel.expectShape(error)), true),
-                                                        SmithyNameResolver.getToDafnyMethodName(serviceShape, awsNormalizedModel.expectShape(error), ""),
-                                                        SmithyNameResolver.getSmithyTypeAws(awsNormalizedModel.expectShape(error), context.symbolProvider().toSymbol(awsNormalizedModel.expectShape(error)), true));
+                                                                  case *$L:
+                                                                      return $L(*err.(*$L))
+                                                                """, SmithyNameResolver.getSmithyTypeAws(awsNormalizedModel.expectShape(error.toShapeId()), context.symbolProvider().toSymbol(awsNormalizedModel.expectShape(error.toShapeId())), true),
+                                                        SmithyNameResolver.getToDafnyMethodName(serviceShape, awsNormalizedModel.expectShape(error.toShapeId()), ""),
+                                                        SmithyNameResolver.getSmithyTypeAws(awsNormalizedModel.expectShape(error.toShapeId()), context.symbolProvider().toSymbol(awsNormalizedModel.expectShape(error.toShapeId())), true));
                                             }
                                         })
                            );
@@ -360,12 +360,13 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                                                 }
                                                 """, DafnyNameResolver.dafnyTypesNamespace(serviceShape),
                                         writer.consumer(w -> {
-                                            for (var error : serviceShape.getErrors()) {
+                                            for (var error : awsNormalizedModel.getShapesWithTrait(ErrorTrait.class)) {
                                                 w.write("""
                                                                 if err.Is_$L() {
-                                                                    return $L(err)
+                                                                    e := $L(err)
+                                                                    return &e
                                                                 }
-                                                                """, error.getName(), SmithyNameResolver.getFromDafnyMethodName(serviceShape, awsNormalizedModel.expectShape(error), ""));
+                                                                """, error.toShapeId().getName(), SmithyNameResolver.getFromDafnyMethodName(serviceShape, awsNormalizedModel.expectShape(error.toShapeId()), ""));
                                             }
                                         })
                            );
