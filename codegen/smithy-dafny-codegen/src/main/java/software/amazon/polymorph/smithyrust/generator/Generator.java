@@ -134,11 +134,11 @@ public class Generator {
             ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
         }
                         
-        impl dafny_runtime::UpcastObject<dyn crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::I$clientName:L> for Client {
-          ::dafny_runtime::UpcastObjectFn!(dyn crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::I$clientName:L);
+        impl dafny_runtime::UpcastObject<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L> for Client {
+          ::dafny_runtime::UpcastObjectFn!(dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L);
         }
         
-        impl crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::I$clientName:L
+        impl crate::r#$dafnyTypesModuleName:L::I$clientName:L
           for Client {
                         
         """, variables));
@@ -152,11 +152,11 @@ public class Generator {
         }
         
         #[allow(non_snake_case)]
-        impl crate::implementation_from_dafny::r#$dafnyModuleName:L::_default {
+        impl crate::r#$dafnyModuleName:L::_default {
           pub fn $clientName:L() -> ::std::rc::Rc<
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
-              ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::I$clientName:L>,
-              ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>
+            crate::r#_Wrappers_Compile::Result<
+              ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
+              ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
               >
             > {
             let rt_result = tokio::runtime::Builder::new_current_thread()
@@ -171,7 +171,7 @@ public class Generator {
             let inner = aws_sdk_$sdkId:L::Client::new(&shared_config);
             let client = Client { inner, rt };
             let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
-            std::rc::Rc::new(crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+            std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
           }
         }
         """, variables));
@@ -201,15 +201,15 @@ public class Generator {
         );
 
         return TokenTree.of(evalTemplate("""
-        fn $operationName:L(&mut self, input: &std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$inputShapeName:L>) 
-          -> std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
-            std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$outputShapeName:L>,
-            std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>
+        fn $operationName:L(&mut self, input: &std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$inputShapeName:L>) 
+          -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+            std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$outputShapeName:L>,
+            std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
           >
         > {
           let native_result =\s
             self.rt.block_on(conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone(), self.inner.clone()).send());
-          dafny_standard_library::conversion::result_to_dafny(&native_result,\s
+          crate::standard_library_conversions::result_to_dafny(&native_result,\s
             conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_response::to_dafny,
             conversions::$snakeCaseOperationName:L::to_dafny_error)
         }
@@ -275,7 +275,7 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
 
         TokenTree errorCases = TokenTree.of(operationShape.getErrors()
                 .stream()
@@ -297,7 +297,7 @@ public class Generator {
                 $sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LError,
                 ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
             >,
-        ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error> {
+        ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error> {
             match value {
               $sdkCrate:L::error::SdkError::ServiceError(service_error) => match service_error.err() {
                 $errorCases:L
@@ -345,7 +345,7 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         String structureName = inputShape.getId().getName();
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
@@ -361,9 +361,9 @@ public class Generator {
         pub fn to_dafny(
             value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LInput
         ) -> ::std::rc::Rc<
-            crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
+            crate::r#$dafnyTypesModuleName:L::$structureName:L,
         >{
-            ::std::rc::Rc::new(crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
                 $variants:L
             })
         }
@@ -375,7 +375,7 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         String structureName = inputShape.getId().getName();
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
@@ -390,7 +390,7 @@ public class Generator {
         #[allow(dead_code)]
         pub fn from_dafny(
             dafny_value: ::std::rc::Rc<
-                crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
+                crate::r#$dafnyTypesModuleName:L::$structureName:L,
             >,
             client: $sdkCrate:L::Client,
         ) -> $sdkCrate:L::operation::$snakeCaseOperationName:L::builders::$operationName:LFluentBuilder {
@@ -425,7 +425,7 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         String structureName = outputShape.getId().getName();
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
@@ -441,9 +441,9 @@ public class Generator {
         pub fn to_dafny(
             value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
         ) -> ::std::rc::Rc<
-            crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
+            crate::r#$dafnyTypesModuleName:L::$structureName:L,
         >{
-            ::std::rc::Rc::new(crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
                 $variants:L
             })
         }
@@ -474,7 +474,7 @@ public class Generator {
                     if (isDafnyOption) {
                         yield TokenTree.of("""
                         match &**%s {
-                            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+                            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
                                 crate::conversions::%s::from_dafny(value)
                             ),
                             _ => None,
@@ -489,7 +489,7 @@ public class Generator {
                     }
                 } else {
                     if (isDafnyOption) {
-                        yield TokenTree.of("dafny_standard_library::conversion::ostring_from_dafny(%s.clone())".formatted(dafnyValue));
+                        yield TokenTree.of("crate::standard_library_conversions::ostring_from_dafny(%s.clone())".formatted(dafnyValue));
                     } else {
                         TokenTree result = TokenTree.of("dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(%s)".formatted(dafnyValue));
                         if (isRustOption) {
@@ -499,42 +499,42 @@ public class Generator {
                     }
                 }
             }
-            case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_from_dafny(%s.clone())".formatted(dafnyValue));
+            case BOOLEAN -> TokenTree.of("crate::standard_library_conversions::obool_from_dafny(%s.clone())".formatted(dafnyValue));
             case INTEGER -> {
                 if (isRustOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::oint_from_dafny(%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("crate::standard_library_conversions::oint_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else {
                     yield TokenTree.of(dafnyValue);
                 }
             }
             case LONG -> {
                 if (isRustOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::olong_from_dafny(%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("crate::standard_library_conversions::olong_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else {
                     yield TokenTree.of(dafnyValue);
                 }
             }
             case DOUBLE -> {
                 if (isRustOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::odouble_from_dafny(%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("crate::standard_library_conversions::odouble_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else {
-                    yield TokenTree.of("dafny_standard_library::conversion::double_from_dafny(&%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("crate::standard_library_conversions::double_from_dafny(&%s.clone())".formatted(dafnyValue));
                 }
             }
             case TIMESTAMP -> {
                 if (isRustOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::otimestamp_from_dafny(%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("crate::standard_library_conversions::otimestamp_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else {
-                    yield TokenTree.of("dafny_standard_library::conversion::timestamp_from_dafny(%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("crate::standard_library_conversions::timestamp_from_dafny(%s.clone())".formatted(dafnyValue));
                 }
             }
             case BLOB -> {
                 if (isDafnyOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::oblob_from_dafny(%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("crate::standard_library_conversions::oblob_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else if (isRustOption) {
-                    yield TokenTree.of("Some(dafny_standard_library::conversion::blob_from_dafny(%s.clone()))".formatted(dafnyValue));
+                    yield TokenTree.of("Some(crate::standard_library_conversions::blob_from_dafny(%s.clone()))".formatted(dafnyValue));
                 } else {
-                    yield TokenTree.of("dafny_standard_library::conversion::blob_from_dafny(%s.clone())".formatted(dafnyValue));
+                    yield TokenTree.of("crate::standard_library_conversions::blob_from_dafny(%s.clone())".formatted(dafnyValue));
                 }
             }
             case LIST -> {
@@ -554,7 +554,7 @@ public class Generator {
                 } else {
                     yield TokenTree.of("""
                         match (*%s).as_ref() {
-                            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                            crate::r#_Wrappers_Compile::Option::Some { value } =>
                                 Some(
                                     ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
                                         |e| %s,
@@ -586,7 +586,7 @@ public class Generator {
                 } else {
                     yield TokenTree.of("""
                             match (*%s).as_ref() {
-                                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                                crate::r#_Wrappers_Compile::Option::Some { value } =>
                                     Some(
                                         ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                                             |k| %s,
@@ -605,7 +605,7 @@ public class Generator {
                 if (isDafnyOption) {
                     yield TokenTree.of("""
                             match (*%s).as_ref() {
-                                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+                                crate::r#_Wrappers_Compile::Option::Some { value } =>
                                     Some(crate::conversions::%s::from_dafny(value.clone())),
                                 _ => None,
                             }
@@ -644,8 +644,8 @@ public class Generator {
                     if (isDafnyOption) {
                         yield TokenTree.of("""
                                 ::std::rc::Rc::new(match &%s {
-                                    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
-                                    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+                                    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                                    None => crate::_Wrappers_Compile::Option::None { }
                                 })
                                 """.formatted(rustValue, enumShapeName));
                     } else if (isRustOption) {
@@ -655,7 +655,7 @@ public class Generator {
                     }
                 } else {
                     if (isRustOption) {
-                        var result = TokenTree.of("dafny_standard_library::conversion::ostring_to_dafny(&%s)".formatted(rustValue));
+                        var result = TokenTree.of("crate::standard_library_conversions::ostring_to_dafny(&%s)".formatted(rustValue));
                         if (!isDafnyOption) {
                             result = TokenTree.of(result, TokenTree.of(".Extract()"));
                         }
@@ -665,13 +665,13 @@ public class Generator {
                     }
                 }
             }
-            case BOOLEAN -> TokenTree.of("dafny_standard_library::conversion::obool_to_dafny(&%s)".formatted(rustValue));
+            case BOOLEAN -> TokenTree.of("crate::standard_library_conversions::obool_to_dafny(%s)".formatted(rustValue));
             case INTEGER -> {
                 if (isDafnyOption) {
                     if (isRustOption) {
-                        yield TokenTree.of("dafny_standard_library::conversion::oint_to_dafny(%s)".formatted(rustValue));
+                        yield TokenTree.of("crate::standard_library_conversions::oint_to_dafny(%s)".formatted(rustValue));
                     } else {
-                        yield TokenTree.of("dafny_standard_library::conversion::oint_to_dafny(Some(%s))".formatted(rustValue));
+                        yield TokenTree.of("crate::standard_library_conversions::oint_to_dafny(Some(%s))".formatted(rustValue));
                     }
                 } else {
                     yield TokenTree.of(rustValue);
@@ -679,32 +679,32 @@ public class Generator {
             }
             case LONG -> {
                 if (isRustOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::olong_to_dafny(&%s)".formatted(rustValue));
+                    yield TokenTree.of("crate::standard_library_conversions::olong_to_dafny(&%s)".formatted(rustValue));
                 } else {
                     yield TokenTree.of(rustValue);
                 }
             }
             case DOUBLE -> {
                 if (isRustOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::odouble_to_dafny(&%s)".formatted(rustValue));
+                    yield TokenTree.of("crate::standard_library_conversions::odouble_to_dafny(&%s)".formatted(rustValue));
                 } else {
-                    yield TokenTree.of("dafny_standard_library::conversion::double_to_dafny(*%s)".formatted(rustValue));
+                    yield TokenTree.of("crate::standard_library_conversions::double_to_dafny(*%s)".formatted(rustValue));
                 }
             }
             case TIMESTAMP -> {
                 if (isRustOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::otimestamp_to_dafny(&%s)".formatted(rustValue));
+                    yield TokenTree.of("crate::standard_library_conversions::otimestamp_to_dafny(&%s)".formatted(rustValue));
                 } else {
-                    yield TokenTree.of("dafny_standard_library::conversion::timestamp_to_dafny(&%s)".formatted(rustValue));
+                    yield TokenTree.of("crate::standard_library_conversions::timestamp_to_dafny(&%s)".formatted(rustValue));
                 }
             }
             case BLOB -> {
                 if (isDafnyOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::oblob_to_dafny(&%s)".formatted(rustValue));
+                    yield TokenTree.of("crate::standard_library_conversions::oblob_to_dafny(&%s)".formatted(rustValue));
                 } else if (isRustOption) {
-                    yield TokenTree.of("dafny_standard_library::conversion::oblob_to_dafny(&%s).Extract()".formatted(rustValue));
+                    yield TokenTree.of("crate::standard_library_conversions::oblob_to_dafny(&%s).Extract()".formatted(rustValue));
                 } else {
-                    yield TokenTree.of("dafny_standard_library::conversion::blob_to_dafny(&%s)".formatted(rustValue));
+                    yield TokenTree.of("crate::standard_library_conversions::blob_to_dafny(&%s)".formatted(rustValue));
                 }
             }
             case LIST -> {
@@ -720,12 +720,12 @@ public class Generator {
                 } else {
                     yield TokenTree.of("""
                             ::std::rc::Rc::new(match &%s {
-                                Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+                                Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
                                     ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
                                         |e| %s,
                                     )
                                 },
-                                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+                                None => crate::r#_Wrappers_Compile::Option::None {}
                             })
                             """.formatted(rustValue,
                                           toDafny(memberShape, "e", false, false)));
@@ -759,13 +759,13 @@ public class Generator {
                     yield TokenTree.of("""
                                                 
                             ::std::rc::Rc::new(match &%s {
-                                Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+                                Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
                                     ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
                                         |k| %s,
                                         |v| %s,
                                     )
                                 },
-                                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+                                None => crate::r#_Wrappers_Compile::Option::None {}
                             })
                             """.formatted(rustValue,
                             toDafny(keyShape, "k", false, false),
@@ -777,8 +777,8 @@ public class Generator {
                 if (isRustOption) {
                     yield TokenTree.of("""
                             ::std::rc::Rc::new(match &%s {
-                                Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
-                                None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+                                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
+                                None => crate::_Wrappers_Compile::Option::None { }
                             })
                             """.formatted(rustValue, structureShapeName));
                 } else {
@@ -805,7 +805,7 @@ public class Generator {
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName())));
 
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
 
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
@@ -815,13 +815,13 @@ public class Generator {
     """
             /// Wraps up an arbitrary Rust Error value as a Dafny Error
             pub fn to_opaque_error<E: 'static>(value: E) ->
-              ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>
+              ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
             {
                 let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> = ::dafny_runtime::Object(Some(
                     ::std::rc::Rc::new(::std::cell::UnsafeCell::new(value)),
                 ));
                 ::std::rc::Rc::new(
-                crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error::Opaque {
+                crate::r#$dafnyTypesModuleName:L::Error::Opaque {
                     obj: error_obj,
                 },
               )
@@ -830,14 +830,14 @@ public class Generator {
             /// Wraps up an arbitrary Rust Error value as a Dafny Result<T, Error>.Failure
             pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: 'static>(value: E) ->
               ::std::rc::Rc<
-                dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result<
+                crate::_Wrappers_Compile::Result<
                   T,
-                  ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>
+                  ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
                 >
               >
             {
                 ::std::rc::Rc::new(
-                    dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+                    crate::_Wrappers_Compile::Result::Failure {
                         error: to_opaque_error(value),
                     },
                 )
@@ -890,9 +890,9 @@ public class Generator {
         #[allow(dead_code)]
         pub fn to_dafny(
             value: aws_sdk_$sdkId:L::types::error::$pascalCaseName:L,
-        ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::Error>{
+        ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>{
           ::std::rc::Rc::new(
-            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_d$sdkId:L_dinternaldafny_dtypes::Error::$structureName:L {
+            crate::r#software::amazon::cryptography::services::$sdkId:L::internaldafny::types::Error::$structureName:L {
               $variants:L
             }
           )
@@ -903,7 +903,7 @@ public class Generator {
                 "sdkId", sdkId,
                 "structureName", structureName,
                 "pascalCaseName", pascalCaseName,
-                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId),
+                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId),
                 "variants", toDafnyVariantsForStructure(errorStructure).toString()
         ));
         return new RustFile(path, TokenTree.of(evaluated));
@@ -944,9 +944,9 @@ public class Generator {
         #[allow(dead_code)]
         pub fn to_dafny(
             value: &aws_sdk_$sdkId:L::types::$structureName:L,
-        ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L>{
+        ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
           ::std::rc::Rc::new(
-            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_d$sdkId:L_dinternaldafny_dtypes::$structureName:L::$structureName:L {
+            crate::r#software::amazon::cryptography::services::$sdkId:L::internaldafny::types::$structureName:L::$structureName:L {
                 $variants:L
             }
           )
@@ -956,7 +956,7 @@ public class Generator {
         String evaluated = evalTemplate(template, Map.of(
                 "sdkId", sdkId,
                 "structureName", structureName,
-                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId),
+                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId),
                 "variants", toDafnyVariantsForStructure(structureShape).toString()
         ));
         return TokenTree.of(evaluated);
@@ -966,7 +966,7 @@ public class Generator {
         String structureName = structureShape.getId().getName();
         String snakeCaseStructureName = toSnakeCase(structureName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         // TODO-HACK: don't know why these structures build BuildErrors and not the rest...
         String unwrapIfNeeded = (structureName.equals("KeysAndAttributes") || structureName.equals("Condition"))
                 ? ".unwrap()" : "";
@@ -983,7 +983,7 @@ public class Generator {
         #[allow(dead_code)]
         pub fn from_dafny(
             dafny_value: ::std::rc::Rc<
-                crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
+                crate::r#$dafnyTypesModuleName:L::$structureName:L,
             >,
         ) -> $sdkCrate:L::types::$structureName:L {
             $sdkCrate:L::types::$structureName:L::builder()
@@ -1003,9 +1003,9 @@ public class Generator {
         #[allow(dead_code)]
         pub fn to_dafny(
             value: &aws_sdk_$sdkId:L::types::$structureName:L,
-        ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L>{
+        ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
           ::std::rc::Rc::new(
-            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_d$sdkId:L_dinternaldafny_dtypes::$structureName:L::$structureName:L {
+            crate::r#software::amazon::cryptography::services::$sdkId:L::internaldafny::types::$structureName:L::$structureName:L {
                 $variants:L
             }
           )
@@ -1015,7 +1015,7 @@ public class Generator {
         String evaluated = evalTemplate(template, Map.of(
                 "sdkId", sdkId,
                 "structureName", structureName,
-                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId),
+                "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId),
                 "variants", toDafnyVariantsForStructure(unionShape).toString()
         ));
         return TokenTree.of(evaluated);
@@ -1025,7 +1025,7 @@ public class Generator {
         String structureName = unionShape.getId().getName();
         String snakeCaseStructureName = toSnakeCase(structureName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "structureName", structureName,
@@ -1038,7 +1038,7 @@ public class Generator {
         #[allow(dead_code)]
         pub fn from_dafny(
             dafny_value: ::std::rc::Rc<
-                crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$structureName:L,
+                crate::r#$dafnyTypesModuleName:L::$structureName:L,
             >,
         ) -> $sdkCrate:L::types::$structureName:L {
             $sdkCrate:L::types::$structureName:L::builder()
@@ -1060,7 +1060,7 @@ public class Generator {
     private TokenTree enumToDafnyFunction(final Shape enumShape) {
         String enumName = enumShape.getId().getName();
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "enumName", enumName,
@@ -1074,7 +1074,7 @@ public class Generator {
          
         pub fn to_dafny(
             value: $sdkCrate:L::types::$enumName:L,
-        ) -> ::std::rc::Rc<crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$enumName:L>{
+        ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$enumName:L>{
             ::std::rc::Rc::new(match value {
 
         """, variables));
@@ -1084,7 +1084,7 @@ public class Generator {
                 .map(e -> TokenTree.of(sdkTypeName
                         + "::"
                         + rustEnumName(e)
-                        + " => crate::implementation_from_dafny::r#"
+                        + " => crate::r#"
                         + dafnyTypesModuleName
                         + "::"
                         + enumName
@@ -1110,7 +1110,7 @@ public class Generator {
     private TokenTree enumFromDafnyFunction(final Shape enumShape) {
         String enumName = enumShape.getId().getName();
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
-        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny_dtypes".formatted(sdkId);
+        String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "enumName", enumName,
@@ -1122,7 +1122,7 @@ public class Generator {
         var prelude = TokenTree.of(evalTemplate("""
         #[allow(dead_code)]
         pub fn from_dafny(
-            dafny_value: &crate::implementation_from_dafny::r#$dafnyTypesModuleName:L::$enumName:L,
+            dafny_value: &crate::r#$dafnyTypesModuleName:L::$enumName:L,
         ) -> $sdkCrate:L::types::$enumName:L {
             match dafny_value {
 
@@ -1131,7 +1131,7 @@ public class Generator {
         var branches = TokenTree.of(enumShape.expectTrait(EnumTrait.class).getValues()
                 .stream()
                 .map(e -> TokenTree.of(
-                        "crate::implementation_from_dafny::r#"
+                        "crate::r#"
                         + dafnyTypesModuleName
                         + "::"
                         + enumName
