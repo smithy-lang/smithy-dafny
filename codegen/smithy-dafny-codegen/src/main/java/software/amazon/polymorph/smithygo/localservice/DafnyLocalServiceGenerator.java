@@ -121,7 +121,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
             }
             final var inputType = inputShape.hasTrait(UnitTypeTrait.class) ? ""
                                                                            : ", params %s.%s".formatted(SmithyNameResolver.smithyTypesNamespace(inputShape), inputShape.toShapeId().getName());
-            var maybeOutputType = outputShape.hasTrait(UnitTypeTrait.class) ? ""
+            var outputType = outputShape.hasTrait(UnitTypeTrait.class) ? ""
                                                                              : "*%s.%s,".formatted(SmithyNameResolver.smithyTypesNamespace(outputShape), outputShape.toShapeId().getName());
             String validationCheck = "";
             if(!inputType.equals("")) {
@@ -132,7 +132,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
                             ErrObject: err,
                         }
                 """.formatted(SmithyNameResolver.smithyTypesNamespace(inputShape));
-                if(maybeOutputType.equals("")) {
+                if(outputType.equals("")) {
                     validationCheck += "return opaqueErr }";
                 }
                 else{
@@ -162,11 +162,9 @@ public class DafnyLocalServiceGenerator implements Runnable {
             }
 
             String returnResponse, returnError;
-            final String outputType;
             if (outputShape.hasTrait(UnitTypeTrait.class)) {
                 returnResponse = "return nil";
                 returnError = "return";
-                outputType = maybeOutputType;
             } else {
                 if (inputShape.hasTrait(PositionalTrait.class)) {
                     returnResponse = """
@@ -175,7 +173,6 @@ public class DafnyLocalServiceGenerator implements Runnable {
                         """;
                 }
                 else {
-                    outputType = maybeOutputType;
                     returnResponse = """
                             var native_response = %s(dafny_response.Extract().(%s))
                             return &native_response, nil
