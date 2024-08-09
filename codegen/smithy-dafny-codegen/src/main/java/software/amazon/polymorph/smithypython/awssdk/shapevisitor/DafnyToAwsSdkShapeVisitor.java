@@ -32,8 +32,6 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
-import static software.amazon.polymorph.smithypython.awssdk.AwsSdkCodegenConstants.BOTO3_TIMESTAMP_STRING_FORMAT;
-
 /**
  * ShapeVisitor that should be dispatched from a shape to generate code that maps a Dafny shape's
  * internal attributes to the corresponding AWS SDK kwarg-indexed dictionary.
