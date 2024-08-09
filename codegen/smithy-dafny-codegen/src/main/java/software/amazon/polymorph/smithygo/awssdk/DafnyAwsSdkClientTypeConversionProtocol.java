@@ -6,6 +6,7 @@ import software.amazon.polymorph.smithygo.codegen.AddOperationShapes;
 import software.amazon.polymorph.smithygo.codegen.ApplicationProtocol;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoDelegator;
+import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
@@ -339,9 +340,10 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
         }
 
         context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+            writer.addUseImports(SmithyGoDependency.FMT);
             writer.write("""
                                  func OpaqueError_Output_FromDafny(dafnyOutput $L.Error)(error) {
-                                     return fmt.Errorf(dafnyOutput.Dtor_obj())
+                                     return fmt.Errorf("")
                                  }""",
                          DafnyNameResolver.dafnyTypesNamespace(serviceShape));
         });

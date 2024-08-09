@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -46,7 +47,7 @@ public class SmithyNameResolver {
     }
 
     public static String getSmithyType(final Shape shape, final Symbol symbol) {
-        if(symbol.getNamespace().contains("smithy.")) {
+        if(symbol.getNamespace().contains("smithy.") || symbol.getName().contains("string")) {
             return symbol.getName();
         }
         return SmithyNameResolver.smithyTypesNamespace(shape).concat(DOT).concat(symbol.getName());
@@ -89,5 +90,11 @@ public class SmithyNameResolver {
     public static String getFromDafnyMethodName(final Shape shape, final String disambiguator) {
         final var methodName = shape.getId().getName().concat("_FromDafny");
         return SmithyNameResolver.shapeNamespace(shape).concat(DOT).concat(methodName);
+    }
+
+    public static String getAwsServiceClient(final ServiceShape serviceShape) {
+        return SmithyNameResolver.smithyTypesNamespaceAws(serviceShape, false)
+                                .concat(DOT)
+                                .concat("Client");
     }
 }
