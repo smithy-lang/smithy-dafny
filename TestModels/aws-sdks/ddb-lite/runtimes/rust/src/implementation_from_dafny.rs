@@ -7145,6 +7145,368 @@ pub mod software {
         }
     }
 }
+pub mod r#_Com_Compile {
+    pub mod r#_Amazonaws_Compile {}
+}
+pub mod r#_TestDDBv2_Compile {
+    pub struct _default {}
+
+    impl _default {
+        pub fn BasicQueryTests() -> () {
+            let mut attributeNameMap: ::dafny_runtime::Map<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            > = ::dafny_runtime::map![(::dafny_runtime::string_utf16_of("#bkid")) => (::dafny_runtime::string_utf16_of("branch-key-id")), (::dafny_runtime::string_utf16_of("#status")) => (::dafny_runtime::string_utf16_of("status"))];
+            let mut attributeValueMap: ::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>> = ::dafny_runtime::map![(::dafny_runtime::string_utf16_of(":bkid")) => (::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+                S: ::dafny_runtime::string_utf16_of("aws-kms-h")
+              })), (::dafny_runtime::string_utf16_of(":status")) => (::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+                S: ::dafny_runtime::string_utf16_of("ACTIVE")
+              }))];
+            let mut queryInput: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::QueryInput> = ::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::QueryInput::QueryInput {
+            TableName: crate::r#_TestDDBv2_Compile::_default::tableNameTest(),
+            IndexName: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Some {
+                  value: crate::r#_TestDDBv2_Compile::_default::secIndex()
+                }),
+            Select: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Select>>::None {}),
+            AttributesToGet: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeNameList>::None {}),
+            Limit: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::PositiveIntegerObject>::None {}),
+            ConsistentRead: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::None {}),
+            KeyConditions: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Condition>>>::None {}),
+            QueryFilter: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Condition>>>::None {}),
+            ConditionalOperator: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ConditionalOperator>>::None {}),
+            ScanIndexForward: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::None {}),
+            ExclusiveStartKey: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>>::None {}),
+            ReturnConsumedCapacity: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity>>::None {}),
+            ProjectionExpression: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::None {}),
+            FilterExpression: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::None {}),
+            KeyConditionExpression: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Some {
+                  value: ::dafny_runtime::string_utf16_of("#status = :status and #bkid = :bkid")
+                }),
+            ExpressionAttributeNames: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>::Some {
+                  value: attributeNameMap.clone()
+                }),
+            ExpressionAttributeValues: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>>::Some {
+                  value: attributeValueMap.clone()
+                })
+          });
+            crate::r#_TestDDBv2_Compile::_default::BasicQueryTest(&queryInput);
+            return ();
+        }
+        pub fn BasicGetTests() -> () {
+            let mut Key2Get: ::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>> = ::dafny_runtime::map![(::dafny_runtime::string_utf16_of("branch-key-id")) => (::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+                S: ::dafny_runtime::string_utf16_of("aws-kms-h")
+              })), (::dafny_runtime::string_utf16_of("version")) => (::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+                S: ::dafny_runtime::string_utf16_of("1")
+              }))];
+            let mut getInput: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemInput> = ::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemInput::GetItemInput {
+            TableName: crate::r#_TestDDBv2_Compile::_default::tableNameTest(),
+            Key: Key2Get.clone(),
+            AttributesToGet: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeNameList>::None {}),
+            ConsistentRead: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::None {}),
+            ReturnConsumedCapacity: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity>>::None {}),
+            ProjectionExpression: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::None {}),
+            ExpressionAttributeNames: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>::None {})
+          });
+            crate::r#_TestDDBv2_Compile::_default::BasicGetTest(&getInput);
+            return ();
+        }
+        pub fn BasicPutTests() -> () {
+            let mut attributeValueMap: ::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>> = ::dafny_runtime::map![(::dafny_runtime::string_utf16_of("branch-key-id")) => (::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+                S: ::dafny_runtime::string_utf16_of("aws-kms-put-item")
+              })), (::dafny_runtime::string_utf16_of("status")) => (::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+                S: ::dafny_runtime::string_utf16_of("ACTIVE")
+              })), (::dafny_runtime::string_utf16_of("version")) => (::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+                S: ::dafny_runtime::string_utf16_of("version-1")
+              }))];
+            let mut putInput: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::PutItemInput> = ::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::PutItemInput::PutItemInput {
+            TableName: crate::r#_TestDDBv2_Compile::_default::tableNameTest(),
+            Item: attributeValueMap.clone(),
+            Expected: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ExpectedAttributeValue>>>::None {}),
+            ReturnValues: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnValue>>::None {}),
+            ReturnConsumedCapacity: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity>>::None {}),
+            ReturnItemCollectionMetrics: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics>>::None {}),
+            ConditionalOperator: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ConditionalOperator>>::None {}),
+            ConditionExpression: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::None {}),
+            ExpressionAttributeNames: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>::None {}),
+            ExpressionAttributeValues: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>>::None {})
+          });
+            crate::r#_TestDDBv2_Compile::_default::BasicPutTest(&putInput);
+            return ();
+        }
+        pub fn BatGetItemTests() -> () {
+            let mut attributeNameBranchKey: ::dafny_runtime::Sequence<
+                ::dafny_runtime::DafnyCharUTF16,
+            > = ::dafny_runtime::string_utf16_of("branch-key-id");
+            let mut attributeValueBranchKey: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue> = ::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+            S: ::dafny_runtime::string_utf16_of("aws-kms-put-item")
+          });
+            let mut attributeNameVersion: ::dafny_runtime::Sequence<
+                ::dafny_runtime::DafnyCharUTF16,
+            > = ::dafny_runtime::string_utf16_of("version");
+            let mut attributeValueVersion: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue> = ::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
+            S: ::dafny_runtime::string_utf16_of("version-1")
+          });
+            let mut key: ::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>> = ::dafny_runtime::map![(attributeNameBranchKey.clone()) => (attributeValueBranchKey.clone()), (attributeNameVersion.clone()) => (attributeValueVersion.clone())];
+            let mut keys: crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::KeyList = ::dafny_runtime::seq![key.clone()];
+            let mut keyAndAttributes: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::KeysAndAttributes> = ::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::KeysAndAttributes::KeysAndAttributes {
+            Keys: keys.clone(),
+            AttributesToGet: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeNameList>::None {}),
+            ConsistentRead: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::None {}),
+            ProjectionExpression: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::None {}),
+            ExpressionAttributeNames: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>::None {})
+          });
+            let mut batchGetRequestMap: crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetRequestMap = ::dafny_runtime::map![(crate::r#_TestDDBv2_Compile::_default::tableNameTest()) => (keyAndAttributes.clone())];
+            let mut batchGetInput: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput> = ::std::rc::Rc::new(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput::BatchGetItemInput {
+            RequestItems: batchGetRequestMap.clone(),
+            ReturnConsumedCapacity: ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity>>::None {})
+          });
+            crate::r#_TestDDBv2_Compile::_default::BatchGetItemTest(&batchGetInput);
+            return ();
+        }
+        pub fn BasicQueryTest(
+            input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::QueryInput>,
+        ) -> () {
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            let mut _out0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            _out0 = ::dafny_runtime::MaybePlacebo::from(crate::software::amazon::cryptography::services::dynamodb::internaldafny::_default::DynamoDBClient());
+            valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out0.read());
+            if !(!valueOrError0.read().IsFailure()) {
+                panic!("Halt")
+            };
+            let mut client: ::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient> = valueOrError0.read().Extract();
+            let mut ret = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::QueryOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::QueryOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            _out1 = ::dafny_runtime::MaybePlacebo::from(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient::Query(::dafny_runtime::md!(client.clone()), input));
+            ret = ::dafny_runtime::MaybePlacebo::from(_out1.read());
+            if !matches!(
+                (&ret.read()).as_ref(),
+                crate::r#_Wrappers_Compile::Result::Success { .. }
+            ) {
+                panic!("Halt")
+            };
+            let mut queryOutput: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::QueryOutput> = ret.read().value().clone();
+            if !matches!(
+                queryOutput.Items().as_ref(),
+                crate::r#_Wrappers_Compile::Option::Some { .. }
+            ) {
+                panic!("Halt")
+            };
+            let mut queryItem: ::dafny_runtime::Sequence<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>> = queryOutput.Items().value().clone();
+            if !(::dafny_runtime::int!(0) < queryItem.cardinality()) {
+                panic!("Halt")
+            };
+            let mut item: ::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>> = queryItem.get(&::dafny_runtime::int!(0));
+            let mut _e00: ::dafny_runtime::Set<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            > = item.keys();
+            let mut _e10: ::dafny_runtime::Set<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            > = ::dafny_runtime::set! {::dafny_runtime::string_utf16_of("branch-key-id"), ::dafny_runtime::string_utf16_of("version"), ::dafny_runtime::string_utf16_of("create-time"), ::dafny_runtime::string_utf16_of("enc"), ::dafny_runtime::string_utf16_of("hierarchy-version"), ::dafny_runtime::string_utf16_of("status")};
+            if !(_e00.clone() == _e10.clone()) {
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Left:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e00));
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Right:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e10));
+                panic!("Halt")
+            };
+            let mut _e01: ::dafny_runtime::DafnyInt = item.keys().cardinality();
+            let mut _e11: ::dafny_runtime::DafnyInt = item.values().cardinality();
+            if !(_e01.clone() == _e11.clone()) {
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Left:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e01));
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Right:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e11));
+                panic!("Halt")
+            };
+            return ();
+        }
+        pub fn BasicGetTest(
+            input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemInput>,
+        ) -> () {
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            let mut _out2 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            _out2 = ::dafny_runtime::MaybePlacebo::from(crate::software::amazon::cryptography::services::dynamodb::internaldafny::_default::DynamoDBClient());
+            valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out2.read());
+            if !(!valueOrError0.read().IsFailure()) {
+                panic!("Halt")
+            };
+            let mut client: ::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient> = valueOrError0.read().Extract();
+            let mut ret = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            let mut _out3 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            _out3 = ::dafny_runtime::MaybePlacebo::from(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient::GetItem(::dafny_runtime::md!(client.clone()), input));
+            ret = ::dafny_runtime::MaybePlacebo::from(_out3.read());
+            if !matches!(
+                (&ret.read()).as_ref(),
+                crate::r#_Wrappers_Compile::Result::Success { .. }
+            ) {
+                panic!("Halt")
+            };
+            let mut itemOutput: ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemOutput> = ret.read().value().clone();
+            if !matches!(
+                itemOutput.Item().as_ref(),
+                crate::r#_Wrappers_Compile::Option::Some { .. }
+            ) {
+                panic!("Halt")
+            };
+            let mut item: ::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>> = itemOutput.Item().value().clone();
+            let mut _e02: ::dafny_runtime::Set<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            > = item.keys();
+            let mut _e12: ::dafny_runtime::Set<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            > = ::dafny_runtime::set! {::dafny_runtime::string_utf16_of("branch-key-id"), ::dafny_runtime::string_utf16_of("version"), ::dafny_runtime::string_utf16_of("create-time"), ::dafny_runtime::string_utf16_of("enc"), ::dafny_runtime::string_utf16_of("hierarchy-version"), ::dafny_runtime::string_utf16_of("status")};
+            if !(_e02.clone() == _e12.clone()) {
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Left:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e02));
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Right:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e12));
+                panic!("Halt")
+            };
+            let mut _e03: ::dafny_runtime::DafnyInt = item.keys().cardinality();
+            let mut _e13: ::dafny_runtime::DafnyInt = item.values().cardinality();
+            if !(_e03.clone() == _e13.clone()) {
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Left:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e03));
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "Right:\n"
+                    ))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&_e13));
+                panic!("Halt")
+            };
+            return ();
+        }
+        pub fn BasicPutTest(
+            input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::PutItemInput>,
+        ) -> () {
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            let mut _out4 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            _out4 = ::dafny_runtime::MaybePlacebo::from(crate::software::amazon::cryptography::services::dynamodb::internaldafny::_default::DynamoDBClient());
+            valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out4.read());
+            if !(!valueOrError0.read().IsFailure()) {
+                panic!("Halt")
+            };
+            let mut client: ::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient> = valueOrError0.read().Extract();
+            let mut ret = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::PutItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            let mut _out5 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::PutItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            _out5 = ::dafny_runtime::MaybePlacebo::from(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient::PutItem(::dafny_runtime::md!(client.clone()), input));
+            ret = ::dafny_runtime::MaybePlacebo::from(_out5.read());
+            if !matches!(
+                (&ret.read()).as_ref(),
+                crate::r#_Wrappers_Compile::Result::Success { .. }
+            ) {
+                panic!("Halt")
+            };
+            return ();
+        }
+        pub fn BatchGetItemTest(
+            input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput>,
+        ) -> () {
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            let mut _out6 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            _out6 = ::dafny_runtime::MaybePlacebo::from(crate::software::amazon::cryptography::services::dynamodb::internaldafny::_default::DynamoDBClient());
+            valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out6.read());
+            if !(!valueOrError0.read().IsFailure()) {
+                panic!("Halt")
+            };
+            let mut client: ::dafny_runtime::Object<dyn crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient> = valueOrError0.read().Extract();
+            let mut ret = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            let mut _out7 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>>::new();
+            _out7 = ::dafny_runtime::MaybePlacebo::from(crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient::BatchGetItem(::dafny_runtime::md!(client.clone()), input));
+            ret = ::dafny_runtime::MaybePlacebo::from(_out7.read());
+            if matches!(
+                (&ret.read()).as_ref(),
+                crate::r#_Wrappers_Compile::Result::Failure { .. }
+            ) {
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of(
+                        "\n\t BatchGetItemTest Failed"
+                    ))
+                );
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of("\n\t"))
+                );
+                print!("{}", ::dafny_runtime::DafnyPrintWrapper(&ret.read()));
+                print!(
+                    "{}",
+                    ::dafny_runtime::DafnyPrintWrapper(&::dafny_runtime::string_utf16_of("\n"))
+                )
+            };
+            if !matches!(
+                (&ret.read()).as_ref(),
+                crate::r#_Wrappers_Compile::Result::Success { .. }
+            ) {
+                panic!("Halt")
+            };
+            return ();
+        }
+        pub fn tableNameTest() -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
+            ::dafny_runtime::string_utf16_of("TestTable")
+        }
+        pub fn secIndex() -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
+            ::dafny_runtime::string_utf16_of("Active-Keys")
+        }
+    }
+
+    #[test]
+    pub fn BasicQueryTests() {
+        _default::BasicQueryTests()
+    }
+
+    #[test]
+    pub fn BasicGetTests() {
+        _default::BasicGetTests()
+    }
+
+    #[test]
+    pub fn BasicPutTests() {
+        _default::BasicPutTests()
+    }
+
+    #[test]
+    pub fn BatGetItemTests() {
+        _default::BatGetItemTests()
+    }
+}
 pub mod r#_StandardLibraryInterop_Compile {
     pub use dafny_runtime::UpcastObject;
     pub use std::any::Any;
@@ -7190,8 +7552,5 @@ pub mod r#_StandardLibraryInterop_Compile {
     impl UpcastObject<dyn Any> for WrappersInterop {
         ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
     }
-}
-pub mod r#_Com_Compile {
-    pub mod r#_Amazonaws_Compile {}
 }
 pub mod _module {}
