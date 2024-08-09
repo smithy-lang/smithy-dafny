@@ -343,7 +343,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
             writer.addUseImports(SmithyGoDependency.FMT);
             writer.write("""
                                  func OpaqueError_Output_FromDafny(dafnyOutput $L.Error)(error) {
-                                     return fmt.Errorf("")
+                                     return fmt.Errorf(fmt.Sprintf("%v", dafnyOutput.Dtor_obj()))
                                  }""",
                          DafnyNameResolver.dafnyTypesNamespace(serviceShape));
         });
