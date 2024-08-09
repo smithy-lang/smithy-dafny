@@ -169,25 +169,10 @@ public class DafnyLocalServiceGenerator implements Runnable {
                 outputType = maybeOutputType;
             } else {
                 if (inputShape.hasTrait(PositionalTrait.class)) {
-                    var insideOutputShape = outputShape.getAllMembers().values().stream().findFirst().get().getTarget();
-                    Shape shapeInsideOutputShape = model.expectShape(insideOutputShape);
-                    if (shapeInsideOutputShape.hasTrait(ReferenceTrait.class)) {
-                        var ReferentId = shapeInsideOutputShape.getTrait(ReferenceTrait.class).get().getReferentId();
-                        Shape referenceShape = model.expectShape(ReferentId);
-                        outputType = "*%s.%s,".formatted(SmithyNameResolver.smithyTypesNamespace(referenceShape), referenceShape.toShapeId().getName());
-                        returnResponse = """
-                            var native_response = dafny_response.Extract().(%s)
-                            return &native_response, nil
-                        """.formatted(SmithyNameResolver.getSmithyType(referenceShape, symbolProvider.toSymbol(referenceShape)));
-                    } else {
-                        outputType = "*%s.%s,".formatted(SmithyNameResolver.smithyTypesNamespace(shapeInsideOutputShape), shapeInsideOutputShape.toShapeId().getName());
-                        returnResponse = """
-                            var native_response = dafny_response.Extract().(%s)
-                            return &native_response, nil
-                        """.formatted(SmithyNameResolver.getSmithyType(shapeInsideOutputShape, symbolProvider.toSymbol(shapeInsideOutputShape)));
-                    }
-                    // dafny_response is unwrapped PositionalTrait
-                    
+                    returnResponse = """
+                            var native_response = dafny_response.Extract()
+                            return native_response, nil
+                        """;
                 }
                 else {
                     outputType = maybeOutputType;

@@ -17,8 +17,10 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+import software.amazon.smithy.codegen.core.Symbol;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -47,19 +49,20 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
         final var writerDelegator = context.writerDelegator();
         serviceShape.getOperations().forEach(eachOperation -> {
             final var operation = model.expectShape(eachOperation, OperationShape.class);
-            final var input = model.expectShape(operation.getInputShape());
+            final Shape input = model.expectShape(operation.getInputShape());
             if (!alreadyVisited.contains(input.toShapeId())) {
                 alreadyVisited.add(input.toShapeId());
                 if (!input.hasTrait(UnitTypeTrait.class) && input.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
                     final var inputToDafnyMethodName = SmithyNameResolver.getToDafnyMethodName(serviceShape, input, "");
                     final var inputSymbol = symbolProvider.toSymbol(input);
-                    final String returnType;
+                    final String outputType;
                     if (input.hasTrait(PositionalTrait.class)) {
-                        // TODO: Change this
-                        returnType = "dafny.Sequence";
-                    }
-                    else {
-                        returnType = DafnyNameResolver.getDafnyType(input, inputSymbol);
+                        // Output type in To Dafny should be unwrapped
+                        Shape inputForPositional = model.expectShape(input.getAllMembers().values().stream().findFirst().get().getTarget());
+                        Symbol symbolForPositional = symbolProvider.toSymbol(inputForPositional);
+                        outputType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
+                    } else {
+                        outputType = DafnyNameResolver.getDafnyType(input, inputSymbol);
                     }
                     writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
                         writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(input.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespace(input));
@@ -67,7 +70,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                              func $L(nativeInput $L)($L) {
                                                  ${C|}
                                              }""", inputToDafnyMethodName, SmithyNameResolver.getSmithyType(input, inputSymbol),
-                                             returnType,
+                                             outputType,
                                      writer.consumer(w -> generateRequestSerializer(context, operation, context.writerDelegator())));
                     });
                 }
@@ -183,8 +186,10 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                     final var inputSymbol = context.symbolProvider().toSymbol(input);
                     final String inputType;
                     if (input.hasTrait(PositionalTrait.class)) {
-                        // TODO: Change this
-                        inputType = "dafny.Sequence";
+                        // Input type in To native should be unwrapped
+                        Shape inputForPositional = context.model().expectShape(input.getAllMembers().values().stream().findFirst().get().getTarget());
+                        Symbol symbolForPositional = context.symbolProvider().toSymbol(input);
+                        inputType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
                     }
                     else {
                         inputType = DafnyNameResolver.getDafnyType(input, inputSymbol);

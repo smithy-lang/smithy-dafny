@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
@@ -23,6 +24,27 @@ public class DafnyNameResolver {
     }
 
     public static String getDafnyType(final Shape shape, final Symbol symbol) {
+
+        switch (shape.getType()) {
+            case STRING:
+                if (shape.hasTrait(EnumTrait.class)) {
+                    return getDafnyTypeDefaultCase(shape, symbol);
+                }
+                else {
+                    return "dafny.Sequence";
+                }
+            // case MAP:
+            //     return "map";
+            // case STRUCTURE:
+            // case UNION:
+            //     return symbol.getName();
+            default:
+                return getDafnyTypeDefaultCase(shape, symbol);
+        }
+        
+    }
+
+    private static String getDafnyTypeDefaultCase(final Shape shape, final Symbol symbol) {
         return DafnyNameResolver.dafnyTypesNamespace(shape)
                                 .concat(DOT)
                                 .concat(symbol.getName());
