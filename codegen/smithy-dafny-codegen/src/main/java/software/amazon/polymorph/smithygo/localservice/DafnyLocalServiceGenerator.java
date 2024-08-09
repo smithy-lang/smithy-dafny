@@ -16,6 +16,7 @@ import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -145,11 +146,10 @@ public class DafnyLocalServiceGenerator implements Runnable {
             } else {
                 String dafnyType; 
                 if (inputShape.hasTrait(PositionalTrait.class)) {
-                    // TODO: Change this
-                    // System.out.println(SmithyNameResolver.shapeNamespace(outputShape.getAllMembers().values().stream().findFirst().get()));
-                    // System.out.println(SmithyNameResolver.getSmithyType(b, symbolProvider.toSymbol(b)));
-                    // System.out.println(symbolProvider.toSymbol(model.expectShape(ReferentId)));
-                    dafnyType = "dafny.Sequence";
+                    Shape inputForPositional = model.expectShape(inputShape.getAllMembers().values().stream().findFirst().get().getTarget());
+                    Symbol symbolForPositional = symbolProvider.toSymbol(inputForPositional);
+                    dafnyType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
+                    outputType = "interface{},";
                 }
                 else {
                     dafnyType = DafnyNameResolver.getDafnyType(inputShape, symbolProvider.toSymbol(inputShape));
