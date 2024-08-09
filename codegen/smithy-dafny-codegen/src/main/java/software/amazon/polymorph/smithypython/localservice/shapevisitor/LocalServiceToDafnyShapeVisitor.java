@@ -271,10 +271,13 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       );
     }
 
-    @Override
-    public String timestampShape(TimestampShape shape) {
-      throw new UnsupportedOperationException("TimestampShape from within a LocalService not supported");
-    }
+  @Override
+  public String timestampShape(TimestampShape shape) {
+    writer.addStdlibImport("_dafny");
+    return "_dafny.Seq(%1$s.isoformat())".formatted(
+            dataSource
+    );
+  }
 
     @Override
     public String unionShape(UnionShape unionShape) {
