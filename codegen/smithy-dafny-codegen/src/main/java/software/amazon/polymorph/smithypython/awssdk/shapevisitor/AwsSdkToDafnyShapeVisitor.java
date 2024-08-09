@@ -32,7 +32,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
-import static software.amazon.polymorph.CodegenConstants.DAFNY_DATETIME_STRING_FORMAT;
+import static software.amazon.polymorph.smithypython.awssdk.AwsSdkCodegenConstants.BOTO3_TIMESTAMP_STRING_FORMAT;
 
 /**
  * ShapeVisitor that should be dispatched from a shape to generate code that maps a AWS SDK
@@ -249,7 +249,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addStdlibImport("datetime", "timezone");
     return "_dafny.Seq(%1$s.astimezone(timezone.utc).strftime(\"%2$s\"))".formatted(
             dataSource,
-            DAFNY_DATETIME_STRING_FORMAT
+            BOTO3_TIMESTAMP_STRING_FORMAT
     );
   }
 

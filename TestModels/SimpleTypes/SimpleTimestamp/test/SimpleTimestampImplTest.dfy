@@ -19,7 +19,7 @@ module SimpleTimestampImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-        var dafnyTimestamp := "2024-06-11T12:34:56";
+        var dafnyTimestamp := "2024-06-11T12:34:56.000Z";
         var ret :- expect client.GetTimestamp(SimpleTimestamp.Types.GetTimestampInput(value:= Some(dafnyTimestamp)));
         expect ret.value == Some(dafnyTimestamp);
         print ret;

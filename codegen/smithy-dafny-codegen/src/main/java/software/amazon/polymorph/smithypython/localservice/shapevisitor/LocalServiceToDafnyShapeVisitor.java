@@ -32,8 +32,6 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
-import static software.amazon.polymorph.CodegenConstants.DAFNY_DATETIME_STRING_FORMAT;
-
 /**
  * ShapeVisitor that should be dispatched from a shape
  * to generate code that maps a Smithy-modelled shape's internal attributes
@@ -275,11 +273,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      writer.addStdlibImport("_dafny");
-      return "_dafny.Seq(%1$s.strftime(\"%2$s\"))".formatted(
-              dataSource,
-              DAFNY_DATETIME_STRING_FORMAT
-      );
+      throw new UnsupportedOperationException("TimestampShape from within a LocalService not supported");
     }
 
     @Override
