@@ -5,9 +5,9 @@
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::operation::batch_get_item::BatchGetItemInput
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::BatchGetItemInput,
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput,
 >{
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::BatchGetItemInput::BatchGetItemInput {
+    ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput::BatchGetItemInput {
         RequestItems: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.request_items.clone().unwrap(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
     |v| crate::conversions::keys_and_attributes::to_dafny(&v)
@@ -15,8 +15,8 @@ pub fn to_dafny(
 )
 ,
  ReturnConsumedCapacity: ::std::rc::Rc::new(match &value.return_consumed_capacity {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::return_consumed_capacity::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::return_consumed_capacity::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
     })
@@ -24,7 +24,7 @@ pub fn to_dafny(
  #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::BatchGetItemInput,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput,
     >,
     client: aws_sdk_dynamodb::Client,
 ) -> aws_sdk_dynamodb::operation::batch_get_item::builders::BatchGetItemFluentBuilder {
@@ -36,7 +36,7 @@ pub fn from_dafny(
 )
  ))
  .set_return_consumed_capacity(match &**dafny_value.ReturnConsumedCapacity() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::return_consumed_capacity::from_dafny(value)
     ),
     _ => None,

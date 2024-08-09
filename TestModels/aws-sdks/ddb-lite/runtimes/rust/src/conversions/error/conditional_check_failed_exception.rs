@@ -6,10 +6,10 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: aws_sdk_dynamodb::types::error::ConditionalCheckFailedException,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Error>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>{
   ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Error::ConditionalCheckFailedException {
-      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message),
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error::ConditionalCheckFailedException {
+      message: crate::standard_library_conversions::ostring_to_dafny(&value.message),
     }
   )
 }

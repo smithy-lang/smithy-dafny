@@ -7,50 +7,50 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::AttributeValue,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>{
   ::std::rc::Rc::new(
     match value {
         aws_sdk_dynamodb::types::AttributeValue::B(x) => 
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::B {
-            B: dafny_standard_library::conversion::blob_to_dafny(x)
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::B {
+            B: crate::standard_library_conversions::blob_to_dafny(x)
           },
         aws_sdk_dynamodb::types::AttributeValue::Bool(x) => 
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::BOOL {
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::BOOL {
             BOOL: *x
           },
         aws_sdk_dynamodb::types::AttributeValue::Bs(x) => 
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::BS {
-            BS: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x, dafny_standard_library::conversion::blob_to_dafny)
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::BS {
+            BS: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x, crate::standard_library_conversions::blob_to_dafny)
           },
         aws_sdk_dynamodb::types::AttributeValue::L(x) =>
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::L {
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::L {
             L: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x, to_dafny)
           },
         aws_sdk_dynamodb::types::AttributeValue::M(x) =>
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::M {
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::M {
             M: dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x, 
               |s| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s),
               to_dafny)
           },
         aws_sdk_dynamodb::types::AttributeValue::N(x) =>
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::N {
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::N {
             N: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x)
           },
         aws_sdk_dynamodb::types::AttributeValue::Ns(x) =>
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::NS {
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::NS {
             NS: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x, 
               |s| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(s))
           },
         aws_sdk_dynamodb::types::AttributeValue::Null(x) => 
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::NULL { 
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::NULL { 
             NULL: *x
           },
         aws_sdk_dynamodb::types::AttributeValue::S(x) =>
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::S {
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S {
             S: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x)
           },
         aws_sdk_dynamodb::types::AttributeValue::Ss(x) =>
-          crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::SS {
+          crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::SS {
             SS: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x, 
               |s| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(s))
           },
@@ -65,51 +65,51 @@ pub fn to_dafny(
 } #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue,
     >,
 ) -> aws_sdk_dynamodb::types::AttributeValue {
   match &*dafny_value {
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::S { S } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::S { S } =>
       aws_sdk_dynamodb::types::AttributeValue::S(
         dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(S)
       ),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::N { N } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::N { N } =>
       aws_sdk_dynamodb::types::AttributeValue::N(
         dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(N)
       ),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::B { B } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::B { B } =>
       aws_sdk_dynamodb::types::AttributeValue::B(
-        dafny_standard_library::conversion::blob_from_dafny(B.clone())
+        crate::standard_library_conversions::blob_from_dafny(B.clone())
       ),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::SS { SS } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::SS { SS } =>
       aws_sdk_dynamodb::types::AttributeValue::Ss(
         dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(SS, 
           dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string)
       ),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::NS { NS } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::NS { NS } =>
       aws_sdk_dynamodb::types::AttributeValue::Ss(
         dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(NS, 
           dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string)
       ),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::BS { BS } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::BS { BS } =>
       aws_sdk_dynamodb::types::AttributeValue::Bs(
         dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(BS, 
-          |b| dafny_standard_library::conversion::blob_from_dafny(b.clone()))
+          |b| crate::standard_library_conversions::blob_from_dafny(b.clone()))
       ),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::M { M } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::M { M } =>
       aws_sdk_dynamodb::types::AttributeValue::M(
         dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(M, 
           dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string,
           |v| from_dafny(v.clone()))
       ),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::L { L } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::L { L } =>
       aws_sdk_dynamodb::types::AttributeValue::L(
         dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(L, 
           |v| from_dafny(v.clone()))
       ),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::NULL { NULL } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::NULL { NULL } =>
         aws_sdk_dynamodb::types::AttributeValue::Null(*NULL),
-    crate::implementation_from_dafny::_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValue::BOOL { BOOL } =>
+    crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::BOOL { BOOL } =>
       aws_sdk_dynamodb::types::AttributeValue::Bool(*BOOL),
   }
 }

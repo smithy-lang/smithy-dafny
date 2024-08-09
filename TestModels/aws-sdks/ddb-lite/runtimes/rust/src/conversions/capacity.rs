@@ -6,24 +6,24 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::Capacity,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Capacity>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Capacity>{
   ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Capacity::Capacity {
-        ReadCapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.read_capacity_units),
- WriteCapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.write_capacity_units),
- CapacityUnits: dafny_standard_library::conversion::odouble_to_dafny(&value.capacity_units),
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Capacity::Capacity {
+        ReadCapacityUnits: crate::standard_library_conversions::odouble_to_dafny(&value.read_capacity_units),
+ WriteCapacityUnits: crate::standard_library_conversions::odouble_to_dafny(&value.write_capacity_units),
+ CapacityUnits: crate::standard_library_conversions::odouble_to_dafny(&value.capacity_units),
     }
   )
 } #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Capacity,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Capacity,
     >,
 ) -> aws_sdk_dynamodb::types::Capacity {
     aws_sdk_dynamodb::types::Capacity::builder()
-          .set_read_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.ReadCapacityUnits().clone()))
- .set_write_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.WriteCapacityUnits().clone()))
- .set_capacity_units(dafny_standard_library::conversion::odouble_from_dafny(dafny_value.CapacityUnits().clone()))
+          .set_read_capacity_units(crate::standard_library_conversions::odouble_from_dafny(dafny_value.ReadCapacityUnits().clone()))
+ .set_write_capacity_units(crate::standard_library_conversions::odouble_from_dafny(dafny_value.WriteCapacityUnits().clone()))
+ .set_capacity_units(crate::standard_library_conversions::odouble_from_dafny(dafny_value.CapacityUnits().clone()))
           .build()
 
 }

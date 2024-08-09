@@ -5,10 +5,10 @@
 
 pub fn to_dafny(
     value: aws_sdk_dynamodb::types::ReturnItemCollectionMetrics,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnItemCollectionMetrics>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics>{
     ::std::rc::Rc::new(match value {
- aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::Size => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnItemCollectionMetrics::SIZE {},
- aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::None => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnItemCollectionMetrics::NONE {},
+ aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::Size => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::SIZE {},
+ aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::None => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::NONE {},
         // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
         // so there's no way to succeed.
         // See https://github.com/smithy-lang/smithy-dafny/issues/476.
@@ -19,10 +19,10 @@ pub fn to_dafny(
 }
  #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnItemCollectionMetrics,
+    dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics,
 ) -> aws_sdk_dynamodb::types::ReturnItemCollectionMetrics {
     match dafny_value {
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnItemCollectionMetrics::SIZE {} => aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::Size,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnItemCollectionMetrics::NONE {} => aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::None,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::SIZE {} => aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::Size,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::NONE {} => aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::None,
     }
 }

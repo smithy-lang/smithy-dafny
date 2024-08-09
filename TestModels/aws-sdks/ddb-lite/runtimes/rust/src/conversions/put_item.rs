@@ -10,7 +10,7 @@ pub fn to_dafny_error(
         aws_sdk_dynamodb::operation::put_item::PutItemError,
         ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
     >,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::Error> {
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error> {
     match value {
       aws_sdk_dynamodb::error::SdkError::ServiceError(service_error) => match service_error.err() {
                 aws_sdk_dynamodb::operation::put_item::PutItemError::InternalServerError(e) =>

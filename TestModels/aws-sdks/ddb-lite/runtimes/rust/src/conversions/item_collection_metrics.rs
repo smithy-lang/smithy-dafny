@@ -6,28 +6,28 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::ItemCollectionMetrics,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ItemCollectionMetrics>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ItemCollectionMetrics>{
   ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ItemCollectionMetrics::ItemCollectionMetrics {
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ItemCollectionMetrics::ItemCollectionMetrics {
         ItemCollectionKey:
 ::std::rc::Rc::new(match &value.item_collection_key {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
             |v| crate::conversions::attribute_value::to_dafny(&v)
 ,
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
  SizeEstimateRangeGB: ::std::rc::Rc::new(match &value.size_estimate_range_gb {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| dafny_standard_library::conversion::double_to_dafny(*e),
+            |e| crate::standard_library_conversions::double_to_dafny(*e),
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
     }
@@ -35,12 +35,12 @@ pub fn to_dafny(
 } #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ItemCollectionMetrics,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ItemCollectionMetrics,
     >,
 ) -> aws_sdk_dynamodb::types::ItemCollectionMetrics {
     aws_sdk_dynamodb::types::ItemCollectionMetrics::builder()
           .set_item_collection_key(match (*dafny_value.ItemCollectionKey()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
@@ -52,10 +52,10 @@ pub fn from_dafny(
 }
 )
  .set_size_estimate_range_gb(match (*dafny_value.SizeEstimateRangeGB()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| dafny_standard_library::conversion::double_from_dafny(&e.clone()),
+                |e| crate::standard_library_conversions::double_from_dafny(&e.clone()),
             )
         ),
     _ => None

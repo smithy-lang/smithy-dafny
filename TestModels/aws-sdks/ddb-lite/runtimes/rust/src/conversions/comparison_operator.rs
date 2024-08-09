@@ -5,21 +5,21 @@
 
 pub fn to_dafny(
     value: aws_sdk_dynamodb::types::ComparisonOperator,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator>{
     ::std::rc::Rc::new(match value {
- aws_sdk_dynamodb::types::ComparisonOperator::Eq => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::EQ {},
- aws_sdk_dynamodb::types::ComparisonOperator::Ne => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::NE {},
- aws_sdk_dynamodb::types::ComparisonOperator::In => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::IN {},
- aws_sdk_dynamodb::types::ComparisonOperator::Le => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::LE {},
- aws_sdk_dynamodb::types::ComparisonOperator::Lt => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::LT {},
- aws_sdk_dynamodb::types::ComparisonOperator::Ge => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::GE {},
- aws_sdk_dynamodb::types::ComparisonOperator::Gt => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::GT {},
- aws_sdk_dynamodb::types::ComparisonOperator::Between => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::BETWEEN {},
- aws_sdk_dynamodb::types::ComparisonOperator::NotNull => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::NOT_NULL {},
- aws_sdk_dynamodb::types::ComparisonOperator::Null => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::NULL {},
- aws_sdk_dynamodb::types::ComparisonOperator::Contains => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::CONTAINS {},
- aws_sdk_dynamodb::types::ComparisonOperator::NotContains => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::NOT_CONTAINS {},
- aws_sdk_dynamodb::types::ComparisonOperator::BeginsWith => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::BEGINS_WITH {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Eq => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::EQ {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Ne => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::NE {},
+ aws_sdk_dynamodb::types::ComparisonOperator::In => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::IN {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Le => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::LE {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Lt => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::LT {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Ge => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::GE {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Gt => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::GT {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Between => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::BETWEEN {},
+ aws_sdk_dynamodb::types::ComparisonOperator::NotNull => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::NOT_NULL {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Null => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::NULL {},
+ aws_sdk_dynamodb::types::ComparisonOperator::Contains => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::CONTAINS {},
+ aws_sdk_dynamodb::types::ComparisonOperator::NotContains => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::NOT_CONTAINS {},
+ aws_sdk_dynamodb::types::ComparisonOperator::BeginsWith => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::BEGINS_WITH {},
         // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
         // so there's no way to succeed.
         // See https://github.com/smithy-lang/smithy-dafny/issues/476.
@@ -30,21 +30,21 @@ pub fn to_dafny(
 }
  #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator,
+    dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator,
 ) -> aws_sdk_dynamodb::types::ComparisonOperator {
     match dafny_value {
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::EQ {} => aws_sdk_dynamodb::types::ComparisonOperator::Eq,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::NE {} => aws_sdk_dynamodb::types::ComparisonOperator::Ne,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::IN {} => aws_sdk_dynamodb::types::ComparisonOperator::In,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::LE {} => aws_sdk_dynamodb::types::ComparisonOperator::Le,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::LT {} => aws_sdk_dynamodb::types::ComparisonOperator::Lt,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::GE {} => aws_sdk_dynamodb::types::ComparisonOperator::Ge,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::GT {} => aws_sdk_dynamodb::types::ComparisonOperator::Gt,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::BETWEEN {} => aws_sdk_dynamodb::types::ComparisonOperator::Between,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::NOT_NULL {} => aws_sdk_dynamodb::types::ComparisonOperator::NotNull,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::NULL {} => aws_sdk_dynamodb::types::ComparisonOperator::Null,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::CONTAINS {} => aws_sdk_dynamodb::types::ComparisonOperator::Contains,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::NOT_CONTAINS {} => aws_sdk_dynamodb::types::ComparisonOperator::NotContains,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ComparisonOperator::BEGINS_WITH {} => aws_sdk_dynamodb::types::ComparisonOperator::BeginsWith,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::EQ {} => aws_sdk_dynamodb::types::ComparisonOperator::Eq,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::NE {} => aws_sdk_dynamodb::types::ComparisonOperator::Ne,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::IN {} => aws_sdk_dynamodb::types::ComparisonOperator::In,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::LE {} => aws_sdk_dynamodb::types::ComparisonOperator::Le,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::LT {} => aws_sdk_dynamodb::types::ComparisonOperator::Lt,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::GE {} => aws_sdk_dynamodb::types::ComparisonOperator::Ge,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::GT {} => aws_sdk_dynamodb::types::ComparisonOperator::Gt,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::BETWEEN {} => aws_sdk_dynamodb::types::ComparisonOperator::Between,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::NOT_NULL {} => aws_sdk_dynamodb::types::ComparisonOperator::NotNull,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::NULL {} => aws_sdk_dynamodb::types::ComparisonOperator::Null,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::CONTAINS {} => aws_sdk_dynamodb::types::ComparisonOperator::Contains,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::NOT_CONTAINS {} => aws_sdk_dynamodb::types::ComparisonOperator::NotContains,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ComparisonOperator::BEGINS_WITH {} => aws_sdk_dynamodb::types::ComparisonOperator::BeginsWith,
     }
 }

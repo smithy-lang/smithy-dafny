@@ -5,11 +5,11 @@
 
 pub fn to_dafny(
     value: aws_sdk_dynamodb::types::ReturnConsumedCapacity,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnConsumedCapacity>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity>{
     ::std::rc::Rc::new(match value {
- aws_sdk_dynamodb::types::ReturnConsumedCapacity::Indexes => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnConsumedCapacity::INDEXES {},
- aws_sdk_dynamodb::types::ReturnConsumedCapacity::Total => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnConsumedCapacity::TOTAL {},
- aws_sdk_dynamodb::types::ReturnConsumedCapacity::None => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnConsumedCapacity::NONE {},
+ aws_sdk_dynamodb::types::ReturnConsumedCapacity::Indexes => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity::INDEXES {},
+ aws_sdk_dynamodb::types::ReturnConsumedCapacity::Total => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity::TOTAL {},
+ aws_sdk_dynamodb::types::ReturnConsumedCapacity::None => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity::NONE {},
         // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
         // so there's no way to succeed.
         // See https://github.com/smithy-lang/smithy-dafny/issues/476.
@@ -20,11 +20,11 @@ pub fn to_dafny(
 }
  #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnConsumedCapacity,
+    dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity,
 ) -> aws_sdk_dynamodb::types::ReturnConsumedCapacity {
     match dafny_value {
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnConsumedCapacity::INDEXES {} => aws_sdk_dynamodb::types::ReturnConsumedCapacity::Indexes,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnConsumedCapacity::TOTAL {} => aws_sdk_dynamodb::types::ReturnConsumedCapacity::Total,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ReturnConsumedCapacity::NONE {} => aws_sdk_dynamodb::types::ReturnConsumedCapacity::None,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity::INDEXES {} => aws_sdk_dynamodb::types::ReturnConsumedCapacity::Indexes,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity::TOTAL {} => aws_sdk_dynamodb::types::ReturnConsumedCapacity::Total,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity::NONE {} => aws_sdk_dynamodb::types::ReturnConsumedCapacity::None,
     }
 }

@@ -5,102 +5,102 @@
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::operation::scan::ScanInput
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ScanInput,
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ScanInput,
 >{
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ScanInput::ScanInput {
-        TableName: dafny_standard_library::conversion::ostring_to_dafny(&value.table_name) .Extract(),
- IndexName: dafny_standard_library::conversion::ostring_to_dafny(&value.index_name),
+    ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ScanInput::ScanInput {
+        TableName: crate::standard_library_conversions::ostring_to_dafny(&value.table_name) .Extract(),
+ IndexName: crate::standard_library_conversions::ostring_to_dafny(&value.index_name),
  AttributesToGet: ::std::rc::Rc::new(match &value.attributes_to_get {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
             |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
- Limit: dafny_standard_library::conversion::oint_to_dafny(value.limit),
+ Limit: crate::standard_library_conversions::oint_to_dafny(value.limit),
  Select: ::std::rc::Rc::new(match &value.select {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::select::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::select::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  ScanFilter:
 ::std::rc::Rc::new(match &value.scan_filter {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
             |v| crate::conversions::condition::to_dafny(&v)
 ,
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
  ConditionalOperator: ::std::rc::Rc::new(match &value.conditional_operator {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::conditional_operator::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::conditional_operator::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  ExclusiveStartKey:
 ::std::rc::Rc::new(match &value.exclusive_start_key {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
             |v| crate::conversions::attribute_value::to_dafny(&v)
 ,
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
  ReturnConsumedCapacity: ::std::rc::Rc::new(match &value.return_consumed_capacity {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::return_consumed_capacity::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::return_consumed_capacity::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
- TotalSegments: dafny_standard_library::conversion::oint_to_dafny(value.total_segments),
- Segment: dafny_standard_library::conversion::oint_to_dafny(value.segment),
- ProjectionExpression: dafny_standard_library::conversion::ostring_to_dafny(&value.projection_expression),
- FilterExpression: dafny_standard_library::conversion::ostring_to_dafny(&value.filter_expression),
+ TotalSegments: crate::standard_library_conversions::oint_to_dafny(value.total_segments),
+ Segment: crate::standard_library_conversions::oint_to_dafny(value.segment),
+ ProjectionExpression: crate::standard_library_conversions::ostring_to_dafny(&value.projection_expression),
+ FilterExpression: crate::standard_library_conversions::ostring_to_dafny(&value.filter_expression),
  ExpressionAttributeNames:
 ::std::rc::Rc::new(match &value.expression_attribute_names {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
             |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
  ExpressionAttributeValues:
 ::std::rc::Rc::new(match &value.expression_attribute_values {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
             |v| crate::conversions::attribute_value::to_dafny(&v)
 ,
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
- ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(value.consistent_read),
+ ConsistentRead: crate::standard_library_conversions::obool_to_dafny(value.consistent_read),
     })
 }
  #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::ScanInput,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ScanInput,
     >,
     client: aws_sdk_dynamodb::Client,
 ) -> aws_sdk_dynamodb::operation::scan::builders::ScanFluentBuilder {
     client.scan()
           .set_table_name(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.TableName()) ))
- .set_index_name(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.IndexName().clone()))
+ .set_index_name(crate::standard_library_conversions::ostring_from_dafny(dafny_value.IndexName().clone()))
  .set_attributes_to_get(match (*dafny_value.AttributesToGet()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
                 |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
@@ -109,16 +109,16 @@ pub fn from_dafny(
     _ => None
 }
 )
- .set_limit(dafny_standard_library::conversion::oint_from_dafny(dafny_value.Limit().clone()))
+ .set_limit(crate::standard_library_conversions::oint_from_dafny(dafny_value.Limit().clone()))
  .set_select(match &**dafny_value.Select() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::select::from_dafny(value)
     ),
     _ => None,
 }
 )
  .set_scan_filter(match (*dafny_value.ScanFilter()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
@@ -130,14 +130,14 @@ pub fn from_dafny(
 }
 )
  .set_conditional_operator(match &**dafny_value.ConditionalOperator() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::conditional_operator::from_dafny(value)
     ),
     _ => None,
 }
 )
  .set_exclusive_start_key(match (*dafny_value.ExclusiveStartKey()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
@@ -149,18 +149,18 @@ pub fn from_dafny(
 }
 )
  .set_return_consumed_capacity(match &**dafny_value.ReturnConsumedCapacity() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::return_consumed_capacity::from_dafny(value)
     ),
     _ => None,
 }
 )
- .set_total_segments(dafny_standard_library::conversion::oint_from_dafny(dafny_value.TotalSegments().clone()))
- .set_segment(dafny_standard_library::conversion::oint_from_dafny(dafny_value.Segment().clone()))
- .set_projection_expression(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.ProjectionExpression().clone()))
- .set_filter_expression(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.FilterExpression().clone()))
+ .set_total_segments(crate::standard_library_conversions::oint_from_dafny(dafny_value.TotalSegments().clone()))
+ .set_segment(crate::standard_library_conversions::oint_from_dafny(dafny_value.Segment().clone()))
+ .set_projection_expression(crate::standard_library_conversions::ostring_from_dafny(dafny_value.ProjectionExpression().clone()))
+ .set_filter_expression(crate::standard_library_conversions::ostring_from_dafny(dafny_value.FilterExpression().clone()))
  .set_expression_attribute_names(match (*dafny_value.ExpressionAttributeNames()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
@@ -171,7 +171,7 @@ pub fn from_dafny(
 }
 )
  .set_expression_attribute_values(match (*dafny_value.ExpressionAttributeValues()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
@@ -182,5 +182,5 @@ pub fn from_dafny(
     _ => None
 }
 )
- .set_consistent_read(dafny_standard_library::conversion::obool_from_dafny(dafny_value.ConsistentRead().clone()))
+ .set_consistent_read(crate::standard_library_conversions::obool_from_dafny(dafny_value.ConsistentRead().clone()))
 }

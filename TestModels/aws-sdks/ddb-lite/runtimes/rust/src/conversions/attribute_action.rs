@@ -5,11 +5,11 @@
 
 pub fn to_dafny(
     value: aws_sdk_dynamodb::types::AttributeAction,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeAction>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeAction>{
     ::std::rc::Rc::new(match value {
- aws_sdk_dynamodb::types::AttributeAction::Add => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeAction::ADD {},
- aws_sdk_dynamodb::types::AttributeAction::Put => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeAction::PUT {},
- aws_sdk_dynamodb::types::AttributeAction::Delete => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeAction::DELETE {},
+ aws_sdk_dynamodb::types::AttributeAction::Add => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeAction::ADD {},
+ aws_sdk_dynamodb::types::AttributeAction::Put => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeAction::PUT {},
+ aws_sdk_dynamodb::types::AttributeAction::Delete => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeAction::DELETE {},
         // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
         // so there's no way to succeed.
         // See https://github.com/smithy-lang/smithy-dafny/issues/476.
@@ -20,11 +20,11 @@ pub fn to_dafny(
 }
  #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeAction,
+    dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeAction,
 ) -> aws_sdk_dynamodb::types::AttributeAction {
     match dafny_value {
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeAction::ADD {} => aws_sdk_dynamodb::types::AttributeAction::Add,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeAction::PUT {} => aws_sdk_dynamodb::types::AttributeAction::Put,
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeAction::DELETE {} => aws_sdk_dynamodb::types::AttributeAction::Delete,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeAction::ADD {} => aws_sdk_dynamodb::types::AttributeAction::Add,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeAction::PUT {} => aws_sdk_dynamodb::types::AttributeAction::Put,
+ crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeAction::DELETE {} => aws_sdk_dynamodb::types::AttributeAction::Delete,
     }
 }
