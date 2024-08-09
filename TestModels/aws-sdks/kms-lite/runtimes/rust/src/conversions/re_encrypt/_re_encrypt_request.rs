@@ -5,67 +5,67 @@
 pub fn to_dafny(
     value: &aws_sdk_kms::operation::re_encrypt::ReEncryptInput
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest,
+    crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptRequest,
 >{
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest::ReEncryptRequest {
-        CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob).Extract(),
+    ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptRequest::ReEncryptRequest {
+        CiphertextBlob: crate::standard_library_conversions::oblob_to_dafny(&value.ciphertext_blob).Extract(),
  SourceEncryptionContext:
 ::std::rc::Rc::new(match &value.source_encryption_context {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
             |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
- SourceKeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.source_key_id),
- DestinationKeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.destination_key_id) .Extract(),
+ SourceKeyId: crate::standard_library_conversions::ostring_to_dafny(&value.source_key_id),
+ DestinationKeyId: crate::standard_library_conversions::ostring_to_dafny(&value.destination_key_id) .Extract(),
  DestinationEncryptionContext:
 ::std::rc::Rc::new(match &value.destination_encryption_context {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
             |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
  SourceEncryptionAlgorithm: ::std::rc::Rc::new(match &value.source_encryption_algorithm {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  DestinationEncryptionAlgorithm: ::std::rc::Rc::new(match &value.destination_encryption_algorithm {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::encryption_algorithm_spec::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
             |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
- DryRun: dafny_standard_library::conversion::obool_to_dafny(&value.dry_run),
+ DryRun: crate::standard_library_conversions::obool_to_dafny(value.dry_run),
     })
 }
  #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::ReEncryptRequest,
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptRequest,
     >,
     client: aws_sdk_kms::Client,
 ) -> aws_sdk_kms::operation::re_encrypt::builders::ReEncryptFluentBuilder {
     client.re_encrypt()
-          .set_ciphertext_blob(Some(dafny_standard_library::conversion::blob_from_dafny(dafny_value.CiphertextBlob().clone())))
+          .set_ciphertext_blob(Some(crate::standard_library_conversions::blob_from_dafny(dafny_value.CiphertextBlob().clone())))
  .set_source_encryption_context(match (*dafny_value.SourceEncryptionContext()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
@@ -75,10 +75,10 @@ pub fn from_dafny(
     _ => None
 }
 )
- .set_source_key_id(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.SourceKeyId().clone()))
+ .set_source_key_id(crate::standard_library_conversions::ostring_from_dafny(dafny_value.SourceKeyId().clone()))
  .set_destination_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.DestinationKeyId()) ))
  .set_destination_encryption_context(match (*dafny_value.DestinationEncryptionContext()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
@@ -89,21 +89,21 @@ pub fn from_dafny(
 }
 )
  .set_source_encryption_algorithm(match &**dafny_value.SourceEncryptionAlgorithm() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::encryption_algorithm_spec::from_dafny(value)
     ),
     _ => None,
 }
 )
  .set_destination_encryption_algorithm(match &**dafny_value.DestinationEncryptionAlgorithm() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::encryption_algorithm_spec::from_dafny(value)
     ),
     _ => None,
 }
 )
  .set_grant_tokens(match (*dafny_value.GrantTokens()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
                 |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
@@ -112,5 +112,5 @@ pub fn from_dafny(
     _ => None
 }
 )
- .set_dry_run(dafny_standard_library::conversion::obool_from_dafny(dafny_value.DryRun().clone()))
+ .set_dry_run(crate::standard_library_conversions::obool_from_dafny(dafny_value.DryRun().clone()))
 }

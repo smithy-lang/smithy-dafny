@@ -6,32 +6,32 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: &aws_sdk_kms::types::RecipientInfo,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo>{
   ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo::RecipientInfo {
+    crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo::RecipientInfo {
         KeyEncryptionAlgorithm: ::std::rc::Rc::new(match &value.key_encryption_algorithm {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::key_encryption_mechanism::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::key_encryption_mechanism::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
- AttestationDocument: dafny_standard_library::conversion::oblob_to_dafny(&value.attestation_document),
+ AttestationDocument: crate::standard_library_conversions::oblob_to_dafny(&value.attestation_document),
     }
   )
 } #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo,
     >,
 ) -> aws_sdk_kms::types::RecipientInfo {
     aws_sdk_kms::types::RecipientInfo::builder()
           .set_key_encryption_algorithm(match &**dafny_value.KeyEncryptionAlgorithm() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::key_encryption_mechanism::from_dafny(value)
     ),
     _ => None,
 }
 )
- .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(dafny_value.AttestationDocument().clone()))
+ .set_attestation_document(crate::standard_library_conversions::oblob_from_dafny(dafny_value.AttestationDocument().clone()))
           .build()
 
 }

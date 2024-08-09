@@ -6,9 +6,9 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::KeysAndAttributes,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::KeysAndAttributes>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::KeysAndAttributes>{
   ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::KeysAndAttributes::KeysAndAttributes {
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::KeysAndAttributes::KeysAndAttributes {
         Keys: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.keys,
     |e| ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&e.clone(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
@@ -19,25 +19,25 @@ pub fn to_dafny(
 )
 ,
  AttributesToGet: ::std::rc::Rc::new(match &value.attributes_to_get {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
             |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
- ConsistentRead: dafny_standard_library::conversion::obool_to_dafny(&value.consistent_read),
- ProjectionExpression: dafny_standard_library::conversion::ostring_to_dafny(&value.projection_expression),
+ ConsistentRead: crate::standard_library_conversions::obool_to_dafny(value.consistent_read),
+ ProjectionExpression: crate::standard_library_conversions::ostring_to_dafny(&value.projection_expression),
  ExpressionAttributeNames:
 ::std::rc::Rc::new(match &value.expression_attribute_names {
-    Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
+    Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
             |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
         )
     },
-    None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
+    None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
     }
@@ -45,7 +45,7 @@ pub fn to_dafny(
 } #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::KeysAndAttributes,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::KeysAndAttributes,
     >,
 ) -> aws_sdk_dynamodb::types::KeysAndAttributes {
     aws_sdk_dynamodb::types::KeysAndAttributes::builder()
@@ -59,7 +59,7 @@ pub fn from_dafny(
 )
  ))
  .set_attributes_to_get(match (*dafny_value.AttributesToGet()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
                 |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
@@ -68,10 +68,10 @@ pub fn from_dafny(
     _ => None
 }
 )
- .set_consistent_read(dafny_standard_library::conversion::obool_from_dafny(dafny_value.ConsistentRead().clone()))
- .set_projection_expression(dafny_standard_library::conversion::ostring_from_dafny(dafny_value.ProjectionExpression().clone()))
+ .set_consistent_read(crate::standard_library_conversions::obool_from_dafny(dafny_value.ConsistentRead().clone()))
+ .set_projection_expression(crate::standard_library_conversions::ostring_from_dafny(dafny_value.ProjectionExpression().clone()))
  .set_expression_attribute_names(match (*dafny_value.ExpressionAttributeNames()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
                 |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),

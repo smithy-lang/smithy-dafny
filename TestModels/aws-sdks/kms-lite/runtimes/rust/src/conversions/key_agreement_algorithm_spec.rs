@@ -5,9 +5,9 @@
 
 pub fn to_dafny(
     value: aws_sdk_kms::types::KeyAgreementAlgorithmSpec,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyAgreementAlgorithmSpec>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec>{
     ::std::rc::Rc::new(match value {
- aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh => crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyAgreementAlgorithmSpec::ECDH {},
+ aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec::ECDH {},
         // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
         // so there's no way to succeed.
         // See https://github.com/smithy-lang/smithy-dafny/issues/476.
@@ -18,9 +18,9 @@ pub fn to_dafny(
 }
  #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyAgreementAlgorithmSpec,
+    dafny_value: &crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec,
 ) -> aws_sdk_kms::types::KeyAgreementAlgorithmSpec {
     match dafny_value {
- crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::KeyAgreementAlgorithmSpec::ECDH {} => aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh,
+ crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec::ECDH {} => aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh,
     }
 }

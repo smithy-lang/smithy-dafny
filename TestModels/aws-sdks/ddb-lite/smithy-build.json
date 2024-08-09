@@ -21,7 +21,7 @@
       "edition": "2023",
       "service": "com.amazonaws.dynamodb#DynamoDB_20120810",
       "dafnyVersion": "${DAFNY_VERSION}",
-      "targetLanguages": ["java", "dotnet", "rust"],
+      "targetLanguages": ["java", "dotnet"],
       "includeDafnyFile": "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
     }
   }

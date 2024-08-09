@@ -6,17 +6,17 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::AttributeValueUpdate,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValueUpdate>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValueUpdate>{
   ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValueUpdate::AttributeValueUpdate {
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValueUpdate::AttributeValueUpdate {
         Value: ::std::rc::Rc::new(match &value.value {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_value::to_dafny(&x) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_value::to_dafny(&x) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  Action: ::std::rc::Rc::new(match &value.action {
-    Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_action::to_dafny(x.clone()) },
-    None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None { }
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_action::to_dafny(x.clone()) },
+    None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
     }
@@ -24,18 +24,18 @@ pub fn to_dafny(
 } #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_ddynamodb_dinternaldafny_dtypes::AttributeValueUpdate,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValueUpdate,
     >,
 ) -> aws_sdk_dynamodb::types::AttributeValueUpdate {
     aws_sdk_dynamodb::types::AttributeValueUpdate::builder()
           .set_value(match (*dafny_value.Value()).as_ref() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(crate::conversions::attribute_value::from_dafny(value.clone())),
     _ => None,
 }
 )
  .set_action(match &**dafny_value.Action() {
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::attribute_action::from_dafny(value)
     ),
     _ => None,
