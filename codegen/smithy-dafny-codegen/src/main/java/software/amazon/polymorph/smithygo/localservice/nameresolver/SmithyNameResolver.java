@@ -39,11 +39,11 @@ public class SmithyNameResolver {
         return getGoModuleNameForSmithyNamespace("sdk.".concat(smithyNamespace));
     }
 
-    public static String smithyTypesNamespaceAws(final Shape shape, boolean isAwsSubType) {
+    public static String smithyTypesNamespaceAws(final ServiceTrait serviceTrait, boolean isAwsSubType) {
         if (isAwsSubType) {
             return "types";
         }
-        return "kms";
+        return serviceTrait.getSdkId().toLowerCase();
     }
 
     public static String getSmithyType(final Shape shape, final Symbol symbol) {
@@ -53,11 +53,11 @@ public class SmithyNameResolver {
         return SmithyNameResolver.smithyTypesNamespace(shape).concat(DOT).concat(symbol.getName());
     }
 
-    public static String getSmithyTypeAws(final Shape shape, final Symbol symbol, boolean subtype) {
+    public static String getSmithyTypeAws(final ServiceTrait serviceTrait, final Symbol symbol, boolean subtype) {
         if(symbol.getNamespace().contains("smithy.") || symbol.getName().contains("string")) {
             return symbol.getName();
         }
-        return SmithyNameResolver.smithyTypesNamespaceAws(shape, subtype).concat(DOT).concat(symbol.getName());
+        return SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(DOT).concat(symbol.getName());
     }
 
     public static String getSmithyType(final Shape shape) {
@@ -92,8 +92,8 @@ public class SmithyNameResolver {
         return SmithyNameResolver.shapeNamespace(shape).concat(DOT).concat(methodName);
     }
 
-    public static String getAwsServiceClient(final ServiceShape serviceShape) {
-        return SmithyNameResolver.smithyTypesNamespaceAws(serviceShape, false)
+    public static String getAwsServiceClient(final ServiceTrait serviceTrait) {
+        return SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, false)
                                 .concat(DOT)
                                 .concat("Client");
     }

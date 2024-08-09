@@ -7,6 +7,7 @@ import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
@@ -29,6 +30,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;
     private final GoWriter writer;
+    private final ServiceTrait serviceTrait;
     private final boolean isOptional;
 
     public DafnyToAwsSdkShapeVisitor(
@@ -49,6 +51,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         this.dataSource = dataSource;
         this.writer = writer;
         this.isOptional = isOptional;
+        this.serviceTrait = context.model().expectShape(context.settings().getService(context.model()).toShapeId()).getTrait(ServiceTrait.class).get();
     }
 
     @Override
@@ -88,14 +91,14 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                                func() %s%s {
                                %s
                               return %s%s {
-                               """.formatted(this.isOptional ? "*" : "", SmithyNameResolver.smithyTypesNamespaceAws(shape, subtype).concat(".").concat(shape.getId().getName()),
+                               """.formatted(this.isOptional ? "*" : "", SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(".").concat(shape.getId().getName()),
                                              this.isOptional ?
                                                      """
                                                      if %s.UnwrapOr(nil) == nil {
                                                      return nil
                                                      }""".formatted(dataSource) : "",
                                              this.isOptional ? "&" : "",
-                                             SmithyNameResolver.smithyTypesNamespaceAws(shape, subtype).concat(".").concat(shape.getId().getName()))
+                                             SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(".").concat(shape.getId().getName()))
         );
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
             final var memberName = memberShapeEntry.getKey();
@@ -137,7 +140,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                                    break
                                }
                                fieldValue = append(fieldValue, %s%s)}
-                          """.formatted(SmithyNameResolver.getSmithyTypeAws(shape, typeName, true), SmithyNameResolver.getSmithyTypeAws(shape, typeName, true), dataSource, dataSource,
+                          """.formatted(SmithyNameResolver.getSmithyTypeAws(serviceTrait, typeName, true), SmithyNameResolver.getSmithyTypeAws(serviceTrait, typeName, true), dataSource, dataSource,
                                         GoPointableIndex.of(context.model()).isPointable(targetShape) && !targetShape.isEnumShape() && !targetShape.hasTrait(EnumTrait.class) && !targetShape.isStructureShape() ? "*" : "",
                                         targetShape.accept(
                                                          new DafnyToAwsSdkShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, !targetShape.isStructureShape())
@@ -224,8 +227,8 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                         		}
                         	}
                         	return u.Values()[index]
-                        }()""".formatted(SmithyNameResolver.smithyTypesNamespaceAws(shape, true), context.symbolProvider().toSymbol(shape).getName(),
-                                         SmithyNameResolver.smithyTypesNamespaceAws(shape, true), context.symbolProvider().toSymbol(shape).getName(),
+                        }()""".formatted(SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true), context.symbolProvider().toSymbol(shape).getName(),
+                                         SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true), context.symbolProvider().toSymbol(shape).getName(),
                                          dataSource,
                                          dataSource, DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)),
                                          DafnyNameResolver.getDafnyCompanionStructType(shape, context.symbolProvider().toSymbol(shape)),
@@ -247,8 +250,8 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                         		}
                         	}
                         	return u.Values()[index]
-                        }()""".formatted(SmithyNameResolver.smithyTypesNamespaceAws(shape, true), context.symbolProvider().toSymbol(shape).getName(),
-                                         SmithyNameResolver.smithyTypesNamespaceAws(shape, true), context.symbolProvider().toSymbol(shape).getName(),
+                        }()""".formatted(SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true), context.symbolProvider().toSymbol(shape).getName(),
+                                         SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true), context.symbolProvider().toSymbol(shape).getName(),
                                          dataSource,
                                          DafnyNameResolver.getDafnyCompanionStructType(shape, context.symbolProvider().toSymbol(shape)),
                                          DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)));

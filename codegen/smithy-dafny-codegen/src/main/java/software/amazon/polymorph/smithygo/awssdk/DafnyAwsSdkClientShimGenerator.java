@@ -53,7 +53,7 @@ public class DafnyAwsSdkClientShimGenerator implements Runnable {
                                  }
                                  """,
                          DafnyNameResolver.getDafnyInterfaceClient(service, service.expectTrait(ServiceTrait.class)),
-                         SmithyNameResolver.getAwsServiceClient(service)
+                         SmithyNameResolver.getAwsServiceClient(service.expectTrait(ServiceTrait.class))
             );
 
 
