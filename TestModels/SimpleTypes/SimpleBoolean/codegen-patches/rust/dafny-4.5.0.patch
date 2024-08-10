@@ -1,6 +1,6 @@
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..7a4f6c04
+index 00000000..3b1e5cf6
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/client.rs
 @@ -0,0 +1,37 @@
@@ -10,7 +10,7 @@ index 00000000..7a4f6c04
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>
 +}
 +
 +impl Client {
@@ -20,12 +20,12 @@ index 00000000..7a4f6c04
 +        conf: crate::types::simple_boolean_config::SimpleBooleanConfig,
 +    ) -> Result<Self, BuildError> {
 +        let inner =
-+            crate::implementation_from_dafny::_simple_dtypes_dboolean_dinternaldafny::_default::SimpleBoolean(
++            simple_boolean_dafny::simple::types::boolean::internaldafny::_default::SimpleBoolean(
 +                &crate::conversions::simple_boolean_config::_simple_boolean_config::to_dafny(conf),
 +            );
 +        if matches!(
 +            inner.as_ref(),
-+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
++            simple_boolean_dafny::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -75,20 +75,20 @@ index 00000000..86f87891
 \ No newline at end of file
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/error.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/error.rs
 new file mode 100644
-index 00000000..e48128a5
+index 00000000..cb606a4b
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/error.rs
 @@ -0,0 +1,30 @@
 +/// Wraps up an arbitrary Rust Error value as a Dafny Error
 +pub fn to_opaque_error<E: std::error::Error + 'static>(value: E) -> 
-+  ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
++  ::std::rc::Rc<simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error>
 +{
 +  let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> =
 +    ::dafny_runtime::Object(Some(::std::rc::Rc::new(
 +        ::std::cell::UnsafeCell::new(value),
 +    )));
 +  ::std::rc::Rc::new(
-+    crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error::Opaque {
++    simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error::Opaque {
 +        obj: error_obj,
 +    },
 +  )
@@ -97,14 +97,14 @@ index 00000000..e48128a5
 +/// Wraps up an arbitrary Rust Error value as a Dafny Result<T, Error>.Failure
 +pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: std::error::Error + 'static>(value: E) -> 
 +  ::std::rc::Rc<
-+    dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result<
++  simple_boolean_dafny::_Wrappers_Compile::Result<
 +      T,
-+      ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
++      ::std::rc::Rc<simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error>
 +    >
 +  >
 +{
 +  ::std::rc::Rc::new(
-+    dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
++    simple_boolean_dafny::_Wrappers_Compile::Result::Failure {
 +      error: to_opaque_error(value)
 +    }
 +  )
@@ -112,7 +112,7 @@ index 00000000..e48128a5
 \ No newline at end of file
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean.rs
 new file mode 100644
-index 00000000..22f78d17
+index 00000000..75d3503e
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean.rs
 @@ -0,0 +1,32 @@
@@ -123,21 +123,21 @@ index 00000000..22f78d17
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_boolean::GetBooleanError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error> {
 +    match value {
 +    crate::operation::get_boolean::GetBooleanError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error,
++        simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_boolean::GetBooleanError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_boolean::GetBooleanError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -150,7 +150,7 @@ index 00000000..22f78d17
 +pub mod _get_boolean_output;
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean/_get_boolean_input.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean/_get_boolean_input.rs
 new file mode 100644
-index 00000000..27e4ef74
+index 00000000..298682e2
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean/_get_boolean_input.rs
 @@ -0,0 +1,37 @@
@@ -159,13 +159,13 @@ index 00000000..27e4ef74
 +pub fn to_dafny(
 +    value: crate::operation::get_boolean::GetBooleanInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput,
++    simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        Some(b) => simple_boolean_dafny::_Wrappers_Compile::Option::Some { value: b },
++        None => simple_boolean_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput::GetBooleanInput {
++    ::std::rc::Rc::new(simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanInput::GetBooleanInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -173,17 +173,17 @@ index 00000000..27e4ef74
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput,
++        simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanInput,
 +    >,
 +) -> crate::operation::get_boolean::GetBooleanInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        simple_boolean_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(dafny_value.value().Extract())
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        simple_boolean_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -193,7 +193,7 @@ index 00000000..27e4ef74
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean/_get_boolean_output.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean/_get_boolean_output.rs
 new file mode 100644
-index 00000000..719f9692
+index 00000000..5e693121
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/get_boolean/_get_boolean_output.rs
 @@ -0,0 +1,37 @@
@@ -202,13 +202,13 @@ index 00000000..719f9692
 +pub fn to_dafny(
 +    value: crate::operation::get_boolean::GetBooleanOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
++    simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        Some(b) => simple_boolean_dafny::_Wrappers_Compile::Option::Some { value: b },
++        None => simple_boolean_dafny::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput::GetBooleanOutput {
++    ::std::rc::Rc::new(simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanOutput::GetBooleanOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -216,17 +216,17 @@ index 00000000..719f9692
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
++        simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanOutput,
 +    >,
 +) -> crate::operation::get_boolean::GetBooleanOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        simple_boolean_dafny::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(dafny_value.value().Extract())
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        simple_boolean_dafny::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -245,7 +245,7 @@ index 00000000..371a47e5
 +pub mod _simple_boolean_config;
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/simple_boolean_config/_simple_boolean_config.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/simple_boolean_config/_simple_boolean_config.rs
 new file mode 100644
-index 00000000..94c39f03
+index 00000000..610d5917
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/simple_boolean_config/_simple_boolean_config.rs
 @@ -0,0 +1,19 @@
@@ -255,15 +255,15 @@ index 00000000..94c39f03
 +pub fn to_dafny(
 +    value: crate::types::simple_boolean_config::SimpleBooleanConfig,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
++    simple_boolean_dafny::simple::types::boolean::internaldafny::types::SimpleBooleanConfig,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig::SimpleBooleanConfig {})
++    ::std::rc::Rc::new(simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::SimpleBooleanConfig::SimpleBooleanConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
++        simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::SimpleBooleanConfig,
 +    >,
 +) -> crate::types::simple_boolean_config::SimpleBooleanConfig {
 +    crate::types::simple_boolean_config::SimpleBooleanConfig {}
@@ -327,10 +327,10 @@ index 00000000..4d66eb2e
 \ No newline at end of file
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/lib.rs
 new file mode 100644
-index 00000000..b8e65a55
+index 00000000..53977d7d
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/lib.rs
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,20 @@
 +#![allow(deprecated)]
 +
 +// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
@@ -345,8 +345,6 @@ index 00000000..b8e65a55
 +pub mod operation;
 +
 +mod conversions;
-+
-+pub mod implementation_from_dafny;
 +
 +#[cfg(feature = "wrapped-client")]
 +pub mod wrapped;
@@ -365,7 +363,7 @@ index 00000000..eb38b9f1
 +pub mod get_boolean;
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean.rs
 new file mode 100644
-index 00000000..5b1fec21
+index 00000000..d18ba33f
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/operation/get_boolean.rs
 @@ -0,0 +1,145 @@
@@ -391,7 +389,7 @@ index 00000000..5b1fec21
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetBoolean(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            simple_boolean_dafny::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_boolean::_get_boolean_output::from_dafny(
@@ -774,7 +772,7 @@ index 00000000..39355176
 \ No newline at end of file
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/wrapped/client.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/wrapped/client.rs
 new file mode 100644
-index 00000000..71509248
+index 00000000..fd0bfa68
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/wrapped/client.rs
 @@ -0,0 +1,88 @@
@@ -788,8 +786,8 @@ index 00000000..71509248
 +    rt: Runtime
 +}
 +
-+impl dafny_runtime::UpcastObject<dyn crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient> for Client {
-+  ::dafny_runtime::UpcastObjectFn!(dyn crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient);
++impl dafny_runtime::UpcastObject<dyn simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient> for Client {
++  ::dafny_runtime::UpcastObjectFn!(dyn simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient);
 +}
 +
 +impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
@@ -798,11 +796,11 @@ index 00000000..71509248
 +
 +impl Client {
 +  pub fn from_conf(config: &::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
++    simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::SimpleBooleanConfig,
 +  >) -> 
-+::std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
-+  ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
-+  ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
++::std::rc::Rc<simple_boolean_dafny::r#_Wrappers_Compile::Result<
++  ::dafny_runtime::Object<dyn simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>,
++  ::std::rc::Rc<simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error>
 +>> {
 +    let rt_result = tokio::runtime::Builder::new_current_thread()
 +          .enable_all()
@@ -823,7 +821,7 @@ index 00000000..71509248
 +          rt
 +        };
 +        std::rc::Rc::new(
-+          crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
++          simple_boolean_dafny::_Wrappers_Compile::Result::Success {
 +            value: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(wrap))
 +          }
 +        )
@@ -833,20 +831,20 @@ index 00000000..71509248
 +  }
 +}
 +
-+impl crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient
++impl simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient
 +    for Client
 +{
 +    fn GetBoolean(
 +        &mut self,
 +        input: &std::rc::Rc<
-+            crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanInput,
++            simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanInput,
 +        >,
 +    ) -> std::rc::Rc<
-+        crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
++        simple_boolean_dafny::r#_Wrappers_Compile::Result<
 +            std::rc::Rc<
-+                crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::GetBooleanOutput,
++                simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanOutput,
 +            >,
-+            std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>,
++            std::rc::Rc<simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::Error>,
 +        >,
 +    >{
 +        let inner_input =
@@ -854,28 +852,15 @@ index 00000000..71509248
 +        let result = self.rt.block_on(crate::operation::get_boolean::GetBoolean::send(&self.wrapped, inner_input));
 +        match result {
 +            Err(error) => ::std::rc::Rc::new(
-+                crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
++                simple_boolean_dafny::_Wrappers_Compile::Result::Failure {
 +                    error: crate::conversions::get_boolean::to_dafny_error(error),
 +                },
 +            ),
 +            Ok(client) => ::std::rc::Rc::new(
-+                crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
++                simple_boolean_dafny::_Wrappers_Compile::Result::Success {
 +                    value: crate::conversions::get_boolean::_get_boolean_output::to_dafny(client),
 +                },
 +            ),
 +        }
 +    }
 +}
-diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
-index ce6d90a2..3304d282 100644
---- b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
-+++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/tests/tests_from_dafny/mod.rs
-@@ -1,5 +1,8 @@
- #![allow(warnings, unconditional_panic)]
- #![allow(nonstandard_style)]
-+use simple_boolean::implementation_from_dafny::*;
-+use simple_boolean::*;
-+mod _wrapped;
- 
- pub mod r#_simple_dtypes_dboolean_dinternaldafny_dwrapped {
-     pub struct _default {}
