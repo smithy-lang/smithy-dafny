@@ -268,9 +268,11 @@ public class DafnyLocalServiceGenerator implements Runnable {
                     inputType = maybeInputType;
                 } else {
                     if (inputShape.hasTrait(PositionalTrait.class)) {
-                        // TODO: get dafny.Sequence from name resolver
                         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-                        inputType = "input %s".formatted("dafny.Sequence");
+                        Shape inputForPositional = model.expectShape(inputShape.getAllMembers().values().stream().findFirst().get().getTarget());
+                        Symbol symbolForPositional = symbolProvider.toSymbol(inputForPositional);
+                        String dafnyType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
+                        inputType = "input %s".formatted(dafnyType);
                         returnResponse = "(native_response)";
                     }
                     else {
