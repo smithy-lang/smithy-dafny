@@ -125,14 +125,7 @@ public final class StructureGenerator implements Runnable {
                             writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(targetShape.toShapeId().getNamespace()), namespace);
                         }
                     }
-                    
-                    System.out.println(memberSymbol);
                     writer.write("$L $P", memberName, memberSymbol);
-                    System.out.println("""
-                        \n\n\n
-                        >>>>
-                        %s
-                    """.formatted(writer));
                 });
         writer.closeBlock("}").write("");
         renderValidator(symbol, sortedMembers, isInputStructure);
