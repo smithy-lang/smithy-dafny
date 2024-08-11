@@ -299,7 +299,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
 
-        if ((boolean)isPointable) {
+        if ((boolean)isOptional) {
             return ("""
                     func() *int32 {
                         var b int32
