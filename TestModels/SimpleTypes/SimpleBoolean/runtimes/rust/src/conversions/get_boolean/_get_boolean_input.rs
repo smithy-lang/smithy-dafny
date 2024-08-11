@@ -3,13 +3,13 @@
 pub fn to_dafny(
     value: crate::operation::get_boolean::GetBooleanInput,
 ) -> ::std::rc::Rc<
-    simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanInput,
+    crate::r#simple::types::boolean::internaldafny::types::GetBooleanInput,
 > {
     let dafny_value = match value.value {
-        Some(b) => simple_boolean_dafny::_Wrappers_Compile::Option::Some { value: b },
-        None => simple_boolean_dafny::_Wrappers_Compile::Option::None {},
+        Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
+        None => crate::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanInput::GetBooleanInput {
+    ::std::rc::Rc::new(crate::r#simple::types::boolean::internaldafny::types::GetBooleanInput::GetBooleanInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -17,17 +17,17 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        simple_boolean_dafny::r#simple::types::boolean::internaldafny::types::GetBooleanInput,
+        crate::r#simple::types::boolean::internaldafny::types::GetBooleanInput,
     >,
 ) -> crate::operation::get_boolean::GetBooleanInput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        simple_boolean_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(dafny_value.value().Extract())
     } else if matches!(
         dafny_value.value().as_ref(),
-        simple_boolean_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {
