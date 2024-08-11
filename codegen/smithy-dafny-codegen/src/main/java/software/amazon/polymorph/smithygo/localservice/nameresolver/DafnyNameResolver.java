@@ -33,6 +33,20 @@ public class DafnyNameResolver {
                 else {
                     return "dafny.Sequence";
                 }
+            case INTEGER:
+                return "int32";
+            case LONG:
+                return "int64";
+            case BLOB:
+            case BOOLEAN:
+            case DOUBLE:
+                return "*dafny.ArraySequence";
+            case MAP:
+                return "dafny.Map";
+            case LIST:
+                return "dafny.Sequence";
+            case STRUCTURE:
+            case UNION:
             // case MAP:
             //     return "map";
             // case STRUCTURE:
