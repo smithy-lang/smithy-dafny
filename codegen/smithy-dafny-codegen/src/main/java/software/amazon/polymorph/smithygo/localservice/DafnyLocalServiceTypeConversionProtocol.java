@@ -188,7 +188,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                     if (input.hasTrait(PositionalTrait.class)) {
                         // Input type in To native should be unwrapped
                         Shape inputForPositional = context.model().expectShape(input.getAllMembers().values().stream().findFirst().get().getTarget());
-                        Symbol symbolForPositional = context.symbolProvider().toSymbol(input);
+                        Symbol symbolForPositional = context.symbolProvider().toSymbol(inputForPositional);
                         inputType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
                     }
                     else {
