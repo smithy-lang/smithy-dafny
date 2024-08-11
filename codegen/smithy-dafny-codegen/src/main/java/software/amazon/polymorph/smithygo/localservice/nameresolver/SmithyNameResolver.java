@@ -52,7 +52,7 @@ public class SmithyNameResolver {
     }
 
     public static String getSmithyType(final Shape shape, final Symbol symbol) {
-        if(symbol.getNamespace().contains("smithy.")) {
+        if(symbol.getNamespace().contains("smithy.") || symbol.getName().contains("string")) {
             return symbol.getName();
         }
         else if (shape.isResourceShape()) {   
