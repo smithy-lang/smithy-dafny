@@ -742,7 +742,7 @@ public class CodegenEngine {
           if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
             Path patchFile = patchFilePair.getValue();
             LOGGER.info("Applying patch file {}", patchFile);
-            runCommand(libraryRoot, "git", "apply", "--whitespace=fix", patchFile.toString());
+            runCommand(libraryRoot, "git", "apply", "--whitespace=fix", "-v", patchFile.toString());
             return;
           }
         }
