@@ -31,6 +31,30 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
     conversions::batch_get_item::_batch_get_item_response::to_dafny,
     conversions::batch_get_item::to_dafny_error)
 }
+ fn CreateTable(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::create_table::_create_table_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::create_table::_create_table_response::to_dafny,
+    conversions::create_table::to_dafny_error)
+}
+ fn DescribeTable(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DescribeTableInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DescribeTableOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::describe_table::_describe_table_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::describe_table::_describe_table_response::to_dafny,
+    conversions::describe_table::to_dafny_error)
+}
  fn GetItem(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemInput>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemOutput>,
@@ -78,6 +102,18 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::scan::_scan_response::to_dafny,
     conversions::scan::to_dafny_error)
+}
+ fn TransactWriteItems(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactWriteItemsInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactWriteItemsOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::transact_write_items::_transact_write_items_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::transact_write_items::_transact_write_items_response::to_dafny,
+    conversions::transact_write_items::to_dafny_error)
 }
  fn UpdateItem(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::UpdateItemInput>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
