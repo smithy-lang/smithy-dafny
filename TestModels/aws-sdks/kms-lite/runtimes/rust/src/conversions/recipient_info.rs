@@ -5,17 +5,17 @@ use aws_sdk_kms::types::KeyEncryptionMechanism;
 pub fn to_dafny(
     value: aws_sdk_kms::types::RecipientInfo,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
+    crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo,
 >{
     ::std::rc::Rc::new(to_dafny_plain(&value))
 }
 
 pub fn to_dafny_plain(
     value: &aws_sdk_kms::types::RecipientInfo,
-) -> crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo {
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo::RecipientInfo {
-        AttestationDocument: dafny_standard_library::conversion::oblob_to_dafny(&value.attestation_document),
-        KeyEncryptionAlgorithm: dafny_standard_library::conversion::option_to_dafny(&value.key_encryption_algorithm, 
+) -> crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo {
+    crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo::RecipientInfo {
+        AttestationDocument: crate::standard_library_conversions::oblob_to_dafny(&value.attestation_document),
+        KeyEncryptionAlgorithm: crate::standard_library_conversions::option_to_dafny(&value.key_encryption_algorithm, 
             |x| crate::conversions::key_encryption_mechanism::to_dafny(x.clone()))
     }
 }
@@ -23,15 +23,15 @@ pub fn to_dafny_plain(
 pub fn option_to_dafny(
     value: Option<&aws_sdk_kms::types::RecipientInfo>,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_Wrappers_Compile::Option<
+    crate::_Wrappers_Compile::Option<
         ::std::rc::Rc<
-            crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
+            crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo,
         >,
     >,
 >{
     let inner = match value {
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
+        None => crate::_Wrappers_Compile::Option::None {},
+        Some(x) => crate::_Wrappers_Compile::Option::Some {
             value: ::std::rc::Rc::new(to_dafny_plain(x)),
         },
     };
@@ -41,15 +41,15 @@ pub fn option_to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo,
     >,
 ) -> aws_sdk_kms::types::RecipientInfo {
     aws_sdk_kms::types::RecipientInfo::builder()
-        .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(
+        .set_attestation_document(crate::standard_library_conversions::oblob_from_dafny(
             dafny_value.AttestationDocument().clone(),
         ))
         .set_key_encryption_algorithm(match &**dafny_value.KeyEncryptionAlgorithm() {
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
                 crate::conversions::key_encryption_mechanism::from_dafny(value),
             ),
             _ => None,
@@ -59,14 +59,14 @@ pub fn from_dafny(
 
 #[allow(dead_code)]
 pub fn plain_from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
+    dafny_value: &crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo,
 ) -> aws_sdk_kms::types::RecipientInfo {
     aws_sdk_kms::types::RecipientInfo::builder()
-        .set_attestation_document(dafny_standard_library::conversion::oblob_from_dafny(
+        .set_attestation_document(crate::standard_library_conversions::oblob_from_dafny(
             dafny_value.AttestationDocument().clone(),
         ))
         .set_key_encryption_algorithm(match &**dafny_value.KeyEncryptionAlgorithm() {
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => Some(
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
                 crate::conversions::key_encryption_mechanism::from_dafny(value),
             ),
             _ => None,
@@ -76,12 +76,12 @@ pub fn plain_from_dafny(
 
 #[allow(dead_code)]
 pub fn option_from_dafny(
-    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-        crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::RecipientInfo,
+    dafny_value: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::std::rc::Rc<
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::RecipientInfo,
     >>>,
 ) -> Option<aws_sdk_kms::types::RecipientInfo> {
     match &*dafny_value {
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
+        crate::_Wrappers_Compile::Option::Some { value } => {
             Some(plain_from_dafny(value))
         }
         _ => None,

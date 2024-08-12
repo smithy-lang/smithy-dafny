@@ -3,13 +3,13 @@
 pub fn to_dafny(
     value: &aws_sdk_kms::operation::generate_data_key::GenerateDataKeyOutput
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse,
+    crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyResponse,
 >{
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::GenerateDataKeyResponse::GenerateDataKeyResponse { 
-      CiphertextBlob: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_blob), 
-      Plaintext: dafny_standard_library::conversion::oblob_to_dafny(&value.plaintext),
-      KeyId: dafny_standard_library::conversion::ostring_to_dafny(&value.key_id),
-      CiphertextForRecipient: dafny_standard_library::conversion::oblob_to_dafny(&value.ciphertext_for_recipient),
+    ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyResponse::GenerateDataKeyResponse { 
+      CiphertextBlob: crate::standard_library_conversions::oblob_to_dafny(&value.ciphertext_blob), 
+      Plaintext: crate::standard_library_conversions::oblob_to_dafny(&value.plaintext),
+      KeyId: crate::standard_library_conversions::ostring_to_dafny(&value.key_id),
+      CiphertextForRecipient: crate::standard_library_conversions::oblob_to_dafny(&value.ciphertext_for_recipient),
     })
 }
 

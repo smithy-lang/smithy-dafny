@@ -3,10 +3,10 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: aws_sdk_kms::types::error::DisabledException,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error>{
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>{
   ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_software_damazon_dcryptography_dservices_dkms_dinternaldafny_dtypes::Error::DisabledException {
-      message: dafny_standard_library::conversion::ostring_to_dafny(&value.message)
+    crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error::DisabledException {
+      message: crate::standard_library_conversions::ostring_to_dafny(&value.message)
     }
   )
 }
