@@ -516,46 +516,31 @@ test_java:
 
 ########################## Rust targets
 
-# Note that transpile_dependencies_test_rust is necessary
-# only because we are patching test code in the StandardLibrary,
-# so we don't transpile that code then the recursive call to polymorph_rust
-# on the StandardLibrary will fail because the patch does not apply.
-transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust transpile_dependencies_test_rust
+# TODO: blah blah Rust only supports a single crate for everything
+transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
 transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_implementation_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
-transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
-
-transpile_test_rust: TARGET=rs
-transpile_test_rust: OUT=tests_from_dafny
-transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
-transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
-# The Dafny Rust code generator is not complete yet,
-# so we want to emit code even if there are unsupported features in the input.
-transpile_test_rust: DAFNY_OPTIONS=-emitUncompilableCode
-transpile_test_rust: _transpile_test_all _mv_test_rust
+# TODO:
+transpile_implementation_rust: TRANSPILE_DEPENDENCIES=
+transpile_implementation_rust: STD_LIBRARY=
+transpile_implementation_rust: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+transpile_implementation_rust: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
+transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
-
-transpile_dependencies_test_rust: LANG=rust
-transpile_dependencies_test_rust: transpile_dependencies_test
 
 _mv_implementation_rust:
 	mkdir -p runtimes/rust/src
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
-_mv_test_rust:
-	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
-	mkdir -p runtimes/rust/tests/tests_from_dafny
-	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny/mod.rs
-	rustfmt runtimes/rust/tests/tests_from_dafny/mod.rs
-	rm -rf tests_from_dafny-rust
 
 build_rust:
 	cd runtimes/rust; \
