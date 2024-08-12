@@ -24,6 +24,20 @@ transpile_net_dependencies:
 format_net:
 	pushd runtimes/net && dotnet format && popd
 
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleTypesSmithyDoubleTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithydouble.internaldafny.types\" } SimpleTypesSmithyDoubleTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleTypesSmithyDoubleTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithydouble.internaldafny\" } SimpleDouble refines AbstractSimpleTypesSmithyDoubleService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleDouble refines AbstractSimpleTypesSmithyDoubleService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedIndex.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithydouble.internaldafny.wrapped\"} WrappedSimpleTypesDouble refines WrappedAbstractSimpleTypesSmithyDoubleService"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesDouble refines WrappedAbstractSimpleTypesSmithyDoubleService"
+
 # Python
 
 PYTHON_MODULE_NAME=simple_types_smithydouble
