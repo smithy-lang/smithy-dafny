@@ -3,17 +3,17 @@
 pub fn to_dafny(
     value: crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestOutput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
+    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 > {
     let dafny_value = match value.value {
-        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
+        Some(b) => crate::_Wrappers_Compile::Option::Some {
             value: ::std::rc::Rc::new(
                 crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&b),
             ),
         },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        None => crate::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
+    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput::GetEnumOutput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -21,12 +21,12 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
+        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
     >,
 ) -> crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestOutput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -35,7 +35,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {
