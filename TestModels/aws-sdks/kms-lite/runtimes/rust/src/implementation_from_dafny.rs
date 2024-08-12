@@ -1436,12 +1436,6 @@ pub mod software {
                             pub struct _default {}
 
                             impl _default {
-                                pub fn IsValid_ArnType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(20) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(2048)
-                                }
                                 pub fn IsValid_AttestationDocumentType(
                                     x: &::dafny_runtime::Sequence<u8>,
                                 ) -> bool {
@@ -1453,24 +1447,6 @@ pub mod software {
                                 ) -> bool {
                                     ::dafny_runtime::int!(1) <= x.cardinality()
                                         && x.cardinality() <= ::dafny_runtime::int!(6144)
-                                }
-                                pub fn IsValid_CloudHsmClusterIdType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(19) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(24)
-                                }
-                                pub fn IsValid_CustomKeyStoreIdType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(1) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(64)
-                                }
-                                pub fn IsValid_DescriptionType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(0) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(8192)
                                 }
                                 pub fn IsValid_GrantTokenList(
                                     x: &::dafny_runtime::Sequence<
@@ -1495,20 +1471,11 @@ pub mod software {
                                 pub fn IsValid_NumberOfBytesType(x: i32) -> bool {
                                     1 <= x && x <= 1024
                                 }
-                                pub fn IsValid_PendingWindowInDaysType(x: i32) -> bool {
-                                    1 <= x && x <= 365
-                                }
                                 pub fn IsValid_PlaintextType(
                                     x: &::dafny_runtime::Sequence<u8>,
                                 ) -> bool {
                                     ::dafny_runtime::int!(1) <= x.cardinality()
                                         && x.cardinality() <= ::dafny_runtime::int!(4096)
-                                }
-                                pub fn IsValid_PolicyType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(1) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(b"131072")
                                 }
                                 pub fn IsValid_PublicKeyType(
                                     x: &::dafny_runtime::Sequence<u8>,
@@ -1521,24 +1488,6 @@ pub mod software {
                                 ) -> bool {
                                     ::dafny_runtime::int!(1) <= x.cardinality()
                                         && x.cardinality() <= ::dafny_runtime::int!(32)
-                                }
-                                pub fn IsValid_TagKeyType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(1) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(128)
-                                }
-                                pub fn IsValid_TagValueType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(0) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(256)
-                                }
-                                pub fn IsValid_XksKeyIdType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(1) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(128)
                                 }
                             }
 
@@ -1637,15 +1586,9 @@ pub mod software {
                                 }
                             }
 
-                            pub type ArnType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
-
                             pub type AttestationDocumentType = ::dafny_runtime::Sequence<u8>;
 
                             pub type CiphertextType = ::dafny_runtime::Sequence<u8>;
-
-                            pub type CloudHsmClusterIdType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
 
                             #[derive(PartialEq, Clone)]
                             pub enum CustomerMasterKeySpec {
@@ -1768,9 +1711,6 @@ pub mod software {
                                     self
                                 }
                             }
-
-                            pub type CustomKeyStoreIdType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
 
                             #[derive(PartialEq, Clone)]
                             pub enum DataKeySpec {
@@ -2512,9 +2452,6 @@ pub mod software {
                                 }
                             }
 
-                            pub type DescriptionType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
-
                             #[derive(PartialEq, Clone)]
                             pub enum EncryptionAlgorithmSpec {
                                 SYMMETRIC_DEFAULT {},
@@ -2899,62 +2836,6 @@ pub mod software {
                             }
 
                             impl AsRef<EncryptResponse> for &EncryptResponse {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
-                            pub enum ExpirationModelType {
-                                KEY_MATERIAL_EXPIRES {},
-                                KEY_MATERIAL_DOES_NOT_EXPIRE {},
-                            }
-
-                            impl ExpirationModelType {}
-
-                            impl Debug for ExpirationModelType {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for ExpirationModelType {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        ExpirationModelType::KEY_MATERIAL_EXPIRES {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.ExpirationModelType.KEY__MATERIAL__EXPIRES")?;
-                                            Ok(())
-                                        }
-                                        ExpirationModelType::KEY_MATERIAL_DOES_NOT_EXPIRE {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.ExpirationModelType.KEY__MATERIAL__DOES__NOT__EXPIRE")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for ExpirationModelType {}
-
-                            impl Hash for ExpirationModelType {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        ExpirationModelType::KEY_MATERIAL_EXPIRES {} => {}
-                                        ExpirationModelType::KEY_MATERIAL_DOES_NOT_EXPIRE {} => {}
-                                    }
-                                }
-                            }
-
-                            impl Default for ExpirationModelType {
-                                fn default() -> ExpirationModelType {
-                                    ExpirationModelType::KEY_MATERIAL_EXPIRES {}
-                                }
-                            }
-
-                            impl AsRef<ExpirationModelType> for &ExpirationModelType {
                                 fn as_ref(&self) -> Self {
                                     self
                                 }
@@ -4010,1215 +3891,6 @@ pub mod software {
                                 ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
 
                             #[derive(PartialEq, Clone)]
-                            pub enum KeyManagerType {
-                                AWS {},
-                                CUSTOMER {},
-                            }
-
-                            impl KeyManagerType {}
-
-                            impl Debug for KeyManagerType {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for KeyManagerType {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        KeyManagerType::AWS {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyManagerType.AWS")?;
-                                            Ok(())
-                                        }
-                                        KeyManagerType::CUSTOMER {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyManagerType.CUSTOMER")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for KeyManagerType {}
-
-                            impl Hash for KeyManagerType {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        KeyManagerType::AWS {} => {}
-                                        KeyManagerType::CUSTOMER {} => {}
-                                    }
-                                }
-                            }
-
-                            impl Default for KeyManagerType {
-                                fn default() -> KeyManagerType {
-                                    KeyManagerType::AWS {}
-                                }
-                            }
-
-                            impl AsRef<KeyManagerType> for &KeyManagerType {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
-                            pub enum KeyMetadata {
-                                KeyMetadata {
-                  AWSAccountId: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  KeyId: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                  Arn: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  CreationDate: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  Enabled: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>>,
-                  Description: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  KeyUsage: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType>>>,
-                  KeyState: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyState>>>,
-                  DeletionDate: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  ValidTo: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  Origin: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::OriginType>>>,
-                  CustomKeyStoreId: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  CloudHsmClusterId: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  ExpirationModel: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::ExpirationModelType>>>,
-                  KeyManager: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyManagerType>>>,
-                  CustomerMasterKeySpec: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::CustomerMasterKeySpec>>>,
-                  KeySpec: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeySpec>>>,
-                  EncryptionAlgorithms: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::EncryptionAlgorithmSpec>>>>,
-                  SigningAlgorithms: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec>>>>,
-                  KeyAgreementAlgorithms: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec>>>>,
-                  MultiRegion: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>>,
-                  MultiRegionConfiguration: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MultiRegionConfiguration>>>,
-                  PendingDeletionWindowInDays: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<crate::software::amazon::cryptography::services::kms::internaldafny::types::PendingWindowInDaysType>>,
-                  MacAlgorithms: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MacAlgorithmSpec>>>>,
-                  XksKeyConfiguration: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::XksKeyConfigurationType>>>
-                }
-              }
-
-                            impl KeyMetadata {
-                                pub fn AWSAccountId(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => AWSAccountId,
-                                    }
-                                }
-                                pub fn KeyId(
-                                    &self,
-                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
-                                {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => KeyId,
-                                    }
-                                }
-                                pub fn Arn(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => Arn,
-                                    }
-                                }
-                                pub fn CreationDate(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => CreationDate,
-                                    }
-                                }
-                                pub fn Enabled(
-                                    &self,
-                                ) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>>
-                                {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => Enabled,
-                                    }
-                                }
-                                pub fn Description(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => Description,
-                                    }
-                                }
-                                pub fn KeyUsage(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => KeyUsage,
-                                    }
-                                }
-                                pub fn KeyState(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyState>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => KeyState,
-                                    }
-                                }
-                                pub fn DeletionDate(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => DeletionDate,
-                                    }
-                                }
-                                pub fn ValidTo(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => ValidTo,
-                                    }
-                                }
-                                pub fn Origin(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::OriginType>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => Origin,
-                                    }
-                                }
-                                pub fn CustomKeyStoreId(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => CustomKeyStoreId,
-                                    }
-                                }
-                                pub fn CloudHsmClusterId(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => CloudHsmClusterId,
-                                    }
-                                }
-                                pub fn ExpirationModel(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::ExpirationModelType>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => ExpirationModel,
-                                    }
-                                }
-                                pub fn KeyManager(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyManagerType>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => KeyManager,
-                                    }
-                                }
-                                pub fn CustomerMasterKeySpec(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::CustomerMasterKeySpec>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => CustomerMasterKeySpec,
-                                    }
-                                }
-                                pub fn KeySpec(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeySpec>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => KeySpec,
-                                    }
-                                }
-                                pub fn EncryptionAlgorithms(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::EncryptionAlgorithmSpec>>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => EncryptionAlgorithms,
-                                    }
-                                }
-                                pub fn SigningAlgorithms(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec>>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => SigningAlgorithms,
-                                    }
-                                }
-                                pub fn KeyAgreementAlgorithms(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec>>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => KeyAgreementAlgorithms,
-                                    }
-                                }
-                                pub fn MultiRegion(
-                                    &self,
-                                ) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>>
-                                {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => MultiRegion,
-                                    }
-                                }
-                                pub fn MultiRegionConfiguration(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MultiRegionConfiguration>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => MultiRegionConfiguration,
-                                    }
-                                }
-                                pub fn PendingDeletionWindowInDays(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<crate::software::amazon::cryptography::services::kms::internaldafny::types::PendingWindowInDaysType>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => PendingDeletionWindowInDays,
-                                    }
-                                }
-                                pub fn MacAlgorithms(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MacAlgorithmSpec>>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => MacAlgorithms,
-                                    }
-                                }
-                                pub fn XksKeyConfiguration(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::XksKeyConfigurationType>>>{
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => XksKeyConfiguration,
-                                    }
-                                }
-                            }
-
-                            impl Debug for KeyMetadata {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for KeyMetadata {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyMetadata.KeyMetadata(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                AWSAccountId,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                KeyId, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Arn, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                CreationDate,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Enabled, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Description,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                KeyUsage, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                KeyState, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                DeletionDate,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                ValidTo, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Origin, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                CustomKeyStoreId,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                CloudHsmClusterId,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                ExpirationModel,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                KeyManager, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                CustomerMasterKeySpec,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                KeySpec, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                EncryptionAlgorithms,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                SigningAlgorithms,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                KeyAgreementAlgorithms,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                MultiRegion,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                MultiRegionConfiguration,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                PendingDeletionWindowInDays,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                MacAlgorithms,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                XksKeyConfiguration,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for KeyMetadata {}
-
-                            impl Hash for KeyMetadata {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        KeyMetadata::KeyMetadata {
-                                            AWSAccountId,
-                                            KeyId,
-                                            Arn,
-                                            CreationDate,
-                                            Enabled,
-                                            Description,
-                                            KeyUsage,
-                                            KeyState,
-                                            DeletionDate,
-                                            ValidTo,
-                                            Origin,
-                                            CustomKeyStoreId,
-                                            CloudHsmClusterId,
-                                            ExpirationModel,
-                                            KeyManager,
-                                            CustomerMasterKeySpec,
-                                            KeySpec,
-                                            EncryptionAlgorithms,
-                                            SigningAlgorithms,
-                                            KeyAgreementAlgorithms,
-                                            MultiRegion,
-                                            MultiRegionConfiguration,
-                                            PendingDeletionWindowInDays,
-                                            MacAlgorithms,
-                                            XksKeyConfiguration,
-                                        } => {
-                                            ::std::hash::Hash::hash(AWSAccountId, _state);
-                                            ::std::hash::Hash::hash(KeyId, _state);
-                                            ::std::hash::Hash::hash(Arn, _state);
-                                            ::std::hash::Hash::hash(CreationDate, _state);
-                                            ::std::hash::Hash::hash(Enabled, _state);
-                                            ::std::hash::Hash::hash(Description, _state);
-                                            ::std::hash::Hash::hash(KeyUsage, _state);
-                                            ::std::hash::Hash::hash(KeyState, _state);
-                                            ::std::hash::Hash::hash(DeletionDate, _state);
-                                            ::std::hash::Hash::hash(ValidTo, _state);
-                                            ::std::hash::Hash::hash(Origin, _state);
-                                            ::std::hash::Hash::hash(CustomKeyStoreId, _state);
-                                            ::std::hash::Hash::hash(CloudHsmClusterId, _state);
-                                            ::std::hash::Hash::hash(ExpirationModel, _state);
-                                            ::std::hash::Hash::hash(KeyManager, _state);
-                                            ::std::hash::Hash::hash(CustomerMasterKeySpec, _state);
-                                            ::std::hash::Hash::hash(KeySpec, _state);
-                                            ::std::hash::Hash::hash(EncryptionAlgorithms, _state);
-                                            ::std::hash::Hash::hash(SigningAlgorithms, _state);
-                                            ::std::hash::Hash::hash(KeyAgreementAlgorithms, _state);
-                                            ::std::hash::Hash::hash(MultiRegion, _state);
-                                            ::std::hash::Hash::hash(
-                                                MultiRegionConfiguration,
-                                                _state,
-                                            );
-                                            ::std::hash::Hash::hash(
-                                                PendingDeletionWindowInDays,
-                                                _state,
-                                            );
-                                            ::std::hash::Hash::hash(MacAlgorithms, _state);
-                                            ::std::hash::Hash::hash(XksKeyConfiguration, _state)
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Default for KeyMetadata {
-                                fn default() -> KeyMetadata {
-                                    KeyMetadata::KeyMetadata {
-                                        AWSAccountId: ::std::default::Default::default(),
-                                        KeyId: ::std::default::Default::default(),
-                                        Arn: ::std::default::Default::default(),
-                                        CreationDate: ::std::default::Default::default(),
-                                        Enabled: ::std::default::Default::default(),
-                                        Description: ::std::default::Default::default(),
-                                        KeyUsage: ::std::default::Default::default(),
-                                        KeyState: ::std::default::Default::default(),
-                                        DeletionDate: ::std::default::Default::default(),
-                                        ValidTo: ::std::default::Default::default(),
-                                        Origin: ::std::default::Default::default(),
-                                        CustomKeyStoreId: ::std::default::Default::default(),
-                                        CloudHsmClusterId: ::std::default::Default::default(),
-                                        ExpirationModel: ::std::default::Default::default(),
-                                        KeyManager: ::std::default::Default::default(),
-                                        CustomerMasterKeySpec: ::std::default::Default::default(),
-                                        KeySpec: ::std::default::Default::default(),
-                                        EncryptionAlgorithms: ::std::default::Default::default(),
-                                        SigningAlgorithms: ::std::default::Default::default(),
-                                        KeyAgreementAlgorithms: ::std::default::Default::default(),
-                                        MultiRegion: ::std::default::Default::default(),
-                                        MultiRegionConfiguration: ::std::default::Default::default(
-                                        ),
-                                        PendingDeletionWindowInDays:
-                                            ::std::default::Default::default(),
-                                        MacAlgorithms: ::std::default::Default::default(),
-                                        XksKeyConfiguration: ::std::default::Default::default(),
-                                    }
-                                }
-                            }
-
-                            impl AsRef<KeyMetadata> for &KeyMetadata {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
                             pub enum KeySpec {
                                 RSA_2048 {},
                                 RSA_3072 {},
@@ -5341,98 +4013,6 @@ pub mod software {
                             }
 
                             #[derive(PartialEq, Clone)]
-                            pub enum KeyState {
-                                Creating {},
-                                Enabled {},
-                                Disabled {},
-                                PendingDeletion {},
-                                PendingImport {},
-                                PendingReplicaDeletion {},
-                                Unavailable {},
-                                Updating {},
-                            }
-
-                            impl KeyState {}
-
-                            impl Debug for KeyState {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for KeyState {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        KeyState::Creating {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyState.Creating")?;
-                                            Ok(())
-                                        }
-                                        KeyState::Enabled {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyState.Enabled")?;
-                                            Ok(())
-                                        }
-                                        KeyState::Disabled {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyState.Disabled")?;
-                                            Ok(())
-                                        }
-                                        KeyState::PendingDeletion {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyState.PendingDeletion")?;
-                                            Ok(())
-                                        }
-                                        KeyState::PendingImport {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyState.PendingImport")?;
-                                            Ok(())
-                                        }
-                                        KeyState::PendingReplicaDeletion {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyState.PendingReplicaDeletion")?;
-                                            Ok(())
-                                        }
-                                        KeyState::Unavailable {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyState.Unavailable")?;
-                                            Ok(())
-                                        }
-                                        KeyState::Updating {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.KeyState.Updating")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for KeyState {}
-
-                            impl Hash for KeyState {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        KeyState::Creating {} => {}
-                                        KeyState::Enabled {} => {}
-                                        KeyState::Disabled {} => {}
-                                        KeyState::PendingDeletion {} => {}
-                                        KeyState::PendingImport {} => {}
-                                        KeyState::PendingReplicaDeletion {} => {}
-                                        KeyState::Unavailable {} => {}
-                                        KeyState::Updating {} => {}
-                                    }
-                                }
-                            }
-
-                            impl Default for KeyState {
-                                fn default() -> KeyState {
-                                    KeyState::Creating {}
-                                }
-                            }
-
-                            impl AsRef<KeyState> for &KeyState {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
                             pub enum KeyUsageType {
                                 SIGN_VERIFY {},
                                 ENCRYPT_DECRYPT {},
@@ -5495,346 +4075,6 @@ pub mod software {
                             }
 
                             impl AsRef<KeyUsageType> for &KeyUsageType {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
-                            pub enum MacAlgorithmSpec {
-                                HMAC_SHA_224 {},
-                                HMAC_SHA_256 {},
-                                HMAC_SHA_384 {},
-                                HMAC_SHA_512 {},
-                            }
-
-                            impl MacAlgorithmSpec {}
-
-                            impl Debug for MacAlgorithmSpec {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for MacAlgorithmSpec {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        MacAlgorithmSpec::HMAC_SHA_224 {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.MacAlgorithmSpec.HMAC__SHA__224")?;
-                                            Ok(())
-                                        }
-                                        MacAlgorithmSpec::HMAC_SHA_256 {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.MacAlgorithmSpec.HMAC__SHA__256")?;
-                                            Ok(())
-                                        }
-                                        MacAlgorithmSpec::HMAC_SHA_384 {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.MacAlgorithmSpec.HMAC__SHA__384")?;
-                                            Ok(())
-                                        }
-                                        MacAlgorithmSpec::HMAC_SHA_512 {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.MacAlgorithmSpec.HMAC__SHA__512")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for MacAlgorithmSpec {}
-
-                            impl Hash for MacAlgorithmSpec {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        MacAlgorithmSpec::HMAC_SHA_224 {} => {}
-                                        MacAlgorithmSpec::HMAC_SHA_256 {} => {}
-                                        MacAlgorithmSpec::HMAC_SHA_384 {} => {}
-                                        MacAlgorithmSpec::HMAC_SHA_512 {} => {}
-                                    }
-                                }
-                            }
-
-                            impl Default for MacAlgorithmSpec {
-                                fn default() -> MacAlgorithmSpec {
-                                    MacAlgorithmSpec::HMAC_SHA_224 {}
-                                }
-                            }
-
-                            impl AsRef<MacAlgorithmSpec> for &MacAlgorithmSpec {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
-                            pub enum MultiRegionConfiguration {
-                                MultiRegionConfiguration {
-                  MultiRegionKeyType: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MultiRegionKeyType>>>,
-                  PrimaryKey: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MultiRegionKey>>>,
-                  ReplicaKeys: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MultiRegionKey>>>>
-                }
-              }
-
-                            impl MultiRegionConfiguration {
-                                pub fn MultiRegionKeyType(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MultiRegionKeyType>>>{
-                                    match self {
-                                        MultiRegionConfiguration::MultiRegionConfiguration {
-                                            MultiRegionKeyType,
-                                            PrimaryKey,
-                                            ReplicaKeys,
-                                        } => MultiRegionKeyType,
-                                    }
-                                }
-                                pub fn PrimaryKey(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MultiRegionKey>>>{
-                                    match self {
-                                        MultiRegionConfiguration::MultiRegionConfiguration {
-                                            MultiRegionKeyType,
-                                            PrimaryKey,
-                                            ReplicaKeys,
-                                        } => PrimaryKey,
-                                    }
-                                }
-                                pub fn ReplicaKeys(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::MultiRegionKey>>>>{
-                                    match self {
-                                        MultiRegionConfiguration::MultiRegionConfiguration {
-                                            MultiRegionKeyType,
-                                            PrimaryKey,
-                                            ReplicaKeys,
-                                        } => ReplicaKeys,
-                                    }
-                                }
-                            }
-
-                            impl Debug for MultiRegionConfiguration {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for MultiRegionConfiguration {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        MultiRegionConfiguration::MultiRegionConfiguration {
-                                            MultiRegionKeyType,
-                                            PrimaryKey,
-                                            ReplicaKeys,
-                                        } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.MultiRegionConfiguration.MultiRegionConfiguration(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                MultiRegionKeyType,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                PrimaryKey, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                ReplicaKeys,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for MultiRegionConfiguration {}
-
-                            impl Hash for MultiRegionConfiguration {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        MultiRegionConfiguration::MultiRegionConfiguration {
-                                            MultiRegionKeyType,
-                                            PrimaryKey,
-                                            ReplicaKeys,
-                                        } => {
-                                            ::std::hash::Hash::hash(MultiRegionKeyType, _state);
-                                            ::std::hash::Hash::hash(PrimaryKey, _state);
-                                            ::std::hash::Hash::hash(ReplicaKeys, _state)
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Default for MultiRegionConfiguration {
-                                fn default() -> MultiRegionConfiguration {
-                                    MultiRegionConfiguration::MultiRegionConfiguration {
-                                        MultiRegionKeyType: ::std::default::Default::default(),
-                                        PrimaryKey: ::std::default::Default::default(),
-                                        ReplicaKeys: ::std::default::Default::default(),
-                                    }
-                                }
-                            }
-
-                            impl AsRef<MultiRegionConfiguration> for &MultiRegionConfiguration {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
-                            pub enum MultiRegionKey {
-                                MultiRegionKey {
-                                    Arn: ::std::rc::Rc<
-                                        crate::r#_Wrappers_Compile::Option<
-                                            ::dafny_runtime::Sequence<
-                                                ::dafny_runtime::DafnyCharUTF16,
-                                            >,
-                                        >,
-                                    >,
-                                    Region: ::std::rc::Rc<
-                                        crate::r#_Wrappers_Compile::Option<
-                                            ::dafny_runtime::Sequence<
-                                                ::dafny_runtime::DafnyCharUTF16,
-                                            >,
-                                        >,
-                                    >,
-                                },
-                            }
-
-                            impl MultiRegionKey {
-                                pub fn Arn(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        MultiRegionKey::MultiRegionKey { Arn, Region } => Arn,
-                                    }
-                                }
-                                pub fn Region(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        MultiRegionKey::MultiRegionKey { Arn, Region } => Region,
-                                    }
-                                }
-                            }
-
-                            impl Debug for MultiRegionKey {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for MultiRegionKey {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        MultiRegionKey::MultiRegionKey { Arn, Region } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.MultiRegionKey.MultiRegionKey(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Arn, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Region, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for MultiRegionKey {}
-
-                            impl Hash for MultiRegionKey {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        MultiRegionKey::MultiRegionKey { Arn, Region } => {
-                                            ::std::hash::Hash::hash(Arn, _state);
-                                            ::std::hash::Hash::hash(Region, _state)
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Default for MultiRegionKey {
-                                fn default() -> MultiRegionKey {
-                                    MultiRegionKey::MultiRegionKey {
-                                        Arn: ::std::default::Default::default(),
-                                        Region: ::std::default::Default::default(),
-                                    }
-                                }
-                            }
-
-                            impl AsRef<MultiRegionKey> for &MultiRegionKey {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
-                            pub enum MultiRegionKeyType {
-                                PRIMARY {},
-                                REPLICA {},
-                            }
-
-                            impl MultiRegionKeyType {}
-
-                            impl Debug for MultiRegionKeyType {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for MultiRegionKeyType {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        MultiRegionKeyType::PRIMARY {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.MultiRegionKeyType.PRIMARY")?;
-                                            Ok(())
-                                        }
-                                        MultiRegionKeyType::REPLICA {} => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.MultiRegionKeyType.REPLICA")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for MultiRegionKeyType {}
-
-                            impl Hash for MultiRegionKeyType {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        MultiRegionKeyType::PRIMARY {} => {}
-                                        MultiRegionKeyType::REPLICA {} => {}
-                                    }
-                                }
-                            }
-
-                            impl Default for MultiRegionKeyType {
-                                fn default() -> MultiRegionKeyType {
-                                    MultiRegionKeyType::PRIMARY {}
-                                }
-                            }
-
-                            impl AsRef<MultiRegionKeyType> for &MultiRegionKeyType {
                                 fn as_ref(&self) -> Self {
                                     self
                                 }
@@ -5910,12 +4150,7 @@ pub mod software {
                                 }
                             }
 
-                            pub type PendingWindowInDaysType = i32;
-
                             pub type PlaintextType = ::dafny_runtime::Sequence<u8>;
-
-                            pub type PolicyType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
 
                             pub type PublicKeyType = ::dafny_runtime::Sequence<u8>;
 
@@ -6542,341 +4777,6 @@ pub mod software {
                                 ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
 
                             #[derive(PartialEq, Clone)]
-                            pub enum ReplicateKeyRequest {
-                                ReplicateKeyRequest {
-                  KeyId: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                  ReplicaRegion: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                  Policy: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  BypassPolicyLockoutSafetyCheck: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>>,
-                  Description: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  Tags: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Tag>>>>
-                }
-              }
-
-                            impl ReplicateKeyRequest {
-                                pub fn KeyId(
-                                    &self,
-                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
-                                {
-                                    match self {
-                                        ReplicateKeyRequest::ReplicateKeyRequest {
-                                            KeyId,
-                                            ReplicaRegion,
-                                            Policy,
-                                            BypassPolicyLockoutSafetyCheck,
-                                            Description,
-                                            Tags,
-                                        } => KeyId,
-                                    }
-                                }
-                                pub fn ReplicaRegion(
-                                    &self,
-                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
-                                {
-                                    match self {
-                                        ReplicateKeyRequest::ReplicateKeyRequest {
-                                            KeyId,
-                                            ReplicaRegion,
-                                            Policy,
-                                            BypassPolicyLockoutSafetyCheck,
-                                            Description,
-                                            Tags,
-                                        } => ReplicaRegion,
-                                    }
-                                }
-                                pub fn Policy(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        ReplicateKeyRequest::ReplicateKeyRequest {
-                                            KeyId,
-                                            ReplicaRegion,
-                                            Policy,
-                                            BypassPolicyLockoutSafetyCheck,
-                                            Description,
-                                            Tags,
-                                        } => Policy,
-                                    }
-                                }
-                                pub fn BypassPolicyLockoutSafetyCheck(
-                                    &self,
-                                ) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>>
-                                {
-                                    match self {
-                                        ReplicateKeyRequest::ReplicateKeyRequest {
-                                            KeyId,
-                                            ReplicaRegion,
-                                            Policy,
-                                            BypassPolicyLockoutSafetyCheck,
-                                            Description,
-                                            Tags,
-                                        } => BypassPolicyLockoutSafetyCheck,
-                                    }
-                                }
-                                pub fn Description(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        ReplicateKeyRequest::ReplicateKeyRequest {
-                                            KeyId,
-                                            ReplicaRegion,
-                                            Policy,
-                                            BypassPolicyLockoutSafetyCheck,
-                                            Description,
-                                            Tags,
-                                        } => Description,
-                                    }
-                                }
-                                pub fn Tags(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Tag>>>>{
-                                    match self {
-                                        ReplicateKeyRequest::ReplicateKeyRequest {
-                                            KeyId,
-                                            ReplicaRegion,
-                                            Policy,
-                                            BypassPolicyLockoutSafetyCheck,
-                                            Description,
-                                            Tags,
-                                        } => Tags,
-                                    }
-                                }
-                            }
-
-                            impl Debug for ReplicateKeyRequest {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for ReplicateKeyRequest {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        ReplicateKeyRequest::ReplicateKeyRequest {
-                                            KeyId,
-                                            ReplicaRegion,
-                                            Policy,
-                                            BypassPolicyLockoutSafetyCheck,
-                                            Description,
-                                            Tags,
-                                        } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.ReplicateKeyRequest.ReplicateKeyRequest(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                KeyId, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                ReplicaRegion,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Policy, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                BypassPolicyLockoutSafetyCheck,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Description,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Tags, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for ReplicateKeyRequest {}
-
-                            impl Hash for ReplicateKeyRequest {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        ReplicateKeyRequest::ReplicateKeyRequest {
-                                            KeyId,
-                                            ReplicaRegion,
-                                            Policy,
-                                            BypassPolicyLockoutSafetyCheck,
-                                            Description,
-                                            Tags,
-                                        } => {
-                                            ::std::hash::Hash::hash(KeyId, _state);
-                                            ::std::hash::Hash::hash(ReplicaRegion, _state);
-                                            ::std::hash::Hash::hash(Policy, _state);
-                                            ::std::hash::Hash::hash(
-                                                BypassPolicyLockoutSafetyCheck,
-                                                _state,
-                                            );
-                                            ::std::hash::Hash::hash(Description, _state);
-                                            ::std::hash::Hash::hash(Tags, _state)
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Default for ReplicateKeyRequest {
-                                fn default() -> ReplicateKeyRequest {
-                                    ReplicateKeyRequest::ReplicateKeyRequest {
-                                        KeyId: ::std::default::Default::default(),
-                                        ReplicaRegion: ::std::default::Default::default(),
-                                        Policy: ::std::default::Default::default(),
-                                        BypassPolicyLockoutSafetyCheck:
-                                            ::std::default::Default::default(),
-                                        Description: ::std::default::Default::default(),
-                                        Tags: ::std::default::Default::default(),
-                                    }
-                                }
-                            }
-
-                            impl AsRef<ReplicateKeyRequest> for &ReplicateKeyRequest {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
-                            pub enum ReplicateKeyResponse {
-                                ReplicateKeyResponse {
-                  ReplicaKeyMetadata: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyMetadata>>>,
-                  ReplicaPolicy: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
-                  ReplicaTags: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Tag>>>>
-                }
-              }
-
-                            impl ReplicateKeyResponse {
-                                pub fn ReplicaKeyMetadata(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyMetadata>>>{
-                                    match self {
-                                        ReplicateKeyResponse::ReplicateKeyResponse {
-                                            ReplicaKeyMetadata,
-                                            ReplicaPolicy,
-                                            ReplicaTags,
-                                        } => ReplicaKeyMetadata,
-                                    }
-                                }
-                                pub fn ReplicaPolicy(
-                                    &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
-                                    match self {
-                                        ReplicateKeyResponse::ReplicateKeyResponse {
-                                            ReplicaKeyMetadata,
-                                            ReplicaPolicy,
-                                            ReplicaTags,
-                                        } => ReplicaPolicy,
-                                    }
-                                }
-                                pub fn ReplicaTags(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Tag>>>>{
-                                    match self {
-                                        ReplicateKeyResponse::ReplicateKeyResponse {
-                                            ReplicaKeyMetadata,
-                                            ReplicaPolicy,
-                                            ReplicaTags,
-                                        } => ReplicaTags,
-                                    }
-                                }
-                            }
-
-                            impl Debug for ReplicateKeyResponse {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for ReplicateKeyResponse {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        ReplicateKeyResponse::ReplicateKeyResponse {
-                                            ReplicaKeyMetadata,
-                                            ReplicaPolicy,
-                                            ReplicaTags,
-                                        } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.ReplicateKeyResponse.ReplicateKeyResponse(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                ReplicaKeyMetadata,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                ReplicaPolicy,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                ReplicaTags,
-                                                _formatter,
-                                                false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for ReplicateKeyResponse {}
-
-                            impl Hash for ReplicateKeyResponse {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        ReplicateKeyResponse::ReplicateKeyResponse {
-                                            ReplicaKeyMetadata,
-                                            ReplicaPolicy,
-                                            ReplicaTags,
-                                        } => {
-                                            ::std::hash::Hash::hash(ReplicaKeyMetadata, _state);
-                                            ::std::hash::Hash::hash(ReplicaPolicy, _state);
-                                            ::std::hash::Hash::hash(ReplicaTags, _state)
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Default for ReplicateKeyResponse {
-                                fn default() -> ReplicateKeyResponse {
-                                    ReplicateKeyResponse::ReplicateKeyResponse {
-                                        ReplicaKeyMetadata: ::std::default::Default::default(),
-                                        ReplicaPolicy: ::std::default::Default::default(),
-                                        ReplicaTags: ::std::default::Default::default(),
-                                    }
-                                }
-                            }
-
-                            impl AsRef<ReplicateKeyResponse> for &ReplicateKeyResponse {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            #[derive(PartialEq, Clone)]
                             pub enum SigningAlgorithmSpec {
                                 RSASSA_PSS_SHA_256 {},
                                 RSASSA_PSS_SHA_384 {},
@@ -6980,98 +4880,6 @@ pub mod software {
                                 }
                             }
 
-                            #[derive(PartialEq, Clone)]
-                            pub enum Tag {
-                                Tag {
-                                    TagKey:
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    TagValue:
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                },
-                            }
-
-                            impl Tag {
-                                pub fn TagKey(
-                                    &self,
-                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
-                                {
-                                    match self {
-                                        Tag::Tag { TagKey, TagValue } => TagKey,
-                                    }
-                                }
-                                pub fn TagValue(
-                                    &self,
-                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
-                                {
-                                    match self {
-                                        Tag::Tag { TagKey, TagValue } => TagValue,
-                                    }
-                                }
-                            }
-
-                            impl Debug for Tag {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for Tag {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                                        Tag::Tag { TagKey, TagValue } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.Tag.Tag(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                TagKey, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ", ")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                TagValue, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Eq for Tag {}
-
-                            impl Hash for Tag {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                                        Tag::Tag { TagKey, TagValue } => {
-                                            ::std::hash::Hash::hash(TagKey, _state);
-                                            ::std::hash::Hash::hash(TagValue, _state)
-                                        }
-                                    }
-                                }
-                            }
-
-                            impl Default for Tag {
-                                fn default() -> Tag {
-                                    Tag::Tag {
-                                        TagKey: ::std::default::Default::default(),
-                                        TagValue: ::std::default::Default::default(),
-                                    }
-                                }
-                            }
-
-                            impl AsRef<Tag> for &Tag {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
-                            }
-
-                            pub type TagKeyType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
-
-                            pub type TagValueType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
-
                             pub struct IKMSClientCallHistory {}
 
                             impl IKMSClientCallHistory {
@@ -7096,103 +4904,93 @@ pub mod software {
                                 fn GenerateDataKeyWithoutPlaintext(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyWithoutPlaintextRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyWithoutPlaintextResponse>, ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
                                 fn GetPublicKey(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyResponse>, ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
                                 fn ReEncrypt(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptResponse>, ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
-                                fn ReplicateKey(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::ReplicateKeyRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::ReplicateKeyResponse>, ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
+                                fn UpdatePrimaryRegion(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::UpdatePrimaryRegionRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<(), ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
                             }
 
                             #[derive(PartialEq, Clone)]
-                            pub enum XksKeyConfigurationType {
-                                XksKeyConfigurationType {
-                                    Id: ::std::rc::Rc<
-                                        crate::r#_Wrappers_Compile::Option<
-                                            ::dafny_runtime::Sequence<
-                                                ::dafny_runtime::DafnyCharUTF16,
-                                            >,
-                                        >,
-                                    >,
+                            pub enum UpdatePrimaryRegionRequest {
+                                UpdatePrimaryRegionRequest {
+                                    KeyId:
+                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+                                    PrimaryRegion:
+                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
                                 },
                             }
 
-                            impl XksKeyConfigurationType {
-                                pub fn Id(
+                            impl UpdatePrimaryRegionRequest {
+                                pub fn KeyId(
                                     &self,
-                                ) -> &::std::rc::Rc<
-                                    crate::r#_Wrappers_Compile::Option<
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    >,
-                                > {
+                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
+                                {
                                     match self {
-                                        XksKeyConfigurationType::XksKeyConfigurationType { Id } => {
-                                            Id
-                                        }
-                                    }
+                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest{KeyId, PrimaryRegion, } => KeyId,
+                  }
+                                }
+                                pub fn PrimaryRegion(
+                                    &self,
+                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
+                                {
+                                    match self {
+                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest{KeyId, PrimaryRegion, } => PrimaryRegion,
+                  }
                                 }
                             }
 
-                            impl Debug for XksKeyConfigurationType {
+                            impl Debug for UpdatePrimaryRegionRequest {
                                 fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                                     ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
                                 }
                             }
 
-                            impl DafnyPrint for XksKeyConfigurationType {
+                            impl DafnyPrint for UpdatePrimaryRegionRequest {
                                 fn fmt_print(
                                     &self,
                                     _formatter: &mut ::std::fmt::Formatter,
                                     _in_seq: bool,
                                 ) -> std::fmt::Result {
                                     match self {
-                                        XksKeyConfigurationType::XksKeyConfigurationType { Id } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.XksKeyConfigurationType.XksKeyConfigurationType(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                Id, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                    }
+                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest{KeyId, PrimaryRegion, } => {
+                      write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.UpdatePrimaryRegionRequest.UpdatePrimaryRegionRequest(")?;
+                      ::dafny_runtime::DafnyPrint::fmt_print(KeyId, _formatter, false)?;
+                      write!(_formatter, ", ")?;
+                      ::dafny_runtime::DafnyPrint::fmt_print(PrimaryRegion, _formatter, false)?;
+                      write!(_formatter, ")")?;
+                      Ok(())
+                    },
+                  }
                                 }
                             }
 
-                            impl Eq for XksKeyConfigurationType {}
+                            impl Eq for UpdatePrimaryRegionRequest {}
 
-                            impl Hash for XksKeyConfigurationType {
+                            impl Hash for UpdatePrimaryRegionRequest {
                                 fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
                                     match self {
-                                        XksKeyConfigurationType::XksKeyConfigurationType { Id } => {
-                                            ::std::hash::Hash::hash(Id, _state)
-                                        }
+                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest{KeyId, PrimaryRegion, } => {
+                      ::std::hash::Hash::hash(KeyId, _state);
+                      ::std::hash::Hash::hash(PrimaryRegion, _state)
+                    },
+                  }
+                                }
+                            }
+
+                            impl Default for UpdatePrimaryRegionRequest {
+                                fn default() -> UpdatePrimaryRegionRequest {
+                                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest {
+                                        KeyId: ::std::default::Default::default(),
+                                        PrimaryRegion: ::std::default::Default::default(),
                                     }
                                 }
                             }
 
-                            impl Default for XksKeyConfigurationType {
-                                fn default() -> XksKeyConfigurationType {
-                                    XksKeyConfigurationType::XksKeyConfigurationType {
-                                        Id: ::std::default::Default::default(),
-                                    }
-                                }
-                            }
-
-                            impl AsRef<XksKeyConfigurationType> for &XksKeyConfigurationType {
+                            impl AsRef<UpdatePrimaryRegionRequest> for &UpdatePrimaryRegionRequest {
                                 fn as_ref(&self) -> Self {
                                     self
                                 }
                             }
 
-                            pub type XksKeyIdType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
-
                             #[derive(PartialEq, Clone)]
                             pub enum Error {
-                                AlreadyExistsException {
-                                    message: ::std::rc::Rc<
-                                        crate::r#_Wrappers_Compile::Option<
-                                            ::dafny_runtime::Sequence<
-                                                ::dafny_runtime::DafnyCharUTF16,
-                                            >,
-                                        >,
-                                    >,
-                                },
                                 DependencyTimeoutException {
                                     message: ::std::rc::Rc<
                                         crate::r#_Wrappers_Compile::Option<
@@ -7292,34 +5090,7 @@ pub mod software {
                                         >,
                                     >,
                                 },
-                                LimitExceededException {
-                                    message: ::std::rc::Rc<
-                                        crate::r#_Wrappers_Compile::Option<
-                                            ::dafny_runtime::Sequence<
-                                                ::dafny_runtime::DafnyCharUTF16,
-                                            >,
-                                        >,
-                                    >,
-                                },
-                                MalformedPolicyDocumentException {
-                                    message: ::std::rc::Rc<
-                                        crate::r#_Wrappers_Compile::Option<
-                                            ::dafny_runtime::Sequence<
-                                                ::dafny_runtime::DafnyCharUTF16,
-                                            >,
-                                        >,
-                                    >,
-                                },
                                 NotFoundException {
-                                    message: ::std::rc::Rc<
-                                        crate::r#_Wrappers_Compile::Option<
-                                            ::dafny_runtime::Sequence<
-                                                ::dafny_runtime::DafnyCharUTF16,
-                                            >,
-                                        >,
-                                    >,
-                                },
-                                TagException {
                                     message: ::std::rc::Rc<
                                         crate::r#_Wrappers_Compile::Option<
                                             ::dafny_runtime::Sequence<
@@ -7351,7 +5122,6 @@ pub mod software {
                                     >,
                                 > {
                                     match self {
-                                        Error::AlreadyExistsException { message } => message,
                                         Error::DependencyTimeoutException { message } => message,
                                         Error::DisabledException { message } => message,
                                         Error::DryRunOperationException { message } => message,
@@ -7363,12 +5133,7 @@ pub mod software {
                                         Error::KeyUnavailableException { message } => message,
                                         Error::KMSInternalException { message } => message,
                                         Error::KMSInvalidStateException { message } => message,
-                                        Error::LimitExceededException { message } => message,
-                                        Error::MalformedPolicyDocumentException { message } => {
-                                            message
-                                        }
                                         Error::NotFoundException { message } => message,
-                                        Error::TagException { message } => message,
                                         Error::UnsupportedOperationException { message } => message,
                                         Error::Opaque { obj } => {
                                             panic!("field does not exist on this variant")
@@ -7377,9 +5142,6 @@ pub mod software {
                                 }
                                 pub fn obj(&self) -> &::dafny_runtime::Object<dyn::std::any::Any> {
                                     match self {
-                                        Error::AlreadyExistsException { message } => {
-                                            panic!("field does not exist on this variant")
-                                        }
                                         Error::DependencyTimeoutException { message } => {
                                             panic!("field does not exist on this variant")
                                         }
@@ -7413,16 +5175,7 @@ pub mod software {
                                         Error::KMSInvalidStateException { message } => {
                                             panic!("field does not exist on this variant")
                                         }
-                                        Error::LimitExceededException { message } => {
-                                            panic!("field does not exist on this variant")
-                                        }
-                                        Error::MalformedPolicyDocumentException { message } => {
-                                            panic!("field does not exist on this variant")
-                                        }
                                         Error::NotFoundException { message } => {
-                                            panic!("field does not exist on this variant")
-                                        }
-                                        Error::TagException { message } => {
                                             panic!("field does not exist on this variant")
                                         }
                                         Error::UnsupportedOperationException { message } => {
@@ -7446,14 +5199,6 @@ pub mod software {
                                     _in_seq: bool,
                                 ) -> std::fmt::Result {
                                     match self {
-                                        Error::AlreadyExistsException { message } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.Error.AlreadyExistsException(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                message, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
                                         Error::DependencyTimeoutException { message } => {
                                             write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.Error.DependencyTimeoutException(")?;
                                             ::dafny_runtime::DafnyPrint::fmt_print(
@@ -7542,32 +5287,8 @@ pub mod software {
                                             write!(_formatter, ")")?;
                                             Ok(())
                                         }
-                                        Error::LimitExceededException { message } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.Error.LimitExceededException(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                message, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                        Error::MalformedPolicyDocumentException { message } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.Error.MalformedPolicyDocumentException(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                message, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
                                         Error::NotFoundException { message } => {
                                             write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.Error.NotFoundException(")?;
-                                            ::dafny_runtime::DafnyPrint::fmt_print(
-                                                message, _formatter, false,
-                                            )?;
-                                            write!(_formatter, ")")?;
-                                            Ok(())
-                                        }
-                                        Error::TagException { message } => {
-                                            write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.Error.TagException(")?;
                                             ::dafny_runtime::DafnyPrint::fmt_print(
                                                 message, _formatter, false,
                                             )?;
@@ -7599,9 +5320,6 @@ pub mod software {
                             impl Hash for Error {
                                 fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
                                     match self {
-                                        Error::AlreadyExistsException { message } => {
-                                            ::std::hash::Hash::hash(message, _state)
-                                        }
                                         Error::DependencyTimeoutException { message } => {
                                             ::std::hash::Hash::hash(message, _state)
                                         }
@@ -7635,16 +5353,7 @@ pub mod software {
                                         Error::KMSInvalidStateException { message } => {
                                             ::std::hash::Hash::hash(message, _state)
                                         }
-                                        Error::LimitExceededException { message } => {
-                                            ::std::hash::Hash::hash(message, _state)
-                                        }
-                                        Error::MalformedPolicyDocumentException { message } => {
-                                            ::std::hash::Hash::hash(message, _state)
-                                        }
                                         Error::NotFoundException { message } => {
-                                            ::std::hash::Hash::hash(message, _state)
-                                        }
-                                        Error::TagException { message } => {
                                             ::std::hash::Hash::hash(message, _state)
                                         }
                                         Error::UnsupportedOperationException { message } => {
@@ -7659,7 +5368,7 @@ pub mod software {
 
                             impl Default for Error {
                                 fn default() -> Error {
-                                    Error::AlreadyExistsException {
+                                    Error::DependencyTimeoutException {
                                         message: ::std::default::Default::default(),
                                     }
                                 }

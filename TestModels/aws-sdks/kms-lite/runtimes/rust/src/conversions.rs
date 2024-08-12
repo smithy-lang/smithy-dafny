@@ -15,8 +15,6 @@ pub mod customer_master_key_spec;
 
  pub mod error;
 
- pub mod expiration_model_type;
-
  pub mod generate_data_key;
 
  pub mod generate_data_key_without_plaintext;
@@ -27,23 +25,9 @@ pub mod customer_master_key_spec;
 
  pub mod key_encryption_mechanism;
 
- pub mod key_manager_type;
-
- pub mod key_metadata;
-
  pub mod key_spec;
 
- pub mod key_state;
-
  pub mod key_usage_type;
-
- pub mod mac_algorithm_spec;
-
- pub mod multi_region_configuration;
-
- pub mod multi_region_key;
-
- pub mod multi_region_key_type;
 
  pub mod origin_type;
 
@@ -51,10 +35,6 @@ pub mod customer_master_key_spec;
 
  pub mod recipient_info;
 
- pub mod replicate_key;
-
  pub mod signing_algorithm_spec;
 
- pub mod tag;
-
- pub mod xks_key_configuration_type;
+ pub mod update_primary_region;

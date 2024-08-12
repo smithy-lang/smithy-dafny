@@ -103,17 +103,17 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     conversions::re_encrypt::_re_encrypt_response::to_dafny,
     conversions::re_encrypt::to_dafny_error)
 }
- fn ReplicateKey(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReplicateKeyRequest>)
+ fn UpdatePrimaryRegion(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::UpdatePrimaryRegionRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
-    std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReplicateKeyResponse>,
+    (),
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
   let native_result =
-    self.rt.block_on(conversions::replicate_key::_replicate_key_request::from_dafny(input.clone(), self.inner.clone()).send());
+    self.rt.block_on(conversions::update_primary_region::_update_primary_region_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::replicate_key::_replicate_key_response::to_dafny,
-    conversions::replicate_key::to_dafny_error)
+    conversions::update_primary_region::_update_primary_region_response::to_dafny,
+    conversions::update_primary_region::to_dafny_error)
 } }
 
 #[allow(non_snake_case)]

@@ -1,9 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-pub mod already_exists_exception;
-
- pub mod dependency_timeout_exception;
+pub mod dependency_timeout_exception;
 
  pub mod disabled_exception;
 
@@ -25,13 +23,7 @@ pub mod already_exists_exception;
 
  pub mod kms_invalid_state_exception;
 
- pub mod limit_exceeded_exception;
-
- pub mod malformed_policy_document_exception;
-
  pub mod not_found_exception;
-
- pub mod tag_exception;
 
  pub mod unsupported_operation_exception;
  /// Wraps up an arbitrary Rust Error value as a Dafny Error
