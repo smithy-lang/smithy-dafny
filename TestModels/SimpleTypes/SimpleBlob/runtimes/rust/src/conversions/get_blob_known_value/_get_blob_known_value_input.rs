@@ -2,15 +2,15 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: crate::operation::get_blob_known_value::GetBlobKnownValueInput,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput>
+) -> ::std::rc::Rc<crate::r#simple::types::blob::internaldafny::types::GetBlobInput>
 {
     let dafny_value = match value.value {
-        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
+        Some(v) => crate::_Wrappers_Compile::Option::Some {
             value: ::dafny_runtime::Sequence::from_array(&v),
         },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        None => crate::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput::GetBlobInput {
+    ::std::rc::Rc::new(crate::r#simple::types::blob::internaldafny::types::GetBlobInput::GetBlobInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -18,12 +18,12 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput,
+        crate::r#simple::types::blob::internaldafny::types::GetBlobInput,
     >,
 ) -> crate::operation::get_blob_known_value::GetBlobKnownValueInput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             ::std::rc::Rc::try_unwrap(dafny_value.value().Extract().to_array())
@@ -31,7 +31,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {
