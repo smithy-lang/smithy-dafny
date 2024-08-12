@@ -1,6 +1,6 @@
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..2dd7a562
+index 00000000..a82eefe9
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/client.rs
 @@ -0,0 +1,39 @@
@@ -10,7 +10,7 @@ index 00000000..2dd7a562
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::ISimpleTypesIntegerClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::r#simple::types::integer::internaldafny::types::ISimpleTypesIntegerClient>
 +}
 +
 +impl Client {
@@ -20,12 +20,12 @@ index 00000000..2dd7a562
 +        conf: crate::types::simple_integer_config::SimpleIntegerConfig,
 +    ) -> Result<Self, BuildError> {
 +        let inner =
-+            crate::implementation_from_dafny::_simple_dtypes_dinteger_dinternaldafny::_default::SimpleInteger(
++            crate::simple::types::integer::internaldafny::_default::SimpleInteger(
 +                &crate::conversions::simple_integer_config::_simple_integer_config::to_dafny(conf),
 +            );
 +        if matches!(
 +            inner.as_ref(),
-+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -100,7 +100,7 @@ index 00000000..9d397cd0
 +pub mod simple_integer_config;
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer.rs
 new file mode 100644
-index 00000000..c6a1e08f
+index 00000000..3637ac26
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer.rs
 @@ -0,0 +1,32 @@
@@ -111,21 +111,21 @@ index 00000000..c6a1e08f
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_integer::GetIntegerError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::types::integer::internaldafny::types::Error> {
 +    match value {
 +    crate::operation::get_integer::GetIntegerError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::r#simple::types::integer::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::Error,
++        crate::r#simple::types::integer::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_integer::GetIntegerError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::types::integer::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_integer::GetIntegerError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -138,7 +138,7 @@ index 00000000..c6a1e08f
 +pub mod _get_integer_output;
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer/_get_integer_input.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer/_get_integer_input.rs
 new file mode 100644
-index 00000000..9434318f
+index 00000000..9b5403e0
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer/_get_integer_input.rs
 @@ -0,0 +1,37 @@
@@ -147,13 +147,13 @@ index 00000000..9434318f
 +pub fn to_dafny(
 +    value: crate::operation::get_integer::GetIntegerInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
++    crate::r#simple::types::integer::internaldafny::types::GetIntegerInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: v },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        Some(v) => crate::_Wrappers_Compile::Option::Some { value: v },
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput::GetIntegerInput {
++    ::std::rc::Rc::new(crate::r#simple::types::integer::internaldafny::types::GetIntegerInput::GetIntegerInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -161,17 +161,17 @@ index 00000000..9434318f
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
++        crate::r#simple::types::integer::internaldafny::types::GetIntegerInput,
 +    >,
 +) -> crate::operation::get_integer::GetIntegerInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(dafny_value.value().Extract())
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -181,7 +181,7 @@ index 00000000..9434318f
 +}
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer/_get_integer_output.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer/_get_integer_output.rs
 new file mode 100644
-index 00000000..b22c89e6
+index 00000000..08831772
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer/_get_integer_output.rs
 @@ -0,0 +1,37 @@
@@ -190,13 +190,13 @@ index 00000000..b22c89e6
 +pub fn to_dafny(
 +    value: crate::operation::get_integer::GetIntegerOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput,
++    crate::r#simple::types::integer::internaldafny::types::GetIntegerOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput::GetIntegerOutput {
++    ::std::rc::Rc::new(crate::r#simple::types::integer::internaldafny::types::GetIntegerOutput::GetIntegerOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -204,17 +204,17 @@ index 00000000..b22c89e6
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput,
++        crate::r#simple::types::integer::internaldafny::types::GetIntegerOutput,
 +    >,
 +) -> crate::operation::get_integer::GetIntegerOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(dafny_value.value().Extract())
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -224,7 +224,7 @@ index 00000000..b22c89e6
 +}
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value.rs
 new file mode 100644
-index 00000000..0b0c5da8
+index 00000000..15c6b7c8
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value.rs
 @@ -0,0 +1,32 @@
@@ -235,21 +235,21 @@ index 00000000..0b0c5da8
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_integer_known_value::GetIntegerKnownValueError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::types::integer::internaldafny::types::Error> {
 +    match value {
 +    crate::operation::get_integer_known_value::GetIntegerKnownValueError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::r#simple::types::integer::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::Error,
++        crate::r#simple::types::integer::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_integer_known_value::GetIntegerKnownValueError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::types::integer::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_integer_known_value::GetIntegerKnownValueError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -262,7 +262,7 @@ index 00000000..0b0c5da8
 +pub mod _get_integer_known_value_output;
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value/_get_integer_known_value_input.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value/_get_integer_known_value_input.rs
 new file mode 100644
-index 00000000..9f260381
+index 00000000..40db6820
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value/_get_integer_known_value_input.rs
 @@ -0,0 +1,37 @@
@@ -271,13 +271,13 @@ index 00000000..9f260381
 +pub fn to_dafny(
 +    value: crate::operation::get_integer_known_value::GetIntegerKnownValueInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
++    crate::r#simple::types::integer::internaldafny::types::GetIntegerInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: v },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        Some(v) => crate::_Wrappers_Compile::Option::Some { value: v },
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput::GetIntegerInput {
++    ::std::rc::Rc::new(crate::r#simple::types::integer::internaldafny::types::GetIntegerInput::GetIntegerInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -285,17 +285,17 @@ index 00000000..9f260381
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerInput,
++        crate::r#simple::types::integer::internaldafny::types::GetIntegerInput,
 +    >,
 +) -> crate::operation::get_integer_known_value::GetIntegerKnownValueInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(dafny_value.value().Extract())
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -305,7 +305,7 @@ index 00000000..9f260381
 +}
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value/_get_integer_known_value_output.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value/_get_integer_known_value_output.rs
 new file mode 100644
-index 00000000..2cf230ef
+index 00000000..c122e6be
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/get_integer_known_value/_get_integer_known_value_output.rs
 @@ -0,0 +1,37 @@
@@ -314,13 +314,13 @@ index 00000000..2cf230ef
 +pub fn to_dafny(
 +    value: crate::operation::get_integer_known_value::GetIntegerKnownValueOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput,
++    crate::r#simple::types::integer::internaldafny::types::GetIntegerOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: b },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput::GetIntegerOutput {
++    ::std::rc::Rc::new(crate::r#simple::types::integer::internaldafny::types::GetIntegerOutput::GetIntegerOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -328,17 +328,17 @@ index 00000000..2cf230ef
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::GetIntegerOutput,
++        crate::r#simple::types::integer::internaldafny::types::GetIntegerOutput,
 +    >,
 +) -> crate::operation::get_integer_known_value::GetIntegerKnownValueOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(dafny_value.value().Extract())
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -357,7 +357,7 @@ index 00000000..f3cdb738
 +pub mod _simple_integer_config;
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/simple_integer_config/_simple_integer_config.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/simple_integer_config/_simple_integer_config.rs
 new file mode 100644
-index 00000000..08cfc8bf
+index 00000000..360d1989
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/conversions/simple_integer_config/_simple_integer_config.rs
 @@ -0,0 +1,19 @@
@@ -367,15 +367,15 @@ index 00000000..08cfc8bf
 +pub fn to_dafny(
 +    value: crate::types::simple_integer_config::SimpleIntegerConfig,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig,
++    crate::simple::types::integer::internaldafny::types::SimpleIntegerConfig,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig::SimpleIntegerConfig {})
++    ::std::rc::Rc::new(crate::r#simple::types::integer::internaldafny::types::SimpleIntegerConfig::SimpleIntegerConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig,
++        crate::r#simple::types::integer::internaldafny::types::SimpleIntegerConfig,
 +    >,
 +) -> crate::types::simple_integer_config::SimpleIntegerConfig {
 +    crate::types::simple_integer_config::SimpleIntegerConfig {}
@@ -432,6 +432,31 @@ index 00000000..cce22d1c
 +impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
 +    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 +}
+diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/implementation_from_dafny.rs
+index 2cac6001..08623efb 100644
+--- b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/implementation_from_dafny.rs
++++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/implementation_from_dafny.rs
+@@ -1,6 +1,20 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ 
++pub mod client;
++pub mod types;
++
++/// Common errors and error handling utilities.
++pub mod error;
++
++/// All operations that this crate can perform.
++pub mod operation;
++
++mod conversions;
++
++pub use client::Client;
++pub use types::simple_integer_config::SimpleIntegerConfig;
++
+ pub mod r#_Wrappers_Compile {
+     pub use dafny_runtime::DafnyPrint;
+     pub use std::cmp::Eq;
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/lib.rs
 new file mode 100644
 index 00000000..e427bffa
@@ -472,7 +497,7 @@ index 00000000..faaa994c
 +pub mod get_integer_known_value;
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer.rs
 new file mode 100644
-index 00000000..52f7b049
+index 00000000..3cb49535
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer.rs
 @@ -0,0 +1,145 @@
@@ -498,7 +523,7 @@ index 00000000..52f7b049
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetInteger(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_integer::_get_integer_output::from_dafny(
@@ -831,7 +856,7 @@ index 00000000..74d985a9
 +}
 diff --git b/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value.rs a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value.rs
 new file mode 100644
-index 00000000..27fe320f
+index 00000000..06e0fa0c
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleInteger/runtimes/rust/src/operation/get_integer_known_value.rs
 @@ -0,0 +1,150 @@
@@ -860,7 +885,7 @@ index 00000000..27fe320f
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetInteger(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_integer_known_value::_get_integer_known_value_output::from_dafny(

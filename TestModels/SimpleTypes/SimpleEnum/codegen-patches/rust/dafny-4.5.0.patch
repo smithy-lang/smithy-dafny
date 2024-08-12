@@ -1,6 +1,6 @@
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..2256d42e
+index 00000000..9649346b
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/client.rs
 @@ -0,0 +1,41 @@
@@ -10,7 +10,7 @@ index 00000000..2256d42e
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::ISimpleTypesEnumClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::r#simple::types::smithyenum::internaldafny::types::ISimpleTypesEnumClient>
 +}
 +
 +impl Client {
@@ -20,12 +20,12 @@ index 00000000..2256d42e
 +        conf: crate::types::simple_enum_config::SimpleEnumConfig,
 +    ) -> Result<Self, BuildError> {
 +        let inner =
-+            crate::implementation_from_dafny::_simple_dtypes_dsmithyenum_dinternaldafny::_default::SimpleEnum(
++            crate::simple::types::smithyenum::internaldafny::_default::SimpleEnum(
 +                &crate::conversions::simple_enum_config::_simple_enum_config::to_dafny(conf),
 +            );
 +        if matches!(
 +            inner.as_ref(),
-+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -153,7 +153,7 @@ index 00000000..7361ee56
 +pub mod simple_enum_shape;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum.rs
 new file mode 100644
-index 00000000..e1e88552
+index 00000000..ef493d11
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum.rs
 @@ -0,0 +1,32 @@
@@ -164,21 +164,21 @@ index 00000000..e1e88552
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_enum::GetEnumError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::types::smithyenum::internaldafny::types::Error> {
 +    match value {
 +    crate::operation::get_enum::GetEnumError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error,
++        crate::r#simple::types::smithyenum::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_enum::GetEnumError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::types::smithyenum::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_enum::GetEnumError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -191,7 +191,7 @@ index 00000000..e1e88552
 +pub mod _get_enum_output;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum/_get_enum_input.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum/_get_enum_input.rs
 new file mode 100644
-index 00000000..890d436c
+index 00000000..3bbf1602
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum/_get_enum_input.rs
 @@ -0,0 +1,45 @@
@@ -200,17 +200,17 @@ index 00000000..890d436c
 +pub fn to_dafny(
 +    value: crate::operation::get_enum::GetEnumInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput,
++    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(
 +                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&v),
 +            ),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput::GetEnumInput {
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput::GetEnumInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -218,12 +218,12 @@ index 00000000..890d436c
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput,
++        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput,
 +    >,
 +) -> crate::operation::get_enum::GetEnumInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -232,7 +232,7 @@ index 00000000..890d436c
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -242,7 +242,7 @@ index 00000000..890d436c
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum/_get_enum_output.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum/_get_enum_output.rs
 new file mode 100644
-index 00000000..17fc6fcc
+index 00000000..1ae04378
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum/_get_enum_output.rs
 @@ -0,0 +1,45 @@
@@ -251,17 +251,17 @@ index 00000000..17fc6fcc
 +pub fn to_dafny(
 +    value: crate::operation::get_enum::GetEnumOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
++    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(b) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(
 +                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&b),
 +            ),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput::GetEnumOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -269,12 +269,12 @@ index 00000000..17fc6fcc
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
++        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 +    >,
 +) -> crate::operation::get_enum::GetEnumOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -283,7 +283,7 @@ index 00000000..17fc6fcc
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -293,7 +293,7 @@ index 00000000..17fc6fcc
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test.rs
 new file mode 100644
-index 00000000..e7c42b88
+index 00000000..5e3e946f
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test.rs
 @@ -0,0 +1,32 @@
@@ -304,21 +304,21 @@ index 00000000..e7c42b88
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_enum_first_known_value_test::GetEnumFirstKnownValueTestError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::types::smithyenum::internaldafny::types::Error> {
 +    match value {
 +    crate::operation::get_enum_first_known_value_test::GetEnumFirstKnownValueTestError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error,
++        crate::r#simple::types::smithyenum::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_enum_first_known_value_test::GetEnumFirstKnownValueTestError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::types::smithyenum::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_enum_first_known_value_test::GetEnumFirstKnownValueTestError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -331,7 +331,7 @@ index 00000000..e7c42b88
 +pub mod _get_enum_first_known_value_test_output;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test/_get_enum_first_known_value_test_input.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test/_get_enum_first_known_value_test_input.rs
 new file mode 100644
-index 00000000..3ca27e40
+index 00000000..45398964
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test/_get_enum_first_known_value_test_input.rs
 @@ -0,0 +1,45 @@
@@ -340,17 +340,17 @@ index 00000000..3ca27e40
 +pub fn to_dafny(
 +    value: crate::operation::get_enum_first_known_value_test::GetEnumFirstKnownValueTestInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput,
++    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(
 +                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&v),
 +            ),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput::GetEnumInput {
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput::GetEnumInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -358,12 +358,12 @@ index 00000000..3ca27e40
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput,
++        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput,
 +    >,
 +) -> crate::operation::get_enum_first_known_value_test::GetEnumFirstKnownValueTestInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -372,7 +372,7 @@ index 00000000..3ca27e40
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -382,7 +382,7 @@ index 00000000..3ca27e40
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test/_get_enum_first_known_value_test_output.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test/_get_enum_first_known_value_test_output.rs
 new file mode 100644
-index 00000000..9fe7a5c6
+index 00000000..c31403c9
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_first_known_value_test/_get_enum_first_known_value_test_output.rs
 @@ -0,0 +1,45 @@
@@ -391,17 +391,17 @@ index 00000000..9fe7a5c6
 +pub fn to_dafny(
 +    value: crate::operation::get_enum_first_known_value_test::GetEnumFirstKnownValueTestOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
++    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(b) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(
 +                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&b),
 +            ),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput::GetEnumOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -409,12 +409,12 @@ index 00000000..9fe7a5c6
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
++        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 +    >,
 +) -> crate::operation::get_enum_first_known_value_test::GetEnumFirstKnownValueTestOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -423,7 +423,7 @@ index 00000000..9fe7a5c6
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -433,7 +433,7 @@ index 00000000..9fe7a5c6
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test.rs
 new file mode 100644
-index 00000000..5496e4ae
+index 00000000..afa0c42c
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test.rs
 @@ -0,0 +1,32 @@
@@ -444,21 +444,21 @@ index 00000000..5496e4ae
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::types::smithyenum::internaldafny::types::Error> {
 +    match value {
 +    crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error,
++        crate::r#simple::types::smithyenum::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::types::smithyenum::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -471,7 +471,7 @@ index 00000000..5496e4ae
 +pub mod _get_enum_second_known_value_test_output;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test/_get_enum_second_known_value_test_input.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test/_get_enum_second_known_value_test_input.rs
 new file mode 100644
-index 00000000..c3368baf
+index 00000000..c73d8a63
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test/_get_enum_second_known_value_test_input.rs
 @@ -0,0 +1,45 @@
@@ -480,17 +480,17 @@ index 00000000..c3368baf
 +pub fn to_dafny(
 +    value: crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput,
++    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(
 +                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&v),
 +            ),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput::GetEnumInput {
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput::GetEnumInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -498,12 +498,12 @@ index 00000000..c3368baf
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput,
++        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput,
 +    >,
 +) -> crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -512,7 +512,7 @@ index 00000000..c3368baf
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -522,7 +522,7 @@ index 00000000..c3368baf
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test/_get_enum_second_known_value_test_output.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test/_get_enum_second_known_value_test_output.rs
 new file mode 100644
-index 00000000..7bcb3e13
+index 00000000..fbb2809e
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_second_known_value_test/_get_enum_second_known_value_test_output.rs
 @@ -0,0 +1,45 @@
@@ -531,17 +531,17 @@ index 00000000..7bcb3e13
 +pub fn to_dafny(
 +    value: crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
++    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(b) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(
 +                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&b),
 +            ),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput::GetEnumOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -549,12 +549,12 @@ index 00000000..7bcb3e13
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
++        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 +    >,
 +) -> crate::operation::get_enum_second_known_value_test::GetEnumSecondKnownValueTestOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -563,7 +563,7 @@ index 00000000..7bcb3e13
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -573,7 +573,7 @@ index 00000000..7bcb3e13
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test.rs
 new file mode 100644
-index 00000000..a72cee55
+index 00000000..b3d8d118
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test.rs
 @@ -0,0 +1,32 @@
@@ -584,21 +584,21 @@ index 00000000..a72cee55
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::types::smithyenum::internaldafny::types::Error> {
 +    match value {
 +    crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error,
++        crate::r#simple::types::smithyenum::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::types::smithyenum::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -611,7 +611,7 @@ index 00000000..a72cee55
 +pub mod _get_enum_third_known_value_test_output;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test/_get_enum_third_known_value_test_input.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test/_get_enum_third_known_value_test_input.rs
 new file mode 100644
-index 00000000..bdca5a22
+index 00000000..73c9d9b6
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test/_get_enum_third_known_value_test_input.rs
 @@ -0,0 +1,45 @@
@@ -620,17 +620,17 @@ index 00000000..bdca5a22
 +pub fn to_dafny(
 +    value: crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput,
++    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(
 +                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&v),
 +            ),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput::GetEnumInput {
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput::GetEnumInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -638,12 +638,12 @@ index 00000000..bdca5a22
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumInput,
++        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumInput,
 +    >,
 +) -> crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -652,7 +652,7 @@ index 00000000..bdca5a22
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -662,7 +662,7 @@ index 00000000..bdca5a22
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test/_get_enum_third_known_value_test_output.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test/_get_enum_third_known_value_test_output.rs
 new file mode 100644
-index 00000000..3f4e17ba
+index 00000000..aafc1403
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/get_enum_third_known_value_test/_get_enum_third_known_value_test_output.rs
 @@ -0,0 +1,45 @@
@@ -671,17 +671,17 @@ index 00000000..3f4e17ba
 +pub fn to_dafny(
 +    value: crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
++    crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 +> {
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(b) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(
 +                crate::conversions::simple_enum_shape::_simple_enum_shape::to_dafny(&b),
 +            ),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput::GetEnumOutput {
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput::GetEnumOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -689,12 +689,12 @@ index 00000000..3f4e17ba
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::GetEnumOutput,
++        crate::r#simple::types::smithyenum::internaldafny::types::GetEnumOutput,
 +    >,
 +) -> crate::operation::get_enum_third_known_value_test::GetEnumThirdKnownValueTestOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            crate::conversions::simple_enum_shape::_simple_enum_shape::from_dafny(
@@ -703,7 +703,7 @@ index 00000000..3f4e17ba
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -722,7 +722,7 @@ index 00000000..973679ee
 +pub mod _simple_enum_config;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_config/_simple_enum_config.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_config/_simple_enum_config.rs
 new file mode 100644
-index 00000000..7c31b411
+index 00000000..a1e48e7f
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_config/_simple_enum_config.rs
 @@ -0,0 +1,19 @@
@@ -732,15 +732,15 @@ index 00000000..7c31b411
 +pub fn to_dafny(
 +    value: crate::types::simple_enum_config::SimpleEnumConfig,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig,
++    crate::simple::types::smithyenum::internaldafny::types::SimpleEnumConfig,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig::SimpleEnumConfig {})
++    ::std::rc::Rc::new(crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumConfig::SimpleEnumConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumConfig,
++        crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumConfig,
 +    >,
 +) -> crate::types::simple_enum_config::SimpleEnumConfig {
 +    crate::types::simple_enum_config::SimpleEnumConfig {}
@@ -756,7 +756,7 @@ index 00000000..f531b553
 +pub mod _simple_enum_shape;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_shape/_simple_enum_shape.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_shape/_simple_enum_shape.rs
 new file mode 100644
-index 00000000..47c3c897
+index 00000000..8519605a
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/conversions/simple_enum_shape/_simple_enum_shape.rs
 @@ -0,0 +1,23 @@
@@ -765,22 +765,22 @@ index 00000000..47c3c897
 +
 +pub fn to_dafny(
 +    value: &crate::types::simple_enum_shape::SimpleEnumShape,
-+) -> crate::implementation_from_dafny::_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape {
++) -> crate::simple::types::smithyenum::internaldafny::types::SimpleEnumShape {
 +    match value {
-+      crate::types::simple_enum_shape::SimpleEnumShape::FIRST => crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {},
-+      crate::types::simple_enum_shape::SimpleEnumShape::SECOND => crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {},
-+      crate::types::simple_enum_shape::SimpleEnumShape::THIRD => crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {},
++      crate::types::simple_enum_shape::SimpleEnumShape::FIRST => crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumShape::FIRST {},
++      crate::types::simple_enum_shape::SimpleEnumShape::SECOND => crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumShape::SECOND {},
++      crate::types::simple_enum_shape::SimpleEnumShape::THIRD => crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumShape::THIRD {},
 +    }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
-+    dafny_value: &crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape,
++    dafny_value: &crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumShape,
 +) -> crate::types::simple_enum_shape::SimpleEnumShape {
 +    match dafny_value {
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::FIRST {} => crate::types::simple_enum_shape::SimpleEnumShape::FIRST,
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::SECOND {} => crate::types::simple_enum_shape::SimpleEnumShape::SECOND,
-+    crate::implementation_from_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::SimpleEnumShape::THIRD {} => crate::types::simple_enum_shape::SimpleEnumShape::THIRD,
++    crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumShape::FIRST {} => crate::types::simple_enum_shape::SimpleEnumShape::FIRST,
++    crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumShape::SECOND {} => crate::types::simple_enum_shape::SimpleEnumShape::SECOND,
++    crate::r#simple::types::smithyenum::internaldafny::types::SimpleEnumShape::THIRD {} => crate::types::simple_enum_shape::SimpleEnumShape::THIRD,
 +  }
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/error.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/error.rs
@@ -835,6 +835,32 @@ index 00000000..cce22d1c
 +impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
 +    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 +}
+diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/implementation_from_dafny.rs
+index 124e031e..c56fd3f3 100644
+--- b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/implementation_from_dafny.rs
++++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/implementation_from_dafny.rs
+@@ -1,6 +1,21 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ 
++pub mod client;
++pub mod types;
++
++/// Common errors and error handling utilities.
++pub mod error;
++
++/// All operations that this crate can perform.
++pub mod operation;
++
++mod conversions;
++
++
++pub use client::Client;
++pub use types::simple_enum_config::SimpleEnumConfig;
++
+ pub mod r#_Wrappers_Compile {
+     pub use dafny_runtime::DafnyPrint;
+     pub use std::cmp::Eq;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/lib.rs
 new file mode 100644
 index 00000000..f914e7ba
@@ -877,7 +903,7 @@ index 00000000..560af271
 +pub mod get_enum_third_known_value_test;
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum.rs
 new file mode 100644
-index 00000000..53210a25
+index 00000000..d75b5ac4
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum.rs
 @@ -0,0 +1,142 @@
@@ -902,7 +928,7 @@ index 00000000..53210a25
 +        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetEnum(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(crate::conversions::get_enum::_get_enum_output::from_dafny(
 +                inner_result.value().clone(),
@@ -1253,7 +1279,7 @@ index 00000000..11e371c1
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_first_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_first_known_value_test.rs
 new file mode 100644
-index 00000000..d3db3b27
+index 00000000..106ec170
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_first_known_value_test.rs
 @@ -0,0 +1,149 @@
@@ -1279,7 +1305,7 @@ index 00000000..d3db3b27
 +        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetEnum(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_enum_first_known_value_test::_get_enum_first_known_value_test_output::from_dafny(
@@ -1648,7 +1674,7 @@ index 00000000..ca84c977
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_second_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_second_known_value_test.rs
 new file mode 100644
-index 00000000..241085f0
+index 00000000..b59e0ce5
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_second_known_value_test.rs
 @@ -0,0 +1,151 @@
@@ -1674,7 +1700,7 @@ index 00000000..241085f0
 +        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetEnum(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_enum_second_known_value_test::_get_enum_second_known_value_test_output::from_dafny(
@@ -2044,7 +2070,7 @@ index 00000000..e54348b3
 +}
 diff --git b/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_third_known_value_test.rs a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_third_known_value_test.rs
 new file mode 100644
-index 00000000..34d24692
+index 00000000..d5def6ff
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleEnum/runtimes/rust/src/operation/get_enum_third_known_value_test.rs
 @@ -0,0 +1,149 @@
@@ -2070,7 +2096,7 @@ index 00000000..34d24692
 +        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetEnum(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_enum_third_known_value_test::_get_enum_third_known_value_test_output::from_dafny(
