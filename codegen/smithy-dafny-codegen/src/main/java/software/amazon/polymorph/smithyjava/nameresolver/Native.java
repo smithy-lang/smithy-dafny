@@ -32,7 +32,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
-import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 /**
@@ -75,13 +74,13 @@ public class Native extends NameResolver {
     NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE =
       Map.ofEntries(
         Map.entry(ShapeType.BLOB, ClassName.get(ByteBuffer.class)),
-        Map.entry(ShapeType.BOOLEAN, TypeName.BOOLEAN),
-        Map.entry(ShapeType.BYTE, TypeName.BYTE),
-        Map.entry(ShapeType.SHORT, TypeName.SHORT),
-        Map.entry(ShapeType.INTEGER, TypeName.INT),
-        Map.entry(ShapeType.LONG, TypeName.LONG),
-        Map.entry(ShapeType.FLOAT, TypeName.FLOAT),
-        Map.entry(ShapeType.DOUBLE, TypeName.DOUBLE),
+        Map.entry(ShapeType.BOOLEAN, TypeName.BOOLEAN.box()),
+        Map.entry(ShapeType.BYTE, TypeName.BYTE.box()),
+        Map.entry(ShapeType.SHORT, TypeName.SHORT.box()),
+        Map.entry(ShapeType.INTEGER, TypeName.INT.box()),
+        Map.entry(ShapeType.LONG, TypeName.LONG.box()),
+        Map.entry(ShapeType.FLOAT, TypeName.FLOAT.box()),
+        Map.entry(ShapeType.DOUBLE, TypeName.DOUBLE.box()),
         // TODO: AWS SDK V2 uses Instant, not Date
         Map.entry(ShapeType.TIMESTAMP, ClassName.get(Date.class)),
         Map.entry(ShapeType.BIG_DECIMAL, ClassName.get(BigDecimal.class)),
@@ -143,21 +142,14 @@ public class Native extends NameResolver {
     }
 
     return switch (shape.getType()) {
-      case BOOLEAN, BYTE, SHORT, INTEGER, LONG, FLOAT, DOUBLE -> {
-        /* From the Smithy Docs:
-         * "Boolean, byte, short, integer, long, float, and double shapes
-         * are only considered boxed if they are marked with the box trait.
-         * All other shapes are always considered boxed."
-         * https://smithy.io/1.0/spec/core/type-refinement-traits.html#box-trait
-         * While Smithy Models SHOULD use Smithy Prelude shapes to avoid this confusion,
-         * they do not have to.
-         * Hence, the need to check if these shapes have the box trait
-         */
-        final TypeName typeName = NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(
-          shape.getType()
-        );
-        yield shape.hasTrait(BoxTrait.class) ? typeName.box() : typeName;
-      }
+      // All primitives are boxed for safety, even if @required
+      case BOOLEAN,
+        BYTE,
+        SHORT,
+        INTEGER,
+        LONG,
+        FLOAT,
+        DOUBLE -> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
       // For supported simple shapes, just map to native types
       case BLOB,
         TIMESTAMP,

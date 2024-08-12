@@ -80,7 +80,7 @@ index 00000000..e48128a5
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/conversions/error.rs
 @@ -0,0 +1,30 @@
 +/// Wraps up an arbitrary Rust Error value as a Dafny Error
-+pub fn to_opaque_error<E: std::error::Error + 'static>(value: E) -> 
++pub fn to_opaque_error<E: std::error::Error + 'static>(value: E) ->
 +  ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
 +{
 +  let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> =
@@ -95,7 +95,7 @@ index 00000000..e48128a5
 +}
 +
 +/// Wraps up an arbitrary Rust Error value as a Dafny Result<T, Error>.Failure
-+pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: std::error::Error + 'static>(value: E) -> 
++pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: std::error::Error + 'static>(value: E) ->
 +  ::std::rc::Rc<
 +    dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result<
 +      T,
@@ -799,7 +799,7 @@ index 00000000..71509248
 +impl Client {
 +  pub fn from_conf(config: &::std::rc::Rc<
 +    crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
-+  >) -> 
++  >) ->
 +::std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
 +  ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::ISimpleTypesBooleanClient>,
 +  ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::Error>
