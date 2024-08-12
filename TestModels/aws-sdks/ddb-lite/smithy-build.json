@@ -6,7 +6,7 @@
         {
           "name": "excludeShapesBySelector",
           "args": {
-            "selector": "operation :not([id|name = BatchGetItem, GetItem, PutItem, UpdateItem, TransactionWriteItem, Query, Scan])"
+            "selector": "operation :not([id|name = BatchGetItem, GetItem, PutItem, UpdateItem, TransactWriteItems, Query, Scan, CreateTable, DescribeTable])"
           }
         },
         {
