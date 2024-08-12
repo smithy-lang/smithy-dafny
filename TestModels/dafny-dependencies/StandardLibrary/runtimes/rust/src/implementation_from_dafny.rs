@@ -1,7 +1,7 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
 
-mod conversion;
+pub mod conversion;
 mod UTF8_externs;
 
 pub mod r#_Wrappers_Compile {
