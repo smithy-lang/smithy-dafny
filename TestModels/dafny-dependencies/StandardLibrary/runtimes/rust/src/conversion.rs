@@ -1,4 +1,4 @@
-use crate::implementation_from_dafny::*;
+use crate::*;
 
 pub fn ostring_to_dafny(
     input: &Option<String>,
@@ -123,7 +123,6 @@ pub fn option_from_dafny<T: ::dafny_runtime::DafnyType, TR>(
     match &*input {
         _Wrappers_Compile::Option::Some { value } => Some(converter(value)),
         _Wrappers_Compile::Option::None { } => None,
-        _Wrappers_Compile::Option::_PhantomVariant(_) => panic!(),
     }
 }
 
@@ -151,7 +150,6 @@ pub fn result_from_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::
     match &*input {
         _Wrappers_Compile::Result::Success { value } => Ok(converter_t(value)),
         _Wrappers_Compile::Result::Failure { error } => Err(converter_e(error)),
-        _Wrappers_Compile::Result::_PhantomVariant(_, _) => panic!(),
     }
 }
 
