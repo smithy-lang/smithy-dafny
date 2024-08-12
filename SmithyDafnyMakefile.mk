@@ -526,28 +526,13 @@ transpile_implementation_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
-transpile_implementation_rust: transpile_everything_rust _mv_implementation_rust
+# TODO:
+transpile_implementation_rust: TRANSPILE_DEPENDENCIES=
+transpile_implementation_rust: STD_LIBRARY=
+transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
-
-transpile_everything_rust: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
-transpile_everything_rust:
-	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-runAllTests:1 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		$(DAFNY_OPTIONS)
 
 _mv_implementation_rust:
 	mkdir -p runtimes/rust/src
