@@ -734,7 +734,7 @@ public class Generator {
                 if (!isDafnyOption) {
                     if (isRustOption) {
                         yield TokenTree.of("""
-                                ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.unwrap(),
+                                ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.clone().unwrap(),
                                     |e| %s,
                                 )
                                 """.formatted(rustValue,
@@ -807,7 +807,7 @@ public class Generator {
                 if (!isDafnyOption) {
                     if (isRustOption) {
                         yield TokenTree.of("""
-                                crate::conversions::%s::to_dafny(&%s.unwrap())
+                                crate::conversions::%s::to_dafny(&%s.clone().unwrap())
                                 """.formatted(structureShapeName, rustValue));
                     } else {
                         yield TokenTree.of("""
