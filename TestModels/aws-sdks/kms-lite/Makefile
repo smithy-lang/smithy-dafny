@@ -35,6 +35,9 @@ _polymorph_dotnet:
 _polymorph_java:
 	$(GRADLEW) polymorphJava
 
+_polymorph_rust:
+	$(GRADLEW) polymorphRust
+	
 # There is no wrapped target for aws-sdk types
 _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
@@ -45,3 +48,4 @@ clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+	../../../codegen/gradlew clean
