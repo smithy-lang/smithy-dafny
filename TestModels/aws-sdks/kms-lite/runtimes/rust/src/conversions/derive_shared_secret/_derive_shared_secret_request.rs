@@ -14,13 +14,13 @@ pub fn to_dafny(
  GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
+            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&e),
         )
     },
     None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
- DryRun: crate::standard_library_conversions::obool_to_dafny(value.dry_run),
+ DryRun: crate::standard_library_conversions::obool_to_dafny(&value.dry_run),
  Recipient: ::std::rc::Rc::new(match &value.recipient {
     Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(&x) },
     None => crate::_Wrappers_Compile::Option::None { }

@@ -184,16 +184,22 @@ public class Generator {
         String operationName = operationShape.getId().getName();
         String snakeCaseOperationName = toSnakeCase(operationName);
         String inputShapeName = operationShape.getInputShape().getName();
-        String outputShapeName = operationShape.getOutputShape().getName();
+        ShapeId outputShapeId = operationShape.getOutputShape();
+        String outputShapeName = outputShapeId.getName();
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId();
         String clientName = "%sClient".formatted(sdkId);
         String dafnyModuleName = "software::amazon::cryptography::services::%s::internaldafny".formatted(sdkId.toLowerCase());
         String dafnyTypesModuleName = "%s::types".formatted(dafnyModuleName);
+        String outputType = outputShapeId.equals(ShapeId.from("smithy.api#Unit"))
+                ? "()"
+                : evalTemplate("std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$outputShapeName:L>", Map.of(
+                "outputShapeName", outputShapeName,
+                "dafnyTypesModuleName", dafnyTypesModuleName));
         Map<String, String> variables = Map.of(
                 "operationName", operationName,
                 "snakeCaseOperationName", snakeCaseOperationName,
                 "inputShapeName", inputShapeName,
-                "outputShapeName", outputShapeName,
+                "outputType", outputType,
                 "sdkId", sdkId.toLowerCase(),
                 "clientName", clientName,
                 "dafnyModuleName", dafnyModuleName,
@@ -203,7 +209,7 @@ public class Generator {
         return TokenTree.of(evalTemplate("""
         fn $operationName:L(&mut self, input: &std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$inputShapeName:L>) 
           -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
-            std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$outputShapeName:L>,
+            $outputType:L,
             std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
           >
         > {
@@ -436,18 +442,30 @@ public class Generator {
                 "variants", toDafnyVariantsForStructure(outputShape).toString()
         );
 
-        return TokenTree.of(evalTemplate("""
-        #[allow(dead_code)]
-        pub fn to_dafny(
-            value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
-        ) -> ::std::rc::Rc<
-            crate::r#$dafnyTypesModuleName:L::$structureName:L,
-        >{
-            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
-                $variants:L
-            })
+        // Dafny maps smithy.api#Unit to ()
+        if (outputShape.getId() == ShapeId.from("smithy.api#Unit")) {
+            return TokenTree.of(evalTemplate("""
+                    #[allow(dead_code)]
+                    pub fn to_dafny(
+                        value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
+                    ) -> () {
+                        ()
+                    }
+                    """, variables));
+        } else {
+            return TokenTree.of(evalTemplate("""
+                    #[allow(dead_code)]
+                    pub fn to_dafny(
+                        value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
+                    ) -> ::std::rc::Rc<
+                        crate::r#$dafnyTypesModuleName:L::$structureName:L,
+                    >{
+                        ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+                            $variants:L
+                        })
+                    }
+                    """, variables));
         }
-        """, variables));
     }
 
     private TokenTree toDafnyVariantsForStructure(Shape shape) {

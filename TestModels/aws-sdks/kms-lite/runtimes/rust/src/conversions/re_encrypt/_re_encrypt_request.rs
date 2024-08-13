@@ -13,8 +13,8 @@ pub fn to_dafny(
 ::std::rc::Rc::new(match &value.source_encryption_context {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
+            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
+            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&v),
         )
     },
     None => crate::r#_Wrappers_Compile::Option::None {}
@@ -26,8 +26,8 @@ pub fn to_dafny(
 ::std::rc::Rc::new(match &value.destination_encryption_context {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
+            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
+            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&v),
         )
     },
     None => crate::r#_Wrappers_Compile::Option::None {}
@@ -46,13 +46,13 @@ pub fn to_dafny(
  GrantTokens: ::std::rc::Rc::new(match &value.grant_tokens {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
+            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&e),
         )
     },
     None => crate::r#_Wrappers_Compile::Option::None {}
 })
 ,
- DryRun: crate::standard_library_conversions::obool_to_dafny(value.dry_run),
+ DryRun: crate::standard_library_conversions::obool_to_dafny(&value.dry_run),
     })
 }
  #[allow(dead_code)]
