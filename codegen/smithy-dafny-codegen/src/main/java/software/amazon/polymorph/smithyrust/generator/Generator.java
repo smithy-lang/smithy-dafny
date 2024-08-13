@@ -463,6 +463,7 @@ public class Generator {
     private TokenTree fromDafnyForMember(MemberShape member) {
         Shape targetShape = model.expectShape(member.getTarget());
         boolean isRequired = member.hasTrait(RequiredTrait.class);
+        // isRustOption is always true
         return fromDafny(targetShape, "dafny_value." + member.getMemberName() + "()", true, !isRequired);
     }
 
@@ -500,10 +501,14 @@ public class Generator {
                 }
             }
             case BOOLEAN -> {
-                if (isRustOption) {
+                if (isDafnyOption) {
                     yield TokenTree.of("crate::standard_library_conversions::obool_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else {
-                    yield TokenTree.of(dafnyValue);
+                    TokenTree result = TokenTree.of(dafnyValue);
+                    if (isRustOption) {
+                        result = TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(".clone())"));
+                    }
+                    yield result;
                 }
             }
             case INTEGER -> {
@@ -514,10 +519,14 @@ public class Generator {
                 }
             }
             case LONG -> {
-                if (isRustOption) {
+                if (isDafnyOption) {
                     yield TokenTree.of("crate::standard_library_conversions::olong_from_dafny(%s.clone())".formatted(dafnyValue));
                 } else {
-                    yield TokenTree.of(dafnyValue);
+                    TokenTree result = TokenTree.of(dafnyValue);
+                    if (isRustOption) {
+                        result = TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(".clone())"));
+                    }
+                    yield result;
                 }
             }
             case DOUBLE -> {
@@ -528,8 +537,10 @@ public class Generator {
                 }
             }
             case TIMESTAMP -> {
-                if (isRustOption) {
+                if (isDafnyOption) {
                     yield TokenTree.of("crate::standard_library_conversions::otimestamp_from_dafny(%s.clone())".formatted(dafnyValue));
+                } else if (isRustOption) {
+                    yield TokenTree.of("Some(crate::standard_library_conversions::timestamp_from_dafny(%s.clone()))".formatted(dafnyValue));
                 } else {
                     yield TokenTree.of("crate::standard_library_conversions::timestamp_from_dafny(%s.clone())".formatted(dafnyValue));
                 }
