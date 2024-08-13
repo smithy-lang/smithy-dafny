@@ -635,7 +635,7 @@ public class Generator {
         String snakeCaseMemberName = toSnakeCase(member.getMemberName());
         boolean isRequired = member.hasTrait(RequiredTrait.class);
         boolean isRustRequired =
-                (isRequired && !operationIndex.isOutputStructure(parent) && !operationIndex.isInputStructure(parent))
+                (isRequired && !operationIndex.isOutputStructure(parent) && !operationIndex.isInputStructure(parent) && !targetShape.isStructureShape())
             || (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape());
         return toDafny(targetShape, "value." + snakeCaseMemberName, !isRustRequired, !isRequired);
     }
@@ -994,8 +994,9 @@ public class Generator {
         String snakeCaseStructureName = toSnakeCase(structureName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
         String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
-        // TODO-HACK: don't know why these structures build BuildErrors and not the rest...
-        String unwrapIfNeeded = (structureName.equals("KeysAndAttributes") || structureName.equals("Condition"))
+        // The builders smithy-rs generates only validate that required fields are provided,
+        // and only produce `Result<...>` values if there are any required fields.
+        String unwrapIfNeeded = structureShape.members().stream().anyMatch(m -> m.isRequired())
                 ? ".unwrap()" : "";
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
