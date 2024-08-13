@@ -56,6 +56,8 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
 GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
+include $(SMITHY_DAFNY_ROOT)/SmithyDafnySedMakefile.mk
+
 ########################## Dafny targets
 
 # TODO: This target will not work for projects that use `replaceable` 
@@ -421,7 +423,7 @@ _polymorph_rust: _polymorph
 
 ########################## .NET targets
 
-transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
+transpile_net: | _with_extern_pre_transpile transpile_implementation_net transpile_test_net transpile_dependencies_net _with_extern_post_transpile
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
@@ -469,7 +471,7 @@ format_net-check:
 build_java: transpile_java mvn_local_deploy_dependencies
 	$(GRADLEW) -p runtimes/java build
 
-transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
+transpile_java: | _with_extern_pre_transpile transpile_implementation_java transpile_test_java transpile_dependencies_java _with_extern_post_transpile
 
 transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
