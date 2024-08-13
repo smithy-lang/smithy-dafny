@@ -1,6 +1,6 @@
 diff --git b/TestModels/Aggregate/runtimes/rust/src/client.rs a/TestModels/Aggregate/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..076fca49
+index 00000000..787630d2
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/client.rs
 @@ -0,0 +1,43 @@
@@ -10,7 +10,7 @@ index 00000000..076fca49
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::ISimpleAggregateClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::r#simple::aggregate::internaldafny::types::ISimpleAggregateClient>
 +}
 +
 +impl Client {
@@ -22,14 +22,14 @@ index 00000000..076fca49
 +        // If this service had any configuration properties,
 +        // they would need converting here too.
 +        let inner =
-+            crate::implementation_from_dafny::_simple_daggregate_dinternaldafny::_default::SimpleAggregate(
++            crate::simple::aggregate::internaldafny::_default::SimpleAggregate(
 +                &crate::conversions::simple_aggregate_config::_simple_aggregate_config::to_dafny(
 +                    conf,
 +                ),
 +            );
 +        if matches!(
 +            inner.as_ref(),
-+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -109,7 +109,7 @@ index 00000000..b5acb2be
 +pub mod structure_list_element;
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate.rs
 new file mode 100644
-index 00000000..1f94e9fa
+index 00000000..e2b2ff74
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate.rs
 @@ -0,0 +1,32 @@
@@ -120,21 +120,21 @@ index 00000000..1f94e9fa
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_aggregate::GetAggregateError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::aggregate::internaldafny::types::Error> {
 +    match value {
 +    crate::operation::get_aggregate::GetAggregateError::Unhandled(unhandled) =>
-+      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
++      ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
 +  }
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::Error,
++        crate::r#simple::aggregate::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_aggregate::GetAggregateError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::aggregate::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_aggregate::GetAggregateError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -147,7 +147,7 @@ index 00000000..1f94e9fa
 +pub mod _get_aggregate_output;
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate/_get_aggregate_input.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate/_get_aggregate_input.rs
 new file mode 100644
-index 00000000..70ea59e7
+index 00000000..3e95555f
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate/_get_aggregate_input.rs
 @@ -0,0 +1,121 @@
@@ -157,21 +157,21 @@ index 00000000..70ea59e7
 +pub fn to_dafny(
 +    value: crate::operation::get_aggregate::GetAggregateInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput,
++    crate::r#simple::aggregate::internaldafny::types::GetAggregateInput,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput::GetAggregateInput {
++    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::GetAggregateInput::GetAggregateInput {
 +        simpleStringList:
 +        ::std::rc::Rc::new(
 +            match value.simple_string_list() {
 +                Some(val) =>
-+                    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
++                    crate::r#_Wrappers_Compile::Option::Some {
 +                        value : ::dafny_runtime::Sequence::from_array(
 +                            &val.iter().map(|x|
 +                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x))
 +                                .collect()
 +                        )
 +                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
++                None => crate::r#_Wrappers_Compile::Option::None{}
 +            }
 +        ),
 +
@@ -179,34 +179,34 @@ index 00000000..70ea59e7
 +        ::std::rc::Rc::new(
 +            match value.structure_list() {
 +                Some(val) =>
-+                    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
++                    crate::r#_Wrappers_Compile::Option::Some {
 +                        value : ::dafny_runtime::Sequence::from_array(
 +                            &val.iter().map(|x|
 +                                crate::conversions::structure_list_element::to_dafny(x.clone()))
 +                                .collect()
 +                        )
 +                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
++                None => crate::r#_Wrappers_Compile::Option::None{}
 +            }
 +        ),
 +
 +        simpleStringMap: ::std::rc::Rc::new(match value.simple_string_map() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++            Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
 +                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
 +                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
 +                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&v),
 +                )
 +            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++            None => crate::r#_Wrappers_Compile::Option::None {}
 +        }),
 +        simpleIntegerMap: ::std::rc::Rc::new(match value.simple_integer_map() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++            Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
 +                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
 +                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
 +                    |v| *v,
 +                )
 +            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++            None => crate::r#_Wrappers_Compile::Option::None {}
 +        }),
 +        nestedStructure: crate::conversions::nested_structure::option_to_dafny(value.nested_structure())
 +    })
@@ -217,11 +217,11 @@ index 00000000..70ea59e7
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput,
++        crate::r#simple::aggregate::internaldafny::types::GetAggregateInput,
 +    >,
 +) -> crate::operation::get_aggregate::GetAggregateInput {
 +    match &*dafny_value {
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput::GetAggregateInput {
++        crate::r#simple::aggregate::internaldafny::types::GetAggregateInput::GetAggregateInput {
 +            simpleStringList,
 +            structureList,
 +            simpleStringMap,
@@ -230,7 +230,7 @@ index 00000000..70ea59e7
 +        } =>
 +        crate::operation::get_aggregate::GetAggregateInput {
 +            simple_string_list : match  (&**simpleStringList).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&value, |x|
 +                            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&x))
@@ -238,7 +238,7 @@ index 00000000..70ea59e7
 +                _ => None
 +            },
 +            structure_list : match (&**structureList).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&value, |x|
 +                            crate::conversions::structure_list_element::plain_from_dafny(&x))
@@ -247,7 +247,7 @@ index 00000000..70ea59e7
 +            },
 +
 +            simple_string_map : match (&**simpleStringMap).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&value,
 +                            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&k),
@@ -258,7 +258,7 @@ index 00000000..70ea59e7
 +            },
 +
 +            simple_integer_map : match (&**simpleIntegerMap).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&value,
 +                            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&k),
@@ -274,7 +274,7 @@ index 00000000..70ea59e7
 +}
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate/_get_aggregate_output.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate/_get_aggregate_output.rs
 new file mode 100644
-index 00000000..6ac58143
+index 00000000..38af1aed
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate/_get_aggregate_output.rs
 @@ -0,0 +1,121 @@
@@ -284,21 +284,21 @@ index 00000000..6ac58143
 +pub fn to_dafny(
 +    value: crate::operation::get_aggregate::GetAggregateOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateOutput,
++    crate::r#simple::aggregate::internaldafny::types::GetAggregateOutput,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateOutput::GetAggregateOutput {
++    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::GetAggregateOutput::GetAggregateOutput {
 +        simpleStringList:
 +        ::std::rc::Rc::new(
 +            match value.simple_string_list() {
 +                Some(val) =>
-+                    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
++                    crate::r#_Wrappers_Compile::Option::Some {
 +                        value : ::dafny_runtime::Sequence::from_array(
 +                            &val.iter().map(|x|
 +                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x))
 +                                .collect()
 +                        )
 +                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
++                None => crate::r#_Wrappers_Compile::Option::None{}
 +            }
 +        ),
 +
@@ -306,34 +306,34 @@ index 00000000..6ac58143
 +        ::std::rc::Rc::new(
 +            match value.structure_list() {
 +                Some(val) =>
-+                    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
++                    crate::r#_Wrappers_Compile::Option::Some {
 +                        value : ::dafny_runtime::Sequence::from_array(
 +                            &val.iter().map(|x|
 +                                crate::conversions::structure_list_element::to_dafny(x.clone()))
 +                                .collect()
 +                        )
 +                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
++                None => crate::r#_Wrappers_Compile::Option::None{}
 +            }
 +        ),
 +
 +        simpleStringMap: ::std::rc::Rc::new(match value.simple_string_map() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++            Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
 +                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
 +                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
 +                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&v),
 +                )
 +            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++            None => crate::r#_Wrappers_Compile::Option::None {}
 +        }),
 +        simpleIntegerMap: ::std::rc::Rc::new(match value.simple_integer_map() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++            Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
 +                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
 +                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
 +                    |v| *v,
 +                )
 +            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++            None => crate::r#_Wrappers_Compile::Option::None {}
 +        }),
 +        nestedStructure: crate::conversions::nested_structure::option_to_dafny(value.nested_structure())
 +    })
@@ -344,11 +344,11 @@ index 00000000..6ac58143
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateOutput,
++        crate::r#simple::aggregate::internaldafny::types::GetAggregateOutput,
 +    >,
 +) -> crate::operation::get_aggregate::GetAggregateOutput {
 +    match &*dafny_value {
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateOutput::GetAggregateOutput {
++        crate::r#simple::aggregate::internaldafny::types::GetAggregateOutput::GetAggregateOutput {
 +            simpleStringList,
 +            structureList,
 +            simpleStringMap,
@@ -357,7 +357,7 @@ index 00000000..6ac58143
 +        } =>
 +        crate::operation::get_aggregate::GetAggregateOutput {
 +            simple_string_list : match  (&**simpleStringList).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&value, |x|
 +                            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&x))
@@ -365,7 +365,7 @@ index 00000000..6ac58143
 +                _ => None
 +            },
 +            structure_list : match (&**structureList).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&value, |x|
 +                            crate::conversions::structure_list_element::plain_from_dafny(&x))
@@ -374,7 +374,7 @@ index 00000000..6ac58143
 +            },
 +
 +            simple_string_map : match (&**simpleStringMap).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&value,
 +                            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&k),
@@ -385,7 +385,7 @@ index 00000000..6ac58143
 +            },
 +
 +            simple_integer_map : match (&**simpleIntegerMap).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&value,
 +                            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&k),
@@ -401,7 +401,7 @@ index 00000000..6ac58143
 +}
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test.rs
 new file mode 100644
-index 00000000..8dadbfaf
+index 00000000..b57c988a
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test.rs
 @@ -0,0 +1,39 @@
@@ -412,12 +412,12 @@ index 00000000..8dadbfaf
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::aggregate::internaldafny::types::Error> {
 +    match value {
 +        crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestError::Unhandled(
 +            unhandled,
 +        ) => ::std::rc::Rc::new(
-+            crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::Error::Opaque {
++            crate::r#simple::aggregate::internaldafny::types::Error::Opaque {
 +                obj: ::dafny_runtime::upcast_object()(
 +                    ::dafny_runtime::object::new(unhandled),
 +                ),
@@ -429,11 +429,11 @@ index 00000000..8dadbfaf
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::Error,
++        crate::r#simple::aggregate::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::aggregate::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -446,7 +446,7 @@ index 00000000..8dadbfaf
 +pub mod _get_aggregate_known_value_test_output;
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test/_get_aggregate_known_value_test_input.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test/_get_aggregate_known_value_test_input.rs
 new file mode 100644
-index 00000000..fe7cdfb7
+index 00000000..abb3931c
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test/_get_aggregate_known_value_test_input.rs
 @@ -0,0 +1,121 @@
@@ -456,21 +456,21 @@ index 00000000..fe7cdfb7
 +pub fn to_dafny(
 +    value: crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestInput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput,
++    crate::r#simple::aggregate::internaldafny::types::GetAggregateInput,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput::GetAggregateInput {
++    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::GetAggregateInput::GetAggregateInput {
 +        simpleStringList:
 +        ::std::rc::Rc::new(
 +            match value.simple_string_list() {
 +                Some(val) =>
-+                    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
++                    crate::r#_Wrappers_Compile::Option::Some {
 +                        value : ::dafny_runtime::Sequence::from_array(
 +                            &val.iter().map(|x|
 +                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x))
 +                                .collect()
 +                        )
 +                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
++                None => crate::r#_Wrappers_Compile::Option::None{}
 +            }
 +        ),
 +
@@ -478,34 +478,34 @@ index 00000000..fe7cdfb7
 +        ::std::rc::Rc::new(
 +            match value.structure_list() {
 +                Some(val) =>
-+                    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
++                    crate::r#_Wrappers_Compile::Option::Some {
 +                        value : ::dafny_runtime::Sequence::from_array(
 +                            &val.iter().map(|x|
 +                                crate::conversions::structure_list_element::to_dafny(x.clone()))
 +                                .collect()
 +                        )
 +                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
++                None => crate::r#_Wrappers_Compile::Option::None{}
 +            }
 +        ),
 +
 +        simpleStringMap: ::std::rc::Rc::new(match value.simple_string_map() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++            Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
 +                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
 +                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
 +                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&v),
 +                )
 +            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++            None => crate::r#_Wrappers_Compile::Option::None {}
 +        }),
 +        simpleIntegerMap: ::std::rc::Rc::new(match value.simple_integer_map() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++            Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
 +                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
 +                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
 +                    |v| *v,
 +                )
 +            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++            None => crate::r#_Wrappers_Compile::Option::None {}
 +        }),
 +        nestedStructure: crate::conversions::nested_structure::option_to_dafny(value.nested_structure())
 +    })
@@ -516,11 +516,11 @@ index 00000000..fe7cdfb7
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput,
++        crate::r#simple::aggregate::internaldafny::types::GetAggregateInput,
 +    >,
 +) -> crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestInput {
 +    match &*dafny_value {
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateInput::GetAggregateInput {
++        crate::r#simple::aggregate::internaldafny::types::GetAggregateInput::GetAggregateInput {
 +            simpleStringList,
 +            structureList,
 +            simpleStringMap,
@@ -529,7 +529,7 @@ index 00000000..fe7cdfb7
 +        } =>
 +        crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestInput {
 +            simple_string_list : match  (&**simpleStringList).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&value, |x|
 +                            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&x))
@@ -537,7 +537,7 @@ index 00000000..fe7cdfb7
 +                _ => None
 +            },
 +            structure_list : match (&**structureList).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&value, |x|
 +                            crate::conversions::structure_list_element::plain_from_dafny(&x))
@@ -546,7 +546,7 @@ index 00000000..fe7cdfb7
 +            },
 +
 +            simple_string_map : match (&**simpleStringMap).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&value,
 +                            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&k),
@@ -557,7 +557,7 @@ index 00000000..fe7cdfb7
 +            },
 +
 +            simple_integer_map : match (&**simpleIntegerMap).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&value,
 +                            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&k),
@@ -573,7 +573,7 @@ index 00000000..fe7cdfb7
 +}
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test/_get_aggregate_known_value_test_output.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test/_get_aggregate_known_value_test_output.rs
 new file mode 100644
-index 00000000..eaac290f
+index 00000000..a25bad5f
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/get_aggregate_known_value_test/_get_aggregate_known_value_test_output.rs
 @@ -0,0 +1,121 @@
@@ -583,21 +583,21 @@ index 00000000..eaac290f
 +pub fn to_dafny(
 +    value: crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestOutput,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateOutput,
++    crate::r#simple::aggregate::internaldafny::types::GetAggregateOutput,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateOutput::GetAggregateOutput {
++    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::GetAggregateOutput::GetAggregateOutput {
 +        simpleStringList:
 +        ::std::rc::Rc::new(
 +            match value.simple_string_list() {
 +                Some(val) =>
-+                    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
++                    crate::r#_Wrappers_Compile::Option::Some {
 +                        value : ::dafny_runtime::Sequence::from_array(
 +                            &val.iter().map(|x|
 +                                dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x))
 +                                .collect()
 +                        )
 +                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
++                None => crate::r#_Wrappers_Compile::Option::None{}
 +            }
 +        ),
 +
@@ -605,34 +605,34 @@ index 00000000..eaac290f
 +        ::std::rc::Rc::new(
 +            match value.structure_list() {
 +                Some(val) =>
-+                    crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
++                    crate::r#_Wrappers_Compile::Option::Some {
 +                        value : ::dafny_runtime::Sequence::from_array(
 +                            &val.iter().map(|x|
 +                                crate::conversions::structure_list_element::to_dafny(x.clone()))
 +                                .collect()
 +                        )
 +                    },
-+                None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None{}
++                None => crate::r#_Wrappers_Compile::Option::None{}
 +            }
 +        ),
 +
 +        simpleStringMap: ::std::rc::Rc::new(match value.simple_string_map() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++            Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
 +                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
 +                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
 +                    |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&v),
 +                )
 +            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++            None => crate::r#_Wrappers_Compile::Option::None {}
 +        }),
 +        simpleIntegerMap: ::std::rc::Rc::new(match value.simple_integer_map() {
-+            Some(x) => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value :
++            Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
 +                ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
 +                    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
 +                    |v| *v,
 +                )
 +            },
-+            None => crate::implementation_from_dafny::r#_Wrappers_Compile::Option::None {}
++            None => crate::r#_Wrappers_Compile::Option::None {}
 +        }),
 +        nestedStructure: crate::conversions::nested_structure::option_to_dafny(value.nested_structure())
 +    })
@@ -643,11 +643,11 @@ index 00000000..eaac290f
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateOutput,
++        crate::r#simple::aggregate::internaldafny::types::GetAggregateOutput,
 +    >,
 +) -> crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestOutput {
 +    match &*dafny_value {
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::GetAggregateOutput::GetAggregateOutput {
++        crate::r#simple::aggregate::internaldafny::types::GetAggregateOutput::GetAggregateOutput {
 +            simpleStringList,
 +            structureList,
 +            simpleStringMap,
@@ -656,7 +656,7 @@ index 00000000..eaac290f
 +        } =>
 +        crate::operation::get_aggregate_known_value_test::GetAggregateKnownValueTestOutput {
 +            simple_string_list : match  (&**simpleStringList).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&value, |x|
 +                            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&x))
@@ -664,7 +664,7 @@ index 00000000..eaac290f
 +                _ => None
 +            },
 +            structure_list : match (&**structureList).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&value, |x|
 +                            crate::conversions::structure_list_element::plain_from_dafny(&x))
@@ -673,7 +673,7 @@ index 00000000..eaac290f
 +            },
 +
 +            simple_string_map : match (&**simpleStringMap).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&value,
 +                            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&k),
@@ -684,7 +684,7 @@ index 00000000..eaac290f
 +            },
 +
 +            simple_integer_map : match (&**simpleIntegerMap).as_ref() {
-+                crate::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } =>
++                crate::r#_Wrappers_Compile::Option::Some { value } =>
 +                    Some(
 +                        ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&value,
 +                            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&k),
@@ -700,7 +700,7 @@ index 00000000..eaac290f
 +}
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/nested_structure.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/nested_structure.rs
 new file mode 100644
-index 00000000..6621ed24
+index 00000000..1986a5bf
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/nested_structure.rs
 @@ -0,0 +1,81 @@
@@ -709,17 +709,17 @@ index 00000000..6621ed24
 +pub fn to_dafny(
 +    value: crate::types::NestedStructure,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
++    crate::r#simple::aggregate::internaldafny::types::NestedStructure,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure::NestedStructure {
++    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::NestedStructure::NestedStructure {
 +    stringStructure: crate::conversions::string_structure::option_to_dafny(value.string_structure),
 +})
 +}
 +
 +pub fn to_dafny_plain(
 +    value: &crate::types::NestedStructure,
-+) -> crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure {
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure::NestedStructure {
++) -> crate::r#simple::aggregate::internaldafny::types::NestedStructure {
++    crate::r#simple::aggregate::internaldafny::types::NestedStructure::NestedStructure {
 +  stringStructure: crate::conversions::string_structure::option_to_dafny(value.string_structure.clone()),
 +}
 +}
@@ -727,15 +727,15 @@ index 00000000..6621ed24
 +pub fn option_to_dafny(
 +    value: Option<&crate::types::NestedStructure>,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::_Wrappers_Compile::Option<
++    crate::_Wrappers_Compile::Option<
 +        ::std::rc::Rc<
-+            crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
++            crate::r#simple::aggregate::internaldafny::types::NestedStructure,
 +        >,
 +    >,
 +> {
 +    let inner = match value {
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-+        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        None => crate::_Wrappers_Compile::Option::None {},
++        Some(x) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(to_dafny_plain(x)),
 +        },
 +    };
@@ -745,11 +745,11 @@ index 00000000..6621ed24
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
++        crate::r#simple::aggregate::internaldafny::types::NestedStructure,
 +    >,
 +) -> crate::types::NestedStructure {
 +    match &*dafny_value {
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure::NestedStructure {
++    crate::r#simple::aggregate::internaldafny::types::NestedStructure::NestedStructure {
 +      stringStructure,
 +    } =>
 +    crate::types::NestedStructure {
@@ -760,10 +760,10 @@ index 00000000..6621ed24
 +
 +#[allow(dead_code)]
 +pub fn plain_from_dafny(
-+    dafny_value: &crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
++    dafny_value: &crate::r#simple::aggregate::internaldafny::types::NestedStructure,
 +) -> crate::types::NestedStructure {
 +    match dafny_value {
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure::NestedStructure {
++    crate::r#simple::aggregate::internaldafny::types::NestedStructure::NestedStructure {
 +      stringStructure,
 +    } =>
 +    crate::types::NestedStructure {
@@ -774,12 +774,12 @@ index 00000000..6621ed24
 +
 +#[allow(dead_code)]
 +pub fn option_from_dafny(
-+    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
++    dafny_value: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::std::rc::Rc<
++        crate::r#simple::aggregate::internaldafny::types::NestedStructure,
 +    >>>,
 +) -> Option<crate::types::NestedStructure> {
 +    match &*dafny_value {
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
++        crate::_Wrappers_Compile::Option::Some { value } => {
 +            Some(plain_from_dafny(value))
 +        }
 +        _ => None,
@@ -796,7 +796,7 @@ index 00000000..177a7b2f
 +pub mod _simple_aggregate_config;
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/simple_aggregate_config/_simple_aggregate_config.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/simple_aggregate_config/_simple_aggregate_config.rs
 new file mode 100644
-index 00000000..b76d9845
+index 00000000..d8b4fce1
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/simple_aggregate_config/_simple_aggregate_config.rs
 @@ -0,0 +1,21 @@
@@ -807,23 +807,23 @@ index 00000000..b76d9845
 +pub fn to_dafny(
 +    value: crate::types::simple_aggregate_config::SimpleAggregateConfig,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig,
++    crate::simple::aggregate::internaldafny::types::SimpleAggregateConfig,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig::SimpleAggregateConfig {})
++    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::SimpleAggregateConfig::SimpleAggregateConfig {})
 +}
 +
 +#[allow(unused_variables)]
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::SimpleAggregateConfig,
++        crate::r#simple::aggregate::internaldafny::types::SimpleAggregateConfig,
 +    >,
 +) -> crate::types::simple_aggregate_config::SimpleAggregateConfig {
 +    crate::types::simple_aggregate_config::SimpleAggregateConfig {}
 +}
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/string_structure.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/string_structure.rs
 new file mode 100644
-index 00000000..29f38e55
+index 00000000..5f8502d3
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/string_structure.rs
 @@ -0,0 +1,74 @@
@@ -832,33 +832,33 @@ index 00000000..29f38e55
 +pub fn to_dafny(
 +    value: crate::types::StringStructure,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
++    crate::r#simple::aggregate::internaldafny::types::StringStructure,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure::StringStructure {
-+  value: dafny_standard_library::conversion::ostring_to_dafny(&value.value),
++    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::StringStructure::StringStructure {
++  value: crate::standard_library_conversions::ostring_to_dafny(&value.value),
 +})
 +}
 +
 +pub fn to_dafny_plain(
 +    value: crate::types::StringStructure,
-+) -> crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure {
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure::StringStructure {
-+  value: dafny_standard_library::conversion::ostring_to_dafny(&value.value),
++) -> crate::r#simple::aggregate::internaldafny::types::StringStructure {
++    crate::r#simple::aggregate::internaldafny::types::StringStructure::StringStructure {
++  value: crate::standard_library_conversions::ostring_to_dafny(&value.value),
 +}
 +}
 +
 +pub fn option_to_dafny(
 +    value: Option<crate::types::StringStructure>,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::_Wrappers_Compile::Option<
++    crate::_Wrappers_Compile::Option<
 +        ::std::rc::Rc<
-+            crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
++            crate::r#simple::aggregate::internaldafny::types::StringStructure,
 +        >,
 +    >,
 +> {
 +    let inner = match value {
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-+        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        None => crate::_Wrappers_Compile::Option::None {},
++        Some(x) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(to_dafny_plain(x)),
 +        },
 +    };
@@ -868,7 +868,7 @@ index 00000000..29f38e55
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
++        crate::r#simple::aggregate::internaldafny::types::StringStructure,
 +    >,
 +) -> crate::types::StringStructure {
 +    plain_from_dafny(&*dafny_value)
@@ -876,26 +876,26 @@ index 00000000..29f38e55
 +
 +#[allow(dead_code)]
 +pub fn plain_from_dafny(
-+    dafny_value : &crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
++    dafny_value : &crate::r#simple::aggregate::internaldafny::types::StringStructure,
 +) -> crate::types::StringStructure {
 +    match dafny_value {
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure::StringStructure {
++    crate::r#simple::aggregate::internaldafny::types::StringStructure::StringStructure {
 +      value,
 +    } =>
 +    crate::types::StringStructure {
-+      value: dafny_standard_library::conversion::ostring_from_dafny(value.clone()),
++      value: crate::standard_library_conversions::ostring_from_dafny(value.clone()),
 +    }
 +}
 +}
 +
 +#[allow(dead_code)]
 +pub fn option_from_dafny(
-+    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
++    dafny_value: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::std::rc::Rc<
++        crate::r#simple::aggregate::internaldafny::types::StringStructure,
 +    >>>,
 +) -> Option<crate::types::StringStructure> {
 +    match &*dafny_value {
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
++        crate::_Wrappers_Compile::Option::Some { value } => {
 +            Some(plain_from_dafny(value))
 +        }
 +        _ => None,
@@ -903,7 +903,7 @@ index 00000000..29f38e55
 +}
 diff --git b/TestModels/Aggregate/runtimes/rust/src/conversions/structure_list_element.rs a/TestModels/Aggregate/runtimes/rust/src/conversions/structure_list_element.rs
 new file mode 100644
-index 00000000..e6603467
+index 00000000..1439b47a
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/conversions/structure_list_element.rs
 @@ -0,0 +1,78 @@
@@ -912,33 +912,33 @@ index 00000000..e6603467
 +pub fn to_dafny(
 +    value: crate::types::StructureListElement,
 +) -> ::std::rc::Rc<
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
++    crate::r#simple::aggregate::internaldafny::types::StructureListElement,
 +> {
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
-+  stringValue: dafny_standard_library::conversion::ostring_to_dafny(&value.string_value),
-+  integerValue: dafny_standard_library::conversion::oint_to_dafny(value.integer_value),
++    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::StructureListElement::StructureListElement {
++  stringValue: crate::standard_library_conversions::ostring_to_dafny(&value.string_value),
++  integerValue: crate::standard_library_conversions::oint_to_dafny(value.integer_value),
 +})
 +}
 +
 +#[allow(dead_code)]
 +pub fn to_dafny_plain(
 +    value: crate::types::StructureListElement,
-+) -> crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement {
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
-+  stringValue: dafny_standard_library::conversion::ostring_to_dafny(&value.string_value),
-+  integerValue: dafny_standard_library::conversion::oint_to_dafny(value.integer_value),
++) -> crate::r#simple::aggregate::internaldafny::types::StructureListElement {
++    crate::r#simple::aggregate::internaldafny::types::StructureListElement::StructureListElement {
++  stringValue: crate::standard_library_conversions::ostring_to_dafny(&value.string_value),
++  integerValue: crate::standard_library_conversions::oint_to_dafny(value.integer_value),
 +}
 +}
 +
 +#[allow(dead_code)]
 +pub fn option_to_dafny(
 +  value: Option<crate::types::StructureListElement>,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-+  crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<::std::rc::Rc<
++  crate::r#simple::aggregate::internaldafny::types::StructureListElement,
 +>>>{
 +    let inner = match value {
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-+        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        None => crate::_Wrappers_Compile::Option::None {},
++        Some(x) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::std::rc::Rc::new(to_dafny_plain(x)),
 +        },
 +    };
@@ -948,7 +948,7 @@ index 00000000..e6603467
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
++        crate::r#simple::aggregate::internaldafny::types::StructureListElement,
 +    >,
 +) -> crate::types::StructureListElement {
 +    plain_from_dafny(&*dafny_value)
@@ -956,28 +956,28 @@ index 00000000..e6603467
 +
 +#[allow(dead_code)]
 +pub fn plain_from_dafny(
-+    dafny_value : &crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
++    dafny_value : &crate::r#simple::aggregate::internaldafny::types::StructureListElement,
 +) -> crate::types::StructureListElement {
 +    match dafny_value {
-+    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement::StructureListElement {
++    crate::r#simple::aggregate::internaldafny::types::StructureListElement::StructureListElement {
 +      stringValue,
 +      integerValue,
 +    } =>
 +    crate::types::StructureListElement {
-+      string_value: dafny_standard_library::conversion::ostring_from_dafny(stringValue.clone()),
-+      integer_value: dafny_standard_library::conversion::oint_from_dafny(integerValue.clone()),
++      string_value: crate::standard_library_conversions::ostring_from_dafny(stringValue.clone()),
++      integer_value: crate::standard_library_conversions::oint_from_dafny(integerValue.clone()),
 +    }
 +}
 +}
 +
 +#[allow(dead_code)]
 +pub fn option_from_dafny(
-+    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StructureListElement,
++    dafny_value: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::std::rc::Rc<
++        crate::r#simple::aggregate::internaldafny::types::StructureListElement,
 +    >>>,
 +) -> Option<crate::types::StructureListElement> {
 +    match &*dafny_value {
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
++        crate::_Wrappers_Compile::Option::Some { value } => {
 +            Some(plain_from_dafny(value))
 +        }
 +        _ => None,
@@ -1037,6 +1037,33 @@ index 00000000..cce22d1c
 +impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
 +    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 +}
+diff --git b/TestModels/Aggregate/runtimes/rust/src/implementation_from_dafny.rs a/TestModels/Aggregate/runtimes/rust/src/implementation_from_dafny.rs
+index e0fd087f..c76afa2b 100644
+--- b/TestModels/Aggregate/runtimes/rust/src/implementation_from_dafny.rs
++++ a/TestModels/Aggregate/runtimes/rust/src/implementation_from_dafny.rs
+@@ -1,6 +1,22 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ 
++pub mod client;
++pub mod types;
++
++/// Common errors and error handling utilities.
++pub mod error;
++
++/// All operations that this crate can perform.
++pub mod operation;
++
++mod conversions;
++mod standard_library_conversions;
++
++pub use client::Client;
++pub use types::simple_aggregate_config::SimpleAggregateConfig;
++
++
+ pub mod r#_Wrappers_Compile {
+     pub use dafny_runtime::DafnyPrint;
+     pub use std::cmp::Eq;
 diff --git b/TestModels/Aggregate/runtimes/rust/src/lib.rs a/TestModels/Aggregate/runtimes/rust/src/lib.rs
 new file mode 100644
 index 00000000..a2840f69
@@ -1077,7 +1104,7 @@ index 00000000..4806430e
 +pub mod get_aggregate_known_value_test;
 diff --git b/TestModels/Aggregate/runtimes/rust/src/operation/get_aggregate.rs a/TestModels/Aggregate/runtimes/rust/src/operation/get_aggregate.rs
 new file mode 100644
-index 00000000..2d06555c
+index 00000000..275313e4
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/operation/get_aggregate.rs
 @@ -0,0 +1,146 @@
@@ -1104,7 +1131,7 @@ index 00000000..2d06555c
 +            ::dafny_runtime::md!(client.dafny_client.clone()).GetAggregate(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_aggregate::_get_aggregate_output::from_dafny(
@@ -1865,7 +1892,7 @@ index 00000000..a146e79b
 +}
 diff --git b/TestModels/Aggregate/runtimes/rust/src/operation/get_aggregate_known_value_test.rs a/TestModels/Aggregate/runtimes/rust/src/operation/get_aggregate_known_value_test.rs
 new file mode 100644
-index 00000000..3d5ab2f0
+index 00000000..bfbc7b95
 --- /dev/null
 +++ a/TestModels/Aggregate/runtimes/rust/src/operation/get_aggregate_known_value_test.rs
 @@ -0,0 +1,149 @@
@@ -1891,7 +1918,7 @@ index 00000000..3d5ab2f0
 +            .GetAggregateKnownValueTest(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_aggregate_known_value_test::_get_aggregate_known_value_test_output::from_dafny(
@@ -2661,6 +2688,259 @@ index 00000000..63afa764
 +        self.inner.get_nested_structure()
 +    }
 +}
+diff --git b/TestModels/Aggregate/runtimes/rust/src/standard_library_conversions.rs a/TestModels/Aggregate/runtimes/rust/src/standard_library_conversions.rs
+new file mode 100644
+index 00000000..2fec0ffb
+--- /dev/null
++++ a/TestModels/Aggregate/runtimes/rust/src/standard_library_conversions.rs
+@@ -0,0 +1,246 @@
++pub fn ostring_to_dafny(
++  input: &Option<String>,
++) -> ::std::rc::Rc<
++  crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>,
++> {
++  let dafny_value = match input {
++  Some(b) => crate::_Wrappers_Compile::Option::Some { value:
++      dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
++      },
++  None => crate::_Wrappers_Compile::Option::None {},
++};
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn ostring_from_dafny(
++  input: ::std::rc::Rc<
++      crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>,
++  >,
++) -> Option<String> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(
++          dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
++              &input.Extract(),
++          ),
++      )
++  } else {
++      None
++  }
++}
++
++pub fn obool_to_dafny(input: Option<bool>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<bool>> {
++  let dafny_value = match input {
++      Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn obool_from_dafny(input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<bool>>) -> Option<bool> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(input.Extract())
++  } else {
++      None
++  }
++}
++
++pub fn oint_to_dafny(input: Option<i32>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<i32>> {
++  let dafny_value = match input {
++      Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn oint_from_dafny(input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<i32>>) -> Option<i32> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(input.Extract())
++  } else {
++      None
++  }
++}
++
++pub fn olong_to_dafny(input: Option<i64>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<i64>> {
++  let dafny_value = match input {
++      Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn olong_from_dafny(input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<i64>>) -> Option<i64> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(input.Extract())
++  } else {
++      None
++  }
++}
++
++pub fn blob_to_dafny(
++  input: &::aws_smithy_types::Blob,
++) -> ::dafny_runtime::Sequence<u8> {
++  ::dafny_runtime::Sequence::from_array(&input.clone().into_inner())
++}
++
++pub fn oblob_to_dafny(
++  input: &Option<::aws_smithy_types::Blob>,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
++  let dafny_value = match input {
++      Some(b) => crate::_Wrappers_Compile::Option::Some {
++          value: blob_to_dafny(&b),
++      },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn blob_from_dafny(
++  input: ::dafny_runtime::Sequence<u8>,
++) -> ::aws_smithy_types::Blob {
++
++  ::aws_smithy_types::Blob::new(
++      ::std::rc::Rc::try_unwrap(input.to_array())
++          .unwrap_or_else(|rc| (*rc).clone()),
++  )
++}
++
++pub fn oblob_from_dafny(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
++) -> Option<::aws_smithy_types::Blob> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(blob_from_dafny(input.Extract()))
++  } else {
++      None
++  }
++}
++
++pub fn double_to_dafny(
++  input: f64,
++) -> ::dafny_runtime::Sequence<u8> {
++  ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(
++      &f64::to_be_bytes(input).to_vec(),
++      |x| *x)
++}
++
++pub fn odouble_to_dafny(
++  input: &Option<f64>,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
++  let dafny_value = match input {
++      Some(f) => crate::_Wrappers_Compile::Option::Some {
++          value: double_to_dafny(*f),
++      },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn double_from_dafny(
++  input: &::dafny_runtime::Sequence<u8>,
++) -> f64 {
++  let v = ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(input, |x| *x);
++  f64::from_be_bytes(v.try_into().expect("Error converting Sequence to f64"))
++}
++
++pub fn odouble_from_dafny(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
++) -> Option<f64> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(double_from_dafny(&input.Extract()))
++  } else {
++      None
++  }
++}
++
++pub fn timestamp_to_dafny(
++  input: ::aws_smithy_types::DateTime,
++) -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
++  ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&input.to_string())
++}
++
++pub fn otimestamp_to_dafny(
++  input: &Option<::aws_smithy_types::DateTime>,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
++  let dafny_value = match input {
++      Some(f) => crate::_Wrappers_Compile::Option::Some {
++          value: timestamp_to_dafny(*f),
++      },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn timestamp_from_dafny(
++  input: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
++) -> ::aws_smithy_types::DateTime {
++  let s = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&input);
++  ::aws_smithy_types::DateTime::from_str(
++      &s,
++      aws_smithy_types::date_time::Format::DateTime,
++  ).unwrap()
++}
++
++pub fn otimestamp_from_dafny(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
++) -> Option<::aws_smithy_types::DateTime> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(timestamp_from_dafny(input.Extract()))
++  } else {
++      None
++  }
++}
++
++pub fn option_from_dafny<T: ::dafny_runtime::DafnyType, TR>(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<T>>,
++  converter: fn(&T) -> TR,
++) -> Option<TR> {
++  match &*input {
++      crate::_Wrappers_Compile::Option::Some { value } => Some(converter(value)),
++      crate::_Wrappers_Compile::Option::None { } => None,
++  }
++}
++
++pub fn option_to_dafny<T: ::dafny_runtime::DafnyType, TR>(
++  input: &Option<TR>,
++  converter: fn(&TR) -> T,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<T>> {
++  match input {
++      Some(value) => ::std::rc::Rc::new(
++          crate::_Wrappers_Compile::Option::Some {
++              value: converter(&value)
++          }
++      ),
++      None => ::std::rc::Rc::new(
++          crate::_Wrappers_Compile::Option::None {}
++      ),
++  }
++}
++
++pub fn result_from_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Result<T, E>>,
++  converter_t: fn(&T) -> TR,
++  converter_e: fn(&E) -> ER,
++) -> Result<TR, ER> {
++  match &*input {
++      crate::_Wrappers_Compile::Result::Success { value } => Ok(converter_t(value)),
++      crate::_Wrappers_Compile::Result::Failure { error } => Err(converter_e(error)),
++  }
++}
++
++pub fn result_to_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
++  input: &Result<TR, ER>,
++  converter_t: fn(&TR) -> T,
++  converter_e: fn(&ER) -> E,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Result<T, E>> {
++  match input {
++      Ok(value) => ::std::rc::Rc::new(
++          crate::_Wrappers_Compile::Result::Success {
++              value: converter_t(&value)
++          }
++      ),
++      Err(error) => ::std::rc::Rc::new(
++          crate::_Wrappers_Compile::Result::Failure {
++              error: converter_e(&error)
++          }
++      ),
++  }
++}
+\ No newline at end of file
 diff --git b/TestModels/Aggregate/runtimes/rust/src/types.rs a/TestModels/Aggregate/runtimes/rust/src/types.rs
 new file mode 100644
 index 00000000..dd259ffa

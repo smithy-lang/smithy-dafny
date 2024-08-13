@@ -3,6 +3,8 @@
 
 CORES=2
 
+TRANSPILE_TESTS_IN_RUST=true
+
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
@@ -65,7 +67,7 @@ transpile_java: | transpile_implementation_java transpile_test_java
 
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
-transpile_rust: | transpile_implementation_rust transpile_test_rust
+transpile_rust: | transpile_implementation_rust
 
 # Override this target to not insert a dependency on the standard library.
 _mv_implementation_rust:

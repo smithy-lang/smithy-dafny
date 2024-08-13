@@ -3,7 +3,7 @@
 
 CORES=2
 
-TRANSPILE_TESTS_IN_RUST=true
+TRANSPILE_TESTS_IN_RUST=1
 
 include ../../SharedMakefile.mk
 
@@ -35,11 +35,7 @@ _polymorph_dotnet:
 _polymorph_java:
 	$(GRADLEW) polymorphJava
 
-_polymorph_rust:
-	$(GRADLEW) polymorphRust
-
 # There is no wrapped target for aws-sdk types
-_polymorph: ;
 _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;

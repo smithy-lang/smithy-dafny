@@ -1483,12 +1483,6 @@ pub mod software {
                                     ::dafny_runtime::int!(1) <= x.cardinality()
                                         && x.cardinality() <= ::dafny_runtime::int!(8192)
                                 }
-                                pub fn IsValid_RegionType(
-                                    x: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                ) -> bool {
-                                    ::dafny_runtime::int!(1) <= x.cardinality()
-                                        && x.cardinality() <= ::dafny_runtime::int!(32)
-                                }
                             }
 
                             #[derive(PartialEq, Clone)]
@@ -4773,9 +4767,6 @@ pub mod software {
                                 }
                             }
 
-                            pub type RegionType =
-                                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>;
-
                             #[derive(PartialEq, Clone)]
                             pub enum SigningAlgorithmSpec {
                                 RSASSA_PSS_SHA_256 {},
@@ -4904,89 +4895,6 @@ pub mod software {
                                 fn GenerateDataKeyWithoutPlaintext(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyWithoutPlaintextRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyWithoutPlaintextResponse>, ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
                                 fn GetPublicKey(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyResponse>, ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
                                 fn ReEncrypt(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptResponse>, ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
-                                fn UpdatePrimaryRegion(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::UpdatePrimaryRegionRequest>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<(), ::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::Error>>>;
-                            }
-
-                            #[derive(PartialEq, Clone)]
-                            pub enum UpdatePrimaryRegionRequest {
-                                UpdatePrimaryRegionRequest {
-                                    KeyId:
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                    PrimaryRegion:
-                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-                                },
-                            }
-
-                            impl UpdatePrimaryRegionRequest {
-                                pub fn KeyId(
-                                    &self,
-                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
-                                {
-                                    match self {
-                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest{KeyId, PrimaryRegion, } => KeyId,
-                  }
-                                }
-                                pub fn PrimaryRegion(
-                                    &self,
-                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
-                                {
-                                    match self {
-                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest{KeyId, PrimaryRegion, } => PrimaryRegion,
-                  }
-                                }
-                            }
-
-                            impl Debug for UpdatePrimaryRegionRequest {
-                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-                                }
-                            }
-
-                            impl DafnyPrint for UpdatePrimaryRegionRequest {
-                                fn fmt_print(
-                                    &self,
-                                    _formatter: &mut ::std::fmt::Formatter,
-                                    _in_seq: bool,
-                                ) -> std::fmt::Result {
-                                    match self {
-                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest{KeyId, PrimaryRegion, } => {
-                      write!(_formatter, "software.amazon.cryptography.services.kms.internaldafny.types.UpdatePrimaryRegionRequest.UpdatePrimaryRegionRequest(")?;
-                      ::dafny_runtime::DafnyPrint::fmt_print(KeyId, _formatter, false)?;
-                      write!(_formatter, ", ")?;
-                      ::dafny_runtime::DafnyPrint::fmt_print(PrimaryRegion, _formatter, false)?;
-                      write!(_formatter, ")")?;
-                      Ok(())
-                    },
-                  }
-                                }
-                            }
-
-                            impl Eq for UpdatePrimaryRegionRequest {}
-
-                            impl Hash for UpdatePrimaryRegionRequest {
-                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
-                                    match self {
-                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest{KeyId, PrimaryRegion, } => {
-                      ::std::hash::Hash::hash(KeyId, _state);
-                      ::std::hash::Hash::hash(PrimaryRegion, _state)
-                    },
-                  }
-                                }
-                            }
-
-                            impl Default for UpdatePrimaryRegionRequest {
-                                fn default() -> UpdatePrimaryRegionRequest {
-                                    UpdatePrimaryRegionRequest::UpdatePrimaryRegionRequest {
-                                        KeyId: ::std::default::Default::default(),
-                                        PrimaryRegion: ::std::default::Default::default(),
-                                    }
-                                }
-                            }
-
-                            impl AsRef<UpdatePrimaryRegionRequest> for &UpdatePrimaryRegionRequest {
-                                fn as_ref(&self) -> Self {
-                                    self
-                                }
                             }
 
                             #[derive(PartialEq, Clone)]

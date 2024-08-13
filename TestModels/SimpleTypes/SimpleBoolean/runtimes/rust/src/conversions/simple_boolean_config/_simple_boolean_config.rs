@@ -4,15 +4,15 @@
 pub fn to_dafny(
     value: crate::types::simple_boolean_config::SimpleBooleanConfig,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
+    crate::simple::types::boolean::internaldafny::types::SimpleBooleanConfig,
 > {
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig::SimpleBooleanConfig {})
+    ::std::rc::Rc::new(crate::r#simple::types::boolean::internaldafny::types::SimpleBooleanConfig::SimpleBooleanConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dtypes_dboolean_dinternaldafny_dtypes::SimpleBooleanConfig,
+        crate::r#simple::types::boolean::internaldafny::types::SimpleBooleanConfig,
     >,
 ) -> crate::types::simple_boolean_config::SimpleBooleanConfig {
     crate::types::simple_boolean_config::SimpleBooleanConfig {}

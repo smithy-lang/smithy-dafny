@@ -1,6 +1,6 @@
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client.rs
 new file mode 100644
-index 00000000..93d1e50b
+index 00000000..0e7fbefe
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/client.rs
 @@ -0,0 +1,38 @@
@@ -10,7 +10,7 @@ index 00000000..93d1e50b
 +
 +#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 +pub struct Client {
-+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::ISimpleTypesBlobClient>
++    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::r#simple::types::blob::internaldafny::types::ISimpleTypesBlobClient>
 +}
 +
 +impl Client {
@@ -19,12 +19,12 @@ index 00000000..93d1e50b
 +    pub fn from_conf(
 +        conf: crate::types::simple_blob_config::SimpleBlobConfig,
 +    ) -> Result<Self, BuildError> {
-+        let inner = crate::implementation_from_dafny::_simple_dtypes_dblob_dinternaldafny::_default::SimpleBlob(
++        let inner = crate::simple::types::blob::internaldafny::_default::SimpleBlob(
 +            &crate::conversions::simple_blob_config::_simple_blob_config::to_dafny(conf),
 +        );
 +        if matches!(
 +            inner.as_ref(),
-+            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
++            crate::_Wrappers_Compile::Result::Failure { .. }
 +        ) {
 +            // TODO: convert error - the potential types are not modeled!
 +            return Err(BuildError::other(
@@ -98,7 +98,7 @@ index 00000000..1cd4ad22
 +pub mod simple_blob_config;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob.rs
 new file mode 100644
-index 00000000..7c8aa91f
+index 00000000..43479fd3
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob.rs
 @@ -0,0 +1,37 @@
@@ -109,10 +109,10 @@ index 00000000..7c8aa91f
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_blob::GetBlobError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::types::blob::internaldafny::types::Error> {
 +    match value {
 +        crate::operation::get_blob::GetBlobError::Unhandled(unhandled) => ::std::rc::Rc::new(
-+            crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error::Opaque {
++            crate::r#simple::types::blob::internaldafny::types::Error::Opaque {
 +                obj: ::dafny_runtime::upcast_object()(
 +                    ::dafny_runtime::object::new(unhandled),
 +                ),
@@ -124,11 +124,11 @@ index 00000000..7c8aa91f
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error,
++        crate::r#simple::types::blob::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_blob::GetBlobError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::types::blob::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_blob::GetBlobError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -141,7 +141,7 @@ index 00000000..7c8aa91f
 +pub mod _get_blob_output;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob/_get_blob_input.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob/_get_blob_input.rs
 new file mode 100644
-index 00000000..ce65274f
+index 00000000..5c7d9c2b
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob/_get_blob_input.rs
 @@ -0,0 +1,42 @@
@@ -149,15 +149,15 @@ index 00000000..ce65274f
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: crate::operation::get_blob::GetBlobInput,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput>
++) -> ::std::rc::Rc<crate::r#simple::types::blob::internaldafny::types::GetBlobInput>
 +{
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::dafny_runtime::Sequence::from_array(&v),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput::GetBlobInput {
++    ::std::rc::Rc::new(crate::r#simple::types::blob::internaldafny::types::GetBlobInput::GetBlobInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -165,12 +165,12 @@ index 00000000..ce65274f
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput,
++        crate::r#simple::types::blob::internaldafny::types::GetBlobInput,
 +    >,
 +) -> crate::operation::get_blob::GetBlobInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            ::std::rc::Rc::try_unwrap(dafny_value.value().Extract().to_array())
@@ -178,7 +178,7 @@ index 00000000..ce65274f
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -189,7 +189,7 @@ index 00000000..ce65274f
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob/_get_blob_output.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob/_get_blob_output.rs
 new file mode 100644
-index 00000000..1dc91e40
+index 00000000..e9770da2
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob/_get_blob_output.rs
 @@ -0,0 +1,43 @@
@@ -197,15 +197,15 @@ index 00000000..1dc91e40
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: crate::operation::get_blob::GetBlobOutput,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobOutput>
++) -> ::std::rc::Rc<crate::r#simple::types::blob::internaldafny::types::GetBlobOutput>
 +{
 +    let dafny_value = match value.value {
-+        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(b) => crate::_Wrappers_Compile::Option::Some {
 +            value: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&b, |e| *e),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobOutput::GetBlobOutput {
++    ::std::rc::Rc::new(crate::r#simple::types::blob::internaldafny::types::GetBlobOutput::GetBlobOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -213,12 +213,12 @@ index 00000000..1dc91e40
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobOutput,
++        crate::r#simple::types::blob::internaldafny::types::GetBlobOutput,
 +    >,
 +) -> crate::operation::get_blob::GetBlobOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
@@ -228,7 +228,7 @@ index 00000000..1dc91e40
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -238,7 +238,7 @@ index 00000000..1dc91e40
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value.rs
 new file mode 100644
-index 00000000..fb107c56
+index 00000000..50a67357
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value.rs
 @@ -0,0 +1,39 @@
@@ -249,11 +249,11 @@ index 00000000..fb107c56
 +#[allow(dead_code)]
 +pub fn to_dafny_error(
 +    value: crate::operation::get_blob_known_value::GetBlobKnownValueError,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error> {
++) -> ::std::rc::Rc<crate::r#simple::types::blob::internaldafny::types::Error> {
 +    match value {
 +        crate::operation::get_blob_known_value::GetBlobKnownValueError::Unhandled(unhandled) => {
 +            ::std::rc::Rc::new(
-+                crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error::Opaque {
++                crate::r#simple::types::blob::internaldafny::types::Error::Opaque {
 +                    obj: ::dafny_runtime::upcast_object()(
 +                        ::dafny_runtime::object::new(unhandled),
 +                    ),
@@ -266,11 +266,11 @@ index 00000000..fb107c56
 +#[allow(dead_code)]
 +pub fn from_dafny_error(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error,
++        crate::r#simple::types::blob::internaldafny::types::Error,
 +    >,
 +) -> crate::operation::get_blob_known_value::GetBlobKnownValueError {
 +    // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-+    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
++    if matches!(&dafny_value.as_ref(), crate::r#simple::types::blob::internaldafny::types::Error::CollectionOfErrors { .. }) {
 +    let error_message = "TODO: can't get message yet";
 +    crate::operation::get_blob_known_value::GetBlobKnownValueError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
 +  } else {
@@ -283,7 +283,7 @@ index 00000000..fb107c56
 +pub mod _get_blob_known_value_output;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value/_get_blob_known_value_input.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value/_get_blob_known_value_input.rs
 new file mode 100644
-index 00000000..22d94d79
+index 00000000..581adeb7
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value/_get_blob_known_value_input.rs
 @@ -0,0 +1,41 @@
@@ -291,15 +291,15 @@ index 00000000..22d94d79
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: crate::operation::get_blob_known_value::GetBlobKnownValueInput,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput>
++) -> ::std::rc::Rc<crate::r#simple::types::blob::internaldafny::types::GetBlobInput>
 +{
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::_Wrappers_Compile::Option::Some {
 +            value: ::dafny_runtime::Sequence::from_array(&v),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput::GetBlobInput {
++    ::std::rc::Rc::new(crate::r#simple::types::blob::internaldafny::types::GetBlobInput::GetBlobInput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -307,12 +307,12 @@ index 00000000..22d94d79
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobInput,
++        crate::r#simple::types::blob::internaldafny::types::GetBlobInput,
 +    >,
 +) -> crate::operation::get_blob_known_value::GetBlobKnownValueInput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            ::std::rc::Rc::try_unwrap(dafny_value.value().Extract().to_array())
@@ -320,7 +320,7 @@ index 00000000..22d94d79
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -330,7 +330,7 @@ index 00000000..22d94d79
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value/_get_blob_known_value_output.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value/_get_blob_known_value_output.rs
 new file mode 100644
-index 00000000..b9de8844
+index 00000000..19cf6355
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/get_blob_known_value/_get_blob_known_value_output.rs
 @@ -0,0 +1,43 @@
@@ -338,15 +338,15 @@ index 00000000..b9de8844
 +#[allow(dead_code)]
 +pub fn to_dafny(
 +    value: crate::operation::get_blob_known_value::GetBlobKnownValueOutput,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobOutput>
++) -> ::std::rc::Rc<crate::r#simple::types::blob::internaldafny::types::GetBlobOutput>
 +{
 +    let dafny_value = match value.value {
-+        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
++        Some(v) => crate::_Wrappers_Compile::Option::Some {
 +            value: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&v, |e| *e),
 +        },
-+        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
++        None => crate::_Wrappers_Compile::Option::None {},
 +    };
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobOutput::GetBlobOutput {
++    ::std::rc::Rc::new(crate::r#simple::types::blob::internaldafny::types::GetBlobOutput::GetBlobOutput {
 +    value: ::std::rc::Rc::new(dafny_value)
 +  })
 +}
@@ -354,12 +354,12 @@ index 00000000..b9de8844
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::GetBlobOutput,
++        crate::r#simple::types::blob::internaldafny::types::GetBlobOutput,
 +    >,
 +) -> crate::operation::get_blob_known_value::GetBlobKnownValueOutput {
 +    let value = if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
++        crate::_Wrappers_Compile::Option::Some { .. }
 +    ) {
 +        Some(
 +            dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
@@ -369,7 +369,7 @@ index 00000000..b9de8844
 +        )
 +    } else if matches!(
 +        dafny_value.value().as_ref(),
-+        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
++        crate::_Wrappers_Compile::Option::None { .. }
 +    ) {
 +        None
 +    } else {
@@ -388,7 +388,7 @@ index 00000000..89599c3f
 +pub mod _simple_blob_config;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/simple_blob_config/_simple_blob_config.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/simple_blob_config/_simple_blob_config.rs
 new file mode 100644
-index 00000000..7081c632
+index 00000000..d0a4cd5c
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/conversions/simple_blob_config/_simple_blob_config.rs
 @@ -0,0 +1,18 @@
@@ -397,15 +397,15 @@ index 00000000..7081c632
 +
 +pub fn to_dafny(
 +    value: crate::types::simple_blob_config::SimpleBlobConfig,
-+) -> ::std::rc::Rc<crate::implementation_from_dafny::_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig>
++) -> ::std::rc::Rc<crate::simple::types::blob::internaldafny::types::SimpleBlobConfig>
 +{
-+    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig::SimpleBlobConfig {})
++    ::std::rc::Rc::new(crate::r#simple::types::blob::internaldafny::types::SimpleBlobConfig::SimpleBlobConfig {})
 +}
 +
 +#[allow(dead_code)]
 +pub fn from_dafny(
 +    dafny_value: ::std::rc::Rc<
-+        crate::implementation_from_dafny::r#_simple_dtypes_dblob_dinternaldafny_dtypes::SimpleBlobConfig,
++        crate::r#simple::types::blob::internaldafny::types::SimpleBlobConfig,
 +    >,
 +) -> crate::types::simple_blob_config::SimpleBlobConfig {
 +    crate::types::simple_blob_config::SimpleBlobConfig {}
@@ -462,6 +462,33 @@ index 00000000..cce22d1c
 +impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for Unhandled {
 +    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 +}
+diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/implementation_from_dafny.rs
+index ef528d59..1c1963a2 100644
+--- b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/implementation_from_dafny.rs
++++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/implementation_from_dafny.rs
+@@ -1,6 +1,22 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ 
++pub mod client;
++pub mod types;
++
++/// Common errors and error handling utilities.
++pub mod error;
++
++/// All operations that this crate can perform.
++pub mod operation;
++
++mod conversions;
++mod standard_library_conversions;
++
++pub use client::Client;
++pub use types::simple_blob_config::SimpleBlobConfig;
++
++
+ pub mod r#_Wrappers_Compile {
+     pub use dafny_runtime::DafnyPrint;
+     pub use std::cmp::Eq;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/lib.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/lib.rs
 new file mode 100644
 index 00000000..3938142e
@@ -502,7 +529,7 @@ index 00000000..a72267ed
 +pub mod get_blob_known_value;
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob.rs
 new file mode 100644
-index 00000000..fb2a00c2
+index 00000000..2c923f1a
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob.rs
 @@ -0,0 +1,142 @@
@@ -527,7 +554,7 @@ index 00000000..fb2a00c2
 +        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetBlob(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(crate::conversions::get_blob::_get_blob_output::from_dafny(
 +                inner_result.value().clone(),
@@ -872,7 +899,7 @@ index 00000000..bedb57b1
 +}
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value.rs
 new file mode 100644
-index 00000000..3d74474a
+index 00000000..ee1819d4
 --- /dev/null
 +++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/operation/get_blob_known_value.rs
 @@ -0,0 +1,145 @@
@@ -898,7 +925,7 @@ index 00000000..3d74474a
 +        let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetBlob(&inner_input);
 +        if matches!(
 +            inner_result.as_ref(),
-+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
++            crate::r#_Wrappers_Compile::Result::Success { .. }
 +        ) {
 +            Ok(
 +                crate::conversions::get_blob_known_value::_get_blob_known_value_output::from_dafny(
@@ -1245,6 +1272,259 @@ index 00000000..274bb3f3
 +        self.inner.get_value()
 +    }
 +}
+diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/standard_library_conversions.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/standard_library_conversions.rs
+new file mode 100644
+index 00000000..2fec0ffb
+--- /dev/null
++++ a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/standard_library_conversions.rs
+@@ -0,0 +1,246 @@
++pub fn ostring_to_dafny(
++  input: &Option<String>,
++) -> ::std::rc::Rc<
++  crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>,
++> {
++  let dafny_value = match input {
++  Some(b) => crate::_Wrappers_Compile::Option::Some { value:
++      dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
++      },
++  None => crate::_Wrappers_Compile::Option::None {},
++};
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn ostring_from_dafny(
++  input: ::std::rc::Rc<
++      crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>,
++  >,
++) -> Option<String> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(
++          dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
++              &input.Extract(),
++          ),
++      )
++  } else {
++      None
++  }
++}
++
++pub fn obool_to_dafny(input: Option<bool>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<bool>> {
++  let dafny_value = match input {
++      Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn obool_from_dafny(input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<bool>>) -> Option<bool> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(input.Extract())
++  } else {
++      None
++  }
++}
++
++pub fn oint_to_dafny(input: Option<i32>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<i32>> {
++  let dafny_value = match input {
++      Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn oint_from_dafny(input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<i32>>) -> Option<i32> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(input.Extract())
++  } else {
++      None
++  }
++}
++
++pub fn olong_to_dafny(input: Option<i64>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<i64>> {
++  let dafny_value = match input {
++      Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn olong_from_dafny(input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<i64>>) -> Option<i64> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(input.Extract())
++  } else {
++      None
++  }
++}
++
++pub fn blob_to_dafny(
++  input: &::aws_smithy_types::Blob,
++) -> ::dafny_runtime::Sequence<u8> {
++  ::dafny_runtime::Sequence::from_array(&input.clone().into_inner())
++}
++
++pub fn oblob_to_dafny(
++  input: &Option<::aws_smithy_types::Blob>,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
++  let dafny_value = match input {
++      Some(b) => crate::_Wrappers_Compile::Option::Some {
++          value: blob_to_dafny(&b),
++      },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn blob_from_dafny(
++  input: ::dafny_runtime::Sequence<u8>,
++) -> ::aws_smithy_types::Blob {
++
++  ::aws_smithy_types::Blob::new(
++      ::std::rc::Rc::try_unwrap(input.to_array())
++          .unwrap_or_else(|rc| (*rc).clone()),
++  )
++}
++
++pub fn oblob_from_dafny(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
++) -> Option<::aws_smithy_types::Blob> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(blob_from_dafny(input.Extract()))
++  } else {
++      None
++  }
++}
++
++pub fn double_to_dafny(
++  input: f64,
++) -> ::dafny_runtime::Sequence<u8> {
++  ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(
++      &f64::to_be_bytes(input).to_vec(),
++      |x| *x)
++}
++
++pub fn odouble_to_dafny(
++  input: &Option<f64>,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
++  let dafny_value = match input {
++      Some(f) => crate::_Wrappers_Compile::Option::Some {
++          value: double_to_dafny(*f),
++      },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn double_from_dafny(
++  input: &::dafny_runtime::Sequence<u8>,
++) -> f64 {
++  let v = ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(input, |x| *x);
++  f64::from_be_bytes(v.try_into().expect("Error converting Sequence to f64"))
++}
++
++pub fn odouble_from_dafny(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
++) -> Option<f64> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(double_from_dafny(&input.Extract()))
++  } else {
++      None
++  }
++}
++
++pub fn timestamp_to_dafny(
++  input: ::aws_smithy_types::DateTime,
++) -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
++  ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&input.to_string())
++}
++
++pub fn otimestamp_to_dafny(
++  input: &Option<::aws_smithy_types::DateTime>,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
++  let dafny_value = match input {
++      Some(f) => crate::_Wrappers_Compile::Option::Some {
++          value: timestamp_to_dafny(*f),
++      },
++      None => crate::_Wrappers_Compile::Option::None {},
++  };
++  ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn timestamp_from_dafny(
++  input: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
++) -> ::aws_smithy_types::DateTime {
++  let s = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&input);
++  ::aws_smithy_types::DateTime::from_str(
++      &s,
++      aws_smithy_types::date_time::Format::DateTime,
++  ).unwrap()
++}
++
++pub fn otimestamp_from_dafny(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
++) -> Option<::aws_smithy_types::DateTime> {
++  if matches!(input.as_ref(), crate::_Wrappers_Compile::Option::Some { .. }) {
++      Some(timestamp_from_dafny(input.Extract()))
++  } else {
++      None
++  }
++}
++
++pub fn option_from_dafny<T: ::dafny_runtime::DafnyType, TR>(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<T>>,
++  converter: fn(&T) -> TR,
++) -> Option<TR> {
++  match &*input {
++      crate::_Wrappers_Compile::Option::Some { value } => Some(converter(value)),
++      crate::_Wrappers_Compile::Option::None { } => None,
++  }
++}
++
++pub fn option_to_dafny<T: ::dafny_runtime::DafnyType, TR>(
++  input: &Option<TR>,
++  converter: fn(&TR) -> T,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<T>> {
++  match input {
++      Some(value) => ::std::rc::Rc::new(
++          crate::_Wrappers_Compile::Option::Some {
++              value: converter(&value)
++          }
++      ),
++      None => ::std::rc::Rc::new(
++          crate::_Wrappers_Compile::Option::None {}
++      ),
++  }
++}
++
++pub fn result_from_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
++  input: ::std::rc::Rc<crate::_Wrappers_Compile::Result<T, E>>,
++  converter_t: fn(&T) -> TR,
++  converter_e: fn(&E) -> ER,
++) -> Result<TR, ER> {
++  match &*input {
++      crate::_Wrappers_Compile::Result::Success { value } => Ok(converter_t(value)),
++      crate::_Wrappers_Compile::Result::Failure { error } => Err(converter_e(error)),
++  }
++}
++
++pub fn result_to_dafny<T: ::dafny_runtime::DafnyType, TR, E: ::dafny_runtime::DafnyType, ER>(
++  input: &Result<TR, ER>,
++  converter_t: fn(&TR) -> T,
++  converter_e: fn(&ER) -> E,
++) -> ::std::rc::Rc<crate::_Wrappers_Compile::Result<T, E>> {
++  match input {
++      Ok(value) => ::std::rc::Rc::new(
++          crate::_Wrappers_Compile::Result::Success {
++              value: converter_t(&value)
++          }
++      ),
++      Err(error) => ::std::rc::Rc::new(
++          crate::_Wrappers_Compile::Result::Failure {
++              error: converter_e(&error)
++          }
++      ),
++  }
++}
+\ No newline at end of file
 diff --git b/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/types.rs a/TestModels/SimpleTypes/SimpleBlob/runtimes/rust/src/types.rs
 new file mode 100644
 index 00000000..1dca219a
