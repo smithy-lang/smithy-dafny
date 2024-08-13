@@ -1,6 +1,23 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
 
+pub mod client;
+pub mod types;
+
+/// Common errors and error handling utilities.
+pub mod error;
+
+/// All operations that this crate can perform.
+pub mod operation;
+
+mod conversions;
+
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
+
+pub use client::Client;
+pub use types::simple_boolean_config::SimpleBooleanConfig;
+
 pub mod r#_Wrappers_Compile {
     pub use dafny_runtime::DafnyPrint;
     pub use std::cmp::Eq;
