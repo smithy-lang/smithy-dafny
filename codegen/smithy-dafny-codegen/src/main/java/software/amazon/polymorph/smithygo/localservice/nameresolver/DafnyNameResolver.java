@@ -26,7 +26,6 @@ public class DafnyNameResolver {
     }
 
     public static String getDafnyType(final Shape shape, final Symbol symbol) {
-
         ShapeType type = shape.getType();
         if (shape.hasTrait(EnumTrait.class)) {
             type = ShapeType.ENUM;
