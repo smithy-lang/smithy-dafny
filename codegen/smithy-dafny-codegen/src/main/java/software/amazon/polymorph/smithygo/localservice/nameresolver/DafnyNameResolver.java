@@ -2,6 +2,8 @@ package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.Shape;
+
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
@@ -25,44 +27,26 @@ public class DafnyNameResolver {
 
     public static String getDafnyType(final Shape shape, final Symbol symbol) {
 
-        switch (shape.getType()) {
-            case STRING:
-                if (shape.hasTrait(EnumTrait.class)) {
-                    return getDafnyTypeDefaultCase(shape, symbol);
-                }
-                else {
-                    return "dafny.Sequence";
-                }
-            case INTEGER:
-                return "int32";
-            case LONG:
-                return "int64";
-            case BLOB:
-            case BOOLEAN:
-            case DOUBLE:
-                return "*dafny.ArraySequence";
+        ShapeType type = shape.getType();
+        if (shape.hasTrait(EnumTrait.class)) {
+            type = ShapeType.ENUM;
+        }
+        switch (type) {
+            case INTEGER, LONG, BOOLEAN: 
+                return symbol.getName();
             case MAP:
                 return "dafny.Map";
-            case LIST:
+            case DOUBLE, STRING, BLOB, LIST:
                 return "dafny.Sequence";
-            case STRUCTURE:
-            case UNION:
-            // case MAP:
-            //     return "map";
-            // case STRUCTURE:
-            // case UNION:
-            //     return symbol.getName();
-            default:
-                return getDafnyTypeDefaultCase(shape, symbol);
-        }
-        
-    }
-
-    private static String getDafnyTypeDefaultCase(final Shape shape, final Symbol symbol) {
-        return DafnyNameResolver.dafnyTypesNamespace(shape)
+            case ENUM, STRUCTURE, UNION:
+                return DafnyNameResolver.dafnyTypesNamespace(shape)
                                 .concat(DOT)
                                 .concat(symbol.getName());
+            default:
+                throw new IllegalArgumentException("Unexpected shape found") ;
+        }
     }
+
     public static String getDafnySubErrorType(final Shape shape, final Symbol symbol) {
         return DafnyNameResolver.getDafnyBaseErrorType(shape)
                                 .concat("_")
