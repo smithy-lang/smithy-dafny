@@ -499,7 +499,13 @@ public class Generator {
                     }
                 }
             }
-            case BOOLEAN -> TokenTree.of("crate::standard_library_conversions::obool_from_dafny(%s.clone())".formatted(dafnyValue));
+            case BOOLEAN -> {
+                if (isRustOption) {
+                    yield TokenTree.of("crate::standard_library_conversions::obool_from_dafny(%s.clone())".formatted(dafnyValue));
+                } else {
+                    yield TokenTree.of(dafnyValue);
+                }
+            }
             case INTEGER -> {
                 if (isRustOption) {
                     yield TokenTree.of("crate::standard_library_conversions::oint_from_dafny(%s.clone())".formatted(dafnyValue));
@@ -628,12 +634,10 @@ public class Generator {
         Shape targetShape = model.expectShape(member.getTarget());
         String snakeCaseMemberName = toSnakeCase(member.getMemberName());
         boolean isRequired = member.hasTrait(RequiredTrait.class);
-        boolean isRustOption =
-                // TODO-HACK: this might be DDB specific...
-                !(operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape())
-                // TODO-HACK: can't figure this one out yet...
-                && !(parent.getId().getName().equals("Condition") && snakeCaseMemberName.equals("comparison_operator"));
-        return toDafny(targetShape, "value." + snakeCaseMemberName, isRustOption, !isRequired);
+        boolean isRustRequired =
+                (isRequired && !operationIndex.isOutputStructure(parent) && !operationIndex.isInputStructure(parent))
+            || (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape());
+        return toDafny(targetShape, "value." + snakeCaseMemberName, !isRustRequired, !isRequired);
     }
 
     private TokenTree toDafny(final Shape shape, final String rustValue, boolean isRustOption, boolean isDafnyOption) {
@@ -661,11 +665,17 @@ public class Generator {
                         }
                         yield result;
                     } else {
-                        yield TokenTree.of("dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(%s)".formatted(rustValue));
+                        yield TokenTree.of("dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&%s)".formatted(rustValue));
                     }
                 }
             }
-            case BOOLEAN -> TokenTree.of("crate::standard_library_conversions::obool_to_dafny(%s)".formatted(rustValue));
+            case BOOLEAN -> {
+                if (isRustOption) {
+                    yield TokenTree.of("crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(rustValue));
+                } else {
+                    yield TokenTree.of(rustValue);
+                }
+            }
             case INTEGER -> {
                 if (isDafnyOption) {
                     if (isRustOption) {
@@ -711,12 +721,21 @@ public class Generator {
                 ListShape listShape = shape.asListShape().get();
                 Shape memberShape = model.expectShape(listShape.getMember().getTarget());
                 if (!isDafnyOption) {
-                    yield TokenTree.of("""
+                    if (isRustOption) {
+                        yield TokenTree.of("""
+                                ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.unwrap(),
+                                    |e| %s,
+                                )
+                                """.formatted(rustValue,
+                                toDafny(memberShape, "e", false, false)));
+                    } else {
+                        yield TokenTree.of("""
                             ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s,
                                 |e| %s,
                             )
                             """.formatted(rustValue,
-                                          toDafny(memberShape, "e", false, false)));
+                                toDafny(memberShape, "e", false, false)));
+                    }
                 } else {
                     yield TokenTree.of("""
                             ::std::rc::Rc::new(match &%s {
@@ -774,17 +793,23 @@ public class Generator {
             }
             case STRUCTURE, UNION -> {
                 var structureShapeName = toSnakeCase(shape.getId().getName());
-                if (isRustOption) {
-                    yield TokenTree.of("""
-                            ::std::rc::Rc::new(match &%s {
-                                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
-                                None => crate::_Wrappers_Compile::Option::None { }
-                            })
-                            """.formatted(rustValue, structureShapeName));
+                if (!isDafnyOption) {
+                    if (isRustOption) {
+                        yield TokenTree.of("""
+                                crate::conversions::%s::to_dafny(&%s.unwrap())
+                                """.formatted(structureShapeName, rustValue));
+                    } else {
+                        yield TokenTree.of("""
+                                crate::conversions::%s::to_dafny(&%s)
+                                """.formatted(structureShapeName, rustValue));
+                    }
                 } else {
                     yield TokenTree.of("""
-                            crate::conversions::%s::to_dafny(&%s)
-                            """.formatted(structureShapeName, rustValue));
+                        ::std::rc::Rc::new(match &%s {
+                            Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
+                            None => crate::_Wrappers_Compile::Option::None { }
+                        })
+                        """.formatted(rustValue, structureShapeName));
                 }
             }
             default -> throw new IllegalArgumentException("Unsupported shape type: %s".formatted(shape.getType()));
@@ -937,13 +962,13 @@ public class Generator {
 
     private TokenTree structureToDafnyFunction(final StructureShape structureShape) {
         String structureName = structureShape.getId().getName();
-        String snakeCaseName = toSnakeCase(structureName);
+        String rustStructureName = toPascalCase(structureName);
         String template = """
         // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
         
         #[allow(dead_code)]
         pub fn to_dafny(
-            value: &aws_sdk_$sdkId:L::types::$structureName:L,
+            value: &aws_sdk_$sdkId:L::types::$rustStructureName:L,
         ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
           ::std::rc::Rc::new(
             crate::r#software::amazon::cryptography::services::$sdkId:L::internaldafny::types::$structureName:L::$structureName:L {
@@ -956,6 +981,7 @@ public class Generator {
         String evaluated = evalTemplate(template, Map.of(
                 "sdkId", sdkId,
                 "structureName", structureName,
+                "rustStructureName", rustStructureName,
                 "dafnyTypesModuleName", "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId),
                 "variants", toDafnyVariantsForStructure(structureShape).toString()
         ));
@@ -964,6 +990,7 @@ public class Generator {
 
     private TokenTree structureFromDafnyFunction(final StructureShape structureShape) {
         String structureName = structureShape.getId().getName();
+        String rustStructureName = toPascalCase(structureName);
         String snakeCaseStructureName = toSnakeCase(structureName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
         String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
@@ -973,6 +1000,7 @@ public class Generator {
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "structureName", structureName,
+                "rustStructureName", rustStructureName,
                 "snakeCaseStructureName", snakeCaseStructureName,
                 "dafnyTypesModuleName", dafnyTypesModuleName,
                 "fluentMemberSetters", fluentMemberSettersForStructure(structureShape).toString(),
@@ -985,8 +1013,8 @@ public class Generator {
             dafny_value: ::std::rc::Rc<
                 crate::r#$dafnyTypesModuleName:L::$structureName:L,
             >,
-        ) -> $sdkCrate:L::types::$structureName:L {
-            $sdkCrate:L::types::$structureName:L::builder()
+        ) -> $sdkCrate:L::types::$rustStructureName:L {
+            $sdkCrate:L::types::$rustStructureName:L::builder()
                   $fluentMemberSetters:L
                   .build()
                   $unwrapIfNeeded:L
@@ -1059,21 +1087,23 @@ public class Generator {
 
     private TokenTree enumToDafnyFunction(final Shape enumShape) {
         String enumName = enumShape.getId().getName();
+        String rustEnumName = toPascalCase(enumName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
         String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "enumName", enumName,
+                "rustEnumName", rustEnumName,
                 "dafnyTypesModuleName", dafnyTypesModuleName
         );
 
-        String sdkTypeName = evalTemplate("$sdkCrate:L::types::$enumName:L", variables);
+        String sdkTypeName = evalTemplate("$sdkCrate:L::types::$rustEnumName:L", variables);
 
         var prelude = TokenTree.of(evalTemplate("""
         #[allow(dead_code)]
          
         pub fn to_dafny(
-            value: $sdkCrate:L::types::$enumName:L,
+            value: $sdkCrate:L::types::$rustEnumName:L,
         ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$enumName:L>{
             ::std::rc::Rc::new(match value {
 
@@ -1109,21 +1139,23 @@ public class Generator {
 
     private TokenTree enumFromDafnyFunction(final Shape enumShape) {
         String enumName = enumShape.getId().getName();
+        String rustEnumName = toPascalCase(enumName);
         String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
         String dafnyTypesModuleName = "software::amazon::cryptography::services::%s::internaldafny::types".formatted(sdkId);
         Map<String, String> variables = Map.of(
                 "sdkCrate", "aws_sdk_" + sdkId,
                 "enumName", enumName,
+                "rustEnumName", rustEnumName,
                 "dafnyTypesModuleName", dafnyTypesModuleName
         );
 
-        String sdkTypeName = evalTemplate("$sdkCrate:L::types::$enumName:L", variables);
+        String sdkTypeName = evalTemplate("$sdkCrate:L::types::$rustEnumName:L", variables);
 
         var prelude = TokenTree.of(evalTemplate("""
         #[allow(dead_code)]
         pub fn from_dafny(
             dafny_value: &crate::r#$dafnyTypesModuleName:L::$enumName:L,
-        ) -> $sdkCrate:L::types::$enumName:L {
+        ) -> $sdkCrate:L::types::$rustEnumName:L {
             match dafny_value {
 
         """, variables));
