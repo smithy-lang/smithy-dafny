@@ -326,10 +326,34 @@ index 00000000..4d66eb2e
 +}
 \ No newline at end of file
 diff --git b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/implementation_from_dafny.rs a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/implementation_from_dafny.rs
-index 0237283a..6f4c59f3 100644
+index 0237283a..162bb766 100644
 --- b/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/implementation_from_dafny.rs
 +++ a/TestModels/SimpleTypes/SimpleBoolean/runtimes/rust/src/implementation_from_dafny.rs
-@@ -2035,6 +2035,52 @@ pub mod r#_SimpleBooleanImpl_Compile {
+@@ -1,6 +1,23 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ 
++pub mod client;
++pub mod types;
++
++/// Common errors and error handling utilities.
++pub mod error;
++
++/// All operations that this crate can perform.
++pub mod operation;
++
++mod conversions;
++
++#[cfg(feature = "wrapped-client")]
++pub mod wrapped;
++
++pub use client::Client;
++pub use types::simple_boolean_config::SimpleBooleanConfig;
++
+ pub mod r#_Wrappers_Compile {
+     pub use dafny_runtime::DafnyPrint;
+     pub use std::cmp::Eq;
+@@ -2035,6 +2052,52 @@ pub mod r#_SimpleBooleanImpl_Compile {
          }
      }
  }
@@ -382,7 +406,7 @@ index 0237283a..6f4c59f3 100644
  pub mod r#_SimpleBooleanImplTest_Compile {
      pub struct _default {}
  
-@@ -2277,52 +2323,6 @@ pub mod r#_WrappedSimpleTypesBooleanTest_Compile {
+@@ -2277,52 +2340,6 @@ pub mod r#_WrappedSimpleTypesBooleanTest_Compile {
          _default::GetBooleanFalse()
      }
  }
