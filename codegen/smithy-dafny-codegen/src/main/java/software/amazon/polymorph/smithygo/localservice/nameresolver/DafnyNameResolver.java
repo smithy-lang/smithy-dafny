@@ -1,7 +1,10 @@
 package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.traits.SensitiveTrait;
 
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -98,6 +101,14 @@ public class DafnyNameResolver {
         return DafnyNameResolver.dafnyTypesNamespace(shape)
                                 .concat(DOT).concat("I")
                                 .concat(shape.toShapeId().getName())
+                                .concat("Client");
+    }
+
+    public static String getDafnyInterfaceClient(final ServiceShape serviceShape,
+                                                 final ServiceTrait awsSdkServiceTrait) {
+        return DafnyNameResolver.dafnyTypesNamespace(serviceShape)
+                                .concat(DOT).concat("I")
+                                .concat(awsSdkServiceTrait.getSdkId())
                                 .concat("Client");
     }
 

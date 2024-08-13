@@ -157,15 +157,19 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
             returnType = "Wrappers.Option";
         }
+        var nilCheck = "";
+        if (isPointerType) {
+            nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
+        }
         builder.append("""
                                func () %s {
-                                   if %s == nil { return %s }
+                                   %s
                                	   fieldValue := dafny.NewMapBuilder()
                                	   for key, val := range %s {
                                		    fieldValue.Add(%s, %s)
                                	   }
                                	   return %s
-                               }()""".formatted(returnType, dataSource, nilWrapIfRequired, dataSource,
+                               }()""".formatted(returnType, nilCheck, dataSource,
                                                 keyTargetShape.accept(
                                                         new AwsSdkToDafnyShapeVisitor(context, "key", writer, isConfigShape, false, false)),
                                                 valueTargetShape.accept(
@@ -218,9 +222,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String booleanShape(BooleanShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        String nilWrapIfRequired = "nil";
+        String nilWrapIfRequired = "false";
         String someWrapIfRequired = "%s%s";
-        String returnType = "interface {}";
+        String returnType = "bool";
         if (this.isOptional) {
             nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
             someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s%s)";
@@ -311,9 +315,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String integerShape(IntegerShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        String nilWrapIfRequired = "nil";
+        String nilWrapIfRequired = "0";
         String someWrapIfRequired = "%s%s";
-        String returnType = "interface {}";
+        String returnType = "int";
         if (this.isOptional) {
             nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
             someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s%s)";
@@ -336,9 +340,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String longShape(LongShape shape) {
-        String nilWrapIfRequired = "nil";
+        String nilWrapIfRequired = "0";
         String someWrapIfRequired = "%s%s";
-        String returnType = "interface {}";
+        String returnType = "int64";
         if (this.isOptional) {
             nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
             someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s%s)";
@@ -366,9 +370,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addUseImports(SmithyGoDependency.stdlib("encoding/binary"));
         writer.addUseImports(SmithyGoDependency.MATH);
 
-        String nilWrapIfRequired = "nil";
+        String nilWrapIfRequired = "dafny.SeqOf()";
         String someWrapIfRequired = "%s";
-        String returnType = "interface {}";
+        String returnType = "dafny.Sequence";
         if (this.isOptional) {
             nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
             someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
@@ -397,11 +401,18 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String unionShape(UnionShape shape) {
-        return "Wrappers.Companion_Option_.Create_None_()";
+        return """
+                func () Wrappers.Option {
+                _ = val
+                return Wrappers.Companion_Option_.Create_None_()
+                }()""";
     }
 
     @Override
     public String timestampShape(TimestampShape shape) {
-        return "Wrappers.Companion_Option_.Create_None_()";
+        if (this.isOptional) {
+            return "Wrappers.Companion_Option_.Create_None_()";
+        }
+        return "dafny.SeqOf()";
     }
 }

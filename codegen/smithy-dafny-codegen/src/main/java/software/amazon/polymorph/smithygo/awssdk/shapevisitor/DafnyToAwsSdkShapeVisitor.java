@@ -7,6 +7,7 @@ import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
@@ -29,6 +30,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;
     private final GoWriter writer;
+    private final ServiceTrait serviceTrait;
     private final boolean isOptional;
 
     public DafnyToAwsSdkShapeVisitor(
@@ -49,6 +51,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         this.dataSource = dataSource;
         this.writer = writer;
         this.isOptional = isOptional;
+        this.serviceTrait = context.model().expectShape(context.settings().getService(context.model()).toShapeId()).getTrait(ServiceTrait.class).get();
     }
 
     @Override
@@ -82,27 +85,38 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     public String structureShape(final StructureShape shape) {
         final var builder = new StringBuilder();
         writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(shape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(shape));
-
-        builder.append("%1$s{".formatted(SmithyNameResolver.smithyTypesNamespaceAws(shape, !(shape.toShapeId().getName().contains("Input") || shape.toShapeId().getName().contains("Output") || shape.toShapeId().getName().contains("Request") || shape.toShapeId().getName().contains("Response"))).concat(".").concat(shape.getId().getName())));
+        var subtype = !(shape.toShapeId().getName().contains("Input") || shape.toShapeId().getName().contains("Output") || shape.toShapeId().getName().contains("Request") || shape.toShapeId().getName().contains("Response"))
+                              || shape.toShapeId().getName().contains("Exception");
+        builder.append("""
+                               func() %s%s {
+                               %s
+                              return %s%s {
+                               """.formatted(this.isOptional ? "*" : "", SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(".").concat(shape.getId().getName()),
+                                             this.isOptional ?
+                                                     """
+                                                     if %s.UnwrapOr(nil) == nil {
+                                                     return nil
+                                                     }""".formatted(dataSource) : "",
+                                             this.isOptional ? "&" : "",
+                                             SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(".").concat(shape.getId().getName()))
+        );
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
             final var memberName = memberShapeEntry.getKey();
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
             //TODO: Is it ever possible for structure to be nil?
-            final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
+            final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource, this.isOptional ? ".UnwrapOr(nil).(%s)".formatted(DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape))) : "",
                                                                        ".Dtor_%s()".formatted(memberName),
-                                                                       memberShape.isOptional() ? ".UnwrapOr(nil)" : "",
-                                                                       memberShape.isOptional() && targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
-            builder.append("%1$s: %2$s%3$s,".formatted(
+                                                                       memberShape.isOptional() && !targetShape.isStructureShape() ? ".UnwrapOr(nil)" : "");
+            builder.append("%1$s: %2$s,".formatted(
                     StringUtils.capitalize(memberName),
-                    targetShape.isStructureShape() ? "&" : "",
                     targetShape.accept(
                             new DafnyToAwsSdkShapeVisitor(context, derivedDataSource, writer, memberShape.isOptional())
                     )
             ));
         }
 
-        return builder.append("}").toString();
+        return builder.append("}}()").toString();
     }
 
     // TODO: smithy-dafny-conversion library
@@ -126,10 +140,10 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                                    break
                                }
                                fieldValue = append(fieldValue, %s%s)}
-                          """.formatted(SmithyNameResolver.getSmithyTypeAws(shape, typeName, true), SmithyNameResolver.getSmithyTypeAws(shape, typeName, true), dataSource, dataSource,
-                                        GoPointableIndex.of(context.model()).isPointable(targetShape) ? "*" : "",
+                          """.formatted(SmithyNameResolver.getSmithyTypeAws(serviceTrait, typeName, true), SmithyNameResolver.getSmithyTypeAws(serviceTrait, typeName, true), dataSource, dataSource,
+                                        GoPointableIndex.of(context.model()).isPointable(targetShape) && !targetShape.isEnumShape() && !targetShape.hasTrait(EnumTrait.class) && !targetShape.isStructureShape() ? "*" : "",
                                         targetShape.accept(
-                                                         new DafnyToAwsSdkShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, false)
+                                                         new DafnyToAwsSdkShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, !targetShape.isStructureShape())
                                                  )));
 
         // Close structure
@@ -198,6 +212,9 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                            func () %s.%s {
                            var u %s.%s
                             //TODO: What to do if nil
+                            if %s == nil {
+                                return u
+                            }
                         	inputEnum := %s.(%s)
                         	index := -1;
                         	for allEnums := dafny.Iterate(%s{}.AllSingletonConstructors()); ; {
@@ -210,8 +227,9 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                         		}
                         	}
                         	return u.Values()[index]
-                        }()""".formatted(SmithyNameResolver.smithyTypesNamespaceAws(shape, true), context.symbolProvider().toSymbol(shape).getName(),
-                                         SmithyNameResolver.smithyTypesNamespaceAws(shape, true), context.symbolProvider().toSymbol(shape).getName(),
+                        }()""".formatted(SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true), context.symbolProvider().toSymbol(shape).getName(),
+                                         SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true), context.symbolProvider().toSymbol(shape).getName(),
+                                         dataSource,
                                          dataSource, DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)),
                                          DafnyNameResolver.getDafnyCompanionStructType(shape, context.symbolProvider().toSymbol(shape)),
                                          DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)));
@@ -232,8 +250,8 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                         		}
                         	}
                         	return u.Values()[index]
-                        }()""".formatted(SmithyNameResolver.smithyTypesNamespaceAws(shape, true), context.symbolProvider().toSymbol(shape).getName(),
-                                         SmithyNameResolver.smithyTypesNamespaceAws(shape, true), context.symbolProvider().toSymbol(shape).getName(),
+                        }()""".formatted(SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true), context.symbolProvider().toSymbol(shape).getName(),
+                                         SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true), context.symbolProvider().toSymbol(shape).getName(),
                                          dataSource,
                                          DafnyNameResolver.getDafnyCompanionStructType(shape, context.symbolProvider().toSymbol(shape)),
                                          DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)));

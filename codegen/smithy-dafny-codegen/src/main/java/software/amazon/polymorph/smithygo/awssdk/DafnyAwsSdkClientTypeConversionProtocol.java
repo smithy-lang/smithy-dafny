@@ -6,9 +6,11 @@ import software.amazon.polymorph.smithygo.codegen.AddOperationShapes;
 import software.amazon.polymorph.smithygo.codegen.ApplicationProtocol;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoDelegator;
+import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -63,7 +65,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                         writer.write("""
                                              func $L(nativeInput $L)($L) {
                                                  ${C|}
-                                             }""", awsNormalizedInputToDafnyMethodName, SmithyNameResolver.getSmithyTypeAws(awsNormalizedInputShape, awsNormalizedInputSymbol, false),
+                                             }""", awsNormalizedInputToDafnyMethodName, SmithyNameResolver.getSmithyTypeAws(serviceShape.expectTrait(ServiceTrait.class), awsNormalizedInputSymbol, false),
                                      DafnyNameResolver.getDafnyType(dafnyNonNormalizedModel.expectShape(dafnyInput), dafnyInputSymbol),
                                      writer.consumer(w -> generateRequestSerializer(context, awsNormalizedOperation, context.writerDelegator())));
                     });
@@ -84,7 +86,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                                              func $L(nativeOutput $L)($L) {
                                                  ${C|}
                                              }""", awsNormalizedOutputToDafnyMethodName,
-                                     SmithyNameResolver.getSmithyTypeAws(awsNormalizedOutputShape, awsNormalizedOutputSymbol, false),
+                                     SmithyNameResolver.getSmithyTypeAws(serviceShape.expectTrait(ServiceTrait.class), awsNormalizedOutputSymbol, false),
                                      DafnyNameResolver.getDafnyType(dafnyNonNormalizedModel.expectShape(dafnyOutput), dafnyOutputSymbol),
                                      writer.consumer(w -> generateResponseSerializer(context, awsNormalizedOperation, context.writerDelegator())));
                     });
@@ -116,7 +118,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                                              func $L(dafnyInput $L)($L) {
                                                  ${C|}
                                              }""", awsNormalizedInputFromDafnyMethodName, DafnyNameResolver.getDafnyType(dafnyNonNormalizedModel.expectShape(dafnyInput), dafnyInputSymbol),
-                                     SmithyNameResolver.getSmithyTypeAws(awsNormalizedInputShape, awsNormalizedInputSymbol, false),
+                                     SmithyNameResolver.getSmithyTypeAws(serviceShape.expectTrait(ServiceTrait.class), awsNormalizedInputSymbol, false),
                                      writer.consumer(w -> generateRequestDeserializer(context, awsNormalizedOperationShape, context.writerDelegator())));
                     });
                 }
@@ -136,7 +138,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                                              func $L(dafnyOutput $L)($L) {
                                                  ${C|}
                                              }""", awsNormalizedOutputFromDafnyMethodName, DafnyNameResolver.getDafnyType(dafnyNonNormalizedModel.expectShape(dafnyOutput), dafnyOutputSymbol),
-                                     SmithyNameResolver.getSmithyTypeAws(awsNormalizedOutputShape, awsNormalizedOutputSymbol, false),
+                                     SmithyNameResolver.getSmithyTypeAws(serviceShape.expectTrait(ServiceTrait.class), awsNormalizedOutputSymbol, false),
                                      writer.consumer(w -> generateResponseDeserializer(context, awsNormalizedOperationShape, context.writerDelegator())));
                     });
                 }
@@ -249,7 +251,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                 final var getInputToDafnyMethodName = SmithyNameResolver.getToDafnyMethodName(serviceShape, errorShape, "");
 
                 context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(errorShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(errorShape), writer -> {
-                    writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSdkNamespace(errorShape.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespaceAws(errorShape, true));
+                    writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSdkNamespace(errorShape.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true));
                     writer.write("""
                                          func $L(nativeInput types.$L)($L) {
                                              ${C|}
@@ -293,13 +295,13 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                                                 }
                                                 """, DafnyNameResolver.dafnyTypesNamespace(serviceShape),
                                         writer.consumer(w -> {
-                                            for (var error : serviceShape.getErrors()) {
+                                            for (var error : errorShapes) {
                                                 w.write("""
-                                                                  case $L:
-                                                                      return $L(err.($L))
-                                                                """, SmithyNameResolver.getSmithyTypeAws(awsNormalizedModel.expectShape(error), context.symbolProvider().toSymbol(awsNormalizedModel.expectShape(error)), true),
-                                                        SmithyNameResolver.getToDafnyMethodName(serviceShape, awsNormalizedModel.expectShape(error), ""),
-                                                        SmithyNameResolver.getSmithyTypeAws(awsNormalizedModel.expectShape(error), context.symbolProvider().toSymbol(awsNormalizedModel.expectShape(error)), true));
+                                                                  case *$L:
+                                                                      return $L(*err.(*$L))
+                                                                """, SmithyNameResolver.getSmithyTypeAws(serviceShape.expectTrait(ServiceTrait.class), context.symbolProvider().toSymbol(awsNormalizedModel.expectShape(error.toShapeId())), true),
+                                                        SmithyNameResolver.getToDafnyMethodName(serviceShape, awsNormalizedModel.expectShape(error.toShapeId()), ""),
+                                                        SmithyNameResolver.getSmithyTypeAws(serviceShape.expectTrait(ServiceTrait.class), context.symbolProvider().toSymbol(awsNormalizedModel.expectShape(error.toShapeId())), true));
                                             }
                                         })
                            );
@@ -318,7 +320,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                 alreadyVisited.add(errorShape.toShapeId());
                 final var getOutputFromDafnyMethodName = SmithyNameResolver.getFromDafnyMethodName(serviceShape, errorShape, "");
                 context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(errorShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(errorShape), writer -> {
-                    writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSdkNamespace(errorShape.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespaceAws(errorShape, true));
+                    writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSdkNamespace(errorShape.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true));
                     writer.write("""
                                          func $L(dafnyOutput $L)(types.$L) {
                                              ${C|}
@@ -339,9 +341,10 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
         }
 
         context.writerDelegator().useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+            writer.addUseImports(SmithyGoDependency.FMT);
             writer.write("""
                                  func OpaqueError_Output_FromDafny(dafnyOutput $L.Error)(error) {
-                                     return fmt.Errorf(dafnyOutput.Dtor_obj())
+                                     return fmt.Errorf(fmt.Sprintf("%v", dafnyOutput.Dtor_obj()))
                                  }""",
                          DafnyNameResolver.dafnyTypesNamespace(serviceShape));
         });
@@ -358,12 +361,13 @@ public class DafnyAwsSdkClientTypeConversionProtocol implements ProtocolGenerato
                                                 }
                                                 """, DafnyNameResolver.dafnyTypesNamespace(serviceShape),
                                         writer.consumer(w -> {
-                                            for (var error : serviceShape.getErrors()) {
+                                            for (var error : awsNormalizedModel.getShapesWithTrait(ErrorTrait.class)) {
                                                 w.write("""
                                                                 if err.Is_$L() {
-                                                                    return $L(err)
+                                                                    e := $L(err)
+                                                                    return &e
                                                                 }
-                                                                """, error.getName(), SmithyNameResolver.getFromDafnyMethodName(serviceShape, awsNormalizedModel.expectShape(error), ""));
+                                                                """, error.toShapeId().getName(), SmithyNameResolver.getFromDafnyMethodName(serviceShape, awsNormalizedModel.expectShape(error.toShapeId()), ""));
                                             }
                                         })
                            );
