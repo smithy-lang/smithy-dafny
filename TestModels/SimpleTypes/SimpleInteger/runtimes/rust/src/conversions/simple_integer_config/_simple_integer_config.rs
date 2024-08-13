@@ -4,15 +4,15 @@
 pub fn to_dafny(
     value: crate::types::simple_integer_config::SimpleIntegerConfig,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig,
+    crate::simple::types::integer::internaldafny::types::SimpleIntegerConfig,
 > {
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig::SimpleIntegerConfig {})
+    ::std::rc::Rc::new(crate::r#simple::types::integer::internaldafny::types::SimpleIntegerConfig::SimpleIntegerConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dtypes_dinteger_dinternaldafny_dtypes::SimpleIntegerConfig,
+        crate::r#simple::types::integer::internaldafny::types::SimpleIntegerConfig,
     >,
 ) -> crate::types::simple_integer_config::SimpleIntegerConfig {
     crate::types::simple_integer_config::SimpleIntegerConfig {}

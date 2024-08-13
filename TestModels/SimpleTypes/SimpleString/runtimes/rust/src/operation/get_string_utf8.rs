@@ -21,7 +21,7 @@ impl GetStringUTF8 {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetStringUTF8(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_string_utf8::_get_string_utf8_output::from_dafny(
