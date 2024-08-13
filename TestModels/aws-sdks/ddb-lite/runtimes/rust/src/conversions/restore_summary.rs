@@ -11,8 +11,8 @@ pub fn to_dafny(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::RestoreSummary::RestoreSummary {
         SourceBackupArn: crate::standard_library_conversions::ostring_to_dafny(&value.source_backup_arn),
  SourceTableArn: crate::standard_library_conversions::ostring_to_dafny(&value.source_table_arn),
- RestoreDateTime: crate::standard_library_conversions::otimestamp_to_dafny(&value.restore_date_time),
- RestoreInProgress: crate::standard_library_conversions::obool_to_dafny(value.restore_in_progress),
+ RestoreDateTime: crate::standard_library_conversions::timestamp_to_dafny(&value.restore_date_time),
+ RestoreInProgress: value.restore_in_progress,
     }
   )
 } #[allow(dead_code)]
@@ -24,8 +24,8 @@ pub fn from_dafny(
     aws_sdk_dynamodb::types::RestoreSummary::builder()
           .set_source_backup_arn(crate::standard_library_conversions::ostring_from_dafny(dafny_value.SourceBackupArn().clone()))
  .set_source_table_arn(crate::standard_library_conversions::ostring_from_dafny(dafny_value.SourceTableArn().clone()))
- .set_restore_date_time(crate::standard_library_conversions::otimestamp_from_dafny(dafny_value.RestoreDateTime().clone()))
- .set_restore_in_progress(crate::standard_library_conversions::obool_from_dafny(dafny_value.RestoreInProgress().clone()))
+ .set_restore_date_time(Some(crate::standard_library_conversions::timestamp_from_dafny(dafny_value.RestoreDateTime().clone())))
+ .set_restore_in_progress(Some( dafny_value.RestoreInProgress() .clone()))
           .build()
-
+          .unwrap()
 }

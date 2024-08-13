@@ -28,9 +28,9 @@ pub fn ostring_from_dafny(
     }
 }
 
-pub fn obool_to_dafny(input: Option<bool>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<bool>> {
+pub fn obool_to_dafny(input: &Option<bool>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<bool>> {
     let dafny_value = match input {
-        Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
+        Some(b) => crate::_Wrappers_Compile::Option::Some { value: *b },
         None => crate::_Wrappers_Compile::Option::None {},
     };
     ::std::rc::Rc::new(dafny_value)
@@ -60,9 +60,9 @@ pub fn oint_from_dafny(input: ::std::rc::Rc<crate::_Wrappers_Compile::Option<i32
     }
 }
 
-pub fn olong_to_dafny(input: Option<i64>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<i64>> {
+pub fn olong_to_dafny(input: &Option<i64>) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<i64>> {
     let dafny_value = match input {
-        Some(b) => crate::_Wrappers_Compile::Option::Some { value: b },
+        Some(b) => crate::_Wrappers_Compile::Option::Some { value: *b },
         None => crate::_Wrappers_Compile::Option::None {},
     };
     ::std::rc::Rc::new(dafny_value)
@@ -152,7 +152,7 @@ pub fn odouble_from_dafny(
 }
 
 pub fn timestamp_to_dafny(
-    input: ::aws_smithy_types::DateTime,
+    input: &::aws_smithy_types::DateTime,
 ) -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
     ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&input.to_string())
 }
@@ -162,7 +162,7 @@ pub fn otimestamp_to_dafny(
 ) -> ::std::rc::Rc<crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
     let dafny_value = match input {
         Some(f) => crate::_Wrappers_Compile::Option::Some {
-            value: timestamp_to_dafny(*f),
+            value: timestamp_to_dafny(f),
         },
         None => crate::_Wrappers_Compile::Option::None {},
     };

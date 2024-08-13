@@ -9,7 +9,7 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::StreamSpecification>{
   ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::StreamSpecification::StreamSpecification {
-        StreamEnabled: crate::standard_library_conversions::obool_to_dafny(value.stream_enabled),
+        StreamEnabled: value.stream_enabled,
  StreamViewType: ::std::rc::Rc::new(match &value.stream_view_type {
     Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::stream_view_type::to_dafny(x.clone()) },
     None => crate::_Wrappers_Compile::Option::None { }
@@ -24,7 +24,7 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::StreamSpecification {
     aws_sdk_dynamodb::types::StreamSpecification::builder()
-          .set_stream_enabled(crate::standard_library_conversions::obool_from_dafny(dafny_value.StreamEnabled().clone()))
+          .set_stream_enabled(Some( dafny_value.StreamEnabled() .clone()))
  .set_stream_view_type(match &**dafny_value.StreamViewType() {
     crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::stream_view_type::from_dafny(value)
@@ -33,5 +33,5 @@ pub fn from_dafny(
 }
 )
           .build()
-
+          .unwrap()
 }

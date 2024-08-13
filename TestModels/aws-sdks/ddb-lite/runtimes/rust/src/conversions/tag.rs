@@ -9,8 +9,8 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Tag>{
   ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Tag::Tag {
-        Key: crate::standard_library_conversions::ostring_to_dafny(&value.key) .Extract(),
- Value: crate::standard_library_conversions::ostring_to_dafny(&value.value) .Extract(),
+        Key: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&value.key),
+ Value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&value.value),
     }
   )
 } #[allow(dead_code)]
@@ -23,5 +23,5 @@ pub fn from_dafny(
           .set_key(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.Key()) ))
  .set_value(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.Value()) ))
           .build()
-
+          .unwrap()
 }

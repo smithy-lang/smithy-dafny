@@ -9,16 +9,13 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::GlobalSecondaryIndex>{
   ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::GlobalSecondaryIndex::GlobalSecondaryIndex {
-        IndexName: crate::standard_library_conversions::ostring_to_dafny(&value.index_name) .Extract(),
+        IndexName: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&value.index_name),
  KeySchema: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.key_schema,
     |e| crate::conversions::key_schema_element::to_dafny(&e)
 ,
 )
 ,
- Projection: ::std::rc::Rc::new(match &value.projection {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::projection::to_dafny(&x) },
-    None => crate::_Wrappers_Compile::Option::None { }
-})
+ Projection: crate::conversions::projection::to_dafny(&value.projection.clone().unwrap())
 ,
  ProvisionedThroughput: ::std::rc::Rc::new(match &value.provisioned_throughput {
     Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput::to_dafny(&x) },
@@ -49,5 +46,5 @@ pub fn from_dafny(
 }
 )
           .build()
-
+          .unwrap()
 }

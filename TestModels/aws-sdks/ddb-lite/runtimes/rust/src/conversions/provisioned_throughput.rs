@@ -9,8 +9,8 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ProvisionedThroughput>{
   ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ProvisionedThroughput::ProvisionedThroughput {
-        ReadCapacityUnits: crate::standard_library_conversions::olong_to_dafny(&value.read_capacity_units),
- WriteCapacityUnits: crate::standard_library_conversions::olong_to_dafny(&value.write_capacity_units),
+        ReadCapacityUnits: value.read_capacity_units,
+ WriteCapacityUnits: value.write_capacity_units,
     }
   )
 } #[allow(dead_code)]
@@ -20,8 +20,8 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::ProvisionedThroughput {
     aws_sdk_dynamodb::types::ProvisionedThroughput::builder()
-          .set_read_capacity_units(crate::standard_library_conversions::olong_from_dafny(dafny_value.ReadCapacityUnits().clone()))
- .set_write_capacity_units(crate::standard_library_conversions::olong_from_dafny(dafny_value.WriteCapacityUnits().clone()))
+          .set_read_capacity_units(Some( dafny_value.ReadCapacityUnits() .clone()))
+ .set_write_capacity_units(Some( dafny_value.WriteCapacityUnits() .clone()))
           .build()
-
+          .unwrap()
 }

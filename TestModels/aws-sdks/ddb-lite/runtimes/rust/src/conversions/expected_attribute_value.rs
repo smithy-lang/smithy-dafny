@@ -14,7 +14,7 @@ pub fn to_dafny(
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
- Exists: crate::standard_library_conversions::obool_to_dafny(value.exists),
+ Exists: crate::standard_library_conversions::obool_to_dafny(&value.exists),
  ComparisonOperator: ::std::rc::Rc::new(match &value.comparison_operator {
     Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::comparison_operator::to_dafny(x.clone()) },
     None => crate::_Wrappers_Compile::Option::None { }

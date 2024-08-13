@@ -30,7 +30,7 @@ pub fn to_dafny(
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
- Backfilling: crate::standard_library_conversions::obool_to_dafny(value.backfilling),
+ Backfilling: crate::standard_library_conversions::obool_to_dafny(&value.backfilling),
  ProvisionedThroughput: ::std::rc::Rc::new(match &value.provisioned_throughput {
     Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput_description::to_dafny(&x) },
     None => crate::_Wrappers_Compile::Option::None { }

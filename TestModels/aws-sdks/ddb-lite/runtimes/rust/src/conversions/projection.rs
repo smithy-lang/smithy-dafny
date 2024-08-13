@@ -17,7 +17,7 @@ pub fn to_dafny(
  NonKeyAttributes: ::std::rc::Rc::new(match &value.non_key_attributes {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(e),
+            |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&e),
         )
     },
     None => crate::r#_Wrappers_Compile::Option::None {}

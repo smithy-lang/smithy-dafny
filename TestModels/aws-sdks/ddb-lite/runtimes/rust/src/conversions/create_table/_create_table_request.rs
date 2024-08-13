@@ -8,13 +8,13 @@ pub fn to_dafny(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableInput,
 >{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableInput::CreateTableInput {
-        AttributeDefinitions: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.attribute_definitions,
+        AttributeDefinitions: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.attribute_definitions.clone().unwrap(),
     |e| crate::conversions::attribute_definition::to_dafny(&e)
 ,
 )
 ,
  TableName: crate::standard_library_conversions::ostring_to_dafny(&value.table_name) .Extract(),
- KeySchema: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.key_schema,
+ KeySchema: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.key_schema.clone().unwrap(),
     |e| crate::conversions::key_schema_element::to_dafny(&e)
 ,
 )

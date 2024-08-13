@@ -10,7 +10,7 @@ pub fn to_dafny(
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::PutItemInput::PutItemInput {
         TableName: crate::standard_library_conversions::ostring_to_dafny(&value.table_name) .Extract(),
  Item: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.item.clone().unwrap(),
-    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
+    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
     |v| crate::conversions::attribute_value::to_dafny(&v)
 ,
 )
@@ -19,7 +19,7 @@ pub fn to_dafny(
 ::std::rc::Rc::new(match &value.expected {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
+            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
             |v| crate::conversions::expected_attribute_value::to_dafny(&v)
 ,
         )
@@ -52,8 +52,8 @@ pub fn to_dafny(
 ::std::rc::Rc::new(match &value.expression_attribute_names {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
-            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(v),
+            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
+            |v| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&v),
         )
     },
     None => crate::r#_Wrappers_Compile::Option::None {}
@@ -63,7 +63,7 @@ pub fn to_dafny(
 ::std::rc::Rc::new(match &value.expression_attribute_values {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(k),
+            |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
             |v| crate::conversions::attribute_value::to_dafny(&v)
 ,
         )

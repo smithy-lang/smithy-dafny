@@ -5,7 +5,7 @@
 
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_dynamodb::types::SSEDescription,
+    value: &aws_sdk_dynamodb::types::SseDescription,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::SSEDescription>{
   ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::SSEDescription::SSEDescription {
@@ -28,8 +28,8 @@ pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::SSEDescription,
     >,
-) -> aws_sdk_dynamodb::types::SSEDescription {
-    aws_sdk_dynamodb::types::SSEDescription::builder()
+) -> aws_sdk_dynamodb::types::SseDescription {
+    aws_sdk_dynamodb::types::SseDescription::builder()
           .set_status(match &**dafny_value.Status() {
     crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::sse_status::from_dafny(value)
