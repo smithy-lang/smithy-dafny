@@ -3,12 +3,8 @@ package software.amazon.polymorph.smithyrust.generator;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
-import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
-import software.amazon.smithy.model.node.ArrayNode;
-import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -22,27 +18,12 @@ import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
-import software.amazon.smithy.rust.codegen.client.smithy.ClientCodegenVisitor;
-import software.amazon.smithy.rust.codegen.client.smithy.customizations.ClientCustomizations;
-import software.amazon.smithy.rust.codegen.client.smithy.customizations.HttpAuthDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.customizations.HttpConnectorConfigDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.customizations.IdempotencyTokenDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.customizations.NoAuthDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.customizations.SensitiveOutputDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.customize.ClientCodegenDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.customize.CombinedClientCodegenDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.customize.RequiredCustomizations;
-import software.amazon.smithy.rust.codegen.client.smithy.endpoint.EndpointParamsDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.endpoint.EndpointsDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.generators.client.FluentClientDecorator;
-import software.amazon.smithy.rust.codegen.client.smithy.generators.config.StalledStreamProtectionDecorator;
 
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,57 +31,22 @@ import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
-public class Generator {
+
+// TODO: Thread SimpleCodeWriters through the methods and call the stateful
+// putContext method, instead of trying to work purely functionality with map literals.
+public class RustAwsSdkShimGenerator {
 
     private final Model model;
     private final ServiceShape service;
     private final OperationIndex operationIndex;
 
-
-    public Generator(Model model, ServiceShape service) {
+    public RustAwsSdkShimGenerator(Model model, ServiceShape service) {
         this.model = model;
         this.service = service;
         this.operationIndex = new OperationIndex(model);
     }
 
-    public static void usingSmithyRs(final Model model, final Path outputDir) {
-        // Mock up a PluginContext for the benefit of smithy-rs libraries
-        FileManifest fileManifest = FileManifest.create(outputDir);
-        ObjectNode settingsNode = ObjectNode.builder()
-                .withMember("module", "SomeModule")
-                .withMember("moduleVersion", "1")
-                .withMember("moduleAuthors", ArrayNode.arrayNode())
-                .build();
-        PluginContext context = PluginContext.builder()
-                .model(model)
-                .fileManifest(fileManifest)
-                .settings(settingsNode)
-                .build();
-        Logger logger = Logger.getLogger("TODO");
-
-        ClientCodegenDecorator[] decorators = {
-                new ClientCustomizations(),
-                new RequiredCustomizations(),
-                new FluentClientDecorator(),
-                new EndpointsDecorator(),
-                new EndpointParamsDecorator(),
-                new NoAuthDecorator(),
-                new HttpAuthDecorator(),
-                new HttpConnectorConfigDecorator(),
-                new SensitiveOutputDecorator(),
-                new IdempotencyTokenDecorator(),
-                new StalledStreamProtectionDecorator(),
-                new LocalServiceDecorator()
-        };
-        CombinedClientCodegenDecorator codegenDecorator =
-                CombinedClientCodegenDecorator.Companion.fromClasspath(
-                        context, decorators, logger);
-
-        // ClientCodegenVisitor is the main driver of code generation that traverses the model and generates code
-        new ClientCodegenVisitor(context, codegenDecorator).execute();
-    }
-
-    public void handRolled(final Path outputDir) {
+    public void generate(final Path outputDir) {
         final var rustFiles = rustFiles();
         final LinkedHashMap<Path, TokenTree> tokenTreeMap = new LinkedHashMap<>();
         for (RustFile rustFile : rustFiles) {
@@ -314,7 +260,7 @@ public class Generator {
               }
            }
         }
-                        
+        
         """, variables));
     }
 
@@ -481,7 +427,9 @@ public class Generator {
     private TokenTree fromDafnyForMember(MemberShape member) {
         Shape targetShape = model.expectShape(member.getTarget());
         boolean isRequired = member.hasTrait(RequiredTrait.class);
-        // isRustOption is always true
+        // isRustOption is always true here because we're using .set_foo(...) fluent builder methods
+        // on the Rust side as opposed to just .foo(...), and those all take options
+        // even for required members.
         return fromDafny(targetShape, "dafny_value." + member.getMemberName() + "()", true, !isRequired);
     }
 

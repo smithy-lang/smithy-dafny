@@ -29,7 +29,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
-import software.amazon.polymorph.smithyrust.generator.Generator;
+import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
@@ -687,8 +687,8 @@ public class CodegenEngine {
     }
 
     if (awsSdkStyle) {
-      Generator generator = new Generator(model, serviceShape);
-      generator.handRolled(outputDir);
+      RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(model, serviceShape);
+      generator.generate(outputDir);
     }
 
     handlePatching(TargetLanguage.RUST, outputDir);
