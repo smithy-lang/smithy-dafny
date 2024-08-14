@@ -516,7 +516,8 @@ test_java:
 
 ########################## Rust targets
 
-# TODO: blah blah Rust only supports a single crate for everything
+# The Dafny Rust code generator only supports a single crate for everything,
+# so (among other consequences) we compile src and test code together.
 transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
@@ -526,7 +527,8 @@ transpile_implementation_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
-# TODO:
+# The Dafny Rust code generator only supports a single crate for everything,
+# so we inline all dependencies by not passing `-library` to Dafny.
 transpile_implementation_rust: TRANSPILE_DEPENDENCIES=
 transpile_implementation_rust: STD_LIBRARY=
 transpile_implementation_rust: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
