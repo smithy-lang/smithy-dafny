@@ -548,7 +548,7 @@ _mv_implementation_rust:
 	python3 -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\n$(RUST_EXTERN_MODULE_DECLARATIONS)\n\npub mod', 1) if b'\npub mod' in data else data)" \
 	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs, \
 	)
-	rustfmt runtimes/rust/src/implementation_from_dafny.rs
+	cargo fmt --manifest-path runtimes/rust/Cargo.toml
 	rm -rf implementation_from_dafny-rust
 
 build_rust:
