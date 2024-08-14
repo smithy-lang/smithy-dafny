@@ -8,7 +8,7 @@ Unlike those projects, however,
 this one is also intended to use the Smithy Gradle plugin to build Dafny SDK clients
 in the same way that other `smithy-<language>` tools support.
 
-NOTE: The `sqs.json` in this project was copied unmodified from https://github.com/aws/aws-sdk-js-v3/blob/main/codegen/sdk-codegen/aws-models/sqs.json on March 6, 2023.
+NOTE: The `sqs.json` in this project was copied unmodified from https://github.com/aws/aws-sdk-js-v3/blob/main/codegen/sdk-codegen/aws-models/sqs.json on August 14, 2024.
 Part of the requirements of this workflow is that you shouldn't have to manually modify models.
 
 You should be able to use the standard [projections](https://smithy.io/2.0/guides/building-models/build-config.html#projections) feature of the Smithy Gradle plugin
