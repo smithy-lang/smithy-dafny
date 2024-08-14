@@ -76,84 +76,88 @@ pub fn to_dafny(
 ,
     })
 }
-#[allow(dead_code)]
+ #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableInput,
     >,
     client: aws_sdk_dynamodb::Client,
 ) -> aws_sdk_dynamodb::operation::create_table::builders::CreateTableFluentBuilder {
-    client
-        .create_table()
-        .set_attribute_definitions(Some(
-            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
-                dafny_value.AttributeDefinitions(),
-                |e| crate::conversions::attribute_definition::from_dafny(e.clone()),
-            ),
-        ))
-        .set_table_name(Some(
-            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
-                dafny_value.TableName(),
-            ),
-        ))
-        .set_key_schema(Some(
-            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
-                dafny_value.KeySchema(),
-                |e| crate::conversions::key_schema_element::from_dafny(e.clone()),
-            ),
-        ))
-        .set_local_secondary_indexes(match (*dafny_value.LocalSecondaryIndexes()).as_ref() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
-                    crate::conversions::local_secondary_index::from_dafny(e.clone())
-                }),
-            ),
-            _ => None,
-        })
-        .set_global_secondary_indexes(match (*dafny_value.GlobalSecondaryIndexes()).as_ref() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
-                    crate::conversions::global_secondary_index::from_dafny(e.clone())
-                }),
-            ),
-            _ => None,
-        })
-        .set_billing_mode(match &**dafny_value.BillingMode() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => {
-                Some(crate::conversions::billing_mode::from_dafny(value))
-            }
-            _ => None,
-        })
-        .set_provisioned_throughput(match (*dafny_value.ProvisionedThroughput()).as_ref() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                crate::conversions::provisioned_throughput::from_dafny(value.clone()),
-            ),
-            _ => None,
-        })
-        .set_stream_specification(match (*dafny_value.StreamSpecification()).as_ref() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                crate::conversions::stream_specification::from_dafny(value.clone()),
-            ),
-            _ => None,
-        })
-        .set_sse_specification(match (*dafny_value.SSESpecification()).as_ref() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                crate::conversions::sse_specification::from_dafny(value.clone()),
-            ),
-            _ => None,
-        })
-        .set_tags(match (*dafny_value.Tags()).as_ref() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
-                    crate::conversions::tag::from_dafny(e.clone())
-                }),
-            ),
-            _ => None,
-        })
-        .set_table_class(match &**dafny_value.TableClass() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => {
-                Some(crate::conversions::table_class::from_dafny(value))
-            }
-            _ => None,
-        })
+    client.create_table()
+          .set_attribute_definitions(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(dafny_value.AttributeDefinitions(),
+    |e| crate::conversions::attribute_definition::from_dafny(e.clone())
+,
+)
+ ))
+ .set_table_name(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.TableName()) ))
+ .set_key_schema(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(dafny_value.KeySchema(),
+    |e| crate::conversions::key_schema_element::from_dafny(e.clone())
+,
+)
+ ))
+ .set_local_secondary_indexes(match (*dafny_value.LocalSecondaryIndexes()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e| crate::conversions::local_secondary_index::from_dafny(e.clone())
+,
+            )
+        ),
+    _ => None
+}
+)
+ .set_global_secondary_indexes(match (*dafny_value.GlobalSecondaryIndexes()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e| crate::conversions::global_secondary_index::from_dafny(e.clone())
+,
+            )
+        ),
+    _ => None
+}
+)
+ .set_billing_mode(match &**dafny_value.BillingMode() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::billing_mode::from_dafny(value)
+    ),
+    _ => None,
+}
+)
+ .set_provisioned_throughput(match (*dafny_value.ProvisionedThroughput()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(crate::conversions::provisioned_throughput::from_dafny(value.clone())),
+    _ => None,
+}
+)
+ .set_stream_specification(match (*dafny_value.StreamSpecification()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(crate::conversions::stream_specification::from_dafny(value.clone())),
+    _ => None,
+}
+)
+ .set_sse_specification(match (*dafny_value.SSESpecification()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(crate::conversions::sse_specification::from_dafny(value.clone())),
+    _ => None,
+}
+)
+ .set_tags(match (*dafny_value.Tags()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e| crate::conversions::tag::from_dafny(e.clone())
+,
+            )
+        ),
+    _ => None
+}
+)
+ .set_table_class(match &**dafny_value.TableClass() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::table_class::from_dafny(value)
+    ),
+    _ => None,
+}
+)
 }

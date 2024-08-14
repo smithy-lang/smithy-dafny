@@ -10,7 +10,7 @@ struct Client {
 }
 
 impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
-    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
+    ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
 }
 
 impl dafny_runtime::UpcastObject<dyn crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient> for Client {
@@ -142,28 +142,24 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
 
 #[allow(non_snake_case)]
 impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::_default {
-    pub fn DynamoDBClient() -> ::std::rc::Rc<
+  pub fn DynamoDBClient() -> ::std::rc::Rc<
     crate::r#_Wrappers_Compile::Result<
       ::dafny_runtime::Object<dyn crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>,
       ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
       >
-    >{
-        let rt_result = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build();
-        if rt_result.is_err() {
-            return conversions::error::to_opaque_error_result(rt_result.err());
-        }
-        let rt = rt_result.unwrap();
-
-        let shared_config = rt.block_on(aws_config::load_defaults(
-            aws_config::BehaviorVersion::v2024_03_28(),
-        ));
-        let inner = aws_sdk_dynamodb::Client::new(&shared_config);
-        let client = Client { inner, rt };
-        let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
-        std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success {
-            value: dafny_client,
-        })
+    > {
+    let rt_result = tokio::runtime::Builder::new_current_thread()
+      .enable_all()
+      .build();
+    if rt_result.is_err() {
+      return conversions::error::to_opaque_error_result(rt_result.err());
     }
+    let rt = rt_result.unwrap();
+
+    let shared_config = rt.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+    let inner = aws_sdk_dynamodb::Client::new(&shared_config);
+    let client = Client { inner, rt };
+    let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
+    std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+  }
 }

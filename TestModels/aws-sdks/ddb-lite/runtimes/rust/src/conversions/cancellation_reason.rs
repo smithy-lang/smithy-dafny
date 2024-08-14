@@ -7,7 +7,7 @@
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::CancellationReason,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CancellationReason>{
-    ::std::rc::Rc::new(
+  ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CancellationReason::CancellationReason {
         Item:
 ::std::rc::Rc::new(match &value.item {
@@ -25,8 +25,7 @@ pub fn to_dafny(
  Message: crate::standard_library_conversions::ostring_to_dafny(&value.message),
     }
   )
-}
-#[allow(dead_code)]
+} #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CancellationReason,
@@ -48,4 +47,5 @@ pub fn from_dafny(
  .set_code(crate::standard_library_conversions::ostring_from_dafny(dafny_value.Code().clone()))
  .set_message(crate::standard_library_conversions::ostring_from_dafny(dafny_value.Message().clone()))
           .build()
+
 }
