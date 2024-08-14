@@ -657,8 +657,6 @@ public class CodegenEngine {
       "Rust code generation is incomplete and may not function correctly!"
     );
 
-    // ...so incomplete it's starting out as a no-op and relying on 100% "patching" :)
-
     // Clear out all contents of src first to make sure if we didn't intend to generate it,
     // it doesn't show up as generated code. This ensures patching has the right baseline.
     // It would be great to do this for all languages,
@@ -667,6 +665,10 @@ public class CodegenEngine {
     //
     // Be sure to NOT delete src/implementation_from_dafny.rs though,
     // by temporarily moving it out of src/
+    //
+    // Note this has no effect if we're being run from the Smithy build plugin,
+    // since outputDir will be something like `build/smithyprojections/...`
+    // and therefore not have any existing content.
     Path outputSrcDir = outputDir.resolve("src");
     Path implementationFromDafnyPath = outputSrcDir.resolve(
       "implementation_from_dafny.rs"

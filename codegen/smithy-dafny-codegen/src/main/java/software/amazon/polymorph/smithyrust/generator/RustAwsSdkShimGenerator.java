@@ -31,8 +31,12 @@ import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
-
-// TODO: Thread SimpleCodeWriters through the methods and call the stateful
+/**
+ * Generates all Rust modules needed to wrap
+ * a Rust AWS SDK into a Dafny SDK.
+ */
+// TODO: There is a lot of duplication in the various calls to evalTemplate.
+// The best way to clean this up is to thread SimpleCodeWriters through the methods and use the stateful
 // putContext method, instead of trying to work purely functionality with map literals.
 public class RustAwsSdkShimGenerator {
 
@@ -53,6 +57,27 @@ public class RustAwsSdkShimGenerator {
             tokenTreeMap.put(rustFile.path(), rustFile.content());
         }
         IOUtils.writeTokenTreesIntoDir(tokenTreeMap, outputDir);
+    }
+
+    private Set<RustFile> rustFiles() {
+        ServiceShape service = model.getServiceShapes().stream().findFirst().get();
+
+        Set<RustFile> result = new HashSet<>();
+        result.add(clientModule());
+        result.addAll(allErrorShapes()
+                .map(errorShape -> errorConversionModule(service, errorShape))
+                .collect(Collectors.toSet()));
+
+        result.addAll(model.getStringShapesWithTrait(EnumTrait.class).stream()
+                .map(enumShape -> enumConversionModule(service, enumShape))
+                .collect(Collectors.toSet()));
+
+        result.add(conversionsModuleFile(model, service));
+        result.addAll(allOperationConversionModules());
+        result.addAll(allStructureConversionModules());
+        result.add(conversionsErrorModule(model, service));
+
+        return result;
     }
 
     private RustFile clientModule() {
@@ -173,29 +198,6 @@ public class RustAwsSdkShimGenerator {
                 .flatMap(operationShape -> operationShape.getErrors().stream())
                 .distinct()
                 .map(errorShapeId -> model.expectShape(errorShapeId, StructureShape.class));
-    }
-
-    private Set<RustFile> rustFiles() {
-        ServiceShape service = model.getServiceShapes().stream().findFirst().get();
-
-        Set<RustFile> result = new HashSet<>();
-        result.add(clientModule());
-        result.addAll(allErrorShapes()
-                .map(errorShape -> errorConversionModule(service, errorShape))
-                .collect(Collectors.toSet()));
-
-        result.addAll(model.getStringShapesWithTrait(EnumTrait.class).stream()
-                .map(enumShape -> enumConversionModule(service, enumShape))
-                .collect(Collectors.toSet()));
-
-        result.add(conversionsModuleFile(model, service));
-        result.addAll(allOperationConversionModules());
-        result.addAll(allStructureConversionModules());
-        result.add(conversionsErrorModule(model, service));
-
-        result.add(libFile());
-
-        return result;
     }
 
     private Set<RustFile> allOperationConversionModules() {
@@ -433,6 +435,14 @@ public class RustAwsSdkShimGenerator {
         return fromDafny(targetShape, "dafny_value." + member.getMemberName() + "()", true, !isRequired);
     }
 
+    /**
+     * @param isRustOption Whether the Rust type is an Option<...> or not.
+     *                     Rust's structures avoid Options when not strictly necessary depending on context.
+     * @param isDafnyOption Whether the Dafny type is an Option<...> or not.
+     *                      Dafny tends to be much more consistent about this.
+     */
+    // TODO: There is obviously a lot of duplication here that should be easy to clean up.
+    // TODO: Some cases do not handle all combinations of isru
     private TokenTree fromDafny(final Shape shape, final String dafnyValue, boolean isRustOption, boolean isDafnyOption) {
         return switch (shape.getType()) {
             case STRING -> {
@@ -611,12 +621,22 @@ public class RustAwsSdkShimGenerator {
         Shape targetShape = model.expectShape(member.getTarget());
         String snakeCaseMemberName = toSnakeCase(member.getMemberName());
         boolean isRequired = member.hasTrait(RequiredTrait.class);
+        // These rules were mostly reverse-engineered from inspection of Rust SDKs,
+        // and may not be complete!
         boolean isRustRequired =
                 (isRequired && !operationIndex.isOutputStructure(parent) && !operationIndex.isInputStructure(parent) && !targetShape.isStructureShape())
             || (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape());
         return toDafny(targetShape, "value." + snakeCaseMemberName, !isRustRequired, !isRequired);
     }
 
+    /**
+     * @param isRustOption Whether the Rust type is an Option<...> or not.
+     *                     Rust's structures avoid Options when not strictly necessary depending on context.
+     * @param isDafnyOption Whether the Dafny type is an Option<...> or not.
+     *                      Dafny tends to be much more consistent about this.
+     *                      We generally trust that Dafny codegen aligns with the constraints,
+     *                      and hence is it safe to call unwrap() on Rust options when necessary.
+     */
     private TokenTree toDafny(final Shape shape, final String rustValue, boolean isRustOption, boolean isDafnyOption) {
         return switch (shape.getType()) {
             case STRING -> {
@@ -793,15 +813,6 @@ public class RustAwsSdkShimGenerator {
         };
     }
 
-    private RustFile libFile() {
-        return new RustFile(Path.of("src", "lib.rs"),
-                TokenTree.of("""
-                        mod client;
-                        mod conversions;
-                        pub mod implementation_from_dafny;
-                        """));
-    }
-
     private RustFile conversionsErrorModule(final Model model, final ServiceShape service) {
         TokenTree modulesDeclarations = declarePubModules(allErrorShapes()
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName())));
@@ -855,13 +866,16 @@ public class RustAwsSdkShimGenerator {
                 .stream()
                 .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
 
+        // smithy-dafny generally generates code for all shapes in the same namespace,
+        // whereas most smithy code generators generate code for all shapes in the service closure.
+        // Here we filter to "normal" structures and unions.
         Stream<String> structureModules = model.getStructureShapes()
                 .stream()
-                .filter(this::isNormalStructure)
+                .filter(this::shouldGenerateStructForStructure)
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
         Stream<String> unionModules = model.getUnionShapes()
                 .stream()
-                .filter(this::isNormalUnion)
+                .filter(this::shouldGenerateEnumForUnion)
                 .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
         Stream<String> enumModules = model.getStringShapesWithTrait(EnumTrait.class).stream()
@@ -911,7 +925,7 @@ public class RustAwsSdkShimGenerator {
         return new RustFile(path, TokenTree.of(evaluated));
     }
 
-    private boolean isNormalStructure(StructureShape structureShape) {
+    private boolean shouldGenerateStructForStructure(StructureShape structureShape) {
         return !operationIndex.isInputStructure(structureShape)
                 && !operationIndex.isOutputStructure(structureShape)
                 && !structureShape.hasTrait(ErrorTrait.class)
@@ -919,13 +933,13 @@ public class RustAwsSdkShimGenerator {
                 && structureShape.getId().getNamespace().equals(service.getId().getNamespace());
     }
 
-    private boolean isNormalUnion(UnionShape unionShape) {
+    private boolean shouldGenerateEnumForUnion(UnionShape unionShape) {
         return unionShape.getId().getNamespace().equals(service.getId().getNamespace());
     }
 
     private Set<RustFile> allStructureConversionModules() {
         return model.getStructureShapes().stream()
-                .filter(this::isNormalStructure)
+                .filter(this::shouldGenerateStructForStructure)
                 .map(this::structureConversionModule)
                 .collect(Collectors.toSet());
     }
@@ -1000,9 +1014,22 @@ public class RustAwsSdkShimGenerator {
         """, variables));
     }
 
+    private Set<RustFile> allUnionConversionModules() {
+        return model.getUnionShapes().stream()
+                .filter(this::shouldGenerateEnumForUnion)
+                .map(this::unionConversionModule)
+                .collect(Collectors.toSet());
+    }
+
+    private RustFile unionConversionModule(final UnionShape unionShape) {
+        String unionName = unionShape.getId().getName();
+        String snakeCaseName = toSnakeCase(unionName);
+        Path path = Path.of("src", "conversions", snakeCaseName + ".rs");
+        return new RustFile(path, TokenTree.of(unionToDafnyFunction(unionShape), unionFromDafnyFunction(unionShape)));
+    }
+
     private TokenTree unionToDafnyFunction(final UnionShape unionShape) {
         String structureName = unionShape.getId().getName();
-        String snakeCaseName = toSnakeCase(structureName);
         String template = """
         // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
         
