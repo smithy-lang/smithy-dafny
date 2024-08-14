@@ -2,15 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.smithy.dafny.codegen;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import software.amazon.polymorph.CodegenEngine;
-import software.amazon.polymorph.smithydafny.DafnyVersion;
-import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.model.node.ObjectNode;
-import software.amazon.smithy.model.node.StringNode;
-import software.amazon.smithy.model.shapes.ShapeId;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -19,6 +10,14 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.polymorph.CodegenEngine;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
+import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.model.node.StringNode;
+import software.amazon.smithy.model.shapes.ShapeId;
 
 class DafnyClientCodegenPluginSettings {
 
@@ -103,9 +102,7 @@ class DafnyClientCodegenPluginSettings {
           case "DOTNET", "CSHARP", "CS" -> Stream.of(
             CodegenEngine.TargetLanguage.DOTNET
           );
-          case "RUST" -> Stream.of(
-            CodegenEngine.TargetLanguage.RUST
-          );
+          case "RUST" -> Stream.of(CodegenEngine.TargetLanguage.RUST);
           case "DAFNY" -> {
             LOGGER.error(
               "Dafny code is always generated, and shouldn't be specified explicitly"

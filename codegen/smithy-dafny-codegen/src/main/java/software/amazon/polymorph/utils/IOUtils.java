@@ -3,11 +3,6 @@
 
 package software.amazon.polymorph.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import software.amazon.smithy.utils.IoUtils;
-import software.amazon.smithy.utils.SimpleCodeWriter;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,6 +10,10 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.SimpleCodeWriter;
 
 public class IOUtils {
 

@@ -7,6 +7,22 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import com.squareup.javapoet.ClassName;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -40,23 +56,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.Pair;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CodegenEngine {
 
@@ -689,13 +688,19 @@ public class CodegenEngine {
     }
 
     if (awsSdkStyle) {
-      RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(model, serviceShape);
+      RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(
+        model,
+        serviceShape
+      );
       generator.generate(outputDir);
 
       // TODO: This should be part of the StandardLibrary instead,
       // but since the Dafny Rust code generator doesn't yet support multiple crates,
       // we have to inline it instead.
-      writeTemplatedFile("runtimes/rust/standard_library_conversions.rs", Map.of());
+      writeTemplatedFile(
+        "runtimes/rust/standard_library_conversions.rs",
+        Map.of()
+      );
     }
 
     handlePatching(TargetLanguage.RUST, outputDir);
