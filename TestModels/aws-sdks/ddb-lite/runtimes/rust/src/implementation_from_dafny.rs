@@ -225,7 +225,7 @@ pub mod r#_Wrappers_Compile {
         }
         pub fn MapFailure<_NewR: ::dafny_runtime::DafnyType>(
             self: &::std::rc::Rc<Self>,
-            reWrap: &::std::rc::Rc<dyn::std::ops::Fn(&R) -> _NewR>,
+            reWrap: &::std::rc::Rc<dyn ::std::ops::Fn(&R) -> _NewR>,
         ) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<T, _NewR>> {
             let mut _source4: ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<T, R>> =
                 self.clone();
@@ -544,7 +544,7 @@ pub mod r#_StandardLibrary_Compile {
         }
         pub fn FindIndex<_T: ::dafny_runtime::DafnyType>(
             s: &::dafny_runtime::Sequence<_T>,
-            f: &::std::rc::Rc<dyn::std::ops::Fn(&_T) -> bool>,
+            f: &::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool>,
             i: &::dafny_runtime::_System::nat,
         ) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::_System::nat>>
         {
@@ -565,7 +565,7 @@ pub mod r#_StandardLibrary_Compile {
                         });
                     } else {
                         let mut _in4: ::dafny_runtime::Sequence<_T> = s.clone();
-                        let mut _in5: ::std::rc::Rc<dyn::std::ops::Fn(&_T) -> bool> = f.clone();
+                        let mut _in5: ::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool> = f.clone();
                         let mut _in6: ::dafny_runtime::DafnyInt =
                             i.clone() + ::dafny_runtime::int!(1);
                         s = _in4.clone();
@@ -578,7 +578,7 @@ pub mod r#_StandardLibrary_Compile {
         }
         pub fn Filter<_T: ::dafny_runtime::DafnyType>(
             s: &::dafny_runtime::Sequence<_T>,
-            f: &::std::rc::Rc<dyn::std::ops::Fn(&_T) -> bool>,
+            f: &::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool>,
         ) -> ::dafny_runtime::Sequence<_T> {
             let mut _accumulator: ::dafny_runtime::Sequence<_T> =
                 ::dafny_runtime::seq![] as ::dafny_runtime::Sequence<_T>;
@@ -595,14 +595,14 @@ pub mod r#_StandardLibrary_Compile {
                             .concat(&::dafny_runtime::seq![s.get(&::dafny_runtime::int!(0))]);
                         let mut _in7: ::dafny_runtime::Sequence<_T> =
                             s.drop(&::dafny_runtime::int!(1));
-                        let mut _in8: ::std::rc::Rc<dyn::std::ops::Fn(&_T) -> bool> = f.clone();
+                        let mut _in8: ::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool> = f.clone();
                         s = _in7.clone();
                         f = _in8.clone();
                         continue 'TAIL_CALL_START;
                     } else {
                         let mut _in9: ::dafny_runtime::Sequence<_T> =
                             s.drop(&::dafny_runtime::int!(1));
-                        let mut _in10: ::std::rc::Rc<dyn::std::ops::Fn(&_T) -> bool> = f.clone();
+                        let mut _in10: ::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool> = f.clone();
                         s = _in9.clone();
                         f = _in10.clone();
                         continue 'TAIL_CALL_START;
@@ -643,7 +643,7 @@ pub mod r#_StandardLibrary_Compile {
             s: &::dafny_runtime::Sequence<_T>,
         ) -> ::dafny_runtime::Object<[_T]> {
             let mut a = ::dafny_runtime::MaybePlacebo::<::dafny_runtime::Object<[_T]>>::new();
-            let mut _init0: ::std::rc::Rc<dyn::std::ops::Fn(&::dafny_runtime::DafnyInt) -> _T> = {
+            let mut _init0: ::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> _T> = {
                 let s: ::dafny_runtime::Sequence<_T> = s.clone();
                 {
                     let mut s = s.clone();
@@ -672,7 +672,7 @@ pub mod r#_StandardLibrary_Compile {
         pub fn LexicographicLessOrEqual<_T: ::dafny_runtime::DafnyTypeEq>(
             a: &::dafny_runtime::Sequence<_T>,
             b: &::dafny_runtime::Sequence<_T>,
-            less: &::std::rc::Rc<dyn::std::ops::Fn(&_T, &_T) -> bool>,
+            less: &::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool>,
         ) -> bool {
             ::dafny_runtime::integer_range(::dafny_runtime::int!(0), a.cardinality() + ::dafny_runtime::int!(1)).any(({
           let mut a = a.clone();
@@ -687,7 +687,7 @@ pub mod r#_StandardLibrary_Compile {
         pub fn LexicographicLessOrEqualAux<_T: ::dafny_runtime::DafnyTypeEq>(
             a: &::dafny_runtime::Sequence<_T>,
             b: &::dafny_runtime::Sequence<_T>,
-            less: &::std::rc::Rc<dyn::std::ops::Fn(&_T, &_T) -> bool>,
+            less: &::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool>,
             lengthOfCommonPrefix: &::dafny_runtime::_System::nat,
         ) -> bool {
             lengthOfCommonPrefix.clone() <= b.cardinality()
@@ -717,7 +717,7 @@ pub mod r#_StandardLibrary_Compile {
         }
         pub fn SetToOrderedSequence<_T: ::dafny_runtime::DafnyTypeEq>(
             s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>,
-            less: &::std::rc::Rc<dyn::std::ops::Fn(&_T, &_T) -> bool>,
+            less: &::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool>,
         ) -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> {
             let mut _accumulator: ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> =
                 ::dafny_runtime::seq![] as ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>;
@@ -755,7 +755,7 @@ pub mod r#_StandardLibrary_Compile {
         pub fn IsMinimum<_T: ::dafny_runtime::DafnyTypeEq>(
             a: &::dafny_runtime::Sequence<_T>,
             s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>,
-            less: &::std::rc::Rc<dyn::std::ops::Fn(&_T, &_T) -> bool>,
+            less: &::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool>,
         ) -> bool {
             s.contains(a) && s.iter().all(({
           let mut a = a.clone();
@@ -5210,7 +5210,7 @@ pub mod software {
 
                             pub trait IDynamoDBClient:
                                 ::std::any::Any
-                                + ::dafny_runtime::UpcastObject<dyn::std::any::Any>
+                                + ::dafny_runtime::UpcastObject<dyn ::std::any::Any>
                             {
                                 fn BatchGetItem(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>;
                                 fn CreateTable(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableInput>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>;
@@ -13817,7 +13817,7 @@ pub mod software {
                                         }
                                     }
                                 }
-                                pub fn obj(&self) -> &::dafny_runtime::Object<dyn::std::any::Any> {
+                                pub fn obj(&self) -> &::dafny_runtime::Object<dyn ::std::any::Any> {
                                     match self {
                                         Error::ConditionalCheckFailedException { message } => {
                                             panic!("field does not exist on this variant")
@@ -14488,7 +14488,7 @@ pub mod r#_StandardLibraryInterop_Compile {
     }
 
     impl UpcastObject<dyn Any> for WrappersInterop {
-        ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
+        ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
     }
 }
 pub mod _module {

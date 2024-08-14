@@ -43,7 +43,7 @@ pub fn to_dafny(
  DryRun: crate::standard_library_conversions::obool_to_dafny(&value.dry_run),
     })
 }
- #[allow(dead_code)]
+#[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyRequest,

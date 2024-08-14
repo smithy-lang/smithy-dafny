@@ -536,9 +536,18 @@ transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
+_mv_implementation_rust: RUST_EXTERN_MODULE_DECLARATIONS=$(if $(AWS_SDK_CMD), \
+mod client; \
+mod conversions; \
+mod standard_library_conversions;, )
 _mv_implementation_rust:
 	mkdir -p runtimes/rust/src
-	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
+# Dafny-generated code assumes its output will be the main library file,
+# so we need to splice in module declarations for any extern code.
+	$(if $(AWS_SDK_CMD), \
+	python3 -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\n$(RUST_EXTERN_MODULE_DECLARATIONS)\n\npub mod', 1) if b'\npub mod' in data else data)" \
+	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs, \
+	)
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 

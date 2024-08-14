@@ -7,7 +7,7 @@
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::TableDescription,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TableDescription>{
-  ::std::rc::Rc::new(
+    ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TableDescription::TableDescription {
         AttributeDefinitions: ::std::rc::Rc::new(match &value.attribute_definitions {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
@@ -110,126 +110,128 @@ pub fn to_dafny(
 ,
     }
   )
-} #[allow(dead_code)]
+}
+#[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TableDescription,
     >,
 ) -> aws_sdk_dynamodb::types::TableDescription {
     aws_sdk_dynamodb::types::TableDescription::builder()
-          .set_attribute_definitions(match (*dafny_value.AttributeDefinitions()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(
-            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| crate::conversions::attribute_definition::from_dafny(e.clone())
-,
-            )
-        ),
-    _ => None
-}
-)
- .set_table_name(crate::standard_library_conversions::ostring_from_dafny(dafny_value.TableName().clone()))
- .set_key_schema(match (*dafny_value.KeySchema()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(
-            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| crate::conversions::key_schema_element::from_dafny(e.clone())
-,
-            )
-        ),
-    _ => None
-}
-)
- .set_table_status(match &**dafny_value.TableStatus() {
-    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-        crate::conversions::table_status::from_dafny(value)
-    ),
-    _ => None,
-}
-)
- .set_creation_date_time(crate::standard_library_conversions::otimestamp_from_dafny(dafny_value.CreationDateTime().clone()))
- .set_provisioned_throughput(match (*dafny_value.ProvisionedThroughput()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(crate::conversions::provisioned_throughput_description::from_dafny(value.clone())),
-    _ => None,
-}
-)
- .set_table_size_bytes(crate::standard_library_conversions::olong_from_dafny(dafny_value.TableSizeBytes().clone()))
- .set_item_count(crate::standard_library_conversions::olong_from_dafny(dafny_value.ItemCount().clone()))
- .set_table_arn(crate::standard_library_conversions::ostring_from_dafny(dafny_value.TableArn().clone()))
- .set_table_id(crate::standard_library_conversions::ostring_from_dafny(dafny_value.TableId().clone()))
- .set_billing_mode_summary(match (*dafny_value.BillingModeSummary()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(crate::conversions::billing_mode_summary::from_dafny(value.clone())),
-    _ => None,
-}
-)
- .set_local_secondary_indexes(match (*dafny_value.LocalSecondaryIndexes()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(
-            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| crate::conversions::local_secondary_index_description::from_dafny(e.clone())
-,
-            )
-        ),
-    _ => None
-}
-)
- .set_global_secondary_indexes(match (*dafny_value.GlobalSecondaryIndexes()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(
-            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| crate::conversions::global_secondary_index_description::from_dafny(e.clone())
-,
-            )
-        ),
-    _ => None
-}
-)
- .set_stream_specification(match (*dafny_value.StreamSpecification()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(crate::conversions::stream_specification::from_dafny(value.clone())),
-    _ => None,
-}
-)
- .set_latest_stream_label(crate::standard_library_conversions::ostring_from_dafny(dafny_value.LatestStreamLabel().clone()))
- .set_latest_stream_arn(crate::standard_library_conversions::ostring_from_dafny(dafny_value.LatestStreamArn().clone()))
- .set_global_table_version(crate::standard_library_conversions::ostring_from_dafny(dafny_value.GlobalTableVersion().clone()))
- .set_replicas(match (*dafny_value.Replicas()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(
-            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| crate::conversions::replica_description::from_dafny(e.clone())
-,
-            )
-        ),
-    _ => None
-}
-)
- .set_restore_summary(match (*dafny_value.RestoreSummary()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(crate::conversions::restore_summary::from_dafny(value.clone())),
-    _ => None,
-}
-)
- .set_sse_description(match (*dafny_value.SSEDescription()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(crate::conversions::sse_description::from_dafny(value.clone())),
-    _ => None,
-}
-)
- .set_archival_summary(match (*dafny_value.ArchivalSummary()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(crate::conversions::archival_summary::from_dafny(value.clone())),
-    _ => None,
-}
-)
- .set_table_class_summary(match (*dafny_value.TableClassSummary()).as_ref() {
-    crate::r#_Wrappers_Compile::Option::Some { value } =>
-        Some(crate::conversions::table_class_summary::from_dafny(value.clone())),
-    _ => None,
-}
-)
-          .build()
-
+        .set_attribute_definitions(match (*dafny_value.AttributeDefinitions()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
+                    crate::conversions::attribute_definition::from_dafny(e.clone())
+                }),
+            ),
+            _ => None,
+        })
+        .set_table_name(crate::standard_library_conversions::ostring_from_dafny(
+            dafny_value.TableName().clone(),
+        ))
+        .set_key_schema(match (*dafny_value.KeySchema()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
+                    crate::conversions::key_schema_element::from_dafny(e.clone())
+                }),
+            ),
+            _ => None,
+        })
+        .set_table_status(match &**dafny_value.TableStatus() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => {
+                Some(crate::conversions::table_status::from_dafny(value))
+            }
+            _ => None,
+        })
+        .set_creation_date_time(crate::standard_library_conversions::otimestamp_from_dafny(
+            dafny_value.CreationDateTime().clone(),
+        ))
+        .set_provisioned_throughput(match (*dafny_value.ProvisionedThroughput()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                crate::conversions::provisioned_throughput_description::from_dafny(value.clone()),
+            ),
+            _ => None,
+        })
+        .set_table_size_bytes(crate::standard_library_conversions::olong_from_dafny(
+            dafny_value.TableSizeBytes().clone(),
+        ))
+        .set_item_count(crate::standard_library_conversions::olong_from_dafny(
+            dafny_value.ItemCount().clone(),
+        ))
+        .set_table_arn(crate::standard_library_conversions::ostring_from_dafny(
+            dafny_value.TableArn().clone(),
+        ))
+        .set_table_id(crate::standard_library_conversions::ostring_from_dafny(
+            dafny_value.TableId().clone(),
+        ))
+        .set_billing_mode_summary(match (*dafny_value.BillingModeSummary()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                crate::conversions::billing_mode_summary::from_dafny(value.clone()),
+            ),
+            _ => None,
+        })
+        .set_local_secondary_indexes(match (*dafny_value.LocalSecondaryIndexes()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
+                    crate::conversions::local_secondary_index_description::from_dafny(e.clone())
+                }),
+            ),
+            _ => None,
+        })
+        .set_global_secondary_indexes(match (*dafny_value.GlobalSecondaryIndexes()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
+                    crate::conversions::global_secondary_index_description::from_dafny(e.clone())
+                }),
+            ),
+            _ => None,
+        })
+        .set_stream_specification(match (*dafny_value.StreamSpecification()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                crate::conversions::stream_specification::from_dafny(value.clone()),
+            ),
+            _ => None,
+        })
+        .set_latest_stream_label(crate::standard_library_conversions::ostring_from_dafny(
+            dafny_value.LatestStreamLabel().clone(),
+        ))
+        .set_latest_stream_arn(crate::standard_library_conversions::ostring_from_dafny(
+            dafny_value.LatestStreamArn().clone(),
+        ))
+        .set_global_table_version(crate::standard_library_conversions::ostring_from_dafny(
+            dafny_value.GlobalTableVersion().clone(),
+        ))
+        .set_replicas(match (*dafny_value.Replicas()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
+                    crate::conversions::replica_description::from_dafny(e.clone())
+                }),
+            ),
+            _ => None,
+        })
+        .set_restore_summary(match (*dafny_value.RestoreSummary()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                crate::conversions::restore_summary::from_dafny(value.clone()),
+            ),
+            _ => None,
+        })
+        .set_sse_description(match (*dafny_value.SSEDescription()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                crate::conversions::sse_description::from_dafny(value.clone()),
+            ),
+            _ => None,
+        })
+        .set_archival_summary(match (*dafny_value.ArchivalSummary()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                crate::conversions::archival_summary::from_dafny(value.clone()),
+            ),
+            _ => None,
+        })
+        .set_table_class_summary(match (*dafny_value.TableClassSummary()).as_ref() {
+            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+                crate::conversions::table_class_summary::from_dafny(value.clone()),
+            ),
+            _ => None,
+        })
+        .build()
 }

@@ -5,7 +5,9 @@
 
 pub fn to_dafny(
     value: aws_sdk_dynamodb::types::SseStatus,
-) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::SSEStatus>{
+) -> ::std::rc::Rc<
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::SSEStatus,
+> {
     ::std::rc::Rc::new(match value {
  aws_sdk_dynamodb::types::SseStatus::Enabling => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::SSEStatus::ENABLING {},
  aws_sdk_dynamodb::types::SseStatus::Enabled => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::SSEStatus::ENABLED {},
@@ -20,7 +22,7 @@ pub fn to_dafny(
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
- #[allow(dead_code)]
+#[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::SSEStatus,
 ) -> aws_sdk_dynamodb::types::SseStatus {
