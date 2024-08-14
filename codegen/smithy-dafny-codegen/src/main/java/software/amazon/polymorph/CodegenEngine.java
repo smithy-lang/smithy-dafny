@@ -689,6 +689,11 @@ public class CodegenEngine {
     if (awsSdkStyle) {
       RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(model, serviceShape);
       generator.generate(outputDir);
+
+      // TODO: This should be part of the StandardLibrary instead,
+      // but since the Dafny Rust code generator doesn't yet support multiple crates,
+      // we have to inline it instead.
+      writeTemplatedFile("runtimes/rust/standard_library_conversions.rs", Map.of());
     }
 
     handlePatching(TargetLanguage.RUST, outputDir);

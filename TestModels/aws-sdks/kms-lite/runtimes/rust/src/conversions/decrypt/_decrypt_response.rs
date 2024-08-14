@@ -3,10 +3,10 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_kms::operation::decrypt::DecryptOutput,
+    value: &aws_sdk_kms::operation::decrypt::DecryptOutput
 ) -> ::std::rc::Rc<
     crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptResponse,
-> {
+>{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptResponse::DecryptResponse {
         KeyId: crate::standard_library_conversions::ostring_to_dafny(&value.key_id),
  Plaintext: crate::standard_library_conversions::oblob_to_dafny(&value.plaintext),
