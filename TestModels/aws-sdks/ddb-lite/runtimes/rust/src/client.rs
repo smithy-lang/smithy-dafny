@@ -43,6 +43,18 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
     conversions::create_table::_create_table_response::to_dafny,
     conversions::create_table::to_dafny_error)
 }
+ fn DeleteItem(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DeleteItemInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DeleteItemOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::delete_item::_delete_item_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::delete_item::_delete_item_response::to_dafny,
+    conversions::delete_item::to_dafny_error)
+}
  fn DescribeTable(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DescribeTableInput>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DescribeTableOutput>,

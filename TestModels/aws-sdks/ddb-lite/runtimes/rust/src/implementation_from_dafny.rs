@@ -4590,6 +4590,474 @@ pub mod software {
                             }
 
                             #[derive(PartialEq, Clone)]
+                            pub enum DeleteItemInput {
+                                DeleteItemInput {
+                  TableName: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+                  Key: ::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>,
+                  Expected: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ExpectedAttributeValue>>>>,
+                  ConditionalOperator: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ConditionalOperator>>>,
+                  ReturnValues: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnValue>>>,
+                  ReturnConsumedCapacity: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity>>>,
+                  ReturnItemCollectionMetrics: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics>>>,
+                  ConditionExpression: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
+                  ExpressionAttributeNames: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>>,
+                  ExpressionAttributeValues: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>>>
+                }
+              }
+
+                            impl DeleteItemInput {
+                                pub fn TableName(
+                                    &self,
+                                ) -> &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>
+                                {
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => TableName,
+                                    }
+                                }
+                                pub fn Key(&self) -> &::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>{
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => Key,
+                                    }
+                                }
+                                pub fn Expected(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ExpectedAttributeValue>>>>{
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => Expected,
+                                    }
+                                }
+                                pub fn ConditionalOperator(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ConditionalOperator>>>{
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => ConditionalOperator,
+                                    }
+                                }
+                                pub fn ReturnValues(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnValue>>>{
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => ReturnValues,
+                                    }
+                                }
+                                pub fn ReturnConsumedCapacity(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity>>>{
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => ReturnConsumedCapacity,
+                                    }
+                                }
+                                pub fn ReturnItemCollectionMetrics(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics>>>{
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => ReturnItemCollectionMetrics,
+                                    }
+                                }
+                                pub fn ConditionExpression(
+                                    &self,
+                                ) -> &::std::rc::Rc<
+                                    crate::r#_Wrappers_Compile::Option<
+                                        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+                                    >,
+                                > {
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => ConditionExpression,
+                                    }
+                                }
+                                pub fn ExpressionAttributeNames(
+                                    &self,
+                                ) -> &::std::rc::Rc<
+                                    crate::r#_Wrappers_Compile::Option<
+                                        ::dafny_runtime::Map<
+                                            ::dafny_runtime::Sequence<
+                                                ::dafny_runtime::DafnyCharUTF16,
+                                            >,
+                                            ::dafny_runtime::Sequence<
+                                                ::dafny_runtime::DafnyCharUTF16,
+                                            >,
+                                        >,
+                                    >,
+                                > {
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => ExpressionAttributeNames,
+                                    }
+                                }
+                                pub fn ExpressionAttributeValues(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>>>{
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => ExpressionAttributeValues,
+                                    }
+                                }
+                            }
+
+                            impl Debug for DeleteItemInput {
+                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+                                }
+                            }
+
+                            impl DafnyPrint for DeleteItemInput {
+                                fn fmt_print(
+                                    &self,
+                                    _formatter: &mut ::std::fmt::Formatter,
+                                    _in_seq: bool,
+                                ) -> std::fmt::Result {
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => {
+                                            write!(_formatter, "software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteItemInput.DeleteItemInput(")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                TableName, _formatter, false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                Key, _formatter, false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                Expected, _formatter, false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ConditionalOperator,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ReturnValues,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ReturnConsumedCapacity,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ReturnItemCollectionMetrics,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ConditionExpression,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ExpressionAttributeNames,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ExpressionAttributeValues,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ")")?;
+                                            Ok(())
+                                        }
+                                    }
+                                }
+                            }
+
+                            impl Eq for DeleteItemInput {}
+
+                            impl Hash for DeleteItemInput {
+                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+                                    match self {
+                                        DeleteItemInput::DeleteItemInput {
+                                            TableName,
+                                            Key,
+                                            Expected,
+                                            ConditionalOperator,
+                                            ReturnValues,
+                                            ReturnConsumedCapacity,
+                                            ReturnItemCollectionMetrics,
+                                            ConditionExpression,
+                                            ExpressionAttributeNames,
+                                            ExpressionAttributeValues,
+                                        } => {
+                                            ::std::hash::Hash::hash(TableName, _state);
+                                            ::std::hash::Hash::hash(Key, _state);
+                                            ::std::hash::Hash::hash(Expected, _state);
+                                            ::std::hash::Hash::hash(ConditionalOperator, _state);
+                                            ::std::hash::Hash::hash(ReturnValues, _state);
+                                            ::std::hash::Hash::hash(ReturnConsumedCapacity, _state);
+                                            ::std::hash::Hash::hash(
+                                                ReturnItemCollectionMetrics,
+                                                _state,
+                                            );
+                                            ::std::hash::Hash::hash(ConditionExpression, _state);
+                                            ::std::hash::Hash::hash(
+                                                ExpressionAttributeNames,
+                                                _state,
+                                            );
+                                            ::std::hash::Hash::hash(
+                                                ExpressionAttributeValues,
+                                                _state,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            impl Default for DeleteItemInput {
+                                fn default() -> DeleteItemInput {
+                                    DeleteItemInput::DeleteItemInput {
+                                        TableName: ::std::default::Default::default(),
+                                        Key: ::std::default::Default::default(),
+                                        Expected: ::std::default::Default::default(),
+                                        ConditionalOperator: ::std::default::Default::default(),
+                                        ReturnValues: ::std::default::Default::default(),
+                                        ReturnConsumedCapacity: ::std::default::Default::default(),
+                                        ReturnItemCollectionMetrics:
+                                            ::std::default::Default::default(),
+                                        ConditionExpression: ::std::default::Default::default(),
+                                        ExpressionAttributeNames: ::std::default::Default::default(
+                                        ),
+                                        ExpressionAttributeValues: ::std::default::Default::default(
+                                        ),
+                                    }
+                                }
+                            }
+
+                            impl AsRef<DeleteItemInput> for &DeleteItemInput {
+                                fn as_ref(&self) -> Self {
+                                    self
+                                }
+                            }
+
+                            #[derive(PartialEq, Clone)]
+                            pub enum DeleteItemOutput {
+                                DeleteItemOutput {
+                  Attributes: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>>>,
+                  ConsumedCapacity: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ConsumedCapacity>>>,
+                  ItemCollectionMetrics: ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ItemCollectionMetrics>>>
+                }
+              }
+
+                            impl DeleteItemOutput {
+                                pub fn Attributes(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::dafny_runtime::Map<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>>>>{
+                                    match self {
+                                        DeleteItemOutput::DeleteItemOutput {
+                                            Attributes,
+                                            ConsumedCapacity,
+                                            ItemCollectionMetrics,
+                                        } => Attributes,
+                                    }
+                                }
+                                pub fn ConsumedCapacity(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ConsumedCapacity>>>{
+                                    match self {
+                                        DeleteItemOutput::DeleteItemOutput {
+                                            Attributes,
+                                            ConsumedCapacity,
+                                            ItemCollectionMetrics,
+                                        } => ConsumedCapacity,
+                                    }
+                                }
+                                pub fn ItemCollectionMetrics(&self) -> &::std::rc::Rc<crate::r#_Wrappers_Compile::Option<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::ItemCollectionMetrics>>>{
+                                    match self {
+                                        DeleteItemOutput::DeleteItemOutput {
+                                            Attributes,
+                                            ConsumedCapacity,
+                                            ItemCollectionMetrics,
+                                        } => ItemCollectionMetrics,
+                                    }
+                                }
+                            }
+
+                            impl Debug for DeleteItemOutput {
+                                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                                    ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+                                }
+                            }
+
+                            impl DafnyPrint for DeleteItemOutput {
+                                fn fmt_print(
+                                    &self,
+                                    _formatter: &mut ::std::fmt::Formatter,
+                                    _in_seq: bool,
+                                ) -> std::fmt::Result {
+                                    match self {
+                                        DeleteItemOutput::DeleteItemOutput {
+                                            Attributes,
+                                            ConsumedCapacity,
+                                            ItemCollectionMetrics,
+                                        } => {
+                                            write!(_formatter, "software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteItemOutput.DeleteItemOutput(")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                Attributes, _formatter, false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ConsumedCapacity,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ", ")?;
+                                            ::dafny_runtime::DafnyPrint::fmt_print(
+                                                ItemCollectionMetrics,
+                                                _formatter,
+                                                false,
+                                            )?;
+                                            write!(_formatter, ")")?;
+                                            Ok(())
+                                        }
+                                    }
+                                }
+                            }
+
+                            impl Eq for DeleteItemOutput {}
+
+                            impl Hash for DeleteItemOutput {
+                                fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+                                    match self {
+                                        DeleteItemOutput::DeleteItemOutput {
+                                            Attributes,
+                                            ConsumedCapacity,
+                                            ItemCollectionMetrics,
+                                        } => {
+                                            ::std::hash::Hash::hash(Attributes, _state);
+                                            ::std::hash::Hash::hash(ConsumedCapacity, _state);
+                                            ::std::hash::Hash::hash(ItemCollectionMetrics, _state)
+                                        }
+                                    }
+                                }
+                            }
+
+                            impl Default for DeleteItemOutput {
+                                fn default() -> DeleteItemOutput {
+                                    DeleteItemOutput::DeleteItemOutput {
+                                        Attributes: ::std::default::Default::default(),
+                                        ConsumedCapacity: ::std::default::Default::default(),
+                                        ItemCollectionMetrics: ::std::default::Default::default(),
+                                    }
+                                }
+                            }
+
+                            impl AsRef<DeleteItemOutput> for &DeleteItemOutput {
+                                fn as_ref(&self) -> Self {
+                                    self
+                                }
+                            }
+
+                            #[derive(PartialEq, Clone)]
                             pub enum DescribeTableInput {
                                 DescribeTableInput {
                                     TableName:
@@ -4746,6 +5214,7 @@ pub mod software {
                             {
                                 fn BatchGetItem(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>;
                                 fn CreateTable(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableInput>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>;
+                                fn DeleteItem(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::DeleteItemInput>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::DeleteItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>;
                                 fn DescribeTable(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::DescribeTableInput>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::DescribeTableOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>;
                                 fn GetItem(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemInput>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>;
                                 fn PutItem(&mut self, input: &::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::PutItemInput>) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::PutItemOutput>, ::std::rc::Rc<crate::software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>>>;

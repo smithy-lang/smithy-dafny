@@ -35,6 +35,8 @@ pub mod archival_summary;
 
  pub mod delete;
 
+ pub mod delete_item;
+
  pub mod describe_table;
 
  pub mod error;

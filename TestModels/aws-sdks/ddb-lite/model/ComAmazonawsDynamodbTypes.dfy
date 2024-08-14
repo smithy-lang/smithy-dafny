@@ -171,6 +171,23 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None ,
     nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure> := Option.None
   )
+  datatype DeleteItemInput = | DeleteItemInput (
+    nameonly TableName: TableName ,
+    nameonly Key: Key ,
+    nameonly Expected: Option<ExpectedAttributeMap> := Option.None ,
+    nameonly ConditionalOperator: Option<ConditionalOperator> := Option.None ,
+    nameonly ReturnValues: Option<ReturnValue> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> := Option.None ,
+    nameonly ConditionExpression: Option<ConditionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None
+  )
+  datatype DeleteItemOutput = | DeleteItemOutput (
+    nameonly Attributes: Option<AttributeMap> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
+    nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics> := Option.None
+  )
   datatype DescribeTableInput = | DescribeTableInput (
     nameonly TableName: TableName
   )
@@ -181,6 +198,7 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ghost constructor() {
       BatchGetItem := [];
       CreateTable := [];
+      DeleteItem := [];
       DescribeTable := [];
       GetItem := [];
       PutItem := [];
@@ -191,6 +209,7 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     }
     ghost var BatchGetItem: seq<DafnyCallEvent<BatchGetItemInput, Result<BatchGetItemOutput, Error>>>
     ghost var CreateTable: seq<DafnyCallEvent<CreateTableInput, Result<CreateTableOutput, Error>>>
+    ghost var DeleteItem: seq<DafnyCallEvent<DeleteItemInput, Result<DeleteItemOutput, Error>>>
     ghost var DescribeTable: seq<DafnyCallEvent<DescribeTableInput, Result<DescribeTableOutput, Error>>>
     ghost var GetItem: seq<DafnyCallEvent<GetItemInput, Result<GetItemOutput, Error>>>
     ghost var PutItem: seq<DafnyCallEvent<PutItemInput, Result<PutItemOutput, Error>>>
@@ -255,6 +274,21 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
         && ValidState()
       ensures CreateTableEnsuresPublicly(input, output)
       ensures History.CreateTable == old(History.CreateTable) + [DafnyCallEvent(input, output)]
+
+    predicate DeleteItemEnsuresPublicly(input: DeleteItemInput , output: Result<DeleteItemOutput, Error>)
+    // The public method to be called by library consumers
+    method DeleteItem ( input: DeleteItemInput )
+      returns (output: Result<DeleteItemOutput, Error>)
+      requires
+        && ValidState()
+      modifies Modifies - {History} ,
+               History`DeleteItem
+      // Dafny will skip type parameters when generating a default decreases clause.
+      decreases Modifies - {History}
+      ensures
+        && ValidState()
+      ensures DeleteItemEnsuresPublicly(input, output)
+      ensures History.DeleteItem == old(History.DeleteItem) + [DafnyCallEvent(input, output)]
 
     predicate DescribeTableEnsuresPublicly(input: DescribeTableInput , output: Result<DescribeTableOutput, Error>)
     // The public method to be called by library consumers
@@ -925,6 +959,22 @@ abstract module AbstractComAmazonawsDynamodbOperations {
     ensures
       && ValidInternalConfig?(config)
     ensures CreateTableEnsuresPublicly(input, output)
+
+
+  predicate DeleteItemEnsuresPublicly(input: DeleteItemInput , output: Result<DeleteItemOutput, Error>)
+  // The private method to be refined by the library developer
+
+
+  method DeleteItem ( config: InternalConfig , input: DeleteItemInput )
+    returns (output: Result<DeleteItemOutput, Error>)
+    requires
+      && ValidInternalConfig?(config)
+    modifies ModifiesInternalConfig(config)
+    // Dafny will skip type parameters when generating a default decreases clause.
+    decreases ModifiesInternalConfig(config)
+    ensures
+      && ValidInternalConfig?(config)
+    ensures DeleteItemEnsuresPublicly(input, output)
 
 
   predicate DescribeTableEnsuresPublicly(input: DescribeTableInput , output: Result<DescribeTableOutput, Error>)
