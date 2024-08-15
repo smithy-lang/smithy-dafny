@@ -752,6 +752,53 @@ public class CodegenEngine {
     }
   }
 
+  public void patchAfterTranspiling() {
+    for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
+      switch (lang) {
+        case RUST -> patchRustAfterTranspiling();
+        default -> {}
+      }
+    }
+  }
+
+  private void patchRustAfterTranspiling() {
+    final String extraDeclarations = awsSdkStyle ? extraDeclarationsForSDK() : extraDeclarationsForLocalService();
+
+
+  }
+
+  private String extraDeclarationsForSDK() {
+    return """
+    mod client;
+    mod conversions;
+    mod standard_library_conversions;
+    """;
+  }
+
+  private String extraDeclarationsForLocalService() {
+    final String configStructName = serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
+    final String configSnakeCase = toSnakeCase(configStructName);
+
+    return IOUtils.evalTemplate("""
+            pub mod client;
+            pub mod types;
+            
+            /// Common errors and error handling utilities.
+            pub mod error;
+                        
+            /// All operations that this crate can perform.
+            pub mod operation;
+                        
+            mod conversions;
+                        
+            #[cfg(feature = "wrapped-client")]
+            pub mod wrapped;
+                        
+            pub use client::Client;
+            pub use types::$configSnakeCase:L::configStructName:L;
+            """, Map.of("configSnakeCase", configSnakeCase, "configStructName", configStructName));
+  }
+
   private String runCommand(Path workingDir, String... args) {
     List<String> argsList = List.of(args);
     StringBuilder output = new StringBuilder();
