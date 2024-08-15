@@ -516,7 +516,8 @@ test_java:
 
 ########################## Rust targets
 
-# TODO: blah blah Rust only supports a single crate for everything
+# The Dafny Rust code generator only supports a single crate for everything,
+# so (among other consequences) we compile src and test code together.
 transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
@@ -526,7 +527,8 @@ transpile_implementation_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
-# TODO:
+# The Dafny Rust code generator only supports a single crate for everything,
+# so we inline all dependencies by not passing `-library` to Dafny.
 transpile_implementation_rust: TRANSPILE_DEPENDENCIES=
 transpile_implementation_rust: STD_LIBRARY=
 transpile_implementation_rust: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
@@ -536,9 +538,18 @@ transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
+_mv_implementation_rust: RUST_EXTERN_MODULE_DECLARATIONS=$(if $(AWS_SDK_CMD), \
+mod client; \
+mod conversions; \
+mod standard_library_conversions;, )
 _mv_implementation_rust:
 	mkdir -p runtimes/rust/src
-	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
+# Dafny-generated code assumes its output will be the main library file,
+# so we need to splice in module declarations for any extern code.
+	$(if $(AWS_SDK_CMD), \
+	python3 -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\n$(RUST_EXTERN_MODULE_DECLARATIONS)\n\npub mod', 1) if b'\npub mod' in data else data)" \
+	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs, \
+	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs)
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 
