@@ -12,6 +12,8 @@ buildscript {
 
     repositories {
         mavenCentral()
+        // For smithy-rust packages
+        mavenLocal()
     }
     dependencies {
         "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
@@ -42,6 +44,11 @@ dependencies {
 
     // Used for parsing-based tests
     testImplementation("org.antlr:antlr4:4.9.2")
+
+    // Smithy-Rust
+    implementation("software.amazon.smithy.rust.codegen:codegen-core:0.1.0")
+    implementation("software.amazon.smithy.rust.codegen:codegen-client:0.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
 }
 
 // TODO: add CodeArtifact publishing logic

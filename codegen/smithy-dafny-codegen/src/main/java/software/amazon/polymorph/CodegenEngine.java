@@ -45,6 +45,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
+import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
@@ -655,8 +656,6 @@ public class CodegenEngine {
       "Rust code generation is incomplete and may not function correctly!"
     );
 
-    // ...so incomplete it's starting out as a no-op and relying on 100% "patching" :)
-
     // Clear out all contents of src first to make sure if we didn't intend to generate it,
     // it doesn't show up as generated code. This ensures patching has the right baseline.
     // It would be great to do this for all languages,
@@ -665,6 +664,10 @@ public class CodegenEngine {
     //
     // Be sure to NOT delete src/implementation_from_dafny.rs though,
     // by temporarily moving it out of src/
+    //
+    // Note this has no effect if we're being run from the Smithy build plugin,
+    // since outputDir will be something like `build/smithyprojections/...`
+    // and therefore not have any existing content.
     Path outputSrcDir = outputDir.resolve("src");
     Path implementationFromDafnyPath = outputSrcDir.resolve(
       "implementation_from_dafny.rs"
@@ -682,6 +685,22 @@ public class CodegenEngine {
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+
+    if (awsSdkStyle) {
+      RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(
+        model,
+        serviceShape
+      );
+      generator.generate(outputDir);
+
+      // TODO: This should be part of the StandardLibrary instead,
+      // but since the Dafny Rust code generator doesn't yet support multiple crates,
+      // we have to inline it instead.
+      writeTemplatedFile(
+        "runtimes/rust/standard_library_conversions.rs",
+        Map.of()
+      );
     }
 
     handlePatching(TargetLanguage.RUST, outputDir);

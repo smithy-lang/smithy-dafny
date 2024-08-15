@@ -1,26 +1,32 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 pub mod dependency_timeout_exception;
 
-pub mod disabled_exception;
+ pub mod disabled_exception;
 
-pub mod dry_run_operation_exception;
+ pub mod dry_run_operation_exception;
 
-pub mod incorrect_key_exception;
+ pub mod incorrect_key_exception;
 
-pub mod invalid_ciphertext_exception;
+ pub mod invalid_arn_exception;
 
-pub mod invalid_grant_token_exception;
+ pub mod invalid_ciphertext_exception;
 
-pub mod invalid_key_usage_exception;
+ pub mod invalid_grant_token_exception;
 
-pub mod key_unavailable_exception;
+ pub mod invalid_key_usage_exception;
 
-pub mod kms_internal_exception;
+ pub mod key_unavailable_exception;
 
-pub mod kms_invalid_state_exception;
+ pub mod kms_internal_exception;
 
-pub mod not_found_exception;
+ pub mod kms_invalid_state_exception;
 
-/// Wraps up an arbitrary Rust Error value as a Dafny Error
+ pub mod not_found_exception;
+
+ pub mod unsupported_operation_exception;
+ /// Wraps up an arbitrary Rust Error value as a Dafny Error
 pub fn to_opaque_error<E: 'static>(value: E) ->
   ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
 {
