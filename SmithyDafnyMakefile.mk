@@ -533,25 +533,40 @@ transpile_implementation_rust: TRANSPILE_DEPENDENCIES=
 transpile_implementation_rust: STD_LIBRARY=
 transpile_implementation_rust: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation_rust: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
-transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust
+transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust patch_after_transpile_rust
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
-_mv_implementation_rust: RUST_EXTERN_MODULE_DECLARATIONS=$(if $(AWS_SDK_CMD), \
-mod client; \
-mod conversions; \
-mod standard_library_conversions;, )
 _mv_implementation_rust:
 	mkdir -p runtimes/rust/src
-# Dafny-generated code assumes its output will be the main library file,
-# so we need to splice in module declarations for any extern code.
-	$(if $(AWS_SDK_CMD), \
-	python3 -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\n$(RUST_EXTERN_MODULE_DECLARATIONS)\n\npub mod', 1) if b'\npub mod' in data else data)" \
-	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs, \
-	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs)
+	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
+
+patch_after_transpile_rust:
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _patch_after_transpile_rust ; \
+	done
+
+_patch_after_transpile_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+_patch_after_transpile_rust:
+	cd $(CODEGEN_CLI_ROOT); \
+	./../gradlew run --args="\
+	patch-after-transpile \
+	--dafny-version $(DAFNY_VERSION) \
+	--library-root $(LIBRARY_ROOT) \
+	$(OUTPUT_RUST) \
+	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
+	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
+	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	--namespace $($(namespace_var)) \
+	$(AWS_SDK_CMD) \
+	$(POLYMORPH_OPTIONS) \
+	";
 
 build_rust:
 	cd runtimes/rust; \

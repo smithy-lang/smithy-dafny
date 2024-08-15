@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,8 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.Pair;
+
+import static software.amazon.smithy.utils.CaseUtils.toSnakeCase;
 
 public class CodegenEngine {
 
@@ -782,8 +786,18 @@ public class CodegenEngine {
 
   private void patchRustAfterTranspiling() {
     final String extraDeclarations = awsSdkStyle ? extraDeclarationsForSDK() : extraDeclarationsForLocalService();
-
-
+    final Path implementationFromDafnyPath = libraryRoot.resolve("runtimes").resolve("rust").resolve("src").resolve("implementation_from_dafny.rs");
+      try {
+          final List<String> lines = Files.readAllLines(implementationFromDafnyPath);
+          final int firstModDeclIndex = IntStream.range(0, lines.size())
+                  .filter(i -> lines.get(i).trim().startsWith("pub mod"))
+                  .findFirst()
+                  .getAsInt();
+          lines.add(firstModDeclIndex, extraDeclarations);
+          Files.write(implementationFromDafnyPath, lines);
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
   }
 
   private String extraDeclarationsForSDK() {
@@ -814,7 +828,8 @@ public class CodegenEngine {
             pub mod wrapped;
                         
             pub use client::Client;
-            pub use types::$configSnakeCase:L::configStructName:L;
+            pub use types::$configSnakeCase:L::$configStructName:L;
+            
             """, Map.of("configSnakeCase", configSnakeCase, "configStructName", configStructName));
   }
 

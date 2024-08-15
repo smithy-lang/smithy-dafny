@@ -331,6 +331,15 @@ public class CodegenCli {
             )
             .addOption(
                     Option
+                            .builder("d")
+                            .longOpt("dependent-model")
+                            .desc("directory for dependent model file[s] (.smithy format)")
+                            .hasArg()
+                            .required()
+                            .build()
+            )
+            .addOption(
+                    Option
                             .builder("n")
                             .longOpt("namespace")
                             .desc("smithy namespace to generate code for, such as 'com.foo'")
