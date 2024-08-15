@@ -596,7 +596,7 @@ public class RustAwsSdkShimGenerator {
           """
           #[allow(dead_code)]
           pub fn to_dafny(
-              value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
+              _value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
           ) -> () {
               ()
           }
