@@ -26,8 +26,8 @@ operation GetStringKnownValue {
 }
 
 operation GetStringUTF8 {
-  input: GetStringInput,
-  output: GetStringOutput,
+  input: GetStringUTF8Input,
+  output: GetStringUTF8Output,
 }
 
 structure GetStringInput {
@@ -36,4 +36,15 @@ structure GetStringInput {
 
 structure GetStringOutput {
   value: String
+}
+
+@aws.polymorph#dafnyUtf8Bytes
+string UTF8Bytes
+
+structure GetStringUTF8Input {
+  value: UTF8Bytes
+}
+
+structure GetStringUTF8Output {
+  value: UTF8Bytes
 }
