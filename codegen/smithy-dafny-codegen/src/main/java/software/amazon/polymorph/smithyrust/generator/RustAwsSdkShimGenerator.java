@@ -596,7 +596,7 @@ public class RustAwsSdkShimGenerator {
           """
           #[allow(dead_code)]
           pub fn to_dafny(
-              value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
+              _value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
           ) -> () {
               ()
           }
@@ -664,7 +664,7 @@ public class RustAwsSdkShimGenerator {
    *                      Dafny tends to be much more consistent about this.
    */
   // TODO: There is obviously a lot of duplication here that should be easy to clean up.
-  // TODO: Some cases do not handle all combinations of isru
+  // TODO: Some cases do not handle all combinations of isRustOption and isDafnyOption.
   private TokenTree fromDafny(
     final Shape shape,
     final String dafnyValue,
