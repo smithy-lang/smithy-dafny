@@ -17,11 +17,6 @@ pub fn to_dafny(
  aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha384 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_384 {},
  aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha512 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_512 {},
  aws_sdk_kms::types::SigningAlgorithmSpec::Sm2Dsa => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::SM2DSA {},
-        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
-        // so there's no way to succeed.
-        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
-        // This could be handled more cleanly if conversion functions returned Results,
-        // but that would be a large and disruptive change to the overall code flow.
         _ => panic!("Unknown enum variant: {}", value),
     })
 }

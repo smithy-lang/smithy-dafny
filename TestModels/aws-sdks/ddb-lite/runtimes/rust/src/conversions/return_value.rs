@@ -12,11 +12,6 @@ pub fn to_dafny(
  aws_sdk_dynamodb::types::ReturnValue::UpdatedOld => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnValue::UPDATED_OLD {},
  aws_sdk_dynamodb::types::ReturnValue::AllNew => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnValue::ALL_NEW {},
  aws_sdk_dynamodb::types::ReturnValue::UpdatedNew => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnValue::UPDATED_NEW {},
-        // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
-        // so there's no way to succeed.
-        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
-        // This could be handled more cleanly if conversion functions returned Results,
-        // but that would be a large and disruptive change to the overall code flow.
         _ => panic!("Unknown enum variant: {}", value),
     })
 }

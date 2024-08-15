@@ -53,12 +53,7 @@ pub fn to_dafny(
             SS: dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
               |s| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(s))
           },
-        // TODO: This should not be a panic, but the Dafny image of the union shape doesn't have an Unknown variant of any kind,
-        // so there's no way to succeed.
-        // See https://github.com/smithy-lang/smithy-dafny/issues/476.
-        // This could be handled more cleanly if conversion functions returned Results,
-        // but that would be a large and disruptive change to the overall code flow.
-        _ => panic!("Unknown enum variant: {:?}", value),
+        _ => panic!("Unknown union variant: {:?}", value),
     }
   )
 }
