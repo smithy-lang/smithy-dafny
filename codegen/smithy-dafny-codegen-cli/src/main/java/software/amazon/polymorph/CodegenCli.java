@@ -36,12 +36,12 @@ public class CodegenCli {
   );
 
   private enum Command {
-    BUILD,
+    GENERATE,
     PATCH_AFTER_TRANSPILE
   }
 
   private static final Map<Command, Options> optionsForCommand = Map.of(
-          Command.BUILD, getCliOptionsForBuild(),
+          Command.GENERATE, getCliOptionsForBuild(),
           Command.PATCH_AFTER_TRANSPILE, getCliOptionsForPatchAfterTranspile()
   );
 
@@ -138,7 +138,7 @@ public class CodegenCli {
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
     final CodegenEngine engine = engineBuilder.build();
     switch (cliArguments.command) {
-      case BUILD: engine.run();
+      case GENERATE: engine.run();
       case PATCH_AFTER_TRANSPILE: engine.patchAfterTranspiling();
     }
   }
@@ -385,7 +385,7 @@ public class CodegenCli {
   }
 
   private static void printHelpMessage() {
-    new HelpFormatter().printHelp("smithy-dafny-codegen-cli [build]", getCliOptionsForBuild());
+    new HelpFormatter().printHelp("smithy-dafny-codegen-cli [generate]", getCliOptionsForBuild());
     new HelpFormatter().printHelp("smithy-dafny-codegen-cli patch-after-transpile", getCliOptionsForPatchAfterTranspile());
   }
 
@@ -418,7 +418,7 @@ public class CodegenCli {
     static Optional<CliArguments> parse(String[] args) throws ParseException {
       final DefaultParser parser = new DefaultParser();
       final String commandString = args.length > 0 && !args[0].startsWith("-")
-        ? args[0] : "build";
+        ? args[0] : "generate";
       Command command = null;
       try {
         command = Command.valueOf(commandString.toUpperCase().replace("-", "_"));
