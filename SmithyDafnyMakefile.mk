@@ -243,6 +243,7 @@ transpile_test:
 		-useRuntimeLib \
 		-out $(OUT) \
 		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES) \
 
@@ -417,7 +418,10 @@ polymorph_rust:
 	done
 
 _polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
-_polymorph_rust: _polymorph
+# For several TestModels we've just manually written the code generation target,
+# So we just want to ensure we can transpile and pass the tests in CI.
+# For those, make polymorph_rust should just be a no-op.
+_polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
 
 ########################## .NET targets
 
