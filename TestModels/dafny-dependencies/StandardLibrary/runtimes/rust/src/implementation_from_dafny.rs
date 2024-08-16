@@ -1,8 +1,11 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
-
+pub mod UTF8_externs;
 pub mod conversion;
-mod UTF8_externs;
+pub mod _dafny_externs {
+    pub use crate::conversion::*;
+    pub use crate::UTF8_externs::*;
+}
 
 pub mod r#_Wrappers_Compile {
     pub use dafny_runtime::DafnyPrint;
