@@ -12,9 +12,11 @@ pub mod operation;
 
 mod conversions;
 
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
+
 pub use client::Client;
 pub use types::simple_string_config::SimpleStringConfig;
-
 
 pub mod r#_Wrappers_Compile {
     pub use dafny_runtime::DafnyPrint;

@@ -54,8 +54,9 @@ transpile_java: | transpile_implementation_java transpile_test_java
 
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
-transpile_rust: DAFNY_OTHER_FILES=runtimes/rust/src/conversion.rs runtimes/rust/src/UTF8_externs.rs
 transpile_rust: | transpile_implementation_rust
+
+RUST_OTHER_FILES=runtimes/rust/src/conversion.rs runtimes/rust/src/UTF8_externs.rs
 
 # Override this target to not insert a dependency on the standard library.
 _mv_implementation_rust:
