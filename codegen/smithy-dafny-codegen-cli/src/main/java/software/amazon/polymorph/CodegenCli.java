@@ -369,6 +369,18 @@ public class CodegenCli {
                             .longOpt("aws-sdk")
                             .desc("<optional> patch Dafny generated code for AWS SDK-style API and shims")
                             .build()
+            )
+            .addOption(
+                    Option
+                            .builder()
+                            .longOpt("generate")
+                            .desc(
+                                    "<optional> optional aspects to generate. Available aspects:\n" +
+                                            CodegenEngine.GenerationAspect.helpText()
+                            )
+                            .hasArgs()
+                            .valueSeparator(',')
+                            .build()
             );
   }
 

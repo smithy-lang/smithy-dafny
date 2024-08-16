@@ -13,9 +13,11 @@ pub mod operation;
 mod conversions;
 mod standard_library_conversions;
 
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
+
 pub use client::Client;
 pub use types::simple_resources_config::SimpleResourcesConfig;
-
 
 pub mod r#_Wrappers_Compile {
     pub use dafny_runtime::DafnyPrint;
@@ -1396,13 +1398,13 @@ pub mod simple {
                         >,
                     >::new();
                     let mut internalConfig: ::std::rc::Rc<
-                        crate::r#simpleResourcesOperations_Compile::Config,
+                        crate::r#_SimpleResourcesOperations_Compile::Config,
                     > = ::std::rc::Rc::new(
-                        crate::r#simpleResourcesOperations_Compile::Config::Config {
+                        crate::r#_SimpleResourcesOperations_Compile::Config::Config {
                             name: config.name().clone(),
                         },
                     );
-                    if crate::r#simpleResourcesOperations_Compile::_default::r#_ValidInternalConfig_q(&internalConfig) {
+                    if crate::r#_SimpleResourcesOperations_Compile::_default::r#_ValidInternalConfig_q(&internalConfig) {
             let mut client = ::dafny_runtime::MaybePlacebo::<::dafny_runtime::Object<crate::simple::resources::internaldafny::SimpleResourcesClient>>::new();
             let mut _nw2: ::dafny_runtime::Object<crate::simple::resources::internaldafny::SimpleResourcesClient> = crate::simple::resources::internaldafny::SimpleResourcesClient::_allocate_object();
             crate::simple::resources::internaldafny::SimpleResourcesClient::_ctor(&_nw2, &internalConfig);
@@ -1435,7 +1437,7 @@ pub mod simple {
 
             pub struct SimpleResourcesClient {
                 pub r#__i_config:
-                    ::std::rc::Rc<crate::r#simpleResourcesOperations_Compile::Config>,
+                    ::std::rc::Rc<crate::r#_SimpleResourcesOperations_Compile::Config>,
             }
 
             impl SimpleResourcesClient {
@@ -1446,7 +1448,7 @@ pub mod simple {
                     this: &::dafny_runtime::Object<
                         crate::simple::resources::internaldafny::SimpleResourcesClient,
                     >,
-                    config: &::std::rc::Rc<crate::r#simpleResourcesOperations_Compile::Config>,
+                    config: &::std::rc::Rc<crate::r#_SimpleResourcesOperations_Compile::Config>,
                 ) -> () {
                     let mut _set__i_config: bool = false;
                     ::dafny_runtime::update_field_uninit_object!(
@@ -1459,7 +1461,7 @@ pub mod simple {
                 }
                 pub fn config(
                     &self,
-                ) -> ::std::rc::Rc<crate::r#simpleResourcesOperations_Compile::Config>
+                ) -> ::std::rc::Rc<crate::r#_SimpleResourcesOperations_Compile::Config>
                 {
                     self.r#__i_config.clone()
                 }
@@ -1486,7 +1488,7 @@ pub mod simple {
                     let mut output = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::simple::resources::internaldafny::types::GetResourcesOutput>, ::std::rc::Rc<crate::simple::resources::internaldafny::types::Error>>>>::new();
                     let mut _out1 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<crate::r#_Wrappers_Compile::Result<::std::rc::Rc<crate::simple::resources::internaldafny::types::GetResourcesOutput>, ::std::rc::Rc<crate::simple::resources::internaldafny::types::Error>>>>::new();
                     _out1 = ::dafny_runtime::MaybePlacebo::from(
-                        crate::r#simpleResourcesOperations_Compile::_default::GetResources(
+                        crate::r#_SimpleResourcesOperations_Compile::_default::GetResources(
                             &self.config().clone(),
                             input,
                         ),
@@ -2374,7 +2376,7 @@ pub mod simple {
         }
     }
 }
-pub mod r#simpleResource_Compile {
+pub mod r#_SimpleResource_Compile {
     pub use crate::simple::resources::internaldafny::types::ISimpleResource;
     pub use dafny_runtime::UpcastObject;
     pub use std::any::Any;
@@ -2393,7 +2395,7 @@ pub mod r#simpleResource_Compile {
             ::dafny_runtime::allocate_object::<Self>()
         }
         pub fn _ctor(
-            this: &::dafny_runtime::Object<crate::r#simpleResource_Compile::SimpleResource>,
+            this: &::dafny_runtime::Object<crate::r#_SimpleResource_Compile::SimpleResource>,
             value: &::std::rc::Rc<
                 crate::r#_Wrappers_Compile::Option<
                     ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
@@ -2497,7 +2499,7 @@ pub mod r#simpleResource_Compile {
         ::dafny_runtime::UpcastObjectFn!(dyn crate::simple::resources::internaldafny::types::ISimpleResource);
     }
 }
-pub mod r#simpleResourcesOperations_Compile {
+pub mod r#_SimpleResourcesOperations_Compile {
     pub use dafny_runtime::DafnyPrint;
     pub use std::cmp::Eq;
     pub use std::convert::AsRef;
@@ -2509,12 +2511,12 @@ pub mod r#simpleResourcesOperations_Compile {
 
     impl _default {
         pub fn r#_ValidInternalConfig_q(
-            config: &::std::rc::Rc<crate::r#simpleResourcesOperations_Compile::Config>,
+            config: &::std::rc::Rc<crate::r#_SimpleResourcesOperations_Compile::Config>,
         ) -> bool {
             true && ::dafny_runtime::int!(0) < config.name().cardinality()
         }
         pub fn GetResources(
-            config: &::std::rc::Rc<crate::r#simpleResourcesOperations_Compile::Config>,
+            config: &::std::rc::Rc<crate::r#_SimpleResourcesOperations_Compile::Config>,
             input: &::std::rc::Rc<
                 crate::simple::resources::internaldafny::types::GetResourcesInput,
             >,
@@ -2535,19 +2537,19 @@ pub mod r#simpleResourcesOperations_Compile {
                 >,
             >::new();
             let mut resource = ::dafny_runtime::MaybePlacebo::<
-                ::dafny_runtime::Object<crate::r#simpleResource_Compile::SimpleResource>,
+                ::dafny_runtime::Object<crate::r#_SimpleResource_Compile::SimpleResource>,
             >::new();
             let mut _nw1: ::dafny_runtime::Object<
-                crate::r#simpleResource_Compile::SimpleResource,
-            > = crate::r#simpleResource_Compile::SimpleResource::_allocate_object();
-            crate::r#simpleResource_Compile::SimpleResource::_ctor(
+                crate::r#_SimpleResource_Compile::SimpleResource,
+            > = crate::r#_SimpleResource_Compile::SimpleResource::_allocate_object();
+            crate::r#_SimpleResource_Compile::SimpleResource::_ctor(
                 &_nw1,
                 input.value(),
                 config.name(),
             );
             resource = ::dafny_runtime::MaybePlacebo::from(_nw1.clone());
             let mut result: ::std::rc::Rc<crate::simple::resources::internaldafny::types::GetResourcesOutput> = ::std::rc::Rc::new(crate::simple::resources::internaldafny::types::GetResourcesOutput::GetResourcesOutput {
-            output: ::dafny_runtime::upcast_object::<crate::r#simpleResource_Compile::SimpleResource, dyn crate::simple::resources::internaldafny::types::ISimpleResource>()(resource.read())
+            output: ::dafny_runtime::upcast_object::<crate::r#_SimpleResource_Compile::SimpleResource, dyn crate::simple::resources::internaldafny::types::ISimpleResource>()(resource.read())
           });
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 crate::r#_Wrappers_Compile::Result::<

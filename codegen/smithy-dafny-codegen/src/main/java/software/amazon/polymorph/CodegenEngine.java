@@ -823,6 +823,7 @@ public class CodegenEngine {
             pub mod operation;
                         
             mod conversions;
+            mod standard_library_conversions;
                         
             #[cfg(feature = "wrapped-client")]
             pub mod wrapped;

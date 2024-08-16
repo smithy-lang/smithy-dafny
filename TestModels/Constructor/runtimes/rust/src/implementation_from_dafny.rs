@@ -1,13 +1,8 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
 
-#[doc(inline)]
-pub use config::Config;
-
 pub mod client;
-
-/// Configuration for Constructor Service.
-pub mod config;
+pub mod types;
 
 /// Common errors and error handling utilities.
 pub mod error;
@@ -15,11 +10,14 @@ pub mod error;
 /// All operations that this crate can perform.
 pub mod operation;
 
-pub mod conversions;
+mod conversions;
 mod standard_library_conversions;
 
-pub use client::Client;
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
 
+pub use client::Client;
+pub use types::simple_constructor_config::SimpleConstructorConfig;
 
 pub mod r#_Wrappers_Compile {
     pub use dafny_runtime::DafnyPrint;
