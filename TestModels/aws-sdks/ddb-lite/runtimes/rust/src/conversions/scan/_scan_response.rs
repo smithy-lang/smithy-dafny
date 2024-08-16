@@ -3,10 +3,10 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_dynamodb::operation::scan::ScanOutput,
+    value: &aws_sdk_dynamodb::operation::scan::ScanOutput
 ) -> ::std::rc::Rc<
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ScanOutput,
-> {
+>{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ScanOutput::ScanOutput {
         Items: ::std::rc::Rc::new(match &value.items {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :

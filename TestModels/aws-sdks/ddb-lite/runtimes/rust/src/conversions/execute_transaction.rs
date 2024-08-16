@@ -3,16 +3,14 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 pub mod _execute_transaction_request;
 
-pub mod _execute_transaction_response;
-#[allow(dead_code)]
+ pub mod _execute_transaction_response;
+ #[allow(dead_code)]
 pub fn to_dafny_error(
     value: &::aws_smithy_runtime_api::client::result::SdkError<
         aws_sdk_dynamodb::operation::execute_transaction::ExecuteTransactionError,
         ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
     >,
-) -> ::std::rc::Rc<
-    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error,
-> {
+) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error> {
     match value {
       aws_sdk_dynamodb::error::SdkError::ServiceError(service_error) => match service_error.err() {
                 aws_sdk_dynamodb::operation::execute_transaction::ExecuteTransactionError::InternalServerError(e) =>

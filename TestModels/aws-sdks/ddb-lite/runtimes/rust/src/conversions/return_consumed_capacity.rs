@@ -13,7 +13,7 @@ pub fn to_dafny(
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
-#[allow(dead_code)]
+ #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnConsumedCapacity,
 ) -> aws_sdk_dynamodb::types::ReturnConsumedCapacity {

@@ -7,7 +7,7 @@
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::ReplicaDescription,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReplicaDescription>{
-    ::std::rc::Rc::new(
+  ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReplicaDescription::ReplicaDescription {
         RegionName: crate::standard_library_conversions::ostring_to_dafny(&value.region_name),
  ReplicaStatus: ::std::rc::Rc::new(match &value.replica_status {
@@ -41,62 +41,48 @@ pub fn to_dafny(
 ,
     }
   )
-}
-#[allow(dead_code)]
+} #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReplicaDescription,
     >,
 ) -> aws_sdk_dynamodb::types::ReplicaDescription {
     aws_sdk_dynamodb::types::ReplicaDescription::builder()
-        .set_region_name(crate::standard_library_conversions::ostring_from_dafny(
-            dafny_value.RegionName().clone(),
-        ))
-        .set_replica_status(match &**dafny_value.ReplicaStatus() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => {
-                Some(crate::conversions::replica_status::from_dafny(value))
-            }
-            _ => None,
-        })
-        .set_replica_status_description(crate::standard_library_conversions::ostring_from_dafny(
-            dafny_value.ReplicaStatusDescription().clone(),
-        ))
-        .set_replica_status_percent_progress(
-            crate::standard_library_conversions::ostring_from_dafny(
-                dafny_value.ReplicaStatusPercentProgress().clone(),
-            ),
-        )
-        .set_kms_master_key_id(crate::standard_library_conversions::ostring_from_dafny(
-            dafny_value.KMSMasterKeyId().clone(),
-        ))
-        .set_provisioned_throughput_override(
-            match (*dafny_value.ProvisionedThroughputOverride()).as_ref() {
-                crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                    crate::conversions::provisioned_throughput_override::from_dafny(value.clone()),
-                ),
-                _ => None,
-            },
-        )
-        .set_global_secondary_indexes(match (*dafny_value.GlobalSecondaryIndexes()).as_ref() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value, |e| {
-                    crate::conversions::replica_global_secondary_index_description::from_dafny(
-                        e.clone(),
-                    )
-                }),
-            ),
-            _ => None,
-        })
-        .set_replica_inaccessible_date_time(
-            crate::standard_library_conversions::otimestamp_from_dafny(
-                dafny_value.ReplicaInaccessibleDateTime().clone(),
-            ),
-        )
-        .set_replica_table_class_summary(match (*dafny_value.ReplicaTableClassSummary()).as_ref() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                crate::conversions::table_class_summary::from_dafny(value.clone()),
-            ),
-            _ => None,
-        })
-        .build()
+          .set_region_name(crate::standard_library_conversions::ostring_from_dafny(dafny_value.RegionName().clone()))
+ .set_replica_status(match &**dafny_value.ReplicaStatus() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::replica_status::from_dafny(value)
+    ),
+    _ => None,
+}
+)
+ .set_replica_status_description(crate::standard_library_conversions::ostring_from_dafny(dafny_value.ReplicaStatusDescription().clone()))
+ .set_replica_status_percent_progress(crate::standard_library_conversions::ostring_from_dafny(dafny_value.ReplicaStatusPercentProgress().clone()))
+ .set_kms_master_key_id(crate::standard_library_conversions::ostring_from_dafny(dafny_value.KMSMasterKeyId().clone()))
+ .set_provisioned_throughput_override(match (*dafny_value.ProvisionedThroughputOverride()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(crate::conversions::provisioned_throughput_override::from_dafny(value.clone())),
+    _ => None,
+}
+)
+ .set_global_secondary_indexes(match (*dafny_value.GlobalSecondaryIndexes()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e| crate::conversions::replica_global_secondary_index_description::from_dafny(e.clone())
+,
+            )
+        ),
+    _ => None
+}
+)
+ .set_replica_inaccessible_date_time(crate::standard_library_conversions::otimestamp_from_dafny(dafny_value.ReplicaInaccessibleDateTime().clone()))
+ .set_replica_table_class_summary(match (*dafny_value.ReplicaTableClassSummary()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(crate::conversions::table_class_summary::from_dafny(value.clone())),
+    _ => None,
+}
+)
+          .build()
+
 }

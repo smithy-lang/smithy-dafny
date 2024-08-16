@@ -21,28 +21,25 @@ pub fn to_dafny(
 ,
     })
 }
-#[allow(dead_code)]
+ #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteTransactionInput,
     >,
     client: aws_sdk_dynamodb::Client,
 ) -> aws_sdk_dynamodb::operation::execute_transaction::builders::ExecuteTransactionFluentBuilder {
-    client
-        .execute_transaction()
-        .set_transact_statements(Some(
-            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
-                dafny_value.TransactStatements(),
-                |e| crate::conversions::parameterized_statement::from_dafny(e.clone()),
-            ),
-        ))
-        .set_client_request_token(crate::standard_library_conversions::ostring_from_dafny(
-            dafny_value.ClientRequestToken().clone(),
-        ))
-        .set_return_consumed_capacity(match &**dafny_value.ReturnConsumedCapacity() {
-            crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                crate::conversions::return_consumed_capacity::from_dafny(value),
-            ),
-            _ => None,
-        })
+    client.execute_transaction()
+          .set_transact_statements(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(dafny_value.TransactStatements(),
+    |e| crate::conversions::parameterized_statement::from_dafny(e.clone())
+,
+)
+ ))
+ .set_client_request_token(crate::standard_library_conversions::ostring_from_dafny(dafny_value.ClientRequestToken().clone()))
+ .set_return_consumed_capacity(match &**dafny_value.ReturnConsumedCapacity() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::return_consumed_capacity::from_dafny(value)
+    ),
+    _ => None,
+}
+)
 }

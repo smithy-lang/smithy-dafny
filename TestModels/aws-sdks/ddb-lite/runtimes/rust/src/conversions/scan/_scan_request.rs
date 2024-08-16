@@ -3,10 +3,10 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_dynamodb::operation::scan::ScanInput,
+    value: &aws_sdk_dynamodb::operation::scan::ScanInput
 ) -> ::std::rc::Rc<
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ScanInput,
-> {
+>{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ScanInput::ScanInput {
         TableName: crate::standard_library_conversions::ostring_to_dafny(&value.table_name) .Extract(),
  IndexName: crate::standard_library_conversions::ostring_to_dafny(&value.index_name),
@@ -89,7 +89,7 @@ pub fn to_dafny(
  ConsistentRead: crate::standard_library_conversions::obool_to_dafny(&value.consistent_read),
     })
 }
-#[allow(dead_code)]
+ #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ScanInput,
