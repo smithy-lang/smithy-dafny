@@ -6,8 +6,10 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: &aws_sdk_dynamodb::types::Projection,
-) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Projection>{
-  ::std::rc::Rc::new(
+) -> ::std::rc::Rc<
+    crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Projection,
+> {
+    ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Projection::Projection {
         ProjectionType: ::std::rc::Rc::new(match &value.projection_type {
     Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::projection_type::to_dafny(x.clone()) },
@@ -25,7 +27,8 @@ pub fn to_dafny(
 ,
     }
   )
-} #[allow(dead_code)]
+}
+#[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Projection,
@@ -50,5 +53,4 @@ pub fn from_dafny(
 }
 )
           .build()
-
 }

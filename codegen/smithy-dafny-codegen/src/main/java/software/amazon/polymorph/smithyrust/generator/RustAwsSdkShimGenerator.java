@@ -1515,7 +1515,9 @@ public class RustAwsSdkShimGenerator {
     String unwrapIfNeeded = structureShape
         .members()
         .stream()
-        .anyMatch(m -> m.isRequired() && !model.expectShape(m.getTarget()).isStructureShape())
+        .anyMatch(m ->
+          m.isRequired() && !model.expectShape(m.getTarget()).isStructureShape()
+        )
       ? ".unwrap()"
       : "";
     Map<String, String> variables = Map.of(

@@ -550,6 +550,10 @@ _mv_implementation_rust:
 	python3 -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\n$(RUST_EXTERN_MODULE_DECLARATIONS)\n\npub mod', 1) if b'\npub mod' in data else data)" \
 	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs, \
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs)
+# rustfmt has a recurring bug where it leaves behind trailing spaces and then complains about it.
+# Pre-process the Dafny-generated Rust code to remove them.
+	sed -e 's/[[:space:]]*$$//' runtimes/rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs.trimmed
+	mv runtimes/rust/src/implementation_from_dafny.rs.trimmed runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 
