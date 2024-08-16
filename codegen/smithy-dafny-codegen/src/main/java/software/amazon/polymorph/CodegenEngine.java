@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph;
 
+import static software.amazon.smithy.utils.CaseUtils.toSnakeCase;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
@@ -58,8 +60,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.Pair;
-
-import static software.amazon.smithy.utils.CaseUtils.toSnakeCase;
 
 public class CodegenEngine {
 
@@ -785,19 +785,28 @@ public class CodegenEngine {
   }
 
   private void patchRustAfterTranspiling() {
-    final String extraDeclarations = awsSdkStyle ? extraDeclarationsForSDK() : extraDeclarationsForLocalService();
-    final Path implementationFromDafnyPath = libraryRoot.resolve("runtimes").resolve("rust").resolve("src").resolve("implementation_from_dafny.rs");
-      try {
-          final List<String> lines = Files.readAllLines(implementationFromDafnyPath);
-          final int firstModDeclIndex = IntStream.range(0, lines.size())
-                  .filter(i -> lines.get(i).trim().startsWith("pub mod"))
-                  .findFirst()
-                  .getAsInt();
-          lines.add(firstModDeclIndex, extraDeclarations);
-          Files.write(implementationFromDafnyPath, lines);
-      } catch (IOException e) {
-          throw new RuntimeException(e);
-      }
+    final String extraDeclarations = awsSdkStyle
+      ? extraDeclarationsForSDK()
+      : extraDeclarationsForLocalService();
+    final Path implementationFromDafnyPath = libraryRoot
+      .resolve("runtimes")
+      .resolve("rust")
+      .resolve("src")
+      .resolve("implementation_from_dafny.rs");
+    try {
+      final List<String> lines = Files.readAllLines(
+        implementationFromDafnyPath
+      );
+      final int firstModDeclIndex = IntStream
+        .range(0, lines.size())
+        .filter(i -> lines.get(i).trim().startsWith("pub mod"))
+        .findFirst()
+        .getAsInt();
+      lines.add(firstModDeclIndex, extraDeclarations);
+      Files.write(implementationFromDafnyPath, lines);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private String extraDeclarationsForSDK() {
@@ -809,29 +818,40 @@ public class CodegenEngine {
   }
 
   private String extraDeclarationsForLocalService() {
-    final String configStructName = serviceShape.expectTrait(LocalServiceTrait.class).getConfigId().getName();
+    final String configStructName = serviceShape
+      .expectTrait(LocalServiceTrait.class)
+      .getConfigId()
+      .getName();
     final String configSnakeCase = toSnakeCase(configStructName);
 
-    return IOUtils.evalTemplate("""
-            pub mod client;
-            pub mod types;
-            
-            /// Common errors and error handling utilities.
-            pub mod error;
-                        
-            /// All operations that this crate can perform.
-            pub mod operation;
-                        
-            mod conversions;
-            mod standard_library_conversions;
-                        
-            #[cfg(feature = "wrapped-client")]
-            pub mod wrapped;
-                        
-            pub use client::Client;
-            pub use types::$configSnakeCase:L::$configStructName:L;
-            
-            """, Map.of("configSnakeCase", configSnakeCase, "configStructName", configStructName));
+    return IOUtils.evalTemplate(
+      """
+      pub mod client;
+      pub mod types;
+
+      /// Common errors and error handling utilities.
+      pub mod error;
+
+      /// All operations that this crate can perform.
+      pub mod operation;
+
+      mod conversions;
+      mod standard_library_conversions;
+
+      #[cfg(feature = "wrapped-client")]
+      pub mod wrapped;
+
+      pub use client::Client;
+      pub use types::$configSnakeCase:L::$configStructName:L;
+
+      """,
+      Map.of(
+        "configSnakeCase",
+        configSnakeCase,
+        "configStructName",
+        configStructName
+      )
+    );
   }
 
   private String runCommand(Path workingDir, String... args) {

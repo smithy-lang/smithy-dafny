@@ -37,12 +37,14 @@ public class CodegenCli {
 
   private enum Command {
     GENERATE,
-    PATCH_AFTER_TRANSPILE
+    PATCH_AFTER_TRANSPILE,
   }
 
   private static final Map<Command, Options> optionsForCommand = Map.of(
-          Command.GENERATE, getCliOptionsForBuild(),
-          Command.PATCH_AFTER_TRANSPILE, getCliOptionsForPatchAfterTranspile()
+    Command.GENERATE,
+    getCliOptionsForBuild(),
+    Command.PATCH_AFTER_TRANSPILE,
+    getCliOptionsForPatchAfterTranspile()
   );
 
   public static void main(String[] args) {
@@ -138,8 +140,10 @@ public class CodegenCli {
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
     final CodegenEngine engine = engineBuilder.build();
     switch (cliArguments.command) {
-      case GENERATE: engine.run();
-      case PATCH_AFTER_TRANSPILE: engine.patchAfterTranspiling();
+      case GENERATE:
+        engine.run();
+      case PATCH_AFTER_TRANSPILE:
+        engine.patchAfterTranspiling();
     }
   }
 
@@ -308,85 +312,95 @@ public class CodegenCli {
 
   private static Options getCliOptionsForPatchAfterTranspile() {
     return new Options()
-            .addOption(
-                    Option.builder("h").longOpt("help").desc("print help message").build()
-            )
-            .addOption(
-                    Option
-                            .builder("r")
-                            .longOpt("library-root")
-                            .desc("root directory of the library")
-                            .hasArg()
-                            .required()
-                            .build()
-            )
-            .addOption(
-                    Option
-                            .builder("m")
-                            .longOpt("model")
-                            .desc("directory for the model file[s] (.smithy or json format).")
-                            .hasArg()
-                            .required()
-                            .build()
-            )
-            .addOption(
-                    Option
-                            .builder("d")
-                            .longOpt("dependent-model")
-                            .desc("directory for dependent model file[s] (.smithy format)")
-                            .hasArg()
-                            .required()
-                            .build()
-            )
-            .addOption(
-                    Option
-                            .builder("n")
-                            .longOpt("namespace")
-                            .desc("smithy namespace to generate code for, such as 'com.foo'")
-                            .hasArg()
-                            .required()
-                            .build()
-            )
-            .addOption(
-                    Option
-                            .builder()
-                            .longOpt("output-rust")
-                            .desc("<optional> output directory for generated Rust files")
-                            .hasArg()
-                            .build()
-            )
-            .addOption(
-                    Option
-                            .builder()
-                            .longOpt("dafny-version")
-                            .desc("Dafny version that generated the code to patch")
-                            .hasArg()
-                            .build()
-            )
-            .addOption(
-                    Option
-                            .builder()
-                            .longOpt("aws-sdk")
-                            .desc("<optional> patch Dafny generated code for AWS SDK-style API and shims")
-                            .build()
-            )
-            .addOption(
-                    Option
-                            .builder()
-                            .longOpt("generate")
-                            .desc(
-                                    "<optional> optional aspects to generate. Available aspects:\n" +
-                                            CodegenEngine.GenerationAspect.helpText()
-                            )
-                            .hasArgs()
-                            .valueSeparator(',')
-                            .build()
-            );
+      .addOption(
+        Option.builder("h").longOpt("help").desc("print help message").build()
+      )
+      .addOption(
+        Option
+          .builder("r")
+          .longOpt("library-root")
+          .desc("root directory of the library")
+          .hasArg()
+          .required()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder("m")
+          .longOpt("model")
+          .desc("directory for the model file[s] (.smithy or json format).")
+          .hasArg()
+          .required()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder("d")
+          .longOpt("dependent-model")
+          .desc("directory for dependent model file[s] (.smithy format)")
+          .hasArg()
+          .required()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder("n")
+          .longOpt("namespace")
+          .desc("smithy namespace to generate code for, such as 'com.foo'")
+          .hasArg()
+          .required()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("output-rust")
+          .desc("<optional> output directory for generated Rust files")
+          .hasArg()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("dafny-version")
+          .desc("Dafny version that generated the code to patch")
+          .hasArg()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("aws-sdk")
+          .desc(
+            "<optional> patch Dafny generated code for AWS SDK-style API and shims"
+          )
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("generate")
+          .desc(
+            "<optional> optional aspects to generate. Available aspects:\n" +
+            CodegenEngine.GenerationAspect.helpText()
+          )
+          .hasArgs()
+          .valueSeparator(',')
+          .build()
+      );
   }
 
   private static void printHelpMessage() {
-    new HelpFormatter().printHelp("smithy-dafny-codegen-cli [generate]", getCliOptionsForBuild());
-    new HelpFormatter().printHelp("smithy-dafny-codegen-cli patch-after-transpile", getCliOptionsForPatchAfterTranspile());
+    new HelpFormatter()
+      .printHelp(
+        "smithy-dafny-codegen-cli [generate]",
+        getCliOptionsForBuild()
+      );
+    new HelpFormatter()
+      .printHelp(
+        "smithy-dafny-codegen-cli patch-after-transpile",
+        getCliOptionsForPatchAfterTranspile()
+      );
   }
 
   private record CliArguments(
@@ -418,10 +432,12 @@ public class CodegenCli {
     static Optional<CliArguments> parse(String[] args) throws ParseException {
       final DefaultParser parser = new DefaultParser();
       final String commandString = args.length > 0 && !args[0].startsWith("-")
-        ? args[0] : "generate";
+        ? args[0]
+        : "generate";
       Command command = null;
       try {
-        command = Command.valueOf(commandString.toUpperCase().replace("-", "_"));
+        command =
+          Command.valueOf(commandString.toUpperCase().replace("-", "_"));
       } catch (IllegalArgumentException e) {
         LOGGER.error("Unrecognized command: {}", commandString);
         printHelpMessage();
