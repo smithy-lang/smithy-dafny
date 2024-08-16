@@ -13,7 +13,6 @@ use std::{
     collections::{HashMap, HashSet},
     fmt::{Debug, Display, Formatter},
     hash::{Hash, Hasher},
-    ptr::NonNull,
     mem,
     ops::{Add, Deref, Div, Mul, Neg, Rem, Sub},
     rc::{Rc, Weak},
@@ -56,6 +55,10 @@ pub mod dafny_runtime_conversions {
     pub type DafnyBool = bool;
     pub type DafnyChar = crate::DafnyChar;
     pub type DafnyCharUTF16 = crate::DafnyCharUTF16;
+    pub type DafnyClass<T> = *mut T;
+    pub type DafnyArray<T> = *mut [T];
+    pub type DafnyArray2<T> = *mut crate::Array2<T>;
+    pub type DafnyArray3<T> = *mut crate::Array3<T>;
 
     use num::BigInt;
     use num::ToPrimitive;
@@ -65,74 +68,29 @@ pub mod dafny_runtime_conversions {
     use std::hash::Hash;
     use std::rc::Rc;
 
-    pub mod object {
-        pub type DafnyClass<T> = crate::Object<T>;
-        pub type DafnyArray<T> = crate::Object<[T]>;
-        pub type DafnyArray2<T> = crate::Object<crate::Array2<T>>;
-        pub type DafnyArray3<T> = crate::Object<crate::Array3<T>>;
-        // Conversion to and from Dafny reference-counted classes. All these methods take ownership of the class.
-        pub unsafe fn dafny_class_to_struct<T: Clone>(ptr: DafnyClass<T>) -> T {
-            let t: &T = crate::rd!(ptr);
-            t.clone()
-        }
-        pub unsafe fn dafny_class_to_boxed_struct<T: Clone>(ptr: DafnyClass<T>) -> Box<T> {
-            Box::new(dafny_class_to_struct(ptr))
-        }
-        pub unsafe fn dafny_class_to_rc_struct<T: Clone + ?Sized>(ptr: DafnyClass<T>) -> ::std::rc::Rc<T> {
-            crate::rcmut::to_rc(ptr.0.unwrap())
-        }
-        pub fn struct_to_dafny_class<T>(t: T) -> DafnyClass<T> {
-            crate::Object::new(t)
-        }
-        pub fn boxed_struct_to_dafny_class<T>(t: Box<T>) -> DafnyClass<T> {
-            struct_to_dafny_class(*t)
-        }
-        pub unsafe fn rc_struct_to_dafny_class<T>(t: ::std::rc::Rc<T>) -> DafnyClass<T> {
-            crate::Object::from_rc(t)
-        }
-        // Conversions to and from Dafny arrays. They all take ownership
-        pub unsafe fn dafny_array_to_vec<T: Clone>(ptr: DafnyArray<T>) -> Vec<T> {
-            ptr.as_ref().to_vec()
-        }
-        pub fn vec_to_dafny_array<T: Clone>(array: Vec<T>) -> DafnyArray<T> {
-            // SAFETY: We own the array
-            unsafe {
-              crate::Object::from_rc(::std::rc::Rc::from(array.into_boxed_slice()))
-            }
-        }
-        pub unsafe fn dafny_array2_to_vec<T: Clone>(ptr: DafnyArray2<T>) -> Vec<Vec<T>> {
-            crate::rd!(ptr).to_vec()
-        }
+    // Conversion to and from Dafny classes. All these methods take ownership of the class.
+    pub unsafe fn dafny_class_to_struct<T: Clone>(ptr: DafnyClass<T>) -> T {
+        *dafny_class_to_boxed_struct(ptr)
+    }
+    pub unsafe fn dafny_class_to_boxed_struct<T: Clone>(ptr: DafnyClass<T>) -> Box<T> {
+        Box::from_raw(ptr)
+    }
+    pub fn struct_to_dafny_class<T>(t: T) -> DafnyClass<T> {
+        boxed_struct_to_dafny_class(Box::new(t))
+    }
+    pub fn boxed_struct_to_dafny_class<T>(t: Box<T>) -> DafnyClass<T> {
+        Box::into_raw(t)
     }
 
-    pub mod ptr {
-        pub type DafnyClass<T> = crate::Ptr<T>;
-        pub type DafnyArray<T> = crate::Ptr<[T]>;
-        pub type DafnyArray2<T> = crate::Ptr<crate::Array2<T>>;
-        pub type DafnyArray3<T> = crate::Ptr<crate::Array3<T>>;
-        // Conversion to and from Dafny reference-counted classes. All these methods take ownership of the class.
-        pub unsafe fn dafny_class_to_struct<T: Clone>(ptr: DafnyClass<T>) -> T {
-            *dafny_class_to_boxed_struct(ptr)
-        }
-        pub unsafe fn dafny_class_to_boxed_struct<T: Clone>(ptr: DafnyClass<T>) -> Box<T> {
-            Box::from_raw(crate::Ptr::into_raw(ptr))
-        }
-        pub fn struct_to_dafny_class<T>(t: T) -> DafnyClass<T> {
-            boxed_struct_to_dafny_class(Box::new(t))
-        }
-        pub fn boxed_struct_to_dafny_class<T>(t: Box<T>) -> DafnyClass<T> {
-            crate::Ptr::from_raw_nonnull(Box::into_raw(t))
-        }
-        // Conversions to and from Dafny arrays. They all take ownership
-        pub unsafe fn dafny_array_to_vec<T: Clone>(ptr: DafnyArray<T>) -> Vec<T> {
-            ptr.as_ref().to_vec()
-        }
-        pub fn vec_to_dafny_array<T: Clone>(array: Vec<T>) -> DafnyArray<T> {
-            crate::Ptr::from_box(array.into_boxed_slice())
-        }
-        pub unsafe fn dafny_array2_to_vec<T: Clone>(ptr: DafnyArray2<T>) -> Vec<Vec<T>> {
-            Box::from_raw(crate::Ptr::into_raw(ptr)).to_vec()
-        }
+    // Conversions to and from Dafny arrays. They all take ownership
+    pub unsafe fn dafny_array_to_vec<T: Clone>(ptr: DafnyArray<T>) -> Vec<T> {
+        ptr.as_ref().unwrap().to_vec()
+    }
+    pub fn vec_to_dafny_array<T: Clone>(array: Vec<T>) -> DafnyArray<T> {
+        Box::into_raw(array.into_boxed_slice())
+    }
+    pub unsafe fn dafny_array2_to_vec<T: Clone>(ptr: DafnyArray2<T>) -> Vec<Vec<T>> {
+        Box::from_raw(ptr).to_vec()
     }
 
     pub fn dafny_int_to_bigint(i: &DafnyInt) -> BigInt {
@@ -1786,6 +1744,12 @@ impl<V: DafnyTypeEq> Hash for Multiset<V> {
     }
 }
 
+pub fn is_instance_of<C: ?Sized + Upcast<dyn Any>, U: 'static>(theobject: *const C) -> bool {
+    read!(Upcast::<dyn Any>::upcast(read!(theobject)))
+        .downcast_ref::<U>()
+        .is_some()
+}
+
 pub fn dafny_rational_to_int(r: &BigRational) -> BigInt {
     euclidian_division(r.numer().clone(), r.denom().clone())
 }
@@ -2571,8 +2535,8 @@ macro_rules! ARRAY_METHODS {
         pub fn placebos_usize(
             $length0: usize,
             $($length: usize),+
-        ) -> Ptr<$ArrayType<$crate::MaybeUninit<T>>> {
-            Ptr::from_box(Self::placebos_box_usize(
+        ) -> *mut $ArrayType<$crate::MaybeUninit<T>> {
+            Box::into_raw(Self::placebos_box_usize(
                 $length0,
                 $($length),+
             ))
@@ -2583,16 +2547,18 @@ macro_rules! ARRAY_METHODS {
             $($length: usize),+
         ) -> $crate::Object<$ArrayType<$crate::MaybeUninit<T>>> {
             // SAFETY: We know the object is owned and never referred to by anything else
-            $crate::Object::new($ArrayType {
-                $($length: $length),+,
-                data: INIT_ARRAY_DATA!($ArrayType, $length0, $($length),+),
-            })
+            unsafe {
+                $crate::Object::from_rc(Rc::new($ArrayType {
+                    $($length: $length),+,
+                    data: INIT_ARRAY_DATA!($ArrayType, $length0, $($length),+),
+                }))
+            }
         }
 
         pub fn placebos(
             $length0: &$crate::DafnyInt,
             $($length: &$crate::DafnyInt),+
-        ) -> Ptr<$ArrayType<$crate::MaybeUninit<T>>> {
+        ) -> *mut $ArrayType<$crate::MaybeUninit<T>> {
             Self::placebos_usize(
                 $length0.as_usize(),
                 $($length.as_usize()),+
@@ -2600,7 +2566,7 @@ macro_rules! ARRAY_METHODS {
         }
 
         // Once all the elements have been initialized, transform the signature of the pointer
-        pub fn construct(p: Ptr<$ArrayType<$crate::MaybeUninit<T>>>) -> Ptr<$ArrayType<T>> {
+        pub fn construct(p: *mut $ArrayType<$crate::MaybeUninit<T>>) -> *mut $ArrayType<T> {
             unsafe { std::mem::transmute(p) }
         }
         // Once all the elements have been initialized, transform the signature of the pointer
@@ -2901,20 +2867,18 @@ pub mod array {
     use num::ToPrimitive;
     use std::mem::MaybeUninit;
     use std::{boxed::Box, rc::Rc, vec::Vec};
-    use super::Ptr;
-
     #[inline]
-    pub fn from_native<T>(v: Box<[T]>) -> Ptr<[T]> {
-        Ptr::from_box(v)
+    pub fn from_native<T>(v: Box<[T]>) -> *mut [T] {
+        Box::into_raw(v)
     }
     #[inline]
-    pub fn from_vec<T>(v: Vec<T>) -> Ptr<[T]> {
+    pub fn from_vec<T>(v: Vec<T>) -> *mut [T] {
         from_native(v.into_boxed_slice())
     }
-    pub fn to_vec<T>(v: Ptr<[T]>) -> Vec<T> {
-        unsafe { Box::<[T]>::from_raw(v.into_raw()) }.into_vec()
+    pub fn to_vec<T>(v: *mut [T]) -> Vec<T> {
+        unsafe { Box::from_raw(v) }.into_vec()
     }
-    pub fn initialize_usize<T>(n: usize, initializer: Rc<dyn Fn(usize) -> T>) -> Ptr<[T]> {
+    pub fn initialize_usize<T>(n: usize, initializer: Rc<dyn Fn(usize) -> T>) -> *mut [T] {
         let mut v = Vec::with_capacity(n);
         for i in 0..n {
             v.push(initializer(i));
@@ -2922,17 +2886,17 @@ pub mod array {
         from_vec(v)
     }
 
-    pub fn placebos<T>(n: &DafnyInt) -> Ptr<[MaybeUninit<T>]> {
+    pub fn placebos<T>(n: &DafnyInt) -> *mut [MaybeUninit<T>] {
         placebos_usize(n.as_usize())
     }
-    pub fn placebos_usize<T>(n: usize) -> Ptr<[MaybeUninit<T>]> {
-        Ptr::from_box(placebos_box_usize(n))
+    pub fn placebos_usize<T>(n: usize) -> *mut [MaybeUninit<T>] {
+        Box::into_raw(placebos_box_usize(n))
     }
     pub fn placebos_usize_object<T>(n: usize) -> super::Object<[MaybeUninit<T>]> {
         super::rcmut::array_object_from_box(placebos_box_usize(n))
     }
     // Once all the elements have been initialized, transform the signature of the pointer
-    pub fn construct<T>(p: Ptr<[MaybeUninit<T>]>) -> Ptr<[T]> {
+    pub fn construct<T>(p: *mut [MaybeUninit<T>]) -> *mut [T] {
         unsafe { std::mem::transmute(p) }
     }
     pub fn construct_object<T>(p: super::Object<[MaybeUninit<T>]>) -> super::Object<[T]> {
@@ -2950,8 +2914,8 @@ pub mod array {
             .collect()
     }
 
-    pub fn initialize<T>(n: &DafnyInt, initializer: Rc<dyn Fn(&DafnyInt) -> T>) -> Ptr<[T]> {
-        super::Ptr::from_box(initialize_box(n, initializer))
+    pub fn initialize<T>(n: &DafnyInt, initializer: Rc<dyn Fn(&DafnyInt) -> T>) -> *mut [T] {
+        Box::into_raw(initialize_box(n, initializer))
     }
 
     pub fn initialize_box<T>(n: &DafnyInt, initializer: Rc<dyn Fn(&DafnyInt) -> T>) -> Box<[T]> {
@@ -2969,30 +2933,30 @@ pub mod array {
     }
 
     #[inline]
-    pub fn length_usize<T>(this: Ptr<[T]>) -> usize {
+    pub fn length_usize<T>(this: *mut [T]) -> usize {
         // safety: Dafny won't call this function unless it can guarantee the array is still allocated
         super::read!(this).len()
     }
     #[inline]
-    pub fn length<T>(this: Ptr<[T]>) -> DafnyInt {
+    pub fn length<T>(this: *mut [T]) -> DafnyInt {
         int!(length_usize(this))
     }
     #[inline]
-    pub fn get_usize<T: Clone>(this: Ptr<[T]>, i: usize) -> T {
+    pub fn get_usize<T: Clone>(this: *mut [T], i: usize) -> T {
         // safety: Dafny won't call this function unless it can guarantee the array is still allocated
-        this.as_ref()[i].clone()
+        (unsafe { &*this } as &[T])[i].clone()
     }
     #[inline]
-    pub fn get<T: Clone>(this: Ptr<[T]>, i: &DafnyInt) -> T {
+    pub fn get<T: Clone>(this: *mut [T], i: &DafnyInt) -> T {
         get_usize(this, i.to_usize().unwrap())
     }
     #[inline]
-    pub fn update_usize<T>(this: Ptr<[T]>, i: usize, val: T) {
+    pub fn update_usize<T>(this: *mut [T], i: usize, val: T) {
         // safety: Dafny won't call this function unless it can guarantee the array is still allocated
-        crate::modify!(this)[i] = val;
+        (unsafe { &mut *this } as &mut [T])[i] = val;
     }
     #[inline]
-    pub fn update<T>(this: Ptr<[T]>, i: &DafnyInt, val: T) {
+    pub fn update<T>(this: *mut [T], i: &DafnyInt, val: T) {
         update_usize(this, i.to_usize().unwrap(), val);
     }
 }
@@ -3000,21 +2964,35 @@ pub mod array {
 ///////////////////
 // Class helpers //
 ///////////////////
-pub fn allocate<T>() -> Ptr<T> {
-    let this_ptr = Box::into_raw(Box::new(MaybeUninit::uninit())) as *mut MaybeUninit<T> as *mut T;
-    Ptr::from_raw_nonnull(this_ptr)
+pub fn allocate<T>() -> *mut T {
+    let mut this: Box<MaybeUninit<T>> = Box::new(MaybeUninit::uninit());
+    let this_ptr = this.as_mut() as *mut MaybeUninit<T> as *mut T;
+    Box::into_raw(this); // Make sure this is not dropped
+    this_ptr
 }
 // Generic function to safely deallocate a raw pointer
 #[inline]
-pub fn deallocate<T: ?Sized>(pointer: Ptr<T>) {
-    // safety: Dafny won't call this function unless it can guarantee the object is still allocated
+pub fn deallocate<T: ?Sized>(pointer: *const T) {
+    // safety: Dafny won't call this function unless it can guarantee the array is still allocated
     unsafe {
         // Takes ownership of the reference,
         // so that it's deallocated at the end of the method
-        let _ = Box::from_raw(pointer.into_raw());
+        let _ = Box::from_raw(pointer as *mut T);
     }
 }
 
+impl<T: ?Sized> DafnyPrint for *mut T {
+    fn fmt_print(&self, f: &mut Formatter<'_>, _in_seq: bool) -> std::fmt::Result {
+        write!(f, "object")
+    }
+}
+
+impl<T> NontrivialDefault for *mut T {
+    fn nontrivial_default() -> Self {
+        // Create a null pointer
+        ::std::ptr::null() as *const T as *mut T
+    }
+}
 pub struct ExactPool<T: Clone> {
     current: T,
     yielded: bool,
@@ -3041,6 +3019,16 @@ pub fn exact_range<T: Clone>(value: T) -> ExactPool<T> {
 
 // Any Dafny trait must require classes extending it to have a method "as_any_mut"
 // that can convert the reference from that trait to a reference of Any
+
+// cast is meant to be used on references only, to downcast a trait reference to a class reference
+#[macro_export]
+macro_rules! cast {
+    ($raw:expr, $id:ty) => {
+        $crate::modify!(Upcast::<dyn Any>::upcast($crate::modify!($raw)))
+            .downcast_mut::<$id>()
+            .unwrap() as *mut $id
+    };
+}
 
 // 'is' is meant to be used on references only, to check if a trait reference is a class reference
 #[macro_export]
@@ -3086,7 +3074,7 @@ macro_rules! cast_any_object {
 #[macro_export]
 macro_rules! update_field_nodrop {
     ($ptr:expr, $field:ident, $value:expr) => {
-        $crate::update_nodrop!($crate::modify!($ptr).$field, $value)
+        $crate::update_nodrop!((*$ptr).$field, $value)
     };
 }
 
@@ -3105,9 +3093,11 @@ macro_rules! update_nodrop {
 #[macro_export]
 macro_rules! modify {
     ($ptr:expr) => {
+        // safety: Dafny will only obtain a mutable borrowed address of a pointer if it can ensure the object
+        // is still allocated
         {
             #[allow(unused_unsafe)]
-            let tmp = unsafe {&mut *(::std::cell::UnsafeCell::raw_get($ptr.0.unwrap_unchecked().as_ptr()))};
+            let tmp = unsafe { &mut *$ptr };
             tmp
         }
     }
@@ -3117,9 +3107,11 @@ macro_rules! modify {
 #[macro_export]
 macro_rules! read {
     ($ptr:expr) => {
+        // safety: Dafny will only obtain a borrowed address of a pointer if it can ensure the object
+        // is still allocated
         {
             #[allow(unused_unsafe)]
-            let tmp = unsafe {&*(::std::cell::UnsafeCell::raw_get($ptr.0.unwrap_unchecked().as_ptr()))};
+            let tmp = unsafe { &*$ptr };
             tmp
         }
     }
@@ -3130,7 +3122,6 @@ macro_rules! read {
 macro_rules! update_field_uninit {
     ($t:expr, $field:ident, $field_assigned:expr, $value:expr) => {{
         let computed_value = $value;
-        #[allow(unused_assignments)]
         if $field_assigned {
             $crate::modify!($t).$field = computed_value;
         } else {
@@ -3153,160 +3144,6 @@ macro_rules! update_field_if_uninit {
 }
 
 /////////////////
-// Raw pointers (require wrapping because of equality)
-/////////////////
-
-// This Ptr has the same run-time space as *mut
-pub struct Ptr<T: ?Sized>(pub Option<NonNull<UnsafeCell<T>>>);
-
-impl <T: ?Sized> Ptr<T> {
-    pub fn null() -> Self {
-        Ptr(None)
-    }
-    pub fn is_null(&self) -> bool {
-        self.0.is_none()
-    }
-    #[inline]
-    pub fn from_raw_nonnull(t: *mut T) -> Ptr<T> {
-        unsafe { Ptr(Some(::std::mem::transmute::<NonNull<T>, NonNull<UnsafeCell<T>>>(NonNull::new_unchecked(t)))) }
-    }
-    pub fn from_box(t: Box<T>) -> Ptr<T> {
-        Self::from_raw_nonnull(Box::into_raw(t))
-    }
-    pub fn into_raw(self) -> *mut T {
-        if self.is_null() {
-            panic!("Cannot turn a null pointer into a raw pointer");
-        }
-        let nonnull = unsafe { self.0.unwrap_unchecked() };
-        unsafe { ::std::mem::transmute::<_, *mut T>(nonnull.as_ptr()) }
-    }
-}
-
-impl <T: ?Sized + 'static + Upcast<dyn Any>> Ptr<T> {
-    pub fn is_instance_of<U: 'static>(self) -> bool {
-        if self.is_null() {
-            false
-        } else {
-            read!(Upcast::<dyn Any>::upcast(read!(self)))
-                .downcast_ref::<U>()
-                .is_some()
-        }
-    }
-}
-
-impl<T> NontrivialDefault for Ptr<T> {
-    fn nontrivial_default() -> Self {
-        // Create a null pointer
-        Self::null()
-    }
-}
-
-impl <T> Ptr<T> {
-    pub fn new(val: T) -> Ptr<T> {
-        Self::from_box(Box::new(val))
-    }
-}
-
-
-impl<T: ?Sized> Eq for Ptr<T> {}
-
-impl<T: ?Sized> Clone for Ptr<T> {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
-
-impl <T: ?Sized> Copy for Ptr<T> { }
-
-impl <T: ?Sized>Default for Ptr<T> {
-    fn default() -> Self {
-        Ptr::null()
-    }
-}
-
-impl<T: ?Sized> Debug for Ptr<T> {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        self.fmt_print(f, false)
-    }
-}
-impl <T: ?Sized> DafnyPrint for Ptr<T> {
-    fn fmt_print(&self, f: &mut Formatter<'_>, _in_seq: bool) -> std::fmt::Result {
-        write!(f, "<object>")
-    }
-}
-
-
-impl <T: ?Sized, U: ?Sized> PartialEq<Ptr<U>> for Ptr<T> {
-    fn eq(&self, other: &Ptr<U>) -> bool {
-        if !self.is_null() {
-            if !other.is_null() {
-                // To compare addresses, we need to ensure we only compare thin pointers
-                // https://users.rust-lang.org/t/comparing-addresses-between-fat-and-thin-pointers/89008
-                ::std::ptr::eq(
-                    self.clone().into_raw() as *const (), 
-                 other.clone().into_raw() as *const ())
-            } else {
-                false
-            }
-        } else if !other.is_null() {
-            false
-        } else {
-            true
-        }
-    }
-}
-
-impl <T: ?Sized> std::hash::Hash for Ptr<T> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        if !self.is_null() {
-            (read!(self.clone()) as *const T as *const ()).hash(state);
-        } else {
-            0.hash(state);
-        }
-    }
-}
-
-impl <T: ?Sized> AsMut<T> for Ptr<T> {
-    fn as_mut(&mut self) -> &mut T {
-        modify!(self.clone())
-    }
-}
-impl <T: ?Sized> AsRef<T> for Ptr<T> {
-    fn as_ref(&self) -> &T {
-        read!(self.clone())
-    }
-}
-
-impl <T: ?Sized> Ptr<T> {
-    // Never use on local values, only on &self types previously called on Ptr types.
-    pub fn from_ref(r: &T) -> Ptr<T> {
-        Ptr(unsafe {::std::mem::transmute::<_, Option<NonNull<UnsafeCell<T>>>>(r as *const T)})
-    }
-}
-// cast is meant to be used on references only, to downcast a trait reference to a class reference
-#[macro_export]
-macro_rules! cast {
-    ($raw:expr, $id:ty) => {
-        {
-            #[allow(unused_unsafe)]
-            let tmp =
-                unsafe {
-                    let expr = $raw;
-                    let res: $crate::Ptr<$id> =
-                        if expr.is_null() {
-                            $crate::Ptr::null()
-                        } else {
-                            $crate::Ptr::from_raw_nonnull(expr.into_raw() as *mut $id)
-                        };
-                    res
-                };
-            tmp
-        }
-    };
-    
-}
-
-/////////////////
 // Reference-counted classes mode
 /////////////////
 
@@ -3315,25 +3152,6 @@ pub struct Object<T: ?Sized>(pub Option<rcmut::RcMut<T>>);
 impl <T: ?Sized> Object<T> {
     pub unsafe fn from_rc(rc: Rc<T>) -> Object<T> {
         Object(Some(rcmut::from_rc(rc)))
-    }
-    pub fn null() -> Object<T> {
-        Object(None)
-    }
-    pub fn is_null(&self) -> bool {
-        self.0.is_none()
-    }
-}
-impl <T: ?Sized + 'static + UpcastObject<dyn Any>> Object<T> {
-    pub fn is_instance_of<U: 'static>(self) -> bool {
-    // safety: Dafny won't call this function unless it can guarantee the object is still allocated
-        rd!(UpcastObject::<dyn Any>::upcast(rd!(self)))
-            .downcast_ref::<U>()
-            .is_some()
-    }
-}
-impl <T> Object<T> {
-    pub fn new(val: T) -> Object<T> {
-        Object(Some(rcmut::new(val)))
     }
 }
 impl<T: ?Sized> Eq for Object<T> {}
@@ -3438,6 +3256,11 @@ pub fn allocate_object_track<T: 'static>(allocation_tracker: &mut AllocationTrac
     res
 }
 
+pub fn is_instance_of_object<T: ?Sized + 'static + UpcastObject<dyn Any>, U: 'static>(theobject: Object<T>) -> bool {
+    // safety: Dafny won't call this function unless it can guarantee the object is still allocated
+    rd!(UpcastObject::<dyn Any>::upcast(rd!(theobject))).downcast_ref::<U>().is_some()
+}
+
 // Equivalent of update_field_nodrop but for rcmut
 #[macro_export]
 macro_rules! update_field_nodrop_object {
@@ -3459,7 +3282,6 @@ macro_rules! update_nodrop_object {
 macro_rules! update_field_if_uninit_object {
     ($t:expr, $field:ident, $field_assigned:expr, $value:expr) => {{
         let computed_value = $value;
-        #[allow(unused_assignments)]
         if !$field_assigned {
             $crate::update_field_nodrop_object!($t, $field, computed_value);
             $field_assigned = true;
@@ -3472,7 +3294,6 @@ macro_rules! update_field_if_uninit_object {
 macro_rules! update_field_uninit_object {
     ($t:expr, $field:ident, $field_assigned:expr, $value:expr) => {{
         let computed_value = $value;
-        #[allow(unused_assignments)]
         if $field_assigned {
             $crate::md!($t).$field = computed_value;
         } else {
@@ -3703,10 +3524,10 @@ pub fn upcast_object<A: ?Sized, B: ?Sized>() -> Rc<impl Fn(Object<A>) -> Object<
     Rc::new(|x: Object<A>| rd!(x).upcast())
 }
 
-pub fn upcast<A: ?Sized, B: ?Sized>() -> Rc<impl Fn(Ptr<A>) -> Ptr<B>>
+pub fn upcast<A: ?Sized, B: ?Sized>() -> Rc<impl Fn(*mut A) -> *mut B>
   where A: Upcast<B>
 {
-    Rc::new(|x: Ptr<A>| read!(x).upcast())
+    Rc::new(|x: *mut A| read!(x).upcast())
 }
 
 pub fn upcast_id<A>() -> Rc<impl Fn(A) -> A>
@@ -3734,15 +3555,15 @@ pub fn fn1_coerce<T: Clone + 'static, A: Clone + 'static, R: Clone + 'static>(
 
 // For pointers
 pub trait Upcast<T: ?Sized> {
-    fn upcast(&self) -> Ptr<T>;
+    fn upcast(&self) -> *mut T;
 }
 pub trait UpcastObject<T: ?Sized> {
     fn upcast(&self) -> Object<T>;
 }
 
 impl <T: ?Sized> Upcast<T> for T {
-    fn upcast(&self) -> Ptr<T> {
-        Ptr::from_raw_nonnull(self as *const T as *mut T)
+    fn upcast(&self) -> *mut T {
+        self as *const T as *mut T
     }
 }
 impl <T: ?Sized> UpcastObject<T> for T {
@@ -3761,8 +3582,8 @@ macro_rules! Extends {
 #[macro_export]
 macro_rules! UpcastFn {
     ($B:ty) => {
-        fn upcast(&self) -> $crate::Ptr<$B> {
-            $crate::Ptr::from_raw_nonnull(self as *const Self as *mut Self as *mut $B)
+        fn upcast(&self) -> *mut $B {
+            self as *const Self as *mut Self as *mut $B
         }
     };
 }
@@ -3771,14 +3592,14 @@ macro_rules! UpcastFn {
 macro_rules! UpcastObjectFn {
     ($B:ty) => {
         fn upcast(&self) -> $crate::Object<$B> {
-            $crate::Object::from_ref(unsafe {& *(self as *const Self as *mut Self as *mut $B) })
+            $crate::Object::from_ref($crate::read!(self as *const Self as *mut Self as *mut $B))
         }
     };
 }
 
 
 
-// It works only when there is no type parameters for $A...
+// IT works only when there is no type parameters for $A...
 #[macro_export]
 macro_rules! UpcastDef {
     ($A:ty, $B:ty) => {
