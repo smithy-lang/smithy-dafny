@@ -11,6 +11,7 @@ pub mod error;
 pub mod operation;
 
 mod conversions;
+mod standard_library_conversions;
 
 #[cfg(feature = "wrapped-client")]
 pub mod wrapped;
@@ -2052,52 +2053,6 @@ pub mod r#_SimpleBooleanImpl_Compile {
         }
     }
 }
-pub mod r#_StandardLibraryInterop_Compile {
-    pub use dafny_runtime::UpcastObject;
-    pub use std::any::Any;
-
-    pub struct WrappersInterop {}
-
-    impl WrappersInterop {
-        pub fn _allocate_object() -> ::dafny_runtime::Object<Self> {
-            ::dafny_runtime::allocate_object::<Self>()
-        }
-        pub fn CreateStringSome(
-            s: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-        ) -> ::std::rc::Rc<
-            crate::r#_Wrappers_Compile::Option<
-                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-            >,
-        > {
-            ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<
-                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-            >::Some {
-                value: s.clone(),
-            })
-        }
-        pub fn CreateStringNone() -> ::std::rc::Rc<
-            crate::r#_Wrappers_Compile::Option<
-                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-            >,
-        > {
-            ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<
-                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-            >::None {})
-        }
-        pub fn CreateBooleanSome(
-            b: bool,
-        ) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>> {
-            ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::Some { value: b })
-        }
-        pub fn CreateBooleanNone() -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>> {
-            ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::None {})
-        }
-    }
-
-    impl UpcastObject<dyn Any> for WrappersInterop {
-        ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
-    }
-}
 pub mod r#_SimpleBooleanImplTest_Compile {
     pub struct _default {}
 
@@ -2338,6 +2293,52 @@ pub mod r#_WrappedSimpleTypesBooleanTest_Compile {
     #[test]
     pub fn GetBooleanFalse() {
         _default::GetBooleanFalse()
+    }
+}
+pub mod r#_StandardLibraryInterop_Compile {
+    pub use dafny_runtime::UpcastObject;
+    pub use std::any::Any;
+
+    pub struct WrappersInterop {}
+
+    impl WrappersInterop {
+        pub fn _allocate_object() -> ::dafny_runtime::Object<Self> {
+            ::dafny_runtime::allocate_object::<Self>()
+        }
+        pub fn CreateStringSome(
+            s: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+        ) -> ::std::rc::Rc<
+            crate::r#_Wrappers_Compile::Option<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            >,
+        > {
+            ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            >::Some {
+                value: s.clone(),
+            })
+        }
+        pub fn CreateStringNone() -> ::std::rc::Rc<
+            crate::r#_Wrappers_Compile::Option<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            >,
+        > {
+            ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<
+                ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
+            >::None {})
+        }
+        pub fn CreateBooleanSome(
+            b: bool,
+        ) -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>> {
+            ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::Some { value: b })
+        }
+        pub fn CreateBooleanNone() -> ::std::rc::Rc<crate::r#_Wrappers_Compile::Option<bool>> {
+            ::std::rc::Rc::new(crate::r#_Wrappers_Compile::Option::<bool>::None {})
+        }
+    }
+
+    impl UpcastObject<dyn Any> for WrappersInterop {
+        ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
     }
 }
 pub mod _module {

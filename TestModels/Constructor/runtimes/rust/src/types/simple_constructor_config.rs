@@ -3,7 +3,7 @@
 /// Configuration for a simple service client.
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
-pub struct Config {
+pub struct SimpleConstructorConfig {
     pub(crate) blob_value: Option<Vec<u8>>,
     pub(crate) boolean_value: Option<bool>,
     pub(crate) string_value: Option<String>,
@@ -11,7 +11,7 @@ pub struct Config {
     pub(crate) long_value: Option<i64>,
 }
 
-impl Config {
+impl SimpleConstructorConfig {
     /// Constructs a config builder.
     pub fn builder() -> Builder {
         Builder::default()
@@ -105,8 +105,8 @@ impl Builder {
 
     /// Builds a [`Config`].
     #[allow(unused_mut)]
-    pub fn build(mut self) -> Config {
-        Config {
+    pub fn build(mut self) -> SimpleConstructorConfig {
+        SimpleConstructorConfig {
             blob_value: self.blob_value,
             boolean_value: self.boolean_value,
             string_value: self.string_value,

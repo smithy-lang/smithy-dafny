@@ -7,7 +7,7 @@ use crate::standard_library_conversions::{
 
 #[allow(dead_code)]
 pub fn to_dafny(
-    config: crate::config::Config,
+    config: crate::types::simple_constructor_config::SimpleConstructorConfig,
 ) -> ::std::rc::Rc<
     crate::simple::constructor::internaldafny::types::SimpleConstructorConfig,
 >{
@@ -35,8 +35,8 @@ pub fn from_dafny(
     config: ::std::rc::Rc<
         crate::simple::constructor::internaldafny::types::SimpleConstructorConfig,
     >,
-) -> crate::config::Config {
-    crate::config::Config {
+) -> crate::types::simple_constructor_config::SimpleConstructorConfig {
+    crate::types::simple_constructor_config::SimpleConstructorConfig {
         blob_value: blob_from_dafny(config.blobValue().clone()),
         boolean_value: obool_from_dafny(config.booleanValue().clone()),
         string_value: ostring_from_dafny(config.stringValue().clone()),
