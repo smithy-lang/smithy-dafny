@@ -11,10 +11,13 @@ pub mod error;
 pub mod operation;
 
 mod conversions;
+mod standard_library_conversions;
+
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
 
 pub use client::Client;
 pub use types::simple_timestamp_config::SimpleTimestampConfig;
-
 
 pub mod r#_Wrappers_Compile {
     pub use dafny_runtime::DafnyPrint;

@@ -1,7 +1,6 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
 
-
 pub mod client;
 pub mod types;
 
@@ -14,9 +13,11 @@ pub mod operation;
 mod conversions;
 mod standard_library_conversions;
 
+#[cfg(feature = "wrapped-client")]
+pub mod wrapped;
+
 pub use client::Client;
 pub use types::simple_refinement_config::SimpleRefinementConfig;
-
 
 pub mod r#_Wrappers_Compile {
     pub use dafny_runtime::DafnyPrint;

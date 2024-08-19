@@ -53,8 +53,8 @@ class RustTestModels extends TestModelTest {
     make(testModelPath, "transpile_rust");
     make(testModelPath, "polymorph_rust");
     make(testModelPath, "test_rust");
-    // Since we're checking in and patching code,
-    // make sure the patch files are up to date.
+    // Since we're checking in generated (or benerated) code,
+    // make sure the state matches what's checked in.
     make(testModelPath, "check_polymorph_diff");
   }
 }

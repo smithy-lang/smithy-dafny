@@ -10,7 +10,7 @@ pub struct Client {
 impl Client {
     /// Creates a new client from the service [`Config`](crate::Config).
     #[track_caller]
-    pub fn from_conf(conf: crate::Config) -> Result<Self, BuildError> {
+    pub fn from_conf(conf: crate::types::simple_constructor_config::SimpleConstructorConfig) -> Result<Self, BuildError> {
         let inner =
             crate::r#simple::constructor::internaldafny::_default::SimpleConstructor(
                 &crate::conversions::simple_constructor_config::_simple_constructor_config::to_dafny(conf),
