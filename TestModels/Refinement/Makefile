@@ -22,3 +22,16 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleRefinementTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.refinement.internaldafny.types\" } SimpleRefinementTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleRefinementTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.refinement.internaldafny\"} SimpleRefinement refines AbstractSimpleRefinementService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleRefinement refines AbstractSimpleRefinementService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleRefinementImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.refinement.internaldafny.wrapped\"} WrappedSimpleRefinementService refines WrappedAbstractSimpleRefinementService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleRefinementService refines WrappedAbstractSimpleRefinementService {"

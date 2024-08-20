@@ -19,7 +19,22 @@ SERVICE_DEPS_SimpleLocalService :=
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
-# DEPENDENT-MODELS:= 
+# DEPENDENT-MODELS:=
+
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleLocalServiceTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.localservice.internaldafny.types\" } SimpleLocalServiceTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleLocalServiceTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.localservice.internaldafny\"} SimpleLocalService refines AbstractSimpleLocalServiceService"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleLocalService refines AbstractSimpleLocalServiceService"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedIndex.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.localservice.internaldafny.wrapped\"} WrappedSimpleLocalService refines WrappedAbstractSimpleLocalServiceService"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleLocalService refines WrappedAbstractSimpleLocalServiceService"
+
 
 
 clean:

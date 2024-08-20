@@ -3,8 +3,6 @@
 
 CORES=2
 
-ENABLE_EXTERN_PROCESSING=1
-
 include ../SharedMakefile.mk
 
 PROJECT_SERVICES := \
@@ -21,5 +19,4 @@ NET_SRC_INDEX=src/replaces/net
 NET_TEST_INDEX=test/replaces/net
 
 # This project has no dependencies 
-# DEPENDENT-MODELS:= 
-
+# DEPENDENT-MODELS:=
