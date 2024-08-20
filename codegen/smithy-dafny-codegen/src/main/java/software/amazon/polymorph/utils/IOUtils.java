@@ -90,16 +90,17 @@ public class IOUtils {
     String templateOutputPath,
     Map<String, String> parameters
   ) {
+    if (templatePath.contains(":")) {
+      throw new IllegalArgumentException(
+        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
+      );
+    }
+
     String content = IoUtils.readUtf8Resource(
       klass,
       "/templates/" + templatePath
     );
 
-    if (templateOutputPath.contains(":")) {
-      throw new IllegalArgumentException(
-        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
-      );
-    }
     templateOutputPath = templateOutputPath.replace(';', ':');
 
     content = evalTemplate(content, parameters);
