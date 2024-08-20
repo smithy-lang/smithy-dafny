@@ -92,7 +92,7 @@ public class IOUtils {
   ) {
     if (templatePath.contains(":")) {
       throw new IllegalArgumentException(
-              "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
+        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
       );
     }
 
