@@ -39,10 +39,10 @@ _no_extern_post_transpile_dependencies:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _no_extern_post_transpile;, $(PROJECT_DEPENDENCIES))
 
 _with_extern_pre_transpile_dependencies:
-	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _no_extern_pre_transpile;, $(PROJECT_DEPENDENCIES))
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _with_extern_pre_transpile;, $(PROJECT_DEPENDENCIES))
 
 _with_extern_post_transpile_dependencies:
-	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _no_extern_post_transpile;, $(PROJECT_DEPENDENCIES))
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _with_extern_post_transpile;, $(PROJECT_DEPENDENCIES))
 
 _sed_types_file_remove_extern:
 	@if [ -z "$(TYPES_FILE_PATH)" ] || [ -z "$(TYPES_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(TYPES_FILE_WITHOUT_EXTERN_STRING)" ]; then \
