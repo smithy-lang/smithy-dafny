@@ -45,60 +45,38 @@ _with_extern_post_transpile_dependencies:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _no_extern_post_transpile;, $(PROJECT_DEPENDENCIES))
 
 _sed_types_file_remove_extern:
+	@if [ -z "$(TYPES_FILE_PATH)" ] || [ -z "$(TYPES_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(TYPES_FILE_WITHOUT_EXTERN_STRING)" ]; then \
+		echo "Error: All variables TYPES_FILE_PATH, TYPES_FILE_WITH_EXTERN_STRING, and TYPES_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
+		exit 1; \
+	fi
 	$(MAKE) _sed_file SED_FILE_PATH=$(TYPES_FILE_PATH) SED_BEFORE_STRING=$(TYPES_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(TYPES_FILE_WITHOUT_EXTERN_STRING)
 
 _sed_index_file_remove_extern:
+	@if [ -z "$(INDEX_FILE_PATH)" ] || [ -z "$(INDEX_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(INDEX_FILE_WITHOUT_EXTERN_STRING)" ]; then \
+		echo "Error: All variables TYPES_FILE_PATH, TYPES_FILE_WITH_EXTERN_STRING, and TYPES_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
+		exit 1; \
+	fi
 	$(MAKE) _sed_file SED_FILE_PATH=$(INDEX_FILE_PATH) SED_BEFORE_STRING=$(INDEX_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(INDEX_FILE_WITHOUT_EXTERN_STRING)
 
 _sed_wrapped_types_file_remove_extern:
 	$(if $(strip $(WRAPPED_INDEX_FILE_PATH)), $(MAKE) _sed_file SED_FILE_PATH=$(WRAPPED_INDEX_FILE_PATH) SED_BEFORE_STRING=$(WRAPPED_INDEX_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING), )
 
 _sed_types_file_add_extern:
+	@if [ -z "$(TYPES_FILE_PATH)" ] || [ -z "$(TYPES_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(TYPES_FILE_WITHOUT_EXTERN_STRING)" ]; then \
+		echo "Error: All variables TYPES_FILE_PATH, TYPES_FILE_WITH_EXTERN_STRING, and TYPES_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
+		exit 1; \
+	fi
 	$(MAKE) _sed_file SED_FILE_PATH=$(TYPES_FILE_PATH) SED_BEFORE_STRING=$(TYPES_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(TYPES_FILE_WITH_EXTERN_STRING)
 
 _sed_index_file_add_extern:
+	@if [ -z "$(INDEX_FILE_PATH)" ] || [ -z "$(INDEX_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(INDEX_FILE_WITHOUT_EXTERN_STRING)" ]; then \
+		echo "Error: All variables TYPES_FILE_PATH, TYPES_FILE_WITH_EXTERN_STRING, and TYPES_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
+		exit 1; \
+	fi
 	$(MAKE) _sed_file SED_FILE_PATH=$(INDEX_FILE_PATH) SED_BEFORE_STRING=$(INDEX_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(INDEX_FILE_WITH_EXTERN_STRING)
 
 _sed_wrapped_types_file_add_extern:
 	$(if $(strip $(WRAPPED_INDEX_FILE_PATH)), $(MAKE) _sed_file SED_FILE_PATH=$(WRAPPED_INDEX_FILE_PATH) SED_BEFORE_STRING=$(WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(WRAPPED_INDEX_FILE_WITH_EXTERN_STRING), )
 
 _sed_file:
-	@{ \
-	: "If the AFTER string is already present and the BEFORE string is not," ; \
-	: "then exit success," ; \
-	: "because the expected result is already present." ; \
-	if grep -q '$(SED_AFTER_STRING)' $(SED_FILE_PATH) && ! grep -q '$(SED_BEFORE_STRING)' $(SED_FILE_PATH); then \
-		echo "String has already been replaced in $(SED_FILE_PATH)"; \
-		exit 0; \
-	fi; \
-	\
-	: "If neither the AFTER nor BEFORE strings are present," ; \
-	: "then exit failure," ; \
-	: "because the sed will fail as the BEFORE string is not present." ; \
-	if ! grep -q '$(SED_BEFORE_STRING)' $(SED_FILE_PATH); then \
-		echo "Error: Could not find string to replace in $(SED_FILE_PATH)"; \
-		exit 1; \
-	fi; \
-	\
-	: "If both the AFTER and BEFORE strings are present," ; \
-	: "then exit failure," ; \
-	: "because the sed will produce unintended results (2 after strings)." ; \
-	if grep -q '$(SED_AFTER_STRING)' $(SED_FILE_PATH) && grep -q '$(SED_BEFORE_STRING)' $(SED_FILE_PATH); then \
-		echo "Error: Could not find string to replace in $(SED_FILE_PATH)"; \
-		exit 1; \
-	fi; \
-	\
-	: "Perform sed" ; \
-	echo "Replacing in $(SED_FILE_PATH)"; \
-	sed -i $(SED_PARAMETER) 's/$(SED_BEFORE_STRING)/$(SED_AFTER_STRING)/g' $(SED_FILE_PATH); \
-	\
-	: "If the BEFORE string is still present or the AFTER string is not present," ; \
-	: "then exit failure," ; \
-	: "because the sed did not succeed." ; \
-	if grep -q '$(SED_BEFORE_STRING)' $(SED_FILE_PATH) || ! grep -q '$(SED_AFTER_STRING)' $(SED_FILE_PATH); then \
-		echo "Error: No replacements made in $(SED_FILE_PATH)"; \
-		exit 1; \
-	else \
-		echo "Replacement successful in $(SED_FILE_PATH)"; \
-	fi; \
-	}
+	$(SMITHY_DAFNY_ROOT)/scripts/sed_replace.sh
