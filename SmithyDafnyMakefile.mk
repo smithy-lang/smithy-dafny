@@ -211,6 +211,7 @@ transpile_implementation:
 		-useRuntimeLib \
 		-out $(OUT) \
 		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES)
 
@@ -252,6 +253,7 @@ transpile_test:
 		-useRuntimeLib \
 		-out $(OUT) \
 		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES) \
 
@@ -426,7 +428,10 @@ polymorph_rust:
 	done
 
 _polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
-_polymorph_rust: _polymorph
+# For several TestModels we've just manually written the code generation target,
+# So we just want to ensure we can transpile and pass the tests in CI.
+# For those, make polymorph_rust should just be a no-op.
+_polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
 
 ########################## .NET targets
 
@@ -529,7 +534,8 @@ test_java:
 
 ########################## Rust targets
 
-# TODO: blah blah Rust only supports a single crate for everything
+# The Dafny Rust code generator only supports a single crate for everything,
+# so (among other consequences) we compile src and test code together.
 transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
@@ -539,12 +545,14 @@ transpile_implementation_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
-# TODO:
+# The Dafny Rust code generator only supports a single crate for everything,
+# so we inline all dependencies by not passing `-library` to Dafny.
 transpile_implementation_rust: TRANSPILE_DEPENDENCIES=
 transpile_implementation_rust: STD_LIBRARY=
 transpile_implementation_rust: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation_rust: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
-transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust
+transpile_implementation_rust: DAFNY_OTHER_FILES=$(RUST_OTHER_FILES)
+transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust patch_after_transpile_rust
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
@@ -554,6 +562,30 @@ _mv_implementation_rust:
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
+
+patch_after_transpile_rust:
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _patch_after_transpile_rust ; \
+	done
+
+_patch_after_transpile_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+_patch_after_transpile_rust:
+	cd $(CODEGEN_CLI_ROOT); \
+	./../gradlew run --args="\
+	patch-after-transpile \
+	--dafny-version $(DAFNY_VERSION) \
+	--library-root $(LIBRARY_ROOT) \
+	$(OUTPUT_RUST) \
+	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
+	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
+	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	--namespace $($(namespace_var)) \
+	$(AWS_SDK_CMD) \
+	$(POLYMORPH_OPTIONS) \
+	";
 
 build_rust:
 	cd runtimes/rust; \
