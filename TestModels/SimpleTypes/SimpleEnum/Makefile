@@ -19,3 +19,16 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleTypesSmithyEnumTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithyenum.internaldafny.types\" } SimpleTypesSmithyEnumTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleTypesSmithyEnumTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithyenum.internaldafny\" } SimpleEnum refines AbstractSimpleTypesSmithyEnumService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleEnum refines AbstractSimpleTypesSmithyEnumService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleEnumImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithyenum.internaldafny.wrapped\"} WrappedSimpleTypesEnumService refines WrappedAbstractSimpleTypesSmithyEnumService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesEnumService refines WrappedAbstractSimpleTypesSmithyEnumService {"

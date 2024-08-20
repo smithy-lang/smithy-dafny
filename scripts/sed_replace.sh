@@ -7,6 +7,12 @@ if [ -z "$SED_FILE_PATH" ] || [ -z "$SED_BEFORE_STRING" ] || [ -z "$SED_AFTER_ST
     exit 1
 fi
 
+# Check if the file exists
+if [ ! -f "$SED_FILE_PATH" ]; then
+    echo "Error: File $SED_FILE_PATH does not exist."
+    exit 1
+fi
+
 # If the AFTER string is already present and the BEFORE string is not,
 # then exit success,
 # because the expected result is already present.

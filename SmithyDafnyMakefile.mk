@@ -58,6 +58,13 @@ GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
 include $(SMITHY_DAFNY_ROOT)/SmithyDafnySedMakefile.mk
 
+# This flag enables pre-processing on extern module names.
+# This pre-processing is required to compile to Python and Go.
+# This is disabled by default.
+# This should be enabled in each individual project's Makefile if that project compiles to Python or Go.
+# This can be enabled by setting this variable to any nonempty value (ex. true, 1)
+ENABLE_EXTERN_PROCESSING?=
+
 ########################## Dafny targets
 
 # TODO: This target will not work for projects that use `replaceable` 
@@ -423,7 +430,9 @@ _polymorph_rust: _polymorph
 
 ########################## .NET targets
 
-transpile_net: | _with_extern_pre_transpile transpile_implementation_net transpile_test_net transpile_dependencies_net _with_extern_post_transpile
+transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
+transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
+transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
@@ -471,7 +480,9 @@ format_net-check:
 build_java: transpile_java mvn_local_deploy_dependencies
 	$(GRADLEW) -p runtimes/java build
 
-transpile_java: | _with_extern_pre_transpile transpile_implementation_java transpile_test_java transpile_dependencies_java _with_extern_post_transpile
+transpile_java: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
+transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
+transpile_java: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny

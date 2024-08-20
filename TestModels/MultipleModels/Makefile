@@ -3,6 +3,8 @@
 
 CORES=2
 
+ENABLE_EXTERN_PROCESSING=1
+
 include ../SharedMakefile.mk
 
 # DIR_STRUCTURE_V2 is used to signal multiple subprojects/models in one project
