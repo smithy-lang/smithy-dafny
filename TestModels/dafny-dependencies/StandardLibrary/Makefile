@@ -95,19 +95,8 @@ transpile_implementation:
 		--allow-warnings \
 		--output $(OUT) \
 		$(DAFNY_OPTIONS) \
-<<<<<<< HEAD
-		$(TRANSPILE_MODULE_NAME)
-
 		$(DAFNY_OTHER_FILES) \
-		-out $(OUT)
-=======
-<<<<<<< HEAD
 		$(TRANSPILE_MODULE_NAME)
-=======
-		$(DAFNY_OTHER_FILES) \
-		-out $(OUT)
->>>>>>> main-1.x
->>>>>>> python-reviewed
 
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
