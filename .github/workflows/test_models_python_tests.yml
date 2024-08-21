@@ -55,7 +55,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
-          dafny-version: ${{ matrix.dafny-version }}
+          dafny-version: ${{ inputs.dafny }}
 
       - name: Setup Python for running tests
         uses: actions/setup-python@v4
