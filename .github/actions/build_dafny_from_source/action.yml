@@ -57,7 +57,7 @@ runs:
     # update the copy of the Rust runtime we have inside TestModels
     # (since it's not published yet)
     - name: Update dafny_runtime_rust
-      shell: bach
+      shell: bash
       run: |
         rm -rf TestModels/dafny-dependencies/dafny_runtime_rust
         cp dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust
