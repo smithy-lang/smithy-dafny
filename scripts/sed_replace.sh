@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# On macOS, sed requires an extra parameter of ""
-OS=$(uname)
-if [ "$OS" = "Darwin" ]; then
-  SED_PARAMETER="''"
-else
-  SED_PARAMETER=""
-fi
-
 # Ensure all required variables are set
 # (This SHOULD have already been checked)
 if [ -z "$SED_FILE_PATH" ] || [ -z "$SED_BEFORE_STRING" ] || [ -z "$SED_AFTER_STRING" ]; then
@@ -47,7 +39,7 @@ fi
 
 # Perform sed
 echo "Replacing in $SED_FILE_PATH"
-sed -i $SED_PARAMETER "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" "$SED_FILE_PATH"
+sed -i "" "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" "$SED_FILE_PATH"
 
 # Verify the replacement was successful
 

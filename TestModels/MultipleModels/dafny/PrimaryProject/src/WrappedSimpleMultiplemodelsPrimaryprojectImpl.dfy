@@ -3,7 +3,7 @@
 include "../Model/SimpleMultiplemodelsPrimaryprojectTypesWrapped.dfy"
 
 module {:extern "simple.multiplemodels.primaryproject.internaldafny.wrapped"} WrappedSimpleMultiplemodelsPrimaryprojectService refines WrappedAbstractSimpleMultiplemodelsPrimaryprojectService {
-    import WrappedService = SimpleMultiplemodelsPrimaryprojectService
+    import WrappedService = PrimaryProject
     function method WrappedDefaultPrimaryProjectConfig(): PrimaryProjectConfig {
         PrimaryProjectConfig
     }

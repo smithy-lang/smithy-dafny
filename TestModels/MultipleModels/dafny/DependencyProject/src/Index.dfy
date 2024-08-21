@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleMultiplemodelsDependencyprojectImpl.dfy"
 
-module {:extern "simple.multiplemodels.dependencyproject.internaldafny" } SimpleMultiplemodelsDependencyprojectService refines AbstractSimpleMultiplemodelsDependencyprojectService {
+module {:extern "simple.multiplemodels.dependencyproject.internaldafny" } DependencyProject refines AbstractSimpleMultiplemodelsDependencyprojectService {
     import Operations = SimpleMultiplemodelsDependencyprojectImpl
 
     function method DefaultDependencyProjectConfig(): DependencyProjectConfig {
