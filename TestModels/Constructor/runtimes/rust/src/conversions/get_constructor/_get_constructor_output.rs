@@ -21,7 +21,7 @@ pub fn to_dafny(
 
     let blob_value = match blob_value {
         Some(v) => crate::_Wrappers_Compile::Option::Some {
-            value: ::dafny_runtime::Sequence::from_array(&v),
+            value: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&v, |x| *x),
         },
         None => crate::_Wrappers_Compile::Option::None {},
     };
