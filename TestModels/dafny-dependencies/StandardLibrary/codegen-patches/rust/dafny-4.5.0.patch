@@ -1,72 +1,69 @@
-diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/UTF8.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/UTF8.rs
+diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/UTF8_externs.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/UTF8_externs.rs
 new file mode 100644
-index 00000000..fb5e7bf9
+index 00000000..4de5cb4e
 --- /dev/null
-+++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/UTF8.rs
-@@ -0,0 +1,67 @@
++++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/UTF8_externs.rs
+@@ -0,0 +1,64 @@
 +
 +// Annotation to ignore the case of this module
-+#[allow(non_snake_case)]
-+pub mod UTF8 {
-+  use crate::implementation_from_dafny::r#_Wrappers_Compile;
-+  use crate::implementation_from_dafny::UTF8;
++use crate::r#_Wrappers_Compile;
++use crate::UTF8;
 +
-+  
-+  impl crate::implementation_from_dafny::UTF8::_default {
-+    pub fn Encode(s: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>) -> ::std::rc::Rc<r#_Wrappers_Compile::Result<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
-+      let v = s.to_array();
-+      let mut _accumulator: Vec<u8> = vec![];
-+      // Use of .encode_utf8 method.
-+      let mut surrogate: Option<u16> = None;
-+      for c in v.iter() {
-+        let s = 
-+          if let Some(s) = surrogate {
-+            String::from_utf16(&[s, c.0])
-+          } else {
-+            String::from_utf16(&[c.0])
-+          };
-+        surrogate = None;
-+        match s {
-+          Ok(value) => {
-+            _accumulator.extend(value.as_bytes());
-+            continue;
-+          },
-+          Err(e) => {
-+            if 0xD800 <= c.0 && c.0 <= 0xDFFF {
-+              surrogate = Some(c.0);
-+              continue;
-+            } 
-+            return ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Failure {
-+              error: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
-+                &e.to_string())
-+            });
-+          }
-+        }
-+      }
-+      if let Some(s) = surrogate {
-+        return ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Failure {
-+          error: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
-+            &format!("Surrogate pair missing: 0x{:04x}", s))
-+        });
-+      }
-+      ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Success { value: ::dafny_runtime::Sequence::from_array_owned(_accumulator) })
-+    }
-+    pub fn Decode(b: &::dafny_runtime::Sequence<u8>) -> ::std::rc::Rc<r#_Wrappers_Compile::Result<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
-+      let b = String::from_utf8(b.to_array().as_ref().clone());
-+      match b {
-+        Ok(s) => {
-+          ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+            ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Success {
-+              value: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
-+          })
++
++impl crate::UTF8::_default {
++  pub fn Encode(s: &::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>) -> ::std::rc::Rc<r#_Wrappers_Compile::Result<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
++    let v = s.to_array();
++    let mut _accumulator: Vec<u8> = vec![];
++    // Use of .encode_utf8 method.
++    let mut surrogate: Option<u16> = None;
++    for c in v.iter() {
++      let s = 
++        if let Some(s) = surrogate {
++          String::from_utf16(&[s, c.0])
++        } else {
++          String::from_utf16(&[c.0])
++        };
++      surrogate = None;
++      match s {
++        Ok(value) => {
++          _accumulator.extend(value.as_bytes());
++          continue;
 +        },
 +        Err(e) => {
-+          return ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-+            ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Failure {
-+              error: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
-+                &e.to_string())
-+            })
++          if 0xD800 <= c.0 && c.0 <= 0xDFFF {
++            surrogate = Some(c.0);
++            continue;
++          } 
++          return ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Failure {
++            error: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
++              &e.to_string())
++          });
 +        }
++      }
++    }
++    if let Some(s) = surrogate {
++      return ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Failure {
++        error: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
++          &format!("Surrogate pair missing: 0x{:04x}", s))
++      });
++    }
++    ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<UTF8::ValidUTF8Bytes, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Success { value: ::dafny_runtime::Sequence::from_array_owned(_accumulator) })
++  }
++  pub fn Decode(b: &::dafny_runtime::Sequence<u8>) -> ::std::rc::Rc<r#_Wrappers_Compile::Result<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
++    let b = String::from_utf8(b.to_array().as_ref().clone());
++    match b {
++      Ok(s) => {
++        ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
++          ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Success {
++            value: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
++        })
++      },
++      Err(e) => {
++        return ::std::rc::Rc::new(r#_Wrappers_Compile::Result::<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
++          ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Failure {
++            error: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
++              &e.to_string())
++          })
 +      }
 +    }
 +  }
@@ -74,11 +71,11 @@ index 00000000..fb5e7bf9
 \ No newline at end of file
 diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs
 new file mode 100644
-index 00000000..8b20a995
+index 00000000..978079e1
 --- /dev/null
 +++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/conversion.rs
-@@ -0,0 +1,175 @@
-+use crate::implementation_from_dafny::*;
+@@ -0,0 +1,248 @@
++use crate::*;
 +
 +pub fn ostring_to_dafny(
 +    input: &Option<String>,
@@ -110,9 +107,9 @@ index 00000000..8b20a995
 +    }
 +}
 +
-+pub fn obool_to_dafny(input: Option<bool>) -> ::std::rc::Rc<_Wrappers_Compile::Option<bool>> {
++pub fn obool_to_dafny(input: &Option<bool>) -> ::std::rc::Rc<_Wrappers_Compile::Option<bool>> {
 +    let dafny_value = match input {
-+        Some(b) => _Wrappers_Compile::Option::Some { value: b },
++        Some(b) => _Wrappers_Compile::Option::Some { value: *b },
 +        None => _Wrappers_Compile::Option::None {},
 +    };
 +    ::std::rc::Rc::new(dafny_value)
@@ -196,6 +193,81 @@ index 00000000..8b20a995
 +    }
 +}
 +
++pub fn double_to_dafny(
++    input: f64,
++) -> ::dafny_runtime::Sequence<u8> {
++    ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(
++        &f64::to_be_bytes(input).to_vec(),
++        |x| *x)
++}
++
++pub fn odouble_to_dafny(
++    input: &Option<f64>,
++) -> ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>> {
++    let dafny_value = match input {
++        Some(f) => _Wrappers_Compile::Option::Some {
++            value: double_to_dafny(*f),
++        },
++        None => _Wrappers_Compile::Option::None {},
++    };
++    ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn double_from_dafny(
++    input: &::dafny_runtime::Sequence<u8>,
++) -> f64 {
++    let v = ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(input, |x| *x);
++    f64::from_be_bytes(v.try_into().expect("Error converting Sequence to f64"))
++}
++
++pub fn odouble_from_dafny(
++    input: ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<u8>>>,
++) -> Option<f64> {
++    if matches!(input.as_ref(), _Wrappers_Compile::Option::Some { .. }) {
++        Some(double_from_dafny(&input.Extract()))
++    } else {
++        None
++    }
++}
++
++pub fn timestamp_to_dafny(
++    input: ::aws_smithy_types::DateTime,
++) -> ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> {
++    ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&input.to_string())
++}
++
++pub fn otimestamp_to_dafny(
++    input: &Option<::aws_smithy_types::DateTime>,
++) -> ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
++    let dafny_value = match input {
++        Some(f) => _Wrappers_Compile::Option::Some {
++            value: timestamp_to_dafny(*f),
++        },
++        None => _Wrappers_Compile::Option::None {},
++    };
++    ::std::rc::Rc::new(dafny_value)
++}
++
++pub fn timestamp_from_dafny(
++    input: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
++) -> ::aws_smithy_types::DateTime {
++    let s = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&input);
++    ::aws_smithy_types::DateTime::from_str(
++        &s,
++        aws_smithy_types::date_time::Format::DateTime,
++    ).unwrap()
++}
++
++pub fn otimestamp_from_dafny(
++    input: ::std::rc::Rc<_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>>,
++) -> Option<::aws_smithy_types::DateTime> {
++    if matches!(input.as_ref(), _Wrappers_Compile::Option::Some { .. }) {
++        Some(timestamp_from_dafny(input.Extract()))
++    } else {
++        None
++    }
++}
++
 +pub fn option_from_dafny<T: ::dafny_runtime::DafnyType, TR>(
 +    input: ::std::rc::Rc<_Wrappers_Compile::Option<T>>,
 +    converter: fn(&T) -> TR,
@@ -203,7 +275,6 @@ index 00000000..8b20a995
 +    match &*input {
 +        _Wrappers_Compile::Option::Some { value } => Some(converter(value)),
 +        _Wrappers_Compile::Option::None { } => None,
-+        _Wrappers_Compile::Option::_PhantomVariant(_) => panic!(),
 +    }
 +}
 +
@@ -231,7 +302,6 @@ index 00000000..8b20a995
 +    match &*input {
 +        _Wrappers_Compile::Result::Success { value } => Ok(converter_t(value)),
 +        _Wrappers_Compile::Result::Failure { error } => Err(converter_e(error)),
-+        _Wrappers_Compile::Result::_PhantomVariant(_, _) => panic!(),
 +    }
 +}
 +
@@ -254,6 +324,20 @@ index 00000000..8b20a995
 +    }
 +}
 \ No newline at end of file
+diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs
+index 7c054901..3e6599ec 100644
+--- b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs
++++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs
+@@ -1,6 +1,9 @@
+ #![allow(warnings, unconditional_panic)]
+ #![allow(nonstandard_style)]
+ 
++pub mod conversion;
++mod UTF8_externs;
++
+ pub mod r#_Wrappers_Compile {
+     pub use dafny_runtime::DafnyPrint;
+     pub use std::cmp::Eq;
 diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/lib.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/lib.rs
 new file mode 100644
 index 00000000..12cdf221
@@ -265,14 +349,3 @@ index 00000000..12cdf221
 +pub mod conversion;
 +pub mod implementation_from_dafny;
 \ No newline at end of file
-diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/tests/tests_from_dafny/mod.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/tests/tests_from_dafny/mod.rs
-index 20caf2dd..c4a1c20f 100644
---- b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/tests/tests_from_dafny/mod.rs
-+++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/tests/tests_from_dafny/mod.rs
-@@ -1,5 +1,6 @@
- #![allow(warnings, unconditional_panic)]
- #![allow(nonstandard_style)]
-+use ::dafny_standard_library::implementation_from_dafny::*;
- 
- pub mod r#_TestUTF8_Compile {
-     pub struct _default {}

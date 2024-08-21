@@ -3,13 +3,13 @@
 pub fn to_dafny(
     value: crate::operation::get_long_known_value::GetLongKnownValueInput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput,
+    crate::r#simple::types::smithylong::internaldafny::types::GetLongInput,
 > {
     let dafny_value = match value.value {
-        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: v },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        Some(v) => crate::_Wrappers_Compile::Option::Some { value: v },
+        None => crate::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput::GetLongInput {
+    ::std::rc::Rc::new(crate::r#simple::types::smithylong::internaldafny::types::GetLongInput::GetLongInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -17,17 +17,17 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dtypes_dsmithylong_dinternaldafny_dtypes::GetLongInput,
+        crate::r#simple::types::smithylong::internaldafny::types::GetLongInput,
     >,
 ) -> crate::operation::get_long_known_value::GetLongKnownValueInput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(dafny_value.value().Extract())
     } else if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

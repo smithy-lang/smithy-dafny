@@ -10,26 +10,26 @@ using Com.Amazonaws.Kms;
 // that refines the AWS SDK KMS Model
 namespace software.amazon.cryptography.services.kms.internaldafny
 {
-  public partial class __default
-  {
-    
-    public static
-      _IResult<
-        types.IKMSClient,
-        types._IError
-      >
-      KMSClient()
+    public partial class __default
     {
-      // var region = RegionEndpoint.GetBySystemName("us-west-2");
-      // TODO add user agent, endpoint, and region
-      var client = new AmazonKeyManagementServiceClient();
 
-      return Result<
-        types.IKMSClient,
-        types._IError
-      >
-        .create_Success(new KeyManagementServiceShim(client));
-    }
+        public static
+          _IResult<
+            types.IKMSClient,
+            types._IError
+          >
+          KMSClient()
+        {
+            // var region = RegionEndpoint.GetBySystemName("us-west-2");
+            // TODO add user agent, endpoint, and region
+            var client = new AmazonKeyManagementServiceClient();
+
+            return Result<
+              types.IKMSClient,
+              types._IError
+            >
+              .create_Success(new KeyManagementServiceShim(client));
+        }
 
         public static _IOption<bool> RegionMatch(
             software.amazon.cryptography.services.kms.internaldafny.types.IKMSClient client,
@@ -41,6 +41,6 @@ namespace software.amazon.cryptography.services.kms.internaldafny
             // our code generation.
             IAmazonKeyManagementService nativeClient = ((KeyManagementServiceShim)client)._impl;
             return new Option_Some<bool>(nativeClient.Config.RegionEndpoint.SystemName.Equals(regionStr));
-        }    
-  }
+        }
+    }
 }

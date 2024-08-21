@@ -21,7 +21,7 @@ PYTHON_SRC_INDEX=src/replaces/python
 PYTHON_TEST_INDEX=test/replaces/python
 
 # This project has no dependencies 
-# DEPENDENT-MODELS:= 
+# DEPENDENT-MODELS:=
 
 # Python
 

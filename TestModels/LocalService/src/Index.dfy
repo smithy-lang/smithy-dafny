@@ -4,8 +4,7 @@
 include "../Model/SimpleLocalServiceTypes.dfy"
 include "./SimpleLocalServiceOperations.dfy"
 
-module
-  SimpleLocalService refines AbstractSimpleLocalServiceService
+module {:extern "simple.localservice.internaldafny"} SimpleLocalService refines AbstractSimpleLocalServiceService
 {
   import Operations = SimpleLocalServiceOperations
 
