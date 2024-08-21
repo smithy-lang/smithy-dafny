@@ -1,6 +1,8 @@
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import static java.lang.String.format;
+import static software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver.isAwsSdkShape;
+import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import java.util.Set;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -355,12 +357,21 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                     var memberName = symbolProvider.toMemberName(member);
                     var target = model.expectShape(member.getTarget());
                     Symbol targetSymbol = symbolProvider.toSymbol(target);
-                    if (target.isStructureShape()) {
+                    if (target.hasTrait(ReferenceTrait.class)) {
+                      ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
+
+                      if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
+                        writer.write(
+                                "kwargs[$S] = d[$S]",
+                                memberName,
+                                capitalize(member.getMemberName()));
+                      }
+                    } else if (target.isStructureShape()) {
                       writer.write(
                           "$S: $L.from_dict(d[$S]),",
                           memberName,
                           targetSymbol.getName(),
-                          member.getMemberName());
+                          capitalize(member.getMemberName()));
                     } else if (targetSymbol.getProperty("fromDict").isPresent()) {
                       var targetFromDictSymbol =
                           targetSymbol.expectProperty("fromDict", Symbol.class);
@@ -368,9 +379,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                           "$S: $T(d[$S]),",
                           memberName,
                           targetFromDictSymbol,
-                          member.getMemberName());
+                          capitalize(member.getMemberName()));
                     } else {
-                      writer.write("$S: d[$S],", memberName, member.getMemberName());
+                      writer.write("$S: d[$S],", memberName, capitalize(member.getMemberName()));
                     }
                   }
                 });
@@ -383,15 +394,24 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             writer.openBlock(
                 "if $S in d:",
                 "",
-                member.getMemberName(),
+                capitalize(member.getMemberName()),
                 () -> {
                   var targetSymbol = symbolProvider.toSymbol(target);
-                  if (target.isStructureShape()) {
+                  if (target.hasTrait(ReferenceTrait.class)) {
+                    ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
+
+                    if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
+                      writer.write(
+                        "kwargs[$S] = d[$S]",
+                        memberName,
+                        capitalize(member.getMemberName()));
+                    }
+                  } else if (target.isStructureShape()) {
                     writer.write(
                         "kwargs[$S] = $L.from_dict(d[$S])",
                         memberName,
                         targetSymbol.getName(),
-                        member.getMemberName());
+                        capitalize(member.getMemberName()));
                   } else if (targetSymbol.getProperty("fromDict").isPresent()) {
                     var targetFromDictSymbol =
                         targetSymbol.expectProperty("fromDict", Symbol.class);
@@ -399,9 +419,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                         "kwargs[$S] = $T(d[$S]),",
                         memberName,
                         targetFromDictSymbol,
-                        member.getMemberName());
+                        capitalize(member.getMemberName()));
                   } else {
-                    writer.write("kwargs[$S] = d[$S]", memberName, member.getMemberName());
+                    writer.write("kwargs[$S] = d[$S]", memberName, capitalize(member.getMemberName()));
                   }
                 });
           }
