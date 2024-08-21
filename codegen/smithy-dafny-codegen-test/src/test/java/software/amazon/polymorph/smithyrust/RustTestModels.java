@@ -6,6 +6,7 @@ package software.amazon.polymorph.smithyrust;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,7 +14,11 @@ import software.amazon.polymorph.TestModelTest;
 
 class RustTestModels extends TestModelTest {
 
+  // Tests in this set will never be run
   private static final Set<String> DISABLED_TESTS = new HashSet<>();
+
+  // If this set is nonempty, only included tests will be run
+  private static final Set<String> ENABLED_TESTS = new HashSet<>();
 
   static {
     DISABLED_TESTS.add("AggregateReferences");
@@ -39,11 +44,15 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/kms");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
+
+    ENABLED_TESTS.add("SimpleTypes/SimpleBoolean");
+//    ENABLED_TESTS.add("aws-sdks/kms-lite");
   }
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForDotnet(String relativeTestModelPath) {
+  void testModelsForRust(String relativeTestModelPath) {
+    Assumptions.assumeTrue(ENABLED_TESTS.isEmpty() || ENABLED_TESTS.contains(relativeTestModelPath));
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

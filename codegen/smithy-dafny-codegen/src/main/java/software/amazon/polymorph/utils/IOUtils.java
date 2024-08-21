@@ -68,20 +68,12 @@ public class IOUtils {
 
   /**
    * Evaluate a simple template as a resource under "/templates/<templatePath>"
-   * and then write it to "<rootPath>/<templatePath>".
-   * The template path is also evaluated as a template,
+   * and then write it to "<rootPath>/<templateOutputPath>".
+   * The template output path is also evaluated as in {@link #safeEvalPathTemplate(String, Map)}
    * so the path can be customized by parameter values as well.
    *
-   * Template parameters with no value bound become "",
-   * so they can also be used to provide more than one template
-   * for the same file.
-   *
-   * Note that ':' can't be used in file paths on Windows,
-   * so we use ';' instead and replace it with ':' before evaluating the templated path.
-   * We also explicitly reject ':' in paths in case someone accidentally
-   * uses that and doesn't test on Windows (purely hypothetically :)
-   *
-   * See also {@link #evalTemplate(String, Map)}.
+   * @see #safeEvalPathTemplate(String, Map) 
+   * @see #evalTemplate(String, Map)
    */
   public static void writeTemplatedFile(
     Class<?> klass,
@@ -90,22 +82,8 @@ public class IOUtils {
     String templateOutputPath,
     Map<String, String> parameters
   ) {
-    String content = IoUtils.readUtf8Resource(
-      klass,
-      "/templates/" + templatePath
-    );
-
-    if (templateOutputPath.contains(":")) {
-      throw new IllegalArgumentException(
-        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
-      );
-    }
-    templateOutputPath = templateOutputPath.replace(';', ':');
-
-    content = evalTemplate(content, parameters);
-    templateOutputPath = evalTemplate(templateOutputPath, parameters);
-
-    Path outputPath = rootPath.resolve(templateOutputPath);
+    final String content = evalTemplate(klass, templatePath, parameters);
+    final Path outputPath = rootPath.resolve(safeEvalPathTemplate(templateOutputPath, parameters));
     try {
       Files.createDirectories(outputPath.getParent());
     } catch (IOException e) {
@@ -114,6 +92,40 @@ public class IOUtils {
 
     IOUtils.writeToFile(content, outputPath.toFile());
     LOGGER.info("Additional templated content written to {}", outputPath);
+  }
+
+  /**
+   * Evaluate a template string representing a file path.
+   * Note that ':' can't be used in file paths on Windows,
+   * so we use ';' instead and replace it with ':' before evaluating the templated path.
+   * We also explicitly reject ':' in paths in case someone accidentally
+   * uses that and doesn't test on Windows (purely hypothetically :)
+   */
+  public static String safeEvalPathTemplate(
+    final String pathTemplate, final Map<String, String> parameters) {
+    if (pathTemplate.contains(":")) {
+      throw new IllegalArgumentException(
+        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
+      );
+    }
+    return evalTemplate(pathTemplate.replace(';', ':'), parameters);
+  }
+
+  /**
+   * Evaluate a simple template from a resource file using a {@link SimpleCodeWriter}.
+   * See {@link software.amazon.smithy.utils.AbstractCodeWriter} for documentation
+   * on the templating syntax.
+   */
+  public static String evalTemplate(
+    Class<?> klass,
+    String templatePath,
+    Map<String, String> context
+  ) {
+    final String template = IoUtils.readUtf8Resource(
+      klass,
+      "/templates/" + templatePath
+    );
+    return evalTemplate(template, context);
   }
 
   /**
