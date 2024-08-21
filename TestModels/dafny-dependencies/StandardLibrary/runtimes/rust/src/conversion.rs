@@ -79,7 +79,10 @@ pub fn olong_from_dafny(input: ::std::rc::Rc<_Wrappers_Compile::Option<i64>>) ->
 }
 
 pub fn blob_to_dafny(input: &::aws_smithy_types::Blob) -> ::dafny_runtime::Sequence<u8> {
-    ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&input.clone().into_inner(), |x| *x)
+    ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(
+        &input.clone().into_inner(),
+        |x| *x,
+    )
 }
 
 pub fn oblob_to_dafny(

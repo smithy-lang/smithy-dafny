@@ -4,10 +4,10 @@ pub fn ostring_to_dafny(
     crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>,
 > {
     let dafny_value = match input {
-  Some(b) => crate::_Wrappers_Compile::Option::Some { value:
-      dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
-      },
-  None => crate::_Wrappers_Compile::Option::None {},
+    Some(b) => crate::_Wrappers_Compile::Option::Some { value:
+        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
+        },
+    None => crate::_Wrappers_Compile::Option::None {},
 };
     ::std::rc::Rc::new(dafny_value)
 }
