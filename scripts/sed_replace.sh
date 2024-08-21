@@ -47,7 +47,7 @@ fi
 
 # Perform sed
 echo "Replacing in $SED_FILE_PATH"
-sed -i "$SED_PARAMETER" "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" "$SED_FILE_PATH"
+sed -i $SED_PARAMETER "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" "$SED_FILE_PATH"
 
 # Verify the replacement was successful
 
