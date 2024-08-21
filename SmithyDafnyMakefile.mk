@@ -208,7 +208,7 @@ transpile_implementation:
 		--allow-warnings \
 		--output $(OUT) \
 		$(DAFNY_OPTIONS) \
-        $(DAFNY_OTHER_FILES) \
+		$(DAFNY_OTHER_FILES) \
 		$(TRANSPILE_MODULE_NAME) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSLATION_RECORD) \
@@ -249,8 +249,8 @@ transpile_test:
 		--function-syntax:3 \
 		--allow-warnings \
 		--output $(OUT) \
-        $(DAFNY_OPTIONS) \
-        $(DAFNY_OTHER_FILES) \
+		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSLATION_RECORD) \
 		$(SOURCE_TRANSLATION_RECORD) \
