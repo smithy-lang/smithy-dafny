@@ -302,8 +302,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   }
 
   /**
-   * Override Smithy-Python writeFromDict to handle importing reference modules to avoid circular
-   * imports. Most of this is lifted directly from Smithy-Python; the changed component is
+   * Override Smithy-Python writeFromDict to handle shapes with {@link ReferenceTrait}s.
+   * Most of this is lifted directly from Smithy-Python; the changed components are
    * highlighted.
    *
    * @param isError
@@ -331,7 +331,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             return;
           }
 
-          // Block below is the only new addition to this function compared to Smithy-Python.
+          // Block below is new.
           // Import any modules required for reference shapes to convert from_dict.
           // Import within function to avoid circular imports from top-level imports
           for (MemberShape memberShape : shape.members()) {
@@ -357,12 +357,14 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                     var memberName = symbolProvider.toMemberName(member);
                     var target = model.expectShape(member.getTarget());
                     Symbol targetSymbol = symbolProvider.toSymbol(target);
+                    // Block below is new.
+                    // If passing a boto3 client, just pass the client.
                     if (target.hasTrait(ReferenceTrait.class)) {
                       ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
 
                       if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
                         writer.write(
-                                "kwargs[$S] = d[$S]",
+                                "$S: d[$S]",
                                 memberName,
                                 capitalize(member.getMemberName()));
                       }
@@ -397,6 +399,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                 capitalize(member.getMemberName()),
                 () -> {
                   var targetSymbol = symbolProvider.toSymbol(target);
+                  // Block below is new.
+                  // If passing a boto3 client, just pass the client.
                   if (target.hasTrait(ReferenceTrait.class)) {
                     ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
 
@@ -431,6 +435,13 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.write("");
   }
 
+  /**
+   * Override Smithy-Python writeAsDict to handle shapes with {@link ReferenceTrait}s.
+   * Most of this is lifted directly from Smithy-Python; the changed components are
+   * highlighted.
+   *
+   * @param isError
+   */
   protected void writeAsDict(boolean isError) {
     writer.openBlock("def as_dict(self) -> Dict[str, Any]:", "", () -> {
       writer.writeDocs(() -> {
@@ -454,6 +465,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             var memberName = symbolProvider.toMemberName(member);
             var target = model.expectShape(member.getTarget());
             var targetSymbol = symbolProvider.toSymbol(target);
+            // Block below is new.
+            // If passing a boto3 client, just pass the client.
             if (target.hasTrait(ReferenceTrait.class)) {
               ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
 
@@ -482,6 +495,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
           var target = model.expectShape(member.getTarget());
           var targetSymbol = symbolProvider.toSymbol(target);
           writer.openBlock("if self.$1L is not None:", "", memberName, () -> {
+            // Block below is new.
+            // If passing a boto3 client, just pass the client.
             if (target.hasTrait(ReferenceTrait.class)) {
               ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
 
