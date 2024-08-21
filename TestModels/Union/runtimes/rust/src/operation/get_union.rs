@@ -20,7 +20,7 @@ impl GetUnion {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetUnion(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_union::_get_union_output::from_dafny(

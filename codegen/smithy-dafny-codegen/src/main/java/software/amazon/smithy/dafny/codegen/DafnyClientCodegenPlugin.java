@@ -56,6 +56,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
             "main",
             "smithy-generated"
           );
+          case RUST -> Paths.get("runtimes", "rust");
           default -> throw new UnsupportedOperationException(
             lang + " is not yet supported"
           );
