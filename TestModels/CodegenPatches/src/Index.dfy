@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "CodegenPatchesImpl.dfy"
 
-module {:extern "simple.codegenpatches.internaldafny" } CodegenPatches refines AbstractSimpleCodegenpatchesService {
+module CodegenPatches refines AbstractSimpleCodegenpatchesService {
   import Operations = CodegenPatchesImpl
 
   function method DefaultCodegenPatchesConfig(): CodegenPatchesConfig {
