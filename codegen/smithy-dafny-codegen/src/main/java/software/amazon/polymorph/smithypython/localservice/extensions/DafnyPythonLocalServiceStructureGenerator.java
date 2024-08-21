@@ -474,12 +474,12 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                   capitalize(member.getMemberName()),
                   memberName);
             } else if (target.isStructureShape() || target.isUnionShape()) {
-              writer.write("$S: self.$L.as_dict(),", member.getMemberName(), memberName);
+              writer.write("$S: self.$L.as_dict(),", capitalize(member.getMemberName()), memberName);
             } else if (targetSymbol.getProperty("asDict").isPresent()) {
               var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
-              writer.write("$S: $T(self.$L),", member.getMemberName(), targetAsDictSymbol, memberName);
+              writer.write("$S: $T(self.$L),", capitalize(member.getMemberName()), targetAsDictSymbol, memberName);
             } else {
-              writer.write("$S: self.$L,", member.getMemberName(), memberName);
+              writer.write("$S: self.$L,", capitalize(member.getMemberName()), memberName);
             }
           }
         });
@@ -504,13 +504,13 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                   memberName);
             }
             if (target.isStructureShape() || target.isUnionShape()) {
-              writer.write("d[$S] = self.$L.as_dict()", member.getMemberName(), memberName);
+              writer.write("d[$S] = self.$L.as_dict()", capitalize(member.getMemberName()), memberName);
             } else if (targetSymbol.getProperty("asDict").isPresent()) {
               var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
-              writer.write("d[$S] = $T(self.$L),", member.getMemberName(), targetAsDictSymbol,
+              writer.write("d[$S] = $T(self.$L),", capitalize(member.getMemberName()), targetAsDictSymbol,
                       memberName);
             } else {
-              writer.write("d[$S] = self.$L", member.getMemberName(), memberName);
+              writer.write("d[$S] = self.$L", capitalize(member.getMemberName()), memberName);
             }
           });
         }
