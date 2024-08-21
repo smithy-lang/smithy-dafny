@@ -12,6 +12,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ public abstract class AbstractRustShimGenerator {
   protected Stream<OperationShape> serviceOperationShapes() {
     return service.getOperations()
       .stream()
+      .sorted()
       .map(shapeId -> model.expectShape(shapeId, OperationShape.class));
   }
 
@@ -85,45 +87,41 @@ public abstract class AbstractRustShimGenerator {
       allErrorShapes()
         .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
     );
-    Map<String, String> variables = Map.of(
-      "dafnyTypesModuleName",
-      getDafnyTypesModuleName()
-    );
     TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(
       evalTemplate(
         """
-          /// Wraps up an arbitrary Rust Error value as a Dafny Error
-          pub fn to_opaque_error<E: ::std::error::Error + 'static>(value: E) ->
-            ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
-          {
-              let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> = ::dafny_runtime::Object(Some(
-                  ::std::rc::Rc::new(::std::cell::UnsafeCell::new(value)),
-              ));
-              ::std::rc::Rc::new(
-              crate::r#$dafnyTypesModuleName:L::Error::Opaque {
-                  obj: error_obj,
-              },
-            )
-          }
-          
-          /// Wraps up an arbitrary Rust Error value as a Dafny Result<T, Error>.Failure
-          pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: ::std::error::Error + 'static>(value: E) ->
-            ::std::rc::Rc<
-              crate::_Wrappers_Compile::Result<
-                T,
-                ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
-              >
+        /// Wraps up an arbitrary Rust Error value as a Dafny Error
+        pub fn to_opaque_error<E: ::std::error::Error + 'static>(value: E) ->
+          ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
+        {
+            let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> = ::dafny_runtime::Object(Some(
+                ::std::rc::Rc::new(::std::cell::UnsafeCell::new(value)),
+            ));
+            ::std::rc::Rc::new(
+            crate::r#$dafnyTypesModuleName:L::Error::Opaque {
+                obj: error_obj,
+            },
+          )
+        }
+        
+        /// Wraps up an arbitrary Rust Error value as a Dafny Result<T, Error>.Failure
+        pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: ::std::error::Error + 'static>(value: E) ->
+          ::std::rc::Rc<
+            crate::_Wrappers_Compile::Result<
+              T,
+              ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
             >
-          {
-              ::std::rc::Rc::new(
-                  crate::_Wrappers_Compile::Result::Failure {
-                      error: to_opaque_error(value),
-                  },
-              )
-          }
-          
-          """,
-        variables
+          >
+        {
+            ::std::rc::Rc::new(
+                crate::_Wrappers_Compile::Result::Failure {
+                    error: to_opaque_error(value),
+                },
+            )
+        }
+        
+        """,
+        dafnyModuleVariables()
       )
     );
     return new RustFile(
@@ -142,11 +140,23 @@ public abstract class AbstractRustShimGenerator {
       .lineSeparated();
   }
 
+  protected Map<String, String> dafnyModuleVariables() {
+    final Map<String, String> stringStringMap = new HashMap<>();
+    stringStringMap.put("dafnyModuleName", getDafnyModuleName());
+    stringStringMap.put("dafnyInternalModuleName", getDafnyInternalModuleName());
+    stringStringMap.put("dafnyTypesModuleName", getDafnyTypesModuleName());
+    return stringStringMap;
+  }
+
   protected String getDafnyModuleName() {
     return service.getId().getNamespace().replace(".", "::");
   }
 
+  protected String getDafnyInternalModuleName() {
+    return "%s::internaldafny".formatted(getDafnyModuleName());
+  }
+
   protected String getDafnyTypesModuleName() {
-    return "%s::internaldafny::types".formatted(getDafnyModuleName());
+    return "%s::types".formatted(getDafnyInternalModuleName());
   }
 }
