@@ -364,7 +364,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                         && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
                       ) {
                           writer.write(
-                            "$S: d[$S]",
+                            "$S: d[$S],",
                             memberName,
                             capitalize(member.getMemberName()));
                     } else if (target.isStructureShape()) {
@@ -405,7 +405,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                     && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
                   ) {
                     writer.write(
-                      "$S: d[$S]",
+                      "kwargs[$S] = d[$S]",
                       memberName,
                       capitalize(member.getMemberName()));
                   } else if (target.isStructureShape()) {
@@ -470,7 +470,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
               && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
             ) {
                 writer.write(
-                  "$S: self.$L",
+                  "$S: self.$L,",
                   capitalize(member.getMemberName()),
                   memberName);
             } else if (target.isStructureShape() || target.isUnionShape()) {
@@ -499,7 +499,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
               && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
             ) {
                 writer.write(
-                  "$S: self.$L",
+                  "d[$S] = self.$L",
                   capitalize(member.getMemberName()),
                   memberName);
             }
