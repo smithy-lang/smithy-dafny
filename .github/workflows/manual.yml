@@ -28,3 +28,7 @@ jobs:
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: ${{ inputs.dafny }}
+  manual-ci-python:
+    uses: ./.github/workflows/test_models_python_tests.yml
+    with:
+      dafny: ${{ inputs.dafny }}
