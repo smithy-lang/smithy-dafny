@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleTypesSmithyStringTypesWrapped.dfy"
 
-module WrappedSimpleTypesStringService refines WrappedAbstractSimpleTypesSmithyStringService {
+module {:extern "simple.types.smithystring.internaldafny.wrapped"} WrappedSimpleTypesStringService refines WrappedAbstractSimpleTypesSmithyStringService {
     import WrappedService = SimpleString
     function method WrappedDefaultSimpleStringConfig(): SimpleStringConfig {
         SimpleStringConfig

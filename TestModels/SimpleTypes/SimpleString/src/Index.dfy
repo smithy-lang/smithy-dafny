@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleStringImpl.dfy"
 
-module SimpleString refines AbstractSimpleTypesSmithyStringService {
+module {:extern "simple.types.smithystring.internaldafny" } SimpleString refines AbstractSimpleTypesSmithyStringService {
     import Operations = SimpleStringImpl
 
     function method DefaultSimpleStringConfig(): SimpleStringConfig {

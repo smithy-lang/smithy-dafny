@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleEnumImpl.dfy"
 
-module SimpleEnum refines AbstractSimpleTypesSmithyEnumService {
+module {:extern "simple.types.smithyenum.internaldafny" } SimpleEnum refines AbstractSimpleTypesSmithyEnumService {
     import Operations = SimpleEnumImpl
 
  function method DefaultSimpleEnumConfig(): SimpleEnumConfig {
