@@ -33,7 +33,6 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
     DISABLED_TESTS.add("SimpleTypes/SimpleShort");
     DISABLED_TESTS.add("aws-sdks/ddb");
-    DISABLED_TESTS.add("aws-sdks/ddb-lite");
     DISABLED_TESTS.add("aws-sdks/glue");
     DISABLED_TESTS.add("aws-sdks/lakeformation");
     DISABLED_TESTS.add("aws-sdks/kms");
@@ -53,8 +52,8 @@ class RustTestModels extends TestModelTest {
     make(testModelPath, "transpile_rust");
     make(testModelPath, "polymorph_rust");
     make(testModelPath, "test_rust");
-    // Since we're checking in and patching code,
-    // make sure the patch files are up to date.
+    // Since we're checking in generated (or benerated) code,
+    // make sure the state matches what's checked in.
     make(testModelPath, "check_polymorph_diff");
   }
 }

@@ -31,7 +31,7 @@ _polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=\
 _polymorph_code_gen: _polymorph_wrapped
 
 # Override this to make polymorph_dafny on the standard library,
-# which generated the project.properties file.
+# which generates the project.properties file.
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
 polymorph_dafny: _polymorph_dependencies
 polymorph_dafny:
@@ -73,7 +73,10 @@ _polymorph_dotnet: _polymorph_wrapped
 _polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 _polymorph_rust: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
-_polymorph_rust: _polymorph
+# For several TestModels we've just manually written the code generation target,
+# So we just want to ensure we can transpile and pass the tests in CI.
+# For those, make polymorph_rust should just be a no-op.
+_polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
 # TODO: This doesn't yet work for Rust because we are patching transpiled code,
 # so this target will complain about "patch does not apply" because it was already applied.
 # _polymorph_rust: OUTPUT_RUST_WRAPPED=--output-rust $(LIBRARY_ROOT)/runtimes/rust
