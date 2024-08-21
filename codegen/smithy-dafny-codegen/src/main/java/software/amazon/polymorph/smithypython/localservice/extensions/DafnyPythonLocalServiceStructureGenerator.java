@@ -431,6 +431,84 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.write("");
   }
 
+  protected void writeAsDict(boolean isError) {
+    writer.openBlock("def as_dict(self) -> Dict[str, Any]:", "", () -> {
+      writer.writeDocs(() -> {
+        writer.write("Converts the $L to a dictionary.\n", symbolProvider.toSymbol(shape).getName());
+        writer.write(writer.formatDocs("""
+                        The dictionary uses the modeled shape names rather than the parameter names \
+                        as keys to be mostly compatible with boto3."""));
+      });
+
+      // If there aren't any optional members, it's best to return immediately.
+      String dictPrefix = optionalMembers.isEmpty() ? "return" : "d: Dict[str, Any] =";
+      if (requiredMembers.isEmpty() && !isError) {
+        writer.write("$L {}", dictPrefix);
+      } else {
+        writer.openBlock("$L {", "}", dictPrefix, () -> {
+          if (isError) {
+            writer.write("'message': self.message,");
+            writer.write("'code': self.code,");
+          }
+          for (MemberShape member : requiredMembers) {
+            var memberName = symbolProvider.toMemberName(member);
+            var target = model.expectShape(member.getTarget());
+            var targetSymbol = symbolProvider.toSymbol(target);
+            if (target.hasTrait(ReferenceTrait.class)) {
+              ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
+
+              if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
+                writer.write(
+                        "$S: self.$L",
+                        capitalize(member.getMemberName()),
+                        memberName);
+              }
+            } else if (target.isStructureShape() || target.isUnionShape()) {
+              writer.write("$S: self.$L.as_dict(),", member.getMemberName(), memberName);
+            } else if (targetSymbol.getProperty("asDict").isPresent()) {
+              var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
+              writer.write("$S: $T(self.$L),", member.getMemberName(), targetAsDictSymbol, memberName);
+            } else {
+              writer.write("$S: self.$L,", member.getMemberName(), memberName);
+            }
+          }
+        });
+      }
+
+      if (!optionalMembers.isEmpty()) {
+        writer.write("");
+        for (MemberShape member : optionalMembers) {
+          var memberName = symbolProvider.toMemberName(member);
+          var target = model.expectShape(member.getTarget());
+          var targetSymbol = symbolProvider.toSymbol(target);
+          writer.openBlock("if self.$1L is not None:", "", memberName, () -> {
+            if (target.hasTrait(ReferenceTrait.class)) {
+              ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
+
+              if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
+                writer.write(
+                        "$S: self.$L",
+                        capitalize(member.getMemberName()),
+                        memberName);
+              }
+            }
+            if (target.isStructureShape() || target.isUnionShape()) {
+              writer.write("d[$S] = self.$L.as_dict()", member.getMemberName(), memberName);
+            } else if (targetSymbol.getProperty("asDict").isPresent()) {
+              var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
+              writer.write("d[$S] = $T(self.$L),", member.getMemberName(), targetAsDictSymbol,
+                      memberName);
+            } else {
+              writer.write("d[$S] = self.$L", member.getMemberName(), memberName);
+            }
+          });
+        }
+        writer.write("return d");
+      }
+    });
+    writer.write("");
+  }
+
   /**
    * Write assignment from __init__ method parameter to new object's required attribute.
    * Writes any constraint-checking code before writing assignment.
