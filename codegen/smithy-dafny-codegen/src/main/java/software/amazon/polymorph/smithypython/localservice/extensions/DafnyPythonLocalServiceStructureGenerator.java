@@ -410,6 +410,13 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                         memberName,
                         capitalize(member.getMemberName()));
                     }
+
+                    // Non-AWS SDK reference shapes
+                    writer.write(
+                      "kwargs[$S] = $L.from_dict(d[$S])",
+                      memberName,
+                      targetSymbol.getName(),
+                      capitalize(member.getMemberName()));
                   } else if (target.isStructureShape()) {
                     writer.write(
                         "kwargs[$S] = $L.from_dict(d[$S])",
