@@ -43,4 +43,4 @@ INDEX_FILE_WITHOUT_EXTERN_STRING="module CodegenPatches refines AbstractSimpleCo
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedCodegenPatchesImpl.dfy
 WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.codegenpatches.internaldafny.wrapped\"} WrappedSimpleCodegenPatchesService refines WrappedAbstractSimpleCodegenpatchesService {"
-WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleCodegenpatchesService refines WrappedAbstractSimpleCodegenpatchesService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleCodegenPatchesService refines WrappedAbstractSimpleCodegenpatchesService {"

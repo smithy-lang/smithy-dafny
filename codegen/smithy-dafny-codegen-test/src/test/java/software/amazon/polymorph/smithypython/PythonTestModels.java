@@ -17,9 +17,6 @@ class PythonTestModels extends TestModelTest {
 
     static {
         DISABLED_TESTS.add("AggregateReferences");
-        DISABLED_TESTS.add("Documentation");
-        DISABLED_TESTS.add("CodegenPatches");
-        DISABLED_TESTS.add("Positional");
         DISABLED_TESTS.add("LanguageSpecificLogic");
         DISABLED_TESTS.add("SimpleTypes/BigDecimal");
         DISABLED_TESTS.add("SimpleTypes/BigInteger");

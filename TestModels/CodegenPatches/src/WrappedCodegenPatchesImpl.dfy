@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleCodegenpatchesTypesWrapped.dfy"
 
-module WrappedSimpleCodegenpatchesService refines WrappedAbstractSimpleCodegenpatchesService {
+module {:extern "simple.codegenpatches.internaldafny.wrapped"} WrappedSimpleCodegenPatchesService refines WrappedAbstractSimpleCodegenpatchesService {
     import WrappedService = CodegenPatches
     function method WrappedDefaultCodegenPatchesConfig(): CodegenPatchesConfig {
         CodegenPatchesConfig
