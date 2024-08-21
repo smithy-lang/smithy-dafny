@@ -3,7 +3,7 @@
 pub fn to_dafny(
     value: crate::operation::get_runtime_information::GetRuntimeInformationOutput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::GetRuntimeInformationOutput,
+    crate::r#language::specific::logic::internaldafny::types::GetRuntimeInformationOutput,
 > {
     let crate::operation::get_runtime_information::GetRuntimeInformationOutput {
         language,
@@ -20,7 +20,7 @@ pub fn to_dafny(
             &runtime,
         );
 
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::GetRuntimeInformationOutput::GetRuntimeInformationOutput {
+    ::std::rc::Rc::new(crate::r#language::specific::logic::internaldafny::types::GetRuntimeInformationOutput::GetRuntimeInformationOutput {
         language: language,
         runtime: runtime,
   })
@@ -28,9 +28,9 @@ pub fn to_dafny(
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::GetRuntimeInformationOutput>,
+    dafny_value: ::std::rc::Rc<crate::r#language::specific::logic::internaldafny::types::GetRuntimeInformationOutput>,
 ) -> crate::operation::get_runtime_information::GetRuntimeInformationOutput {
-    let crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::GetRuntimeInformationOutput::GetRuntimeInformationOutput { language, runtime } = dafny_value.as_ref();
+    let crate::r#language::specific::logic::internaldafny::types::GetRuntimeInformationOutput::GetRuntimeInformationOutput { language, runtime } = dafny_value.as_ref();
 
     let language =
         dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(

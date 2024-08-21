@@ -4,15 +4,15 @@
 pub fn to_dafny(
     value: crate::types::language_specific_logic_config::LanguageSpecificLogicConfig,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_language_dspecific_dlogic_dinternaldafny_dtypes::LanguageSpecificLogicConfig,
+    crate::language::specific::logic::internaldafny::types::LanguageSpecificLogicConfig,
 > {
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::LanguageSpecificLogicConfig::LanguageSpecificLogicConfig {})
+    ::std::rc::Rc::new(crate::r#language::specific::logic::internaldafny::types::LanguageSpecificLogicConfig::LanguageSpecificLogicConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::LanguageSpecificLogicConfig,
+        crate::r#language::specific::logic::internaldafny::types::LanguageSpecificLogicConfig,
     >,
 ) -> crate::types::language_specific_logic_config::LanguageSpecificLogicConfig {
     crate::types::language_specific_logic_config::LanguageSpecificLogicConfig {}

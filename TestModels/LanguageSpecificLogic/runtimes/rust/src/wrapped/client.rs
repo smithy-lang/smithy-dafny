@@ -8,8 +8,8 @@ pub struct Client {
     rt: Runtime
 }
 
-impl dafny_runtime::UpcastObject<dyn crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::ILanguageSpecificLogicClient> for Client {
-  ::dafny_runtime::UpcastObjectFn!(dyn crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::ILanguageSpecificLogicClient);
+impl dafny_runtime::UpcastObject<dyn crate::r#language::specific::logic::internaldafny::types::ILanguageSpecificLogicClient> for Client {
+  ::dafny_runtime::UpcastObjectFn!(dyn crate::r#language::specific::logic::internaldafny::types::ILanguageSpecificLogicClient);
 }
 
 impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
@@ -18,11 +18,11 @@ impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
 
 impl Client {
   pub fn from_conf(config: &::std::rc::Rc<
-    crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::LanguageSpecificLogicConfig,
+    crate::r#language::specific::logic::internaldafny::types::LanguageSpecificLogicConfig,
   >) ->
-::std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
-  ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::ILanguageSpecificLogicClient>,
-  ::std::rc::Rc<crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::Error>
+::std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+  ::dafny_runtime::Object<dyn crate::r#language::specific::logic::internaldafny::types::ILanguageSpecificLogicClient>,
+  ::std::rc::Rc<crate::r#language::specific::logic::internaldafny::types::Error>
 >> {
     let rt_result = tokio::runtime::Builder::new_current_thread()
           .enable_all()
@@ -43,7 +43,7 @@ impl Client {
           rt
         };
         std::rc::Rc::new(
-          crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
+          crate::_Wrappers_Compile::Result::Success {
             value: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(wrap))
           }
         )
@@ -53,28 +53,28 @@ impl Client {
   }
 }
 
-impl crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::ILanguageSpecificLogicClient
+impl crate::r#language::specific::logic::internaldafny::types::ILanguageSpecificLogicClient
     for Client
 {
     fn GetRuntimeInformation(
         &mut self,
     ) -> std::rc::Rc<
-        crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+        crate::r#_Wrappers_Compile::Result<
             std::rc::Rc<
-                crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::GetRuntimeInformationOutput,
+                crate::r#language::specific::logic::internaldafny::types::GetRuntimeInformationOutput,
             >,
-            std::rc::Rc<crate::implementation_from_dafny::r#_language_dspecific_dlogic_dinternaldafny_dtypes::Error>,
+            std::rc::Rc<crate::r#language::specific::logic::internaldafny::types::Error>,
         >,
     >{
         let result = self.rt.block_on(crate::operation::get_runtime_information::GetRuntimeInformation::send(&self.wrapped));
         match result {
             Err(error) => ::std::rc::Rc::new(
-                crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+                crate::_Wrappers_Compile::Result::Failure {
                     error: crate::conversions::get_runtime_information::to_dafny_error(error),
                 },
             ),
             Ok(client) => ::std::rc::Rc::new(
-                crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
+                crate::_Wrappers_Compile::Result::Success {
                     value: crate::conversions::get_runtime_information::_get_runtime_information_output::to_dafny(client),
                 },
             ),

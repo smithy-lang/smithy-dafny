@@ -1,8 +1,6 @@
 use language_specific_logic::*;
 
 
-mod tests_from_dafny;
-
 #[tokio::test]
 async fn test_get_runtime_information() {
     let result = client()
@@ -18,9 +16,4 @@ async fn test_get_runtime_information() {
 pub fn client() -> Client {
     let config = LanguageSpecificLogicConfig::builder().build().unwrap();
     Client::from_conf(config).unwrap()
-}
-
-#[test]
-fn dafny_tests() {
-    crate::tests_from_dafny::_module::_default::_Test__Main_()
 }

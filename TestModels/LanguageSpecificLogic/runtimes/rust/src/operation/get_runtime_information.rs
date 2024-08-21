@@ -18,7 +18,7 @@ impl GetRuntimeInformation {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetRuntimeInformation();
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_runtime_information::_get_runtime_information_output::from_dafny(
