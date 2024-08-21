@@ -359,15 +359,14 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                     Symbol targetSymbol = symbolProvider.toSymbol(target);
                     // Block below is new.
                     // If passing a boto3 client, just pass the client.
-                    if (target.hasTrait(ReferenceTrait.class)) {
-                      ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
-
-                      if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
-                        writer.write(
-                                "$S: d[$S]",
-                                memberName,
-                                capitalize(member.getMemberName()));
-                      }
+                    if (target.hasTrait(ReferenceTrait.class)
+                        && target.expectTrait(ReferenceTrait.class).isService()
+                        && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
+                      ) {
+                          writer.write(
+                            "$S: d[$S]",
+                            memberName,
+                            capitalize(member.getMemberName()));
                     } else if (target.isStructureShape()) {
                       writer.write(
                           "$S: $L.from_dict(d[$S]),",
@@ -401,22 +400,14 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                   var targetSymbol = symbolProvider.toSymbol(target);
                   // Block below is new.
                   // If passing a boto3 client, just pass the client.
-                  if (target.hasTrait(ReferenceTrait.class)) {
-                    ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
-
-                    if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
-                      writer.write(
-                        "kwargs[$S] = d[$S]",
-                        memberName,
-                        capitalize(member.getMemberName()));
-                    } else {
-                      // Non-AWS SDK reference shapes
-                      writer.write(
-                        "kwargs[$S] = $L.from_dict(d[$S])",
-                        memberName,
-                        targetSymbol.getName(),
-                        capitalize(member.getMemberName()));
-                    }
+                  if (target.hasTrait(ReferenceTrait.class)
+                    && target.expectTrait(ReferenceTrait.class).isService()
+                    && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
+                  ) {
+                    writer.write(
+                      "$S: d[$S]",
+                      memberName,
+                      capitalize(member.getMemberName()));
                   } else if (target.isStructureShape()) {
                     writer.write(
                         "kwargs[$S] = $L.from_dict(d[$S])",
@@ -474,15 +465,14 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             var targetSymbol = symbolProvider.toSymbol(target);
             // Block below is new.
             // If passing a boto3 client, just pass the client.
-            if (target.hasTrait(ReferenceTrait.class)) {
-              ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
-
-              if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
+            if (target.hasTrait(ReferenceTrait.class)
+              && target.expectTrait(ReferenceTrait.class).isService()
+              && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
+            ) {
                 writer.write(
-                        "$S: self.$L",
-                        capitalize(member.getMemberName()),
-                        memberName);
-              }
+                  "$S: self.$L",
+                  capitalize(member.getMemberName()),
+                  memberName);
             } else if (target.isStructureShape() || target.isUnionShape()) {
               writer.write("$S: self.$L.as_dict(),", member.getMemberName(), memberName);
             } else if (targetSymbol.getProperty("asDict").isPresent()) {
@@ -504,15 +494,14 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
           writer.openBlock("if self.$1L is not None:", "", memberName, () -> {
             // Block below is new.
             // If passing a boto3 client, just pass the client.
-            if (target.hasTrait(ReferenceTrait.class)) {
-              ReferenceTrait referenceTrait = target.expectTrait(ReferenceTrait.class);
-
-              if (referenceTrait.isService() && isAwsSdkShape(referenceTrait.getReferentId())) {
+            if (target.hasTrait(ReferenceTrait.class)
+              && target.expectTrait(ReferenceTrait.class).isService()
+              && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
+            ) {
                 writer.write(
-                        "$S: self.$L",
-                        capitalize(member.getMemberName()),
-                        memberName);
-              }
+                  "$S: self.$L",
+                  capitalize(member.getMemberName()),
+                  memberName);
             }
             if (target.isStructureShape() || target.isUnionShape()) {
               writer.write("d[$S] = self.$L.as_dict()", member.getMemberName(), memberName);
