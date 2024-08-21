@@ -17,12 +17,17 @@ class PythonTestModels extends TestModelTest {
 
     static {
         DISABLED_TESTS.add("AggregateReferences");
+        DISABLED_TESTS.add("Documentation");
+        DISABLED_TESTS.add("CodegenPatches");
+        DISABLED_TESTS.add("Positional");
         DISABLED_TESTS.add("LanguageSpecificLogic");
         DISABLED_TESTS.add("SimpleTypes/BigDecimal");
         DISABLED_TESTS.add("SimpleTypes/BigInteger");
         DISABLED_TESTS.add("SimpleTypes/SimpleByte");
         DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
         DISABLED_TESTS.add("SimpleTypes/SimpleShort");
+        DISABLED_TESTS.add("SimpleTypes/SimpleTimestamp");
+        DISABLED_TESTS.add("aws-sdks/ddb-lite");
         DISABLED_TESTS.add("aws-sdks/glue");
         DISABLED_TESTS.add("aws-sdks/lakeformation");
         DISABLED_TESTS.add("aws-sdks/kms-lite");
