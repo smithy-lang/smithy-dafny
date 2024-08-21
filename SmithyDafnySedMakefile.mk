@@ -45,15 +45,15 @@ _with_extern_post_transpile_dependencies:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _with_extern_post_transpile;, $(PROJECT_DEPENDENCIES))
 
 _sed_types_file_remove_extern:
-	@if [ -z "$(TYPES_FILE_PATH)" ] || [ -z "$(TYPES_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(TYPES_FILE_WITHOUT_EXTERN_STRING)" ]; then \
+	@if [ -z $(TYPES_FILE_PATH) ] || [ -z $(TYPES_FILE_WITH_EXTERN_STRING) ] || [ -z $(TYPES_FILE_WITHOUT_EXTERN_STRING) ]; then \
 		echo "Error: All variables TYPES_FILE_PATH, TYPES_FILE_WITH_EXTERN_STRING, and TYPES_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
 		exit 1; \
 	fi
 	$(MAKE) _sed_file SED_FILE_PATH=$(TYPES_FILE_PATH) SED_BEFORE_STRING=$(TYPES_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(TYPES_FILE_WITHOUT_EXTERN_STRING)
 
 _sed_index_file_remove_extern:
-	@if [ -z "$(INDEX_FILE_PATH)" ] || [ -z "$(INDEX_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(INDEX_FILE_WITHOUT_EXTERN_STRING)" ]; then \
-		echo "Error: All variables TYPES_FILE_PATH, TYPES_FILE_WITH_EXTERN_STRING, and TYPES_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
+	@if [ -z $(INDEX_FILE_PATH) ] || [ -z $(INDEX_FILE_WITH_EXTERN_STRING) ] || [ -z $(INDEX_FILE_WITHOUT_EXTERN_STRING) ]; then \
+		echo "Error: All variables INDEX_FILE_PATH, INDEX_FILE_WITH_EXTERN_STRING, and INDEX_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
 		exit 1; \
 	fi
 	$(MAKE) _sed_file SED_FILE_PATH=$(INDEX_FILE_PATH) SED_BEFORE_STRING=$(INDEX_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(INDEX_FILE_WITHOUT_EXTERN_STRING)
@@ -62,15 +62,15 @@ _sed_wrapped_types_file_remove_extern:
 	$(if $(strip $(WRAPPED_INDEX_FILE_PATH)), $(MAKE) _sed_file SED_FILE_PATH=$(WRAPPED_INDEX_FILE_PATH) SED_BEFORE_STRING=$(WRAPPED_INDEX_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING), )
 
 _sed_types_file_add_extern:
-	@if [ -z "$(TYPES_FILE_PATH)" ] || [ -z "$(TYPES_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(TYPES_FILE_WITHOUT_EXTERN_STRING)" ]; then \
+	@if [ -z $(TYPES_FILE_PATH) ] || [ -z $(TYPES_FILE_WITH_EXTERN_STRING) ] || [ -z $(TYPES_FILE_WITHOUT_EXTERN_STRING) ]; then \
 		echo "Error: All variables TYPES_FILE_PATH, TYPES_FILE_WITH_EXTERN_STRING, and TYPES_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
 		exit 1; \
 	fi
 	$(MAKE) _sed_file SED_FILE_PATH=$(TYPES_FILE_PATH) SED_BEFORE_STRING=$(TYPES_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(TYPES_FILE_WITH_EXTERN_STRING)
 
 _sed_index_file_add_extern:
-	@if [ -z "$(INDEX_FILE_PATH)" ] || [ -z "$(INDEX_FILE_WITH_EXTERN_STRING)" ] || [ -z "$(INDEX_FILE_WITHOUT_EXTERN_STRING)" ]; then \
-		echo "Error: All variables TYPES_FILE_PATH, TYPES_FILE_WITH_EXTERN_STRING, and TYPES_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
+	@if [ -z $(INDEX_FILE_PATH) ] || [ -z $(INDEX_FILE_WITH_EXTERN_STRING) ] || [ -z $(INDEX_FILE_WITHOUT_EXTERN_STRING) ]; then \
+		echo "Error: All variables INDEX_FILE_PATH, INDEX_FILE_WITH_EXTERN_STRING, and INDEX_FILE_WITHOUT_EXTERN_STRING must be set and non-empty."; \
 		exit 1; \
 	fi
 	$(MAKE) _sed_file SED_FILE_PATH=$(INDEX_FILE_PATH) SED_BEFORE_STRING=$(INDEX_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(INDEX_FILE_WITH_EXTERN_STRING)
