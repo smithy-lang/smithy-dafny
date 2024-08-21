@@ -60,4 +60,4 @@ runs:
       shell: bash
       run: |
         rm -rf TestModels/dafny-dependencies/dafny_runtime_rust
-        cp dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust
+        cp -r dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust
