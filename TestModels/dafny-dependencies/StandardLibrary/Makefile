@@ -46,7 +46,6 @@ polymorph_python :
 # Using this target for the side-effect of maintaining patches,
 # Since Dafny Rust code generation is incomplete and also needs to be patched.
 # That only works if you run transpile_rust first.
-
 polymorph_rust :
 	echo "Skipping polymorph_rust for StandardLibrary"
 
@@ -96,10 +95,19 @@ transpile_implementation:
 		--allow-warnings \
 		--output $(OUT) \
 		$(DAFNY_OPTIONS) \
+<<<<<<< HEAD
 		$(TRANSPILE_MODULE_NAME)
 
 		$(DAFNY_OTHER_FILES) \
 		-out $(OUT)
+=======
+<<<<<<< HEAD
+		$(TRANSPILE_MODULE_NAME)
+=======
+		$(DAFNY_OTHER_FILES) \
+		-out $(OUT)
+>>>>>>> main-1.x
+>>>>>>> python-reviewed
 
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency

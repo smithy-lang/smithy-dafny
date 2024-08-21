@@ -212,7 +212,7 @@ transpile_implementation:
 		$(TRANSPILE_MODULE_NAME) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSLATION_RECORD) \
-		$(TRANSPILE_DEPENDENCIES) \
+		$(TRANSPILE_DEPENDENCIES)
 
 
 # If the project under transpilation uses `replaceable` modules,
