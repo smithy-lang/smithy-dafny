@@ -10,14 +10,6 @@
 # Eventually, the replaceable modules should be removed (or, their extern names should be removed),
 # and should be replaced by per-language package/namespace prefixes.
 
-# On macOS, sed requires an extra parameter of ""
-OS := $(shell uname)
-ifeq ($(OS), Darwin)
-  SED_PARAMETER := ""
-else
-  SED_PARAMETER :=
-endif
-
 # Before transpiling to a target language that does not expect externs,
 # remove any extern attributes.
 _no_extern_pre_transpile: _no_extern_pre_transpile_dependencies _sed_types_file_remove_extern _sed_index_file_remove_extern _sed_wrapped_types_file_remove_extern
