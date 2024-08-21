@@ -3,12 +3,12 @@
 include "../src/Index.dfy"
 
 module SimpleMultiplemodelsPrimaryprojectImplTest {
-    import PrimaryProject
+    import SimpleMultiplemodelsPrimaryprojectService
     import opened SimpleMultiplemodelsPrimaryprojectTypes
     import SimpleMultiplemodelsDependencyprojectTypes
     import opened Wrappers
     method{:test} TestPrimaryProject(){
-        var client :- expect PrimaryProject.PrimaryProject();
+        var client :- expect SimpleMultiplemodelsPrimaryprojectService.PrimaryProject();
     }
 
     method TestPrimaryProjectClient(client: IPrimaryProjectClient)
