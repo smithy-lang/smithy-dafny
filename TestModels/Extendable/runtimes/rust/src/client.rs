@@ -4,7 +4,7 @@ use aws_smithy_types::error::operation::BuildError;
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::ISimpleExtendableResourcesClient>
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::r#simple::extendable::resources::internaldafny::types::ISimpleExtendableResourcesClient>
 }
 
 impl Client {
@@ -14,14 +14,14 @@ impl Client {
         conf: crate::types::simple_extendable_resources_config::SimpleExtendableResourcesConfig,
     ) -> Result<Self, BuildError> {
         let inner =
-            ::simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny::_default::SimpleExtendableResources(
+            crate::simple::extendable::resources::internaldafny::_default::SimpleExtendableResources(
                 &crate::conversions::simple_extendable_resources_config::_simple_extendable_resources_config::to_dafny(
                     conf,
                 ),
             );
         if matches!(
             inner.as_ref(),
-            ::simple_extendable_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(

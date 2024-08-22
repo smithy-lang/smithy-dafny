@@ -3,9 +3,9 @@
 pub fn to_dafny(
     value: crate::operation::use_extendable_resource::UseExtendableResourceOutput,
 ) -> ::std::rc::Rc<
-    ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::UseExtendableResourceOutput,
+    crate::r#simple::extendable::resources::internaldafny::types::UseExtendableResourceOutput,
 >{
-    ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::UseExtendableResourceOutput::UseExtendableResourceOutput {
+    ::std::rc::Rc::new(crate::r#simple::extendable::resources::internaldafny::types::UseExtendableResourceOutput::UseExtendableResourceOutput {
         output : crate::conversions::get_extendable_resource_data::_get_extendable_resource_data_output::to_dafny(value.output().clone())
   })
 }
@@ -13,11 +13,11 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::UseExtendableResourceOutput,
+        crate::r#simple::extendable::resources::internaldafny::types::UseExtendableResourceOutput,
     >,
 ) -> crate::operation::use_extendable_resource::UseExtendableResourceOutput {
     match &*dafny_value {
-        ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::UseExtendableResourceOutput::UseExtendableResourceOutput {
+        crate::r#simple::extendable::resources::internaldafny::types::UseExtendableResourceOutput::UseExtendableResourceOutput {
             output,
         } =>
         crate::operation::use_extendable_resource::UseExtendableResourceOutput {

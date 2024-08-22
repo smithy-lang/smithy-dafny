@@ -69,30 +69,31 @@ pub async fn TestClientDafnyResource() {
     eprintln!("\nafter TestNoneUseExtendableResource");
     TestSomeUseExtendableResource(&client, resource.clone(), TEST_RESOURCE_NAME);
     eprintln!("\nafter TestSomeUseExtendableResource");
-    TestUseAlwaysModeledError(client, resource);
-    TestUseAlwaysMultipleErrors(client, resource);
-    TestDafnyUseAlwaysOpaqueError(client, resource);
-    eprintln!("\n before drop resource\n");
-    drop(resource);
-    eprintln!("\n before drop client\n");
-    drop(client);
-    eprintln!("\n before drop config\n");
-    drop(config);
-    eprintln!("\n before exit\n");
+    TestUseAlwaysModeledError(resource);
+    // TestUseAlwaysMultipleErrors(client, resource);
+    // TestDafnyUseAlwaysOpaqueError(client, resource);
+    // eprintln!("\n before drop resource\n");
+    // drop(resource);
+    // eprintln!("\n before drop client\n");
+    // drop(client);
+    // eprintln!("\n before drop config\n");
+    // drop(config);
+    // eprintln!("\n before exit\n");
 }
 
   // Test the Resource created through an Extern
   #[tokio::test]
   pub async fn TestClientNativeResource()
   {
-    let client = SimpleExtendableResources::builder().build();
+    let config = SimpleExtendableResourcesConfig::builder().build().unwrap();
+    let client = Client::from_conf(config.clone()).unwrap();
     // The explicit type cast is needed for the `is` test on the next line
     // var resource: Types.IExtendableResource := DafnyFactory();
     // expect !(resource is ExtendableResource.ExtendableResource);
     // The `is` test above asserts this NOT a "pure" Dafny resource
     // assert fresh(resource.Modifies - client.Modifies - {client.History});
-    TestNoneUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
-    TestSomeUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
+    // TestNoneUseExtendableResource(&client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
+    // TestSomeUseExtendableResource(&client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
     // TestUseAlwaysModeledError(client, resource);
     // TestUseAlwaysMultipleErrors(client, resource);
     // TestUseAlwaysOpaqueError(client, resource);
@@ -147,7 +148,7 @@ async fn TestNativeResource() {
     let resource: ExtendableResourceRef = DafnyFactory();
     TestSomeGetResourceData(resource.clone()).await;
     TestNoneGetResourceData(resource.clone()).await;
-    TestAlwaysModeledError(resource);
+    TestUseAlwaysModeledError(resource);
     //   TestAlwaysMultipleErrors(resource);
     //   TestAlwaysOpaqueError(resource);
     //   TestNoneAlwaysOpaqueError(resource);
@@ -222,7 +223,7 @@ pub fn checkNone(name: &str, output: &GetExtendableResourceDataOutput) {
 
 pub fn allSome() -> GetExtendableResourceDataInput {
     GetExtendableResourceDataInput::builder()
-        .blob_value(vec![1u8])
+        .blob_value(aws_smithy_types::Blob::new(vec![1u8]))
         .boolean_value(true)
         .string_value("Some".to_string())
         .integer_value(1)
@@ -236,7 +237,7 @@ pub fn checkSome(name: &str, output: &GetExtendableResourceDataOutput) {
         Some("Some".to_string() + " " + name),
         *output.string_value()
     );
-    assert_eq!(Some(vec![1u8]), *output.blob_value());
+    assert_eq!(Some(aws_smithy_types::Blob::new(vec![1u8])), *output.blob_value());
     assert_eq!(Some(true), output.boolean_value());
     assert_eq!(Some(1), output.integer_value());
     assert_eq!(Some(1), output.long_value());

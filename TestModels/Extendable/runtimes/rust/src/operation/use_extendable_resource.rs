@@ -24,7 +24,7 @@ impl UseExtendableResource {
             ::dafny_runtime::md!(client.dafny_client.clone()).UseExtendableResource(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_extendable_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::use_extendable_resource::_use_extendable_resource_output::from_dafny(

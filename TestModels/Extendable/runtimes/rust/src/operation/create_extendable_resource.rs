@@ -20,7 +20,7 @@ impl CreateExtendableResource {
             .CreateExtendableResource(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_extendable_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::create_extendable_resource::_create_extendable_resource_output::from_dafny(

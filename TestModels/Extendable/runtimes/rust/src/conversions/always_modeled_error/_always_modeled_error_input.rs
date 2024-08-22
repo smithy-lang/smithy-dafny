@@ -3,25 +3,25 @@
 pub fn to_dafny(
     value: crate::operation::always_modeled_error::AlwaysModeledErrorInput,
 ) -> ::std::rc::Rc<
-    ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput,
+    crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput,
 >{
-    ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput::GetExtendableResourceErrorsInput {
-        value: dafny_standard_library::conversion::ostring_to_dafny(value.value()),
+    ::std::rc::Rc::new(crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput::GetExtendableResourceErrorsInput {
+        value: crate::standard_library_conversions::ostring_to_dafny(value.value()),
   })
 }
 // _always_modeled_error_Input
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput,
+        crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput,
     >,
 ) -> crate::operation::always_modeled_error::AlwaysModeledErrorInput {
     match &*dafny_value {
-        ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput::GetExtendableResourceErrorsInput {
+        crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput::GetExtendableResourceErrorsInput {
             value,
         } =>
         crate::operation::always_modeled_error::AlwaysModeledErrorInput {
-            value: dafny_standard_library::conversion::ostring_from_dafny(value.clone()),
+            value: crate::standard_library_conversions::ostring_from_dafny(value.clone()),
         }
     }
 }

@@ -3,7 +3,7 @@
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct GetExtendableResourceDataInput {
-    pub(crate) blob_value: Option<Vec<u8>>,
+    pub(crate) blob_value: Option<aws_smithy_types::Blob>,
     pub(crate) boolean_value: Option<bool>,
     pub(crate) string_value: Option<String>,
     pub(crate) integer_value: Option<i32>,
@@ -12,7 +12,7 @@ pub struct GetExtendableResourceDataInput {
 
 impl GetExtendableResourceDataInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn blob_value(&self) -> &Option<Vec<u8>> {
+    pub fn blob_value(&self) -> &Option<aws_smithy_types::Blob> {
         &self.blob_value
     }
     #[allow(missing_docs)] // documentation missing in model
@@ -46,7 +46,7 @@ impl GetExtendableResourceDataInput {
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
 pub struct GetExtendableResourceDataInputBuilder {
-    blob_value: Option<Vec<u8>>,
+    blob_value: Option<aws_smithy_types::Blob>,
     boolean_value: Option<bool>,
     string_value: Option<String>,
     integer_value: Option<i32>,
@@ -55,19 +55,19 @@ pub struct GetExtendableResourceDataInputBuilder {
 
 impl GetExtendableResourceDataInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn blob_value(mut self, input: Vec<u8>) -> Self {
-        self.blob_value = Some(input);
+    pub fn blob_value(mut self, input: aws_smithy_types::Blob) -> Self {
+        self.blob_value = Some(input.into());
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_blob_value(mut self, input: Option<Vec<u8>>) -> Self {
+    pub fn set_blob_value(mut self, input: Option<aws_smithy_types::Blob>) -> Self {
         self.blob_value = input;
         self
     }
 
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_blob_value(&self) -> &Option<Vec<u8>> {
+    pub fn get_blob_value(&self) -> &Option<aws_smithy_types::Blob> {
         &self.blob_value
     }
 

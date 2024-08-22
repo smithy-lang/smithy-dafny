@@ -5,10 +5,10 @@ use crate::types::extendable_resource::ExtendableResource;
 pub fn to_dafny(
     value: crate::types::extendable_resource::ExtendableResourceRef,
 ) ->
-::dafny_runtime::Object<dyn simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource>
+::dafny_runtime::Object<dyn crate::r#simple::extendable::resources::internaldafny::types::IExtendableResource>
 {
     let wrap = ExtendableResourceWrapper { obj: value.clone() };
-    let inner : ::std::rc::Rc<::std::cell::UnsafeCell<dyn ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource>>
+    let inner : ::std::rc::Rc<::std::cell::UnsafeCell<dyn crate::r#simple::extendable::resources::internaldafny::types::IExtendableResource>>
     = ::std::rc::Rc::new(::std::cell::UnsafeCell::new(wrap));
 
     ::dafny_runtime::Object(Some(inner))
@@ -16,7 +16,7 @@ pub fn to_dafny(
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::dafny_runtime::Object<dyn simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource>,
+    dafny_value: ::dafny_runtime::Object<dyn crate::r#simple::extendable::resources::internaldafny::types::IExtendableResource>,
 ) -> crate::types::extendable_resource::ExtendableResourceRef {
     let wrap = ExtendableResourceDafnyWrapper {
         obj: dafny_value.clone(),
@@ -33,20 +33,20 @@ impl dafny_runtime::UpcastObject<dyn std::any::Any> for ExtendableResourceWrappe
     ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 }
 
-impl ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource
+impl crate::r#simple::extendable::resources::internaldafny::types::IExtendableResource
     for ExtendableResourceWrapper
 {
     fn r#_GetExtendableResourceData_k(
         &mut self,
         input: &::std::rc::Rc<
-            ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataInput,
+            crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceDataInput,
         >,
     ) -> ::std::rc::Rc<
-        ::simple_extendable_dafny::r#_Wrappers_Compile::Result<
+        crate::r#_Wrappers_Compile::Result<
             ::std::rc::Rc<
-                ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput,
+                crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceDataOutput,
             >,
-            ::std::rc::Rc<::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::Error>,
+            ::std::rc::Rc<crate::r#simple::extendable::resources::internaldafny::types::Error>,
         >,
     >
     {
@@ -56,22 +56,22 @@ impl ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_
             );
         let inner_result = self.obj.borrow_mut().get_extendable_resource_data(inner_input);
         let result = match inner_result {
-            Ok(x) => ::simple_extendable_dafny::r#_Wrappers_Compile::Result::Success {
+            Ok(x) => crate::r#_Wrappers_Compile::Result::Success {
                 value: crate::conversions::get_extendable_resource_data::_get_extendable_resource_data_output::to_dafny(
                     x,
                 ),
             },
-            Err(x) => ::simple_extendable_dafny::r#_Wrappers_Compile::Result::Failure {
+            Err(x) => crate::r#_Wrappers_Compile::Result::Failure {
                 error: crate::conversions::get_extendable_resource_data::to_dafny_error(x),
             },
         };
         ::std::rc::Rc::new(result)
     }
-    fn _AlwaysMultipleErrors_k(&mut self, input: & std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput>)
-    ->  std::rc::Rc<simple_extendable_dafny::_Wrappers_Compile::Result< std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>,  std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>
+    fn _AlwaysMultipleErrors_k(&mut self, input: & std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput>)
+    ->  std::rc::Rc<crate::_Wrappers_Compile::Result< std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsOutput>,  std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::Error>>>
     { todo!() }
-    fn _AlwaysModeledError_k(&mut self, input: & std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput>)
-    ->  std::rc::Rc<simple_extendable_dafny::_Wrappers_Compile::Result< std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>,  std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>
+    fn _AlwaysModeledError_k(&mut self, input: & std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput>)
+    ->  std::rc::Rc<crate::_Wrappers_Compile::Result< std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsOutput>,  std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::Error>>>
     {
         let inner_input =
         crate::conversions::always_modeled_error::_always_modeled_error_input::from_dafny(
@@ -79,27 +79,27 @@ impl ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_
         );
     let inner_result = self.obj.borrow_mut().always_modeled_error(inner_input);
     let result = match inner_result {
-        Ok(x) => ::simple_extendable_dafny::r#_Wrappers_Compile::Result::Success {
+        Ok(x) => crate::r#_Wrappers_Compile::Result::Success {
             value: crate::conversions::always_modeled_error::_always_modeled_error_output::to_dafny(
                 x,
             ),
         },
-        Err(x) => ::simple_extendable_dafny::r#_Wrappers_Compile::Result::Failure {
+        Err(x) => crate::r#_Wrappers_Compile::Result::Failure {
             error: crate::conversions::always_modeled_error::to_dafny_error(x),
         },
     };
     ::std::rc::Rc::new(result)
 
     }
-    fn _AlwaysOpaqueError_k(&mut self, input: & std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsInput>)
-    ->  std::rc::Rc<simple_extendable_dafny::_Wrappers_Compile::Result< std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceErrorsOutput>,  std::rc::Rc<simple_extendable_dafny::_simple_dextendable_dresources_dinternaldafny_dtypes::Error>>>
+    fn _AlwaysOpaqueError_k(&mut self, input: & std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput>)
+    ->  std::rc::Rc<crate::_Wrappers_Compile::Result< std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsOutput>,  std::rc::Rc<crate::simple::extendable::resources::internaldafny::types::Error>>>
     { todo!() }
  }
 
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
 pub struct ExtendableResourceDafnyWrapper {
     pub(crate) obj: ::dafny_runtime::Object<
-        dyn ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::IExtendableResource,
+        dyn crate::r#simple::extendable::resources::internaldafny::types::IExtendableResource,
     >,
 }
 
@@ -117,7 +117,7 @@ impl ExtendableResource for ExtendableResourceDafnyWrapper {
             ::dafny_runtime::md!(self.obj.clone()).GetExtendableResourceData(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_extendable_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_extendable_resource_data::_get_extendable_resource_data_output::from_dafny(
@@ -145,7 +145,7 @@ impl ExtendableResource for ExtendableResourceDafnyWrapper {
         let inner_result = ::dafny_runtime::md!(self.obj.clone()).AlwaysModeledError(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_extendable_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::always_modeled_error::_always_modeled_error_output::from_dafny(

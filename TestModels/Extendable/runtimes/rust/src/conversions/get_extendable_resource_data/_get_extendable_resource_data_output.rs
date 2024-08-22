@@ -3,25 +3,25 @@
 pub fn to_dafny(
     value: crate::operation::get_extendable_resource_data::GetExtendableResourceDataOutput,
 ) -> ::std::rc::Rc<
-    ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput,
+    crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceDataOutput,
 >{
-    ::std::rc::Rc::new(::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput::GetExtendableResourceDataOutput {
-        stringValue: dafny_standard_library::conversion::ostring_to_dafny(value.string_value()),
-        booleanValue: dafny_standard_library::conversion::obool_to_dafny(value.boolean_value()),
-        integerValue: dafny_standard_library::conversion::oint_to_dafny(value.integer_value()),
-        longValue: dafny_standard_library::conversion::olong_to_dafny(value.long_value()),
-        blobValue: dafny_standard_library::conversion::oblob_to_dafny(value.blob_value())
+    ::std::rc::Rc::new(crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceDataOutput::GetExtendableResourceDataOutput {
+        stringValue: crate::standard_library_conversions::ostring_to_dafny(value.string_value()),
+        booleanValue: crate::standard_library_conversions::obool_to_dafny(value.boolean_value()),
+        integerValue: crate::standard_library_conversions::oint_to_dafny(value.integer_value()),
+        longValue: crate::standard_library_conversions::olong_to_dafny(value.long_value()),
+        blobValue: crate::standard_library_conversions::oblob_to_dafny(value.blob_value())
   })
 }
 // _get_extendable_resource_data_output
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput,
+        crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceDataOutput,
     >,
 ) -> crate::operation::get_extendable_resource_data::GetExtendableResourceDataOutput {
     match &*dafny_value {
-        ::simple_extendable_dafny::r#_simple_dextendable_dresources_dinternaldafny_dtypes::GetExtendableResourceDataOutput::GetExtendableResourceDataOutput {
+        crate::r#simple::extendable::resources::internaldafny::types::GetExtendableResourceDataOutput::GetExtendableResourceDataOutput {
             blobValue,
             booleanValue,
             integerValue,
@@ -29,11 +29,11 @@ pub fn from_dafny(
             stringValue,
         } =>
         crate::operation::get_extendable_resource_data::GetExtendableResourceDataOutput {
-            string_value: dafny_standard_library::conversion::ostring_from_dafny(stringValue.clone()),
-            boolean_value: dafny_standard_library::conversion::obool_from_dafny(booleanValue.clone()),
-            integer_value: dafny_standard_library::conversion::oint_from_dafny(integerValue.clone()),
-            long_value: dafny_standard_library::conversion::olong_from_dafny(longValue.clone()),
-            blob_value: dafny_standard_library::conversion::oblob_from_dafny(blobValue.clone())
+            string_value: crate::standard_library_conversions::ostring_from_dafny(stringValue.clone()),
+            boolean_value: crate::standard_library_conversions::obool_from_dafny(booleanValue.clone()),
+            integer_value: crate::standard_library_conversions::oint_from_dafny(integerValue.clone()),
+            long_value: crate::standard_library_conversions::olong_from_dafny(longValue.clone()),
+            blob_value: crate::standard_library_conversions::oblob_from_dafny(blobValue.clone())
          }
     }
 }
