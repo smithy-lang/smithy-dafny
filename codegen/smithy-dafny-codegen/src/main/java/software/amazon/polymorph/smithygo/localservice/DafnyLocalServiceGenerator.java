@@ -265,23 +265,21 @@ public class DafnyLocalServiceGenerator implements Runnable {
                     clientResponse = "var native_error";
                     returnResponse = "dafny.TupleOf()";
                     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-                    inputType = maybeInputType;
                 } else {
-                    if (inputShape.hasTrait(PositionalTrait.class)) {
-                        writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-                        Shape inputForPositional = model.expectShape(inputShape.getAllMembers().values().stream().findFirst().get().getTarget());
-                        Symbol symbolForPositional = symbolProvider.toSymbol(inputForPositional);
-                        String dafnyType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
-                        inputType = "input %s".formatted(dafnyType);
-                        returnResponse = "(native_response)";
-                    }
-                    else {
-                        inputType = maybeInputType;
-                        returnResponse = "%s(*native_response)".formatted(SmithyNameResolver.getToDafnyMethodName(outputShape, ""));
-                    }
                     clientResponse = "var native_response, native_error";
+                    returnResponse = "%s(*native_response)".formatted(SmithyNameResolver.getToDafnyMethodName(outputShape, ""));
                 }
-
+                if (inputShape.hasTrait(PositionalTrait.class)) {
+                    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+                    Shape inputForPositional = model.expectShape(inputShape.getAllMembers().values().stream().findFirst().get().getTarget());
+                    Symbol symbolForPositional = symbolProvider.toSymbol(inputForPositional);
+                    String dafnyType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
+                    inputType = "input %s".formatted(dafnyType);
+                    returnResponse = "(native_response)";
+                }
+                else {
+                    inputType = maybeInputType;   
+                }
                 writer.write("""
                                        func (shim *Shim) $L($L) Wrappers.Result {
                                            $L
