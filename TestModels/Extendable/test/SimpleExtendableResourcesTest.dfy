@@ -13,13 +13,13 @@ module SimpleExtendableResourcesTest {
   import opened TestHelpers
   import opened NativeResourceFactory
 
-  const TEST_RESOURCE_NAME: string := "Dafny-Test";
+  const TEST_RESOURCE_NAME: string := "Dafny-Test"
   
   // Tests the Resource created purely through Dafny Source Code
   method {:test} TestClientDafnyResource()
   {
     var client :- expect SimpleExtendableResources.SimpleExtendableResources();
-    // The explict type cast is needed for the `is` test on the next line
+    // The explicit type cast is needed for the `is` test on the next line
     var resource: Types.IExtendableResource := TestCreateExtendableResource(
       client, TEST_RESOURCE_NAME
     );
@@ -36,7 +36,7 @@ module SimpleExtendableResourcesTest {
   method {:test} TestClientNativeResource()
   {
     var client :- expect SimpleExtendableResources.SimpleExtendableResources();
-    // The explict type cast is needed for the `is` test on the next line
+    // The explicit type cast is needed for the `is` test on the next line
     var resource: Types.IExtendableResource := DafnyFactory();
     expect !(resource is ExtendableResource.ExtendableResource);
     // The `is` test above asserts this NOT a "pure" Dafny resource

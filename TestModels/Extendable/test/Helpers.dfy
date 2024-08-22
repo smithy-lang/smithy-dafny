@@ -93,7 +93,7 @@ module TestHelpers {
       // Therefore, we cannot constrain/test the value of obj
       // with pure Dafny.
       // What is very odd is that 
-      // .NET cannot percieve OpaqueMessage (when using a Native Resource), but Java Can!
+      // .NET cannot perceive OpaqueMessage (when using a Native Resource), but Java Can!
       // Put another way,
       // the next line is true for .NET and False for Java!
       // && !(actualError.obj is ExtendableResource.OpaqueMessage);

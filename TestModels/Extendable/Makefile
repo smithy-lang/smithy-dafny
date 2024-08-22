@@ -4,6 +4,7 @@
 CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
+RUST_BENERATED=1
 
 include ../SharedMakefile.mk
 
