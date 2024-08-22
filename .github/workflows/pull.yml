@@ -10,6 +10,9 @@ jobs:
     steps:
       - name: Populate Dafny versions list
         id: populate-dafny-versions-list
+        run: echo "dafny-versions-list=['4.2.0', '4.4.0']" >> $GITHUB_OUTPUT
+      - name: Populate Dafny versions list for "only new versions" languages (Python)
+        id: populate-only-new-dafny-versions-list
         run: echo "dafny-versions-list=['4.7.0']" >> $GITHUB_OUTPUT
     outputs:
       dafny-version-list: ${{ steps.populate-dafny-versions-list.outputs.dafny-versions-list }}
@@ -58,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
+        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.populate-only-new-dafny-versions-list) }}
     uses: ./.github/workflows/test_models_python_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}
