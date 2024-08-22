@@ -67,13 +67,6 @@ ENABLE_EXTERN_PROCESSING?=
 
 ########################## Dafny targets
 
-# TODO: This target will not work for projects that use `replaceable` 
-#       module syntax with multiple language targets.
-# It will fail with error:
-# Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
-# We need to come up with some way to verify files per-language.
-# Rewrite this as part of Java implementation of LanguageSpecificLogic TestModel.
-
 # Proof of correctness for the math below
 #  function Z3_PROCESSES(cpus:nat): nat
 #  { if cpus >= 3 then 2 else 1 }

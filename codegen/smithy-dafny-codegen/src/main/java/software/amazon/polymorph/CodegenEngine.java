@@ -716,7 +716,7 @@ public class CodegenEngine {
       // but since the Dafny Rust code generator doesn't yet support multiple crates,
       // we have to inline it instead.
       writeTemplatedFile(
-        "runtimes/rust/standard_library_conversions.rs",
+        "runtimes/rust/src/standard_library_conversions.rs",
         Map.of()
       );
     }
