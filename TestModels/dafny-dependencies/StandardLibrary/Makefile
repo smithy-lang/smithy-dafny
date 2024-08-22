@@ -117,10 +117,7 @@ transpile_implementation_new_cli:
 		--output $(OUT) \
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
-		$(TRANSPILE_MODULE_NAME) \
-		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-		$(TRANSLATION_RECORD) \
-		$(TRANSPILE_DEPENDENCIES)
+		$(TRANSPILE_MODULE_NAME)
 
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
