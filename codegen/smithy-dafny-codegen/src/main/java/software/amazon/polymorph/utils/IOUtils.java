@@ -84,6 +84,7 @@ public class IOUtils {
   ) {
     final String content = evalTemplate(klass, templatePath, parameters);
     final Path outputPath = rootPath.resolve(safeEvalPathTemplate(templateOutputPath, parameters));
+
     try {
       Files.createDirectories(outputPath.getParent());
     } catch (IOException e) {

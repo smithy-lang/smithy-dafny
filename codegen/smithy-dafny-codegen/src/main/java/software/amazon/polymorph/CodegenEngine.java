@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -712,7 +711,6 @@ public class CodegenEngine {
     // but since the Dafny Rust code generator doesn't yet support multiple crates,
     // we have to inline it instead.
     writeTemplatedFile(
-      "runtimes/rust/standard_library_conversions.rs",
       "runtimes/rust/src/standard_library_conversions.rs",
       Map.of()
     );
