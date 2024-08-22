@@ -8,8 +8,6 @@ CORES=2
 
 TRANSPILE_TESTS_IN_RUST=1
 
-RUST_BENERATED=1
-
 include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.boolean
