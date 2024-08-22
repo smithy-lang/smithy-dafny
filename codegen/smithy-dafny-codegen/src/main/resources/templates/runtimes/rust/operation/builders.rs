@@ -22,7 +22,7 @@ impl $operationInputName:LBuilder {
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct $operationName:LFluentBuilder {
     client: crate::client::Client,
-    inner: crate::operation::$snakeCaseOperationName:L::builders::$operationInputName:LBuilder,
+    pub(crate) inner: crate::operation::$snakeCaseOperationName:L::builders::$operationInputName:LBuilder,
 }
 impl $operationName:LFluentBuilder {
     /// Creates a new `$operationName:L`.

@@ -12,7 +12,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.rust.codegen.core.util.StringsKt;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -22,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
 /**
@@ -58,7 +57,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     // errors
     result.add(errorModule());
     result.add(sealedUnhandledErrorModule());
-    result.add(conversionsErrorModule());
     result.addAll(
       allErrorShapes()
         .map(errorShape -> errorConversionModule(service, errorShape))
@@ -69,17 +67,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(operationModule());
     result.addAll(serviceOperationImplementationModules());
 
-//    result.addAll(
-//      model
-//        .getStringShapesWithTrait(EnumTrait.class)
-//        .stream()
-//        .map(enumShape -> enumConversionModule(service, enumShape))
-//        .collect(Collectors.toSet())
-//    );
-
-//    result.add(conversionsModuleFile(model, service));
-//    result.addAll(allOperationConversionModules());
-//    result.addAll(allStructureConversionModules());
+    result.add(conversionsModule());
+    result.add(conversionsErrorModule());
+    result.addAll(configConversionModules());
+    result.addAll(allOperationConversionModules());
+    // TODO structure conversion modules
+    // TODO enum conversion modules
 
     // wrapped client
     result.add(wrappedModule());
@@ -360,11 +353,128 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(Path.of("src", "error", "sealed_unhandled.rs"), TokenTree.of(content));
   }
 
+  @SuppressWarnings("unused")
   private RustFile errorConversionModule(
     final ServiceShape service,
     final Shape errorStructure
   ) {
     throw new UnsupportedOperationException("Error conversion is not yet implemented for library services");
+  }
+
+  private Set<RustFile> configConversionModules() {
+    final Map<String, String> variables = MapUtils.merge(serviceVariables(), dafnyModuleVariables());
+    final String snakeCaseConfigName = variables.get("snakeCaseConfigName");
+
+    final String outerContent = IOUtils.evalTemplate(getClass(), "runtimes/rust/conversions/config.rs", variables);
+    final Path outerPath = Path.of("src", "conversions", "%s.rs".formatted(snakeCaseConfigName));
+    final RustFile outerModule = new RustFile(outerPath, TokenTree.of(outerContent));
+
+    final String innerContent = IOUtils.evalTemplate(getClass(), "runtimes/rust/conversions/config/_config.rs", variables);
+    final Path innerPath = Path.of("src", "conversions", snakeCaseConfigName, "_%s.rs".formatted(snakeCaseConfigName));
+    final RustFile innerModule = new RustFile(innerPath, TokenTree.of(innerContent));
+
+    return Set.of(outerModule, innerModule);
+  }
+
+  @Override
+  protected Set<RustFile> operationConversionModules(final OperationShape operationShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables(),
+      operationVariables(operationShape)
+    );
+
+    final String operationModuleName = toSnakeCase(operationName(operationShape));
+    final String outerContent = IOUtils.evalTemplate(getClass(), "runtimes/rust/conversions/operation.rs", variables);
+    final RustFile outerModule = new RustFile(
+      Path.of("src", "conversions", operationModuleName + ".rs"),
+      TokenTree.of(outerContent)
+    );
+
+    final RustFile requestModule = operationRequestConversionModule(operationShape);
+    final RustFile responseModule = operationResponseConversionModule(operationShape);
+
+    return Set.of(outerModule, requestModule, responseModule);
+  }
+
+  @Override
+  protected TokenTree operationRequestToDafnyFunction(OperationShape operationShape) {
+    return operationStructureToDafnyFunction(operationShape, operationShape.getInputShape());
+  }
+
+  @Override
+  protected TokenTree operationResponseToDafnyFunction(OperationShape operationShape) {
+    return operationStructureToDafnyFunction(operationShape, operationShape.getOutputShape());
+  }
+
+  private TokenTree operationStructureToDafnyFunction(final OperationShape operationShape, final ShapeId structureId) {
+    final StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables(),
+      operationVariables(operationShape)
+    );
+    variables.put("structureName", structureId.getName(service));
+    variables.put("variants", toDafnyVariantsForStructure(structureShape).toString());
+
+    return TokenTree.of(
+      evalTemplate(
+        """
+        #[allow(dead_code)]
+        pub fn to_dafny(
+            value: crate::operation::$snakeCaseOperationName:L::$structureName:L,
+        ) -> ::std::rc::Rc<
+            crate::r#$dafnyTypesModuleName:L::$structureName:L,
+        >{
+            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+                $variants:L
+            })
+        }
+        """,
+        variables
+      )
+    );
+  }
+
+  @Override
+  protected TokenTree operationRequestFromDafnyFunction(OperationShape operationShape) {
+    return operationStructureFromDafnyFunction(operationShape, operationShape.getInputShape());
+  }
+
+  @Override
+  protected TokenTree operationResponseFromDafnyFunction(OperationShape operationShape) {
+    return operationStructureFromDafnyFunction(operationShape, operationShape.getOutputShape());
+  }
+
+  private TokenTree operationStructureFromDafnyFunction(final OperationShape operationShape, final ShapeId structureId) {
+    final StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables(),
+      operationVariables(operationShape)
+    );
+    variables.put("structureName", structureId.getName(service));
+    variables.put("fluentMemberSetters", fluentMemberSettersForStructure(structureShape).toString());
+
+    // unwrap() is safe as long as the builder is infallible
+    return TokenTree.of(
+      evalTemplate(
+        """
+        #[allow(dead_code)]
+        pub fn from_dafny(
+            dafny_value: ::std::rc::Rc<
+                crate::r#$dafnyTypesModuleName:L::$structureName:L,
+            >,
+        ) -> crate::operation::$snakeCaseOperationName:L::$structureName:L {
+            crate::operation::$snakeCaseOperationName:L::$structureName:L::builder()
+                $fluentMemberSetters:L
+                .build()
+                .unwrap()
+        }
+        """,
+        variables
+      )
+    );
   }
 
   private RustFile wrappedModule() {
@@ -382,7 +492,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "operationImpls",
       serviceOperationShapes().map(this::wrappedClientOperationImpl).collect(Collectors.joining("\n\n"))
     );
-    // TODO add operation-specific stuff
     final String content = IOUtils.evalTemplate(
       getClass(),
       "runtimes/rust/wrapped/client.rs",
@@ -404,18 +513,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private String operationName(final OperationShape operationShape) {
-    return operationShape.getId().getName(service);
-  }
-
-  private String operationInputName(final OperationShape operationShape) {
-    return operationShape.getInputShape().getName(service);
-  }
-
-  private String operationOutputName(final OperationShape operationShape) {
-    return operationShape.getOutputShape().getName(service);
-  }
-
   private Path operationsModuleFilePath() {
     return Path.of("src", "operation");
   }
@@ -424,76 +521,21 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return operationsModuleFilePath().resolve(toSnakeCase(operationName(operationShape)));
   }
 
-  private String operationErrorTypeName(final OperationShape operationShape) {
-    return "%sError".formatted(operationName(operationShape));
+  private LocalServiceTrait localServiceTrait() {
+    return service.expectTrait(LocalServiceTrait.class);
   }
 
-  /**
-   * Generates values for variables commonly used in service-specific templates.
-   */
-  private HashMap<String, String> serviceVariables() {
-    final LocalServiceTrait localServiceTrait = service.expectTrait(LocalServiceTrait.class);
+  @Override
+  protected HashMap<String, String> serviceVariables() {
+    final HashMap<String, String> variables = super.serviceVariables();
+
+    final LocalServiceTrait localServiceTrait = localServiceTrait();
     final String sdkId = localServiceTrait.getSdkId();
     final String configName = localServiceTrait.getConfigId().getName(service);
-
-    final HashMap<String, String> variables = new HashMap<>();
-    variables.put("serviceName", service.getId().getName(service));
     variables.put("sdkId", sdkId);
     variables.put("configName", configName);
     variables.put("snakeCaseConfigName", toSnakeCase(configName));
+
     return variables;
-  }
-
-  /**
-   * Generates values for variables commonly used in operation-specific templates.
-   */
-  private HashMap<String, String> operationVariables(final OperationShape operationShape) {
-    final String opName = operationName(operationShape);
-    final String opInputName = operationInputName(operationShape);
-    final String opOutputName = operationOutputName(operationShape);
-    final String snakeCaseOpName = toSnakeCase(opName);
-
-    final HashMap<String, String> variables = new HashMap<>();
-    variables.put("operationName", opName);
-    variables.put("operationInputName", opInputName);
-    variables.put("operationOutputName", opOutputName);
-    variables.put("operationErrorName", operationErrorTypeName(operationShape));
-    variables.put("snakeCaseOperationName", snakeCaseOpName);
-    variables.put("snakeCaseOperationInputName", toSnakeCase(opInputName));
-    variables.put("snakeCaseOperationOutputName", toSnakeCase(opOutputName));
-    return variables;
-  }
-
-  /**
-   * Generates values for variables commonly used in structure-member-specific templates.
-   */
-  private HashMap<String, String> memberVariables(final MemberShape memberShape) {
-    final HashMap<String, String> variables = new HashMap<>();
-    variables.put("fieldName", toSnakeCase(memberShape.getMemberName()));
-    variables.put("fieldType", rustTypeForShape(model.expectShape(memberShape.getTarget())));
-    return variables;
-  }
-
-  // Currently only handles simple types, and doesn't account for any traits
-  private String rustTypeForShape(final Shape shape) {
-    return switch (shape.getType()) {
-      case BOOLEAN -> "::std::primitive::bool";
-      // integral
-      case BYTE -> "::std::primitive::i8";
-      case SHORT -> "::std::primitive::i16";
-      case INTEGER -> "::std::primitive::i32";
-      case LONG -> "::std::primitive::i64";
-      // floats
-      case FLOAT -> "::std::primitive::f32";
-      case DOUBLE -> "::std::primitive::f64";
-      // special numerics
-      case BIG_INTEGER -> "::num::bigint::BigInt";
-      case BIG_DECIMAL -> "::num::rational::BigRational";
-      // special collections
-      case BLOB -> "::std::vec::Vec<::std::primitive::u8>";
-      case STRING -> "::std::string::String";
-      // TODO: enum, list, map, structure, union
-      default -> throw new UnsupportedOperationException("Unsupported shape type: " + shape.getType());
-    };
   }
 }

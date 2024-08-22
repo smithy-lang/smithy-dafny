@@ -718,6 +718,7 @@ public class CodegenEngine {
     // we have to inline it instead.
     writeTemplatedFile(
       "runtimes/rust/standard_library_conversions.rs",
+      "runtimes/rust/src/standard_library_conversions.rs",
       Map.of()
     );
 
@@ -812,6 +813,10 @@ public class CodegenEngine {
       final List<String> lines = Files.readAllLines(
         implementationFromDafnyPath
       );
+      // TODO fix root cause of duplicate extra declarations
+      if (lines.contains("// (extra-declarations)")) {
+        return;
+      }
       final int firstModDeclIndex = IntStream
         .range(0, lines.size())
         .filter(i -> lines.get(i).trim().startsWith("pub mod"))
@@ -841,6 +846,8 @@ public class CodegenEngine {
 
     return IOUtils.evalTemplate(
       """
+        // (extra-declarations)
+        
         pub mod client;
         pub mod types;
         

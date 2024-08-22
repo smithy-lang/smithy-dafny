@@ -137,9 +137,9 @@ pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationOutputN
 
 pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::$operationInputName:L;
 
-mod _$snakeCaseOperationOutputName:L;
+pub(crate) mod _$snakeCaseOperationOutputName:L;
 
-mod _$snakeCaseOperationInputName:L;
+pub(crate) mod _$snakeCaseOperationInputName:L;
 
 /// Builders
 pub mod builders;
