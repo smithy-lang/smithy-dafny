@@ -34,10 +34,6 @@ public class SmithyNameResolver {
     }
 
     public static String smithyTypesNamespace(final Shape shape) {
-        // if (shape.isResourceShape()) {   
-        //     // TypesNamespace for resources are in ShapeName        
-        //     return shape.getId().getName();
-        // }
         return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase().concat("types");
     }
 
