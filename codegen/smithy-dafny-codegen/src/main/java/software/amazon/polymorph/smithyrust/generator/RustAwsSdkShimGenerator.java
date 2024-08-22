@@ -159,7 +159,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     variables.put("clientName", "%sClient".formatted(getSdkId()));
 
     final ShapeId outputShapeId = operationShape.getOutputShape();
-    final String outputType = outputShapeId.equals(ShapeId.from("smithy.api#Unit"))
+    final String outputType = outputShapeId.equals(
+        ShapeId.from("smithy.api#Unit")
+      )
       ? "()"
       : evalTemplate(
         "std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$operationOutputName:L>",
@@ -237,7 +239,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
     variables.put("structureName", structureName);
     variables.put("rustStructureName", toPascalCase(structureName));
-    variables.put("variants", toDafnyVariantsForStructure(structureShape).toString());
+    variables.put(
+      "variants",
+      toDafnyVariantsForStructure(structureShape).toString()
+    );
 
     return TokenTree.of(evalTemplate(template, variables));
   }
@@ -264,7 +269,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     variables.put("structureName", structureName);
     variables.put("rustStructureName", toPascalCase(structureName));
     variables.put("snakeCaseStructureName", toSnakeCase(structureName));
-    variables.put("fluentMemberSetters", fluentMemberSettersForStructure(structureShape).toString());
+    variables.put(
+      "fluentMemberSetters",
+      fluentMemberSettersForStructure(structureShape).toString()
+    );
     variables.put("unwrapIfNeeded", unwrapIfNeeded);
 
     return TokenTree.of(
@@ -526,9 +534,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private RustFile errorConversionModule(
-    final Shape errorStructure
-  ) {
+  private RustFile errorConversionModule(final Shape errorStructure) {
     String structureName = errorStructure.getId().getName();
     String snakeCaseName = toSnakeCase(structureName);
     String pascalCaseName = toPascalCase(structureName);
@@ -554,7 +560,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
     variables.put("structureName", structureName);
     variables.put("pascalCaseName", pascalCaseName);
-    variables.put("variants", toDafnyVariantsForStructure(errorStructure).toString());
+    variables.put(
+      "variants",
+      toDafnyVariantsForStructure(errorStructure).toString()
+    );
     String evaluated = evalTemplate(template, variables);
     return new RustFile(path, TokenTree.of(evaluated));
   }
