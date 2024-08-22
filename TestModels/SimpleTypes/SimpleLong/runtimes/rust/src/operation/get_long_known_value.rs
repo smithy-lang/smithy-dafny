@@ -20,7 +20,7 @@ impl GetLongKnownValue {
         let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetLong(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_long_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_long_known_value::_get_long_known_value_output::from_dafny(

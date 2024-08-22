@@ -3,6 +3,8 @@
 
 CORES=2
 
+TRANSPILE_TESTS_IN_RUST=true
+
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
@@ -36,21 +38,8 @@ polymorph_dotnet :
 polymorph_java :
 	echo "Skipping polymorph_java for StandardLibrary"
 
-# Using this target for the side-effect of maintaining patches,
-# Since Dafny Rust code generation is incomplete and also needs to be patched.
-# That only works if you run transpile_rust first.
 polymorph_rust :
-	cd $(CODEGEN_CLI_ROOT); \
-	$(GRADLEW) run --args="\
-	--dafny-version $(DAFNY_VERSION) \
-	--library-root $(LIBRARY_ROOT) \
-	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
-	--output-rust $(LIBRARY_ROOT)/runtimes/rust \
-	--model $(PROJECT_ROOT)/$(STD_LIBRARY)/Model \
-	--namespace aws.polymorph \
-	--dependent-model $(PROJECT_ROOT)/$(STD_LIBRARY)/../Model \
-	$(POLYMORPH_OPTIONS) \
-	";
+	echo "Skipping polymorph_rust for StandardLibrary"
 
 _polymorph_dependencies: 
 	echo "Skipping _polymorph_dependencies for StandardLibrary"
@@ -67,19 +56,13 @@ transpile_java: | transpile_implementation_java transpile_test_java
 # StandardLibrary as a dependency
 transpile_rust: | transpile_implementation_rust
 
-RUST_TEST_INDEX=test_for_rust
+RUST_OTHER_FILES=runtimes/rust/src/conversion.rs runtimes/rust/src/UTF8_externs.rs
 
-# Override the targets to relocate translated Rust code directly into the main crate,
-# instead of the dafny_impl sub-crate.
-# We also don't want to delete the src directory since we have an extern in there too.
+# Override this target to not insert a dependency on the standard library.
 _mv_implementation_rust:
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
-_mv_test_rust:
-	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny.rs
-	rustfmt runtimes/rust/tests/tests_from_dafny.rs
-	rm -rf tests_from_dafny-rust
 
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
@@ -100,6 +83,7 @@ transpile_implementation:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		-out $(OUT)
 
 # Override SharedMakefile's build_java to not install

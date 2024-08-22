@@ -18,7 +18,7 @@ impl OnlyOutput {
         let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).OnlyOutput();
         if matches!(
             inner_result.as_ref(),
-            ::simple_refinement_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::only_output::_only_output_output::from_dafny(

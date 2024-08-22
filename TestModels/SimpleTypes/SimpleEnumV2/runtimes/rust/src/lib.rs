@@ -13,5 +13,7 @@ pub mod operation;
 
 mod conversions;
 
+pub mod implementation_from_dafny;
+
 pub use client::Client;
 pub use types::simple_enum_v2_config::SimpleEnumV2Config;

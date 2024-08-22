@@ -2,3 +2,5 @@
 pub mod get_boolean;
 
 pub mod simple_boolean_config;
+
+pub(crate) mod error;

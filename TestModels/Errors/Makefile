@@ -3,6 +3,8 @@
 
 CORES=2
 
+ENABLE_EXTERN_PROCESSING=1
+
 include ../SharedMakefile.mk
 
 PROJECT_SERVICES := \
@@ -21,3 +23,17 @@ clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleErrorsTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.errors.internaldafny.types\" } SimpleErrorsTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleErrorsTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.errors.internaldafny\" } SimpleErrors refines AbstractSimpleErrorsService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleErrors refines AbstractSimpleErrorsService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleErrorsImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.errors.internaldafny.wrapped\"} WrappedSimpleErrorsService refines WrappedAbstractSimpleErrorsService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleErrorsService refines WrappedAbstractSimpleErrorsService {"

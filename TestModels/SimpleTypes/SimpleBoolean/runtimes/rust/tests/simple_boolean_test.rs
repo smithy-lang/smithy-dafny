@@ -1,4 +1,5 @@
 use simple_boolean::*;
+
 /*
     method{:test} GetBooleanTrue(){
         var client :- expect SimpleBoolean.SimpleBoolean();
