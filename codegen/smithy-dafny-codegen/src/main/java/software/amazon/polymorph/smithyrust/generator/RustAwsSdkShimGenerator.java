@@ -7,6 +7,7 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,7 +44,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     result.add(clientModule());
     result.addAll(
       allErrorShapes()
-        .map(errorShape -> errorConversionModule(service, errorShape))
+        .map(errorShape -> errorConversionModule(errorShape))
         .collect(Collectors.toSet())
     );
 
@@ -64,20 +65,11 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   private RustFile clientModule() {
-    String sdkId = service.expectTrait(ServiceTrait.class).getSdkId();
-    String clientName = "%sClient".formatted(sdkId);
-    String dafnyModuleName = getDafnyModuleName();
-    String dafnyTypesModuleName = "%s::types".formatted(dafnyModuleName);
-    Map<String, String> variables = Map.of(
-      "sdkId",
-      sdkId.toLowerCase(),
-      "clientName",
-      clientName,
-      "dafnyModuleName",
-      dafnyModuleName,
-      "dafnyTypesModuleName",
-      dafnyTypesModuleName
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables()
     );
+    variables.put("clientName", "%sClient".formatted(getSdkId()));
 
     var preamble = TokenTree.of(
       evalTemplate(
@@ -85,7 +77,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         use crate::conversions;
 
         struct Client {
-            inner: aws_sdk_$sdkId:L::Client,
+            inner: $sdkCrate:L::Client,
 
             rt: tokio::runtime::Runtime,
         }
@@ -139,7 +131,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             let rt = rt_result.unwrap();
 
             let shared_config = rt.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
-            let inner = aws_sdk_$sdkId:L::Client::new(&shared_config);
+            let inner = $sdkCrate:L::Client::new(&shared_config);
             let client = Client { inner, rt };
             let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
             std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
@@ -159,46 +151,26 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   private TokenTree operationClientFunction(
     final OperationShape operationShape
   ) {
-    String operationName = operationShape.getId().getName();
-    String snakeCaseOperationName = toSnakeCase(operationName);
-    String inputShapeName = operationShape.getInputShape().getName();
-    ShapeId outputShapeId = operationShape.getOutputShape();
-    String outputShapeName = outputShapeId.getName();
-    String sdkId = service.expectTrait(ServiceTrait.class).getSdkId();
-    String clientName = "%sClient".formatted(sdkId);
-    String dafnyTypesModuleName = getDafnyTypesModuleName();
-    String outputType = outputShapeId.equals(ShapeId.from("smithy.api#Unit"))
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables(),
+      operationVariables(operationShape)
+    );
+    variables.put("clientName", "%sClient".formatted(getSdkId()));
+
+    final ShapeId outputShapeId = operationShape.getOutputShape();
+    final String outputType = outputShapeId.equals(ShapeId.from("smithy.api#Unit"))
       ? "()"
       : evalTemplate(
-        "std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$outputShapeName:L>",
-        Map.of(
-          "outputShapeName",
-          outputShapeName,
-          "dafnyTypesModuleName",
-          dafnyTypesModuleName
-        )
+        "std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$operationOutputName:L>",
+        variables
       );
-    Map<String, String> variables = Map.of(
-      "operationName",
-      operationName,
-      "snakeCaseOperationName",
-      snakeCaseOperationName,
-      "inputShapeName",
-      inputShapeName,
-      "outputType",
-      outputType,
-      "sdkId",
-      sdkId.toLowerCase(),
-      "clientName",
-      clientName,
-      "dafnyTypesModuleName",
-      dafnyTypesModuleName
-    );
+    variables.put("outputType", outputType);
 
     return TokenTree.of(
       evalTemplate(
         """
-        fn $operationName:L(&mut self, input: &std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$inputShapeName:L>)
+        fn $operationName:L(&mut self, input: &std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$operationInputName:L>)
           -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
             $outputType:L,
             std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
@@ -244,14 +216,13 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final StructureShape structureShape
   ) {
     String structureName = structureShape.getId().getName();
-    String rustStructureName = toPascalCase(structureName);
     String template =
       """
       // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 
       #[allow(dead_code)]
       pub fn to_dafny(
-          value: &aws_sdk_$sdkId:L::types::$rustStructureName:L,
+          value: &$sdkCrate:L::types::$rustStructureName:L,
       ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
         ::std::rc::Rc::new(
           crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
@@ -260,39 +231,21 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         )
       }
       """;
-    String sdkId = service
-      .expectTrait(ServiceTrait.class)
-      .getSdkId()
-      .toLowerCase();
-    String evaluated = evalTemplate(
-      template,
-      Map.of(
-        "sdkId",
-        sdkId,
-        "structureName",
-        structureName,
-        "rustStructureName",
-        rustStructureName,
-        "dafnyTypesModuleName",
-        getDafnyTypesModuleName(),
-        "variants",
-        toDafnyVariantsForStructure(structureShape).toString()
-      )
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables()
     );
-    return TokenTree.of(evaluated);
+    variables.put("structureName", structureName);
+    variables.put("rustStructureName", toPascalCase(structureName));
+    variables.put("variants", toDafnyVariantsForStructure(structureShape).toString());
+
+    return TokenTree.of(evalTemplate(template, variables));
   }
 
   private TokenTree structureFromDafnyFunction(
     final StructureShape structureShape
   ) {
     String structureName = structureShape.getId().getName();
-    String rustStructureName = toPascalCase(structureName);
-    String snakeCaseStructureName = toSnakeCase(structureName);
-    String sdkId = service
-      .expectTrait(ServiceTrait.class)
-      .getSdkId()
-      .toLowerCase();
-    String dafnyTypesModuleName = getDafnyTypesModuleName();
     // The builders smithy-rs generates only validate that required fields are provided,
     // and only produce `Result<...>` values if there are any required fields
     // (...that aren't structures, for some reason)
@@ -304,22 +257,15 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         )
       ? ".unwrap()"
       : "";
-    Map<String, String> variables = Map.of(
-      "sdkCrate",
-      "aws_sdk_" + sdkId,
-      "structureName",
-      structureName,
-      "rustStructureName",
-      rustStructureName,
-      "snakeCaseStructureName",
-      snakeCaseStructureName,
-      "dafnyTypesModuleName",
-      dafnyTypesModuleName,
-      "fluentMemberSetters",
-      fluentMemberSettersForStructure(structureShape).toString(),
-      "unwrapIfNeeded",
-      unwrapIfNeeded
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables()
     );
+    variables.put("structureName", structureName);
+    variables.put("rustStructureName", toPascalCase(structureName));
+    variables.put("snakeCaseStructureName", toSnakeCase(structureName));
+    variables.put("fluentMemberSetters", fluentMemberSettersForStructure(structureShape).toString());
+    variables.put("unwrapIfNeeded", unwrapIfNeeded);
 
     return TokenTree.of(
       evalTemplate(
@@ -508,14 +454,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   protected TokenTree operationErrorToDafnyFunction(
     final OperationShape operationShape
   ) {
-    String operationName = operationShape.getId().getName();
-    String snakeCaseOperationName = toSnakeCase(operationName);
-    String sdkId = service
-      .expectTrait(ServiceTrait.class)
-      .getSdkId()
-      .toLowerCase();
-    String dafnyTypesModuleName = getDafnyTypesModuleName();
-
     TokenTree errorCases = TokenTree
       .of(
         operationShape
@@ -530,18 +468,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       )
       .lineSeparated();
 
-    Map<String, String> variables = Map.of(
-      "sdkCrate",
-      "aws_sdk_" + sdkId,
-      "operationName",
-      operationName,
-      "snakeCaseOperationName",
-      snakeCaseOperationName,
-      "dafnyTypesModuleName",
-      dafnyTypesModuleName,
-      "errorCases",
-      errorCases.toString()
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables(),
+      operationVariables(operationShape)
     );
+    variables.put("errorCases", errorCases.toString());
 
     return TokenTree.of(
       evalTemplate(
@@ -574,29 +506,19 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final OperationShape operationShape,
     final StructureShape errorShape
   ) {
-    String operationName = operationShape.getId().getName();
-    String errorName = toPascalCase(errorShape.getId().getName());
-    String sdkId = service
-      .expectTrait(ServiceTrait.class)
-      .getSdkId()
-      .toLowerCase();
-    Map<String, String> variables = Map.of(
-      "sdkId",
-      sdkId,
-      "operationName",
-      operationName,
-      "snakeCaseOperationName",
-      toSnakeCase(operationName),
-      "errorName",
-      errorName,
-      "snakeCaseErrorName",
-      toSnakeCase(errorName)
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables(),
+      operationVariables(operationShape)
     );
+    String errorName = toPascalCase(errorShape.getId().getName());
+    variables.put("errorName", errorName);
+    variables.put("snakeCaseErrorName", toSnakeCase(errorName));
 
     return TokenTree.of(
       evalTemplate(
         """
-                aws_sdk_$sdkId:L::operation::$snakeCaseOperationName:L::$operationName:LError::$errorName:L(e) =>
+                $sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LError::$errorName:L(e) =>
                     crate::conversions::error::$snakeCaseErrorName:L::to_dafny(e.clone()),
         """,
         variables
@@ -605,7 +527,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   private RustFile errorConversionModule(
-    final ServiceShape service,
     final Shape errorStructure
   ) {
     String structureName = errorStructure.getId().getName();
@@ -618,7 +539,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
       #[allow(dead_code)]
       pub fn to_dafny(
-          value: aws_sdk_$sdkId:L::types::error::$pascalCaseName:L,
+          value: $sdkCrate:L::types::error::$pascalCaseName:L,
       ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>{
         ::std::rc::Rc::new(
           crate::r#$dafnyTypesModuleName:L::Error::$structureName:L {
@@ -627,25 +548,14 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         )
       }
       """;
-    String sdkId = service
-      .expectTrait(ServiceTrait.class)
-      .getSdkId()
-      .toLowerCase();
-    String evaluated = evalTemplate(
-      template,
-      Map.of(
-        "sdkId",
-        sdkId,
-        "structureName",
-        structureName,
-        "pascalCaseName",
-        pascalCaseName,
-        "dafnyTypesModuleName",
-        getDafnyTypesModuleName(),
-        "variants",
-        toDafnyVariantsForStructure(errorStructure).toString()
-      )
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables()
     );
+    variables.put("structureName", structureName);
+    variables.put("pascalCaseName", pascalCaseName);
+    variables.put("variants", toDafnyVariantsForStructure(errorStructure).toString());
+    String evaluated = evalTemplate(template, variables);
     return new RustFile(path, TokenTree.of(evaluated));
   }
 
@@ -679,7 +589,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   private String getSdkCrate() {
-    return "aws_sdk_%s".formatted(getSdkId());
+    return "aws_sdk_%s".formatted(getSdkId().toLowerCase(Locale.ROOT));
   }
 
   @Override
