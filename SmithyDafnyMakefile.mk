@@ -553,6 +553,9 @@ transpile_dependencies_rust: transpile_dependencies
 _mv_implementation_rust:
 	mkdir -p runtimes/rust/src
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
+# rustfmt has a recurring bug where it leaves behind trailing spaces and then complains about it.
+# Pre-process the Dafny-generated Rust code to remove them.
+	sed -i -e 's/[[:space:]]*$$//' runtimes/rust/src/implementation_from_dafny.rs 
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 
