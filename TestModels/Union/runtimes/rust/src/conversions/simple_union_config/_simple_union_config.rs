@@ -3,14 +3,14 @@
 
 pub fn to_dafny(
     value: crate::types::simple_union_config::SimpleUnionConfig,
-) -> ::std::rc::Rc<::simple_union_dafny::_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig> {
-    ::std::rc::Rc::new(::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig::SimpleUnionConfig {})
+) -> ::std::rc::Rc<crate::simple::union::internaldafny::types::SimpleUnionConfig> {
+    ::std::rc::Rc::new(crate::r#simple::union::internaldafny::types::SimpleUnionConfig::SimpleUnionConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::SimpleUnionConfig,
+        crate::r#simple::union::internaldafny::types::SimpleUnionConfig,
     >,
 ) -> crate::types::simple_union_config::SimpleUnionConfig {
     crate::types::simple_union_config::SimpleUnionConfig {}

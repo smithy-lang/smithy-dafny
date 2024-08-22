@@ -20,7 +20,7 @@ impl GetTimestamp {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetTimestamp(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_timestamp_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             crate::conversions::get_timestamp::_get_timestamp_output::from_dafny(
                 inner_result.value().clone(),

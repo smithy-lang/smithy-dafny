@@ -1,0 +1,22 @@
+[package]
+name = "ddb_lite"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aws-smithy-runtime = {version = "1.6.0", features = ["client"] }
+aws-smithy-runtime-api = {version = "1.7.0", features = ["client"] }
+aws-smithy-types = "1.2.0"
+dafny_runtime = { path = "../../../../dafny-dependencies/dafny_runtime_rust"}
+
+aws-sdk-dynamodb = "1.35.0"
+aws-config = "1.5.4"
+
+[dependencies.tokio]
+version = "1.26.0"
+features = ["full"]
+
+[lib]
+path = "src/implementation_from_dafny.rs"

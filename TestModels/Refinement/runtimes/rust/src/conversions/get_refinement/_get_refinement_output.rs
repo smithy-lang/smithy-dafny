@@ -3,7 +3,7 @@
 pub fn to_dafny(
     value: crate::operation::get_refinement::GetRefinementOutput,
 ) -> ::std::rc::Rc<
-    ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput,
+    crate::r#simple::refinement::internaldafny::types::GetRefinementOutput,
 > {
     let crate::operation::get_refinement::GetRefinementOutput {
         required_string,
@@ -16,11 +16,11 @@ pub fn to_dafny(
         );
 
     let optional_string = match optional_string {
-        Some(s) => ::simple_refinement_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-        None => ::simple_refinement_dafny::_Wrappers_Compile::Option::None {},
+        Some(s) => crate::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
+        None => crate::_Wrappers_Compile::Option::None {},
     };
 
-    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput::GetRefinementOutput {
+    ::std::rc::Rc::new(crate::r#simple::refinement::internaldafny::types::GetRefinementOutput::GetRefinementOutput {
         requiredString: required_string,
         optionalString: ::std::rc::Rc::new(optional_string),
   })
@@ -29,10 +29,10 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput,
+        crate::r#simple::refinement::internaldafny::types::GetRefinementOutput,
     >,
 ) -> crate::operation::get_refinement::GetRefinementOutput {
-    let ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::GetRefinementOutput::GetRefinementOutput { requiredString, optionalString } = dafny_value.as_ref();
+    let crate::r#simple::refinement::internaldafny::types::GetRefinementOutput::GetRefinementOutput { requiredString, optionalString } = dafny_value.as_ref();
 
     let required_string =
         dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -40,9 +40,8 @@ pub fn from_dafny(
         );
 
     let optional_string = match optionalString.as_ref() {
-        simple_refinement_dafny::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
-        simple_refinement_dafny::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
-        simple_refinement_dafny::_Wrappers_Compile::Option::_PhantomVariant(_) => unreachable!(),
+        crate::_Wrappers_Compile::Option::None {} => ::std::option::Option::None,
+        crate::_Wrappers_Compile::Option::Some { value } => ::std::option::Option::Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&value)),
     };
 
     crate::operation::get_refinement::GetRefinementOutput {

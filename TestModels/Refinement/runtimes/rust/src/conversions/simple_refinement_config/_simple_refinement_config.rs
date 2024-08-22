@@ -4,15 +4,15 @@
 pub fn to_dafny(
     value: crate::types::simple_refinement_config::SimpleRefinementConfig,
 ) -> ::std::rc::Rc<
-    ::simple_refinement_dafny::_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig,
+    crate::simple::refinement::internaldafny::types::SimpleRefinementConfig,
 > {
-    ::std::rc::Rc::new(::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig::SimpleRefinementConfig {})
+    ::std::rc::Rc::new(crate::r#simple::refinement::internaldafny::types::SimpleRefinementConfig::SimpleRefinementConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_refinement_dafny::r#_simple_drefinement_dinternaldafny_dtypes::SimpleRefinementConfig,
+        crate::r#simple::refinement::internaldafny::types::SimpleRefinementConfig,
     >,
 ) -> crate::types::simple_refinement_config::SimpleRefinementConfig {
     crate::types::simple_refinement_config::SimpleRefinementConfig {}

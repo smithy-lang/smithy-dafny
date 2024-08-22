@@ -4,15 +4,15 @@
 pub fn to_dafny(
     value: crate::types::simple_double_config::SimpleDoubleConfig,
 ) -> ::std::rc::Rc<
-    ::simple_double_dafny::_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig,
+    crate::simple::types::smithydouble::internaldafny::types::SimpleDoubleConfig,
 > {
-    ::std::rc::Rc::new(::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig::SimpleDoubleConfig {})
+    ::std::rc::Rc::new(crate::r#simple::types::smithydouble::internaldafny::types::SimpleDoubleConfig::SimpleDoubleConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_double_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::SimpleDoubleConfig,
+        crate::r#simple::types::smithydouble::internaldafny::types::SimpleDoubleConfig,
     >,
 ) -> crate::types::simple_double_config::SimpleDoubleConfig {
     crate::types::simple_double_config::SimpleDoubleConfig {}

@@ -4,9 +4,9 @@
 pub fn to_dafny(
     value: crate::types::simple_resources_config::SimpleResourcesConfig,
 ) -> ::std::rc::Rc<
-    ::simple_resources_dafny::_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
+    crate::simple::resources::internaldafny::types::SimpleResourcesConfig,
 > {
-    let inner = ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig::SimpleResourcesConfig {
+    let inner = crate::r#simple::resources::internaldafny::types::SimpleResourcesConfig::SimpleResourcesConfig {
         name : dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&value.name)
     };
     ::std::rc::Rc::new(inner)
@@ -15,7 +15,7 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_resources_dafny::r#_simple_dresources_dinternaldafny_dtypes::SimpleResourcesConfig,
+        crate::r#simple::resources::internaldafny::types::SimpleResourcesConfig,
     >,
 ) -> crate::types::simple_resources_config::SimpleResourcesConfig {
     crate::types::simple_resources_config::SimpleResourcesConfig {

@@ -3,9 +3,7 @@
 
 include "../Model/SimpleLocalServiceTypesWrapped.dfy"
 
-module
-  {:extern "simple.localservice.internaldafny.wrapped"}
-  WrappedSimpleLocalService refines WrappedAbstractSimpleLocalServiceService
+module {:extern "simple.localservice.internaldafny.wrapped"} WrappedSimpleLocalService refines WrappedAbstractSimpleLocalServiceService
 {
   import WrappedService = SimpleLocalService
 

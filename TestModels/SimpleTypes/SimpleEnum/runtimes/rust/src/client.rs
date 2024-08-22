@@ -4,7 +4,7 @@ use aws_smithy_types::error::operation::BuildError;
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
-    pub(crate) dafny_client: ::dafny_runtime::Object<dyn ::simple_enum_dafny::r#_simple_dtypes_dsmithyenum_dinternaldafny_dtypes::ISimpleTypesEnumClient>
+    pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::r#simple::types::smithyenum::internaldafny::types::ISimpleTypesEnumClient>
 }
 
 impl Client {
@@ -14,12 +14,12 @@ impl Client {
         conf: crate::types::simple_enum_config::SimpleEnumConfig,
     ) -> Result<Self, BuildError> {
         let inner =
-            ::simple_enum_dafny::_simple_dtypes_dsmithyenum_dinternaldafny::_default::SimpleEnum(
+            crate::simple::types::smithyenum::internaldafny::_default::SimpleEnum(
                 &crate::conversions::simple_enum_config::_simple_enum_config::to_dafny(conf),
             );
         if matches!(
             inner.as_ref(),
-            ::simple_enum_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(

@@ -5,11 +5,11 @@ use std::any::Any;
 #[allow(dead_code)]
 pub fn to_dafny_error(
     value: crate::operation::get_known_value_union::GetKnownValueUnionError,
-) -> ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error> {
+) -> ::std::rc::Rc<crate::r#simple::union::internaldafny::types::Error> {
     match value {
         crate::operation::get_known_value_union::GetKnownValueUnionError::Unhandled(unhandled) => {
             ::std::rc::Rc::new(
-                ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::Opaque {
+                crate::r#simple::union::internaldafny::types::Error::Opaque {
                     obj: ::dafny_runtime::upcast_object()(
                         ::dafny_runtime::object::new(unhandled),
                     ),
@@ -21,12 +21,12 @@ pub fn to_dafny_error(
 
 #[allow(dead_code)]
 pub fn from_dafny_error(
-    dafny_value: ::std::rc::Rc<::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error>,
+    dafny_value: ::std::rc::Rc<crate::r#simple::union::internaldafny::types::Error>,
 ) -> crate::operation::get_known_value_union::GetKnownValueUnionError {
     // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
     if matches!(
         &dafny_value.as_ref(),
-        ::simple_union_dafny::r#_simple_dunion_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }
+        crate::r#simple::union::internaldafny::types::Error::CollectionOfErrors { .. }
     ) {
         let error_message = "TODO: can't get message yet";
         crate::operation::get_known_value_union::GetKnownValueUnionError::generic(

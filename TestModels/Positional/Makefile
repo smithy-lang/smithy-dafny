@@ -3,6 +3,8 @@
 
 CORES=2
 
+ENABLE_EXTERN_PROCESSING=1
+
 include ../SharedMakefile.mk
 
 NAMESPACE=simple.positional
@@ -21,3 +23,16 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 POLYMORPH_OPTIONS=--generate project-files,client-constructors
 
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimplePositionalTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.positional.internaldafny.types\" } SimplePositionalTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimplePositionalTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.positional.internaldafny\" } SimplePositional refines AbstractSimplePositionalService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimplePositional refines AbstractSimplePositionalService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimplePositionalImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:options \"--function-syntax:4\"} {:extern \"simple.positional.internaldafny.wrapped\"} WrappedSimplePositionalService refines WrappedAbstractSimplePositionalService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module {:options \"--function-syntax:4\" WrappedSimplePositionalService refines WrappedAbstractSimplePositionalService {"
