@@ -11,3 +11,6 @@
 .project
 .classpath
 .settings
+
+# Added by formatting tooling
+node_modules
