@@ -21,7 +21,7 @@ impl GetConstructor {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetConstructor(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_constructor::_get_constructor_output::from_dafny(

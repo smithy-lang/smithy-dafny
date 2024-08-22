@@ -2,13 +2,13 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: crate::operation::get_known_value_union::GetKnownValueUnionOutput,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput> {
+) -> ::std::rc::Rc<crate::r#simple::union::internaldafny::types::GetUnionOutput> {
     let dafny_value = match value.union {
-        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
+        Some(v) => crate::_Wrappers_Compile::Option::Some {
             value: {
                 let v = match v {
                 crate::types::_known_value_union::KnownValueUnion::Value(n) => {
-                    crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::MyUnion::IntegerValue { IntegerValue: n }
+                    crate::simple::union::internaldafny::types::MyUnion::IntegerValue { IntegerValue: n }
                 }
                 crate::types::_known_value_union::KnownValueUnion::Unknown => unreachable!(),
                 };
@@ -16,9 +16,9 @@ pub fn to_dafny(
                 ::std::rc::Rc::new(v)
             },
         },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        None => crate::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetUnionOutput::GetUnionOutput {
+    ::std::rc::Rc::new(crate::r#simple::union::internaldafny::types::GetUnionOutput::GetUnionOutput {
     r#union: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -26,24 +26,24 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::GetKnownValueUnionOutput,
+        crate::r#simple::union::internaldafny::types::GetKnownValueUnionOutput,
     >,
 ) -> crate::operation::get_known_value_union::GetKnownValueUnionOutput {
     let union = if matches!(
         dafny_value.union().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         let v = dafny_value.union().Extract();
         let v = ::std::rc::Rc::try_unwrap(v).unwrap_or_else(|rc| (*rc).clone());
         let v = match v {
-            crate::implementation_from_dafny::_simple_dunion_dinternaldafny_dtypes::KnownValueUnion::Value {
+            crate::simple::union::internaldafny::types::KnownValueUnion::Value {
                 Value,
             } => crate::types::_known_value_union::KnownValueUnion::Value(Value),
         };
         Some(v)
     } else if matches!(
         dafny_value.union().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

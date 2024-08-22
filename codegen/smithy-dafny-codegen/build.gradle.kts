@@ -12,6 +12,8 @@ buildscript {
 
     repositories {
         mavenCentral()
+        // For smithy-rust packages
+        mavenLocal()
     }
     dependencies {
         "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
@@ -25,13 +27,8 @@ dependencies {
     implementation("software.amazon.smithy:smithy-aws-traits:$smithyVersion")
     implementation("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
     implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
-    // Using a hard coded version here because this package didn't exist until 1.40.0,
-    // but upgrading $smithyVersion ends up breaking the sqs-via-cli test model
-    // because the SQS model isn't actually valid, and newer versions of Smithy crash on it.
-    // We also can't yet update the SQS model because newer versions use Smithy 2.0 enum shapes,
-    // which we don't yet support for .NET.
-    // See https://github.com/smithy-lang/smithy-dafny/issues/184#issuecomment-2105109715
-    implementation("software.amazon.smithy:smithy-smoke-test-traits:1.49.0")
+    implementation("software.amazon.smithy:smithy-smoke-test-traits:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-aws-endpoints:$smithyVersion")
 
     implementation("org.commonmark:commonmark:0.22.0")
 
@@ -47,6 +44,11 @@ dependencies {
 
     // Used for parsing-based tests
     testImplementation("org.antlr:antlr4:4.9.2")
+
+    // Smithy-Rust
+    implementation("software.amazon.smithy.rust.codegen:codegen-core:0.1.0")
+    implementation("software.amazon.smithy.rust.codegen:codegen-client:0.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
 }
 
 // TODO: add CodeArtifact publishing logic
