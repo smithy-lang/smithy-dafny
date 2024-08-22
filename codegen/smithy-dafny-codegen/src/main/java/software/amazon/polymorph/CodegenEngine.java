@@ -694,18 +694,13 @@ public class CodegenEngine {
       throw new RuntimeException(e);
     }
 
-    // TODO remove
-    final Set<String> libraryServicesToGenerate = Set.of(
-      "SimpleTypesBoolean"
-    );
-
     if (awsSdkStyle) {
       RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(
         model,
         serviceShape
       );
       generator.generate(outputDir);
-    } else if (libraryServicesToGenerate.contains(serviceShape.getId().getName())) {
+    } else {
       RustLibraryShimGenerator generator = new RustLibraryShimGenerator(
         model,
         serviceShape

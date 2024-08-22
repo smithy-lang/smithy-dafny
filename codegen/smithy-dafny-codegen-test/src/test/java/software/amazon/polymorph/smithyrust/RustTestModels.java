@@ -45,7 +45,8 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
 
-    ENABLED_TESTS.add("SimpleTypes/SimpleBoolean");
+    // For testing individual tests
+//    ENABLED_TESTS.add("SimpleTypes/SimpleBoolean");
 //    ENABLED_TESTS.add("aws-sdks/kms-lite");
   }
 
