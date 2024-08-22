@@ -4,10 +4,10 @@ pub fn ostring_to_dafny(
     crate::_Wrappers_Compile::Option<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>,
 > {
     let dafny_value = match input {
-  Some(b) => crate::_Wrappers_Compile::Option::Some { value:
-      dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
-      },
-  None => crate::_Wrappers_Compile::Option::None {},
+    Some(b) => crate::_Wrappers_Compile::Option::Some { value:
+        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
+        },
+    None => crate::_Wrappers_Compile::Option::None {},
 };
     ::std::rc::Rc::new(dafny_value)
 }
@@ -97,7 +97,7 @@ pub fn olong_from_dafny(
 }
 
 pub fn blob_to_dafny(input: &::aws_smithy_types::Blob) -> ::dafny_runtime::Sequence<u8> {
-    ::dafny_runtime::Sequence::from_array(&input.clone().into_inner())
+    ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&input.clone().into_inner(), |x| *x)
 }
 
 pub fn oblob_to_dafny(

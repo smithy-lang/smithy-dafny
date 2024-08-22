@@ -3,6 +3,8 @@
 
 CORES=2
 
+ENABLE_EXTERN_PROCESSING=1
+
 include ../SharedMakefile.mk
 
 PROJECT_SERVICES := \
@@ -39,3 +41,15 @@ clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+
+TYPES_FILE_PATH=Model/SimpleDependenciesTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.dependencies.internaldafny.types\" } SimpleDependenciesTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleDependenciesTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.dependencies.internaldafny\" } SimpleDependencies refines AbstractSimpleDependenciesService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleDependencies refines AbstractSimpleDependenciesService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleDependenciesImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.dependencies.internaldafny.wrapped\"} WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {"
