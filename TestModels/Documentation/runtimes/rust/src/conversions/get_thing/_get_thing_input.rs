@@ -3,14 +3,14 @@
 pub fn to_dafny(
     value: crate::operation::get_thing::GetThingInput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput,
+    crate::r#simple::documentation::internaldafny::types::GetThingInput,
 > {
     let name =
         dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
             &value.name.unwrap(),
         );
 
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput::GetThingInput {        
+    ::std::rc::Rc::new(crate::r#simple::documentation::internaldafny::types::GetThingInput::GetThingInput {        
         name,
   })
 }
@@ -18,7 +18,7 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput,
+        crate::r#simple::documentation::internaldafny::types::GetThingInput,
     >,
 ) -> crate::operation::get_thing::GetThingInput {
     let name =

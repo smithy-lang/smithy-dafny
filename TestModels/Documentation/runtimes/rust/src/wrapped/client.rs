@@ -8,8 +8,8 @@ pub struct Client {
     rt: Runtime,
 }
 
-impl dafny_runtime::UpcastObject<dyn crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::ISimpleDocumentationClient> for Client {
-  ::dafny_runtime::UpcastObjectFn!(dyn crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::ISimpleDocumentationClient);
+impl dafny_runtime::UpcastObject<dyn crate::r#simple::documentation::internaldafny::types::ISimpleDocumentationClient> for Client {
+  ::dafny_runtime::UpcastObjectFn!(dyn crate::r#simple::documentation::internaldafny::types::ISimpleDocumentationClient);
 }
 
 impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
@@ -18,11 +18,11 @@ impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
 
 impl Client {
     pub fn from_conf(config: &::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::SimpleDocumentationConfig,
+    crate::r#simple::documentation::internaldafny::types::SimpleDocumentationConfig,
   >) ->
-::std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
-  ::dafny_runtime::Object<dyn crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::ISimpleDocumentationClient>,
-  ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Error>
+::std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+  ::dafny_runtime::Object<dyn crate::r#simple::documentation::internaldafny::types::ISimpleDocumentationClient>,
+  ::std::rc::Rc<crate::r#simple::documentation::internaldafny::types::Error>
     >>{
         let rt_result = tokio::runtime::Builder::new_current_thread()
             .enable_all()
@@ -43,7 +43,7 @@ impl Client {
                     rt,
                 };
                 std::rc::Rc::new(
-                    crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
+                    crate::_Wrappers_Compile::Result::Success {
                         value: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(wrap)),
                     },
                 )
@@ -53,20 +53,20 @@ impl Client {
     }
 }
 
-impl crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::ISimpleDocumentationClient
+impl crate::r#simple::documentation::internaldafny::types::ISimpleDocumentationClient
     for Client
 {
     fn GetThing(
         &mut self,
         input: &std::rc::Rc<
-            crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingInput,
+            crate::r#simple::documentation::internaldafny::types::GetThingInput,
         >,
     ) -> std::rc::Rc<
-        crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+        crate::r#_Wrappers_Compile::Result<
             std::rc::Rc<
-                crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput,
+                crate::r#simple::documentation::internaldafny::types::GetThingOutput,
             >,
-            std::rc::Rc<crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Error>,
+            std::rc::Rc<crate::r#simple::documentation::internaldafny::types::Error>,
         >,
     >{
         let inner_input =
@@ -74,12 +74,12 @@ impl crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_d
         let result = self.rt.block_on(crate::operation::get_thing::GetThing::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
-                crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+                crate::_Wrappers_Compile::Result::Failure {
                     error: crate::conversions::get_thing::to_dafny_error(error),
                 },
             ),
             Ok(client) => ::std::rc::Rc::new(
-                crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
+                crate::_Wrappers_Compile::Result::Success {
                     value: crate::conversions::get_thing::_get_thing_output::to_dafny(client),
                 },
             ),

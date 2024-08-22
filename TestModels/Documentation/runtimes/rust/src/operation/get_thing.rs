@@ -19,7 +19,7 @@ impl GetThing {
         let inner_result = ::dafny_runtime::md!(client.dafny_client.clone()).GetThing(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_thing::_get_thing_output::from_dafny(

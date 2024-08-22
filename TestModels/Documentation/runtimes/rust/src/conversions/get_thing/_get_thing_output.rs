@@ -3,33 +3,33 @@
 pub fn to_dafny(
     value: crate::operation::get_thing::GetThingOutput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput,
+    crate::r#simple::documentation::internaldafny::types::GetThingOutput,
 >{
     let name = ::std::rc::Rc::new(
-        dafny_standard_library::implementation_from_dafny::r#_Wrappers_Compile::Option::Some {
+        crate::r#_Wrappers_Compile::Option::Some {
             value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
             &value.thing.name.unwrap(),
         ),
         },
     );
 
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput::GetThingOutput {
-        thing: ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Thing::Thing { name }),
+    ::std::rc::Rc::new(crate::r#simple::documentation::internaldafny::types::GetThingOutput::GetThingOutput {
+        thing: ::std::rc::Rc::new(crate::r#simple::documentation::internaldafny::types::Thing::Thing { name }),
   })
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput,
+        crate::r#simple::documentation::internaldafny::types::GetThingOutput,
         >,
 ) -> crate::operation::get_thing::GetThingOutput {
     let thing = match dafny_value.as_ref() {
-        crate::implementation_from_dafny::_simple_ddocumentation_dinternaldafny_dtypes::GetThingOutput::GetThingOutput { thing } => {
+        crate::simple::documentation::internaldafny::types::GetThingOutput::GetThingOutput { thing } => {
             match thing.as_ref() {
-                crate::implementation_from_dafny::_simple_ddocumentation_dinternaldafny_dtypes::Thing::Thing { name } => {
+                crate::simple::documentation::internaldafny::types::Thing::Thing { name } => {
                     match name.as_ref() {
-                        dafny_standard_library::implementation_from_dafny::r#_Wrappers_Compile::Option::Some { value } => {
+                        crate::r#_Wrappers_Compile::Option::Some { value } => {
                             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
                                 value,
                             )

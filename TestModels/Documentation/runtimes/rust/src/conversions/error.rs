@@ -2,13 +2,13 @@
 pub fn to_opaque_error<E: std::error::Error + 'static>(
     value: E,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Error,
+    crate::r#simple::documentation::internaldafny::types::Error,
 > {
     let error_obj: ::dafny_runtime::Object<dyn ::std::any::Any> = ::dafny_runtime::Object(Some(
         ::std::rc::Rc::new(::std::cell::UnsafeCell::new(value)),
     ));
     ::std::rc::Rc::new(
-    crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Error::Opaque {
+    crate::r#simple::documentation::internaldafny::types::Error::Opaque {
         obj: error_obj,
     },
   )
@@ -18,15 +18,15 @@ pub fn to_opaque_error<E: std::error::Error + 'static>(
 pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: std::error::Error + 'static>(
     value: E,
 ) -> ::std::rc::Rc<
-    dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result<
+    crate::_Wrappers_Compile::Result<
         T,
         ::std::rc::Rc<
-            crate::implementation_from_dafny::r#_simple_ddocumentation_dinternaldafny_dtypes::Error,
+            crate::r#simple::documentation::internaldafny::types::Error,
         >,
     >,
 > {
     ::std::rc::Rc::new(
-        dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+        crate::_Wrappers_Compile::Result::Failure {
             error: to_opaque_error(value),
         },
     )
