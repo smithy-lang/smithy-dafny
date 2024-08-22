@@ -5,7 +5,7 @@ use aws_smithy_types::error::operation::BuildError;
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
     pub(crate) dafny_client: ::dafny_runtime::Object<
-        dyn ::simple_errors_dafny::r#_simple_derrors_dinternaldafny_dtypes::ISimpleErrorsClient,
+        dyn crate::r#simple::errors::internaldafny::types::ISimpleErrorsClient,
     >,
 }
 
@@ -17,12 +17,12 @@ impl Client {
     ) -> Result<Self, BuildError> {
         // If this service had any configuration properties,
         // they would need converting here too.
-        let inner = ::simple_errors_dafny::_simple_derrors_dinternaldafny::_default::SimpleErrors(
+        let inner = crate::simple::errors::internaldafny::_default::SimpleErrors(
             &crate::conversions::simple_errors_config::to_dafny(conf),
         );
         if matches!(
             inner.as_ref(),
-            ::simple_errors_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(
@@ -32,7 +32,7 @@ impl Client {
             ));
         }
         Ok(Self {
-            dafny_client: ::dafny_runtime::UpcastTo::<dafny_runtime::Object<(dyn ::simple_errors_dafny::r#_simple_derrors_dinternaldafny_dtypes::ISimpleErrorsClient + 'static)>>::upcast_to(inner.Extract()),
+            dafny_client: ::dafny_runtime::upcast_object()(inner.Extract()),
         })
     }
 }

@@ -21,7 +21,7 @@ impl AlwaysNativeError {
             ::dafny_runtime::md!(client.dafny_client.clone()).AlwaysNativeError(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_errors_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::always_native_error::_always_native_error_output::from_dafny(

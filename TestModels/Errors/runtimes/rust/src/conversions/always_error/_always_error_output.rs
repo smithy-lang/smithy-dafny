@@ -2,15 +2,15 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: crate::operation::always_error::AlwaysErrorOutput,
-) -> ::std::rc::Rc<::simple_errors_dafny::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>
+) -> ::std::rc::Rc<crate::r#simple::errors::internaldafny::types::GetErrorsOutput>
 {
     let dafny_value = match value.value {
-      Some(s) => ::simple_errors_dafny::_Wrappers_Compile::Option::Some {
+      Some(s) => crate::_Wrappers_Compile::Option::Some {
         value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s)
       },
-      None => ::simple_errors_dafny::_Wrappers_Compile::Option::None {},
+      None => crate::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(::simple_errors_dafny::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput::GetErrorsOutput {
+    ::std::rc::Rc::new(crate::r#simple::errors::internaldafny::types::GetErrorsOutput::GetErrorsOutput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -18,12 +18,12 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        ::simple_errors_dafny::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+        crate::r#simple::errors::internaldafny::types::GetErrorsOutput,
     >,
 ) -> crate::operation::always_error::AlwaysErrorOutput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        ::simple_errors_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -32,7 +32,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.value().as_ref(),
-        ::simple_errors_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

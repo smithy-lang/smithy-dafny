@@ -2,7 +2,7 @@
 #![allow(nonstandard_style)]
 pub use dafny_standard_library::implementation_from_dafny::*;
 
-pub mod r#_simple_derrors_dinternaldafny_dtypes {
+pub mod r#simple::errors::internaldafny::types {
     #[derive(PartialEq, Clone)]
     pub enum DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
         DafnyCallEvent { input: I, output: O },
@@ -44,7 +44,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
                 DafnyCallEvent::DafnyCallEvent { input, output } => {
                     write!(
                         _formatter,
-                        "r#_simple_derrors_dinternaldafny_dtypes.DafnyCallEvent.DafnyCallEvent("
+                        "r#simple::errors::internaldafny::types.DafnyCallEvent.DafnyCallEvent("
                     )?;
                     ::dafny_runtime::DafnyPrint::fmt_print(input, _formatter, false)?;
                     write!(_formatter, ", ")?;
@@ -144,7 +144,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
                 GetErrorsInput::GetErrorsInput { value } => {
                     write!(
                         _formatter,
-                        "r#_simple_derrors_dinternaldafny_dtypes.GetErrorsInput.GetErrorsInput("
+                        "r#simple::errors::internaldafny::types.GetErrorsInput.GetErrorsInput("
                     )?;
                     ::dafny_runtime::DafnyPrint::fmt_print(value, _formatter, false)?;
                     write!(_formatter, ")")?;
@@ -219,7 +219,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
                 GetErrorsOutput::GetErrorsOutput { value } => {
                     write!(
                         _formatter,
-                        "r#_simple_derrors_dinternaldafny_dtypes.GetErrorsOutput.GetErrorsOutput("
+                        "r#simple::errors::internaldafny::types.GetErrorsOutput.GetErrorsOutput("
                     )?;
                     ::dafny_runtime::DafnyPrint::fmt_print(value, _formatter, false)?;
                     write!(_formatter, ")")?;
@@ -264,29 +264,29 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
     pub trait ISimpleErrorsClient {
         fn AlwaysError(
             &mut self,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         >;
         fn AlwaysMultipleErrors(
             &mut self,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         >;
         fn AlwaysNativeError(
             &mut self,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         >;
     }
@@ -312,7 +312,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
         ) -> std::fmt::Result {
             match self {
                 SimpleErrorsConfig::SimpleErrorsConfig {} => {
-                    write!(_formatter, "r#_simple_derrors_dinternaldafny_dtypes.SimpleErrorsConfig.SimpleErrorsConfig")?;
+                    write!(_formatter, "r#simple::errors::internaldafny::types.SimpleErrorsConfig.SimpleErrorsConfig")?;
                     Ok(())
                 }
             }
@@ -348,7 +348,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
         },
         CollectionOfErrors {
             list: ::dafny_runtime::Sequence<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
             message: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
         },
@@ -368,7 +368,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
         pub fn list(
             &self,
         ) -> &::dafny_runtime::Sequence<
-            ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+            ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
         > {
             match self {
                 Error::SimpleErrorsException { message } => {
@@ -407,7 +407,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
                 Error::SimpleErrorsException { message } => {
                     write!(
                         _formatter,
-                        "r#_simple_derrors_dinternaldafny_dtypes.Error.SimpleErrorsException("
+                        "r#simple::errors::internaldafny::types.Error.SimpleErrorsException("
                     )?;
                     ::dafny_runtime::DafnyPrint::fmt_print(message, _formatter, false)?;
                     write!(_formatter, ")")?;
@@ -416,7 +416,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
                 Error::CollectionOfErrors { list, message } => {
                     write!(
                         _formatter,
-                        "r#_simple_derrors_dinternaldafny_dtypes.Error.CollectionOfErrors("
+                        "r#simple::errors::internaldafny::types.Error.CollectionOfErrors("
                     )?;
                     ::dafny_runtime::DafnyPrint::fmt_print(list, _formatter, false)?;
                     write!(_formatter, ", ")?;
@@ -427,7 +427,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
                 Error::Opaque { obj } => {
                     write!(
                         _formatter,
-                        "r#_simple_derrors_dinternaldafny_dtypes.Error.Opaque("
+                        "r#simple::errors::internaldafny::types.Error.Opaque("
                     )?;
                     ::dafny_runtime::DafnyPrint::fmt_print(obj, _formatter, false)?;
                     write!(_formatter, ")")?;
@@ -466,7 +466,7 @@ pub mod r#_simple_derrors_dinternaldafny_dtypes {
         }
     }
 
-    pub type OpaqueError = ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>;
+    pub type OpaqueError = ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>;
 }
 pub mod r#_SimpleErrorsImpl_Compile {
     pub struct _default {}
@@ -477,20 +477,20 @@ pub mod r#_SimpleErrorsImpl_Compile {
         }
         pub fn AlwaysError(
             config: &::std::rc::Rc<super::r#_SimpleErrorsImpl_Compile::Config>,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             let mut output = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -500,21 +500,21 @@ pub mod r#_SimpleErrorsImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            let mut res: ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error> =
+            let mut res: ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error> =
                 ::std::rc::Rc::new(
-                    super::r#_simple_derrors_dinternaldafny_dtypes::Error::SimpleErrorsException {
+                    super::r#simple::errors::internaldafny::types::Error::SimpleErrorsException {
                         message: input.value().value().clone(),
                     },
                 );
             res = ::std::rc::Rc::new(
-                super::r#_simple_derrors_dinternaldafny_dtypes::Error::SimpleErrorsException {
+                super::r#simple::errors::internaldafny::types::Error::SimpleErrorsException {
                     message: input.value().value().clone(),
                 },
             );
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
-                    ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                    ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                    ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                    ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                 >::Failure {
                     error: res.clone(),
                 },
@@ -524,20 +524,20 @@ pub mod r#_SimpleErrorsImpl_Compile {
         }
         pub fn AlwaysMultipleErrors(
             config: &::std::rc::Rc<super::r#_SimpleErrorsImpl_Compile::Config>,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             let mut output = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -547,22 +547,22 @@ pub mod r#_SimpleErrorsImpl_Compile {
             ) {
                 panic!("Halt")
             };
-            let mut res: ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error> = ::std::rc::Rc::new(super::r#_simple_derrors_dinternaldafny_dtypes::Error::CollectionOfErrors {
-            list: ::dafny_runtime::seq![::std::rc::Rc::new(super::r#_simple_derrors_dinternaldafny_dtypes::Error::SimpleErrorsException {
+            let mut res: ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error> = ::std::rc::Rc::new(super::r#simple::errors::internaldafny::types::Error::CollectionOfErrors {
+            list: ::dafny_runtime::seq![::std::rc::Rc::new(super::r#simple::errors::internaldafny::types::Error::SimpleErrorsException {
                     message: input.value().value().clone()
                   })],
             message: ::dafny_runtime::string_utf16_of("Something")
           });
-            res = ::std::rc::Rc::new(super::r#_simple_derrors_dinternaldafny_dtypes::Error::CollectionOfErrors {
-            list: ::dafny_runtime::seq![::std::rc::Rc::new(super::r#_simple_derrors_dinternaldafny_dtypes::Error::SimpleErrorsException {
+            res = ::std::rc::Rc::new(super::r#simple::errors::internaldafny::types::Error::CollectionOfErrors {
+            list: ::dafny_runtime::seq![::std::rc::Rc::new(super::r#simple::errors::internaldafny::types::Error::SimpleErrorsException {
                     message: input.value().value().clone()
                   })],
             message: ::dafny_runtime::string_utf16_of("Something")
           });
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
-                    ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                    ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                    ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                    ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                 >::Failure {
                     error: res.clone(),
                 },
@@ -572,20 +572,20 @@ pub mod r#_SimpleErrorsImpl_Compile {
         }
         pub fn AlwaysNativeError(
             config: &::std::rc::Rc<super::r#_SimpleErrorsImpl_Compile::Config>,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             let mut output = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -597,16 +597,16 @@ pub mod r#_SimpleErrorsImpl_Compile {
             let mut _nw0: ::dafny_runtime::Object<super::r#_SimpleErrorsImpl_Compile::SomeOpaqueGeneratedTypeForTesting> = super::r#_SimpleErrorsImpl_Compile::SomeOpaqueGeneratedTypeForTesting::_allocate_rcmut();
             super::r#_SimpleErrorsImpl_Compile::SomeOpaqueGeneratedTypeForTesting::_ctor(&_nw0);
             opaqueObject = ::dafny_runtime::MaybePlacebo::from(_nw0.clone());
-            let mut res: ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error> = ::std::rc::Rc::new(super::r#_simple_derrors_dinternaldafny_dtypes::Error::Opaque {
+            let mut res: ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error> = ::std::rc::Rc::new(super::r#simple::errors::internaldafny::types::Error::Opaque {
             obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn ::std::any::Any>>::upcast_to(opaqueObject.read())
           });
-            res = ::std::rc::Rc::new(super::r#_simple_derrors_dinternaldafny_dtypes::Error::Opaque {
+            res = ::std::rc::Rc::new(super::r#simple::errors::internaldafny::types::Error::Opaque {
             obj: ::dafny_runtime::UpcastTo::<::dafny_runtime::Object<dyn ::std::any::Any>>::upcast_to(opaqueObject.read())
           });
             output = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
-                    ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                    ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                    ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                    ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                 >::Failure {
                     error: res.clone(),
                 },
@@ -677,7 +677,7 @@ pub mod r#_SimpleErrorsImpl_Compile {
         }
     }
 }
-pub mod r#_simple_derrors_dinternaldafny {
+pub mod r#simple::errors::internaldafny {
     pub struct _default {}
 
     impl _default {
@@ -685,41 +685,41 @@ pub mod r#_simple_derrors_dinternaldafny {
             ::dafny_runtime::allocate_rcmut::<Self>()
         }
         pub fn DefaultSimpleErrorsConfig(
-        ) -> ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::SimpleErrorsConfig>
+        ) -> ::std::rc::Rc<super::r#simple::errors::internaldafny::types::SimpleErrorsConfig>
         {
-            ::std::rc::Rc::new(super::r#_simple_derrors_dinternaldafny_dtypes::SimpleErrorsConfig::SimpleErrorsConfig {})
+            ::std::rc::Rc::new(super::r#simple::errors::internaldafny::types::SimpleErrorsConfig::SimpleErrorsConfig {})
         }
         pub fn SimpleErrors(
             config: &::std::rc::Rc<
-                super::r#_simple_derrors_dinternaldafny_dtypes::SimpleErrorsConfig,
+                super::r#simple::errors::internaldafny::types::SimpleErrorsConfig,
             >,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::dafny_runtime::Object<
-                    super::r#_simple_derrors_dinternaldafny::SimpleErrorsClient,
+                    super::r#simple::errors::internaldafny::SimpleErrorsClient,
                 >,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             let mut res = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            super::r#_simple_derrors_dinternaldafny::SimpleErrorsClient,
+                            super::r#simple::errors::internaldafny::SimpleErrorsClient,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
             let mut client = ::dafny_runtime::MaybePlacebo::<
                 ::dafny_runtime::Object<
-                    super::r#_simple_derrors_dinternaldafny::SimpleErrorsClient,
+                    super::r#simple::errors::internaldafny::SimpleErrorsClient,
                 >,
             >::new();
             let mut _nw1: ::dafny_runtime::Object<
-                super::r#_simple_derrors_dinternaldafny::SimpleErrorsClient,
-            > = super::r#_simple_derrors_dinternaldafny::SimpleErrorsClient::_allocate_rcmut();
-            super::r#_simple_derrors_dinternaldafny::SimpleErrorsClient::_ctor(
+                super::r#simple::errors::internaldafny::SimpleErrorsClient,
+            > = super::r#simple::errors::internaldafny::SimpleErrorsClient::_allocate_rcmut();
+            super::r#simple::errors::internaldafny::SimpleErrorsClient::_ctor(
                 &_nw1,
                 &::std::rc::Rc::new(super::r#_SimpleErrorsImpl_Compile::Config::Config {}),
             );
@@ -727,9 +727,9 @@ pub mod r#_simple_derrors_dinternaldafny {
             res = ::dafny_runtime::MaybePlacebo::from(::std::rc::Rc::new(
                 super::r#_Wrappers_Compile::Result::<
                     ::dafny_runtime::Object<
-                        super::r#_simple_derrors_dinternaldafny::SimpleErrorsClient,
+                        super::r#simple::errors::internaldafny::SimpleErrorsClient,
                     >,
-                    ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                    ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                 >::Success {
                     value: client.read(),
                 },
@@ -739,40 +739,40 @@ pub mod r#_simple_derrors_dinternaldafny {
         }
         pub fn CreateSuccessOfClient(
             client: &::dafny_runtime::Object<
-                dyn super::r#_simple_derrors_dinternaldafny_dtypes::ISimpleErrorsClient,
+                dyn super::r#simple::errors::internaldafny::types::ISimpleErrorsClient,
             >,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::dafny_runtime::Object<
-                    dyn super::r#_simple_derrors_dinternaldafny_dtypes::ISimpleErrorsClient,
+                    dyn super::r#simple::errors::internaldafny::types::ISimpleErrorsClient,
                 >,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<
                 ::dafny_runtime::Object<
-                    dyn super::r#_simple_derrors_dinternaldafny_dtypes::ISimpleErrorsClient,
+                    dyn super::r#simple::errors::internaldafny::types::ISimpleErrorsClient,
                 >,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >::Success {
                 value: client.clone(),
             })
         }
         pub fn CreateFailureOfError(
-            error: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+            error: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
                 ::dafny_runtime::Object<
-                    dyn super::r#_simple_derrors_dinternaldafny_dtypes::ISimpleErrorsClient,
+                    dyn super::r#simple::errors::internaldafny::types::ISimpleErrorsClient,
                 >,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<
                 ::dafny_runtime::Object<
-                    dyn super::r#_simple_derrors_dinternaldafny_dtypes::ISimpleErrorsClient,
+                    dyn super::r#simple::errors::internaldafny::types::ISimpleErrorsClient,
                 >,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >::Failure {
                 error: error.clone(),
             })
@@ -805,25 +805,25 @@ pub mod r#_simple_derrors_dinternaldafny {
         }
     }
 
-    impl super::r#_simple_derrors_dinternaldafny_dtypes::ISimpleErrorsClient
-        for super::r#_simple_derrors_dinternaldafny::SimpleErrorsClient
+    impl super::r#simple::errors::internaldafny::types::ISimpleErrorsClient
+        for super::r#simple::errors::internaldafny::SimpleErrorsClient
     {
         fn AlwaysError(
             &mut self,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             let mut output = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -831,9 +831,9 @@ pub mod r#_simple_derrors_dinternaldafny {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -845,20 +845,20 @@ pub mod r#_simple_derrors_dinternaldafny {
         }
         fn AlwaysMultipleErrors(
             &mut self,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             let mut output = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -866,9 +866,9 @@ pub mod r#_simple_derrors_dinternaldafny {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -883,20 +883,20 @@ pub mod r#_simple_derrors_dinternaldafny {
         }
         fn AlwaysNativeError(
             &mut self,
-            input: &::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsInput>,
+            input: &::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsInput>,
         ) -> ::std::rc::Rc<
             super::r#_Wrappers_Compile::Result<
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput>,
-                ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::GetErrorsOutput>,
+                ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
             >,
         > {
             let mut output = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -904,9 +904,9 @@ pub mod r#_simple_derrors_dinternaldafny {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_derrors_dinternaldafny_dtypes::GetErrorsOutput,
+                            super::r#simple::errors::internaldafny::types::GetErrorsOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_derrors_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::errors::internaldafny::types::Error>,
                     >,
                 >,
             >::new();

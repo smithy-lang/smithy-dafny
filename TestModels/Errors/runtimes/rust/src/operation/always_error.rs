@@ -20,7 +20,7 @@ impl AlwaysError {
             ::dafny_runtime::md!(client.dafny_client.clone()).AlwaysError(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_errors_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::always_error::_always_error_output::from_dafny(

@@ -23,7 +23,7 @@ impl AlwaysMultipleErrors {
             ::dafny_runtime::md!(client.dafny_client.clone()).AlwaysMultipleErrors(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            ::simple_errors_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(crate::conversions::always_multiple_errors::_always_multiple_errors_output::from_dafny(inner_result.value().clone()))
         } else {
