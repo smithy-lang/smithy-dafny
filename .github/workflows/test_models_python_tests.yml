@@ -89,7 +89,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: :smithy-python-codegen:pTML
-          build-root-directory: codegen/smithy-dafny-codegen-modules/smithy-python/codegen/smithy-python-codegen
+          build-root-directory: codegen/smithy-dafny-codegen-modules/smithy-python/codegen
 
       - name: Install smithy-dafny-codegen locally
         uses: gradle/gradle-build-action@v2
