@@ -3,6 +3,8 @@
 
 CORES=2
 
+ENABLE_EXTERN_PROCESSING=1
+
 include ../SharedMakefile.mk
 
 NAMESPACE=simple.extendable.resources
@@ -34,3 +36,17 @@ PYTHON_MODULE_NAME=simple_extendable_resources
 
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleExtendableResourcesTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.extendable.resources.internaldafny.types\" } SimpleExtendableResourcesTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleExtendableResourcesTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.extendable.resources.internaldafny\"} SimpleExtendableResources refines AbstractSimpleExtendableResourcesService"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleExtendableResources refines AbstractSimpleExtendableResourcesService"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedIndex.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.extendable.resources.internaldafny.wrapped\"} WrappedSimpleExtendableResources refines WrappedAbstractSimpleExtendableResourcesService"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleExtendableResources refines WrappedAbstractSimpleExtendableResourcesService"

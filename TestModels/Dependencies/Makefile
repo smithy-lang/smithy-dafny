@@ -3,6 +3,8 @@
 
 CORES=2
 
+ENABLE_EXTERN_PROCESSING=1
+
 include ../SharedMakefile.mk
 
 PROJECT_SERVICES := \
@@ -56,3 +58,15 @@ TRANSLATION_RECORD_PYTHON := \
     --translation-record ../Errors/runtimes/python/src/simple_errors/internaldafny/generated/dafny_src-py.dtr \
     --translation-record ../Extendable/runtimes/python/src/simple_extendable_resources/internaldafny/generated/dafny_src-py.dtr \
     --translation-record ../Constraints/runtimes/python/src/simple_constraints/internaldafny/generated/dafny_src-py.dtr
+
+TYPES_FILE_PATH=Model/SimpleDependenciesTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.dependencies.internaldafny.types\" } SimpleDependenciesTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleDependenciesTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.dependencies.internaldafny\" } SimpleDependencies refines AbstractSimpleDependenciesService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleDependencies refines AbstractSimpleDependenciesService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleDependenciesImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.dependencies.internaldafny.wrapped\"} WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {"
