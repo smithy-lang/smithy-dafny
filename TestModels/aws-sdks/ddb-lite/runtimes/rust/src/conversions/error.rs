@@ -3,6 +3,8 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 pub mod conditional_check_failed_exception;
 
+ pub mod duplicate_item_exception;
+
  pub mod idempotent_parameter_mismatch_exception;
 
  pub mod internal_server_error;

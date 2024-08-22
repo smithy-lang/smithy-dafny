@@ -19,6 +19,18 @@ impl dafny_runtime::UpcastObject<dyn crate::r#software::amazon::cryptography::se
 
 impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient
   for Client {
+ fn BatchExecuteStatement(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchExecuteStatementInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchExecuteStatementOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::batch_execute_statement::_batch_execute_statement_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::batch_execute_statement::_batch_execute_statement_response::to_dafny,
+    conversions::batch_execute_statement::to_dafny_error)
+}
  fn BatchGetItem(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemOutput>,
@@ -30,6 +42,18 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::batch_get_item::_batch_get_item_response::to_dafny,
     conversions::batch_get_item::to_dafny_error)
+}
+ fn BatchWriteItem(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchWriteItemInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchWriteItemOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::batch_write_item::_batch_write_item_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::batch_write_item::_batch_write_item_response::to_dafny,
+    conversions::batch_write_item::to_dafny_error)
 }
  fn CreateTable(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableInput>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -66,6 +90,30 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::describe_table::_describe_table_response::to_dafny,
     conversions::describe_table::to_dafny_error)
+}
+ fn ExecuteStatement(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteStatementInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteStatementOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::execute_statement::_execute_statement_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::execute_statement::_execute_statement_response::to_dafny,
+    conversions::execute_statement::to_dafny_error)
+}
+ fn ExecuteTransaction(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteTransactionInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteTransactionOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::execute_transaction::_execute_transaction_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::execute_transaction::_execute_transaction_response::to_dafny,
+    conversions::execute_transaction::to_dafny_error)
 }
  fn GetItem(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::GetItemInput>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -114,6 +162,18 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::scan::_scan_response::to_dafny,
     conversions::scan::to_dafny_error)
+}
+ fn TransactGetItems(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactGetItemsInput>)
+  -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactGetItemsOutput>,
+    std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+  >
+> {
+  let native_result =
+    self.rt.block_on(conversions::transact_get_items::_transact_get_items_request::from_dafny(input.clone(), self.inner.clone()).send());
+  crate::standard_library_conversions::result_to_dafny(&native_result,
+    conversions::transact_get_items::_transact_get_items_response::to_dafny,
+    conversions::transact_get_items::to_dafny_error)
 }
  fn TransactWriteItems(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactWriteItemsInput>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
