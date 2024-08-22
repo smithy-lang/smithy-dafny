@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
  /// Wraps up an arbitrary Rust Error value as a Dafny Error
-pub fn to_opaque_error<E: ::std::error::Error + 'static>(value: E) ->
+pub fn to_opaque_error<E: 'static>(value: E) ->
   ::std::rc::Rc<crate::r#simple::types::boolean::internaldafny::types::Error>
 {
     let error_obj: ::dafny_runtime::Object<dyn::std::any::Any> = ::dafny_runtime::Object(Some(
@@ -16,7 +16,7 @@ pub fn to_opaque_error<E: ::std::error::Error + 'static>(value: E) ->
 }
 
 /// Wraps up an arbitrary Rust Error value as a Dafny Result<T, Error>.Failure
-pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: ::std::error::Error + 'static>(value: E) ->
+pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: 'static>(value: E) ->
   ::std::rc::Rc<
     crate::_Wrappers_Compile::Result<
       T,
