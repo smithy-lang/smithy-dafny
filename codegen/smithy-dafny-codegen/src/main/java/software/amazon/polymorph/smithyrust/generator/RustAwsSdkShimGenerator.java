@@ -344,6 +344,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
+      dafnyModuleVariables(),
       operationVariables(operationShape)
     );
     StructureShape inputShape = model.expectShape(
@@ -381,6 +382,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
+      dafnyModuleVariables(),
       operationVariables(operationShape)
     );
     StructureShape inputShape = model.expectShape(
@@ -418,6 +420,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
+      dafnyModuleVariables(),
       operationVariables(operationShape)
     );
     StructureShape outputShape = model.expectShape(
