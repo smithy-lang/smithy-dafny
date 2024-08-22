@@ -3,8 +3,7 @@
 
 include "../src/Index.dfy"
 
-module
-  NativeResourceFactory
+module {:extern} NativeResourceFactory
 {
   import Types = SimpleExtendableResourcesTypes
   
