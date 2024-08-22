@@ -323,6 +323,14 @@ transpile_dependencies_test:
 
 ########################## Code-Gen targets
 
+setup_polymorph: install_polymorph_python_dependencies install_polymorph_rust_dependencies
+
+install_polymorph_python_dependencies:
+	cd $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-modules/smithy-python/codegen/ && ./gradlew publishToMavenLocal
+
+install_polymorph_rust_dependencies:
+	cd $(SMITHY_DAFNY_ROOT)/smithy-dafny-codegen-modules/smithy-rs && ./gradlew publishToMavenLocal
+
 # The OUTPUT variables are created this way
 # so that it is possible to run _parts_ of polymorph.
 # Otherwise it is difficult to run/test only a Dafny change.
