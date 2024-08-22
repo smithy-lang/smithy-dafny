@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.populate-only-new-dafny-version-list) }}
+        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.only-new-dafny-version-list) }}
     uses: ./.github/workflows/test_models_python_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}
