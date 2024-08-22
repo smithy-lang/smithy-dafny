@@ -88,6 +88,19 @@ tasks.register("polymorphJava") {
     }
 }
 
+tasks.register("polymorphRust") {
+    dependsOn("build")
+    doLast {
+        // if needed, specify a projection to use instead
+        // default (no projection) is "source"
+        val projectionName = "operation-subset"
+        copy {
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/rust/src"))
+            into("runtimes/rust/src")
+        }
+    }
+}
+
 buildscript {
     val smithyVersion: String by project
 

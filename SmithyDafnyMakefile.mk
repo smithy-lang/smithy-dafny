@@ -56,14 +56,16 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
 GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
-########################## Dafny targets
+include $(SMITHY_DAFNY_ROOT)/SmithyDafnySedMakefile.mk
 
-# TODO: This target will not work for projects that use `replaceable` 
-#       module syntax with multiple language targets.
-# It will fail with error:
-# Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
-# We need to come up with some way to verify files per-language.
-# Rewrite this as part of Java implementation of LanguageSpecificLogic TestModel.
+# This flag enables pre-processing on extern module names.
+# This pre-processing is required to compile to Python and Go.
+# This is disabled by default.
+# This should be enabled in each individual project's Makefile if that project compiles to Python or Go.
+# This can be enabled by setting this variable to any nonempty value (ex. true, 1)
+ENABLE_EXTERN_PROCESSING?=
+
+########################## Dafny targets
 
 # Proof of correctness for the math below
 #  function Z3_PROCESSES(cpus:nat): nat
@@ -202,6 +204,7 @@ transpile_implementation:
 		-useRuntimeLib \
 		-out $(OUT) \
 		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES)
 
@@ -243,6 +246,7 @@ transpile_test:
 		-useRuntimeLib \
 		-out $(OUT) \
 		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES) \
 
@@ -417,11 +421,16 @@ polymorph_rust:
 	done
 
 _polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
-_polymorph_rust: _polymorph
+# For several TestModels we've just manually written the code generation target,
+# So we just want to ensure we can transpile and pass the tests in CI.
+# For those, make polymorph_rust should just be a no-op.
+_polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
 
 ########################## .NET targets
 
+transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
+transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
@@ -469,7 +478,9 @@ format_net-check:
 build_java: transpile_java mvn_local_deploy_dependencies
 	$(GRADLEW) -p runtimes/java build
 
+transpile_java: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
 transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
+transpile_java: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
@@ -516,50 +527,58 @@ test_java:
 
 ########################## Rust targets
 
-# Note that transpile_dependencies_test_rust is necessary
-# only because we are patching test code in the StandardLibrary,
-# so we don't transpile that code then the recursive call to polymorph_rust
-# on the StandardLibrary will fail because the patch does not apply.
-transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust transpile_dependencies_test_rust
+# The Dafny Rust code generator only supports a single crate for everything,
+# so (among other consequences) we compile src and test code together.
+transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
 transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_implementation_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
 transpile_implementation_rust: DAFNY_OPTIONS=-emitUncompilableCode
-transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
-
-transpile_test_rust: TARGET=rs
-transpile_test_rust: OUT=tests_from_dafny
-transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
-transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
-# The Dafny Rust code generator is not complete yet,
-# so we want to emit code even if there are unsupported features in the input.
-transpile_test_rust: DAFNY_OPTIONS=-emitUncompilableCode
-transpile_test_rust: _transpile_test_all _mv_test_rust
+# The Dafny Rust code generator only supports a single crate for everything,
+# so we inline all dependencies by not passing `-library` to Dafny.
+transpile_implementation_rust: TRANSPILE_DEPENDENCIES=
+transpile_implementation_rust: STD_LIBRARY=
+transpile_implementation_rust: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+transpile_implementation_rust: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
+transpile_implementation_rust: DAFNY_OTHER_FILES=$(RUST_OTHER_FILES)
+transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust patch_after_transpile_rust
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
-transpile_dependencies_test_rust: LANG=rust
-transpile_dependencies_test_rust: transpile_dependencies_test
-
 _mv_implementation_rust:
-	# rm -rf runtimes/rust/dafny_impl/src
-	# mkdir -p runtimes/rust/dafny_impl/src
-	mkdir -p runtimes/rust/src	
-# TODO: Currently need to insert an import of the the StandardLibrary.
-	python -c "import sys; data = sys.stdin.buffer.read(); sys.stdout.buffer.write(data.replace(b'\npub mod', b'\npub use dafny_standard_library::implementation_from_dafny::*;\n\npub mod', 1) if b'\npub mod' in data else data)" \
-	  < implementation_from_dafny-rust/src/implementation_from_dafny.rs > runtimes/rust/src/implementation_from_dafny.rs
+	mkdir -p runtimes/rust/src
+	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
-_mv_test_rust:
-	rm -f runtimes/rust/tests/tests_from_dafny/mod.rs
-	mkdir -p runtimes/rust/tests/tests_from_dafny
-	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny/mod.rs
-	rustfmt runtimes/rust/tests/tests_from_dafny/mod.rs
-	rm -rf tests_from_dafny-rust
+
+patch_after_transpile_rust:
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _patch_after_transpile_rust ; \
+	done
+
+_patch_after_transpile_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+_patch_after_transpile_rust:
+	cd $(CODEGEN_CLI_ROOT); \
+	./../gradlew run --args="\
+	patch-after-transpile \
+	--dafny-version $(DAFNY_VERSION) \
+	--library-root $(LIBRARY_ROOT) \
+	$(OUTPUT_RUST) \
+	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
+	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
+	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	--namespace $($(namespace_var)) \
+	$(AWS_SDK_CMD) \
+	$(POLYMORPH_OPTIONS) \
+	";
 
 build_rust:
 	cd runtimes/rust; \
