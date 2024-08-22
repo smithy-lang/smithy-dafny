@@ -297,11 +297,11 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     // and only produce `Result<...>` values if there are any required fields
     // (...that aren't structures, for some reason)
     String unwrapIfNeeded = structureShape
-      .members()
-      .stream()
-      .anyMatch(m ->
-        m.isRequired() && !model.expectShape(m.getTarget()).isStructureShape()
-      )
+        .members()
+        .stream()
+        .anyMatch(m ->
+          m.isRequired() && !model.expectShape(m.getTarget()).isStructureShape()
+        )
       ? ".unwrap()"
       : "";
     Map<String, String> variables = Map.of(
