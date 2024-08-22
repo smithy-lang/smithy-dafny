@@ -68,7 +68,7 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: smithy-dafny-conversion
 
-      - name: Install smithy-dafny-codegen dependencies locally
+      - name: Install smithy-dafny-codegen Rust dependencies locally
         uses: gradle/gradle-build-action@v2
         with:
           arguments: :codegen-client:pTML :codegen-core:pTML :rust-runtime:pTML

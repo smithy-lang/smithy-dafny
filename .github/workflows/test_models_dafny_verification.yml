@@ -58,11 +58,17 @@ jobs:
           distribution: "corretto"
           java-version: "17"
 
-      - name: Install smithy-dafny-codegen dependencies locally
+      - name: Install smithy-dafny-codegen Rust dependencies locally
         uses: gradle/gradle-build-action@v2
         with:
           arguments: :codegen-client:pTML :codegen-core:pTML :rust-runtime:pTML
           build-root-directory: smithy-dafny-codegen-modules/smithy-rs
+      
+      - name: Install smithy-dafny-codegen Python dependencies locally
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :smithy-python-codegen:pTML
+          build-root-directory: codegen/smithy-dafny-codegen-modules/smithy-python/codegen
 
       - name: Install smithy-dafny-codegen locally
         uses: gradle/gradle-build-action@v2
