@@ -33,6 +33,7 @@ import software.amazon.smithy.utils.SetUtils;
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -289,18 +290,25 @@ public final class StructureGenerator implements Runnable {
 
             // Write out a struct to hold the error data.
             writer.openBlock("type $L struct {", "}", structureSymbol.getName(), () -> {
-                // The message is the only part of the standard APIError interface that isn't known ahead of time.
-                // Message is a pointer mostly for the sake of consistency.
                 writer.write("$LBaseException", context.settings().getService().getName());
-                writer.write("Message *string").write("");
-                writer.write("ErrorCodeOverride *string").write("");
-
+                Set<String> memberNameSet = new HashSet<>();
+                // TODO: Revisit if message has to be strictly pointer or not (even with required trait). 
+                // When any shape is required we don't add pointer in local service but AWS SDK does.
                 for (MemberShape member : shape.getAllMembers().values()) {
                     String memberName = symbolProvider.toMemberName(member);
-                    // error messages are represented under Message for consistency
-                    if (!ERROR_MEMBER_NAMES.contains(memberName)) {
-                        writer.write("$L $P", memberName, symbolProvider.toSymbol(member));
-                    }
+                    memberNameSet.add(memberName);
+                    writer.write("$L $P", memberName, symbolProvider.toSymbol(member));
+                }
+                
+                // The message is the only part of the standard APIError interface that isn't known ahead of time.
+                // Message is a pointer mostly for the sake of consistency.
+
+                // If Message and ErrorCodeOverride is not defined in model.
+                if (!memberNameSet.contains("Message")) {
+                    writer.write("Message *string").write("");
+                }
+                if (!memberNameSet.contains("ErrorCodeOverride")) {
+                    writer.write("ErrorCodeOverride *string").write("");
                 }
 
             }).write("");

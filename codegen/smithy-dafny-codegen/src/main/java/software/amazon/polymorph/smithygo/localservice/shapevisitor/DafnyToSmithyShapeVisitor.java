@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
+import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
@@ -177,9 +178,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 			if !ok {
 				break
 			}
-			fieldValue = append(fieldValue, %s%s)}
+			fieldValue = append(fieldValue, %s)}
 			""".formatted(SmithyNameResolver.getSmithyType(shape, typeName), SmithyNameResolver.getSmithyType(shape, typeName), dataSource, dataSource,
-                targetShape.isStructureShape() ? "" : "*",
                 targetShape.accept(
                         new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
                 )));
@@ -210,7 +210,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 		if !ok {
 			break;
 		}
-		m[*%s] = *%s
+		m[%s] = %s
 	}
 	return m
                                }()""".formatted(type, type, type, dataSource, dataSource, keyTargetShape.accept(
@@ -269,7 +269,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         }
 
         var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? "uint8" : "dafny.Char";
-        return """
+        if ((boolean)isOptional) {
+            return """
                 func() (*string) {
                     var s string
                 if %s == nil {
@@ -284,14 +285,28 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                         }
                    }
                }()""".formatted(dataSource, dataSource, underlyingType);
+        }
+        else {
+            return """
+                func() (string) {
+                    var s string
+                    for i := dafny.Iterate(%s) ; ; {
+                        val, ok := i()
+                        if !ok {
+                            return s
+                        } else {
+                            s = s + string(val.(%s))
+                        }
+                   }
+               }()""".formatted(dataSource, underlyingType);
+        }
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
 
-        if ((boolean)isPointable) {
+        if ((boolean)isOptional) {
             return ("""
                     func() *int32 {
                         var b int32
@@ -349,17 +364,73 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String unionShape(UnionShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        return """
-            func () types.%s {
-                var union types.%s
-                union = &types.MyUnionMemberIntegerValue{
-                    Value: %s.(int32),
-                }
-                return union
-            }()""".formatted(
-                shape.toShapeId().getName(),
-                shape.toShapeId().getName(),
-                dataSource);
+        String nilCheck;
+        if (GoPointableIndex.of(context.model()).isPointable(shape) == false) {
+            nilCheck = "";
+        } else {
+            nilCheck = """
+                if %s == nil {
+                        return nil
+                }""".formatted(
+                        dataSource
+                );
+        }
+        final String functionInit = """
+            func() %s {
+                var union %s
+                %s
+            """.formatted(
+                context.symbolProvider().toSymbol(shape), 
+                context.symbolProvider().toSymbol(shape),
+                nilCheck
+            );
+        StringBuilder eachMemberInUnion = new StringBuilder();
+        for (var member : shape.getAllMembers().values()) {
+            final Shape targetShape = context.model().expectShape(member.getTarget());
+            final String memberName = context.symbolProvider().toMemberName(member);
+            final String rawUnionDataSource = "(" + dataSource + ".(" + DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)) + "))";
+            // unwrap union type, assert it then convert it to its member type with Dtor_ (example: Dtor_BlobValue()). unionDataSource is not a wrapper object until now.
+            String unionDataSource = rawUnionDataSource + ".Dtor_" + memberName.replace(shape.getId().getName() + "Member", "") + "()";
+            final Boolean isMemberShapePointable = (GoPointableIndex.of(context.model()).isPointable(targetShape) && GoPointableIndex.of(context.model()).isDereferencable(targetShape)) && !targetShape.isStructureShape();
+            final String pointerForPointableShape = isMemberShapePointable ? "*" : "";
+            final String isMemberCheck = """
+                        if ((%s).%s()) {""".formatted(
+                            rawUnionDataSource,
+                            memberName.replace(shape.getId().getName() + "Member", "Is_")
+                        );
+            String wrappedDataSource = "";
+            if (!(targetShape.isStructureShape())) {
+                // All other shape except structure needs a Wrapper object but unionDataSource is not a Wrapper object. 
+                wrappedDataSource = """
+                    var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)""".formatted(unionDataSource);
+                unionDataSource = "dataSource.UnwrapOr(nil)";
+            }
+            eachMemberInUnion.append("""
+                            %s
+                            %s
+                            union = &%s.%s{
+                                    Value: %s(%s),
+                                }
+                            }
+                            """.formatted(
+                            isMemberCheck,
+                            wrappedDataSource,
+                            SmithyNameResolver.smithyTypesNamespace(shape),
+                            memberName,
+                            pointerForPointableShape,
+                            targetShape.accept(
+                                    new DafnyToSmithyShapeVisitor(context, unionDataSource, writer, isConfigShape, isMemberShapePointable)
+                                )));
+        }
+        return 
+        """
+            %s
+            %s
+            return union
+        }()""".formatted(
+            functionInit,
+            eachMemberInUnion
+        );
     }
 
     @Override
