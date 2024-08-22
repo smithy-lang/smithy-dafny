@@ -19,6 +19,12 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+# Python
+
+PYTHON_MODULE_NAME=codegen_patches
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
@@ -33,8 +39,8 @@ TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleCodegenpatchesTypes"
 
 INDEX_FILE_PATH=src/Index.dfy
 INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.codegenpatches.internaldafny\" } CodegenPatches refines AbstractSimpleCodegenpatchesService {"
-INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleCodegenpatches refines AbstractSimpleCodegenpatchesService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module CodegenPatches refines AbstractSimpleCodegenpatchesService {"
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedCodegenPatchesImpl.dfy
 WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.codegenpatches.internaldafny.wrapped\"} WrappedSimpleCodegenPatchesService refines WrappedAbstractSimpleCodegenpatchesService {"
-WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleCodegenpatchesService refines WrappedAbstractSimpleCodegenpatchesService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleCodegenPatchesService refines WrappedAbstractSimpleCodegenpatchesService {"

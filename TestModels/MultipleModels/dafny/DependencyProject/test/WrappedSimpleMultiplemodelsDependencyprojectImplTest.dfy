@@ -4,11 +4,11 @@ include "../src/WrappedSimpleMultiplemodelsDependencyprojectImpl.dfy"
 include "SimpleMultiplemodelsDependencyprojectImplTest.dfy"
 
 module WrappedSimpleMultiplemodelsDependencyprojectTest {
-    import WrappedDependencyProject
+    import WrappedSimpleMultiplemodelsDependencyprojectService
     import SimpleMultiplemodelsDependencyprojectImplTest
     import opened Wrappers
-    method{:test} WrappedDependencyProjectTest() {
-        var client :- expect WrappedDependencyProject.WrappedDependencyProject();
+    method{:test} WrappedDependencyProject() {
+        var client :- expect WrappedSimpleMultiplemodelsDependencyprojectService.WrappedDependencyProject();
         SimpleMultiplemodelsDependencyprojectImplTest.TestDependencyProjectClient(client);
     }
 }
