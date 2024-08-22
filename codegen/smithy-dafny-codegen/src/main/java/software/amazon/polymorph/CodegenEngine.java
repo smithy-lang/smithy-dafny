@@ -9,7 +9,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import com.squareup.javapoet.ClassName;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -27,7 +26,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -787,8 +785,7 @@ public class CodegenEngine {
     for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
       switch (lang) {
         case RUST -> patchRustAfterTranspiling();
-        default -> {
-        }
+        default -> {}
       }
     }
   }
@@ -824,10 +821,10 @@ public class CodegenEngine {
 
   private String extraDeclarationsForSDK() {
     return """
-      mod client;
-      mod conversions;
-      mod standard_library_conversions;
-      """;
+    mod client;
+    mod conversions;
+    mod standard_library_conversions;
+    """;
   }
 
   private String extraDeclarationsForLocalService() {
@@ -839,27 +836,27 @@ public class CodegenEngine {
 
     return IOUtils.evalTemplate(
       """
-        // (extra-declarations)
-        
-        pub mod client;
-        pub mod types;
-        
-        /// Common errors and error handling utilities.
-        pub mod error;
-        
-        /// All operations that this crate can perform.
-        pub mod operation;
-        
-        mod conversions;
-        mod standard_library_conversions;
-        
-        #[cfg(feature = "wrapped-client")]
-        pub mod wrapped;
-        
-        pub use client::Client;
-        pub use types::$configSnakeCase:L::$configStructName:L;
-        
-        """,
+      // (extra-declarations)
+
+      pub mod client;
+      pub mod types;
+
+      /// Common errors and error handling utilities.
+      pub mod error;
+
+      /// All operations that this crate can perform.
+      pub mod operation;
+
+      mod conversions;
+      mod standard_library_conversions;
+
+      #[cfg(feature = "wrapped-client")]
+      pub mod wrapped;
+
+      pub use client::Client;
+      pub use types::$configSnakeCase:L::$configStructName:L;
+
+      """,
       Map.of(
         "configSnakeCase",
         configSnakeCase,
@@ -894,10 +891,10 @@ public class CodegenEngine {
   private Path standardLibraryPath() {
     final Path includeDafnyFile =
       this.includeDafnyFile.orElseThrow(() ->
-        new IllegalStateException(
-          "includeDafnyFile required when generating additional aspects (--generate)"
-        )
-      );
+          new IllegalStateException(
+            "includeDafnyFile required when generating additional aspects (--generate)"
+          )
+        );
 
     // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
     // TODO be smarter about finding the StandardLibrary path
@@ -948,8 +945,7 @@ public class CodegenEngine {
     private Path patchFilesDir;
     private boolean updatePatchFiles = false;
 
-    public Builder() {
-    }
+    public Builder() {}
 
     /**
      * Sets the directory in which to search for model files(s) containing the desired service.
@@ -1108,7 +1104,7 @@ public class CodegenEngine {
     public CodegenEngine build() {
       final Model serviceModel = Objects.requireNonNull(this.serviceModel);
       final Path[] dependentModelPaths = this.dependentModelPaths == null
-        ? new Path[]{}
+        ? new Path[] {}
         : this.dependentModelPaths.clone();
       if (Strings.isNullOrEmpty(this.namespace)) {
         throw new IllegalStateException("No namespace provided");
@@ -1142,7 +1138,7 @@ public class CodegenEngine {
 
       if (
         targetLangOutputDirs.containsKey(TargetLanguage.DAFNY) &&
-          this.includeDafnyFile == null
+        this.includeDafnyFile == null
       ) {
         throw new IllegalStateException(
           "includeDafnyFile is required when generating Dafny code"

@@ -6,7 +6,6 @@ package software.amazon.polymorph.smithyrust;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -45,14 +44,16 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
 
     // For testing individual tests
-//    ENABLED_TESTS.add("SimpleTypes/SimpleBoolean");
-//    ENABLED_TESTS.add("aws-sdks/kms-lite");
+    // ENABLED_TESTS.add("SimpleTypes/SimpleBoolean");
+    // ENABLED_TESTS.add("aws-sdks/kms-lite");
   }
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
   void testModelsForRust(String relativeTestModelPath) {
-    Assumptions.assumeTrue(ENABLED_TESTS.isEmpty() || ENABLED_TESTS.contains(relativeTestModelPath));
+    Assumptions.assumeTrue(
+      ENABLED_TESTS.isEmpty() || ENABLED_TESTS.contains(relativeTestModelPath)
+    );
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

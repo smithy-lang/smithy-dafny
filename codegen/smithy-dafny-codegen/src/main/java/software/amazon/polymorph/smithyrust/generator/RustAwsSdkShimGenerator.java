@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -31,6 +30,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 // The best way to clean this up is to thread SimpleCodeWriters through the methods and use the stateful
 // putContext method, instead of trying to work purely functionality with map literals.
 public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
+
   public RustAwsSdkShimGenerator(Model model, ServiceShape service) {
     super(model, service);
   }
@@ -296,9 +296,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     // The builders smithy-rs generates only validate that required fields are provided,
     // and only produce `Result<...>` values if there are any required fields.
     String unwrapIfNeeded = structureShape
-      .members()
-      .stream()
-      .anyMatch(m -> m.isRequired())
+        .members()
+        .stream()
+        .anyMatch(m -> m.isRequired())
       ? ".unwrap()"
       : "";
     Map<String, String> variables = Map.of(
@@ -339,7 +339,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected TokenTree operationRequestToDafnyFunction(final OperationShape operationShape) {
+  protected TokenTree operationRequestToDafnyFunction(
+    final OperationShape operationShape
+  ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
       operationVariables(operationShape)
@@ -349,7 +351,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       StructureShape.class
     );
     variables.put("structureName", operationInputName(operationShape));
-    variables.put("variants", toDafnyVariantsForStructure(inputShape).toString());
+    variables.put(
+      "variants",
+      toDafnyVariantsForStructure(inputShape).toString()
+    );
 
     return TokenTree.of(
       evalTemplate(
@@ -371,14 +376,22 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected TokenTree operationRequestFromDafnyFunction(final OperationShape operationShape) {
+  protected TokenTree operationRequestFromDafnyFunction(
+    final OperationShape operationShape
+  ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
       operationVariables(operationShape)
     );
-    StructureShape inputShape = model.expectShape(operationShape.getInputShape(), StructureShape.class);
+    StructureShape inputShape = model.expectShape(
+      operationShape.getInputShape(),
+      StructureShape.class
+    );
     variables.put("structureName", operationInputName(operationShape));
-    variables.put("fluentMemberSetters", fluentMemberSettersForStructure(inputShape).toString());
+    variables.put(
+      "fluentMemberSetters",
+      fluentMemberSettersForStructure(inputShape).toString()
+    );
 
     return TokenTree.of(
       evalTemplate(
@@ -400,14 +413,22 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected TokenTree operationResponseToDafnyFunction(final OperationShape operationShape) {
+  protected TokenTree operationResponseToDafnyFunction(
+    final OperationShape operationShape
+  ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
       operationVariables(operationShape)
     );
-    StructureShape outputShape = model.expectShape(operationShape.getOutputShape(), StructureShape.class);
+    StructureShape outputShape = model.expectShape(
+      operationShape.getOutputShape(),
+      StructureShape.class
+    );
     variables.put("structureName", operationOutputName(operationShape));
-    variables.put("variants", toDafnyVariantsForStructure(outputShape).toString());
+    variables.put(
+      "variants",
+      toDafnyVariantsForStructure(outputShape).toString()
+    );
 
     // Dafny maps smithy.api#Unit to ()
     if (outputShape.getId() == ShapeId.from("smithy.api#Unit")) {
@@ -446,13 +467,17 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected TokenTree operationResponseFromDafnyFunction(final OperationShape operationShape) {
+  protected TokenTree operationResponseFromDafnyFunction(
+    final OperationShape operationShape
+  ) {
     // No need for Dafny-to-Rust conversion
     return TokenTree.empty();
   }
 
   @Override
-  protected Set<RustFile> operationConversionModules(final OperationShape operationShape) {
+  protected Set<RustFile> operationConversionModules(
+    final OperationShape operationShape
+  ) {
     var operationModuleName = toSnakeCase(operationName(operationShape));
     var operationModuleContent = declarePubModules(
       Stream.of(
@@ -573,7 +598,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-
   private RustFile errorConversionModule(
     final ServiceShape service,
     final Shape errorStructure
@@ -637,7 +661,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected String getDafnyModuleName() {
-    String sdkId = service.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+    String sdkId = service
+      .expectTrait(ServiceTrait.class)
+      .getSdkId()
+      .toLowerCase();
     return "software::amazon::cryptography::services::%s".formatted(sdkId);
   }
 

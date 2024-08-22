@@ -72,7 +72,7 @@ public class IOUtils {
    * The template output path is also evaluated as in {@link #safeEvalPathTemplate(String, Map)}
    * so the path can be customized by parameter values as well.
    *
-   * @see #safeEvalPathTemplate(String, Map) 
+   * @see #safeEvalPathTemplate(String, Map)
    * @see #evalTemplate(String, Map)
    */
   public static void writeTemplatedFile(
@@ -83,7 +83,9 @@ public class IOUtils {
     Map<String, String> parameters
   ) {
     final String content = evalTemplate(klass, templatePath, parameters);
-    final Path outputPath = rootPath.resolve(safeEvalPathTemplate(templateOutputPath, parameters));
+    final Path outputPath = rootPath.resolve(
+      safeEvalPathTemplate(templateOutputPath, parameters)
+    );
 
     try {
       Files.createDirectories(outputPath.getParent());
@@ -103,7 +105,9 @@ public class IOUtils {
    * uses that and doesn't test on Windows (purely hypothetically :)
    */
   public static String safeEvalPathTemplate(
-    final String pathTemplate, final Map<String, String> parameters) {
+    final String pathTemplate,
+    final Map<String, String> parameters
+  ) {
     if (pathTemplate.contains(":")) {
       throw new IllegalArgumentException(
         "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."

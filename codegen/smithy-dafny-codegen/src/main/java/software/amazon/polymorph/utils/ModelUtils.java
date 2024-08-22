@@ -71,7 +71,12 @@ public class ModelUtils {
   public static Stream<MemberShape> streamStructureMembersSorted(
     final StructureShape structureShape
   ) {
-    return structureShape.getAllMembers().entrySet().stream().sorted().map(Map.Entry::getValue);
+    return structureShape
+      .getAllMembers()
+      .entrySet()
+      .stream()
+      .sorted()
+      .map(Map.Entry::getValue);
   }
 
   public static Stream<MemberShape> streamUnionMembers(
