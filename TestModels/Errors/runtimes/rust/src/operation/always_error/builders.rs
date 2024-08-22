@@ -10,7 +10,7 @@ impl AlwaysErrorInputBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::always_error::AlwaysErrorOutput,
-        crate::operation::always_error::AlwaysErrorError,
+        crate::types::error::Error,
     > {
         let mut fluent_builder = client.always_error();
         fluent_builder.inner = self;
@@ -41,7 +41,7 @@ impl AlwaysErrorFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::always_error::AlwaysErrorOutput,
-        crate::operation::always_error::AlwaysErrorError,
+        crate::types::error::Error,
     > {
         let input = self.inner.build()?;
         crate::operation::always_error::AlwaysError::send(&self.client, input).await

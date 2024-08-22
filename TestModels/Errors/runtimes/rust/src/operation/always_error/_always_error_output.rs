@@ -47,7 +47,7 @@ impl AlwaysErrorOutputBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::always_error::AlwaysErrorOutput,
-        crate::operation::always_error::AlwaysErrorError,
+        crate::types::error::Error,
     > {
         ::std::result::Result::Ok(crate::operation::always_error::AlwaysErrorOutput {
             value: self.value,
