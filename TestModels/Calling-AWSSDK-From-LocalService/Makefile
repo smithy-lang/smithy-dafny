@@ -14,6 +14,8 @@ SERVICE_DEPS_SimpleCallingAWSSDKFromLocalService :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+AWS_SDK_CMD=--aws-sdk
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 

@@ -1,15 +1,12 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-namespace simple.constraints
+namespace simple.callingawssdkfromlocalservice
 
 use com.amazonaws.dynamodb#DynamoDB_20120810
 
 @aws.polymorph#localService(
   sdkId: "SimpleCallingAWSSDKFromLocalService",
   config: SimpleCallingAWSSDKFromLocalServiceConfig,
-  dependencies: [
-    DynamoDB_20120810
-  ]
 )
 
 service SimpleCallingAWSSDKFromLocalService {
