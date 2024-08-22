@@ -159,7 +159,7 @@ clean-dafny-report:
 _transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 _transpile_implementation_all: transpile_implementation
 
-# As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
+# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
 # the `transpile_implementation` target should start using the new Dafny CLI,
 # and the `transpile_implementation_new_cli` target should be removed
 # in favor of `transpile_implementation` using the new CLI.
@@ -215,7 +215,7 @@ transpile_implementation:
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES)
 
-# As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
+# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
 # the `transpile_implementation` target should start using the new Dafny CLI,
 # and the `transpile_implementation_new_cli` target should be removed
 # in favor of `transpile_implementation` using the new CLI.
@@ -259,7 +259,7 @@ _transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst
 # Transpile the entire project's tests
 _transpile_test_all: transpile_test
 
-# As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
+# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
 # the `transpile_implementation` target should start using the new Dafny CLI,
 # and the `transpile_implementation_new_cli` target should be removed
 # in favor of `transpile_implementation` using the new CLI.
@@ -288,7 +288,7 @@ transpile_test:
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES) \
 
-# As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
+# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
 # the `transpile_implementation` target should start using the new Dafny CLI,
 # and the `transpile_implementation_new_cli` target should be removed
 # in favor of `transpile_implementation` using the new CLI.
