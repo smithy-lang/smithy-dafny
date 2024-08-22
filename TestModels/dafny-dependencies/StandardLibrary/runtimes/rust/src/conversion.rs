@@ -32,21 +32,18 @@ pub fn ostring_from_dafny(
 
 pub fn string_to_dafny(
     input: &String,
-) -> ::std::rc::Rc<
-    ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-> {
-    let dafny_value = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(input);
+) -> ::std::rc::Rc<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>> {
+    let dafny_value =
+        dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(
+            input,
+        );
     ::std::rc::Rc::new(dafny_value)
 }
 
 pub fn string_from_dafny(
-    input: ::std::rc::Rc<
-        ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>,
-    >,
+    input: ::std::rc::Rc<::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>,
 ) -> String {
-    dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
-        &*input
-    )
+    dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&*input)
 }
 
 pub fn obool_to_dafny(input: &Option<bool>) -> ::std::rc::Rc<_Wrappers_Compile::Option<bool>> {
