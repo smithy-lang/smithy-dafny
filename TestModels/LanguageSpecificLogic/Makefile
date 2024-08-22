@@ -25,5 +25,5 @@ RUST_TEST_INDEX=test/replaces/rust
 RUST_OTHER_FILES=runtimes/rust/src/externs.rs
 
 # This project has no dependencies 
-# DEPENDENT-MODELS:= 
+# DEPENDENT-MODELS:=
 
