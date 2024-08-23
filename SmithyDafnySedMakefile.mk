@@ -6,7 +6,7 @@
 # These targets can remove or add those extern names based on the target language.
 # A target language SHOULD declare use of these targets.
 
-# These should eventually be replaced by replaceable modules that declare per-langauge extern names.
+# These should eventually be replaced by replaceable modules that declare per-language extern names.
 # See https://github.com/smithy-lang/smithy-dafny/issues/528.
 # Eventually, the replaceable modules should be removed (or, their extern names should be removed),
 # and should be replaced by per-language package/namespace prefixes.
