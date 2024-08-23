@@ -13,6 +13,7 @@ module  SimpleStringImplTest {
         TestGetStringKnownValue(client);
         TestGetStringNonAscii(client);
         TestGetStringUTF8(client);
+        TestGetStringUTF8KnownValue(client);
     }
 
     method TestGetString(client: ISimpleTypesStringClient)
@@ -59,6 +60,17 @@ module  SimpleStringImplTest {
         var ret :- expect client.GetStringUTF8(SimpleString.Types.GetStringUTF8Input(value:= Some(utf8EncodedString)));
         var retUnwrapped :- expect ret.value;
         expect retUnwrapped == utf8EncodedString;
+        print ret;
+    }
+    method TestGetStringUTF8KnownValue(client: ISimpleTypesStringClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        var encoded: UTF8.ValidUTF8Bytes :- expect UTF8.Encode("Hello");
+        var ret :- expect client.GetStringUTF8KnownValue(SimpleString.Types.GetStringUTF8Input(value := Some(encoded)));
+        var retUnwrapped :- expect ret.value;
+        expect retUnwrapped == encoded;
         print ret;
     }
 }

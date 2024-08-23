@@ -89,6 +89,29 @@ mod simple_string_test {
         assert_eq!(value, utf8_encoded_string);
     }
 
+    /*method TestGetStringUTF8KnownValue(client: ISimpleTypesStringClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        var encoded: UTF8.ValidUTF8Bytes :- expect UTF8.Encode("Hello");
+        var ret :- expect client.GetStringUTF8KnownValue(SimpleString.Types.GetStringUTF8Input(value := Some(encoded)));
+        var retUnwrapped :- expect ret.value;
+        expect retUnwrapped == encoded;
+        print ret;
+    }*/
+    #[tokio::test]
+    async fn test_get_string_utf8_known_value() {
+        let result = client()
+            .get_string_utf8_known_value()
+            .value("Hello")
+            .send()
+            .await;
+        let output = result.unwrap();
+        let value = output.value().unwrap();
+        assert_eq!(value, "Hello");
+    }
+
     pub fn client() -> Client {
         let config = SimpleStringConfig::builder().build().unwrap();
         Client::from_conf(config).unwrap()
