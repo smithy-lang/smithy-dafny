@@ -80,7 +80,7 @@ jobs:
           build-root-directory: smithy-dafny-conversion
 
       - name: Install Smithy-Dafny codegen dependencies
-        uses: ./.github/actions/build_dafny_from_source
+        uses: ./.github/actions/install_smithy_dafny_codegen_dependencies
 
       - name: Install smithy-dafny-codegen locally
         uses: gradle/gradle-build-action@v2
