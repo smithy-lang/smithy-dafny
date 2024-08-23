@@ -331,7 +331,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             return;
           }
 
-          // Block below is new.
+          // Block below is changed from Smithy-Python.
           // Import any modules required for reference shapes to convert from_dict.
           // Import within function to avoid circular imports from top-level imports
           for (MemberShape memberShape : shape.members()) {
@@ -357,8 +357,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                     var memberName = symbolProvider.toMemberName(member);
                     var target = model.expectShape(member.getTarget());
                     Symbol targetSymbol = symbolProvider.toSymbol(target);
-                    // Block below is new.
+                    // Block below is changed from Smithy-Python.
                     // If passing a boto3 client, just pass the client.
+                    // Also, use snakecase member name inside the dictionary.
                     if (target.hasTrait(ReferenceTrait.class)
                         && target.expectTrait(ReferenceTrait.class).isService()
                         && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
@@ -398,8 +399,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                 memberName,
                 () -> {
                   var targetSymbol = symbolProvider.toSymbol(target);
-                  // Block below is new.
+                  // Block below is changed from Smithy-Python.
                   // If passing a boto3 client, just pass the client.
+                  // Also, use snakecase member name inside the dictionary.
                   if (target.hasTrait(ReferenceTrait.class)
                     && target.expectTrait(ReferenceTrait.class).isService()
                     && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
@@ -463,8 +465,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             var memberName = symbolProvider.toMemberName(member);
             var target = model.expectShape(member.getTarget());
             var targetSymbol = symbolProvider.toSymbol(target);
-            // Block below is new.
+            // Block below is changed from Smithy-Python.
             // If passing a boto3 client, just pass the client.
+            // Also, use snakecase member name inside the dictionary.
             if (target.hasTrait(ReferenceTrait.class)
               && target.expectTrait(ReferenceTrait.class).isService()
               && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
@@ -492,8 +495,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
           var target = model.expectShape(member.getTarget());
           var targetSymbol = symbolProvider.toSymbol(target);
           writer.openBlock("if self.$1L is not None:", "", memberName, () -> {
-            // Block below is new.
+            // Block below is changed from Smithy-Python.
             // If passing a boto3 client, just pass the client.
+            // Also, use snakecase member name inside the dictionary.
             if (target.hasTrait(ReferenceTrait.class)
               && target.expectTrait(ReferenceTrait.class).isService()
               && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
