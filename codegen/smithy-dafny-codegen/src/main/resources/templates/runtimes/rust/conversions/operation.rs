@@ -25,6 +25,6 @@ pub fn from_dafny_error(
   }
 }
 
-pub mod _$snakeCaseOperationInputName:L;
+pub mod _$snakeCaseSyntheticOperationInputName:L;
 
-pub mod _$snakeCaseOperationOutputName:L;
+pub mod _$snakeCaseSyntheticOperationOutputName:L;

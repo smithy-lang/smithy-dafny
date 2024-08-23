@@ -16,6 +16,7 @@ import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -327,6 +328,15 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         variables
       )
     );
+  }
+
+  @Override
+  protected boolean isRustFieldRequired(Shape parent, MemberShape member) {
+    // These rules were mostly reverse-engineered from inspection of Rust SDKs,
+    // and may not be complete!
+    final Shape targetShape = model.expectShape(member.getTarget());
+    return super.isRustFieldRequired(parent, member)
+      || (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape());
   }
 
   @Override
