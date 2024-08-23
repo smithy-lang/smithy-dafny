@@ -115,7 +115,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         }
 
         #[allow(non_snake_case)]
-        impl crate::r#$dafnyModuleName:L::_default {
+        impl crate::r#$dafnyInternalModuleName:L::_default {
           pub fn $clientName:L() -> ::std::rc::Rc<
             crate::r#_Wrappers_Compile::Result<
               ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
@@ -319,7 +319,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         """
         #[allow(dead_code)]
         pub fn to_dafny(
-            value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationInputName:L,
+            value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationInputStruct:L,
         ) -> ::std::rc::Rc<
             crate::r#$dafnyTypesModuleName:L::$structureName:L,
         >{
@@ -397,7 +397,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           """
           #[allow(dead_code)]
           pub fn to_dafny(
-              _value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
+              _value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationOutputStruct:L
           ) -> () {
               ()
           }
@@ -411,7 +411,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           """
           #[allow(dead_code)]
           pub fn to_dafny(
-              value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LOutput
+              value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationOutputStruct:L
           ) -> ::std::rc::Rc<
               crate::r#$dafnyTypesModuleName:L::$structureName:L,
           >{
@@ -586,11 +586,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected String getDafnyModuleName() {
-    String sdkId = service
-      .expectTrait(ServiceTrait.class)
-      .getSdkId()
-      .toLowerCase();
-    return "software::amazon::cryptography::services::%s".formatted(sdkId);
+    return "software::amazon::cryptography::services::%s".formatted(getSdkId().toLowerCase());
   }
 
   private String getSdkId() {
@@ -606,6 +602,30 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final HashMap<String, String> variables = super.serviceVariables();
     variables.put("sdkId", getSdkId());
     variables.put("sdkCrate", getSdkCrate());
+    return variables;
+  }
+
+  private String sdkOperationInputStruct(final OperationShape operationShape) {
+    return operationName(operationShape) + "Input";
+  }
+
+  private String sdkOperationOutputStruct(final OperationShape operationShape) {
+    return operationName(operationShape) + "Output";
+  }
+
+  protected String operationInputName(final OperationShape operationShape) {
+    return operationName(operationShape) + "Request";
+  }
+
+  protected String operationOutputName(final OperationShape operationShape) {
+    return operationName(operationShape) + "Response";
+  }
+
+  @Override
+  protected HashMap<String, String> operationVariables(OperationShape operationShape) {
+    final HashMap<String, String> variables = super.operationVariables(operationShape);
+    variables.put("sdkOperationInputStruct", sdkOperationInputStruct(operationShape));
+    variables.put("sdkOperationOutputStruct", sdkOperationOutputStruct(operationShape));
     return variables;
   }
 }
