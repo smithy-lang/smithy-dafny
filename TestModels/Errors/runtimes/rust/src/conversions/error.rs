@@ -36,8 +36,8 @@ pub fn from_dafny(
         },
         crate::r#simple::errors::internaldafny::types::Error::Opaque{obj} =>
         match &obj.0 {
-            None => crate::types::error::Error::Opaque{obj : crate::types::error::Object(None)},
-            Some(x) => crate::types::error::Error::Opaque{obj : crate::types::error::Object(Some(x.clone()))},
+            None => crate::types::error::Error::Opaque{obj : dafny_runtime::Object(None)},
+            Some(x) => crate::types::error::Error::Opaque{obj : dafny_runtime::Object(Some(x.clone()))},
         },
     }
 }
