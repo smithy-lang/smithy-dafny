@@ -506,8 +506,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                   "d[$S] = self.$L",
                   memberName,
                   memberName);
-            }
-            if (target.isStructureShape() || target.isUnionShape()) {
+            } else if (target.isStructureShape() || target.isUnionShape()) {
               writer.write("d[$S] = self.$L.as_dict()", memberName, memberName);
             } else if (targetSymbol.getProperty("asDict").isPresent()) {
               var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
