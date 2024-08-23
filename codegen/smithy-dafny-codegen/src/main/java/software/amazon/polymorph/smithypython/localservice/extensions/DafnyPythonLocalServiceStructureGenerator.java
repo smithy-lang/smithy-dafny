@@ -6,10 +6,10 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import java.util.Set;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
-import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -29,15 +29,17 @@ import software.amazon.smithy.python.codegen.StructureGenerator;
  * - Support {@link ReferenceTrait}s (forward references, other namespaces)
  * - Support Smithy constraints in constructors ({@link RangeTrait}, {@link LengthTrait})
  */
-public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerator {
+public class DafnyPythonLocalServiceStructureGenerator
+  extends StructureGenerator {
 
   public DafnyPythonLocalServiceStructureGenerator(
-      Model model,
-      PythonSettings settings,
-      SymbolProvider symbolProvider,
-      PythonWriter writer,
-      StructureShape shape,
-      Set<Shape> recursiveShapes) {
+    Model model,
+    PythonSettings settings,
+    SymbolProvider symbolProvider,
+    PythonWriter writer,
+    StructureShape shape,
+    Set<Shape> recursiveShapes
+  ) {
     super(model, settings, symbolProvider, writer, shape, recursiveShapes);
   }
 
@@ -65,49 +67,57 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.addStdlibImport("typing", "Literal");
     var code = shape.getId().getName();
     var symbol = symbolProvider.toSymbol(shape);
-    var apiError =
-        Symbol.builder()
-            .name("ApiError")
-            .namespace(
-                format(
-                    "%s.errors",
-                    SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                        settings.getService().getNamespace(), settings)),
-                ".")
-            .definitionFile(
-                format(
-                    "./%s/errors.py",
-                    SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-                        settings.getService().getNamespace())))
-            .build();
+    var apiError = Symbol
+      .builder()
+      .name("ApiError")
+      .namespace(
+        format(
+          "%s.errors",
+          SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+            settings.getService().getNamespace(),
+            settings
+          )
+        ),
+        "."
+      )
+      .definitionFile(
+        format(
+          "./%s/errors.py",
+          SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+            settings.getService().getNamespace()
+          )
+        )
+      )
+      .build();
     writer.openBlock(
-        "class $L($T[Literal[$S]]):",
-        "",
-        symbol.getName(),
-        apiError,
-        code,
-        () -> {
-          writer.write("code: Literal[$1S] = $1S", code);
-          writer.write("message: str");
-          writeProperties(true);
-          writeInit(true);
-          writeAsDict(true);
-          writeFromDict(true);
-          writeRepr(true);
-          writeEq(true);
-        });
+      "class $L($T[Literal[$S]]):",
+      "",
+      symbol.getName(),
+      apiError,
+      code,
+      () -> {
+        writer.write("code: Literal[$1S] = $1S", code);
+        writer.write("message: str");
+        writeProperties(true);
+        writeInit(true);
+        writeAsDict(true);
+        writeFromDict(true);
+        writeRepr(true);
+        writeEq(true);
+      }
+    );
     writer.write("");
   }
 
-    /**
-     * Override Smithy-Python to not unambiguously write a `message`
-     * attribute on errors;
-     * Smithy-Dafny defines this attribute on its errors,
-     * so Smithy-Python behavior is changed to not write `message` multiple times.
-     * (In particular, OpaqueErrors may not have a `message` attribute,
-     * which leads to issues.)
-     * @param isError
-     */
+  /**
+   * Override Smithy-Python to not unambiguously write a `message`
+   * attribute on errors;
+   * Smithy-Dafny defines this attribute on its errors,
+   * so Smithy-Python behavior is changed to not write `message` multiple times.
+   * (In particular, OpaqueErrors may not have a `message` attribute,
+   * which leads to issues.)
+   * @param isError
+   */
   @Override
   protected void writeReprMembers(boolean isError) {
     var iter = shape.members().iterator();
@@ -119,20 +129,22 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
         // Sensitive members must not be printed
         // see: https://smithy.io/2.0/spec/documentation-traits.html#smithy-api-sensitive-trait
         writer.write(
-            """
-                    if self.$1L is not None:
-                        result += f"$1L=...$2L"
-                    """,
-            memberName,
-            trailingComma);
+          """
+          if self.$1L is not None:
+              result += f"$1L=...$2L"
+          """,
+          memberName,
+          trailingComma
+        );
       } else {
         writer.write(
-            """
-                    if self.$1L is not None:
-                        result += f"$1L={repr(self.$1L)}$2L"
-                    """,
-            memberName,
-            trailingComma);
+          """
+          if self.$1L is not None:
+              result += f"$1L={repr(self.$1L)}$2L"
+          """,
+          memberName,
+          trailingComma
+        );
       }
     }
   }
@@ -147,39 +159,54 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    * @param memberShape
    */
   @Override
-  protected void writePropertyForMember(boolean isError, MemberShape memberShape) {
+  protected void writePropertyForMember(
+    boolean isError,
+    MemberShape memberShape
+  ) {
     Shape target = model.expectShape(memberShape.getTarget());
     String memberName = symbolProvider.toMemberName(memberShape);
 
-    if (target.isListShape()
-        && model
-            .expectShape(target.asListShape().get().getMember().getTarget())
-            .hasTrait(ReferenceTrait.class)) {
-      Shape listMemberShape = model.expectShape(target.asListShape().get().getMember().getTarget());
-      Shape referentShape =
-          model.expectShape(listMemberShape.expectTrait(ReferenceTrait.class).getReferentId());
+    if (
+      target.isListShape() &&
+      model
+        .expectShape(target.asListShape().get().getMember().getTarget())
+        .hasTrait(ReferenceTrait.class)
+    ) {
+      Shape listMemberShape = model.expectShape(
+        target.asListShape().get().getMember().getTarget()
+      );
+      Shape referentShape = model.expectShape(
+        listMemberShape.expectTrait(ReferenceTrait.class).getReferentId()
+      );
       Symbol targetSymbol = symbolProvider.toSymbol(referentShape);
 
       // Use forward reference for reference traits to avoid circular import
       String formatString = "$L: list['$L']";
       writer.write(
-          formatString, memberName, targetSymbol.getNamespace() + "." + targetSymbol.getName());
+        formatString,
+        memberName,
+        targetSymbol.getNamespace() + "." + targetSymbol.getName()
+      );
       return;
     }
 
     // We currently don't have any map shapes that have values with reference traits;
     // once we do, this needs to be filled in
-    if (target.isMapShape()
-        && model
-            .expectShape(target.asMapShape().get().getValue().getTarget())
-            .hasTrait(ReferenceTrait.class)) {
+    if (
+      target.isMapShape() &&
+      model
+        .expectShape(target.asMapShape().get().getValue().getTarget())
+        .hasTrait(ReferenceTrait.class)
+    ) {
       throw new IllegalArgumentException(
-          "Map shapes containing references currently unsupported: " + target);
+        "Map shapes containing references currently unsupported: " + target
+      );
     }
 
     if (target.hasTrait(ReferenceTrait.class)) {
-      Shape referentShape =
-          model.expectShape(target.expectTrait(ReferenceTrait.class).getReferentId());
+      Shape referentShape = model.expectShape(
+        target.expectTrait(ReferenceTrait.class).getReferentId()
+      );
 
       NullableIndex index = NullableIndex.of(model);
 
@@ -188,22 +215,28 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
         // Use forward reference for reference traits to avoid circular import
         String formatString = "$L: Optional['$L']";
         writer.write(
-            formatString,
-            memberName,
-            symbolProvider.toSymbol(referentShape).getNamespace()
-                + "."
-                + symbolProvider.toSymbol(referentShape).getName());
-        writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
+          formatString,
+          memberName,
+          symbolProvider.toSymbol(referentShape).getNamespace() +
+          "." +
+          symbolProvider.toSymbol(referentShape).getName()
+        );
+        writer.addStdlibImport(
+          symbolProvider.toSymbol(referentShape).getNamespace()
+        );
       } else {
         // Use forward reference for reference traits to avoid circular import,
         String formatString = "$L: '$L'";
         writer.write(
-            formatString,
-            memberName,
-            symbolProvider.toSymbol(referentShape).getNamespace()
-                + "."
-                + symbolProvider.toSymbol(referentShape).getName());
-        writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
+          formatString,
+          memberName,
+          symbolProvider.toSymbol(referentShape).getNamespace() +
+          "." +
+          symbolProvider.toSymbol(referentShape).getName()
+        );
+        writer.addStdlibImport(
+          symbolProvider.toSymbol(referentShape).getNamespace()
+        );
       }
     } else {
       super.writePropertyForMember(isError, memberShape);
@@ -221,48 +254,65 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    */
   @Override
   protected void writeInitMethodParameterForRequiredMember(
-      boolean isError, MemberShape memberShape) {
+    boolean isError,
+    MemberShape memberShape
+  ) {
     Shape target = model.expectShape(memberShape.getTarget());
     String memberName = symbolProvider.toMemberName(memberShape);
 
-    if (target.isListShape()
-        && model
-            .expectShape(target.asListShape().get().getMember().getTarget())
-            .hasTrait(ReferenceTrait.class)) {
-      Shape listMemberShape = model.expectShape(target.asListShape().get().getMember().getTarget());
-      Shape referentShape =
-          model.expectShape(listMemberShape.expectTrait(ReferenceTrait.class).getReferentId());
+    if (
+      target.isListShape() &&
+      model
+        .expectShape(target.asListShape().get().getMember().getTarget())
+        .hasTrait(ReferenceTrait.class)
+    ) {
+      Shape listMemberShape = model.expectShape(
+        target.asListShape().get().getMember().getTarget()
+      );
+      Shape referentShape = model.expectShape(
+        listMemberShape.expectTrait(ReferenceTrait.class).getReferentId()
+      );
       Symbol targetSymbol = symbolProvider.toSymbol(referentShape);
 
       // Use forward reference for reference traits to avoid circular import
       String formatString = "$L: list['$L'],";
       writer.write(
-          formatString, memberName, targetSymbol.getNamespace() + "." + targetSymbol.getName());
+        formatString,
+        memberName,
+        targetSymbol.getNamespace() + "." + targetSymbol.getName()
+      );
       return;
     }
 
     // We currently don't have any map shapes that have values with reference traits;
     // once we do, this needs to be filled in
-    if (target.isMapShape()
-        && model
-            .expectShape(target.asMapShape().get().getValue().getTarget())
-            .hasTrait(ReferenceTrait.class)) {
+    if (
+      target.isMapShape() &&
+      model
+        .expectShape(target.asMapShape().get().getValue().getTarget())
+        .hasTrait(ReferenceTrait.class)
+    ) {
       throw new IllegalArgumentException(
-          "Map shapes containing references currently unsupported: " + target);
+        "Map shapes containing references currently unsupported: " + target
+      );
     }
 
     if (target.hasTrait(ReferenceTrait.class)) {
-      Shape referentShape =
-          model.expectShape(target.expectTrait(ReferenceTrait.class).getReferentId());
+      Shape referentShape = model.expectShape(
+        target.expectTrait(ReferenceTrait.class).getReferentId()
+      );
       // Use forward reference for reference traits to avoid circular import
       String formatString = "$L: '$L',";
       writer.write(
-          formatString,
-          memberName,
-          symbolProvider.toSymbol(referentShape).getNamespace()
-              + "."
-              + symbolProvider.toSymbol(referentShape).getName());
-      writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
+        formatString,
+        memberName,
+        symbolProvider.toSymbol(referentShape).getNamespace() +
+        "." +
+        symbolProvider.toSymbol(referentShape).getName()
+      );
+      writer.addStdlibImport(
+        symbolProvider.toSymbol(referentShape).getNamespace()
+      );
     } else {
       super.writeInitMethodParameterForRequiredMember(isError, memberShape);
     }
@@ -278,24 +328,30 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    */
   @Override
   protected void writeInitMethodParameterForOptionalMember(
-      boolean isError, MemberShape memberShape) {
+    boolean isError,
+    MemberShape memberShape
+  ) {
     Shape target = model.expectShape(memberShape.getTarget());
 
     if (target.hasTrait(ReferenceTrait.class)) {
-      Shape referentShape =
-          model.expectShape(target.expectTrait(ReferenceTrait.class).getReferentId());
+      Shape referentShape = model.expectShape(
+        target.expectTrait(ReferenceTrait.class).getReferentId()
+      );
       String memberName = symbolProvider.toMemberName(memberShape);
 
       writer.addStdlibImport("typing", "Optional");
       // Use forward reference for reference traits to avoid circular import
       String formatString = "$L: Optional['$L'] = None,";
       writer.write(
-          formatString,
-          memberName,
-          symbolProvider.toSymbol(referentShape).getNamespace()
-              + "."
-              + symbolProvider.toSymbol(referentShape).getName());
-      writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
+        formatString,
+        memberName,
+        symbolProvider.toSymbol(referentShape).getNamespace() +
+        "." +
+        symbolProvider.toSymbol(referentShape).getName()
+      );
+      writer.addStdlibImport(
+        symbolProvider.toSymbol(referentShape).getNamespace()
+      );
     } else {
       super.writeInitMethodParameterForOptionalMember(isError, memberShape);
     }
@@ -312,124 +368,139 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.write("@staticmethod");
     var shapeName = symbolProvider.toSymbol(shape).getName();
     writer.openBlock(
-        "def from_dict(d: Dict[str, Any]) -> $S:",
-        "",
-        shapeName,
-        () -> {
-          writer.writeDocs(
-              () -> {
-                writer.write("Creates a $L from a dictionary.\n", shapeName);
-                writer.write(
-                    writer.formatDocs(
-                        """
-                        The dictionary is expected to use the modeled shape names rather \
-                        than the parameter names as keys to be mostly compatible with boto3."""));
-              });
-
-          if (shape.members().isEmpty() && !isError) {
-            writer.write("return $L()", shapeName);
-            return;
-          }
-
-          // Block below is new.
-          // Import any modules required for reference shapes to convert from_dict.
-          // Import within function to avoid circular imports from top-level imports
-          for (MemberShape memberShape : shape.members()) {
-            var target = model.expectShape(memberShape.getTarget());
-            if (target.hasTrait(ReferenceTrait.class)) {
-              Symbol targetSymbol = symbolProvider.toSymbol(target);
-              writer.write(
-                  "from $L import $L", targetSymbol.getNamespace(), targetSymbol.getName());
-            }
-          }
-
-          if (requiredMembers.isEmpty() && !isError) {
-            writer.write("kwargs: Dict[str, Any] = {}");
-          } else {
-            writer.openBlock(
-                "kwargs: Dict[str, Any] = {",
-                "}",
-                () -> {
-                  if (isError) {
-                    writer.write("'message': d['message'],");
-                  }
-                  for (MemberShape member : requiredMembers) {
-                    var memberName = symbolProvider.toMemberName(member);
-                    var target = model.expectShape(member.getTarget());
-                    Symbol targetSymbol = symbolProvider.toSymbol(target);
-                    // Block below is new.
-                    // If passing a boto3 client, just pass the client.
-                    if (target.hasTrait(ReferenceTrait.class)
-                        && target.expectTrait(ReferenceTrait.class).isService()
-                        && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
-                      ) {
-                          writer.write(
-                            "$S: d[$S],",
-                            memberName,
-                            memberName);
-                    } else if (target.isStructureShape()) {
-                      writer.write(
-                          "$S: $L.from_dict(d[$S]),",
-                          memberName,
-                          targetSymbol.getName(),
-                          memberName);
-                    } else if (targetSymbol.getProperty("fromDict").isPresent()) {
-                      var targetFromDictSymbol =
-                          targetSymbol.expectProperty("fromDict", Symbol.class);
-                      writer.write(
-                          "$S: $T(d[$S]),",
-                          memberName,
-                          targetFromDictSymbol,
-                          memberName);
-                    } else {
-                      writer.write("$S: d[$S],", memberName, memberName);
-                    }
-                  }
-                });
-          }
-          writer.write("");
-
-          for (MemberShape member : optionalMembers) {
-            var memberName = symbolProvider.toMemberName(member);
-            var target = model.expectShape(member.getTarget());
-            writer.openBlock(
-                "if $S in d:",
-                "",
-                memberName,
-                () -> {
-                  var targetSymbol = symbolProvider.toSymbol(target);
-                  // Block below is new.
-                  // If passing a boto3 client, just pass the client.
-                  if (target.hasTrait(ReferenceTrait.class)
-                    && target.expectTrait(ReferenceTrait.class).isService()
-                    && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
-                  ) {
-                    writer.write(
-                      "kwargs[$S] = d[$S]",
-                      memberName,
-                      memberName);
-                  } else if (target.isStructureShape()) {
-                    writer.write(
-                        "kwargs[$S] = $L.from_dict(d[$S])",
-                        memberName,
-                        targetSymbol.getName(),
-                        memberName);
-                  } else if (targetSymbol.getProperty("fromDict").isPresent()) {
-                    var targetFromDictSymbol =
-                        targetSymbol.expectProperty("fromDict", Symbol.class);
-                    writer.write(
-                        "kwargs[$S] = $T(d[$S]),",
-                        memberName,
-                        targetFromDictSymbol,
-                        memberName);
-                  } else {
-                    writer.write("kwargs[$S] = d[$S]", memberName, memberName);
-                  }
-                });
-          }
-
-          writer.write("return $L(**kwargs)", shapeName);
+      "def from_dict(d: Dict[str, Any]) -> $S:",
+      "",
+      shapeName,
+      () -> {
+        writer.writeDocs(() -> {
+          writer.write("Creates a $L from a dictionary.\n", shapeName);
+          writer.write(
+            writer.formatDocs(
+              """
+              The dictionary is expected to use the modeled shape names rather \
+              than the parameter names as keys to be mostly compatible with boto3."""
+            )
+          );
         });
+
+        if (shape.members().isEmpty() && !isError) {
+          writer.write("return $L()", shapeName);
+          return;
+        }
+
+        // Block below is new.
+        // Import any modules required for reference shapes to convert from_dict.
+        // Import within function to avoid circular imports from top-level imports
+        for (MemberShape memberShape : shape.members()) {
+          var target = model.expectShape(memberShape.getTarget());
+          if (target.hasTrait(ReferenceTrait.class)) {
+            Symbol targetSymbol = symbolProvider.toSymbol(target);
+            writer.write(
+              "from $L import $L",
+              targetSymbol.getNamespace(),
+              targetSymbol.getName()
+            );
+          }
+        }
+
+        if (requiredMembers.isEmpty() && !isError) {
+          writer.write("kwargs: Dict[str, Any] = {}");
+        } else {
+          writer.openBlock(
+            "kwargs: Dict[str, Any] = {",
+            "}",
+            () -> {
+              if (isError) {
+                writer.write("'message': d['message'],");
+              }
+              for (MemberShape member : requiredMembers) {
+                var memberName = symbolProvider.toMemberName(member);
+                var target = model.expectShape(member.getTarget());
+                Symbol targetSymbol = symbolProvider.toSymbol(target);
+                // Block below is new.
+                // If passing a boto3 client, just pass the client.
+                if (
+                  target.hasTrait(ReferenceTrait.class) &&
+                  target.expectTrait(ReferenceTrait.class).isService() &&
+                  isAwsSdkShape(
+                    target.expectTrait(ReferenceTrait.class).getReferentId()
+                  )
+                ) {
+                  writer.write("$S: d[$S],", memberName, memberName);
+                } else if (target.isStructureShape()) {
+                  writer.write(
+                    "$S: $L.from_dict(d[$S]),",
+                    memberName,
+                    targetSymbol.getName(),
+                    memberName
+                  );
+                } else if (targetSymbol.getProperty("fromDict").isPresent()) {
+                  var targetFromDictSymbol = targetSymbol.expectProperty(
+                    "fromDict",
+                    Symbol.class
+                  );
+                  writer.write(
+                    "$S: $T(d[$S]),",
+                    memberName,
+                    targetFromDictSymbol,
+                    memberName
+                  );
+                } else {
+                  writer.write("$S: d[$S],", memberName, memberName);
+                }
+              }
+            }
+          );
+        }
+        writer.write("");
+
+        for (MemberShape member : optionalMembers) {
+          var memberName = symbolProvider.toMemberName(member);
+          var target = model.expectShape(member.getTarget());
+          writer.openBlock(
+            "if $S in d:",
+            "",
+            memberName,
+            () -> {
+              var targetSymbol = symbolProvider.toSymbol(target);
+              // Block below is new.
+              // If passing a boto3 client, just pass the client.
+              if (
+                target.hasTrait(ReferenceTrait.class) &&
+                target.expectTrait(ReferenceTrait.class).isService() &&
+                isAwsSdkShape(
+                  target.expectTrait(ReferenceTrait.class).getReferentId()
+                )
+              ) {
+                writer.write("kwargs[$S] = d[$S]", memberName, memberName);
+              } else if (target.isStructureShape()) {
+                writer.write(
+                  "kwargs[$S] = $L.from_dict(d[$S])",
+                  memberName,
+                  targetSymbol.getName(),
+                  memberName
+                );
+              } else if (targetSymbol.getProperty("fromDict").isPresent()) {
+                var targetFromDictSymbol = targetSymbol.expectProperty(
+                  "fromDict",
+                  Symbol.class
+                );
+                writer.write(
+                  "kwargs[$S] = $T(d[$S]),",
+                  memberName,
+                  targetFromDictSymbol,
+                  memberName
+                );
+              } else {
+                writer.write("kwargs[$S] = d[$S]", memberName, memberName);
+              }
+            }
+          );
+        }
+
+        writer.write("return $L(**kwargs)", shapeName);
+      }
+    );
     writer.write("");
   }
 
@@ -441,82 +512,128 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    * @param isError
    */
   protected void writeAsDict(boolean isError) {
-    writer.openBlock("def as_dict(self) -> Dict[str, Any]:", "", () -> {
-      writer.writeDocs(() -> {
-        writer.write("Converts the $L to a dictionary.\n", symbolProvider.toSymbol(shape).getName());
-        writer.write(writer.formatDocs("""
-                        The dictionary uses the modeled shape names rather than the parameter names \
-                        as keys to be mostly compatible with boto3."""));
-      });
+    writer.openBlock(
+      "def as_dict(self) -> Dict[str, Any]:",
+      "",
+      () -> {
+        writer.writeDocs(() -> {
+          writer.write(
+            "Converts the $L to a dictionary.\n",
+            symbolProvider.toSymbol(shape).getName()
+          );
+          writer.write(
+            writer.formatDocs(
+              """
+              The dictionary uses the modeled shape names rather than the parameter names \
+              as keys to be mostly compatible with boto3."""
+            )
+          );
+        });
 
-      // If there aren't any optional members, it's best to return immediately.
-      String dictPrefix = optionalMembers.isEmpty() ? "return" : "d: Dict[str, Any] =";
-      if (requiredMembers.isEmpty() && !isError) {
-        writer.write("$L {}", dictPrefix);
-      } else {
-        writer.openBlock("$L {", "}", dictPrefix, () -> {
-          if (isError) {
-            writer.write("'message': self.message,");
-            writer.write("'code': self.code,");
-          }
-          for (MemberShape member : requiredMembers) {
+        // If there aren't any optional members, it's best to return immediately.
+        String dictPrefix = optionalMembers.isEmpty()
+          ? "return"
+          : "d: Dict[str, Any] =";
+        if (requiredMembers.isEmpty() && !isError) {
+          writer.write("$L {}", dictPrefix);
+        } else {
+          writer.openBlock(
+            "$L {",
+            "}",
+            dictPrefix,
+            () -> {
+              if (isError) {
+                writer.write("'message': self.message,");
+                writer.write("'code': self.code,");
+              }
+              for (MemberShape member : requiredMembers) {
+                var memberName = symbolProvider.toMemberName(member);
+                var target = model.expectShape(member.getTarget());
+                var targetSymbol = symbolProvider.toSymbol(target);
+                // Block below is new.
+                // If passing a boto3 client, just pass the client.
+                if (
+                  target.hasTrait(ReferenceTrait.class) &&
+                  target.expectTrait(ReferenceTrait.class).isService() &&
+                  isAwsSdkShape(
+                    target.expectTrait(ReferenceTrait.class).getReferentId()
+                  )
+                ) {
+                  writer.write("$S: self.$L,", memberName, memberName);
+                } else if (target.isStructureShape() || target.isUnionShape()) {
+                  writer.write(
+                    "$S: self.$L.as_dict(),",
+                    memberName,
+                    memberName
+                  );
+                } else if (targetSymbol.getProperty("asDict").isPresent()) {
+                  var targetAsDictSymbol = targetSymbol.expectProperty(
+                    "asDict",
+                    Symbol.class
+                  );
+                  writer.write(
+                    "$S: $T(self.$L),",
+                    memberName,
+                    targetAsDictSymbol,
+                    memberName
+                  );
+                } else {
+                  writer.write("$S: self.$L,", memberName, memberName);
+                }
+              }
+            }
+          );
+        }
+
+        if (!optionalMembers.isEmpty()) {
+          writer.write("");
+          for (MemberShape member : optionalMembers) {
             var memberName = symbolProvider.toMemberName(member);
             var target = model.expectShape(member.getTarget());
             var targetSymbol = symbolProvider.toSymbol(target);
-            // Block below is new.
-            // If passing a boto3 client, just pass the client.
-            if (target.hasTrait(ReferenceTrait.class)
-              && target.expectTrait(ReferenceTrait.class).isService()
-              && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
-            ) {
-                writer.write(
-                  "$S: self.$L,",
-                  memberName,
-                  memberName);
-            } else if (target.isStructureShape() || target.isUnionShape()) {
-              writer.write("$S: self.$L.as_dict(),", memberName, memberName);
-            } else if (targetSymbol.getProperty("asDict").isPresent()) {
-              var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
-              writer.write("$S: $T(self.$L),", memberName, targetAsDictSymbol, memberName);
-            } else {
-              writer.write("$S: self.$L,", memberName, memberName);
-            }
+            writer.openBlock(
+              "if self.$1L is not None:",
+              "",
+              memberName,
+              () -> {
+                // Block below is new.
+                // If passing a boto3 client, just pass the client.
+                if (
+                  target.hasTrait(ReferenceTrait.class) &&
+                  target.expectTrait(ReferenceTrait.class).isService() &&
+                  isAwsSdkShape(
+                    target.expectTrait(ReferenceTrait.class).getReferentId()
+                  )
+                ) {
+                  writer.write("d[$S] = self.$L", memberName, memberName);
+                }
+                if (target.isStructureShape() || target.isUnionShape()) {
+                  writer.write(
+                    "d[$S] = self.$L.as_dict()",
+                    memberName,
+                    memberName
+                  );
+                } else if (targetSymbol.getProperty("asDict").isPresent()) {
+                  var targetAsDictSymbol = targetSymbol.expectProperty(
+                    "asDict",
+                    Symbol.class
+                  );
+                  writer.write(
+                    "d[$S] = $T(self.$L),",
+                    memberName,
+                    targetAsDictSymbol,
+                    memberName
+                  );
+                } else {
+                  writer.write("d[$S] = self.$L", memberName, memberName);
+                }
+              }
+            );
           }
-        });
-      }
-
-      if (!optionalMembers.isEmpty()) {
-        writer.write("");
-        for (MemberShape member : optionalMembers) {
-          var memberName = symbolProvider.toMemberName(member);
-          var target = model.expectShape(member.getTarget());
-          var targetSymbol = symbolProvider.toSymbol(target);
-          writer.openBlock("if self.$1L is not None:", "", memberName, () -> {
-            // Block below is new.
-            // If passing a boto3 client, just pass the client.
-            if (target.hasTrait(ReferenceTrait.class)
-              && target.expectTrait(ReferenceTrait.class).isService()
-              && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
-            ) {
-                writer.write(
-                  "d[$S] = self.$L",
-                  memberName,
-                  memberName);
-            }
-            if (target.isStructureShape() || target.isUnionShape()) {
-              writer.write("d[$S] = self.$L.as_dict()", memberName, memberName);
-            } else if (targetSymbol.getProperty("asDict").isPresent()) {
-              var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
-              writer.write("d[$S] = $T(self.$L),", memberName, targetAsDictSymbol,
-                      memberName);
-            } else {
-              writer.write("d[$S] = self.$L", memberName, memberName);
-            }
-          });
+          writer.write("return d");
         }
-        writer.write("return d");
       }
-    });
+    );
     writer.write("");
   }
 
@@ -526,8 +643,16 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    * @param member
    * @param memberName
    */
-  protected void writeInitMethodAssignerForRequiredMember(MemberShape member, String memberName) {
-    ConstraintUtils.writeInitMethodConstraintsChecksForMember(writer, model, member, memberName);
+  protected void writeInitMethodAssignerForRequiredMember(
+    MemberShape member,
+    String memberName
+  ) {
+    ConstraintUtils.writeInitMethodConstraintsChecksForMember(
+      writer,
+      model,
+      member,
+      memberName
+    );
     writer.write("self.$1L = $1L", memberName);
   }
 
@@ -537,9 +662,20 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
    * @param member
    * @param memberName
    */
-  protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
-    ConstraintUtils.writeInitMethodConstraintsChecksForMember(writer, model, member, memberName);
+  protected void writeInitMethodAssignerForOptionalMember(
+    MemberShape member,
+    String memberName
+  ) {
+    ConstraintUtils.writeInitMethodConstraintsChecksForMember(
+      writer,
+      model,
+      member,
+      memberName
+    );
     writer.write(
-        "self.$1L = $1L if $1L is not None else $2L", memberName, getDefaultValue(writer, member));
+      "self.$1L = $1L if $1L is not None else $2L",
+      memberName,
+      getDefaultValue(writer, member)
+    );
   }
 }

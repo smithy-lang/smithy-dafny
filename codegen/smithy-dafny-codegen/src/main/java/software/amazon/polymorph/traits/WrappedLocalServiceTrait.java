@@ -19,9 +19,13 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  * implement SmithyBuildPlugins to signal that the code generation process should generate a wrapped
  * LocalService.
  */
-public class WrappedLocalServiceTrait extends AbstractTrait
-    implements ToSmithyBuilder<WrappedLocalServiceTrait> {
-  public static final ShapeId ID = ShapeId.from("aws.polymorph#wrappedLocalService");
+public class WrappedLocalServiceTrait
+  extends AbstractTrait
+  implements ToSmithyBuilder<WrappedLocalServiceTrait> {
+
+  public static final ShapeId ID = ShapeId.from(
+    "aws.polymorph#wrappedLocalService"
+  );
 
   private WrappedLocalServiceTrait(WrappedLocalServiceTrait.Builder builder) {
     super(ID, builder.getSourceLocation());
@@ -46,6 +50,7 @@ public class WrappedLocalServiceTrait extends AbstractTrait
   }
 
   public static final class Provider extends AbstractTrait.Provider {
+
     public Provider() {
       super(ID);
     }
@@ -58,7 +63,10 @@ public class WrappedLocalServiceTrait extends AbstractTrait
 
   /** Builder for {@link WrappedLocalServiceTrait}. */
   public static final class Builder
-      extends AbstractTraitBuilder<WrappedLocalServiceTrait, WrappedLocalServiceTrait.Builder> {
+    extends AbstractTraitBuilder<
+      WrappedLocalServiceTrait,
+      WrappedLocalServiceTrait.Builder
+    > {
 
     private Builder() {}
 

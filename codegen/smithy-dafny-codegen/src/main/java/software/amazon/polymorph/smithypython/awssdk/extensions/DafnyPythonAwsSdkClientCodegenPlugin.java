@@ -3,9 +3,10 @@
 
 package software.amazon.polymorph.smithypython.awssdk.extensions;
 
+import java.util.Map;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.traits.DafnyAwsSdkProtocolTrait;
-import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
@@ -19,8 +20,6 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
-import java.util.Map;
-
 /**
  * Plugin to trigger Smithy-Dafny Python code generation for AWS SDK services. This Plugin differs
  * from the PythonClientCodegenPlugin by not calling `runner.performDefaultCodegenTransforms()` and
@@ -32,11 +31,16 @@ import java.util.Map;
  * proper to define some custom protocol and use that.
  */
 @SmithyUnstableApi
-public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPlugin {
+public final class DafnyPythonAwsSdkClientCodegenPlugin
+  implements SmithyBuildPlugin {
 
-  public DafnyPythonAwsSdkClientCodegenPlugin(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+  public DafnyPythonAwsSdkClientCodegenPlugin(
+    Map<String, String> smithyNamespaceToPythonModuleNameMap
+  ) {
     super();
-    SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
+    SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(
+      smithyNamespaceToPythonModuleNameMap
+    );
   }
 
   /**
@@ -45,19 +49,28 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
    * @param serviceShape
    * @return
    */
-  public static Model addAwsSdkProtocolTrait(Model model, ServiceShape serviceShape) {
-    return ModelTransformer.create()
-        .mapShapes(
-            model,
-            shape -> {
-              if (shape instanceof ServiceShape && shape.hasTrait(LocalServiceTrait.class)) {
-                return serviceShape.toBuilder()
-                    .addTrait(DafnyAwsSdkProtocolTrait.builder().build())
-                    .build();
-              } else {
-                return shape;
-              }
-            });
+  public static Model addAwsSdkProtocolTrait(
+    Model model,
+    ServiceShape serviceShape
+  ) {
+    return ModelTransformer
+      .create()
+      .mapShapes(
+        model,
+        shape -> {
+          if (
+            shape instanceof ServiceShape &&
+            shape.hasTrait(LocalServiceTrait.class)
+          ) {
+            return serviceShape
+              .toBuilder()
+              .addTrait(DafnyAwsSdkProtocolTrait.builder().build())
+              .build();
+          } else {
+            return shape;
+          }
+        }
+      );
   }
 
   @Override
@@ -67,8 +80,12 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
 
   @Override
   public void execute(PluginContext context) {
-    final CodegenDirector<PythonWriter, PythonIntegration, GenerationContext, PythonSettings> runner =
-        new CodegenDirector<>();
+    final CodegenDirector<
+      PythonWriter,
+      PythonIntegration,
+      GenerationContext,
+      PythonSettings
+    > runner = new CodegenDirector<>();
 
     final PythonSettings settings = PythonSettings.from(context.getSettings());
     settings.setProtocol(DafnyAwsSdkProtocolTrait.ID);
@@ -81,8 +98,11 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
 
     // Add a DafnyAwsSdkProtocolTrait to the service as a contextual indicator highlighting
     //   that the DafnyPythonAwsSdk protocol should be used.
-    final ServiceShape serviceShape =
-        context.getModel().expectShape(settings.getService()).asServiceShape().get();
+    final ServiceShape serviceShape = context
+      .getModel()
+      .expectShape(settings.getService())
+      .asServiceShape()
+      .get();
     runner.model(addAwsSdkProtocolTrait(context.getModel(), serviceShape));
 
     runner.run();

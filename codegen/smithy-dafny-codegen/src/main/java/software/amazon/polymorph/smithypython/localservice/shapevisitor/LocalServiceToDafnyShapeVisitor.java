@@ -42,33 +42,35 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  *   to a Dafny-modelled shape.
  * Code that requires these conversions will call out to this file.
  */
-public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
-    private final GenerationContext context;
-    private final String dataSource;
-    private final PythonWriter writer;
-    private final String filename;
+public class LocalServiceToDafnyShapeVisitor
+  extends ShapeVisitor.Default<String> {
 
-    /**
-     * @param context The generation context.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code input.foo}, {@code entry}, etc.)
-     */
-    public LocalServiceToDafnyShapeVisitor(
-        final GenerationContext context,
-        final String dataSource,
-        final PythonWriter writer,
-        final String filename
-    ) {
-      this.context = context;
-      this.dataSource = dataSource;
-      this.writer = writer;
-      this.filename = filename;
-    }
+  private final GenerationContext context;
+  private final String dataSource;
+  private final PythonWriter writer;
+  private final String filename;
+
+  /**
+   * @param context The generation context.
+   * @param dataSource The in-code location of the data to provide an output of
+   *                   ({@code input.foo}, {@code entry}, etc.)
+   */
+  public LocalServiceToDafnyShapeVisitor(
+    final GenerationContext context,
+    final String dataSource,
+    final PythonWriter writer,
+    final String filename
+  ) {
+    this.context = context;
+    this.dataSource = dataSource;
+    this.writer = writer;
+    this.filename = filename;
+  }
 
   public LocalServiceToDafnyShapeVisitor(
-      final GenerationContext context,
-      final String dataSource,
-      final PythonWriter writer
+    final GenerationContext context,
+    final String dataSource,
+    final PythonWriter writer
   ) {
     this.context = context;
     this.dataSource = dataSource;
@@ -76,233 +78,319 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
     this.filename = "";
   }
 
-    @Override
-    protected String getDefault(Shape shape) {
-      final String protocolName = context.protocolGenerator().getName();
-      throw new CodegenException(String.format(
-          "Unsupported conversion of %s to %s using the %s protocol",
-          shape, shape.getType(), protocolName));
+  @Override
+  protected String getDefault(Shape shape) {
+    final String protocolName = context.protocolGenerator().getName();
+    throw new CodegenException(
+      String.format(
+        "Unsupported conversion of %s to %s using the %s protocol",
+        shape,
+        shape.getType(),
+        protocolName
+      )
+    );
+  }
+
+  @Override
+  public String blobShape(BlobShape shape) {
+    writer.addStdlibImport("_dafny", "Seq");
+    return "Seq(" + dataSource + ")";
+  }
+
+  @Override
+  public String structureShape(StructureShape structureShape) {
+    // ONLY write converters if the shape under generation is in the current namespace (or Unit shape)
+    if (
+      structureShape
+        .getId()
+        .getNamespace()
+        .equals(context.settings().getService().getNamespace()) ||
+      SmithyNameResolver.isUnitShape(structureShape.getId())
+    ) {
+      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
+        structureShape,
+        context,
+        writer
+      );
+      // Write the conversion method for the opposite direction to support WrappedLocalServices
+      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
+        structureShape,
+        context,
+        writer
+      );
     }
 
-    @Override
-    public String blobShape(BlobShape shape) {
-      writer.addStdlibImport("_dafny", "Seq");
-      return "Seq(" + dataSource + ")";
-    }
+    // Import the converter from where the ShapeVisitor was called
+    final String pythonModuleName =
+      SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+        structureShape.getId().getNamespace(),
+        context
+      );
+    writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
 
-    @Override
-    public String structureShape(StructureShape structureShape) {
-      // ONLY write converters if the shape under generation is in the current namespace (or Unit shape)
-      if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())
-          || SmithyNameResolver.isUnitShape(structureShape.getId())) {
-        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
-            context, writer);
-        // Write the conversion method for the opposite direction to support WrappedLocalServices
-        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
-            context, writer);
-      }
-
-      // Import the converter from where the ShapeVisitor was called
-      final String pythonModuleName = SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-          structureShape.getId().getNamespace(),
+    // Return a reference to the generated conversion method
+    // ex. for shape example.namespace.ExampleShape
+    // returns
+    // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
+    return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
+        pythonModuleName,
+        SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(
+          structureShape,
           context
+        ),
+        dataSource
       );
-      writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
+  }
 
-      // Return a reference to the generated conversion method
-      // ex. for shape example.namespace.ExampleShape
-      // returns
-      // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
-          pythonModuleName,
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context),
-          dataSource
-      );
-    }
+  @Override
+  public String listShape(ListShape shape) {
+    writer.addStdlibImport("_dafny", "Seq");
 
-    @Override
-    public String listShape(ListShape shape) {
-      writer.addStdlibImport("_dafny", "Seq");
+    final StringBuilder builder = new StringBuilder();
 
-      final StringBuilder builder = new StringBuilder();
+    // Open Dafny sequence:
+    // `Seq([`
+    builder.append("Seq([");
+    final MemberShape memberShape = shape.getMember();
+    final Shape targetShape = context
+      .model()
+      .expectShape(memberShape.getTarget());
 
-      // Open Dafny sequence:
-      // `Seq([`
-      builder.append("Seq([");
-      final MemberShape memberShape = shape.getMember();
-      final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-      // Add converted list elements into the list:
-      // `Seq([`SmithyToDafny(list_element)``
-      builder.append("%1$s".formatted(
+    // Add converted list elements into the list:
+    // `Seq([`SmithyToDafny(list_element)``
+    builder.append(
+      "%1$s".formatted(
           targetShape.accept(
-              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape, context, "list_element", writer)
-          )));
+            ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
+              targetShape,
+              context,
+              "list_element",
+              writer
+            )
+          )
+        )
+    );
 
-      // Close structure
-      // `Seq([`SmithyToDafny(list_element)` for list_element in `dataSource`])``
-      return builder.append(" for list_element in %1$s])".formatted(dataSource)).toString();
-    }
+    // Close structure
+    // `Seq([`SmithyToDafny(list_element)` for list_element in `dataSource`])``
+    return builder
+      .append(" for list_element in %1$s])".formatted(dataSource))
+      .toString();
+  }
 
-    @Override
-    public String mapShape(MapShape shape) {
-      writer.addStdlibImport("_dafny", "Map");
+  @Override
+  public String mapShape(MapShape shape) {
+    writer.addStdlibImport("_dafny", "Map");
 
-      final StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
 
-      // Open Dafny map:
-      // `Map({`
-      builder.append("Map({");
-      final MemberShape keyMemberShape = shape.getKey();
-      final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
-      final MemberShape valueMemberShape = shape.getValue();
-      final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
+    // Open Dafny map:
+    // `Map({`
+    builder.append("Map({");
+    final MemberShape keyMemberShape = shape.getKey();
+    final Shape keyTargetShape = context
+      .model()
+      .expectShape(keyMemberShape.getTarget());
+    final MemberShape valueMemberShape = shape.getValue();
+    final Shape valueTargetShape = context
+      .model()
+      .expectShape(valueMemberShape.getTarget());
 
-      // Write converted map keys into the map:
-      // `{`SmithyToDafny(key)`:`
-      builder.append("%1$s: ".formatted(
+    // Write converted map keys into the map:
+    // `{`SmithyToDafny(key)`:`
+    builder.append(
+      "%1$s: ".formatted(
           keyTargetShape.accept(
-              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(keyTargetShape, context, "key", writer)
+            ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
+              keyTargetShape,
+              context,
+              "key",
+              writer
+            )
           )
-      ));
+        )
+    );
 
-      // Write converted map values into the map:
-      // `{`SmithyToDafny(key)`: `SmithyToDafny(value)``
-      builder.append("%1$s".formatted(
+    // Write converted map values into the map:
+    // `{`SmithyToDafny(key)`: `SmithyToDafny(value)``
+    builder.append(
+      "%1$s".formatted(
           valueTargetShape.accept(
-              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(valueTargetShape, context, "value", writer)
+            ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
+              valueTargetShape,
+              context,
+              "value",
+              writer
+            )
           )
-      ));
+        )
+    );
 
-      // Complete map comprehension and close map
-      // `{`SmithyToDafny(key)`: `SmithyToDafny(value)`` for (key, value) in `dataSource`.items() }`
-      return builder.append(" for (key, value) in %1$s.items() })".formatted(dataSource)).toString();
+    // Complete map comprehension and close map
+    // `{`SmithyToDafny(key)`: `SmithyToDafny(value)`` for (key, value) in `dataSource`.items() }`
+    return builder
+      .append(" for (key, value) in %1$s.items() })".formatted(dataSource))
+      .toString();
+  }
+
+  @Override
+  public String booleanShape(BooleanShape shape) {
+    return dataSource;
+  }
+
+  @Override
+  public String stringShape(StringShape shape) {
+    writer.addStdlibImport("_dafny", "Seq");
+    if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+      writer.addStdlibImport(
+        "standard_library.internaldafny.generated",
+        "UTF8"
+      );
+      // Convert to Dafny type, then UTF8 encode
+      return "UTF8.default__.Encode(Seq(%1$s)).value".formatted(dataSource);
     }
+    // Note: Other Smithy-Dafny code generators would treat enums here,
+    // as Polymorph-compatible Smithy models often define an enum
+    // as a StringShape with an EnumTrait.
+    // Smithy-Dafny-Python converts these StringShapes to EnumShapes
+    // at model load time, so those shapes are not handled here.
+    writer.addStdlibImport("_dafny", "Seq");
+    return "Seq(" + dataSource + ")";
+  }
 
-    @Override
-    public String booleanShape(BooleanShape shape) {
-      return dataSource;
-    }
+  @Override
+  public String byteShape(ByteShape shape) {
+    return getDefault(shape);
+  }
 
-    @Override
-    public String stringShape(StringShape shape) {
-      writer.addStdlibImport("_dafny", "Seq");
-      if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-        writer.addStdlibImport("standard_library.internaldafny.generated", "UTF8");
-        // Convert to Dafny type, then UTF8 encode
-        return "UTF8.default__.Encode(Seq(%1$s)).value".formatted(dataSource);
-      }
-      // Note: Other Smithy-Dafny code generators would treat enums here,
-      // as Polymorph-compatible Smithy models often define an enum
-      // as a StringShape with an EnumTrait.
-      // Smithy-Dafny-Python converts these StringShapes to EnumShapes
-      // at model load time, so those shapes are not handled here.
-      writer.addStdlibImport("_dafny", "Seq");
-      return "Seq(" + dataSource + ")";
-    }
+  @Override
+  public String shortShape(ShortShape shape) {
+    return getDefault(shape);
+  }
 
-    @Override
-    public String byteShape(ByteShape shape) {
-      return getDefault(shape);
-    }
+  @Override
+  public String integerShape(IntegerShape shape) {
+    return dataSource;
+  }
 
-    @Override
-    public String shortShape(ShortShape shape) {
-      return getDefault(shape);
-    }
+  @Override
+  public String longShape(LongShape shape) {
+    return dataSource;
+  }
 
-    @Override
-    public String integerShape(IntegerShape shape) {
-      return dataSource;
-    }
+  @Override
+  public String bigIntegerShape(BigIntegerShape shape) {
+    return getDefault(shape);
+  }
 
-    @Override
-    public String longShape(LongShape shape) {
-      return dataSource;
-    }
+  @Override
+  public String floatShape(FloatShape shape) {
+    return getDefault(shape);
+  }
 
-    @Override
-    public String bigIntegerShape(BigIntegerShape shape) {
-      return getDefault(shape);
-    }
+  @Override
+  public String doubleShape(DoubleShape shape) {
+    return dataSource;
+  }
 
-    @Override
-    public String floatShape(FloatShape shape) {
-      return getDefault(shape);
-    }
+  @Override
+  public String bigDecimalShape(BigDecimalShape shape) {
+    return getDefault(shape);
+  }
 
-    @Override
-    public String doubleShape(DoubleShape shape) {
-      return dataSource;
-    }
-
-    @Override
-    public String bigDecimalShape(BigDecimalShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String enumShape(EnumShape shape) {
-      // ONLY write converters if the shape under generation is in the current namespace
-      if (shape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
-        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
-                context, writer);
-        // Write the conversion method for the opposite direction to support WrappedLocalServices
-        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
-                context, writer);
-      }
-
-      // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-      final String pythonModuleSmithygeneratedPath =
-              SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                      shape.getId().getNamespace(),
-                      context
-              );
-      writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".smithy_to_dafny");
-
-      // Return a reference to the generated conversion method
-      // ex. for shape example.namespace.ExampleShape
-      // returns
-      // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
-              pythonModuleSmithygeneratedPath,
-              SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(shape, context),
-              dataSource
+  @Override
+  public String enumShape(EnumShape shape) {
+    // ONLY write converters if the shape under generation is in the current namespace
+    if (
+      shape
+        .getId()
+        .getNamespace()
+        .equals(context.settings().getService().getNamespace())
+    ) {
+      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
+        shape,
+        context,
+        writer
+      );
+      // Write the conversion method for the opposite direction to support WrappedLocalServices
+      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
+        shape,
+        context,
+        writer
       );
     }
 
-    @Override
-    public String timestampShape(TimestampShape shape) {
-      throw new UnsupportedOperationException("TimestampShape from within a LocalService not supported");
-    }
+    // Import the smithy_to_dafny converter from where the ShapeVisitor was called
+    final String pythonModuleSmithygeneratedPath =
+      SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+        shape.getId().getNamespace(),
+        context
+      );
+    writer.addStdlibImport(
+      pythonModuleSmithygeneratedPath + ".smithy_to_dafny"
+    );
 
-    @Override
-    public String unionShape(UnionShape unionShape) {
-      // ONLY write converters if the shape under generation is in the current namespace
-      if (unionShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
-        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
-            context, writer);
-        // Write the conversion method for the opposite direction to support WrappedLocalServices
-        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
-            context, writer);
-      }
+    // Return a reference to the generated conversion method
+    // ex. for shape example.namespace.ExampleShape
+    // returns
+    // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
+    return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
+        pythonModuleSmithygeneratedPath,
+        SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(shape, context),
+        dataSource
+      );
+  }
 
-      // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-      final String pythonModuleSmithygeneratedPath =
-          SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-              unionShape.getId().getNamespace(),
-              context
-          );
-      writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".smithy_to_dafny");
+  @Override
+  public String timestampShape(TimestampShape shape) {
+    throw new UnsupportedOperationException(
+      "TimestampShape from within a LocalService not supported"
+    );
+  }
 
-      // Return a reference to the generated conversion method
-      // ex. for shape example.namespace.ExampleShape
-      // returns
-      // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
-          pythonModuleSmithygeneratedPath,
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape, context),
-          dataSource
+  @Override
+  public String unionShape(UnionShape unionShape) {
+    // ONLY write converters if the shape under generation is in the current namespace
+    if (
+      unionShape
+        .getId()
+        .getNamespace()
+        .equals(context.settings().getService().getNamespace())
+    ) {
+      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
+        unionShape,
+        context,
+        writer
+      );
+      // Write the conversion method for the opposite direction to support WrappedLocalServices
+      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(
+        unionShape,
+        context,
+        writer
       );
     }
+
+    // Import the smithy_to_dafny converter from where the ShapeVisitor was called
+    final String pythonModuleSmithygeneratedPath =
+      SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+        unionShape.getId().getNamespace(),
+        context
+      );
+    writer.addStdlibImport(
+      pythonModuleSmithygeneratedPath + ".smithy_to_dafny"
+    );
+
+    // Return a reference to the generated conversion method
+    // ex. for shape example.namespace.ExampleShape
+    // returns
+    // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
+    return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
+        pythonModuleSmithygeneratedPath,
+        SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(
+          unionShape,
+          context
+        ),
+        dataSource
+      );
+  }
 }

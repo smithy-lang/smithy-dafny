@@ -188,7 +188,9 @@ public class CodegenCli {
         Option
           .builder("dln")
           .longOpt("dependency-library-name")
-          .desc("namespace-to-library-name map entry for a dependency namespace")
+          .desc(
+            "namespace-to-library-name map entry for a dependency namespace"
+          )
           .hasArg()
           .build()
       )
@@ -205,7 +207,9 @@ public class CodegenCli {
         Option
           .builder("ln")
           .longOpt("library-name")
-          .desc("if generating for a language that uses library names (go, python), the name of the library in that language")
+          .desc(
+            "if generating for a language that uses library names (go, python), the name of the library in that language"
+          )
           .hasArg()
           .build()
       )
@@ -503,15 +507,18 @@ public class CodegenCli {
       // maps the Smithy namespace `aws.cryptography.materialproviders` to a module name `aws_cryptographic_materialproviders`
       // via a map key of "aws.cryptography.materialproviders" and a value of "aws_cryptographic_materialproviders"
       final Map<String, String> dependencyNamespacesToLibraryNamesMap =
-              commandLine.hasOption("dependency-library-name")
-                      ? Arrays.stream(commandLine.getOptionValues("dln"))
-                      .map(s -> s.split("="))
-                      .collect(Collectors.toMap(i -> i[0], i -> i[1]))
-                      : new HashMap<>();
+        commandLine.hasOption("dependency-library-name")
+          ? Arrays
+            .stream(commandLine.getOptionValues("dln"))
+            .map(s -> s.split("="))
+            .collect(Collectors.toMap(i -> i[0], i -> i[1]))
+          : new HashMap<>();
 
       final String namespace = commandLine.getOptionValue('n');
 
-      final Optional<String> libraryName = Optional.ofNullable(commandLine.getOptionValue("library-name"));
+      final Optional<String> libraryName = Optional.ofNullable(
+        commandLine.getOptionValue("library-name")
+      );
 
       Optional<Path> outputDafnyDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dafny"))
@@ -537,7 +544,7 @@ public class CodegenCli {
       final Optional<Path> outputRustDir = Optional
         .ofNullable(commandLine.getOptionValue("output-rust"))
         .map(Paths::get);
-    final Optional<Path> outputPythonDir = Optional
+      final Optional<Path> outputPythonDir = Optional
         .ofNullable(commandLine.getOptionValue("output-python"))
         .map(Paths::get);
 

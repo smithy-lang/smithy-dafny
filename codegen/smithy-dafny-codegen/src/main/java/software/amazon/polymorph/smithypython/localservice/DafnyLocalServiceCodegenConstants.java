@@ -7,10 +7,10 @@ public class DafnyLocalServiceCodegenConstants {
 
   // Dafny ApplicationProtocol constants
   public static String DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL_NAME =
-      "dafny_python_local_service";
+    "dafny_python_local_service";
   public static String DAFNY_PROTOCOL_PYTHON_FILENAME = ".dafny_protocol";
   public static String DAFNY_PROTOCOL_REQUEST = "DafnyRequest";
   public static String DAFNY_PROTOCOL_RESPONSE = "DafnyResponse";
   public static String LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME =
-      "localservice_codegen_todelete";
+    "localservice_codegen_todelete";
 }

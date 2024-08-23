@@ -32,7 +32,10 @@ import software.amazon.smithy.utils.StringUtils;
  */
 public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
 
-  public DafnyPythonLocalServiceSymbolVisitor(Model model, PythonSettings settings) {
+  public DafnyPythonLocalServiceSymbolVisitor(
+    Model model,
+    PythonSettings settings
+  ) {
     super(model, settings);
   }
 
@@ -43,12 +46,17 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    * @return
    */
   protected String getSymbolNamespacePathForNamespaceAndFilename(
-      String namespace, String filename) {
+    String namespace,
+    String filename
+  ) {
     return format(
-        "%s.%s",
-        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-            namespace, settings),
-        filename);
+      "%s.%s",
+      SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+        namespace,
+        settings
+      ),
+      filename
+    );
   }
 
   /**
@@ -58,15 +66,20 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    * @return
    */
   protected String getSymbolDefinitionFilePathForNamespaceAndFilename(
-      String namespace, String filename) {
+    String namespace,
+    String filename
+  ) {
     String directoryFilePath;
     if ("smithy.api".equals(namespace)) {
       directoryFilePath =
-          SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-              settings.getService().getNamespace());
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+          settings.getService().getNamespace()
+        );
     } else {
       directoryFilePath =
-          SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(namespace);
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+          namespace
+        );
     }
 
     return format("./%s/%s.py", directoryFilePath, filename);
@@ -81,51 +94,57 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   @Override
   public Symbol serviceShape(ServiceShape serviceShape) {
     String generationPath =
-        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            settings.getService().getNamespace());
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        settings.getService().getNamespace()
+      );
 
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       String name = getDefaultShapeName(serviceShape);
       String filename = "client";
-      String definitionFile =
-          serviceShape.getId().equals(settings.getService())
-              ? getSymbolDefinitionFilePathForNamespaceAndFilename(
-                  serviceShape.getId().getNamespace(), filename)
-              // Smithy and Smithy-Python will always attempt to write a referenced symbol.
-              // There is no way to disable writing referenced symbols, even for externally-defined
-              // symbols.
-              // We don't want to write a LocalService symbol, since it is either in this project's
-              // `client.py`,
-              //   or is already written in another project's `client.py`.
-              // As a workaround, dump dependency localService symbols to a file that will be
-              // deleted after codegen.
-              // Typehints will reference the `namespace` and `serviceShape` name and not this file.
-              : generationPath
-                  + "/"
-                  + DafnyLocalServiceCodegenConstants
-                      .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
-                  + ".py";
+      String definitionFile = serviceShape.getId().equals(settings.getService())
+        ? getSymbolDefinitionFilePathForNamespaceAndFilename(
+          serviceShape.getId().getNamespace(),
+          filename
+        )
+        // Smithy and Smithy-Python will always attempt to write a referenced symbol.
+        // There is no way to disable writing referenced symbols, even for externally-defined
+        // symbols.
+        // We don't want to write a LocalService symbol, since it is either in this project's
+        // `client.py`,
+        //   or is already written in another project's `client.py`.
+        // As a workaround, dump dependency localService symbols to a file that will be
+        // deleted after codegen.
+        // Typehints will reference the `namespace` and `serviceShape` name and not this file.
+        : generationPath +
+        "/" +
+        DafnyLocalServiceCodegenConstants.LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME +
+        ".py";
       return createSymbolBuilder(
-              serviceShape,
-              name,
-              getSymbolNamespacePathForNamespaceAndFilename(
-                  serviceShape.getId().getNamespace(), filename))
-          .definitionFile(definitionFile)
-          .build();
+        serviceShape,
+        name,
+        getSymbolNamespacePathForNamespaceAndFilename(
+          serviceShape.getId().getNamespace(),
+          filename
+        )
+      )
+        .definitionFile(definitionFile)
+        .build();
     } else if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
       return createSymbolBuilder(serviceShape, "BaseClient", "botocore.client")
-          // Same as above; there is no way to disable writing referenced symbols.
-          // Dump boto3 client type into a file that will be deleted after codegen.
-          // Typehints will reference boto3 clients as `botocore.client.BaseClient`.
-          .definitionFile(
-              generationPath
-                  + "/"
-                  + DafnyLocalServiceCodegenConstants
-                      .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
-                  + ".py")
-          .build();
+        // Same as above; there is no way to disable writing referenced symbols.
+        // Dump boto3 client type into a file that will be deleted after codegen.
+        // Typehints will reference boto3 clients as `botocore.client.BaseClient`.
+        .definitionFile(
+          generationPath +
+          "/" +
+          DafnyLocalServiceCodegenConstants.LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME +
+          ".py"
+        )
+        .build();
     } else {
-      throw new IllegalArgumentException("ServiceShape not supported: " + serviceShape);
+      throw new IllegalArgumentException(
+        "ServiceShape not supported: " + serviceShape
+      );
     }
   }
 
@@ -140,8 +159,9 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     String filename = "references";
 
     String generationPath =
-        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            settings.getService().getNamespace());
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        settings.getService().getNamespace()
+      );
 
     // Smithy and Smithy-Python will always attempt to write a referenced symbol.
     // There is no way to disable writing referenced symbols, even for externally-defined symbols.
@@ -151,17 +171,20 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     // As a workaround, dump dependency reference symbols to a file that will be deleted after
     // codegen.
     // Typehints will reference the `namespace` and `resourceShape` name and not this file.
-      return createSymbolBuilder(
-          resourceShape,
-          name,
-          getSymbolNamespacePathForNamespaceAndFilename(
-              resourceShape.getId().getNamespace(), filename))
+    return createSymbolBuilder(
+      resourceShape,
+      name,
+      getSymbolNamespacePathForNamespaceAndFilename(
+        resourceShape.getId().getNamespace(),
+        filename
+      )
+    )
       .definitionFile(
-          generationPath
-              + "/"
-              + DafnyLocalServiceCodegenConstants
-                  .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
-              + ".py")
+        generationPath +
+        "/" +
+        DafnyLocalServiceCodegenConstants.LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME +
+        ".py"
+      )
       .putProperty("stdlib", true)
       .build();
   }
@@ -177,33 +200,49 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     if (shape.hasTrait(ErrorTrait.class)) {
       String filename = "errors";
       return createSymbolBuilder(
-              shape,
-              name,
-              getSymbolNamespacePathForNamespaceAndFilename(shape.getId().getNamespace(), filename))
-          .definitionFile(
-              getSymbolDefinitionFilePathForNamespaceAndFilename(
-                  shape.getId().getNamespace(), filename))
-          .build();
+        shape,
+        name,
+        getSymbolNamespacePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+        .definitionFile(
+          getSymbolDefinitionFilePathForNamespaceAndFilename(
+            shape.getId().getNamespace(),
+            filename
+          )
+        )
+        .build();
     }
 
-    Set<ShapeId> localServiceConfigShapes = SmithyNameResolver.getLocalServiceConfigShapes(model);
+    Set<ShapeId> localServiceConfigShapes =
+      SmithyNameResolver.getLocalServiceConfigShapes(model);
     if (localServiceConfigShapes.contains(shape.getId())) {
       String filename = "config";
       return createSymbolBuilder(
-              shape,
-              name,
-              getSymbolNamespacePathForNamespaceAndFilename(shape.getId().getNamespace(), filename))
-          .definitionFile(
-              getSymbolDefinitionFilePathForNamespaceAndFilename(
-                  shape.getId().getNamespace(), filename))
-          .build();
+        shape,
+        name,
+        getSymbolNamespacePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+        .definitionFile(
+          getSymbolDefinitionFilePathForNamespaceAndFilename(
+            shape.getId().getNamespace(),
+            filename
+          )
+        )
+        .build();
     }
 
     if (shape.hasTrait(PositionalTrait.class)) {
       String filename = "models";
       String generationPath =
-              SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-                      settings.getService().getNamespace());
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+          settings.getService().getNamespace()
+        );
       MemberShape memberShape = PositionalTrait.onlyMember(shape);
       ShapeId targetShapeId = memberShape.getTarget();
       Shape targetShape = model.expectShape(targetShapeId);
@@ -212,22 +251,27 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
         return structureShape(targetShape.asStructureShape().get());
       }
       return createSymbolBuilder(
-              targetShape,
-              targetShapeName,
-              getSymbolNamespacePathForNamespaceAndFilename(
-                      targetShapeId.getNamespace(), filename))
-              .definitionFile(
-                      generationPath
-                              + "/"
-                              + DafnyLocalServiceCodegenConstants
-                              .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
-                              + ".py")
-              .putProperty("stdlib", true)
-              .build();
+        targetShape,
+        targetShapeName,
+        getSymbolNamespacePathForNamespaceAndFilename(
+          targetShapeId.getNamespace(),
+          filename
+        )
+      )
+        .definitionFile(
+          generationPath +
+          "/" +
+          DafnyLocalServiceCodegenConstants.LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME +
+          ".py"
+        )
+        .putProperty("stdlib", true)
+        .build();
     }
 
     if (shape.hasTrait(ReferenceTrait.class)) {
-      ShapeId referentShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
+      ShapeId referentShapeId = shape
+        .expectTrait(ReferenceTrait.class)
+        .getReferentId();
       Shape referentShape = model.expectShape(referentShapeId);
       if (referentShape.isResourceShape()) {
         return resourceShape(referentShape.asResourceShape().get());
@@ -235,19 +279,28 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
       if (referentShape.isServiceShape()) {
         return serviceShape(referentShape.asServiceShape().get());
       } else {
-        throw new IllegalArgumentException("Referent shape is not of a supported type: " + shape);
+        throw new IllegalArgumentException(
+          "Referent shape is not of a supported type: " + shape
+        );
       }
     }
 
     String filename = "models";
     return createSymbolBuilder(
-            shape,
-            name,
-            getSymbolNamespacePathForNamespaceAndFilename(shape.getId().getNamespace(), filename))
-        .definitionFile(
-            getSymbolDefinitionFilePathForNamespaceAndFilename(
-                shape.getId().getNamespace(), filename))
-        .build();
+      shape,
+      name,
+      getSymbolNamespacePathForNamespaceAndFilename(
+        shape.getId().getNamespace(),
+        filename
+      )
+    )
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+      .build();
   }
 
   /**
@@ -281,21 +334,31 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     if (container.isUnionShape()) {
       // Union members, unlike other shape members, have types generated for them.
       var containerSymbol = container.accept(this);
-      var name = containerSymbol.getName() + StringUtils.capitalize(shape.getMemberName());
+      var name =
+        containerSymbol.getName() +
+        StringUtils.capitalize(shape.getMemberName());
       String filename = "models";
       return createSymbolBuilder(
-              shape,
-              name,
-              getSymbolNamespacePathForNamespaceAndFilename(shape.getId().getNamespace(), filename))
-          .definitionFile(
-              getSymbolDefinitionFilePathForNamespaceAndFilename(
-                  shape.getId().getNamespace(), filename))
-          .build();
+        shape,
+        name,
+        getSymbolNamespacePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+        .definitionFile(
+          getSymbolDefinitionFilePathForNamespaceAndFilename(
+            shape.getId().getNamespace(),
+            filename
+          )
+        )
+        .build();
     }
-    Shape targetShape =
-        model
-            .getShape(shape.getTarget())
-            .orElseThrow(() -> new CodegenException("Shape not found: " + shape.getTarget()));
+    Shape targetShape = model
+      .getShape(shape.getTarget())
+      .orElseThrow(() ->
+        new CodegenException("Shape not found: " + shape.getTarget())
+      );
     return toSymbol(targetShape);
   }
 
@@ -309,16 +372,21 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     var builder = createSymbolBuilder(shape, "str");
     String name = getDefaultShapeName(shape);
     String filename = "models";
-    Symbol enumSymbol =
-        createSymbolBuilder(
-                shape,
-                name,
-                getSymbolNamespacePathForNamespaceAndFilename(
-                    shape.getId().getNamespace(), filename))
-            .definitionFile(
-                getSymbolDefinitionFilePathForNamespaceAndFilename(
-                    shape.getId().getNamespace(), filename))
-            .build();
+    Symbol enumSymbol = createSymbolBuilder(
+      shape,
+      name,
+      getSymbolNamespacePathForNamespaceAndFilename(
+        shape.getId().getNamespace(),
+        filename
+      )
+    )
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+      .build();
 
     // We add this enum symbol as a property on a generic string symbol
     // rather than returning the enum symbol directly because we only
@@ -339,16 +407,21 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     var builder = createSymbolBuilder(shape, "int");
     String name = getDefaultShapeName(shape);
     String filename = "models";
-    Symbol enumSymbol =
-        createSymbolBuilder(
-                shape,
-                name,
-                getSymbolNamespacePathForNamespaceAndFilename(
-                    shape.getId().getNamespace(), filename))
-            .definitionFile(
-                getSymbolDefinitionFilePathForNamespaceAndFilename(
-                    shape.getId().getNamespace(), filename))
-            .build();
+    Symbol enumSymbol = createSymbolBuilder(
+      shape,
+      name,
+      getSymbolNamespacePathForNamespaceAndFilename(
+        shape.getId().getNamespace(),
+        filename
+      )
+    )
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+      .build();
 
     // Like string enums, int enums are plain ints when used as members.
     builder.putProperty("enumSymbol", escaper.escapeSymbol(shape, enumSymbol));
@@ -366,27 +439,39 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
 
     var unknownName = name + "Unknown";
     String filename = "models";
-    var unknownSymbol =
-        createSymbolBuilder(
-                shape,
-                name,
-                getSymbolNamespacePathForNamespaceAndFilename(
-                    shape.getId().getNamespace(), filename))
-            .definitionFile(
-                getSymbolDefinitionFilePathForNamespaceAndFilename(
-                    shape.getId().getNamespace(), filename))
-            .build();
+    var unknownSymbol = createSymbolBuilder(
+      shape,
+      name,
+      getSymbolNamespacePathForNamespaceAndFilename(
+        shape.getId().getNamespace(),
+        filename
+      )
+    )
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+      .build();
 
     return createSymbolBuilder(
-            shape,
-            name,
-            getSymbolNamespacePathForNamespaceAndFilename(shape.getId().getNamespace(), filename))
-        .definitionFile(
-            getSymbolDefinitionFilePathForNamespaceAndFilename(
-                shape.getId().getNamespace(), filename))
-        .putProperty("fromDict", createFromDictFunctionSymbol(shape))
-        .putProperty("unknown", unknownSymbol)
-        .build();
+      shape,
+      name,
+      getSymbolNamespacePathForNamespaceAndFilename(
+        shape.getId().getNamespace(),
+        filename
+      )
+    )
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+      .putProperty("fromDict", createFromDictFunctionSymbol(shape))
+      .putProperty("unknown", unknownSymbol)
+      .build();
   }
 
   /**
@@ -397,15 +482,28 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   @Override
   protected Symbol createAsDictFunctionSymbol(Shape shape) {
     String filename = "models";
-    return Symbol.builder()
-        .name(String.format("_%s_as_dict", CaseUtils.toSnakeCase(shape.getId().getName())))
-        .namespace(
-            getSymbolNamespacePathForNamespaceAndFilename(shape.getId().getNamespace(), filename),
-            ".")
-        .definitionFile(
-            getSymbolDefinitionFilePathForNamespaceAndFilename(
-                shape.getId().getNamespace(), filename))
-        .build();
+    return Symbol
+      .builder()
+      .name(
+        String.format(
+          "_%s_as_dict",
+          CaseUtils.toSnakeCase(shape.getId().getName())
+        )
+      )
+      .namespace(
+        getSymbolNamespacePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        ),
+        "."
+      )
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+      .build();
   }
 
   /**
@@ -416,14 +514,27 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   @Override
   protected Symbol createFromDictFunctionSymbol(Shape shape) {
     String filename = "models";
-    return Symbol.builder()
-        .name(String.format("_%s_from_dict", CaseUtils.toSnakeCase(shape.getId().getName())))
-        .namespace(
-            getSymbolNamespacePathForNamespaceAndFilename(shape.getId().getNamespace(), filename),
-            ".")
-        .definitionFile(
-            getSymbolDefinitionFilePathForNamespaceAndFilename(
-                shape.getId().getNamespace(), filename))
-        .build();
+    return Symbol
+      .builder()
+      .name(
+        String.format(
+          "_%s_from_dict",
+          CaseUtils.toSnakeCase(shape.getId().getName())
+        )
+      )
+      .namespace(
+        getSymbolNamespacePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        ),
+        "."
+      )
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          filename
+        )
+      )
+      .build();
   }
 }
