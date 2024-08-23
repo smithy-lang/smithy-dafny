@@ -76,6 +76,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(operationModule());
     result.addAll(serviceOperationImplementationModules());
 
+    // conversions
     result.add(conversionsModule());
     result.add(conversionsErrorModule());
     result.addAll(configConversionModules());
@@ -218,18 +219,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       /// Types for the `$operationName:L` operation.
       pub mod $snakeCaseOperationName:L;
       """;
-    final Map<String, String> variables = Map.of(
-      "operationModules",
-      serviceOperationShapes()
+    final String content = serviceOperationShapes()
         .map(this::operationVariables)
         .map(opVariables -> IOUtils.evalTemplate(opTemplate, opVariables))
-        .collect(Collectors.joining("\n\n"))
-    );
-    final String content = IOUtils.evalTemplate(
-      getClass(),
-      "runtimes/rust/operation.rs",
-      variables
-    );
+        .collect(Collectors.joining("\n\n"));
     return new RustFile(Path.of("src", "operation.rs"), TokenTree.of(content));
   }
 
