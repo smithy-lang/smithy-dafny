@@ -16,8 +16,8 @@ pub fn value(&self) -> ::std::option::Option<::std::primitive::i64> {
 }
 impl GetLongInput {
     /// Creates a new builder-style object to manufacture [`GetLongInput`](crate::operation::operation::GetLongInput).
-    pub fn builder() -> crate::operation::get_long::builders::GetLongInputBuilder {
-        crate::operation::get_long::builders::GetLongInputBuilder::default()
+    pub fn builder() -> crate::operation::get_long_known_value_test::builders::GetLongInputBuilder {
+        crate::operation::get_long_known_value_test::builders::GetLongInputBuilder::default()
     }
 }
 
@@ -48,10 +48,10 @@ pub fn get_value(&self) -> &::std::option::Option<::std::primitive::i64> {
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_long::GetLongInput,
+        crate::operation::get_long_known_value_test::GetLongInput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_long::GetLongInput {
+        ::std::result::Result::Ok(crate::operation::get_long_known_value_test::GetLongInput {
             value: self.value,
         })
     }

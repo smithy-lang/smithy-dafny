@@ -4,32 +4,32 @@
 #[allow(missing_docs)] // documentation missing in model
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-pub struct GetLongInput {
+pub struct GetLongOutput {
     #[allow(missing_docs)] // documentation missing in model
 pub value: ::std::option::Option<::std::primitive::i64>,
 }
-impl GetLongInput {
+impl GetLongOutput {
     #[allow(missing_docs)] // documentation missing in model
 pub fn value(&self) -> ::std::option::Option<::std::primitive::i64> {
     self.value
 }
 }
-impl GetLongInput {
-    /// Creates a new builder-style object to manufacture [`GetLongInput`](crate::operation::operation::GetLongInput).
-    pub fn builder() -> crate::operation::get_long::builders::GetLongInputBuilder {
-        crate::operation::get_long::builders::GetLongInputBuilder::default()
+impl GetLongOutput {
+    /// Creates a new builder-style object to manufacture [`GetLongOutput`](crate::operation::operation::GetLongOutput).
+    pub fn builder() -> crate::operation::get_long_known_value_test::builders::GetLongOutputBuilder {
+        crate::operation::get_long_known_value_test::builders::GetLongOutputBuilder::default()
     }
 }
 
-/// A builder for [`GetLongInput`](crate::operation::operation::GetLongInput).
+/// A builder for [`GetLongOutput`](crate::operation::operation::GetLongOutput).
 #[non_exhaustive]
 #[derive(
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
-pub struct GetLongInputBuilder {
+pub struct GetLongOutputBuilder {
     pub(crate) value: ::std::option::Option<::std::primitive::i64>,
 }
-impl GetLongInputBuilder {
+impl GetLongOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
 pub fn value(mut self, input: impl ::std::convert::Into<::std::primitive::i64>) -> Self {
     self.value = ::std::option::Option::Some(input.into());
@@ -44,14 +44,14 @@ pub fn set_value(mut self, input: ::std::option::Option<::std::primitive::i64>) 
 pub fn get_value(&self) -> &::std::option::Option<::std::primitive::i64> {
     &self.value
 }
-    /// Consumes the builder and constructs a [`GetLongInput`](crate::operation::operation::GetLongInput).
+    /// Consumes the builder and constructs a [`GetLongOutput`](crate::operation::operation::GetLongOutput).
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_long::GetLongInput,
+        crate::operation::get_long_known_value_test::GetLongOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_long::GetLongInput {
+        ::std::result::Result::Ok(crate::operation::get_long_known_value_test::GetLongOutput {
             value: self.value,
         })
     }
