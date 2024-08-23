@@ -571,22 +571,26 @@ public abstract class AbstractRustShimGenerator {
   ) {
     Shape targetShape = model.expectShape(member.getTarget());
     String snakeCaseMemberName = toSnakeCase(member.getMemberName());
-    boolean isRequired = member.hasTrait(RequiredTrait.class);
-    // These rules were mostly reverse-engineered from inspection of Rust SDKs,
-    // and may not be complete!
-    boolean isRustRequired =
-      (isRequired &&
-        !operationIndex.isOutputStructure(parent) &&
-        !operationIndex.isInputStructure(parent) &&
-        !targetShape.isStructureShape()) ||
-      (operationIndex.isOutputStructure(parent) &&
-        targetShape.isIntegerShape());
     return toDafny(
       targetShape,
       "value." + snakeCaseMemberName,
-      !isRustRequired,
-      !isRequired
+      !isRustFieldRequired(parent, member),
+      !hasRequiredTrait(member)
     );
+  }
+
+  protected final boolean hasRequiredTrait(final MemberShape member) {
+    return member.hasTrait(RequiredTrait.class);
+  }
+
+  protected boolean isRustFieldRequired(final Shape parent, final MemberShape member) {
+    // These rules were mostly reverse-engineered from inspection of Rust SDKs,
+    // and may not be complete!
+    final Shape targetShape = model.expectShape(member.getTarget());
+    return hasRequiredTrait(member) &&
+        !operationIndex.isOutputStructure(parent) &&
+        !operationIndex.isInputStructure(parent) &&
+        !targetShape.isStructureShape();
   }
 
   /**
@@ -1066,6 +1070,8 @@ public abstract class AbstractRustShimGenerator {
     final String opName = operationName(operationShape);
     final String opInputName = operationInputName(operationShape);
     final String opOutputName = operationOutputName(operationShape);
+    final String synOpInputName = syntheticOperationInputName(operationShape);
+    final String synOpOutputName = syntheticOperationOutputName(operationShape);
     final String snakeCaseOpName = toSnakeCase(opName);
 
     final HashMap<String, String> variables = new HashMap<>();
@@ -1073,16 +1079,18 @@ public abstract class AbstractRustShimGenerator {
     variables.put("operationInputName", opInputName);
     variables.put("operationOutputName", opOutputName);
     variables.put("operationErrorName", operationErrorTypeName(operationShape));
+    variables.put("syntheticOperationInputName", synOpInputName);
+    variables.put("syntheticOperationOutputName", synOpOutputName);
     variables.put("snakeCaseOperationName", snakeCaseOpName);
     variables.put("snakeCaseOperationInputName", toSnakeCase(opInputName));
     variables.put("snakeCaseOperationOutputName", toSnakeCase(opOutputName));
     variables.put(
-      "syntheticOperationInputName",
-      syntheticOperationInputName(operationShape)
+      "snakeCaseSyntheticOperationInputName",
+      toSnakeCase(synOpInputName)
     );
     variables.put(
-      "syntheticOperationOutputName",
-      syntheticOperationOutputName(operationShape)
+      "snakeCaseSyntheticOperationOutputName",
+      toSnakeCase(synOpOutputName)
     );
     return variables;
   }
