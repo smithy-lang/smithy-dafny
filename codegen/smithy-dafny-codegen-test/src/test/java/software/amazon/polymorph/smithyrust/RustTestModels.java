@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import software.amazon.polymorph.TestModelTest;
 
 class RustTestModels extends TestModelTest {
+
   private static final Set<String> DISABLED_TESTS = new HashSet<>();
 
   static {

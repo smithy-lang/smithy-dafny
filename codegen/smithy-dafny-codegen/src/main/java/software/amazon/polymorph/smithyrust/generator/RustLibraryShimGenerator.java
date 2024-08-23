@@ -220,9 +220,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       pub mod $snakeCaseOperationName:L;
       """;
     final String content = serviceOperationShapes()
-        .map(this::operationVariables)
-        .map(opVariables -> IOUtils.evalTemplate(opTemplate, opVariables))
-        .collect(Collectors.joining("\n\n"));
+      .map(this::operationVariables)
+      .map(opVariables -> IOUtils.evalTemplate(opTemplate, opVariables))
+      .collect(Collectors.joining("\n\n"));
     return new RustFile(Path.of("src", "operation.rs"), TokenTree.of(content));
   }
 

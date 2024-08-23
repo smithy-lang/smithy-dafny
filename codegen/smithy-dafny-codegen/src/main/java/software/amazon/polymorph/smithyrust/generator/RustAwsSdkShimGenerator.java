@@ -582,7 +582,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected String getDafnyModuleName() {
-    return "software::amazon::cryptography::services::%s".formatted(getSdkId().toLowerCase());
+    return "software::amazon::cryptography::services::%s".formatted(
+        getSdkId().toLowerCase()
+      );
   }
 
   private String getSdkId() {
@@ -618,10 +620,20 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected HashMap<String, String> operationVariables(OperationShape operationShape) {
-    final HashMap<String, String> variables = super.operationVariables(operationShape);
-    variables.put("sdkOperationInputStruct", sdkOperationInputStruct(operationShape));
-    variables.put("sdkOperationOutputStruct", sdkOperationOutputStruct(operationShape));
+  protected HashMap<String, String> operationVariables(
+    OperationShape operationShape
+  ) {
+    final HashMap<String, String> variables = super.operationVariables(
+      operationShape
+    );
+    variables.put(
+      "sdkOperationInputStruct",
+      sdkOperationInputStruct(operationShape)
+    );
+    variables.put(
+      "sdkOperationOutputStruct",
+      sdkOperationOutputStruct(operationShape)
+    );
     return variables;
   }
 }
