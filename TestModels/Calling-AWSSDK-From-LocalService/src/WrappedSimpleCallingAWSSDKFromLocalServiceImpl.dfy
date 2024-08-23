@@ -4,7 +4,7 @@ include "../Model/SimpleCallingawssdkfromlocalserviceTypesWrapped.dfy"
 
 module {:extern "simple.callingawssdkfromlocalservice.internaldafny.wrapped"} WrappedCallingAWSSDKFromLocalServiceService refines WrappedAbstractSimpleCallingawssdkfromlocalserviceService {
     import WrappedService = SimpleCallingAWSSDKFromLocalService
-    function method WrappedDefaultSimpleCallingawssdkfromlocalserviceConfig(): SimpleCallingAWSSDKFromLocalServiceConfig {
+    function method WrappedDefaultSimpleCallingAWSSDKFromLocalServiceConfig(): SimpleCallingAWSSDKFromLocalServiceConfig {
         WrappedService.DefaultSimpleCallingAWSSDKFromLocalServiceConfig()
     }
 }
