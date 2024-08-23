@@ -9,3 +9,11 @@ format_java_misc-check: setup_prettier
 
 setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
+
+mvn_local_deploy_polymorph_dependencies:
+	cd smithy-dafny-codegen-modules/smithy-rs; \
+	./gradlew :codegen-client:pTML :codegen-core:pTML :rust-runtime:pTML
+
+mvn_local_deploy_polymorph:
+	cd codegen; \
+	./gradlew :smithy-dafny-codegen:pTML
