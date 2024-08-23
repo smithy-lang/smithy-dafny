@@ -13,7 +13,7 @@ service SimpleCallingAWSSDKFromLocalService {
   version: "2021-11-01",
   resources: [],
   operations: [ CallDDB ],
-  errors: [],
+  errors: [ SimpleCallingAWSSDKFromLocalServiceException ],
 }
 
 structure SimpleCallingAWSSDKFromLocalServiceConfig {}
@@ -26,8 +26,18 @@ operation CallDDB {
 structure CallDDBInput {
   @required
   tableArn: com.amazonaws.dynamodb#TableArn
+  MyString: MyString,
 }
 
+@length(min: 1, max: 10)
+string MyString
+
 structure CallDDBOutput {
-  
+  MyString: MyString,
+}
+
+@error("client")
+structure SimpleCallingAWSSDKFromLocalServiceException {
+  @required
+  message: String,
 }

@@ -6,6 +6,7 @@ include "../src/WrappedSimpleCallingAWSSDKFromLocalServiceImpl.dfy"
 module SimpleCallingAWSSDKFromLocalServiceImplTest {
     import ComAmazonawsDynamodbTypes
     import SimpleCallingAWSSDKFromLocalService
+
     import opened SimpleCallingawssdkfromlocalserviceTypes
     import opened Wrappers
     method{:test} CallDDB(){
@@ -19,7 +20,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
       ensures client.ValidState()
     {
         var arn: ComAmazonawsDynamodbTypes.TableArn := "1";
-        var ret :- expect client.CallDDB(SimpleCallingAWSSDKFromLocalService.Types.CallDDBInput(tableArn:= arn));
+        var ret :- expect client.CallDDB(SimpleCallingAWSSDKFromLocalService.Types.CallDDBInput(tableArn:= arn, MyString := Some("abc")));
         print ret;
     }
 }
