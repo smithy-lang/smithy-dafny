@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -1041,7 +1042,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String getDafnyModuleName() {
-    return service.getId().getNamespace().replace(".", "::");
+    return service.getId().getNamespace().replace(".", "::").toLowerCase(Locale.ROOT);
   }
 
   protected String getDafnyInternalModuleName() {
