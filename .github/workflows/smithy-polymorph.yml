@@ -31,17 +31,8 @@ jobs:
           # Matching the hard-coded version for the "2023" edition for now
           dafny-version: 4.1.0
 
-      - name: Install smithy-dafny-codegen Rust dependencies locally
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: :codegen-client:pTML :codegen-core:pTML :rust-runtime:pTML
-          build-root-directory: smithy-dafny-codegen-modules/smithy-rs
-      
-      - name: Install smithy-dafny-codegen Python dependencies locally
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: :smithy-python-codegen:pTML
-          build-root-directory: codegen/smithy-dafny-codegen-modules/smithy-python/codegen
+      - name: Install Smithy-Dafny codegen dependencies
+        uses: ./.github/actions/build_dafny_from_source
 
       - name: Execute smithy-dafny-codegen-cli tests
         uses: gradle/gradle-build-action@v2
