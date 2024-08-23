@@ -1,9 +1,9 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-pub use crate::operation::get_integer::_get_integer_output::GetIntegerOutputBuilder;
+pub use crate::operation::get_integer_known_value_test::_get_integer_output::GetIntegerOutputBuilder;
 
-pub use crate::operation::get_integer::_get_integer_input::GetIntegerInputBuilder;
+pub use crate::operation::get_integer_known_value_test::_get_integer_input::GetIntegerInputBuilder;
 
 impl GetIntegerInputBuilder {
     /// Sends a request with this input using the given client.
@@ -11,50 +11,50 @@ impl GetIntegerInputBuilder {
         self,
         client: &crate::Client,
     ) -> ::std::result::Result<
-        crate::operation::get_integer::GetIntegerOutput,
-        crate::operation::get_integer::GetIntegerError,
+        crate::operation::get_integer_known_value_test::GetIntegerOutput,
+        crate::operation::get_integer_known_value_test::GetIntegerKnownValueTestError,
     > {
-        let mut fluent_builder = client.get_integer();
+        let mut fluent_builder = client.get_integer_known_value_test();
         fluent_builder.inner = self;
         fluent_builder.send().await
     }
 }
-/// Fluent builder constructing a request to `GetInteger`.
+/// Fluent builder constructing a request to `GetIntegerKnownValueTest`.
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
-pub struct GetIntegerFluentBuilder {
+pub struct GetIntegerKnownValueTestFluentBuilder {
     client: crate::client::Client,
-    pub(crate) inner: crate::operation::get_integer::builders::GetIntegerInputBuilder,
+    pub(crate) inner: crate::operation::get_integer_known_value_test::builders::GetIntegerInputBuilder,
 }
-impl GetIntegerFluentBuilder {
-    /// Creates a new `GetInteger`.
+impl GetIntegerKnownValueTestFluentBuilder {
+    /// Creates a new `GetIntegerKnownValueTest`.
     pub(crate) fn new(client: crate::client::Client) -> Self {
         Self {
             client,
             inner: ::std::default::Default::default(),
         }
     }
-    /// Access the GetInteger as a reference.
-    pub fn as_input(&self) -> &crate::operation::get_integer::builders::GetIntegerInputBuilder {
+    /// Access the GetIntegerKnownValueTest as a reference.
+    pub fn as_input(&self) -> &crate::operation::get_integer_known_value_test::builders::GetIntegerInputBuilder {
         &self.inner
     }
     /// Sends the request and returns the response.
     pub async fn send(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_integer::GetIntegerOutput,
-        crate::operation::get_integer::GetIntegerError,
+        crate::operation::get_integer_known_value_test::GetIntegerOutput,
+        crate::operation::get_integer_known_value_test::GetIntegerKnownValueTestError,
     > {
         let input = self
             .inner
             .build()
-            // Using unhandled since GetInteger doesn't declare any validation,
+            // Using unhandled since GetIntegerKnownValueTest doesn't declare any validation,
             // and smithy-rs seems to not generate a ValidationError case unless there is
             // (but isn't that a backwards compatibility problem for output structures?)
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
-            .map_err(crate::operation::get_integer::GetIntegerError::unhandled)?;
-        crate::operation::get_integer::GetInteger::send(&self.client, input).await
+            .map_err(crate::operation::get_integer_known_value_test::GetIntegerKnownValueTestError::unhandled)?;
+        crate::operation::get_integer_known_value_test::GetIntegerKnownValueTest::send(&self.client, input).await
     }
 
     #[allow(missing_docs)] // documentation missing in model
