@@ -21,10 +21,8 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("Constraints");
     DISABLED_TESTS.add("Dependencies");
     DISABLED_TESTS.add("Documentation");
-    DISABLED_TESTS.add("Errors");
     DISABLED_TESTS.add("Extendable");
     DISABLED_TESTS.add("Extern");
-    DISABLED_TESTS.add("LanguageSpecificLogic");
     DISABLED_TESTS.add("LocalService");
     DISABLED_TESTS.add("MultipleModels");
     DISABLED_TESTS.add("Positional");
@@ -53,8 +51,8 @@ class RustTestModels extends TestModelTest {
     make(testModelPath, "transpile_rust");
     make(testModelPath, "polymorph_rust");
     make(testModelPath, "test_rust");
-    // Since we're checking in and patching code,
-    // make sure the patch files are up to date.
+    // Since we're checking in generated (or benerated) code,
+    // make sure the state matches what's checked in.
     make(testModelPath, "check_polymorph_diff");
   }
 }

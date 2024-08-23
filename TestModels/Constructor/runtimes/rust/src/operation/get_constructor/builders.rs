@@ -23,7 +23,7 @@ impl GetConstructorInputBuilder {
 pub struct GetConstructorFluentBuilder {
     client: crate::Client,
     inner: crate::operation::get_constructor::builders::GetConstructorInputBuilder,
-    config_override: ::std::option::Option<crate::config::Builder>,
+    config_override: ::std::option::Option<crate::types::simple_constructor_config::Builder>,
 }
 impl GetConstructorFluentBuilder {
     /// Creates a new `GetConstructorFluentBuilder`.
@@ -61,7 +61,7 @@ impl GetConstructorFluentBuilder {
 
     pub(crate) fn config_override(
         mut self,
-        config_override: impl ::std::convert::Into<crate::config::Builder>,
+        config_override: impl ::std::convert::Into<crate::types::simple_constructor_config::Builder>,
     ) -> Self {
         self.set_config_override(::std::option::Option::Some(config_override.into()));
         self
@@ -69,7 +69,7 @@ impl GetConstructorFluentBuilder {
 
     pub(crate) fn set_config_override(
         &mut self,
-        config_override: ::std::option::Option<crate::config::Builder>,
+        config_override: ::std::option::Option<crate::types::simple_constructor_config::Builder>,
     ) -> &mut Self {
         self.config_override = config_override;
         self

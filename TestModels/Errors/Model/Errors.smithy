@@ -32,7 +32,7 @@ operation AlwaysMultipleErrors {
   output: GetErrorsOutput,
 }
 
-// This operation MUST ==> native unmodled error
+// This operation MUST ==> native unmodeled error
 operation AlwaysNativeError {
   input: GetErrorsInput,
   output: GetErrorsOutput,

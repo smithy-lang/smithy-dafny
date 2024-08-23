@@ -10,8 +10,7 @@
 **/runtimes/java/src/test/dafny-generated/
 
 # Dafny Generated Rust
-# (Rust code generation is incomplete so we're patching and checking in for now)
-#**/runtimes/rust
+**/runtimes/rust/src/implementation_from_dafny.rs
 # Cargo.lock files should only be committed for binaries, not libraries
 **/Cargo.lock
 

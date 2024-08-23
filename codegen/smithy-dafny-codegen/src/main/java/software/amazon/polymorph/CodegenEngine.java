@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph;
 
+import static software.amazon.smithy.utils.CaseUtils.toSnakeCase;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
@@ -18,10 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -698,7 +702,7 @@ public class CodegenEngine {
       // but since the Dafny Rust code generator doesn't yet support multiple crates,
       // we have to inline it instead.
       writeTemplatedFile(
-        "runtimes/rust/standard_library_conversions.rs",
+        "runtimes/rust/src/standard_library_conversions.rs",
         Map.of()
       );
     }
@@ -769,6 +773,85 @@ public class CodegenEngine {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public void patchAfterTranspiling() {
+    for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
+      switch (lang) {
+        case RUST -> patchRustAfterTranspiling();
+        default -> {}
+      }
+    }
+  }
+
+  private void patchRustAfterTranspiling() {
+    final String extraDeclarations = awsSdkStyle
+      ? extraDeclarationsForSDK()
+      : extraDeclarationsForLocalService();
+    final Path implementationFromDafnyPath = libraryRoot
+      .resolve("runtimes")
+      .resolve("rust")
+      .resolve("src")
+      .resolve("implementation_from_dafny.rs");
+    try {
+      final List<String> lines = Files.readAllLines(
+        implementationFromDafnyPath
+      );
+      final int firstModDeclIndex = IntStream
+        .range(0, lines.size())
+        .filter(i -> lines.get(i).trim().startsWith("pub mod"))
+        .findFirst()
+        .getAsInt();
+      lines.add(firstModDeclIndex, extraDeclarations);
+      Files.write(implementationFromDafnyPath, lines);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private String extraDeclarationsForSDK() {
+    return """
+    mod client;
+    mod conversions;
+    mod standard_library_conversions;
+    """;
+  }
+
+  private String extraDeclarationsForLocalService() {
+    final String configStructName = serviceShape
+      .expectTrait(LocalServiceTrait.class)
+      .getConfigId()
+      .getName();
+    final String configSnakeCase = toSnakeCase(configStructName);
+
+    return IOUtils.evalTemplate(
+      """
+      pub mod client;
+      pub mod types;
+
+      /// Common errors and error handling utilities.
+      pub mod error;
+
+      /// All operations that this crate can perform.
+      pub mod operation;
+
+      mod conversions;
+      mod standard_library_conversions;
+
+      #[cfg(feature = "wrapped-client")]
+      pub mod wrapped;
+
+      pub use client::Client;
+      pub use types::$configSnakeCase:L::$configStructName:L;
+
+      """,
+      Map.of(
+        "configSnakeCase",
+        configSnakeCase,
+        "configStructName",
+        configStructName
+      )
+    );
   }
 
   private String runCommand(Path workingDir, String... args) {
