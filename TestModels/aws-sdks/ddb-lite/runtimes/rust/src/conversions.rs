@@ -11,7 +11,19 @@ pub mod archival_summary;
 
  pub mod attribute_value_update;
 
+ pub mod batch_execute_statement;
+
  pub mod batch_get_item;
+
+ pub mod batch_statement_error;
+
+ pub mod batch_statement_error_code_enum;
+
+ pub mod batch_statement_request;
+
+ pub mod batch_statement_response;
+
+ pub mod batch_write_item;
 
  pub mod billing_mode;
 
@@ -37,11 +49,19 @@ pub mod archival_summary;
 
  pub mod delete_item;
 
+ pub mod delete_request;
+
  pub mod describe_table;
 
  pub mod error;
 
+ pub mod execute_statement;
+
+ pub mod execute_transaction;
+
  pub mod expected_attribute_value;
+
+ pub mod get;
 
  pub mod get_item;
 
@@ -53,6 +73,8 @@ pub mod archival_summary;
 
  pub mod item_collection_metrics;
 
+ pub mod item_response;
+
  pub mod key_schema_element;
 
  pub mod key_type;
@@ -62,6 +84,8 @@ pub mod archival_summary;
  pub mod local_secondary_index;
 
  pub mod local_secondary_index_description;
+
+ pub mod parameterized_statement;
 
  pub mod projection;
 
@@ -76,6 +100,8 @@ pub mod archival_summary;
  pub mod put;
 
  pub mod put_item;
+
+ pub mod put_request;
 
  pub mod query;
 
@@ -123,6 +149,10 @@ pub mod archival_summary;
 
  pub mod tag;
 
+ pub mod transact_get_item;
+
+ pub mod transact_get_items;
+
  pub mod transact_write_item;
 
  pub mod transact_write_items;
@@ -130,3 +160,5 @@ pub mod archival_summary;
  pub mod update;
 
  pub mod update_item;
+
+ pub mod write_request;

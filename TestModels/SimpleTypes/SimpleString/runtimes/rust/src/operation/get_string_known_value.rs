@@ -20,7 +20,7 @@ impl GetStringKnownValue {
                 input,
             );
         let inner_result =
-            ::dafny_runtime::md!(client.dafny_client.clone()).GetStringUTF8(&inner_input);
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetString(&inner_input);
         if matches!(
             inner_result.as_ref(),
             crate::r#_Wrappers_Compile::Result::Success { .. }
