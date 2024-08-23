@@ -1153,6 +1153,8 @@ public abstract class AbstractRustShimGenerator {
       // special collections
       case BLOB -> "::aws_smithy_types::Blob";
       case STRING -> "::std::string::String";
+      // everything else
+      case TIMESTAMP -> "::aws_smithy_types::DateTime";
       // TODO: enum, list, map, structure, union
       default -> throw new UnsupportedOperationException(
         "Unsupported shape type: " + shape.getType()
