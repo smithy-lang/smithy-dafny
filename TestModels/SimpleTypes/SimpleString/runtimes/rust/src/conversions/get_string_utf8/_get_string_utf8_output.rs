@@ -18,17 +18,15 @@ pub fn to_dafny(
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::std::rc::Rc<crate::r#simple::types::smithystring::internaldafny::types::GetStringOutput>,
+    dafny_value: ::std::rc::Rc<crate::r#simple::types::smithystring::internaldafny::types::GetStringUTF8Output>,
 ) -> crate::operation::get_string_utf8::GetStringUTF8Output {
     let value = if matches!(
         dafny_value.value().as_ref(),
         crate::_Wrappers_Compile::Option::Some { .. }
     ) {
-        Some(
-            dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
-                &dafny_value.value().Extract(),
-            ),
-        )
+        let bytes = dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
+            &dafny_value.value().Extract(), |b| *b);
+        Some(String::from_utf8(bytes).unwrap())
     } else if matches!(
         dafny_value.value().as_ref(),
         crate::_Wrappers_Compile::Option::None { .. }
