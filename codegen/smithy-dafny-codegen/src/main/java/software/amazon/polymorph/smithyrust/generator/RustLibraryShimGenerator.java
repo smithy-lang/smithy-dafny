@@ -83,6 +83,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.addAll(allOperationConversionModules());
     // TODO structure conversion modules
     // TODO enum conversion modules
+    // TODO union conversion modules
 
     // wrapped client
     result.add(wrappedModule());

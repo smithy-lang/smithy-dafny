@@ -185,11 +185,12 @@ public abstract class AbstractRustShimGenerator {
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
 
+    final String snakeCaseOperationName = toSnakeCase(operationName(operationShape));
     final Path path = Path.of(
       "src",
       "conversions",
-      toSnakeCase(operationName(operationShape)),
-      "_%s.rs".formatted(toSnakeCase(operationInputName(operationShape)))
+      snakeCaseOperationName,
+      "_%s_request.rs".formatted(snakeCaseOperationName)
     );
     return new RustFile(path, content);
   }
@@ -203,11 +204,12 @@ public abstract class AbstractRustShimGenerator {
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
 
+    final String snakeCaseOperationName = toSnakeCase(operationName(operationShape));
     final Path path = Path.of(
       "src",
       "conversions",
-      toSnakeCase(operationName(operationShape)),
-      "_%s.rs".formatted(toSnakeCase(operationOutputName(operationShape)))
+      snakeCaseOperationName,
+      "_%s_response.rs".formatted(snakeCaseOperationName)
     );
     return new RustFile(path, content);
   }

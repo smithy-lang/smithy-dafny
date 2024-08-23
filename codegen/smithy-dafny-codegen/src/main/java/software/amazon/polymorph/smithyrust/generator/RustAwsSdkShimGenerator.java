@@ -38,13 +38,11 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected Set<RustFile> rustFiles() {
-    ServiceShape service = model.getServiceShapes().stream().findFirst().get();
-
     Set<RustFile> result = new HashSet<>();
     result.add(clientModule());
     result.addAll(
       allErrorShapes()
-        .map(errorShape -> errorConversionModule(errorShape))
+        .map(this::errorConversionModule)
         .collect(Collectors.toSet())
     );
 
@@ -52,7 +50,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       model
         .getStringShapesWithTrait(EnumTrait.class)
         .stream()
-        .map(enumShape -> enumConversionModule(enumShape))
+        .map(this::enumConversionModule)
         .collect(Collectors.toSet())
     );
 
@@ -60,6 +58,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     result.addAll(allOperationConversionModules());
     result.addAll(allStructureConversionModules());
     result.add(conversionsErrorModule());
+    // TODO union conversion modules
 
     return result;
   }
@@ -306,7 +305,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       operationShape.getInputShape(),
       StructureShape.class
     );
-    variables.put("structureName", operationInputName(operationShape));
     variables.put(
       "variants",
       toDafnyVariantsForStructure(inputShape).toString()
@@ -319,9 +317,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         pub fn to_dafny(
             value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationInputStruct:L,
         ) -> ::std::rc::Rc<
-            crate::r#$dafnyTypesModuleName:L::$structureName:L,
+            crate::r#$dafnyTypesModuleName:L::$operationInputName:L,
         >{
-            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$operationInputName:L::$operationInputName:L {
                 $variants:L
             })
         }
@@ -344,7 +342,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       operationShape.getInputShape(),
       StructureShape.class
     );
-    variables.put("structureName", operationInputName(operationShape));
     variables.put(
       "fluentMemberSetters",
       fluentMemberSettersForStructure(inputShape).toString()
@@ -356,7 +353,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         #[allow(dead_code)]
         pub fn from_dafny(
             dafny_value: ::std::rc::Rc<
-                crate::r#$dafnyTypesModuleName:L::$structureName:L,
+                crate::r#$dafnyTypesModuleName:L::$operationInputName:L,
             >,
             client: $sdkCrate:L::Client,
         ) -> $sdkCrate:L::operation::$snakeCaseOperationName:L::builders::$operationName:LFluentBuilder {
@@ -439,8 +436,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     var operationModuleName = toSnakeCase(operationName(operationShape));
     var operationModuleContent = declarePubModules(
       Stream.of(
-        "_" + toSnakeCase(operationInputName(operationShape)),
-        "_" + toSnakeCase(operationOutputName(operationShape))
+        "_" + toSnakeCase(operationName(operationShape) + "Request"),
+        "_" + toSnakeCase(operationName(operationShape) + "Response")
       )
     );
 
@@ -609,14 +606,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   private String sdkOperationOutputStruct(final OperationShape operationShape) {
     return operationName(operationShape) + "Output";
-  }
-
-  protected String operationInputName(final OperationShape operationShape) {
-    return operationName(operationShape) + "Request";
-  }
-
-  protected String operationOutputName(final OperationShape operationShape) {
-    return operationName(operationShape) + "Response";
   }
 
   @Override
