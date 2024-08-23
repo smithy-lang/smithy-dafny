@@ -600,6 +600,16 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     return variables;
   }
 
+  @Override
+  protected String syntheticOperationInputName(OperationShape operationShape) {
+    return operationName(operationShape) + "Request";
+  }
+
+  @Override
+  protected String syntheticOperationOutputName(OperationShape operationShape) {
+    return operationName(operationShape) + "Response";
+  }
+
   private String sdkOperationInputStruct(final OperationShape operationShape) {
     return operationName(operationShape) + "Input";
   }

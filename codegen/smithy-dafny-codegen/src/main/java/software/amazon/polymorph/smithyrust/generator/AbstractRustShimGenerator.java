@@ -12,10 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import software.amazon.awssdk.codegen.model.rules.endpoints.OperationInput;
-import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.IOUtils;
-import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
@@ -192,7 +189,9 @@ public abstract class AbstractRustShimGenerator {
       "src",
       "conversions",
       snakeCaseOperationName,
-      "_%s_request.rs".formatted(snakeCaseOperationName)
+      "_%s.rs".formatted(
+          toSnakeCase(syntheticOperationInputName(operationShape))
+        )
     );
     return new RustFile(path, content);
   }
@@ -213,7 +212,9 @@ public abstract class AbstractRustShimGenerator {
       "src",
       "conversions",
       snakeCaseOperationName,
-      "_%s_response.rs".formatted(snakeCaseOperationName)
+      "_%s.rs".formatted(
+          toSnakeCase(syntheticOperationOutputName(operationShape))
+        )
     );
     return new RustFile(path, content);
   }
@@ -1075,20 +1076,13 @@ public abstract class AbstractRustShimGenerator {
     variables.put("snakeCaseOperationName", snakeCaseOpName);
     variables.put("snakeCaseOperationInputName", toSnakeCase(opInputName));
     variables.put("snakeCaseOperationOutputName", toSnakeCase(opOutputName));
-    return variables;
-  }
-
-  /**
-   * Generates values for variables commonly used in structure-member-specific templates.
-   */
-  protected HashMap<String, String> memberVariables(
-    final MemberShape memberShape
-  ) {
-    final HashMap<String, String> variables = new HashMap<>();
-    variables.put("fieldName", toSnakeCase(memberShape.getMemberName()));
     variables.put(
-      "fieldType",
-      rustTypeForShape(model.expectShape(memberShape.getTarget()))
+      "syntheticOperationInputName",
+      syntheticOperationInputName(operationShape)
+    );
+    variables.put(
+      "syntheticOperationOutputName",
+      syntheticOperationOutputName(operationShape)
     );
     return variables;
   }
@@ -1105,8 +1099,31 @@ public abstract class AbstractRustShimGenerator {
     return operationShape.getOutputShape().getName(service);
   }
 
+  protected abstract String syntheticOperationInputName(
+    final OperationShape operationShape
+  );
+
+  protected abstract String syntheticOperationOutputName(
+    final OperationShape operationShape
+  );
+
   protected String operationErrorTypeName(final OperationShape operationShape) {
     return "%sError".formatted(operationName(operationShape));
+  }
+
+  /**
+   * Generates values for variables commonly used in structure-member-specific templates.
+   */
+  protected HashMap<String, String> memberVariables(
+    final MemberShape memberShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    variables.put("fieldName", toSnakeCase(memberShape.getMemberName()));
+    variables.put(
+      "fieldType",
+      rustTypeForShape(model.expectShape(memberShape.getTarget()))
+    );
+    return variables;
   }
 
   // Currently only handles simple types, and doesn't account for any traits

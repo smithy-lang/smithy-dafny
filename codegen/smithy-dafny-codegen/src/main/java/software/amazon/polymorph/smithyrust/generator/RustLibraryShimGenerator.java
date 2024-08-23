@@ -703,4 +703,14 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     return variables;
   }
+
+  @Override
+  protected String syntheticOperationInputName(OperationShape operationShape) {
+    return operationName(operationShape) + "Input";
+  }
+
+  @Override
+  protected String syntheticOperationOutputName(OperationShape operationShape) {
+    return operationName(operationShape) + "Output";
+  }
 }
