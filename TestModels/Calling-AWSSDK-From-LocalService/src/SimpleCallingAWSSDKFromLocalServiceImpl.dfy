@@ -15,8 +15,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
 
     method CallDDB ( config: InternalConfig,  input: CallDDBInput )
     returns (output: Result<CallDDBOutput, Error>) {
-        var res := CallDDBOutput(tableArn := "input.value");
-        print(res);
+        var res := CallDDBOutput();
         return Success(res);
     }
 }
