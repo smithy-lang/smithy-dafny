@@ -1151,7 +1151,7 @@ public abstract class AbstractRustShimGenerator {
       case BIG_INTEGER -> "::num::bigint::BigInt";
       case BIG_DECIMAL -> "::num::rational::BigRational";
       // special collections
-      case BLOB -> "::std::vec::Vec<::std::primitive::u8>";
+      case BLOB -> "::aws_smithy_types::Blob";
       case STRING -> "::std::string::String";
       // TODO: enum, list, map, structure, union
       default -> throw new UnsupportedOperationException(

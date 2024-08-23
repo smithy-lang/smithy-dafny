@@ -319,14 +319,20 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private String operationStructureGetter(final MemberShape memberShape) {
+    final Map<String, String> variables = memberVariables(memberShape);
+
+    // unlike other simple shapes, the Rust runtime type for Blob is not Copy
+    final boolean needsClone = model.expectShape(memberShape.getTarget()).isBlobShape();
+    variables.put("fieldClone", needsClone ? ".clone()" : "");
+
     final String template =
       """
       #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(&self) -> ::std::option::Option<$fieldType:L> {
-          self.$fieldName:L
+          self.$fieldName:L$fieldClone:L
       }
       """;
-    return IOUtils.evalTemplate(template, memberVariables(memberShape));
+    return IOUtils.evalTemplate(template, variables);
   }
 
   private String operationStructureBuilderField(final MemberShape memberShape) {
