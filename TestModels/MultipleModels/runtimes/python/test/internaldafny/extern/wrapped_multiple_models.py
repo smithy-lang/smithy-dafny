@@ -11,10 +11,10 @@ from multiple_models.smithygenerated.simple_multiplemodels_primaryproject.config
 import standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
-import WrappedDependencyProject
-import WrappedPrimaryProject
+import WrappedSimpleMultiplemodelsDependencyprojectService
+import WrappedSimpleMultiplemodelsPrimaryprojectService
 
-class dependency_default__(WrappedDependencyProject.default__):
+class dependency_default__(WrappedSimpleMultiplemodelsDependencyprojectService.default__):
 
     @staticmethod
     def WrappedDependencyProject(config):
@@ -23,9 +23,9 @@ class dependency_default__(WrappedDependencyProject.default__):
         wrapped_client = DependencyProjectShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-WrappedDependencyProject.default__ = dependency_default__
+WrappedSimpleMultiplemodelsDependencyprojectService.default__ = dependency_default__
 
-class primary_default__(WrappedPrimaryProject.default__):
+class primary_default__(WrappedSimpleMultiplemodelsPrimaryprojectService.default__):
 
     @staticmethod
     def WrappedPrimaryProject(config):
@@ -34,4 +34,4 @@ class primary_default__(WrappedPrimaryProject.default__):
         wrapped_client = PrimaryProjectShim(impl)
         return Wrappers.Result_Success(wrapped_client)
 
-WrappedPrimaryProject.default__ = primary_default__
+WrappedSimpleMultiplemodelsPrimaryprojectService.default__ = primary_default__

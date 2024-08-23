@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleConstraintsImpl.dfy"
 
-module SimpleConstraints refines AbstractSimpleConstraintsService {
+module {:extern "simple.constraints.internaldafny" } SimpleConstraints refines AbstractSimpleConstraintsService {
   import Operations = SimpleConstraintsImpl
 
   function method DefaultSimpleConstraintsConfig(): SimpleConstraintsConfig {
