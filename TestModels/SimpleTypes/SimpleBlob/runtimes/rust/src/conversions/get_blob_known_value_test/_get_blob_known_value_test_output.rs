@@ -3,7 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: crate::operation::get_blob::GetBlobOutput,
+    value: crate::operation::get_blob_known_value_test::GetBlobOutput,
 ) -> ::std::rc::Rc<
     crate::r#simple::types::blob::internaldafny::types::GetBlobOutput,
 >{
@@ -16,8 +16,8 @@ pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#simple::types::blob::internaldafny::types::GetBlobOutput,
     >,
-) -> crate::operation::get_blob::GetBlobOutput {
-    crate::operation::get_blob::GetBlobOutput::builder()
+) -> crate::operation::get_blob_known_value_test::GetBlobOutput {
+    crate::operation::get_blob_known_value_test::GetBlobOutput::builder()
         .set_value(crate::standard_library_conversions::oblob_from_dafny(dafny_value.value().clone()))
         .build()
         .unwrap()
