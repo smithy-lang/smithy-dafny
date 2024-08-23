@@ -54,7 +54,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     ServiceShape service = model.getServiceShapes().stream().findFirst().get();
 
     Set<RustFile> result = new HashSet<>();
-    result.add(libModule());
 
     // client
     result.add(clientModule());
@@ -89,15 +88,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(wrappedClientModule());
 
     return result;
-  }
-
-  private RustFile libModule() {
-    final String content = IOUtils.evalTemplate(
-      getClass(),
-      "runtimes/rust/lib.rs",
-      serviceVariables()
-    );
-    return new RustFile(Path.of("src", "lib.rs"), TokenTree.of(content));
   }
 
   private RustFile clientModule() {
