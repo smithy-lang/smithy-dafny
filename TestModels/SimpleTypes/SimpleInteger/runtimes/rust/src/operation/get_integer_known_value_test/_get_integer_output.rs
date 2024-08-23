@@ -16,8 +16,8 @@ pub fn value(&self) -> ::std::option::Option<::std::primitive::i32> {
 }
 impl GetIntegerOutput {
     /// Creates a new builder-style object to manufacture [`GetIntegerOutput`](crate::operation::operation::GetIntegerOutput).
-    pub fn builder() -> crate::operation::get_integer::builders::GetIntegerOutputBuilder {
-        crate::operation::get_integer::builders::GetIntegerOutputBuilder::default()
+    pub fn builder() -> crate::operation::get_integer_known_value_test::builders::GetIntegerOutputBuilder {
+        crate::operation::get_integer_known_value_test::builders::GetIntegerOutputBuilder::default()
     }
 }
 
@@ -48,10 +48,10 @@ pub fn get_value(&self) -> &::std::option::Option<::std::primitive::i32> {
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_integer::GetIntegerOutput,
+        crate::operation::get_integer_known_value_test::GetIntegerOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_integer::GetIntegerOutput {
+        ::std::result::Result::Ok(crate::operation::get_integer_known_value_test::GetIntegerOutput {
             value: self.value,
         })
     }

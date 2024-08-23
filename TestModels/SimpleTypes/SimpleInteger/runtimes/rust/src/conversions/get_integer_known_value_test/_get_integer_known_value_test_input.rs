@@ -3,7 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: crate::operation::get_integer::GetIntegerInput,
+    value: crate::operation::get_integer_known_value_test::GetIntegerInput,
 ) -> ::std::rc::Rc<
     crate::r#simple::types::integer::internaldafny::types::GetIntegerInput,
 >{
@@ -16,8 +16,8 @@ pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#simple::types::integer::internaldafny::types::GetIntegerInput,
     >,
-) -> crate::operation::get_integer::GetIntegerInput {
-    crate::operation::get_integer::GetIntegerInput::builder()
+) -> crate::operation::get_integer_known_value_test::GetIntegerInput {
+    crate::operation::get_integer_known_value_test::GetIntegerInput::builder()
         .set_value(crate::standard_library_conversions::oint_from_dafny(dafny_value.value().clone()))
         .build()
         .unwrap()
