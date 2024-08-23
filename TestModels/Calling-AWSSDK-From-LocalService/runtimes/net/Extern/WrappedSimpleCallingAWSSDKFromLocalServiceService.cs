@@ -1,9 +1,9 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 using Wrappers_Compile;
-using Simple.CallingAWSSDKFromLocalService;
-using Simple.CallingAWSSDKFromLocalService.Wrapped;
-using TypeConversion = Simple.CallingAWSSDKFromLocalService.TypeConversion;
+using Simple.Callingawssdkfromlocalservice;
+using Simple.Callingawssdkfromlocalservice.Wrapped;
+using TypeConversion = Simple.Callingawssdkfromlocalservice.TypeConversion;
 namespace simple.callingawssdkfromlocalservice.internaldafny.wrapped
 {
     public partial class __default
