@@ -366,13 +366,13 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                           writer.write(
                             "$S: d[$S],",
                             memberName,
-                            capitalize(member.getMemberName()));
+                            memberName);
                     } else if (target.isStructureShape()) {
                       writer.write(
                           "$S: $L.from_dict(d[$S]),",
                           memberName,
                           targetSymbol.getName(),
-                          capitalize(member.getMemberName()));
+                          memberName);
                     } else if (targetSymbol.getProperty("fromDict").isPresent()) {
                       var targetFromDictSymbol =
                           targetSymbol.expectProperty("fromDict", Symbol.class);
@@ -380,9 +380,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                           "$S: $T(d[$S]),",
                           memberName,
                           targetFromDictSymbol,
-                          capitalize(member.getMemberName()));
+                          memberName);
                     } else {
-                      writer.write("$S: d[$S],", memberName, capitalize(member.getMemberName()));
+                      writer.write("$S: d[$S],", memberName, memberName);
                     }
                   }
                 });
@@ -395,7 +395,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             writer.openBlock(
                 "if $S in d:",
                 "",
-                capitalize(member.getMemberName()),
+                memberName,
                 () -> {
                   var targetSymbol = symbolProvider.toSymbol(target);
                   // Block below is new.
@@ -407,13 +407,13 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                     writer.write(
                       "kwargs[$S] = d[$S]",
                       memberName,
-                      capitalize(member.getMemberName()));
+                      memberName);
                   } else if (target.isStructureShape()) {
                     writer.write(
                         "kwargs[$S] = $L.from_dict(d[$S])",
                         memberName,
                         targetSymbol.getName(),
-                        capitalize(member.getMemberName()));
+                        memberName);
                   } else if (targetSymbol.getProperty("fromDict").isPresent()) {
                     var targetFromDictSymbol =
                         targetSymbol.expectProperty("fromDict", Symbol.class);
@@ -421,9 +421,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                         "kwargs[$S] = $T(d[$S]),",
                         memberName,
                         targetFromDictSymbol,
-                        capitalize(member.getMemberName()));
+                        memberName);
                   } else {
-                    writer.write("kwargs[$S] = d[$S]", memberName, capitalize(member.getMemberName()));
+                    writer.write("kwargs[$S] = d[$S]", memberName, memberName);
                   }
                 });
           }
@@ -471,15 +471,15 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             ) {
                 writer.write(
                   "$S: self.$L,",
-                  capitalize(member.getMemberName()),
+                  memberName,
                   memberName);
             } else if (target.isStructureShape() || target.isUnionShape()) {
-              writer.write("$S: self.$L.as_dict(),", capitalize(member.getMemberName()), memberName);
+              writer.write("$S: self.$L.as_dict(),", memberName, memberName);
             } else if (targetSymbol.getProperty("asDict").isPresent()) {
               var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
-              writer.write("$S: $T(self.$L),", capitalize(member.getMemberName()), targetAsDictSymbol, memberName);
+              writer.write("$S: $T(self.$L),", memberName, targetAsDictSymbol, memberName);
             } else {
-              writer.write("$S: self.$L,", capitalize(member.getMemberName()), memberName);
+              writer.write("$S: self.$L,", memberName, memberName);
             }
           }
         });
@@ -500,17 +500,17 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             ) {
                 writer.write(
                   "d[$S] = self.$L",
-                  capitalize(member.getMemberName()),
+                  memberName,
                   memberName);
             }
             if (target.isStructureShape() || target.isUnionShape()) {
-              writer.write("d[$S] = self.$L.as_dict()", capitalize(member.getMemberName()), memberName);
+              writer.write("d[$S] = self.$L.as_dict()", memberName, memberName);
             } else if (targetSymbol.getProperty("asDict").isPresent()) {
               var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
-              writer.write("d[$S] = $T(self.$L),", capitalize(member.getMemberName()), targetAsDictSymbol,
+              writer.write("d[$S] = $T(self.$L),", memberName, targetAsDictSymbol,
                       memberName);
             } else {
-              writer.write("d[$S] = self.$L", capitalize(member.getMemberName()), memberName);
+              writer.write("d[$S] = self.$L", memberName, memberName);
             }
           });
         }
