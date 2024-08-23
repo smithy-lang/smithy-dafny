@@ -8,3 +8,7 @@ pub mod get_string_known_value;
 
 /// Types for the `GetStringUTF8` operation.
 pub mod get_string_utf8;
+
+/// Types for the `GetStringUTF8KnownValue` operation.
+pub mod get_string_utf8_known_value;
+
