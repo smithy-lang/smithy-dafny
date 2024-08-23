@@ -4,32 +4,32 @@
 #[allow(missing_docs)] // documentation missing in model
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-pub struct GetBlobInput {
+pub struct GetBlobOutput {
     #[allow(missing_docs)] // documentation missing in model
 pub value: ::std::option::Option<::aws_smithy_types::Blob>,
 }
-impl GetBlobInput {
+impl GetBlobOutput {
     #[allow(missing_docs)] // documentation missing in model
 pub fn value(&self) -> ::std::option::Option<::aws_smithy_types::Blob> {
     self.value.clone()
 }
 }
-impl GetBlobInput {
-    /// Creates a new builder-style object to manufacture [`GetBlobInput`](crate::operation::operation::GetBlobInput).
-    pub fn builder() -> crate::operation::get_blob::builders::GetBlobInputBuilder {
-        crate::operation::get_blob::builders::GetBlobInputBuilder::default()
+impl GetBlobOutput {
+    /// Creates a new builder-style object to manufacture [`GetBlobOutput`](crate::operation::operation::GetBlobOutput).
+    pub fn builder() -> crate::operation::get_blob_known_value_test::builders::GetBlobOutputBuilder {
+        crate::operation::get_blob_known_value_test::builders::GetBlobOutputBuilder::default()
     }
 }
 
-/// A builder for [`GetBlobInput`](crate::operation::operation::GetBlobInput).
+/// A builder for [`GetBlobOutput`](crate::operation::operation::GetBlobOutput).
 #[non_exhaustive]
 #[derive(
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
-pub struct GetBlobInputBuilder {
+pub struct GetBlobOutputBuilder {
     pub(crate) value: ::std::option::Option<::aws_smithy_types::Blob>,
 }
-impl GetBlobInputBuilder {
+impl GetBlobOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
 pub fn value(mut self, input: impl ::std::convert::Into<::aws_smithy_types::Blob>) -> Self {
     self.value = ::std::option::Option::Some(input.into());
@@ -44,14 +44,14 @@ pub fn set_value(mut self, input: ::std::option::Option<::aws_smithy_types::Blob
 pub fn get_value(&self) -> &::std::option::Option<::aws_smithy_types::Blob> {
     &self.value
 }
-    /// Consumes the builder and constructs a [`GetBlobInput`](crate::operation::operation::GetBlobInput).
+    /// Consumes the builder and constructs a [`GetBlobOutput`](crate::operation::operation::GetBlobOutput).
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_blob::GetBlobInput,
+        crate::operation::get_blob_known_value_test::GetBlobOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_blob::GetBlobInput {
+        ::std::result::Result::Ok(crate::operation::get_blob_known_value_test::GetBlobOutput {
             value: self.value,
         })
     }

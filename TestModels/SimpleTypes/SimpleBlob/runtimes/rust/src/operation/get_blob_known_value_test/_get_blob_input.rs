@@ -16,8 +16,8 @@ pub fn value(&self) -> ::std::option::Option<::aws_smithy_types::Blob> {
 }
 impl GetBlobInput {
     /// Creates a new builder-style object to manufacture [`GetBlobInput`](crate::operation::operation::GetBlobInput).
-    pub fn builder() -> crate::operation::get_blob::builders::GetBlobInputBuilder {
-        crate::operation::get_blob::builders::GetBlobInputBuilder::default()
+    pub fn builder() -> crate::operation::get_blob_known_value_test::builders::GetBlobInputBuilder {
+        crate::operation::get_blob_known_value_test::builders::GetBlobInputBuilder::default()
     }
 }
 
@@ -48,10 +48,10 @@ pub fn get_value(&self) -> &::std::option::Option<::aws_smithy_types::Blob> {
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_blob::GetBlobInput,
+        crate::operation::get_blob_known_value_test::GetBlobInput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_blob::GetBlobInput {
+        ::std::result::Result::Ok(crate::operation::get_blob_known_value_test::GetBlobInput {
             value: self.value,
         })
     }
