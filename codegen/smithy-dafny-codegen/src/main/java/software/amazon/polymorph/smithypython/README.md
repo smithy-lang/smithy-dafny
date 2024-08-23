@@ -16,8 +16,8 @@ Each subfolder follows a similar structure:
 │               Generates new files or adds new code to Smithy-Python generated files.
 ├── extensions - Classes that extend or replace Smithy-Python codegen components.
 ├── nameresolver - Utility classes to map Smithy model shapes to strings used in generated code.
-└── shapevisitor - Classes that generate code to convert to/from Smithy client Python shapes 
-    │              (or AWS SDK shapes) and Dafny implementation shapes. 
-    └── conversionwriter - Classes that generate functions that convert to/from Smithy client Python shapes 
+└── shapevisitor - Classes that generate code to convert to/from Smithy client Python shapes
+    │              (or AWS SDK shapes) and Dafny implementation shapes.
+    └── conversionwriter - Classes that generate functions that convert to/from Smithy client Python shapes
                    (or AWS SDK shapes) and Dafny implementation shapes for StructureShapes and UnionShapes.
 ```
