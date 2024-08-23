@@ -2,20 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleCallingAWSSDKFromLocalServiceImpl.dfy"
 
-module {:extern "simple.callingawssdkfromlocalservice.internaldafny.types" } SimpleCallingawssdkfromlocalserviceTypes refines AbstractSimpleCallingawssdkfromlocalserviceService {
+module {:extern "simple.callingawssdkfromlocalservice.internaldafny" } SimpleCallingAWSSDKFromLocalService refines AbstractSimpleCallingawssdkfromlocalserviceService {
     import Operations = SimpleCallingAWSSDKFromLocalServiceImpl
 
-    function method DefaultSimpleCallingAWSSDKFromLocalServiceImplConfig(): SimpleCallingAWSSDKFromLocalServiceImplConfig {
-       SimpleCallingAWSSDKFromLocalServiceImplConfig
+    function method DefaultSimpleCallingAWSSDKFromLocalServiceConfig(): SimpleCallingAWSSDKFromLocalServiceConfig {
+       SimpleCallingAWSSDKFromLocalServiceConfig
     }
 
-    method SimpleCallingAWSSDKFromLocal(config: SimpleCallingAWSSDKFromLocalServiceImplConfig)
-    returns (res: Result<SimpleCallingAWSSDKFromLocalClient, Error>) {
-        var client := new SimpleCallingAWSSDKFromLocalClient(Operations.Config);
+    method SimpleCallingAWSSDKFromLocalService(config: SimpleCallingAWSSDKFromLocalServiceConfig)
+        returns (res: Result<SimpleCallingAWSSDKFromLocalServiceClient, Error>) 
+    {
+        var client := new SimpleCallingAWSSDKFromLocalServiceClient(Operations.Config);
         return Success(client);
     }
 
-    class SimpleCallingAWSSDKFromLocalClient... {
+    class SimpleCallingAWSSDKFromLocalServiceClient... {
         predicate ValidState()
         {
             && Operations.ValidInternalConfig?(config)
@@ -23,7 +24,7 @@ module {:extern "simple.callingawssdkfromlocalservice.internaldafny.types" } Sim
         }
         constructor(config: Operations.InternalConfig) {
             this.config := config;
-            History := new ISimpleCallingAWSSDKFromLocalClientCallHistory();
+            History := new ISimpleCallingAWSSDKFromLocalServiceClientCallHistory();
             Modifies := Operations.ModifiesInternalConfig(config) + {History};
         }
     }

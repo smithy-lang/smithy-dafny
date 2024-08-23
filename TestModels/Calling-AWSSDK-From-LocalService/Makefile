@@ -1,7 +1,7 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-CORES=2
+CORES=10
 
 include ../SharedMakefile.mk
 
@@ -10,11 +10,10 @@ PROJECT_SERVICES := \
 
 SERVICE_NAMESPACE_SimpleCallingAWSSDKFromLocalService=simple.callingawssdkfromlocalservice
 
-SERVICE_DEPS_SimpleCallingAWSSDKFromLocalService :=
+SERVICE_DEPS_SimpleCallingAWSSDKFromLocalService := \
+	aws-sdks/ddb
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
-
-AWS_SDK_CMD=--aws-sdk
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

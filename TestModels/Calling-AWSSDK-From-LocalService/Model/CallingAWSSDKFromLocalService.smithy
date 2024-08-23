@@ -24,9 +24,10 @@ operation CallDDB {
 }
 
 structure CallDDBInput {
+  @required
+  tableArn: com.amazonaws.dynamodb#TableArn
 }
 
 structure CallDDBOutput {
-  @required
-  tableArn: com.amazonaws.dynamodb#TableArn
+  
 }
