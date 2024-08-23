@@ -5,10 +5,10 @@ use std::any::Any;
 
 #[allow(dead_code)]
 pub fn to_dafny_error(
-    value: crate::operation::get_long::GetLongError,
+    value: crate::operation::get_long_known_value_test::GetLongKnownValueTestError,
 ) -> ::std::rc::Rc<crate::r#simple::types::smithylong::internaldafny::types::Error> {
     match value {
-    crate::operation::get_long::GetLongError::Unhandled(unhandled) =>
+    crate::operation::get_long_known_value_test::GetLongKnownValueTestError::Unhandled(unhandled) =>
       ::std::rc::Rc::new(crate::r#simple::types::smithylong::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
   }
 }
@@ -18,16 +18,16 @@ pub fn from_dafny_error(
     dafny_value: ::std::rc::Rc<
         crate::r#simple::types::smithylong::internaldafny::types::Error,
     >,
-) -> crate::operation::get_long::GetLongError {
+) -> crate::operation::get_long_known_value_test::GetLongKnownValueTestError {
     // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
     if matches!(&dafny_value.as_ref(), crate::r#simple::types::smithylong::internaldafny::types::Error::CollectionOfErrors { .. }) {
     let error_message = "TODO: can't get message yet";
-    crate::operation::get_long::GetLongError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
+    crate::operation::get_long_known_value_test::GetLongKnownValueTestError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
   } else {
-    crate::operation::get_long::GetLongError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message("Opaque error").build())
+    crate::operation::get_long_known_value_test::GetLongKnownValueTestError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message("Opaque error").build())
   }
 }
 
-pub mod _get_long_input;
+pub mod _get_long_known_value_test_input;
 
-pub mod _get_long_output;
+pub mod _get_long_known_value_test_output;
