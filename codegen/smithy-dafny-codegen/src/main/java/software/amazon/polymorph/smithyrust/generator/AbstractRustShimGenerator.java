@@ -185,7 +185,9 @@ public abstract class AbstractRustShimGenerator {
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
 
-    final String snakeCaseOperationName = toSnakeCase(operationName(operationShape));
+    final String snakeCaseOperationName = toSnakeCase(
+      operationName(operationShape)
+    );
     final Path path = Path.of(
       "src",
       "conversions",
@@ -204,7 +206,9 @@ public abstract class AbstractRustShimGenerator {
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
 
-    final String snakeCaseOperationName = toSnakeCase(operationName(operationShape));
+    final String snakeCaseOperationName = toSnakeCase(
+      operationName(operationShape)
+    );
     final Path path = Path.of(
       "src",
       "conversions",
