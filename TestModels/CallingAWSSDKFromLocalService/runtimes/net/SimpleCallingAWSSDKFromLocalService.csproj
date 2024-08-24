@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../../aws-sdks/ddb/runtimes/net/DDBv2.csproj" />
     <ProjectReference Include="../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj" />
   </ItemGroup>
   

@@ -4,23 +4,35 @@ include "../src/Index.dfy"
 include "../src/WrappedSimpleCallingAWSSDKFromLocalServiceImpl.dfy"
 
 module SimpleCallingAWSSDKFromLocalServiceImplTest {
-    import ComAmazonawsDynamodbTypes
-    import SimpleCallingAWSSDKFromLocalService
+  import ComAmazonawsDynamodbTypes
+  import SimpleCallingAWSSDKFromLocalService
 
-    import opened SimpleCallingawssdkfromlocalserviceTypes
-    import opened Wrappers
-    method{:test} CallDDB(){
-        var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
-        TestCallDDB(client);
-    }
+  import opened SimpleCallingawssdkfromlocalserviceTypes
+  import opened Wrappers
+  method{:test} BasicGet(){
+    var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
+    TestBasicGet(client);
+  }
 
-    method TestCallDDB(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-      requires client.ValidState()
-      modifies client.Modifies
-      ensures client.ValidState()
-    {
-        var arn: ComAmazonawsDynamodbTypes.TableArn := "1";
-        var ret :- expect client.CallDDB(SimpleCallingAWSSDKFromLocalService.Types.CallDDBInput(tableArn:= arn, MyString := Some("abc")));
-        print ret;
-    }
+  method TestBasicGet(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var Key2Get: ComAmazonawsDynamodbTypes.Key := map[
+          "branch-key-id" := ComAmazonawsDynamodbTypes.AttributeValue.S("aws-kms-h"),
+          "version" := ComAmazonawsDynamodbTypes.AttributeValue.S("1")
+        ];
+    var getInput := ComAmazonawsDynamodbTypes.GetItemInput(
+      TableName := "tableNameTest",
+      Key := Key2Get,
+      AttributesToGet := ComAmazonawsDynamodbTypes.Wrappers.None,
+        ConsistentRead := ComAmazonawsDynamodbTypes.Wrappers.None,
+            ReturnConsumedCapacity := ComAmazonawsDynamodbTypes.Wrappers.None,
+            ProjectionExpression := ComAmazonawsDynamodbTypes.Wrappers.None,
+            ExpressionAttributeNames := ComAmazonawsDynamodbTypes.Wrappers.None
+    );
+    var ret := client.BasicGet(SimpleCallingAWSSDKFromLocalService.Types.BasicGetInput(item := getInput));
+    print ret;
+  }
 }

@@ -12,32 +12,22 @@ use com.amazonaws.dynamodb#DynamoDB_20120810
 service SimpleCallingAWSSDKFromLocalService {
   version: "2021-11-01",
   resources: [],
-  operations: [ CallDDB ],
-  errors: [ SimpleCallingAWSSDKFromLocalServiceException ],
+  operations: [ BasicGet ],
+  errors: [ ],
 }
 
 structure SimpleCallingAWSSDKFromLocalServiceConfig {}
 
-operation CallDDB {
-  input: CallDDBInput,
-  output: CallDDBOutput,
+operation BasicGet {
+  input: BasicGetInput,
+  output: BasicGetOutput,
 }
 
-structure CallDDBInput {
+structure BasicGetInput {
   @required
-  tableArn: com.amazonaws.dynamodb#TableArn
-  MyString: MyString,
+  item: com.amazonaws.dynamodb#GetItemInput
 }
 
-@length(min: 1, max: 10)
-string MyString
-
-structure CallDDBOutput {
-  MyString: MyString,
-}
-
-@error("client")
-structure SimpleCallingAWSSDKFromLocalServiceException {
-  @required
-  message: String,
+structure BasicGetOutput {
+  putItemOutput: com.amazonaws.dynamodb#GetItemOutput
 }

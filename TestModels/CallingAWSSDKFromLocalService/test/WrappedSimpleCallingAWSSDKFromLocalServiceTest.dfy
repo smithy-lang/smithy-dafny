@@ -4,13 +4,13 @@ include "../src/WrappedSimpleCallingAWSSDKFromLocalServiceImpl.dfy"
 include "SimpleCallingAWSSDKFromLocalServiceImplTest.dfy"
 
 module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
-    import opened WrappedCallingAWSSDKFromLocalServiceService
+  import opened WrappedCallingAWSSDKFromLocalServiceService
     // import opened SimpleCallingAWSSDKFromLocalServiceTypes
-    import SimpleCallingAWSSDKFromLocalServiceImplTest
-    import opened Wrappers
-    import opened StandardLibrary.UInt
-    method{:test} TestCallDDB() {
-        var client :- expect WrappedCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
-        SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDB(client);
-    }
+  import SimpleCallingAWSSDKFromLocalServiceImplTest
+  import opened Wrappers
+  import opened StandardLibrary.UInt
+  method{:test} TestBasicGet() {
+    var client :- expect WrappedCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
+    SimpleCallingAWSSDKFromLocalServiceImplTest.TestBasicGet(client);
+  }
 }

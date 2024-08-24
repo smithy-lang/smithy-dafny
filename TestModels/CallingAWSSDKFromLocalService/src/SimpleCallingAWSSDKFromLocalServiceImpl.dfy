@@ -3,19 +3,24 @@
 include "../Model/SimpleCallingawssdkfromlocalserviceTypes.dfy"
 
 module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawssdkfromlocalserviceOperations  {
-    datatype Config = Config
-    type InternalConfig = Config
-    predicate ValidInternalConfig?(config: InternalConfig)
-    {true}
-    function ModifiesInternalConfig(config: InternalConfig) : set<object>
-    {{}}
-    predicate CallDDBEnsuresPublicly(input: CallDDBInput, output: Result<CallDDBOutput, Error>) {
-        true
-    }
+  import ComAmazonawsDynamodbTypes
+  import DDBOperations =  Com.Amazonaws.Dynamodb
+  datatype Config = Config
+  type InternalConfig = Config
+  predicate ValidInternalConfig?(config: InternalConfig)
+  {true}
+  function ModifiesInternalConfig(config: InternalConfig) : set<object>
+  {{}}
+  predicate BasicGetEnsuresPublicly(input: BasicGetInput, output: Result<BasicGetOutput, Error>) {
+    true
+  }
 
-    method CallDDB ( config: InternalConfig,  input: CallDDBInput )
-    returns (output: Result<CallDDBOutput, Error>) {
-        var res := CallDDBOutput(MyString := input.MyString);
-        return Success(res);
-    }
+  method BasicGet ( config: InternalConfig,  input: BasicGetInput )
+    returns (output: Result<BasicGetOutput, Error>) {
+    var client : ComAmazonawsDynamodbTypes.IDynamoDBClient;
+    var maybeDdbClient := DDBOperations.DynamoDBClient();
+    client :- expect maybeDdbClient;
+    var ret := client.GetItem(input.item);
+    return Success(BasicGetOutput(putItemOutput := Some(ret.value)));
+  }
 }
