@@ -335,8 +335,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     // These rules were mostly reverse-engineered from inspection of Rust SDKs,
     // and may not be complete!
     final Shape targetShape = model.expectShape(member.getTarget());
-    return super.isRustFieldRequired(parent, member)
-      || (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape());
+    return (
+      super.isRustFieldRequired(parent, member) ||
+      (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape())
+    );
   }
 
   @Override

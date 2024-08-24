@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.Token;
@@ -333,14 +332,19 @@ public abstract class AbstractRustShimGenerator {
             yield result;
           }
         } else if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-          final String dafnyToRust = "::std::string::String::from_utf8(dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&%s, |b| *b)).unwrap()";
+          final String dafnyToRust =
+            "::std::string::String::from_utf8(dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&%s, |b| *b)).unwrap()";
           String valueToRust;
           if (isDafnyOption) {
-            valueToRust = """
+            valueToRust =
+              """
               match %s.as_ref() {
                 crate::_Wrappers_Compile::Option::Some { .. } => ::std::option::Option::Some(%s),
                 _ => ::std::option::Option::None,
-              }""".formatted(dafnyValue, dafnyToRust.formatted(dafnyValue + ".Extract()"));
+              }""".formatted(
+                  dafnyValue,
+                  dafnyToRust.formatted(dafnyValue + ".Extract()")
+                );
             if (!isRustOption) {
               valueToRust = "(%s).unwrap()".formatted(valueToRust);
             }
@@ -606,14 +610,19 @@ public abstract class AbstractRustShimGenerator {
     return member.hasTrait(RequiredTrait.class);
   }
 
-  protected boolean isRustFieldRequired(final Shape parent, final MemberShape member) {
+  protected boolean isRustFieldRequired(
+    final Shape parent,
+    final MemberShape member
+  ) {
     // These rules were mostly reverse-engineered from inspection of Rust SDKs,
     // and may not be complete!
     final Shape targetShape = model.expectShape(member.getTarget());
-    return hasRequiredTrait(member) &&
-        !operationIndex.isOutputStructure(parent) &&
-        !operationIndex.isInputStructure(parent) &&
-        !targetShape.isStructureShape();
+    return (
+      hasRequiredTrait(member) &&
+      !operationIndex.isOutputStructure(parent) &&
+      !operationIndex.isInputStructure(parent) &&
+      !targetShape.isStructureShape()
+    );
   }
 
   /**
@@ -659,10 +668,12 @@ public abstract class AbstractRustShimGenerator {
             );
           }
         } else if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-          final String rustToDafny = "dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.as_bytes().to_vec(), |b| *b)";
+          final String rustToDafny =
+            "dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.as_bytes().to_vec(), |b| *b)";
           String valueToDafny;
           if (isRustOption) {
-            valueToDafny = """
+            valueToDafny =
+              """
               match %s {
                 Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
                 None => crate::_Wrappers_Compile::Option::None {},
@@ -1080,7 +1091,11 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String getDafnyModuleName() {
-    return service.getId().getNamespace().replace(".", "::").toLowerCase(Locale.ROOT);
+    return service
+      .getId()
+      .getNamespace()
+      .replace(".", "::")
+      .toLowerCase(Locale.ROOT);
   }
 
   protected String getDafnyInternalModuleName() {
