@@ -16,8 +16,8 @@ pub fn value(&self) -> ::std::option::Option<::std::string::String> {
 }
 impl GetStringOutput {
     /// Creates a new builder-style object to manufacture [`GetStringOutput`](crate::operation::operation::GetStringOutput).
-    pub fn builder() -> crate::operation::get_string::builders::GetStringOutputBuilder {
-        crate::operation::get_string::builders::GetStringOutputBuilder::default()
+    pub fn builder() -> crate::operation::get_string_known_value::builders::GetStringOutputBuilder {
+        crate::operation::get_string_known_value::builders::GetStringOutputBuilder::default()
     }
 }
 
@@ -48,10 +48,10 @@ pub fn get_value(&self) -> &::std::option::Option<::std::string::String> {
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_string::GetStringOutput,
+        crate::operation::get_string_known_value::GetStringOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_string::GetStringOutput {
+        ::std::result::Result::Ok(crate::operation::get_string_known_value::GetStringOutput {
             value: self.value,
         })
     }
