@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyrust.generator;
 
 import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
 import java.nio.file.Path;
@@ -17,12 +18,14 @@ import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.EnumShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 
 /**
  * Generates all Rust modules needed to wrap a Dafny library as a Rust library.
@@ -62,7 +65,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     // types
     result.add(typesModule());
     result.add(typesConfigModule());
-    // TODO enum type modules
+    result.addAll(
+      ModelUtils
+        .streamEnumShapes(model, service.getId().getNamespace())
+        .map(this::enumTypeModule)
+        .toList()
+    );
 
     // errors
     result.add(errorModule());
@@ -194,10 +202,26 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private RustFile typesModule() {
+    final Map<String, String> variables = serviceVariables();
+
+    final String enumModules = ModelUtils
+      .streamEnumShapes(model, service.getId().getNamespace())
+      .map(enumShape ->
+        IOUtils.evalTemplate(
+          """
+          mod _$snakeCaseEnumName:L;
+          pub use crate::types::_$snakeCaseEnumName:L::$rustEnumName:L;
+          """,
+          enumVariables(enumShape)
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("enumModules", enumModules);
+
     final String content = IOUtils.evalTemplate(
       getClass(),
       "runtimes/rust/types.rs",
-      serviceVariables()
+      variables
     );
     return new RustFile(Path.of("src", "types.rs"), TokenTree.of(content));
   }
@@ -213,6 +237,46 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "src",
       "types",
       "%s.rs".formatted(variables.get("snakeCaseConfigName"))
+    );
+    return new RustFile(path, TokenTree.of(content));
+  }
+
+  private RustFile enumTypeModule(final EnumShape enumShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      enumVariables(enumShape)
+    );
+
+    final Set<String> memberNames = enumShape.getEnumValues().keySet();
+
+    final String variants = memberNames
+      .stream()
+      .map(this::rustEnumMemberName)
+      .map("%s,"::formatted)
+      .collect(Collectors.joining("\n"));
+    variables.put("variants", variants);
+
+    final String displayVariants = memberNames
+      .stream()
+      .map(memberName ->
+        IOUtils.evalTemplate(
+          "$rustEnumName:L::$rustEnumMemberName:L => write!(f, \"$enumMemberName:L\"),",
+          MapUtils.merge(variables, enumMemberVariables(memberName))
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("displayVariants", displayVariants);
+
+    final String content = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/types/enum.rs",
+      variables
+    );
+
+    final Path path = Path.of(
+      "src",
+      "types",
+      "_%s.rs".formatted(toSnakeCase(enumName(enumShape)))
     );
     return new RustFile(path, TokenTree.of(content));
   }
@@ -718,5 +782,56 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   @Override
   protected String syntheticOperationOutputName(OperationShape operationShape) {
     return operationName(operationShape) + "Output";
+  }
+
+  /**
+   * Generates values for variables commonly used in structure-member-specific templates.
+   */
+  private HashMap<String, String> memberVariables(
+    final MemberShape memberShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    variables.put("fieldName", toSnakeCase(memberShape.getMemberName()));
+    variables.put(
+      "fieldType",
+      rustTypeForShape(model.expectShape(memberShape.getTarget()))
+    );
+    return variables;
+  }
+
+  // Currently only handles simple types and enums, and doesn't account for any traits
+  private String rustTypeForShape(final Shape shape) {
+    return switch (shape.getType()) {
+      case BOOLEAN -> "::std::primitive::bool";
+      // integral
+      case BYTE -> "::std::primitive::i8";
+      case SHORT -> "::std::primitive::i16";
+      case INTEGER -> "::std::primitive::i32";
+      case LONG -> "::std::primitive::i64";
+      // floats
+      case FLOAT -> "::std::primitive::f32";
+      case DOUBLE -> "::std::primitive::f64";
+      // special numerics
+      case BIG_INTEGER -> "::num::bigint::BigInt";
+      case BIG_DECIMAL -> "::num::rational::BigRational";
+      // special collections
+      case BLOB -> "::aws_smithy_types::Blob";
+      case STRING -> {
+        //noinspection deprecation
+        if (shape.hasTrait(EnumTrait.class)) {
+          yield qualifiedRustEnumType(
+            ModelUtils.stringToEnumShape(shape.asStringShape().orElseThrow())
+          );
+        }
+        yield "::std::string::String";
+      }
+      case ENUM -> qualifiedRustEnumType(shape.asEnumShape().orElseThrow());
+      // everything else
+      case TIMESTAMP -> "::aws_smithy_types::DateTime";
+      // TODO: list, map, structure, union
+      default -> throw new UnsupportedOperationException(
+        "Unsupported shape type: " + shape.getType()
+      );
+    };
   }
 }

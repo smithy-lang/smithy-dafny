@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
@@ -27,7 +28,6 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -145,9 +145,8 @@ public abstract class AbstractRustShimGenerator {
       .filter(this::shouldGenerateEnumForUnion)
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
-    Stream<String> enumModules = model
-      .getStringShapesWithTrait(EnumTrait.class)
-      .stream()
+    Stream<String> enumModules = ModelUtils
+      .streamEnumShapes(model, service.getId().getNamespace())
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
     TokenTree content = declarePubModules(
@@ -293,8 +292,8 @@ public abstract class AbstractRustShimGenerator {
     boolean isDafnyOption
   ) {
     return switch (shape.getType()) {
-      case STRING -> {
-        if (shape.hasTrait(EnumTrait.class)) {
+      case STRING, ENUM -> {
+        if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
           var enumShapeName = toSnakeCase(shape.toShapeId().getName());
           if (isDafnyOption) {
             yield TokenTree.of(
@@ -629,8 +628,8 @@ public abstract class AbstractRustShimGenerator {
     boolean isDafnyOption
   ) {
     return switch (shape.getType()) {
-      case STRING -> {
-        if (shape.hasTrait(EnumTrait.class)) {
+      case STRING, ENUM -> {
+        if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
           var enumShapeName = toSnakeCase(shape.toShapeId().getName());
           if (isDafnyOption) {
             yield TokenTree.of(
@@ -1103,30 +1102,28 @@ public abstract class AbstractRustShimGenerator {
     return "%sError".formatted(operationName(operationShape));
   }
 
-  /**
-   * Generates values for variables commonly used in structure-member-specific templates.
-   */
-  protected HashMap<String, String> memberVariables(
-    final MemberShape memberShape
-  ) {
-    final HashMap<String, String> variables = new HashMap<>();
-    variables.put("fieldName", toSnakeCase(memberShape.getMemberName()));
-    variables.put(
-      "fieldType",
-      rustTypeForShape(model.expectShape(memberShape.getTarget()))
-    );
-    return variables;
-  }
-
   protected String enumName(final EnumShape enumShape) {
     return enumShape.getId().getName(service);
+  }
+
+  protected String rustEnumName(final EnumShape enumShape) {
+    return toPascalCase(enumName(enumShape));
+  }
+
+  protected String qualifiedRustEnumType(final EnumShape enumShape) {
+    return "%s::%s".formatted(
+        getRustTypesModuleName(),
+        rustEnumName(enumShape)
+      );
   }
 
   protected HashMap<String, String> enumVariables(final EnumShape enumShape) {
     final HashMap<String, String> variables = new HashMap<>();
     final String enumName = enumName(enumShape);
     variables.put("enumName", enumName);
-    variables.put("rustEnumName", toPascalCase(enumName));
+    variables.put("snakeCaseEnumName", toSnakeCase(enumName));
+    variables.put("rustEnumName", rustEnumName(enumShape));
+    variables.put("qualifiedRustEnumType", qualifiedRustEnumType(enumShape));
     return variables;
   }
 
@@ -1142,35 +1139,9 @@ public abstract class AbstractRustShimGenerator {
     final String memberName
   ) {
     final HashMap<String, String> variables = new HashMap<>();
+    variables.put("enumMemberName", memberName);
     variables.put("dafnyEnumMemberName", dafnyEnumMemberName(memberName));
     variables.put("rustEnumMemberName", rustEnumMemberName(memberName));
     return variables;
-  }
-
-  // Currently only handles simple types, and doesn't account for any traits
-  protected String rustTypeForShape(final Shape shape) {
-    return switch (shape.getType()) {
-      case BOOLEAN -> "::std::primitive::bool";
-      // integral
-      case BYTE -> "::std::primitive::i8";
-      case SHORT -> "::std::primitive::i16";
-      case INTEGER -> "::std::primitive::i32";
-      case LONG -> "::std::primitive::i64";
-      // floats
-      case FLOAT -> "::std::primitive::f32";
-      case DOUBLE -> "::std::primitive::f64";
-      // special numerics
-      case BIG_INTEGER -> "::num::bigint::BigInt";
-      case BIG_DECIMAL -> "::num::rational::BigRational";
-      // special collections
-      case BLOB -> "::aws_smithy_types::Blob";
-      case STRING -> "::std::string::String";
-      // everything else
-      case TIMESTAMP -> "::aws_smithy_types::DateTime";
-      // TODO: enum, list, map, structure, union
-      default -> throw new UnsupportedOperationException(
-        "Unsupported shape type: " + shape.getType()
-      );
-    };
   }
 }
