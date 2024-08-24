@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.IOUtils;
-import software.amazon.polymorph.utils.Token;
+import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
+import software.amazon.smithy.model.shapes.EnumShape;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -27,9 +27,9 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
@@ -921,31 +921,31 @@ public abstract class AbstractRustShimGenerator {
     };
   }
 
-  protected TokenTree enumToDafnyFunction(final Shape enumShape) {
-    String enumName = enumShape.getId().getName();
-    String rustEnumName = toPascalCase(enumName);
-    String sdkId = service
-      .expectTrait(ServiceTrait.class)
-      .getSdkId()
-      .toLowerCase();
-    String dafnyTypesModuleName = getDafnyTypesModuleName();
-    Map<String, String> variables = Map.of(
-      "sdkCrate",
-      "aws_sdk_" + sdkId,
-      "enumName",
-      enumName,
-      "rustEnumName",
-      rustEnumName,
-      "dafnyTypesModuleName",
-      dafnyTypesModuleName
+  protected TokenTree enumToDafnyFunction(final EnumShape enumShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables(),
+      enumVariables(enumShape)
     );
+    var branches = enumShape
+      .getEnumValues()
+      .keySet()
+      .stream()
+      .map(memberName ->
+        evalTemplate(
+          "$sdkCrate:L::types::$rustEnumName:L::$rustEnumMemberName:L => crate::r#$dafnyTypesModuleName:L::$enumName:L::$dafnyEnumMemberName:L {},",
+          MapUtils.merge(variables, enumMemberVariables(memberName))
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("branches", branches);
 
-    String sdkTypeName = evalTemplate(
-      "$sdkCrate:L::types::$rustEnumName:L",
-      variables
-    );
-
-    var prelude = TokenTree.of(
+    // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
+    // so there's no way to succeed.
+    // See https://github.com/smithy-lang/smithy-dafny/issues/476.
+    // This could be handled more cleanly if conversion functions returned Results,
+    // but that would be a large and disruptive change to the overall code flow.
+    return TokenTree.of(
       evalTemplate(
         """
         #[allow(dead_code)]
@@ -954,76 +954,37 @@ public abstract class AbstractRustShimGenerator {
             value: $sdkCrate:L::types::$rustEnumName:L,
         ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$enumName:L>{
             ::std::rc::Rc::new(match value {
-
+                $branches:L
+                _ => panic!("Unknown enum variant: {}", value),
+            })
+        }
         """,
         variables
       )
     );
-
-    var branches = TokenTree
-      .of(
-        enumShape
-          .expectTrait(EnumTrait.class)
-          .getValues()
-          .stream()
-          .map(e ->
-            TokenTree.of(
-              sdkTypeName +
-              "::" +
-              rustEnumName(e) +
-              " => crate::r#" +
-              dafnyTypesModuleName +
-              "::" +
-              enumName +
-              "::" +
-              dafnyEnumName(e) +
-              " {},"
-            )
-          )
-      )
-      .lineSeparated();
-    // TODO: This should not be a panic, but the Dafny image of the enum shape doesn't have an Unknown variant of any kind,
-    // so there's no way to succeed.
-    // See https://github.com/smithy-lang/smithy-dafny/issues/476.
-    // This could be handled more cleanly if conversion functions returned Results,
-    // but that would be a large and disruptive change to the overall code flow.
-    final var postlude = TokenTree.of(
-      """
-
-              _ => panic!("Unknown enum variant: {}", value),
-          })
-      }
-      """
-    );
-
-    return TokenTree.of(prelude, branches, postlude);
   }
 
-  protected TokenTree enumFromDafnyFunction(final Shape enumShape) {
-    String enumName = enumShape.getId().getName();
-    String rustEnumName = toPascalCase(enumName);
-    String sdkId = service
-      .expectTrait(ServiceTrait.class)
-      .getSdkId()
-      .toLowerCase();
-    String dafnyTypesModuleName = getDafnyTypesModuleName();
-    Map<String, String> variables = Map.of(
-      "sdkCrate",
-      "aws_sdk_" + sdkId,
-      "enumName",
-      enumName,
-      "rustEnumName",
-      rustEnumName,
-      "dafnyTypesModuleName",
-      dafnyTypesModuleName
+  protected TokenTree enumFromDafnyFunction(final EnumShape enumShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      dafnyModuleVariables(),
+      enumVariables(enumShape)
     );
 
-    String sdkTypeName = evalTemplate(
-      "$sdkCrate:L::types::$rustEnumName:L",
-      variables
-    );
+    var branches = enumShape
+      .getEnumValues()
+      .keySet()
+      .stream()
+      .map(memberName ->
+        evalTemplate(
+          "crate::r#$dafnyTypesModuleName:L::$enumName:L::$dafnyEnumMemberName:L {} => $sdkCrate:L::types::$rustEnumName:L::$rustEnumMemberName:L,",
+          MapUtils.merge(variables, enumMemberVariables(memberName))
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("branches", branches);
 
-    var prelude = TokenTree.of(
+    return TokenTree.of(
       evalTemplate(
         """
         #[allow(dead_code)]
@@ -1031,44 +992,13 @@ public abstract class AbstractRustShimGenerator {
             dafny_value: &crate::r#$dafnyTypesModuleName:L::$enumName:L,
         ) -> $sdkCrate:L::types::$rustEnumName:L {
             match dafny_value {
-
+                $branches:L
+            }
+        }
         """,
         variables
       )
     );
-
-    var branches = TokenTree
-      .of(
-        enumShape
-          .expectTrait(EnumTrait.class)
-          .getValues()
-          .stream()
-          .map(e ->
-            TokenTree.of(
-              "crate::r#" +
-              dafnyTypesModuleName +
-              "::" +
-              enumName +
-              "::" +
-              dafnyEnumName(e) +
-              " {} => " +
-              sdkTypeName +
-              "::" +
-              rustEnumName(e) +
-              ","
-            )
-          )
-      )
-      .lineSeparated();
-    final var postlude = TokenTree.of(
-      """
-
-          }
-      }
-      """
-    );
-
-    return TokenTree.of(prelude, branches, postlude);
   }
 
   protected Set<RustFile> allOperationConversionModules() {
@@ -1082,12 +1012,29 @@ public abstract class AbstractRustShimGenerator {
     final OperationShape operationShape
   );
 
-  private String rustEnumName(EnumDefinition ed) {
-    return toPascalCase(ed.getValue());
+  protected final EnumShape stringToEnumShape(final StringShape stringShape) {
+    return EnumShape
+      .fromStringShape(stringShape)
+      .orElseThrow(() ->
+        new UnsupportedOperationException(
+          "Could not convert %s to an enum".formatted(stringShape.getId())
+        )
+      );
   }
 
-  private String dafnyEnumName(EnumDefinition ed) {
-    return ed.getValue();
+  protected RustFile enumConversionModule(final EnumShape enumShape) {
+    Path path = Path.of(
+      "src",
+      "conversions",
+      toSnakeCase(enumName(enumShape)) + ".rs"
+    );
+
+    return new RustFile(
+      path,
+      TokenTree
+        .of(enumToDafnyFunction(enumShape), enumFromDafnyFunction(enumShape))
+        .lineSeparated()
+    );
   }
 
   protected String getDafnyModuleName() {
@@ -1185,6 +1132,35 @@ public abstract class AbstractRustShimGenerator {
       "fieldType",
       rustTypeForShape(model.expectShape(memberShape.getTarget()))
     );
+    return variables;
+  }
+
+  protected String enumName(final EnumShape enumShape) {
+    return enumShape.getId().getName(service);
+  }
+
+  protected HashMap<String, String> enumVariables(final EnumShape enumShape) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String enumName = enumName(enumShape);
+    variables.put("enumName", enumName);
+    variables.put("rustEnumName", toPascalCase(enumName));
+    return variables;
+  }
+
+  protected String rustEnumMemberName(final String memberName) {
+    return toPascalCase(memberName);
+  }
+
+  protected String dafnyEnumMemberName(final String memberName) {
+    return memberName;
+  }
+
+  protected HashMap<String, String> enumMemberVariables(
+    final String memberName
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    variables.put("dafnyEnumMemberName", dafnyEnumMemberName(memberName));
+    variables.put("rustEnumMemberName", rustEnumMemberName(memberName));
     return variables;
   }
 

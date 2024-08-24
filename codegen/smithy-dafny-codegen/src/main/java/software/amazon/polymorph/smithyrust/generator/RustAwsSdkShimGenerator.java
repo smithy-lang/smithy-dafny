@@ -51,6 +51,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       model
         .getStringShapesWithTrait(EnumTrait.class)
         .stream()
+        .map(this::stringToEnumShape)
         .map(this::enumConversionModule)
         .collect(Collectors.toSet())
     );
@@ -571,22 +572,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
     String evaluated = evalTemplate(template, variables);
     return new RustFile(path, TokenTree.of(evaluated));
-  }
-
-  private RustFile enumConversionModule(final Shape enumShape) {
-    Path path = Path.of(
-      "src",
-      "conversions",
-      toSnakeCase(enumShape.getId().getName()) + ".rs"
-    );
-
-    return new RustFile(
-      path,
-      TokenTree.of(
-        enumToDafnyFunction(enumShape),
-        enumFromDafnyFunction(enumShape)
-      )
-    );
   }
 
   @Override

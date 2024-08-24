@@ -23,6 +23,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 
 /**
  * Generates all Rust modules needed to wrap a Dafny library as a Rust library.
@@ -81,8 +82,15 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(conversionsErrorModule());
     result.addAll(configConversionModules());
     result.addAll(allOperationConversionModules());
+    result.addAll(
+      model
+        .getStringShapesWithTrait(EnumTrait.class)
+        .stream()
+        .map(this::stringToEnumShape)
+        .map(this::enumConversionModule)
+        .collect(Collectors.toSet())
+    );
     // TODO structure conversion modules
-    // TODO enum conversion modules
     // TODO union conversion modules
 
     // wrapped client
