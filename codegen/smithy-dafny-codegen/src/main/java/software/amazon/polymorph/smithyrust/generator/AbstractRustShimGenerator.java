@@ -13,7 +13,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.IOUtils;
+import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
@@ -329,6 +332,25 @@ public abstract class AbstractRustShimGenerator {
             }
             yield result;
           }
+        } else if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+          final String dafnyToRust = "::std::string::String::from_utf8(dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&%s, |b| *b)).unwrap()";
+          String valueToRust;
+          if (isDafnyOption) {
+            valueToRust = """
+              match %s.as_ref() {
+                crate::_Wrappers_Compile::Option::Some { .. } => ::std::option::Option::Some(%s),
+                _ => ::std::option::Option::None,
+              }""".formatted(dafnyValue, dafnyToRust.formatted(dafnyValue + ".Extract()"));
+            if (!isRustOption) {
+              valueToRust = "(%s).unwrap()".formatted(valueToRust);
+            }
+          } else {
+            valueToRust = dafnyToRust.formatted(dafnyValue + ".as_ref()");
+            if (isRustOption) {
+              valueToRust = "Some(%s)".formatted(valueToRust);
+            }
+          }
+          yield TokenTree.of(valueToRust);
         } else {
           if (isDafnyOption) {
             yield TokenTree.of(
@@ -636,6 +658,22 @@ public abstract class AbstractRustShimGenerator {
                 )
             );
           }
+        } else if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+          final String rustToDafny = "dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.as_bytes().to_vec(), |b| *b)";
+          String valueToDafny;
+          if (isRustOption) {
+            valueToDafny = """
+              match %s {
+                Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
+                None => crate::_Wrappers_Compile::Option::None {},
+              }""".formatted(rustValue, rustToDafny.formatted("s"));
+            if (!isDafnyOption) {
+              valueToDafny = "(%s).Extract()".formatted(valueToDafny);
+            }
+          } else {
+            valueToDafny = rustToDafny.formatted(rustValue);
+          }
+          yield TokenTree.of("::std::rc::Rc::new(%s)".formatted(valueToDafny));
         } else {
           if (isRustOption) {
             var result = TokenTree.of(
