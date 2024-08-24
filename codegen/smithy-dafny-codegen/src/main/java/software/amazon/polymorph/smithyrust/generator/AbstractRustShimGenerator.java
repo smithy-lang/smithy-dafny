@@ -106,7 +106,7 @@ public abstract class AbstractRustShimGenerator {
       evalTemplate(
         getClass(),
         "runtimes/rust/conversions/error.rs",
-        dafnyModuleVariables()
+        serviceVariables()
       )
     );
     return new RustFile(
@@ -123,17 +123,6 @@ public abstract class AbstractRustShimGenerator {
           .map(module -> TokenTree.of("pub mod " + module + ";\n"))
       )
       .lineSeparated();
-  }
-
-  protected Map<String, String> dafnyModuleVariables() {
-    final Map<String, String> stringStringMap = new HashMap<>();
-    stringStringMap.put("dafnyModuleName", getDafnyModuleName());
-    stringStringMap.put(
-      "dafnyInternalModuleName",
-      getDafnyInternalModuleName()
-    );
-    stringStringMap.put("dafnyTypesModuleName", getDafnyTypesModuleName());
-    return stringStringMap;
   }
 
   protected RustFile conversionsModule() {
@@ -924,7 +913,6 @@ public abstract class AbstractRustShimGenerator {
   protected TokenTree enumToDafnyFunction(final EnumShape enumShape) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      dafnyModuleVariables(),
       enumVariables(enumShape)
     );
     var branches = enumShape
@@ -933,7 +921,7 @@ public abstract class AbstractRustShimGenerator {
       .stream()
       .map(memberName ->
         evalTemplate(
-          "$sdkCrate:L::types::$rustEnumName:L::$rustEnumMemberName:L => crate::r#$dafnyTypesModuleName:L::$enumName:L::$dafnyEnumMemberName:L {},",
+          "$rustTypesModuleName:L::$rustEnumName:L::$rustEnumMemberName:L => crate::r#$dafnyTypesModuleName:L::$enumName:L::$dafnyEnumMemberName:L {},",
           MapUtils.merge(variables, enumMemberVariables(memberName))
         )
       )
@@ -951,7 +939,7 @@ public abstract class AbstractRustShimGenerator {
         #[allow(dead_code)]
 
         pub fn to_dafny(
-            value: $sdkCrate:L::types::$rustEnumName:L,
+            value: $rustTypesModuleName:L::$rustEnumName:L,
         ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$enumName:L>{
             ::std::rc::Rc::new(match value {
                 $branches:L
@@ -967,7 +955,6 @@ public abstract class AbstractRustShimGenerator {
   protected TokenTree enumFromDafnyFunction(final EnumShape enumShape) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      dafnyModuleVariables(),
       enumVariables(enumShape)
     );
 
@@ -977,7 +964,7 @@ public abstract class AbstractRustShimGenerator {
       .stream()
       .map(memberName ->
         evalTemplate(
-          "crate::r#$dafnyTypesModuleName:L::$enumName:L::$dafnyEnumMemberName:L {} => $sdkCrate:L::types::$rustEnumName:L::$rustEnumMemberName:L,",
+          "crate::r#$dafnyTypesModuleName:L::$enumName:L::$dafnyEnumMemberName:L {} => $rustTypesModuleName:L::$rustEnumName:L::$rustEnumMemberName:L,",
           MapUtils.merge(variables, enumMemberVariables(memberName))
         )
       )
@@ -990,7 +977,7 @@ public abstract class AbstractRustShimGenerator {
         #[allow(dead_code)]
         pub fn from_dafny(
             dafny_value: &crate::r#$dafnyTypesModuleName:L::$enumName:L,
-        ) -> $sdkCrate:L::types::$rustEnumName:L {
+        ) -> $rustTypesModuleName:L::$rustEnumName:L {
             match dafny_value {
                 $branches:L
             }
@@ -1012,16 +999,6 @@ public abstract class AbstractRustShimGenerator {
     final OperationShape operationShape
   );
 
-  protected final EnumShape stringToEnumShape(final StringShape stringShape) {
-    return EnumShape
-      .fromStringShape(stringShape)
-      .orElseThrow(() ->
-        new UnsupportedOperationException(
-          "Could not convert %s to an enum".formatted(stringShape.getId())
-        )
-      );
-  }
-
   protected RustFile enumConversionModule(final EnumShape enumShape) {
     Path path = Path.of(
       "src",
@@ -1035,6 +1012,19 @@ public abstract class AbstractRustShimGenerator {
         .of(enumToDafnyFunction(enumShape), enumFromDafnyFunction(enumShape))
         .lineSeparated()
     );
+  }
+
+  /**
+   * Generates values for variables commonly used in service-specific templates.
+   */
+  protected HashMap<String, String> serviceVariables() {
+    final HashMap<String, String> variables = new HashMap<>();
+    variables.put("serviceName", service.getId().getName(service));
+    variables.put("dafnyModuleName", getDafnyModuleName());
+    variables.put("dafnyInternalModuleName", getDafnyInternalModuleName());
+    variables.put("dafnyTypesModuleName", getDafnyTypesModuleName());
+    variables.put("rustTypesModuleName", getRustTypesModuleName());
+    return variables;
   }
 
   protected String getDafnyModuleName() {
@@ -1053,14 +1043,7 @@ public abstract class AbstractRustShimGenerator {
     return "%s::types".formatted(getDafnyInternalModuleName());
   }
 
-  /**
-   * Generates values for variables commonly used in service-specific templates.
-   */
-  protected HashMap<String, String> serviceVariables() {
-    final HashMap<String, String> variables = new HashMap<>();
-    variables.put("serviceName", service.getId().getName(service));
-    return variables;
-  }
+  protected abstract String getRustTypesModuleName();
 
   /**
    * Generates values for variables commonly used in operation-specific templates.

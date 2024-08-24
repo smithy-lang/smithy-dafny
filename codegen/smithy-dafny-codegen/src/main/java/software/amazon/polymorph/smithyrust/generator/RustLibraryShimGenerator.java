@@ -23,7 +23,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.EnumTrait;
 
 /**
  * Generates all Rust modules needed to wrap a Dafny library as a Rust library.
@@ -63,6 +62,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     // types
     result.add(typesModule());
     result.add(typesConfigModule());
+    // TODO enum type modules
 
     // errors
     result.add(errorModule());
@@ -83,12 +83,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.addAll(configConversionModules());
     result.addAll(allOperationConversionModules());
     result.addAll(
-      model
-        .getStringShapesWithTrait(EnumTrait.class)
-        .stream()
-        .map(this::stringToEnumShape)
+      ModelUtils
+        .streamEnumShapes(model, service.getId().getNamespace())
         .map(this::enumConversionModule)
-        .collect(Collectors.toSet())
+        .toList()
     );
     // TODO structure conversion modules
     // TODO union conversion modules
@@ -101,10 +99,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private RustFile clientModule() {
-    final Map<String, String> variables = MapUtils.merge(
-      dafnyModuleVariables(),
-      serviceVariables()
-    );
+    final Map<String, String> variables = serviceVariables();
     variables.put(
       "operationModules",
       serviceOperationShapes()
@@ -456,10 +451,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private Set<RustFile> configConversionModules() {
-    final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(),
-      dafnyModuleVariables()
-    );
+    final Map<String, String> variables = serviceVariables();
     final String snakeCaseConfigName = variables.get("snakeCaseConfigName");
 
     final String outerContent = IOUtils.evalTemplate(
@@ -502,7 +494,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      dafnyModuleVariables(),
       operationVariables(operationShape)
     );
 
@@ -559,7 +550,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      dafnyModuleVariables(),
       operationVariables(operationShape)
     );
     variables.put("structureName", structureId.getName(service));
@@ -617,7 +607,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      dafnyModuleVariables(),
       operationVariables(operationShape)
     );
     variables.put("structureName", structureId.getName(service));
@@ -651,16 +640,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String content = IOUtils.evalTemplate(
       getClass(),
       "runtimes/rust/wrapped.rs",
-      MapUtils.merge(serviceVariables(), dafnyModuleVariables())
+      serviceVariables()
     );
     return new RustFile(Path.of("src", "wrapped.rs"), TokenTree.of(content));
   }
 
   private RustFile wrappedClientModule() {
-    final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(),
-      dafnyModuleVariables()
-    );
+    final Map<String, String> variables = serviceVariables();
     variables.put(
       "operationImpls",
       serviceOperationShapes()
@@ -683,7 +669,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      dafnyModuleVariables(),
       operationVariables(operationShape)
     );
     return IOUtils.evalTemplate(
@@ -718,6 +703,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put("snakeCaseConfigName", toSnakeCase(configName));
 
     return variables;
+  }
+
+  @Override
+  protected String getRustTypesModuleName() {
+    return "crate::types";
   }
 
   @Override
