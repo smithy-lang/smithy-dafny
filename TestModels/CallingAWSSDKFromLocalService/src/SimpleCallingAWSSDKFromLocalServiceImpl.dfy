@@ -19,4 +19,8 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
     returns (output: Result<CallDDBOutput, Error>) {
     return Success(CallDDBOutput(ddbClient := input.ddbClient));
   }
+  method CallKMS ( config: InternalConfig,  input: CallKMSInput )
+    returns (output: Result<CallKMSOutput, Error>) {
+    return Success(CallKMSOutput(kmsClient := input.kmsClient));
+  }
 }

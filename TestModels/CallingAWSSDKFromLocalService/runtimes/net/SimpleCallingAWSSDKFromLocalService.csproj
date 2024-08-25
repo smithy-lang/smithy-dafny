@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../aws-sdks/ddb/runtimes/net/DDBv2.csproj" />
+    <ProjectReference Include="../../../aws-sdks/kms/runtimes/net/KMS.csproj" />
     <ProjectReference Include="../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj" />
   </ItemGroup>
   

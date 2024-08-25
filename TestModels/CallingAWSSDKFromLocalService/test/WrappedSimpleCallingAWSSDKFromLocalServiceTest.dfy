@@ -5,12 +5,16 @@ include "SimpleCallingAWSSDKFromLocalServiceImplTest.dfy"
 
 module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
   import opened WrappedCallingAWSSDKFromLocalServiceService
-    // import opened SimpleCallingAWSSDKFromLocalServiceTypes
   import SimpleCallingAWSSDKFromLocalServiceImplTest
   import opened Wrappers
   import opened StandardLibrary.UInt
   method{:test} TestCallDDB() {
     var client :- expect WrappedCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
     SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDB(client);
+  }
+
+  method{:test} TestCallKMS() {
+    var client :- expect WrappedCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
+    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallKMS(client);
   }
 }
