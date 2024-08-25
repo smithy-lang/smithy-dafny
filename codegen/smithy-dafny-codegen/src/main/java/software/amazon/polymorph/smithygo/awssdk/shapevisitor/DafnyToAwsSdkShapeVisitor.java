@@ -5,6 +5,7 @@ import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
 import software.amazon.polymorph.smithygo.codegen.SymbolUtils;
+import software.amazon.polymorph.smithygo.codegen.Synthetic;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.DafnyGoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
@@ -100,7 +101,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     public String structureShape(final StructureShape shape) {
         final var builder = new StringBuilder();
         writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(shape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(shape));
-        var subtype = !(shape.toShapeId().getName().contains("Input") || shape.toShapeId().getName().contains("Output"))
+        var subtype = !(awsSdkGoPointableIndex.isOperationStruct(shape) || shape.hasTrait(Synthetic.class))
                               || shape.toShapeId().getName().contains("Exception");
         var nilcheck = "";
         if (this.isOptional) {
