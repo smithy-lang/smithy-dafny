@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
+import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
@@ -130,7 +131,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             builder.append("%1$s%2$s".formatted(
                     targetShape.accept(
                             new AwsSdkToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
-                                                                                                                       writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
+                                                          writer, isConfigShape, memberShape.isOptional(), AwsSdkGoPointableIndex.of(context.model()).isPointable(memberShape)
                             )), fieldSeparator
             ));
         }

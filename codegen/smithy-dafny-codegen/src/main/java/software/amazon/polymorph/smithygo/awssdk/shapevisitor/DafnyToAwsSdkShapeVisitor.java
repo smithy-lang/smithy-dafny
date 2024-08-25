@@ -3,12 +3,18 @@ package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
+import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
+import software.amazon.polymorph.smithygo.codegen.SymbolUtils;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
+import software.amazon.polymorph.smithygo.localservice.DafnyGoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
@@ -26,31 +32,40 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.utils.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
+    private static final List<String> shapeName = Arrays.asList("IndexSizeBytes", "ItemCount", "ProcessedSizeBytes", "TableSizeBytes");
+    private final AwsSdkGoPointableIndex awsSdkGoPointableIndex;
     private final GenerationContext context;
     private final String dataSource;
     private final GoWriter writer;
     private final ServiceTrait serviceTrait;
     private final boolean isOptional;
+    private final boolean isPointable;
 
     public DafnyToAwsSdkShapeVisitor(
             final GenerationContext context,
             final String dataSource,
             final GoWriter writer
     ) {
-        this(context, dataSource, writer, false);
+        this(context, dataSource, writer, false, false);
     }
 
     public DafnyToAwsSdkShapeVisitor(
             final GenerationContext context,
             final String dataSource,
             final GoWriter writer,
-            final boolean isOptional
+            final boolean isOptional,
+            final boolean isPointable
     ) {
         this.context = context;
         this.dataSource = dataSource;
         this.writer = writer;
         this.isOptional = isOptional;
+        this.isPointable = isPointable;
+        this.awsSdkGoPointableIndex = new AwsSdkGoPointableIndex(context.model());
         this.serviceTrait = context.model().expectShape(context.settings().getService(context.model()).toShapeId()).getTrait(ServiceTrait.class).get();
     }
 
@@ -85,19 +100,23 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     public String structureShape(final StructureShape shape) {
         final var builder = new StringBuilder();
         writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(shape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(shape));
-        var subtype = !(shape.toShapeId().getName().contains("Input") || shape.toShapeId().getName().contains("Output") || shape.toShapeId().getName().contains("Request") || shape.toShapeId().getName().contains("Response"))
+        var subtype = !(shape.toShapeId().getName().contains("Input") || shape.toShapeId().getName().contains("Output"))
                               || shape.toShapeId().getName().contains("Exception");
+        var nilcheck = "";
+        if (this.isOptional) {
+            if (this.isPointable) {
+                nilcheck = "if %s == nil { return nil }".formatted(dataSource);
+            } else {
+                nilcheck = "";
+            }
+        }
         builder.append("""
                                func() %s%s {
                                %s
-                              return %s%s {
-                               """.formatted(this.isOptional ? "*" : "", SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(".").concat(shape.getId().getName()),
-                                             this.isOptional ?
-                                                     """
-                                                     if %s.UnwrapOr(nil) == nil {
-                                                     return nil
-                                                     }""".formatted(dataSource) : "",
-                                             this.isOptional ? "&" : "",
+                               return %s%s {
+                               """.formatted(this.isPointable ? "*" : "", SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(".").concat(shape.getId().getName()),
+                                             nilcheck,
+                                             this.isPointable ? "&" : "",
                                              SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(".").concat(shape.getId().getName()))
         );
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
@@ -105,13 +124,13 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
             //TODO: Is it ever possible for structure to be nil?
-            final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource, this.isOptional ? ".UnwrapOr(nil).(%s)".formatted(DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape))) : "",
+            final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource, this.isOptional ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape))) : "",
                                                                        ".Dtor_%s()".formatted(memberName),
-                                                                       memberShape.isOptional() && !targetShape.isStructureShape() ? ".UnwrapOr(nil)" : "");
+                                                                       memberShape.isOptional() ? ".UnwrapOr(nil)" : "");
             builder.append("%1$s: %2$s,".formatted(
                     StringUtils.capitalize(memberName),
                     targetShape.accept(
-                            new DafnyToAwsSdkShapeVisitor(context, derivedDataSource, writer, memberShape.isOptional())
+                            new DafnyToAwsSdkShapeVisitor(context, derivedDataSource, writer, memberShape.isOptional(), shapeName.contains(memberName) || awsSdkGoPointableIndex.isPointable(memberShape))
                     )
             ));
         }
@@ -127,24 +146,24 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
         MemberShape memberShape = shape.getMember();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-        final var typeName = context.symbolProvider().toSymbol(memberShape);
+        var typeName = GoCodegenUtils.getType(context.symbolProvider().toSymbol(targetShape), serviceTrait);
         builder.append("""
-                          func() []%s{
-                              var fieldValue []%s
-                              if %s == nil {
-                                  return nil
-                              }
-                              for i := dafny.Iterate(%s.(dafny.Sequence)); ; {
-                               val, ok := i()
-                               if !ok {
-                                   break
-                               }
-                               fieldValue = append(fieldValue, %s%s)}
-                          """.formatted(SmithyNameResolver.getSmithyTypeAws(serviceTrait, typeName, true), SmithyNameResolver.getSmithyTypeAws(serviceTrait, typeName, true), dataSource, dataSource,
-                                        GoPointableIndex.of(context.model()).isPointable(targetShape) && !targetShape.isEnumShape() && !targetShape.hasTrait(EnumTrait.class) && !targetShape.isStructureShape() ? "*" : "",
-                                        targetShape.accept(
-                                                         new DafnyToAwsSdkShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, !targetShape.isStructureShape())
-                                                 )));
+                               func() []%s{
+                                   var fieldValue []%s
+                                   %s
+                                   for i := dafny.Iterate(%s.(dafny.Sequence)); ; {
+                                    val, ok := i()
+                                    if !ok {
+                                        break
+                                    }
+                                    fieldValue = append(fieldValue, %s)}
+                               """.formatted(typeName, typeName, this.isOptional ? """
+                                                     if %s == nil {
+                                                         return nil
+                                                     }""".formatted(dataSource) : "", dataSource,
+                                             targetShape.accept(
+                                                     new DafnyToAwsSdkShapeVisitor(context, "val%s".formatted(memberShape.isOptional() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, false, awsSdkGoPointableIndex.isPointable(memberShape))
+                                             )));
 
         // Close structure
         return builder.append("return fieldValue }()").toString();
@@ -159,27 +178,33 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
         MemberShape valueMemberShape = shape.getValue();
         final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
-        final var type = context.symbolProvider().toSymbol(valueTargetShape).getName();
+        var typeName = GoCodegenUtils.getType(context.symbolProvider().toSymbol(valueTargetShape), serviceTrait);
 
+        var nilCheck = "";
+        if (this.isOptional) {
+            nilCheck = """
+                    if %s == nil {
+                        return nil
+                    }
+                    """.formatted(dataSource);
+        }
         builder.append("""
                                func() map[string]%s {
                                    var m map[string]%s = make(map[string]%s)
-                                   if %s == nil {
-                                       return nil
-                                   }
-                                   for i := dafny.Iterate(%s.(dafny.Map).Items());; {
+                                   %s
+                                   for i := dafny.Iterate(%s%s.Items());; {
                                        val, ok := i()
                                     	  if !ok {
                                     	      break;
                                     	  }
-                                    	  m[*%s] = *%s
+                                    	  m[%s] = %s
                                    }
                                    return m
-                               }()""".formatted(type, type, type, dataSource, dataSource, keyTargetShape.accept(
-                                                        new DafnyToAwsSdkShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, false)
-                                                ),
+                               }()""".formatted(typeName, typeName, typeName, nilCheck, dataSource, this.isOptional ? ".(dafny.Map)" : "",
+                                                keyTargetShape.accept(
+                                                        new DafnyToAwsSdkShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, keyMemberShape.isOptional(), awsSdkGoPointableIndex.isPointable(keyMemberShape))),
                                                 valueTargetShape.accept(
-                                                        new DafnyToAwsSdkShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(1))", writer)
+                                                        new DafnyToAwsSdkShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(1))%s".formatted(valueMemberShape.isOptional() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape))) : ""), writer, false, awsSdkGoPointableIndex.isPointable(valueMemberShape))
                                                 )
         ));
         return builder.toString();
@@ -188,26 +213,29 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String booleanShape(BooleanShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        if (GoPointableIndex.of(context.model()).isPointable(shape)) {
-            return """
-                    func() *bool {
-                        var b bool
-                        if %s == nil {
-                            return nil
-                        }
-                        b = %s.(%s)
-                        return &b
-                    }()""".formatted(dataSource, dataSource, context.symbolProvider().toSymbol(shape).getName());
-        } else {
-            return "%s.(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape).getName());
+        var nilCheck = "";
+        if (this.isOptional) {
+            if (this.isPointable) {
+                nilCheck = "if %s == nil { return nil }".formatted(dataSource);
+            } else {
+                nilCheck = "if %s == nil { return b }".formatted(dataSource);
+            }
         }
+        return """
+                func() %sbool {
+                    var b bool
+                    %s
+                    b = %s%s
+                    return %sb
+                }()""".formatted(this.isPointable ? "*" : "", nilCheck, dataSource, this.isOptional ? ".(%s)".formatted(context.symbolProvider().toSymbol(shape).getName()) : "",
+                                 this.isPointable ? "&" : "");
     }
 
     @Override
     public String stringShape(StringShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         if (shape.hasTrait(EnumTrait.class)) {
-            if (isOptional) {
+            if (this.isOptional) {
                 return """
                            func () %s.%s {
                            var u %s.%s
@@ -237,7 +265,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                 return """
                            func () %s.%s {
                            var u %s.%s
-                           
+                        
                         	inputEnum := %s
                         	index := -1;
                         	for allEnums := dafny.Iterate(%s{}.AllSingletonConstructors()); ; {
@@ -259,42 +287,33 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         }
 
         var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? "uint8" : "dafny.Char";
-        if (GoPointableIndex.of(context.model()).isPointable(shape)) {
-            return """
-                     func() (*string) {
-                         var s string
-                     if %s == nil {
-                         return nil
-                     }
-                         for i := dafny.Iterate(%s) ; ; {
-                             val, ok := i()
-                             if !ok {
-                                 return &[]string{s}[0]
-                             } else {
-                                 s = s + string(val.(%s))
-                             }
-                        }
-                    }()""".formatted(dataSource, dataSource, underlyingType);
-        } else {
-            return """
-                     func() (string) {
-                         var s string
-                         for i := dafny.Iterate(%s) ; ; {
-                             val, ok := i()
-                             if !ok {
-                                 return s
-                             } else {
-                                 s = s + string(val.(%s))
-                             }
-                        }
-                    }()""".formatted(dataSource, underlyingType);
+        var nilCheck = "";
+        if (this.isOptional) {
+            if (this.isPointable) {
+                nilCheck = "if %s == nil { return nil }".formatted(dataSource);
+            } else {
+                nilCheck = "if %s == nil { return s }".formatted(dataSource);
+            }
         }
+        return """
+                 func() (%sstring) {
+                     var s string
+                 %s
+                     for i := dafny.Iterate(%s) ; ; {
+                         val, ok := i()
+                         if !ok {
+                             return %s[]string{s}[0]
+                         } else {
+                             s = s + string(val.(%s))
+                         }
+                    }
+                }()""".formatted(this.isPointable ? "*" : "", nilCheck, dataSource, this.isPointable ? "&" : "", underlyingType);
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        if (GoPointableIndex.of(context.model()).isPointable(shape)) {
+        if (AwsSdkGoPointableIndex.of(context.model()).isPointable(shape)) {
             return """
                     func() *int32 {
                         var i int32
@@ -312,61 +331,59 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String longShape(LongShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        if (GoPointableIndex.of(context.model()).isPointable(shape)) {
-            return """
-                    func() *int64 {
-                        var i int64
-                        if %s == nil {
-                            return nil
-                        }
-                        i = %s.(int64)
-                        return &i
-                    }()""".formatted(dataSource, dataSource);
-        } else {
-            return "%s.(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape).getName());
+        var nilCheck = "";
+        if (this.isOptional) {
+            if (this.isPointable) {
+                nilCheck = "if %s == nil { return nil }".formatted(dataSource);
+            } else {
+                nilCheck = "if %s == nil { return i}".formatted(dataSource);
+            }
         }
+        return """
+                func() %sint64 {
+                    var i int64
+                    %s
+                    i = %s%s
+                    return %si
+                }()""".formatted(this.isPointable ? "*" : "", nilCheck, dataSource, this.isOptional ? ".(int64)" : "", this.isPointable ? "&" : "");
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         writer.addUseImports(SmithyGoDependency.MATH);
-        if (GoPointableIndex.of(context.model()).isPointable(shape)) {
-            return """
-                    func () *float64 {
-                        var b []byte
-                    if %s == nil {
-                        return nil
-                    }
-                        for i := dafny.Iterate(%s) ; ; {
-                            val, ok := i()
-                    	    if !ok {
-                          return &[]float64{math.Float64frombits(binary.LittleEndian.Uint64(b))}[0]
-                         } else {
-                          b = append(b, val.(byte))
-                         }
-                        }
-                    }()""".formatted(dataSource, dataSource);
-        } else {
-            return """
-                    func () float64 {
-                        var b []byte
-                        for i := dafny.Iterate(%s) ; ; {
-                                                    val, ok := i()
-                                            	    if !ok {
-                                                  return math.Float64frombits(binary.LittleEndian.Uint64(b))
-                                                 } else {
-                                                  b = append(b, val.(byte))
-                                                 }
-                                                }
-                                            }()""".formatted(dataSource);
+        writer.addUseImports(SmithyGoDependency.stdlib("encoding/binary"));
+        var nilCheck = "";
+        if (this.isOptional) {
+            if (this.isPointable) {
+                nilCheck = "if %s == nil { return nil }".formatted(dataSource);
+            } else {
+                nilCheck = "if %s == nil { var f float64; return f}".formatted(dataSource);
+            }
         }
+        return """
+                func () %sfloat64 {
+                    var b []byte
+                %s
+                    for i := dafny.Iterate(%s) ; ; {
+                        val, ok := i()
+                	    if !ok {
+                      return %s[]float64{math.Float64frombits(binary.LittleEndian.Uint64(b))}[0]
+                     } else {
+                      b = append(b, val.(byte))
+                     }
+                    }
+                }()""".formatted(this.isPointable ? "*" : "", nilCheck, dataSource, this.isPointable ? "&" : "");
     }
 
     @Override
     public String unionShape(UnionShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        return "nil";
+        return """
+                func () types.%s {
+                _ = val
+                return nil
+                }()""".formatted(context.symbolProvider().toSymbol(shape).getName());
     }
 
     @Override
