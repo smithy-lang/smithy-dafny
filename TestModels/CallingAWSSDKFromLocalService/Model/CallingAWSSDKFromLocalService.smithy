@@ -3,31 +3,39 @@
 namespace simple.callingawssdkfromlocalservice
 
 use com.amazonaws.dynamodb#DynamoDB_20120810
+use aws.polymorph#reference
+
+@reference(service: DynamoDB_20120810)
+structure DdbClientReference {}
 
 @aws.polymorph#localService(
   sdkId: "SimpleCallingAWSSDKFromLocalService",
   config: SimpleCallingAWSSDKFromLocalServiceConfig,
+  dependencies: [
+    DynamoDB_20120810,
+  ]
 )
 
 service SimpleCallingAWSSDKFromLocalService {
   version: "2021-11-01",
   resources: [],
-  operations: [ BasicGet ],
+  operations: [ CallDDB ],
   errors: [ ],
 }
 
 structure SimpleCallingAWSSDKFromLocalServiceConfig {}
 
-operation BasicGet {
-  input: BasicGetInput,
-  output: BasicGetOutput,
+operation CallDDB {
+  input: CallDDBInput,
+  output: CallDDBOutput,
 }
 
-structure BasicGetInput {
+structure CallDDBInput {
   @required
-  item: com.amazonaws.dynamodb#GetItemInput
+  ddbClient: DdbClientReference,
 }
 
-structure BasicGetOutput {
-  putItemOutput: com.amazonaws.dynamodb#GetItemOutput
+structure CallDDBOutput {
+  @required
+  ddbClient: DdbClientReference,
 }

@@ -3,7 +3,7 @@
 include "../Model/SimpleCallingawssdkfromlocalserviceTypes.dfy"
 
 module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawssdkfromlocalserviceOperations  {
-  import ComAmazonawsDynamodbTypes
+  import DDB = ComAmazonawsDynamodbTypes
   import DDBOperations =  Com.Amazonaws.Dynamodb
   datatype Config = Config
   type InternalConfig = Config
@@ -11,16 +11,12 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
   {true}
   function ModifiesInternalConfig(config: InternalConfig) : set<object>
   {{}}
-  predicate BasicGetEnsuresPublicly(input: BasicGetInput, output: Result<BasicGetOutput, Error>) {
+  predicate CallDDBEnsuresPublicly(input: CallDDBInput, output: Result<CallDDBOutput, Error>) {
     true
   }
 
-  method BasicGet ( config: InternalConfig,  input: BasicGetInput )
-    returns (output: Result<BasicGetOutput, Error>) {
-    var client : ComAmazonawsDynamodbTypes.IDynamoDBClient;
-    var maybeDdbClient := DDBOperations.DynamoDBClient();
-    client :- expect maybeDdbClient;
-    var ret := client.GetItem(input.item);
-    return Success(BasicGetOutput(putItemOutput := Some(ret.value)));
+  method CallDDB ( config: InternalConfig,  input: CallDDBInput )
+    returns (output: Result<CallDDBOutput, Error>) {
+    return Success(CallDDBOutput(ddbClient := input.ddbClient));
   }
 }

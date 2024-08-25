@@ -2,11 +2,16 @@
 
   <PropertyGroup>
     <RootNamespace>SimpleCallingAWSSDKFromLocalService</RootNamespace>
-    <ImplicitUsings>disable</ImplicitUsings>
+    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <LangVersion>10</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!--
+      Ignore errors from generated code. Ideally this would be scoped to just the relevant files.
+      CS0105: duplicate namespace, CS0618: obsolete members
+    -->
+    <NoWarn>CS0105,CS0618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

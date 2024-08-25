@@ -9,8 +9,8 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
   import SimpleCallingAWSSDKFromLocalServiceImplTest
   import opened Wrappers
   import opened StandardLibrary.UInt
-  method{:test} TestBasicGet() {
+  method{:test} TestCallDDB() {
     var client :- expect WrappedCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
-    SimpleCallingAWSSDKFromLocalServiceImplTest.TestBasicGet(client);
+    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDB(client);
   }
 }

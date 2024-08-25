@@ -13,6 +13,9 @@ SERVICE_NAMESPACE_SimpleCallingAWSSDKFromLocalService=simple.callingawssdkfromlo
 SERVICE_DEPS_SimpleCallingAWSSDKFromLocalService := \
 	aws-sdks/ddb
 
+PROJECT_INDEX := \
+	aws-sdks/ddb/src/Index.dfy
+
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
