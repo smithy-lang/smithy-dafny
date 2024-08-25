@@ -1167,7 +1167,15 @@ public class DafnyApiCodegen {
       (target.getType() == ShapeType.LIST &&
         model
           .expectShape(target.asListShape().get().getMember().getTarget())
-          .hasTrait(ReferenceTrait.class))
+          .hasTrait(ReferenceTrait.class)) ||
+      // If the member is a UNION
+        (target.getType() == ShapeType.UNION &&
+          target
+          .asUnionShape()
+          .get()
+          .members()
+          .stream()
+          .anyMatch(this::OnlyReferenceStructures))
     );
   }
 
@@ -1196,8 +1204,13 @@ public class DafnyApiCodegen {
       throw new IllegalStateException("Member not on operation");
     }
 
+    final Shape memberShape = model.expectShape(member.getTarget());
+    // These options are disjoint.
+    // That means that a shape can not be both a list and a union.
     final boolean isList =
-      model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
+      memberShape.getType() == ShapeType.LIST;
+    final boolean isUnion =
+      memberShape.getType() == ShapeType.UNION;
     // This is tricky, given where we are, there MUST be an output shape.
     // If this output is @positional,
     // then we need to drop the member name
@@ -1225,7 +1238,7 @@ public class DafnyApiCodegen {
     // This second claim is to ensure that state can be reasoned about
     // third, everything MUST be fresh. This will make using things _much_ simpler
     // you may hate me now, but you will come around
-    if (member.isRequired() && !isList) {
+    if (member.isRequired() && !isList && !isUnion) {
       // Required single item
       return TokenTree
         .of(
@@ -1253,7 +1266,7 @@ public class DafnyApiCodegen {
         )
         .dropEmpty()
         .prependSeperated(Token.of("\n &&"));
-    } else if (!member.isRequired() && !isList) {
+    } else if (!member.isRequired() && !isList && !isUnion) {
       // Optional single item
       return TokenTree
         .of(
@@ -1312,6 +1325,82 @@ public class DafnyApiCodegen {
         )
         .dropEmpty()
         .lineSeparated();
+    } else if (isUnion && member.isRequired()) {
+      // Required Union
+      return TokenTree
+        .of(
+          TokenTree.of("\n && (match %s ".formatted(varName)),
+          TokenTree.of(memberShape
+            .asUnionShape()
+            .get()
+            .members()
+            .stream()
+            .filter(this::OnlyReferenceStructures)
+            .map(s -> TokenTree.of(
+              TokenTree.of("case %s(o) =>".formatted(s.getMemberName())),
+              TokenTree.of("&& o.%s()".formatted(validStateInvariantName)),
+              TokenTree.of(
+                // If we are putting the method in an abstract module
+                // then there is no object to share state with
+                !implementationType.equals(ImplementationType.ABSTRACT)
+                  ? "&& o.Modifies !! {%s}".formatted(
+                  nameResolver.callHistoryFieldName()
+                )
+                  : ""),
+              TokenTree.of(isOutput ? "&& fresh(o)" : ""),
+              isOutput
+                ? Token
+                .of("&& fresh")
+                .append(
+                  TokenTree
+                    .of(Token.of("o.Modifies"), removeInputs)
+                    .parenthesized()
+                )
+                : TokenTree.empty()
+              )
+              .lineSeparated()))
+            .lineSeparated(),
+          TokenTree.of("case _ => true)")
+        )
+        .lineSeparated();
+    } else if (isUnion && !member.isRequired()) {
+      // Optional Union
+      return TokenTree
+        .of(
+          TokenTree.of("\n && ( %1$s.Some? \n ==> match %1$s.value ".formatted(varName)),
+          TokenTree.of(memberShape
+              .asUnionShape()
+              .get()
+              .members()
+              .stream()
+              .filter(this::OnlyReferenceStructures)
+              .map(s -> TokenTree.of(
+                TokenTree.of("case %s(o) =>".formatted(s.getMemberName())),
+                TokenTree.of("&& o.%s()".formatted(validStateInvariantName)),
+                TokenTree.of(
+                  // If we are putting the method in an abstract module
+                  // then there is no object to share state with
+                  !implementationType.equals(ImplementationType.ABSTRACT)
+                    ? "&& o.Modifies !! {%s}".formatted(
+                    nameResolver.callHistoryFieldName()
+                  )
+                    : ""),
+                TokenTree.of(isOutput ? "&& fresh(o)" : ""),
+                isOutput
+                  ? Token
+                  .of("&& fresh")
+                  .append(
+                    TokenTree
+                      .of(Token.of("o.Modifies"), removeInputs)
+                      .parenthesized()
+                  )
+                  : TokenTree.empty()
+              )
+                .lineSeparated()))
+            .lineSeparated(),
+          TokenTree.of("case _ => true)")
+        )
+        .lineSeparated();
     } else {
       throw new IllegalStateException("Unsupported shape type");
     }
@@ -1369,8 +1458,13 @@ public class DafnyApiCodegen {
       throw new IllegalStateException("Member not on operation");
     }
 
+    final Shape memberShape = model.expectShape(member.getTarget());
+    // These options are disjoint.
+    // That means that a shape can not be both a list and a union.
     final boolean isList =
-      model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
+      memberShape.getType() == ShapeType.LIST;
+    final boolean isUnion =
+      memberShape.getType() == ShapeType.UNION;
     // This is tricky, given where we are, there MUST be an output shape.
     // If this output is @positional,
     // then we need to drop the member name
@@ -1389,10 +1483,10 @@ public class DafnyApiCodegen {
     // The decreases clause is because
     // Dafny will skip type parameters
     // when generating a default decreases clause.
-    if (member.isRequired() && !isList) {
+    if (member.isRequired() && !isList && !isUnion) {
       // Required single item
       return TokenTree.of("%s.Modifies".formatted(varName));
-    } else if (!member.isRequired() && !isList) {
+    } else if (!member.isRequired() && !isList && !isUnion) {
       // Optional single item
       return TokenTree
         .of(
@@ -1421,6 +1515,67 @@ public class DafnyApiCodegen {
             )
         )
         .lineSeparated();
+    } else if (isUnion && member.isRequired()) {
+      // Required union item
+      // This is very annoying
+      // the way that the decreases clause work
+      // it needs to delimit this list of values
+      // It treads each return as an individual TokenTree
+      // Without the toString, this will be broken up in the wrong way :(
+      return TokenTree.of(
+        TokenTree
+          .of(
+            Token.of("(match %s ".formatted(varName)),
+            Token.of(memberShape
+              .asUnionShape()
+              .get()
+              .members()
+              .stream()
+              .filter(this::OnlyReferenceStructures)
+              .map(s -> Token
+                .of(
+                  "case %s(o) => o.Modifies"
+                    .formatted(s.getMemberName())
+                ))),
+            Token.of("case _ => {})")
+          )
+          .flatten()
+          .dropEmpty()
+          .lineSeparated()
+          .toString()
+      );
+    } else if (isUnion && !member.isRequired()) {
+      // Optional union item
+      // Required union item
+      // This is very annoying
+      // the way that the decreases clause work
+      // it needs to delimit this list of values
+      // It treads each return as an individual TokenTree
+      // Without the toString, this will be broken up in the wrong way :(
+      return TokenTree.of(
+        TokenTree
+          .of(
+            Token.of("(if %1$s.Some? then match %1$s.value ".formatted(varName)),
+            Token.of(memberShape
+              .asUnionShape()
+              .get()
+              .members()
+              .stream()
+              .filter(this::OnlyReferenceStructures)
+              .map(s -> Token
+                .of(
+                  "case %s(o) => o.Modifies"
+                    .formatted(s.getMemberName())
+                ))),
+            Token.of("case _ => {}"),
+            Token.of("else {})")
+          )
+          .flatten()
+          .dropEmpty()
+          .lineSeparated()
+          .toString()
+      );
+
     } else {
       throw new IllegalStateException("Unsupported shape type");
     }
