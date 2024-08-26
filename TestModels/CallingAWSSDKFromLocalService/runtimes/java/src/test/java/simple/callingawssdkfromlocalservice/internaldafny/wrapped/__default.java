@@ -15,17 +15,18 @@ public class __default extends _ExternBase___default {
   public static Result<
     ISimpleConstraintsClient,
     Error
-  > WrappedSimpleCallingAWSSDKFromLocalService(SimpleCallingAWSSDKFromLocalServiceConfig config) {
+  > WrappedSimpleCallingAWSSDKFromLocalService(
+    SimpleCallingAWSSDKFromLocalServiceConfig config
+  ) {
     simple.constraints.model.SimpleCallingAWSSDKFromLocalServiceConfig wrappedConfig =
       ToNative.SimpleCallingAWSSDKFromLocalServiceConfig(config);
-    simple.constraints.SimpleCallingAWSSDKFromLocalService impl = SimpleCallingAWSSDKFromLocalService
-      .builder()
-      .SimpleCallingAWSSDKFromLocalServiceConfig(wrappedConfig)
-      .build();
-    TestSimpleCallingAWSSDKFromLocalService wrappedClient = TestSimpleCallingAWSSDKFromLocalService
-      .builder()
-      .impl(impl)
-      .build();
+    simple.constraints.SimpleCallingAWSSDKFromLocalService impl =
+      SimpleCallingAWSSDKFromLocalService
+        .builder()
+        .SimpleCallingAWSSDKFromLocalServiceConfig(wrappedConfig)
+        .build();
+    TestSimpleCallingAWSSDKFromLocalService wrappedClient =
+      TestSimpleCallingAWSSDKFromLocalService.builder().impl(impl).build();
     return simple.constraints.internaldafny.__default.CreateSuccessOfClient(
       wrappedClient
     );
