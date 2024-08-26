@@ -31,6 +31,7 @@ structure GetAggregateInput {
   simpleStringMap: SimpleStringMap,
   simpleIntegerMap: SimpleIntegerMap,
   nestedStructure: NestedStructure,
+  recursiveUnion: RecursiveUnion
 }
 
 structure GetAggregateOutput {
@@ -39,6 +40,7 @@ structure GetAggregateOutput {
   simpleStringMap: SimpleStringMap,
   simpleIntegerMap: SimpleIntegerMap,
   nestedStructure: NestedStructure,
+  recursiveUnion: RecursiveUnion
 }
 
 list SimpleStringList {
@@ -68,6 +70,21 @@ map SimpleIntegerMap {
 
 structure NestedStructure {
   stringStructure: StringStructure
+}
+
+union RecursiveUnion {
+  IntegerValue: Integer,
+  StringValue: String,
+  DataMap: StructuredDataMap
+}
+
+map StructuredDataMap {
+    key: String,
+    value: StructuredData
+}
+
+structure StructuredData {
+    content: RecursiveUnion
 }
 
 structure StringStructure {

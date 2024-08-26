@@ -21,7 +21,8 @@ module SimpleAggregateImpl refines AbstractSimpleAggregateOperations {
                                         structureList := input.structureList,
                                         simpleStringMap := input.simpleStringMap,
                                         simpleIntegerMap := input.simpleIntegerMap,
-                                        nestedStructure := input.nestedStructure);
+                                        nestedStructure := input.nestedStructure,
+                                        recursiveUnion := input.recursiveUnion);
         return Success(res);
     }
 
@@ -33,7 +34,8 @@ module SimpleAggregateImpl refines AbstractSimpleAggregateOperations {
                                         structureList := input.structureList,
                                         simpleStringMap := input.simpleStringMap,
                                         simpleIntegerMap := input.simpleIntegerMap,
-                                        nestedStructure := input.nestedStructure);
+                                        nestedStructure := input.nestedStructure,
+                                        recursiveUnion := input.recursiveUnion);
         return Success(res);
     }
 
