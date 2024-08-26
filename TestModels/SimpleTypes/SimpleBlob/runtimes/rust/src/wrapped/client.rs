@@ -101,7 +101,7 @@ impl crate::r#simple::types::blob::internaldafny::types::ISimpleTypesBlobClient 
         >,
     >{
         let inner_input =
-            crate::conversions::get_blob_known_value_test::_get_blob_input::from_dafny(input.clone());
+            crate::conversions::get_blob_known_value_test::_get_blob_known_value_test_input::from_dafny(input.clone());
         let result = self.rt.block_on(crate::operation::get_blob_known_value_test::GetBlobKnownValueTest::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
@@ -111,7 +111,7 @@ impl crate::r#simple::types::blob::internaldafny::types::ISimpleTypesBlobClient 
             ),
             Ok(client) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::get_blob_known_value_test::_get_blob_output::to_dafny(client),
+                    value: crate::conversions::get_blob_known_value_test::_get_blob_known_value_test_output::to_dafny(client),
                 },
             ),
         }
