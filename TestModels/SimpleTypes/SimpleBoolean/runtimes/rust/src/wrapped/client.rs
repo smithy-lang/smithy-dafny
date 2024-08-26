@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 use tokio::runtime::Runtime;
 
 pub struct Client {
@@ -19,7 +22,7 @@ impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
 impl Client {
   pub fn from_conf(config: &::std::rc::Rc<
     crate::r#simple::types::boolean::internaldafny::types::SimpleBooleanConfig,
-  >) -> 
+  >) ->
 ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<
   ::dafny_runtime::Object<dyn crate::r#simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient>,
   ::std::rc::Rc<crate::r#simple::types::boolean::internaldafny::types::Error>
@@ -53,9 +56,7 @@ impl Client {
   }
 }
 
-impl crate::r#simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient
-    for Client
-{
+impl crate::r#simple::types::boolean::internaldafny::types::ISimpleTypesBooleanClient for Client {
     fn GetBoolean(
         &mut self,
         input: &std::rc::Rc<

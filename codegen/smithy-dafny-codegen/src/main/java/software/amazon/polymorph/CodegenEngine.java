@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +49,7 @@ import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
+import software.amazon.polymorph.smithyrust.generator.RustLibraryShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
@@ -697,15 +697,21 @@ public class CodegenEngine {
         serviceShape
       );
       generator.generate(outputDir);
-
-      // TODO: This should be part of the StandardLibrary instead,
-      // but since the Dafny Rust code generator doesn't yet support multiple crates,
-      // we have to inline it instead.
-      writeTemplatedFile(
-        "runtimes/rust/src/standard_library_conversions.rs",
-        Map.of()
+    } else {
+      RustLibraryShimGenerator generator = new RustLibraryShimGenerator(
+        model,
+        serviceShape
       );
+      generator.generate(outputDir);
     }
+
+    // TODO: This should be part of the StandardLibrary instead,
+    // but since the Dafny Rust code generator doesn't yet support multiple crates,
+    // we have to inline it instead.
+    writeTemplatedFile(
+      "runtimes/rust/src/standard_library_conversions.rs",
+      Map.of()
+    );
 
     handlePatching(TargetLanguage.RUST, outputDir);
   }
@@ -797,6 +803,10 @@ public class CodegenEngine {
       final List<String> lines = Files.readAllLines(
         implementationFromDafnyPath
       );
+      // TODO fix root cause of duplicate extra declarations
+      if (lines.contains("// (extra-declarations)")) {
+        return;
+      }
       final int firstModDeclIndex = IntStream
         .range(0, lines.size())
         .filter(i -> lines.get(i).trim().startsWith("pub mod"))
@@ -826,6 +836,8 @@ public class CodegenEngine {
 
     return IOUtils.evalTemplate(
       """
+      // (extra-declarations)
+
       pub mod client;
       pub mod types;
 
