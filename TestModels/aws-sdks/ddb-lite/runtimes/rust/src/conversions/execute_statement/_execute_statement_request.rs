@@ -3,7 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_dynamodb::operation::execute_statement::ExecuteStatementInput
+    value: &aws_sdk_dynamodb::operation::execute_statement::ExecuteStatementInput,
 ) -> ::std::rc::Rc<
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteStatementInput,
 >{
