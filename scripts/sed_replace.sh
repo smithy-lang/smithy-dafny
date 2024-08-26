@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 #!/bin/bash
 
+=======
+>>>>>>> main-1.x
 # Ensure all required variables are set
 # (This SHOULD have already been checked)
 if [ -z "$SED_FILE_PATH" ] || [ -z "$SED_BEFORE_STRING" ] || [ -z "$SED_AFTER_STRING" ]; then
@@ -39,11 +42,22 @@ fi
 
 # Perform sed
 echo "Replacing in $SED_FILE_PATH"
-# On macOS, sed requires an extra parameter of ""
 OS=$(uname)
+echo "Using sed-like command for OS $OS"
+
+# macOS
 if [ "$OS" = "Darwin" ]; then
+    echo "Replacing in $SED_FILE_PATH using macOS-formatted sed"
     sed -i "" "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" $SED_FILE_PATH
+
+# Windows
+elif [[ "$OS" == *"NT"* ]] || [ "$OS" = "MINGW64_NT" ]; then
+    echo "Replacing in $SED_FILE_PATH using PowerShell"
+    powershell -Command "(Get-Content '$SED_FILE_PATH') -replace '$SED_BEFORE_STRING', '$SED_AFTER_STRING' | Set-Content '$SED_FILE_PATH'"
+
+# Linux
 else
+    echo "Replacing in $SED_FILE_PATH using Linux-formatted sed"
     sed -i "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" $SED_FILE_PATH
 fi 
 

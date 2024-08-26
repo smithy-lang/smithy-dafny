@@ -80,4 +80,4 @@ _sed_wrapped_types_file_add_extern:
 	$(if $(strip $(WRAPPED_INDEX_FILE_PATH)), $(MAKE) _sed_file SED_FILE_PATH=$(WRAPPED_INDEX_FILE_PATH) SED_BEFORE_STRING=$(WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(WRAPPED_INDEX_FILE_WITH_EXTERN_STRING), )
 
 _sed_file:
-	$(SMITHY_DAFNY_ROOT)/scripts/sed_replace.sh
+	bash $(SMITHY_DAFNY_ROOT)/scripts/sed_replace.sh
