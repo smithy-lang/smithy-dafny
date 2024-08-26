@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Ensure all required variables are set
 # (This SHOULD have already been checked)
 if [ -z "$SED_FILE_PATH" ] || [ -z "$SED_BEFORE_STRING" ] || [ -z "$SED_AFTER_STRING" ]; then
