@@ -13,3 +13,6 @@
 .classpath
 .settings
 .class
+
+# Added by formatting tooling
+node_modules
