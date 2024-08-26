@@ -360,7 +360,7 @@ public class DafnyPythonLocalServiceStructureGenerator
   /**
    * Override Smithy-Python writeFromDict to handle shapes with {@link ReferenceTrait}s.
    * Most of this is lifted directly from Smithy-Python; the changed components are
-   * highlighted.
+   * called out with comments saying "Block below is changed from Smithy-Python."
    *
    * @param isError
    */
@@ -388,7 +388,7 @@ public class DafnyPythonLocalServiceStructureGenerator
           return;
         }
 
-        // Block below is new.
+        // Block below is changed from Smithy-Python.
         // Import any modules required for reference shapes to convert from_dict.
         // Import within function to avoid circular imports from top-level imports
         for (MemberShape memberShape : shape.members()) {
@@ -417,8 +417,9 @@ public class DafnyPythonLocalServiceStructureGenerator
                 var memberName = symbolProvider.toMemberName(member);
                 var target = model.expectShape(member.getTarget());
                 Symbol targetSymbol = symbolProvider.toSymbol(target);
-                // Block below is new.
+                // Block below is changed from Smithy-Python.
                 // If passing a boto3 client, just pass the client.
+                // Also, use snakecase member name inside the dictionary.
                 if (
                   target.hasTrait(ReferenceTrait.class) &&
                   target.expectTrait(ReferenceTrait.class).isService() &&
@@ -463,8 +464,9 @@ public class DafnyPythonLocalServiceStructureGenerator
             memberName,
             () -> {
               var targetSymbol = symbolProvider.toSymbol(target);
-              // Block below is new.
+              // Block below is changed from Smithy-Python.
               // If passing a boto3 client, just pass the client.
+              // Also, use snakecase member name inside the dictionary.
               if (
                 target.hasTrait(ReferenceTrait.class) &&
                 target.expectTrait(ReferenceTrait.class).isService() &&
@@ -507,7 +509,7 @@ public class DafnyPythonLocalServiceStructureGenerator
   /**
    * Override Smithy-Python writeAsDict to handle shapes with {@link ReferenceTrait}s.
    * Most of this is lifted directly from Smithy-Python; the changed components are
-   * highlighted.
+   * called out with comments saying "Block below is changed from Smithy-Python."
    *
    * @param isError
    */
@@ -550,8 +552,9 @@ public class DafnyPythonLocalServiceStructureGenerator
                 var memberName = symbolProvider.toMemberName(member);
                 var target = model.expectShape(member.getTarget());
                 var targetSymbol = symbolProvider.toSymbol(target);
-                // Block below is new.
+                // Block below is changed from Smithy-Python.
                 // If passing a boto3 client, just pass the client.
+                // Also, use snakecase member name inside the dictionary.
                 if (
                   target.hasTrait(ReferenceTrait.class) &&
                   target.expectTrait(ReferenceTrait.class).isService() &&
@@ -596,8 +599,9 @@ public class DafnyPythonLocalServiceStructureGenerator
               "",
               memberName,
               () -> {
-                // Block below is new.
+                // Block below is changed from Smithy-Python.
                 // If passing a boto3 client, just pass the client.
+                // Also, use snakecase member name inside the dictionary.
                 if (
                   target.hasTrait(ReferenceTrait.class) &&
                   target.expectTrait(ReferenceTrait.class).isService() &&
@@ -606,8 +610,7 @@ public class DafnyPythonLocalServiceStructureGenerator
                   )
                 ) {
                   writer.write("d[$S] = self.$L", memberName, memberName);
-                }
-                if (target.isStructureShape() || target.isUnionShape()) {
+                } else if (target.isStructureShape() || target.isUnionShape()) {
                   writer.write(
                     "d[$S] = self.$L.as_dict()",
                     memberName,
