@@ -27,7 +27,7 @@ service SimpleCallingAWSSDKFromLocalService {
   operations: [ CallDDB,
                 CallKMS
              ],
-  errors: [ ],
+  errors: [ SimpleCallingAWSSDKFromLocalServiceException ],
 }
 
 structure SimpleCallingAWSSDKFromLocalServiceConfig {}
@@ -40,11 +40,13 @@ operation CallDDB {
 structure CallDDBInput {
   @required
   ddbClient: DdbClientReference,
+  @required
+  itemInput: com.amazonaws.dynamodb#GetItemInput
 }
 
 structure CallDDBOutput {
   @required
-  ddbClient: DdbClientReference,
+  itemOutput: com.amazonaws.dynamodb#GetItemOutput
 }
 
 operation CallKMS {
@@ -60,4 +62,10 @@ structure CallKMSInput {
 structure CallKMSOutput {
   @required
   kmsClient: KmsClientReference,
+}
+
+@error("client")
+structure SimpleCallingAWSSDKFromLocalServiceException {
+  @required
+  message: String,
 }
