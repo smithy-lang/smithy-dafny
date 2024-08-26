@@ -304,7 +304,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   /**
    * Override Smithy-Python writeFromDict to handle shapes with {@link ReferenceTrait}s.
    * Most of this is lifted directly from Smithy-Python; the changed components are
-   * highlighted.
+   * called out with comments saying "Block below is changed from Smithy-Python."
    *
    * @param isError
    */
@@ -438,7 +438,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   /**
    * Override Smithy-Python writeAsDict to handle shapes with {@link ReferenceTrait}s.
    * Most of this is lifted directly from Smithy-Python; the changed components are
-   * highlighted.
+   * called out with comments saying "Block below is changed from Smithy-Python."
    *
    * @param isError
    */
