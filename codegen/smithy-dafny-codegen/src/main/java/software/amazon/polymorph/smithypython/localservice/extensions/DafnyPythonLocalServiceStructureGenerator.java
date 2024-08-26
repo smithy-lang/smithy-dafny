@@ -1,6 +1,8 @@
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import static java.lang.String.format;
+import static software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver.isAwsSdkShape;
+import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import java.util.Set;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -300,9 +302,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   }
 
   /**
-   * Override Smithy-Python writeFromDict to handle importing reference modules to avoid circular
-   * imports. Most of this is lifted directly from Smithy-Python; the changed component is
-   * highlighted.
+   * Override Smithy-Python writeFromDict to handle shapes with {@link ReferenceTrait}s.
+   * Most of this is lifted directly from Smithy-Python; the changed components are
+   * called out with comments saying "Block below is changed from Smithy-Python."
    *
    * @param isError
    */
@@ -329,7 +331,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             return;
           }
 
-          // Block below is the only new addition to this function compared to Smithy-Python.
+          // Block below is changed from Smithy-Python.
           // Import any modules required for reference shapes to convert from_dict.
           // Import within function to avoid circular imports from top-level imports
           for (MemberShape memberShape : shape.members()) {
@@ -355,12 +357,23 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                     var memberName = symbolProvider.toMemberName(member);
                     var target = model.expectShape(member.getTarget());
                     Symbol targetSymbol = symbolProvider.toSymbol(target);
-                    if (target.isStructureShape()) {
+                    // Block below is changed from Smithy-Python.
+                    // If passing a boto3 client, just pass the client.
+                    // Also, use snakecase member name inside the dictionary.
+                    if (target.hasTrait(ReferenceTrait.class)
+                        && target.expectTrait(ReferenceTrait.class).isService()
+                        && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
+                      ) {
+                          writer.write(
+                            "$S: d[$S],",
+                            memberName,
+                            memberName);
+                    } else if (target.isStructureShape()) {
                       writer.write(
                           "$S: $L.from_dict(d[$S]),",
                           memberName,
                           targetSymbol.getName(),
-                          member.getMemberName());
+                          memberName);
                     } else if (targetSymbol.getProperty("fromDict").isPresent()) {
                       var targetFromDictSymbol =
                           targetSymbol.expectProperty("fromDict", Symbol.class);
@@ -368,9 +381,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                           "$S: $T(d[$S]),",
                           memberName,
                           targetFromDictSymbol,
-                          member.getMemberName());
+                          memberName);
                     } else {
-                      writer.write("$S: d[$S],", memberName, member.getMemberName());
+                      writer.write("$S: d[$S],", memberName, memberName);
                     }
                   }
                 });
@@ -383,15 +396,26 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
             writer.openBlock(
                 "if $S in d:",
                 "",
-                member.getMemberName(),
+                memberName,
                 () -> {
                   var targetSymbol = symbolProvider.toSymbol(target);
-                  if (target.isStructureShape()) {
+                  // Block below is changed from Smithy-Python.
+                  // If passing a boto3 client, just pass the client.
+                  // Also, use snakecase member name inside the dictionary.
+                  if (target.hasTrait(ReferenceTrait.class)
+                    && target.expectTrait(ReferenceTrait.class).isService()
+                    && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
+                  ) {
+                    writer.write(
+                      "kwargs[$S] = d[$S]",
+                      memberName,
+                      memberName);
+                  } else if (target.isStructureShape()) {
                     writer.write(
                         "kwargs[$S] = $L.from_dict(d[$S])",
                         memberName,
                         targetSymbol.getName(),
-                        member.getMemberName());
+                        memberName);
                   } else if (targetSymbol.getProperty("fromDict").isPresent()) {
                     var targetFromDictSymbol =
                         targetSymbol.expectProperty("fromDict", Symbol.class);
@@ -399,15 +423,103 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                         "kwargs[$S] = $T(d[$S]),",
                         memberName,
                         targetFromDictSymbol,
-                        member.getMemberName());
+                        memberName);
                   } else {
-                    writer.write("kwargs[$S] = d[$S]", memberName, member.getMemberName());
+                    writer.write("kwargs[$S] = d[$S]", memberName, memberName);
                   }
                 });
           }
 
           writer.write("return $L(**kwargs)", shapeName);
         });
+    writer.write("");
+  }
+
+  /**
+   * Override Smithy-Python writeAsDict to handle shapes with {@link ReferenceTrait}s.
+   * Most of this is lifted directly from Smithy-Python; the changed components are
+   * called out with comments saying "Block below is changed from Smithy-Python."
+   *
+   * @param isError
+   */
+  protected void writeAsDict(boolean isError) {
+    writer.openBlock("def as_dict(self) -> Dict[str, Any]:", "", () -> {
+      writer.writeDocs(() -> {
+        writer.write("Converts the $L to a dictionary.\n", symbolProvider.toSymbol(shape).getName());
+        writer.write(writer.formatDocs("""
+                        The dictionary uses the modeled shape names rather than the parameter names \
+                        as keys to be mostly compatible with boto3."""));
+      });
+
+      // If there aren't any optional members, it's best to return immediately.
+      String dictPrefix = optionalMembers.isEmpty() ? "return" : "d: Dict[str, Any] =";
+      if (requiredMembers.isEmpty() && !isError) {
+        writer.write("$L {}", dictPrefix);
+      } else {
+        writer.openBlock("$L {", "}", dictPrefix, () -> {
+          if (isError) {
+            writer.write("'message': self.message,");
+            writer.write("'code': self.code,");
+          }
+          for (MemberShape member : requiredMembers) {
+            var memberName = symbolProvider.toMemberName(member);
+            var target = model.expectShape(member.getTarget());
+            var targetSymbol = symbolProvider.toSymbol(target);
+            // Block below is changed from Smithy-Python.
+            // If passing a boto3 client, just pass the client.
+            // Also, use snakecase member name inside the dictionary.
+            if (target.hasTrait(ReferenceTrait.class)
+              && target.expectTrait(ReferenceTrait.class).isService()
+              && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
+            ) {
+                writer.write(
+                  "$S: self.$L,",
+                  memberName,
+                  memberName);
+            } else if (target.isStructureShape() || target.isUnionShape()) {
+              writer.write("$S: self.$L.as_dict(),", memberName, memberName);
+            } else if (targetSymbol.getProperty("asDict").isPresent()) {
+              var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
+              writer.write("$S: $T(self.$L),", memberName, targetAsDictSymbol, memberName);
+            } else {
+              writer.write("$S: self.$L,", memberName, memberName);
+            }
+          }
+        });
+      }
+
+      if (!optionalMembers.isEmpty()) {
+        writer.write("");
+        for (MemberShape member : optionalMembers) {
+          var memberName = symbolProvider.toMemberName(member);
+          var target = model.expectShape(member.getTarget());
+          var targetSymbol = symbolProvider.toSymbol(target);
+          writer.openBlock("if self.$1L is not None:", "", memberName, () -> {
+            // Block below is changed from Smithy-Python.
+            // If passing a boto3 client, just pass the client.
+            // Also, use snakecase member name inside the dictionary.
+            if (target.hasTrait(ReferenceTrait.class)
+              && target.expectTrait(ReferenceTrait.class).isService()
+              && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())
+            ) {
+                writer.write(
+                  "d[$S] = self.$L",
+                  memberName,
+                  memberName);
+            } else if (target.isStructureShape() || target.isUnionShape()) {
+              writer.write("d[$S] = self.$L.as_dict()", memberName, memberName);
+            } else if (targetSymbol.getProperty("asDict").isPresent()) {
+              var targetAsDictSymbol = targetSymbol.expectProperty("asDict", Symbol.class);
+              writer.write("d[$S] = $T(self.$L),", memberName, targetAsDictSymbol,
+                      memberName);
+            } else {
+              writer.write("d[$S] = self.$L", memberName, memberName);
+            }
+          });
+        }
+        writer.write("return d");
+      }
+    });
     writer.write("");
   }
 
