@@ -42,8 +42,12 @@ echo "Replacing in $SED_FILE_PATH"
 # On macOS, sed requires an extra parameter of ""
 OS=$(uname)
 if [ "$OS" = "Darwin" ]; then
+    echo "Replacing in $SED_FILE_PATH using sed"
     sed -i "" "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" $SED_FILE_PATH
-else
+elif [[ "$OS" == *"NT"* ]] || [ "$OS" = "MINGW64_NT" ]; then
+    echo "Replacing in $SED_FILE_PATH using PowerShell"
+    powershell -Command "(Get-Content '$SED_FILE_PATH') -replace '$SED_BEFORE_STRING', '$SED_AFTER_STRING' | Set-Content '$SED_FILE_PATH'"
+else # Linux
     sed -i "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" $SED_FILE_PATH
 fi 
 
