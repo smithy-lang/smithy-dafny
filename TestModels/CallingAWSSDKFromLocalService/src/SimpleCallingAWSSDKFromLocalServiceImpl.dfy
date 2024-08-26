@@ -15,7 +15,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
     true
   }
 
-  predicate CallKMSEnsuresPublicly(input: CallDDBInput, output: Result<CallDDBOutput, Error>) {
+  predicate CallKMSEnsuresPublicly(input: CallKMSInput, output: Result<CallKMSOutput, Error>) {
     true
   }
 
