@@ -48,10 +48,10 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
@@ -122,7 +122,6 @@ public class CodegenEngine {
     final boolean updatePatchFiles,
     final Map<String, String> dependencyLibraryNames,
     final Optional<String> libraryName
-
   ) {
     // To be provided to constructor
     this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
@@ -790,40 +789,54 @@ public class CodegenEngine {
   }
 
   private void generatePython() {
-
     if (libraryName.isEmpty()) {
-      throw new IllegalArgumentException("Python codegen requires a module name");
+      throw new IllegalArgumentException(
+        "Python codegen requires a module name"
+      );
     }
 
-    ObjectNode.Builder pythonSettingsBuilder = ObjectNode.builder()
-            .withMember("service", serviceShape.getId().toString())
-            .withMember("module", libraryName.get())
+    ObjectNode.Builder pythonSettingsBuilder = ObjectNode
+      .builder()
+      .withMember("service", serviceShape.getId().toString())
+      .withMember("module", libraryName.get())
+      // Smithy-Python requires some string to be present here, but this is unused.
+      // Any references to this version are deleted as part of code generation.
+      .withMember("moduleVersion", "0.0.1");
 
-            // Smithy-Python requires some string to be present here, but this is unused.
-            // Any references to this version are deleted as part of code generation.
-            .withMember("moduleVersion", "0.0.1");
+    final PluginContext pluginContext = PluginContext
+      .builder()
+      .model(model)
+      .fileManifest(
+        FileManifest.create(targetLangOutputDirs.get(TargetLanguage.PYTHON))
+      )
+      .settings(pythonSettingsBuilder.build())
+      .build();
 
-    final PluginContext pluginContext = PluginContext.builder()
-            .model(model)
-            .fileManifest(FileManifest.create(targetLangOutputDirs.get(TargetLanguage.PYTHON)))
-            .settings(pythonSettingsBuilder.build())
-            .build();
-
-    final Map<String, String> smithyNamespaceToPythonModuleNameMap = new HashMap<>();
-    smithyNamespaceToPythonModuleNameMap.put(serviceShape.getId().getNamespace(), libraryName.get());
+    final Map<String, String> smithyNamespaceToPythonModuleNameMap =
+      new HashMap<>();
+    smithyNamespaceToPythonModuleNameMap.put(
+      serviceShape.getId().getNamespace(),
+      libraryName.get()
+    );
     smithyNamespaceToPythonModuleNameMap.putAll(dependencyLibraryNames);
 
     if (this.awsSdkStyle) {
-      DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin
-              = new DafnyPythonAwsSdkClientCodegenPlugin(smithyNamespaceToPythonModuleNameMap);
+      DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin =
+        new DafnyPythonAwsSdkClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
       dafnyPythonAwsSdkClientCodegenPlugin.execute(pluginContext);
     } else if (this.localServiceTest) {
-      DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin
-              = new DafnyPythonWrappedLocalServiceClientCodegenPlugin(smithyNamespaceToPythonModuleNameMap);
+      DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin =
+        new DafnyPythonWrappedLocalServiceClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
       pythonClientCodegenPlugin.execute(pluginContext);
     } else {
-      DafnyPythonLocalServiceClientCodegenPlugin pythonClientCodegenPlugin
-              = new DafnyPythonLocalServiceClientCodegenPlugin(smithyNamespaceToPythonModuleNameMap);
+      DafnyPythonLocalServiceClientCodegenPlugin pythonClientCodegenPlugin =
+        new DafnyPythonLocalServiceClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
       pythonClientCodegenPlugin.execute(pluginContext);
     }
   }
@@ -1017,7 +1030,9 @@ public class CodegenEngine {
     /**
      * Sets the directories in which to search for dependent model file(s).
      */
-    public Builder withDependencyLibraryNames(final Map<String, String> dependencyLibraryNames) {
+    public Builder withDependencyLibraryNames(
+      final Map<String, String> dependencyLibraryNames
+    ) {
       this.dependencyLibraryNames = dependencyLibraryNames;
       return this;
     }
@@ -1169,9 +1184,10 @@ public class CodegenEngine {
         throw new IllegalStateException("No namespace provided");
       }
 
-      final Map<String, String> dependencyLibraryNames = this.dependencyLibraryNames == null
-        ? new HashMap<>()
-        : this.dependencyLibraryNames;
+      final Map<String, String> dependencyLibraryNames =
+        this.dependencyLibraryNames == null
+          ? new HashMap<>()
+          : this.dependencyLibraryNames;
 
       final Map<TargetLanguage, Path> targetLangOutputDirsRaw =
         Objects.requireNonNull(this.targetLangOutputDirs);
@@ -1217,7 +1233,9 @@ public class CodegenEngine {
         );
       }
 
-      final Optional<String> libraryName = Optional.ofNullable(this.libraryName);
+      final Optional<String> libraryName = Optional.ofNullable(
+        this.libraryName
+      );
 
       final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
 

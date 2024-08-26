@@ -18,7 +18,10 @@ public class Utils {
    * @return
    */
   public static boolean isUnitShape(ShapeId shapeId) {
-    return shapeId.getNamespace().equals("smithy.api") && shapeId.getName().equals("Unit");
+    return (
+      shapeId.getNamespace().equals("smithy.api") &&
+      shapeId.getName().equals("Unit")
+    );
   }
 
   private static boolean isUnitShape(Shape shape) {

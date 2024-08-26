@@ -29,20 +29,26 @@ import software.amazon.smithy.python.codegen.PythonSettings;
  * generate a shim wrapping the LocalService-generated Smithy client.
  */
 public class DirectedDafnyPythonWrappedLocalServiceCodegen
-    extends DirectedDafnyPythonLocalServiceCodegen {
+  extends DirectedDafnyPythonLocalServiceCodegen {
 
-  private static final Logger LOGGER =
-      Logger.getLogger(DirectedDafnyPythonWrappedLocalServiceCodegen.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(
+    DirectedDafnyPythonWrappedLocalServiceCodegen.class.getName()
+  );
 
   @Override
   public SymbolProvider createSymbolProvider(
-      CreateSymbolProviderDirective<PythonSettings> directive) {
-    return new DafnyPythonWrappedLocalServiceSymbolVisitor(directive.model(), directive.settings());
+    CreateSymbolProviderDirective<PythonSettings> directive
+  ) {
+    return new DafnyPythonWrappedLocalServiceSymbolVisitor(
+      directive.model(),
+      directive.settings()
+    );
   }
 
   @Override
   public void generateResource(
-      GenerateResourceDirective<GenerationContext, PythonSettings> directive) {}
+    GenerateResourceDirective<GenerationContext, PythonSettings> directive
+  ) {}
 
   /**
    * Do NOT generate any service config code for Dafny Python AWS SDKs (i.e. `config.py`). Override
@@ -52,7 +58,8 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen
    */
   @Override
   public void customizeBeforeShapeGeneration(
-      CustomizeDirective<GenerationContext, PythonSettings> directive) {}
+    CustomizeDirective<GenerationContext, PythonSettings> directive
+  ) {}
 
   /**
    * Do NOT generate any service code for Dafny Python AWS SDKs. Override DirectedPythonCodegen to
@@ -63,7 +70,8 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen
    */
   @Override
   public void generateService(
-      GenerateServiceDirective<GenerationContext, PythonSettings> directive) {}
+    GenerateServiceDirective<GenerationContext, PythonSettings> directive
+  ) {}
 
   /**
    * Call `DirectedPythonCodegen.customizeAfterIntegrations`, then remove `models.py` and
@@ -73,19 +81,21 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen
    */
   @Override
   public void customizeAfterIntegrations(
-      CustomizeDirective<GenerationContext, PythonSettings> directive) {
+    CustomizeDirective<GenerationContext, PythonSettings> directive
+  ) {
     // DirectedPythonCodegen's customizeAfterIntegrations implementation SHOULD run first;
     //   its implementation writes all files by flushing its writers;
     //   this implementation removes some of those files.
     super.customizeAfterIntegrations(directive);
 
     FileManifest fileManifest = directive.fileManifest();
-    Path generationPath =
-        Path.of(
-            fileManifest.getBaseDir()
-                + "/"
-                + SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-                    directive.context().settings().getService().getNamespace()));
+    Path generationPath = Path.of(
+      fileManifest.getBaseDir() +
+      "/" +
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        directive.context().settings().getService().getNamespace()
+      )
+    );
 
     /**
      * Smithy ALWAYS writes visited symbols to a file. For wrapped codegen, we do NOT want to write
@@ -98,21 +108,29 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen
      */
     try {
       LOGGER.info(
+        format(
+          "Attempting to remove %s.py",
+          WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+        )
+      );
+      CodegenUtils
+        .runCommand(
           format(
-              "Attempting to remove %s.py",
-              WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME));
-      CodegenUtils.runCommand(
-              format(
-                  "rm -f %s.py", WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME),
-              generationPath)
-          .strip();
+            "rm -f %s.py",
+            WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+          ),
+          generationPath
+        )
+        .strip();
     } catch (CodegenException e) {
       // Fail loudly. We do not want to accidentally distribute this file.
       throw new RuntimeException(
-          format(
-              "Unable to remove %s.py",
-              WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME),
-          e);
+        format(
+          "Unable to remove %s.py",
+          WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+        ),
+        e
+      );
     }
   }
 }

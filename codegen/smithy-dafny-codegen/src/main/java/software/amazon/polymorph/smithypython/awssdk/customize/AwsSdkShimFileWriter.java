@@ -30,45 +30,60 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
-      ServiceShape serviceShape, GenerationContext codegenContext) {
+    ServiceShape serviceShape,
+    GenerationContext codegenContext
+  ) {
     String typesModulePrelude =
-        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext);
+      DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
+        serviceShape.getId(),
+        codegenContext
+      );
     String moduleName =
-        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            codegenContext.settings().getService().getNamespace());
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        codegenContext.settings().getService().getNamespace()
+      );
     codegenContext
-        .writerDelegator()
-        .useFileWriter(
-            moduleName + "/shim.py",
-            "",
-            writer -> {
-              writer.write(
-                  """
-          import standard_library.internaldafny.generated.Wrappers as Wrappers
-          from botocore.exceptions import ClientError
-          import $L
+      .writerDelegator()
+      .useFileWriter(
+        moduleName + "/shim.py",
+        "",
+        writer -> {
+          writer.write(
+            """
+            import standard_library.internaldafny.generated.Wrappers as Wrappers
+            from botocore.exceptions import ClientError
+            import $L
 
-          def _sdk_error_to_dafny_error(e: ClientError):
-              ""\"
-              Converts the provided native Smithy-modelled error
-              into the corresponding Dafny error.
-              ""\"
-              ${C|}
+            def _sdk_error_to_dafny_error(e: ClientError):
+                ""\"
+                Converts the provided native Smithy-modelled error
+                into the corresponding Dafny error.
+                ""\"
+                ${C|}
 
-          class $L:
-              def __init__(self, _impl, _region):
-                  self._impl = _impl
-                  self._region = _region
+            class $L:
+                def __init__(self, _impl, _region):
+                    self._impl = _impl
+                    self._region = _region
 
-              ${C|}
+                ${C|}
 
-              """,
-                  typesModulePrelude,
-                  writer.consumer(
-                      w -> generateAwsSdkErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
-                  AwsSdkNameResolver.shimNameForService(serviceShape),
-                  writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w)));
-            });
+                """,
+            typesModulePrelude,
+            writer.consumer(w ->
+              generateAwsSdkErrorToDafnyErrorBlock(
+                codegenContext,
+                serviceShape,
+                w
+              )
+            ),
+            AwsSdkNameResolver.shimNameForService(serviceShape),
+            writer.consumer(w ->
+              generateOperationsBlock(codegenContext, serviceShape, w)
+            )
+          );
+        }
+      );
   }
 
   /**
@@ -80,20 +95,25 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateAwsSdkErrorToDafnyErrorBlock(
-      GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
-
+    GenerationContext codegenContext,
+    ServiceShape serviceShape,
+    PythonWriter writer
+  ) {
     // Get modelled error converters for this service
-    TreeSet<ShapeId> errorShapeSet =
-        new TreeSet<ShapeId>(
-            codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class).stream()
-                .filter(
-                    structureShape ->
-                        structureShape
-                            .getId()
-                            .getNamespace()
-                            .equals(codegenContext.settings().getService().getNamespace()))
-                .map(Shape::getId)
-                .collect(Collectors.toSet()));
+    TreeSet<ShapeId> errorShapeSet = new TreeSet<ShapeId>(
+      codegenContext
+        .model()
+        .getStructureShapesWithTrait(ErrorTrait.class)
+        .stream()
+        .filter(structureShape ->
+          structureShape
+            .getId()
+            .getNamespace()
+            .equals(codegenContext.settings().getService().getNamespace())
+        )
+        .map(Shape::getId)
+        .collect(Collectors.toSet())
+    );
 
     // First error case opens a new `if` block; others do not need to, and write `elif`
     boolean hasOpenedIfBlock = false;
@@ -105,17 +125,24 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       // software_amazon_cryptography_services_kms_internaldafny_types.Error_InvalidImportTokenException(message=e.response['Error']['Code'])
       Shape errorShape = codegenContext.model().expectShape(errorShapeId);
       writer.openBlock(
-          "$L e.response['Error']['Code'] == '$L':",
-          "",
-          hasOpenedIfBlock ? "elif" : "if",
-          errorShapeId.getName(),
-          () -> {
-            writer.write(
-                "return %1$s"
-                    .formatted(
-                        errorShape.accept(
-                            new AwsSdkToDafnyShapeVisitor(codegenContext, "e.response", writer))));
-          });
+        "$L e.response['Error']['Code'] == '$L':",
+        "",
+        hasOpenedIfBlock ? "elif" : "if",
+        errorShapeId.getName(),
+        () -> {
+          writer.write(
+            "return %1$s".formatted(
+                errorShape.accept(
+                  new AwsSdkToDafnyShapeVisitor(
+                    codegenContext,
+                    "e.response",
+                    writer
+                  )
+                )
+              )
+          );
+        }
+      );
       hasOpenedIfBlock = true;
     }
 
@@ -123,19 +150,27 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       // If `hasOpenedIfBlock` is false, then codegen never wrote any errors,
       // and this function should only cast to Opaque errors
       writer.write(
-          """
+        """
         return $L.Error_Opaque(obj=e)
         """,
-          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
+        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
+          serviceShape.getId(),
+          codegenContext
+        )
+      );
     } else {
       // If `hasOpenedIfBlock` is true, then codegen wrote at least one error,
       // and this function should only cast to Opaque error via `else`
       writer.write(
-          """
+        """
         else:
             return $L.Error_Opaque(obj=e)
         """,
-          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), codegenContext));
+        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
+          serviceShape.getId(),
+          codegenContext
+        )
+      );
     }
   }
 
@@ -151,18 +186,29 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateOperationsBlock(
-      GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
-
+    GenerationContext codegenContext,
+    ServiceShape serviceShape,
+    PythonWriter writer
+  ) {
     for (ShapeId operationShapeId : serviceShape.getOperations()) {
-      OperationShape operationShape =
-          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+      OperationShape operationShape = codegenContext
+        .model()
+        .expectShape(operationShapeId, OperationShape.class);
 
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
 
       // Import input/output shape types
-      DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
-      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
+      DafnyNameResolver.importDafnyTypeForShape(
+        writer,
+        inputShape,
+        codegenContext
+      );
+      DafnyNameResolver.importDafnyTypeForShape(
+        writer,
+        outputShape,
+        codegenContext
+      );
 
       // No 'native' type to import; native AWS SDK types are modelled in dictionaries
 
@@ -173,60 +219,70 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       //  2) Call boto3 client with the input transformed to kwargs; and
       //  3) Convert the Smithy output to the Dafny type.
       writer.openBlock(
-          "def $L(self, $L) -> $L:",
-          "",
-          operationShape.getId().getName(),
-          // Do not generate an `input` parameter if the operation does not take in an input
-          SmithyNameResolver.isUnitShape(inputShape)
-              ? ""
-              : "input: " + DafnyNameResolver.getDafnyTypeForShape(inputShape),
-          // Return `None` type if the operation does not return an output
-          SmithyNameResolver.isUnitShape(outputShape)
-              ? "None"
-              : DafnyNameResolver.getDafnyTypeForShape(outputShape),
-          () -> {
-            Shape targetShapeInput =
-                codegenContext.model().expectShape(operationShape.getInputShape());
-            // Generate code that converts the input from the Dafny type to the corresponding Smithy
-            // type
-            // `input` will hold a string that converts the Dafny `input` to the Smithy-modelled
-            // output.
-            // If this is a type that allows for self-recursion (unions or sets: can contain
-            // themselves as a member),
-            //   this will delegate to DafnyToAwsSdkConversionFunctionWriter
-            String input =
-                targetShapeInput.accept(
-                    new DafnyToAwsSdkShapeVisitor(codegenContext, "input", writer));
-            writer.addImport(".", "dafny_to_aws_sdk");
+        "def $L(self, $L) -> $L:",
+        "",
+        operationShape.getId().getName(),
+        // Do not generate an `input` parameter if the operation does not take in an input
+        SmithyNameResolver.isUnitShape(inputShape)
+          ? ""
+          : "input: " + DafnyNameResolver.getDafnyTypeForShape(inputShape),
+        // Return `None` type if the operation does not return an output
+        SmithyNameResolver.isUnitShape(outputShape)
+          ? "None"
+          : DafnyNameResolver.getDafnyTypeForShape(outputShape),
+        () -> {
+          Shape targetShapeInput = codegenContext
+            .model()
+            .expectShape(operationShape.getInputShape());
+          // Generate code that converts the input from the Dafny type to the corresponding Smithy
+          // type
+          // `input` will hold a string that converts the Dafny `input` to the Smithy-modelled
+          // output.
+          // If this is a type that allows for self-recursion (unions or sets: can contain
+          // themselves as a member),
+          //   this will delegate to DafnyToAwsSdkConversionFunctionWriter
+          String input = targetShapeInput.accept(
+            new DafnyToAwsSdkShapeVisitor(codegenContext, "input", writer)
+          );
+          writer.addImport(".", "dafny_to_aws_sdk");
 
-            // Generate code that:
-            // 1) "unwraps" the request (converts from the Dafny type to the AWS SDK type);
-            // 2) calls boto3;
-            // 3) wraps boto3 ClientErrors as Dafny failures
-            writer.write(
-                """
-              boto_request_dict = $L
-              try:
-                  boto_response_dict = self._impl.$L(**boto_request_dict)
-              except ClientError as e:
-                  return Wrappers.Result_Failure(_sdk_error_to_dafny_error(e))
-              """,
-                input,
-                codegenContext.symbolProvider().toSymbol(operationShape).getName());
+          // Generate code that:
+          // 1) "unwraps" the request (converts from the Dafny type to the AWS SDK type);
+          // 2) calls boto3;
+          // 3) wraps boto3 ClientErrors as Dafny failures
+          writer.write(
+            """
+            boto_request_dict = $L
+            try:
+                boto_response_dict = self._impl.$L(**boto_request_dict)
+            except ClientError as e:
+                return Wrappers.Result_Failure(_sdk_error_to_dafny_error(e))
+            """,
+            input,
+            codegenContext.symbolProvider().toSymbol(operationShape).getName()
+          );
 
-            Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
-            // Generate code that converts the output from SDK type to the corresponding Dafny type
-            String output =
-                targetShape.accept(
-                    new AwsSdkToDafnyShapeVisitor(codegenContext, "boto_response_dict", writer));
+          Shape targetShape = codegenContext
+            .model()
+            .expectShape(operationShape.getOutputShape());
+          // Generate code that converts the output from SDK type to the corresponding Dafny type
+          String output = targetShape.accept(
+            new AwsSdkToDafnyShapeVisitor(
+              codegenContext,
+              "boto_response_dict",
+              writer
+            )
+          );
 
-            // Generate code that wraps SDK success shapes as Dafny success shapes
-            writer.write(
-                """
-                return Wrappers.Result_Success($L)
-                """,
-                SmithyNameResolver.isUnitShape(outputShape) ? "None" : output);
-          });
+          // Generate code that wraps SDK success shapes as Dafny success shapes
+          writer.write(
+            """
+            return Wrappers.Result_Success($L)
+            """,
+            SmithyNameResolver.isUnitShape(outputShape) ? "None" : output
+          );
+        }
+      );
     }
   }
 }

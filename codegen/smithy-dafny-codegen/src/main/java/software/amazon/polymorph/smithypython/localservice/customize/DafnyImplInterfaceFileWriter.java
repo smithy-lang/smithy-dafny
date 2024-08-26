@@ -3,10 +3,10 @@
 
 package software.amazon.polymorph.smithypython.localservice.customize;
 
-import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -26,58 +26,67 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
-      ServiceShape serviceShape, GenerationContext codegenContext) {
+    ServiceShape serviceShape,
+    GenerationContext codegenContext
+  ) {
     String moduleName =
-        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            codegenContext.settings().getService().getNamespace());
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        codegenContext.settings().getService().getNamespace()
+      );
     String clientName = SmithyNameResolver.clientNameForService(serviceShape);
     String implModulePrelude =
-        DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape, codegenContext);
+      DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(
+        serviceShape,
+        codegenContext
+      );
 
     codegenContext
-        .writerDelegator()
-        .useFileWriter(
-            moduleName + "/dafnyImplInterface.py",
-            "",
-            writer -> {
-              writer.write(
-                  """
-                from $L import $L
-                from $L import $L
+      .writerDelegator()
+      .useFileWriter(
+        moduleName + "/dafnyImplInterface.py",
+        "",
+        writer -> {
+          writer.write(
+            """
+            from $L import $L
+            from $L import $L
 
-                class DafnyImplInterface:
-                    $L: $L | None = None
+            class DafnyImplInterface:
+                $L: $L | None = None
 
-                    # operation_map cannot be created at dafnyImplInterface create time,
-                    # as the map's values reference values inside `self.impl`,
-                    # and impl is only populated at runtime.
-                    # Accessing these before impl is populated results in an error.
-                    # At runtime, the map is populated once and cached.
-                    operation_map = None
+                # operation_map cannot be created at dafnyImplInterface create time,
+                # as the map's values reference values inside `self.impl`,
+                # and impl is only populated at runtime.
+                # Accessing these before impl is populated results in an error.
+                # At runtime, the map is populated once and cached.
+                operation_map = None
 
-                    def handle_request(self, input: DafnyRequest):
-                        if self.operation_map is None:
-                            self.operation_map = {
-                                ${C|}
-                            }
+                def handle_request(self, input: DafnyRequest):
+                    if self.operation_map is None:
+                        self.operation_map = {
+                            ${C|}
+                        }
 
-                         # This logic is where a typical Smithy client would expect the "server" to be.
-                         # This code can be thought of as logic our Dafny "server" uses
-                         #   to route incoming client requests to the correct request handler code.
-                        if input.dafny_operation_input is None:
-                            return self.operation_map[input.operation_name]()
-                        else:
-                            return self.operation_map[input.operation_name](input.dafny_operation_input)
-                """,
-                  implModulePrelude,
-                  clientName,
-                  DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME,
-                  DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST,
-                  "impl",
-                  clientName,
-                  writer.consumer(
-                      w -> generateImplInterfaceOperationMap(serviceShape, codegenContext, w)));
-            });
+                     # This logic is where a typical Smithy client would expect the "server" to be.
+                     # This code can be thought of as logic our Dafny "server" uses
+                     #   to route incoming client requests to the correct request handler code.
+                    if input.dafny_operation_input is None:
+                        return self.operation_map[input.operation_name]()
+                    else:
+                        return self.operation_map[input.operation_name](input.dafny_operation_input)
+            """,
+            implModulePrelude,
+            clientName,
+            DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME,
+            DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST,
+            "impl",
+            clientName,
+            writer.consumer(w ->
+              generateImplInterfaceOperationMap(serviceShape, codegenContext, w)
+            )
+          );
+        }
+      );
   }
 
   /**
@@ -89,16 +98,21 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateImplInterfaceOperationMap(
-      ServiceShape serviceShape, GenerationContext codegenContext, PythonWriter writer) {
+    ServiceShape serviceShape,
+    GenerationContext codegenContext,
+    PythonWriter writer
+  ) {
     for (ShapeId operationShapeId : serviceShape.getOperations()) {
-      final OperationShape operationShape =
-          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+      final OperationShape operationShape = codegenContext
+        .model()
+        .expectShape(operationShapeId, OperationShape.class);
       writer.write(
-          """
-          "$L": self.$L.$L,""",
-          operationShape.getId().getName(),
-          "impl",
-          operationShape.getId().getName());
+        """
+        "$L": self.$L.$L,""",
+        operationShape.getId().getName(),
+        "impl",
+        operationShape.getId().getName()
+      );
     }
   }
 }

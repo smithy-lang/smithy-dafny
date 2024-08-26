@@ -18,7 +18,8 @@ import software.amazon.smithy.python.codegen.PythonSettings;
  * visited symbols into a file whose name will never be used and deletes this file as part of its
  * Smithy codegen plugin.
  */
-public class DafnyPythonAwsSdkSymbolVisitor extends DafnyPythonLocalServiceSymbolVisitor {
+public class DafnyPythonAwsSdkSymbolVisitor
+  extends DafnyPythonLocalServiceSymbolVisitor {
 
   public DafnyPythonAwsSdkSymbolVisitor(Model model, PythonSettings settings) {
     super(model, settings);
@@ -32,19 +33,26 @@ public class DafnyPythonAwsSdkSymbolVisitor extends DafnyPythonLocalServiceSymbo
    */
   @Override
   protected String getSymbolDefinitionFilePathForNamespaceAndFilename(
-      String namespace, String filename) {
+    String namespace,
+    String filename
+  ) {
     String directoryFilePath;
     if ("smithy.api".equals(namespace)) {
       directoryFilePath =
-          SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-              settings.getService().getNamespace());
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+          settings.getService().getNamespace()
+        );
     } else {
       directoryFilePath =
-          SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(namespace);
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+          namespace
+        );
     }
 
     return format(
-        "%s/%s.py",
-        directoryFilePath, AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME);
+      "%s/%s.py",
+      directoryFilePath,
+      AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+    );
   }
 }

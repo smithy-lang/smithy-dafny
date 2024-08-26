@@ -23,14 +23,20 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
   @Override
   public void customize(GenerationContext codegenContext) {
     // ONLY run this integration's customizations IF the codegen is using its ApplicationProtocol
-    if (!codegenContext
+    if (
+      !codegenContext
         .applicationProtocol()
-        .equals(DafnyPythonAwsSdkProtocolGenerator.DAFNY_PYTHON_AWS_SDK_PROTOCOL)) {
+        .equals(
+          DafnyPythonAwsSdkProtocolGenerator.DAFNY_PYTHON_AWS_SDK_PROTOCOL
+        )
+    ) {
       return;
     }
 
     customizeForServiceShape(
-        codegenContext.settings().getService(codegenContext.model()), codegenContext);
+      codegenContext.settings().getService(codegenContext.model()),
+      codegenContext
+    );
   }
 
   /**
@@ -40,8 +46,11 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
    * @param codegenContext
    */
   private void customizeForServiceShape(
-      ServiceShape serviceShape, GenerationContext codegenContext) {
-    new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+    ServiceShape serviceShape,
+    GenerationContext codegenContext
+  ) {
+    new AwsSdkShimFileWriter()
+      .customizeFileForServiceShape(serviceShape, codegenContext);
   }
 
   /**
@@ -55,15 +64,16 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
   public List<ProtocolGenerator> getProtocolGenerators() {
     List<ProtocolGenerator> protocolGenerators = new ArrayList<>();
     protocolGenerators.add(
-        new DafnyPythonAwsSdkProtocolGenerator() {
-          // Setting a Polymorph-specific protocol allows any services that
-          // have this protocol trait to be generated using this PythonIntegration.
-          // See DafnyAwsSdkProtocolTrait class.
-          @Override
-          public ShapeId getProtocol() {
-            return ShapeId.fromParts("aws.polymorph", "awsSdk");
-          }
-        });
+      new DafnyPythonAwsSdkProtocolGenerator() {
+        // Setting a Polymorph-specific protocol allows any services that
+        // have this protocol trait to be generated using this PythonIntegration.
+        // See DafnyAwsSdkProtocolTrait class.
+        @Override
+        public ShapeId getProtocol() {
+          return ShapeId.fromParts("aws.polymorph", "awsSdk");
+        }
+      }
+    );
 
     return protocolGenerators;
   }

@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
+import java.util.Map;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -24,8 +25,6 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
-import java.util.Map;
-
 /**
  * Plugin to trigger Smithy-Dafny Python code generation.
  * This differs from the PythonClientCodegenPlugin by not calling
@@ -40,11 +39,16 @@ import java.util.Map;
  *   to the service shape so they can be discovered by Smithy plugins.
  */
 @SmithyUnstableApi
-public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyBuildPlugin {
+public final class DafnyPythonLocalServiceClientCodegenPlugin
+  implements SmithyBuildPlugin {
 
-  public DafnyPythonLocalServiceClientCodegenPlugin(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+  public DafnyPythonLocalServiceClientCodegenPlugin(
+    Map<String, String> smithyNamespaceToPythonModuleNameMap
+  ) {
     super();
-    SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
+    SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(
+      smithyNamespaceToPythonModuleNameMap
+    );
   }
 
   @Override
@@ -54,8 +58,12 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
 
   @Override
   public void execute(PluginContext context) {
-    CodegenDirector<PythonWriter, PythonIntegration, GenerationContext, PythonSettings> runner
-        = new CodegenDirector<>();
+    CodegenDirector<
+      PythonWriter,
+      PythonIntegration,
+      GenerationContext,
+      PythonSettings
+    > runner = new CodegenDirector<>();
 
     PythonSettings settings = PythonSettings.from(context.getSettings());
     runner.settings(settings);
@@ -63,8 +71,15 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     runner.fileManifest(context.getFileManifest());
     runner.integrationClass(PythonIntegration.class);
 
-    ServiceShape serviceShape = context.getModel().expectShape(settings.getService()).asServiceShape().get();
-    Model transformedModel = transformModelForLocalService(context.getModel(), serviceShape);
+    ServiceShape serviceShape = context
+      .getModel()
+      .expectShape(settings.getService())
+      .asServiceShape()
+      .get();
+    Model transformedModel = transformModelForLocalService(
+      context.getModel(),
+      serviceShape
+    );
 
     runner.model(transformedModel);
     runner.service(settings.getService());
@@ -78,10 +93,18 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
    * @param serviceShape
    * @return
    */
-  public static Model transformModelForLocalService(Model model, ServiceShape serviceShape) {
+  public static Model transformModelForLocalService(
+    Model model,
+    ServiceShape serviceShape
+  ) {
     Model transformedModel = model;
-    transformedModel = transformJavadocTraitsToDocumentationTraits(transformedModel);
-    transformedModel = transformServiceShapeToAddReferenceResources(transformedModel, serviceShape);
+    transformedModel =
+      transformJavadocTraitsToDocumentationTraits(transformedModel);
+    transformedModel =
+      transformServiceShapeToAddReferenceResources(
+        transformedModel,
+        serviceShape
+      );
     transformedModel = transformStringEnumShapesToEnumShapes(transformedModel);
     return transformedModel;
   }
@@ -94,34 +117,48 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
    * @return
    */
   public static Model transformJavadocTraitsToDocumentationTraits(Model model) {
-    return ModelTransformer.create().mapShapes(model, shape -> {
-      if (shape.hasTrait(JavaDocTrait.class)) {
-        JavaDocTrait javaDocTrait = shape.getTrait(JavaDocTrait.class).get();
-        DocumentationTrait documentationTrait = new DocumentationTrait(javaDocTrait.getValue());
+    return ModelTransformer
+      .create()
+      .mapShapes(
+        model,
+        shape -> {
+          if (shape.hasTrait(JavaDocTrait.class)) {
+            JavaDocTrait javaDocTrait = shape
+              .getTrait(JavaDocTrait.class)
+              .get();
+            DocumentationTrait documentationTrait = new DocumentationTrait(
+              javaDocTrait.getValue()
+            );
 
-        AbstractShapeBuilder<?,?> builder = ModelUtils.getBuilderForShape(shape);
-        builder.addTrait(documentationTrait);
-        return builder.build();
-      // Crypto Tools developers sometimes write out long strings of slashes to mark a "break" in our smithy files
-      // However, Smithy plugins interpret strings starting with `//` as a comment
-      //   that becomes a DocumentationTrait!
-      // This leads to poor UX on some pydocs.
-      // Remove any DocumentationTraits consisting solely of `/`s.
-      } else if (shape.hasTrait(DocumentationTrait.class)) {
-        DocumentationTrait documentationTrait = shape.getTrait(DocumentationTrait.class).get();
-        String documentation = documentationTrait.getValue();
+            AbstractShapeBuilder<?, ?> builder = ModelUtils.getBuilderForShape(
+              shape
+            );
+            builder.addTrait(documentationTrait);
+            return builder.build();
+            // Crypto Tools developers sometimes write out long strings of slashes to mark a "break" in our smithy files
+            // However, Smithy plugins interpret strings starting with `//` as a comment
+            //   that becomes a DocumentationTrait!
+            // This leads to poor UX on some pydocs.
+            // Remove any DocumentationTraits consisting solely of `/`s.
+          } else if (shape.hasTrait(DocumentationTrait.class)) {
+            DocumentationTrait documentationTrait = shape
+              .getTrait(DocumentationTrait.class)
+              .get();
+            String documentation = documentationTrait.getValue();
 
-        if (documentation.trim().matches("/+")) {
-          AbstractShapeBuilder<?,?> builder = ModelUtils.getBuilderForShape(shape);
-          builder.removeTrait(DocumentationTrait.ID);
-          return builder.build();
-        } else {
-          return shape;
+            if (documentation.trim().matches("/+")) {
+              AbstractShapeBuilder<?, ?> builder =
+                ModelUtils.getBuilderForShape(shape);
+              builder.removeTrait(DocumentationTrait.ID);
+              return builder.build();
+            } else {
+              return shape;
+            }
+          } else {
+            return shape;
+          }
         }
-      } else {
-        return shape;
-      }
-    });
+      );
   }
 
   /**
@@ -134,26 +171,41 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
    * @param serviceShape
    * @return
    */
-  public static Model transformServiceShapeToAddReferenceResources(Model model, ServiceShape serviceShape) {
-
-    ServiceShape.Builder transformedServiceShapeBuilder = serviceShape.toBuilder();
-    ModelTransformer.create().mapShapes(model, shape -> {
-      if (shape.hasTrait(ReferenceTrait.class)) {
-        ShapeId referenceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
-        if (model.expectShape(referenceShapeId).isResourceShape()) {
-          transformedServiceShapeBuilder.addResource(referenceShapeId);
+  public static Model transformServiceShapeToAddReferenceResources(
+    Model model,
+    ServiceShape serviceShape
+  ) {
+    ServiceShape.Builder transformedServiceShapeBuilder =
+      serviceShape.toBuilder();
+    ModelTransformer
+      .create()
+      .mapShapes(
+        model,
+        shape -> {
+          if (shape.hasTrait(ReferenceTrait.class)) {
+            ShapeId referenceShapeId = shape
+              .expectTrait(ReferenceTrait.class)
+              .getReferentId();
+            if (model.expectShape(referenceShapeId).isResourceShape()) {
+              transformedServiceShapeBuilder.addResource(referenceShapeId);
+            }
+          }
+          return shape;
         }
-      }
-      return shape;
-    });
+      );
 
-    return ModelTransformer.create().mapShapes(model, shape -> {
-      if (shape.getId().equals(serviceShape.getId())) {
-        return transformedServiceShapeBuilder.build();
-      } else {
-        return shape;
-      }
-    });
+    return ModelTransformer
+      .create()
+      .mapShapes(
+        model,
+        shape -> {
+          if (shape.getId().equals(serviceShape.getId())) {
+            return transformedServiceShapeBuilder.build();
+          } else {
+            return shape;
+          }
+        }
+      );
   }
 
   /**
@@ -165,15 +217,18 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
    * @param model
    * @return
    */
-  public static Model transformStringEnumShapesToEnumShapes(
-      Model model) {
-
-    return ModelTransformer.create().mapShapes(model, shape -> {
-      if (shape.isStringShape() && shape.hasTrait(EnumTrait.class)) {
-        return EnumShape.fromStringShape(shape.asStringShape().get()).get();
-      } else {
-        return shape;
-      }
-    });
+  public static Model transformStringEnumShapesToEnumShapes(Model model) {
+    return ModelTransformer
+      .create()
+      .mapShapes(
+        model,
+        shape -> {
+          if (shape.isStringShape() && shape.hasTrait(EnumTrait.class)) {
+            return EnumShape.fromStringShape(shape.asStringShape().get()).get();
+          } else {
+            return shape;
+          }
+        }
+      );
   }
 }

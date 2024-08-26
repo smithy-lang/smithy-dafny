@@ -3,9 +3,15 @@
 
 package software.amazon.polymorph.smithypython.common.nameresolver;
 
+import static software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -13,18 +19,11 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import static software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName;
 
 /**
  * Contains utility functions that map Smithy shapes to an expected corresponding string generated
@@ -36,10 +35,46 @@ public class DafnyNameResolver {
   // https://github.com/dafny-lang/dafny/blob/709edd1b938afad604dfad62b86c884d6ec5a44b/Source/DafnyCore/Backends/Python/PythonCodeGenerator.cs#L63-L66
   // If a word is in this set, Dafny will apply "mangling" to it by appending an `_`.
   // Smithy-Dafny needs to know this set so it can also apply mangling and append an `_` to these words.
-  private static Set<String> dafnyReservedWords = new HashSet<>(Arrays.asList("False", "None", "True", "and", "as"
-          , "assert", "async", "await", "break", "class", "continue", "def", "del", "enum", "elif", "else", "except"
-          , "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass"
-          , "raise", "return", "try", "while", "with", "yield"));
+  private static Set<String> dafnyReservedWords = new HashSet<>(
+    Arrays.asList(
+      "False",
+      "None",
+      "True",
+      "and",
+      "as",
+      "assert",
+      "async",
+      "await",
+      "break",
+      "class",
+      "continue",
+      "def",
+      "del",
+      "enum",
+      "elif",
+      "else",
+      "except",
+      "finally",
+      "for",
+      "from",
+      "global",
+      "if",
+      "import",
+      "in",
+      "is",
+      "lambda",
+      "nonlocal",
+      "not",
+      "or",
+      "pass",
+      "raise",
+      "return",
+      "try",
+      "while",
+      "with",
+      "yield"
+    )
+  );
 
   /**
    * "Mangle" any Dafny reserved words by adding an "_".
@@ -65,7 +100,10 @@ public class DafnyNameResolver {
    * @param shape
    * @return
    */
-  public static String getDafnyPythonTypesModuleNameForShape(Shape shape, GenerationContext context) {
+  public static String getDafnyPythonTypesModuleNameForShape(
+    Shape shape,
+    GenerationContext context
+  ) {
     return getDafnyPythonTypesModuleNameForShape(shape.getId(), context);
   }
 
@@ -77,8 +115,14 @@ public class DafnyNameResolver {
    * @param shapeId
    * @return
    */
-  public static String getDafnyPythonTypesModuleNameForShape(ShapeId shapeId, GenerationContext context) {
-    return getDafnyTypesModuleNameForSmithyNamespace(shapeId.getNamespace(), context);
+  public static String getDafnyPythonTypesModuleNameForShape(
+    ShapeId shapeId,
+    GenerationContext context
+  ) {
+    return getDafnyTypesModuleNameForSmithyNamespace(
+      shapeId.getNamespace(),
+      context
+    );
   }
 
   /**
@@ -89,7 +133,10 @@ public class DafnyNameResolver {
    * @param shape
    * @return
    */
-  public static String getDafnyPythonIndexModuleNameForShape(Shape shape, GenerationContext context) {
+  public static String getDafnyPythonIndexModuleNameForShape(
+    Shape shape,
+    GenerationContext context
+  ) {
     return getDafnyPythonIndexModuleNameForShape(shape.getId(), context);
   }
 
@@ -101,8 +148,14 @@ public class DafnyNameResolver {
    * @param shapeId
    * @return
    */
-  public static String getDafnyPythonIndexModuleNameForShape(ShapeId shapeId, GenerationContext context) {
-    return getDafnyIndexModuleNameForSmithyNamespace(shapeId.getNamespace(), context);
+  public static String getDafnyPythonIndexModuleNameForShape(
+    ShapeId shapeId,
+    GenerationContext context
+  ) {
+    return getDafnyIndexModuleNameForSmithyNamespace(
+      shapeId.getNamespace(),
+      context
+    );
   }
 
   /**
@@ -113,9 +166,16 @@ public class DafnyNameResolver {
    * @param smithyNamespace
    * @return
    */
-  public static String getDafnyGeneratedPathForSmithyNamespace(String smithyNamespace) {
+  public static String getDafnyGeneratedPathForSmithyNamespace(
+    String smithyNamespace
+  ) {
     // If this is an AWS SDK shape, rewrite its namespace to match the Dafny extern namespace
-    return SmithyNameResolver.getPythonModuleNameForSmithyNamespace(smithyNamespace) + ".internaldafny.generated";
+    return (
+      SmithyNameResolver.getPythonModuleNameForSmithyNamespace(
+        smithyNamespace
+      ) +
+      ".internaldafny.generated"
+    );
   }
 
   /**
@@ -126,7 +186,10 @@ public class DafnyNameResolver {
    * @param smithyNamespace
    * @return
    */
-  public static String getDafnyIndexModuleNameForSmithyNamespace(String smithyNamespace, GenerationContext context) {
+  public static String getDafnyIndexModuleNameForSmithyNamespace(
+    String smithyNamespace,
+    GenerationContext context
+  ) {
     String indexModuleName = "";
 
     if (AwsSdkNameResolver.isAwsSdkNamespace(smithyNamespace)) {
@@ -145,17 +208,23 @@ public class DafnyNameResolver {
       // For localService, index module name SHOULD be the defined sdkId on the localService trait
       for (ServiceShape serviceShape : context.model().getServiceShapes()) {
         if (smithyNamespace.equals(serviceShape.getId().getNamespace())) {
-          indexModuleName = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+          indexModuleName =
+            serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
           break;
         }
       }
     }
 
     if (Strings.isNullOrEmpty(indexModuleName)) {
-      throw new IllegalArgumentException("Could not determine index module name for " + smithyNamespace);
+      throw new IllegalArgumentException(
+        "Could not determine index module name for " + smithyNamespace
+      );
     }
-    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." +
-            indexModuleName;
+    return (
+      getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) +
+      "." +
+      indexModuleName
+    );
   }
 
   /**
@@ -166,8 +235,15 @@ public class DafnyNameResolver {
    * @param smithyNamespace
    * @return
    */
-  public static String getDafnyTypesModuleNameForSmithyNamespace(String smithyNamespace, GenerationContext context) {
-    return getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) + "." + dafnyTypesModuleName(smithyNamespace);
+  public static String getDafnyTypesModuleNameForSmithyNamespace(
+    String smithyNamespace,
+    GenerationContext context
+  ) {
+    return (
+      getDafnyGeneratedPathForSmithyNamespace(smithyNamespace) +
+      "." +
+      dafnyTypesModuleName(smithyNamespace)
+    );
   }
 
   /**
@@ -208,30 +284,51 @@ public class DafnyNameResolver {
    * @return
    */
   public static String getDafnyTypeForStringShapeWithEnumTrait(
-      StringShape stringShape, String enumValue) {
-    if (!stringShape.hasTrait(EnumTrait.class) || !stringShape.isStringShape()) {
+    StringShape stringShape,
+    String enumValue
+  ) {
+    if (
+      !stringShape.hasTrait(EnumTrait.class) || !stringShape.isStringShape()
+    ) {
       throw new IllegalArgumentException(
-          "Argument is not a StringShape with EnumTrait: " + stringShape.getId());
+        "Argument is not a StringShape with EnumTrait: " + stringShape.getId()
+      );
     }
 
-    return mangleDafnyType(stringShape.getId().getName())
-            + "_"
-            + mangleDafnyType(enumValue.replace("_", "__"));
+    return (
+      mangleDafnyType(stringShape.getId().getName()) +
+      "_" +
+      mangleDafnyType(enumValue.replace("_", "__"))
+    );
   }
 
   public static void importDafnyTypeForStringShapeWithEnumTrait(
-      PythonWriter writer, StringShape stringShape, String enumValue, GenerationContext context) {
+    PythonWriter writer,
+    StringShape stringShape,
+    String enumValue,
+    GenerationContext context
+  ) {
     if (!stringShape.hasTrait(EnumTrait.class)) {
       throw new IllegalArgumentException(
-          "Argument is not a StringShape with EnumTrait: " + stringShape.getId());
+        "Argument is not a StringShape with EnumTrait: " + stringShape.getId()
+      );
     }
 
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular
     // dependencies
-    writer.addStdlibImport(getDafnyGeneratedPathForSmithyNamespace(stringShape.getId().getNamespace()) + ".module_");
     writer.addStdlibImport(
-        getDafnyTypesModuleNameForSmithyNamespace(stringShape.getId().getNamespace(), context),
-        getDafnyTypeForStringShapeWithEnumTrait(stringShape, enumValue));
+      getDafnyGeneratedPathForSmithyNamespace(
+        stringShape.getId().getNamespace()
+      ) +
+      ".module_"
+    );
+    writer.addStdlibImport(
+      getDafnyTypesModuleNameForSmithyNamespace(
+        stringShape.getId().getNamespace(),
+        context
+      ),
+      getDafnyTypeForStringShapeWithEnumTrait(stringShape, enumValue)
+    );
   }
 
   /**
@@ -243,7 +340,10 @@ public class DafnyNameResolver {
    * @return
    */
   private static void importDafnyTypeForShape(
-      PythonWriter writer, Shape shape, GenerationContext context) {
+    PythonWriter writer,
+    Shape shape,
+    GenerationContext context
+  ) {
     importDafnyTypeForShape(writer, shape.getId(), context);
   }
 
@@ -255,32 +355,38 @@ public class DafnyNameResolver {
    * @param shapeId
    */
   public static void importDafnyTypeForShape(
-      PythonWriter writer, ShapeId shapeId, GenerationContext context) {
-
+    PythonWriter writer,
+    ShapeId shapeId,
+    GenerationContext context
+  ) {
     if (SmithyNameResolver.isUnitShape(shapeId)) {
       // No corresponding Dafny type for unit. Dafny uses "None", which does not need to be imported
       return;
-    }
-
-    else if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
+    } else if (
+      context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)
+    ) {
       importDafnyTypeForError(writer, shapeId, context);
-    }
-
-    else if (context.model().expectShape(shapeId).hasTrait(PositionalTrait.class)) {
+    } else if (
+      context.model().expectShape(shapeId).hasTrait(PositionalTrait.class)
+    ) {
       // Don't import positional shapes; their underlying types are discovered and imported
       return;
-    }
-
-    else {
+    } else {
       // When generating a Dafny import, must ALWAYS first import module_ to avoid circular
       // dependencies
-      writer.addStdlibImport(getDafnyGeneratedPathForSmithyNamespace(shapeId.getNamespace()) + ".module_");
+      writer.addStdlibImport(
+        getDafnyGeneratedPathForSmithyNamespace(shapeId.getNamespace()) +
+        ".module_"
+      );
       String name = shapeId.getName();
       writer.addStdlibImport(
-          getDafnyPythonTypesModuleNameForShape(shapeId, context),
-          // Mangling for "normal" repeated types only appears to apply to the first name
-          mangleDafnyType(name.replace("_", "__")) + "_" + name.replace("_", "__"),
-          getDafnyTypeForShape(shapeId));
+        getDafnyPythonTypesModuleNameForShape(shapeId, context),
+        // Mangling for "normal" repeated types only appears to apply to the first name
+        mangleDafnyType(name.replace("_", "__")) +
+        "_" +
+        name.replace("_", "__"),
+        getDafnyTypeForShape(shapeId)
+      );
     }
   }
 
@@ -291,7 +397,9 @@ public class DafnyNameResolver {
    * @param serviceShape
    * @return
    */
-  public static String getDafnyClientInterfaceTypeForServiceShape(ServiceShape serviceShape) {
+  public static String getDafnyClientInterfaceTypeForServiceShape(
+    ServiceShape serviceShape
+  ) {
     if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
       return "I" + AwsSdkNameResolver.clientNameForService(serviceShape);
     } else {
@@ -306,7 +414,9 @@ public class DafnyNameResolver {
    * @param serviceShape
    * @return
    */
-  public static String getDafnyClientTypeForServiceShape(ServiceShape serviceShape) {
+  public static String getDafnyClientTypeForServiceShape(
+    ServiceShape serviceShape
+  ) {
     return serviceShape.getId().getName() + "Client";
   }
 
@@ -317,7 +427,9 @@ public class DafnyNameResolver {
    * @param resourceShape
    * @return
    */
-  public static String getDafnyInterfaceTypeForResourceShape(ResourceShape resourceShape) {
+  public static String getDafnyInterfaceTypeForResourceShape(
+    ResourceShape resourceShape
+  ) {
     return "I" + resourceShape.getId().getName();
   }
 
@@ -329,13 +441,22 @@ public class DafnyNameResolver {
    * @return
    */
   public static void importDafnyTypeForResourceShape(
-      PythonWriter writer, ResourceShape resourceShape, GenerationContext context) {
+    PythonWriter writer,
+    ResourceShape resourceShape,
+    GenerationContext context
+  ) {
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular
     // dependencies
-    writer.addStdlibImport(getDafnyGeneratedPathForSmithyNamespace(resourceShape.getId().getNamespace()) + ".module_");
     writer.addStdlibImport(
-        getDafnyPythonTypesModuleNameForShape(resourceShape.getId(), context),
-        getDafnyInterfaceTypeForResourceShape(resourceShape));
+      getDafnyGeneratedPathForSmithyNamespace(
+        resourceShape.getId().getNamespace()
+      ) +
+      ".module_"
+    );
+    writer.addStdlibImport(
+      getDafnyPythonTypesModuleNameForShape(resourceShape.getId(), context),
+      getDafnyInterfaceTypeForResourceShape(resourceShape)
+    );
   }
 
   /**
@@ -347,13 +468,22 @@ public class DafnyNameResolver {
    * @return
    */
   public static void importDafnyTypeForServiceShape(
-      PythonWriter writer, ServiceShape serviceShape, GenerationContext context) {
+    PythonWriter writer,
+    ServiceShape serviceShape,
+    GenerationContext context
+  ) {
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular
     // dependencies
-    writer.addStdlibImport(getDafnyGeneratedPathForSmithyNamespace(serviceShape.getId().getNamespace()) + ".module_");
     writer.addStdlibImport(
-        getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), context),
-        getDafnyClientInterfaceTypeForServiceShape(serviceShape));
+      getDafnyGeneratedPathForSmithyNamespace(
+        serviceShape.getId().getNamespace()
+      ) +
+      ".module_"
+    );
+    writer.addStdlibImport(
+      getDafnyPythonTypesModuleNameForShape(serviceShape.getId(), context),
+      getDafnyClientInterfaceTypeForServiceShape(serviceShape)
+    );
   }
 
   /**
@@ -396,10 +526,15 @@ public class DafnyNameResolver {
    * @param memberShape
    * @return
    */
-  public static String getDafnyTypeForUnion(UnionShape unionShape, MemberShape memberShape) {
-    return unionShape.getId().getName().replace("_", "__")
-        + "_"
-        + memberShape.getMemberName().replace("_", "__");
+  public static String getDafnyTypeForUnion(
+    UnionShape unionShape,
+    MemberShape memberShape
+  ) {
+    return (
+      unionShape.getId().getName().replace("_", "__") +
+      "_" +
+      memberShape.getMemberName().replace("_", "__")
+    );
   }
 
   /**
@@ -411,10 +546,15 @@ public class DafnyNameResolver {
    * @return
    */
   public static void importDafnyTypeForUnion(
-      PythonWriter writer, UnionShape unionShape, MemberShape memberShape, GenerationContext context) {
+    PythonWriter writer,
+    UnionShape unionShape,
+    MemberShape memberShape,
+    GenerationContext context
+  ) {
     writer.addStdlibImport(
-        getDafnyPythonTypesModuleNameForShape(unionShape, context),
-        getDafnyTypeForUnion(unionShape, memberShape));
+      getDafnyPythonTypesModuleNameForShape(unionShape, context),
+      getDafnyTypeForUnion(unionShape, memberShape)
+    );
   }
 
   /**
@@ -427,16 +567,26 @@ public class DafnyNameResolver {
    * @param shapeId
    */
   public static void importDafnyTypeForError(
-      PythonWriter writer, ShapeId shapeId, GenerationContext context) {
+    PythonWriter writer,
+    ShapeId shapeId,
+    GenerationContext context
+  ) {
     if (!context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
       throw new IllegalArgumentException(
-          "Must provide an error shape to importDafnyTypeForError. Provided " + shapeId);
+        "Must provide an error shape to importDafnyTypeForError. Provided " +
+        shapeId
+      );
     }
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular
     // dependencies
-    writer.addStdlibImport(getDafnyGeneratedPathForSmithyNamespace(shapeId.getNamespace()) + ".module_");
     writer.addStdlibImport(
-        getDafnyPythonTypesModuleNameForShape(shapeId, context), getDafnyTypeForError(shapeId));
+      getDafnyGeneratedPathForSmithyNamespace(shapeId.getNamespace()) +
+      ".module_"
+    );
+    writer.addStdlibImport(
+      getDafnyPythonTypesModuleNameForShape(shapeId, context),
+      getDafnyTypeForError(shapeId)
+    );
   }
 
   /**
@@ -447,11 +597,18 @@ public class DafnyNameResolver {
    * @param namespace
    */
   public static void importGenericDafnyErrorTypeForNamespace(
-      PythonWriter writer, String namespace, GenerationContext context) {
+    PythonWriter writer,
+    String namespace,
+    GenerationContext context
+  ) {
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular
     // dependencies
-    writer.addStdlibImport(getDafnyGeneratedPathForSmithyNamespace(namespace) + ".module_");
-    writer.addStdlibImport(getDafnyTypesModuleNameForSmithyNamespace(namespace, context), "Error");
+    writer.addStdlibImport(
+      getDafnyGeneratedPathForSmithyNamespace(namespace) + ".module_"
+    );
+    writer.addStdlibImport(
+      getDafnyTypesModuleNameForSmithyNamespace(namespace, context),
+      "Error"
+    );
   }
-
 }

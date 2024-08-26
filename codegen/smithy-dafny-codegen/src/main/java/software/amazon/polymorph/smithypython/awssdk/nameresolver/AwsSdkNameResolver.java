@@ -53,7 +53,9 @@ public class AwsSdkNameResolver {
    */
   public static String clientNameForService(ServiceShape serviceShape) {
     if (!isAwsSdkNamespace(serviceShape.getId().getNamespace())) {
-      throw new IllegalArgumentException("serviceShape is not an AWS SDK service: " + serviceShape);
+      throw new IllegalArgumentException(
+        "serviceShape is not an AWS SDK service: " + serviceShape
+      );
     }
     return switch (serviceShape.getId().getName()) {
       case "TrentService" -> "KMSClient";
@@ -80,8 +82,12 @@ public class AwsSdkNameResolver {
    * @param serviceShape
    * @return
    */
-  public static String dependencyErrorNameForService(ServiceShape serviceShape) {
-    return DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace());
+  public static String dependencyErrorNameForService(
+    ServiceShape serviceShape
+  ) {
+    return DafnyNameResolver.dafnyBaseModuleName(
+      serviceShape.getId().getNamespace()
+    );
   }
 
   /**
@@ -115,9 +121,12 @@ public class AwsSdkNameResolver {
    * @return
    */
   public static String getConversionFunctionNameForShape(Shape shape) {
-    return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            shape.getId().getNamespace())
-            + "_"
-            + shape.getId().getName();
+    return (
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        shape.getId().getNamespace()
+      ) +
+      "_" +
+      shape.getId().getName()
+    );
   }
 }

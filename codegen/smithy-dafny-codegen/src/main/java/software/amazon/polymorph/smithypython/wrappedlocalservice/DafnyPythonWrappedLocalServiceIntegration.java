@@ -12,7 +12,8 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 
-public final class DafnyPythonWrappedLocalServiceIntegration implements PythonIntegration {
+public final class DafnyPythonWrappedLocalServiceIntegration
+  implements PythonIntegration {
 
   /**
    * Generate all custom code for wrapped LocalServices.
@@ -23,16 +24,20 @@ public final class DafnyPythonWrappedLocalServiceIntegration implements PythonIn
   @Override
   public void customize(GenerationContext codegenContext) {
     // ONLY run this integration's customizations if the codegen is using wrapped localService
-    if (!codegenContext
+    if (
+      !codegenContext
         .applicationProtocol()
         .equals(
-            DafnyPythonWrappedLocalServiceProtocolGenerator
-                .DAFNY_PYTHON_WRAPPED_LOCAL_SERVICE_PROTOCOL)) {
+          DafnyPythonWrappedLocalServiceProtocolGenerator.DAFNY_PYTHON_WRAPPED_LOCAL_SERVICE_PROTOCOL
+        )
+    ) {
       return;
     }
 
     customizeForServiceShape(
-        codegenContext.settings().getService(codegenContext.model()), codegenContext);
+      codegenContext.settings().getService(codegenContext.model()),
+      codegenContext
+    );
   }
 
   /**
@@ -42,19 +47,23 @@ public final class DafnyPythonWrappedLocalServiceIntegration implements PythonIn
    * @param codegenContext
    */
   private void customizeForServiceShape(
-      ServiceShape serviceShape, GenerationContext codegenContext) {
-    new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+    ServiceShape serviceShape,
+    GenerationContext codegenContext
+  ) {
+    new ShimFileWriter()
+      .customizeFileForServiceShape(serviceShape, codegenContext);
   }
 
   @Override
   public List<ProtocolGenerator> getProtocolGenerators() {
     return Collections.singletonList(
-        new DafnyPythonWrappedLocalServiceProtocolGenerator() {
-          // See the WrappedLocalServiceTrait class in this directory.
-          @Override
-          public ShapeId getProtocol() {
-            return ShapeId.from("aws.polymorph#wrappedLocalService");
-          }
-        });
+      new DafnyPythonWrappedLocalServiceProtocolGenerator() {
+        // See the WrappedLocalServiceTrait class in this directory.
+        @Override
+        public ShapeId getProtocol() {
+          return ShapeId.from("aws.polymorph#wrappedLocalService");
+        }
+      }
+    );
   }
 }

@@ -13,25 +13,29 @@ public class ModelsFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
-      ServiceShape serviceShape, GenerationContext codegenContext) {
+    ServiceShape serviceShape,
+    GenerationContext codegenContext
+  ) {
     String moduleName =
-        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            codegenContext.settings().getService().getNamespace());
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        codegenContext.settings().getService().getNamespace()
+      );
     codegenContext
-        .writerDelegator()
-        .useFileWriter(
-            moduleName + "/models.py",
-            "",
-            writer -> {
-
-              // This block defines an empty `Unit` class used by Smithy-Python generated code
-              // Defining this seems necessary to avoid forking Smithy-Python
-              // TODO-Python: Find some way to not need this, or decide this is OK. Low priority
-              writer.write(
-                  """
-              class Unit:
-                  pass
-               """);
-            });
+      .writerDelegator()
+      .useFileWriter(
+        moduleName + "/models.py",
+        "",
+        writer -> {
+          // This block defines an empty `Unit` class used by Smithy-Python generated code
+          // Defining this seems necessary to avoid forking Smithy-Python
+          // TODO-Python: Find some way to not need this, or decide this is OK. Low priority
+          writer.write(
+            """
+            class Unit:
+                pass
+             """
+          );
+        }
+      );
   }
 }
