@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleUnionImpl.dfy"
 
-module SimpleUnion refines AbstractSimpleUnionService {
+module {:extern "simple.union.internaldafny" } SimpleUnion refines AbstractSimpleUnionService {
     import Operations = SimpleUnionImpl
 
     function method DefaultSimpleUnionConfig(): SimpleUnionConfig {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleUnionTypesWrapped.dfy"
 
-module WrappedSimpleUnionService refines WrappedAbstractSimpleUnionService {
+module {:extern "simple.union.internaldafny.wrapped"} WrappedSimpleUnionService refines WrappedAbstractSimpleUnionService {
     import WrappedService = SimpleUnion
     function method WrappedDefaultSimpleUnionConfig(): SimpleUnionConfig {
         SimpleUnionConfig

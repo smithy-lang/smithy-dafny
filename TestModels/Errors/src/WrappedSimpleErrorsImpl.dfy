@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleErrorsTypesWrapped.dfy"
 
-module WrappedSimpleErrorsService refines WrappedAbstractSimpleErrorsService {
+module {:extern "simple.errors.internaldafny.wrapped"} WrappedSimpleErrorsService refines WrappedAbstractSimpleErrorsService {
     import WrappedService = SimpleErrors
     function method WrappedDefaultSimpleErrorsConfig(): SimpleErrorsConfig {
         SimpleErrorsConfig

@@ -129,7 +129,10 @@ public class DafnyApiCodegen {
       namespace
     );
     final TokenTree typesModuleHeader = Token.of(
-      "module %s".formatted(
+      "module {:extern \"%s\" } %s".formatted(
+          DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(
+            serviceShape.getId()
+          ),
           typesModuleName
         )
     );

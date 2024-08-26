@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleAggregateImpl.dfy"
 
-module SimpleAggregate refines AbstractSimpleAggregateService {
+module {:extern "simple.aggregate.internaldafny"} SimpleAggregate refines AbstractSimpleAggregateService {
     import Operations = SimpleAggregateImpl
 
     function method DefaultSimpleAggregateConfig(): SimpleAggregateConfig {

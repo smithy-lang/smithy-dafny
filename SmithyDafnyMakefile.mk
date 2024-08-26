@@ -156,8 +156,15 @@ clean-dafny-report:
 # Transpile the entire project's impl
 # For each index file listed in the project Makefile's PROJECT_INDEX variable,
 #   append a `-library:TestModels/$(PROJECT_INDEX) to the transpiliation target
-_transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+_transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 _transpile_implementation_all: transpile_implementation
+
+# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
+# the `transpile_implementation` target should start using the new Dafny CLI,
+# and the `transpile_implementation_new_cli` target should be removed
+# in favor of `transpile_implementation` using the new CLI.
+_transpile_implementation_all_new_cli: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+_transpile_implementation_all_new_cli: transpile_implementation_new_cli
 
 # The `$(OUT)` and $(TARGET) variables are problematic.
 # Ideally they are different for every target call.
@@ -191,6 +198,30 @@ transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src
 # `find` looks for `Index.dfy` files in either V1 or V2-styled project directories (single vs. multiple model files).
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+		-stdin \
+		-noVerify \
+		-vcsCores:$(CORES) \
+		-compileTarget:$(TARGET) \
+		-spillTargetCode:3 \
+		-compile:0 \
+		-optimizeErasableDatatypeWrapper:0 \
+		-compileSuffix:1 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-useRuntimeLib \
+		-out $(OUT) \
+		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
+		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(TRANSPILE_DEPENDENCIES)
+
+# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
+# the `transpile_implementation` target should start using the new Dafny CLI,
+# and the `transpile_implementation_new_cli` target should be removed
+# in favor of `transpile_implementation` using the new CLI.
+transpile_implementation_new_cli: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+transpile_implementation_new_cli:
+	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 	translate $(TARGET) \
 		--stdin \
 		--no-verify \
@@ -200,11 +231,12 @@ transpile_implementation:
 		--function-syntax:3 \
 		--allow-warnings \
 		--output $(OUT) \
+		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		$(TRANSPILE_MODULE_NAME) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSLATION_RECORD) \
 		$(TRANSPILE_DEPENDENCIES)
-
 
 # If the project under transpilation uses `replaceable` modules,
 #   it MUST define a SRC_INDEX variable per language.
@@ -223,12 +255,44 @@ _transpile_test_all: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
 #     append `-library:/path/to/Index.dfy` to the transpile target
 # Else: (i.e. single model/service in project), then:
 #   append `-library:/path/to/Index.dfy` to the transpile target
-_transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, --library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), --library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
+_transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), -library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
 # Transpile the entire project's tests
 _transpile_test_all: transpile_test
 
-# `find` looks for tests in either V1 or V2-styled project directories (single vs. multiple model files).
+# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
+# the `transpile_implementation` target should start using the new Dafny CLI,
+# and the `transpile_implementation_new_cli` target should be removed
+# in favor of `transpile_implementation` using the new CLI.
+_transpile_test_all_new_cli: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+_transpile_test_all_new_cli: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
+_transpile_test_all_new_cli: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, --library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), --library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
+_transpile_test_all_new_cli: transpile_test_new_cli
+
 transpile_test:
+	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+		-stdin \
+		-noVerify \
+		-vcsCores:$(CORES) \
+		-compileTarget:$(TARGET) \
+		-spillTargetCode:3 \
+		-runAllTests:1 \
+		-compile:0 \
+		-optimizeErasableDatatypeWrapper:0 \
+		-compileSuffix:1 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-useRuntimeLib \
+		-out $(OUT) \
+		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
+		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(TRANSPILE_DEPENDENCIES) \
+
+# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
+# the `transpile_implementation` target should start using the new Dafny CLI,
+# and the `transpile_implementation_new_cli` target should be removed
+# in favor of `transpile_implementation` using the new CLI.
+transpile_test_new_cli:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate $(TARGET) \
 		--stdin \
@@ -240,6 +304,8 @@ transpile_test:
 		--function-syntax:3 \
 		--allow-warnings \
 		--output $(OUT) \
+		$(DAFNY_OPTIONS) \
+		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSLATION_RECORD) \
 		$(SOURCE_TRANSLATION_RECORD) \
@@ -573,6 +639,9 @@ transpile_dependencies_rust: transpile_dependencies
 _mv_implementation_rust:
 	mkdir -p runtimes/rust/src
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
+# rustfmt has a recurring bug where it leaves behind trailing spaces and then complains about it.
+# Pre-process the Dafny-generated Rust code to remove them.
+	sed -i -e 's/[[:space:]]*$$//' runtimes/rust/src/implementation_from_dafny.rs 
 	rustfmt runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 
@@ -623,14 +692,16 @@ clean: _clean
 ########################## Python targets
 
 # Python MUST transpile dependencies first to generate .dtr files
+transpile_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_pre_transpile, )
 transpile_python: | transpile_dependencies_python transpile_implementation_python transpile_test_python
+transpile_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_post_transpile, )
 
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
 transpile_implementation_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_implementation_python: TRANSPILE_MODULE_NAME=--python-module-name=$(PYTHON_MODULE_NAME).internaldafny.generated
 transpile_implementation_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
-transpile_implementation_python: _transpile_implementation_all _mv_implementation_python
+transpile_implementation_python: _transpile_implementation_all_new_cli _mv_implementation_python
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/dafny_test
@@ -638,7 +709,7 @@ transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
 transpile_test_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
 transpile_test_python: SOURCE_TRANSLATION_RECORD= --translation-record runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/dafny_src-py.dtr
-transpile_test_python: _transpile_test_all _mv_test_python
+transpile_test_python: _transpile_test_all_new_cli _mv_test_python
 
 # Move Dafny-generated code into its expected location in the Python module
 _mv_implementation_python:
