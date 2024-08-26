@@ -37,8 +37,8 @@ fi
 
 # Perform sed
 echo "Replacing in $SED_FILE_PATH"
-# On macOS, sed requires an extra parameter of ""
 OS=$(uname)
+echo "Using sed-like command for OS $OS"
 
 # macOS
 if [ "$OS" = "Darwin" ]; then
