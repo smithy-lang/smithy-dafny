@@ -15,6 +15,10 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
     true
   }
 
+  predicate CallKMSEnsuresPublicly(input: CallDDBInput, output: Result<CallDDBOutput, Error>) {
+    true
+  }
+
   method CallDDB ( config: InternalConfig,  input: CallDDBInput )
     returns (output: Result<CallDDBOutput, Error>) {
     return Success(CallDDBOutput(ddbClient := input.ddbClient));
