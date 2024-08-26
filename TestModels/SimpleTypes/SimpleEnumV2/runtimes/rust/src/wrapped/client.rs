@@ -101,7 +101,7 @@ impl crate::r#simple::types::enumv2::internaldafny::types::ISimpleTypesEnumV2Cli
         >,
     >{
         let inner_input =
-            crate::conversions::get_enum_v2_first_known_value_test::_get_enum_v2_input::from_dafny(input.clone());
+            crate::conversions::get_enum_v2_first_known_value_test::_get_enum_v2_first_known_value_test_input::from_dafny(input.clone());
         let result = self.rt.block_on(crate::operation::get_enum_v2_first_known_value_test::GetEnumV2FirstKnownValueTest::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
@@ -111,7 +111,7 @@ impl crate::r#simple::types::enumv2::internaldafny::types::ISimpleTypesEnumV2Cli
             ),
             Ok(client) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::get_enum_v2_first_known_value_test::_get_enum_v2_output::to_dafny(client),
+                    value: crate::conversions::get_enum_v2_first_known_value_test::_get_enum_v2_first_known_value_test_output::to_dafny(client),
                 },
             ),
         }
@@ -131,7 +131,7 @@ impl crate::r#simple::types::enumv2::internaldafny::types::ISimpleTypesEnumV2Cli
         >,
     >{
         let inner_input =
-            crate::conversions::get_enum_v2_second_known_value_test::_get_enum_v2_input::from_dafny(input.clone());
+            crate::conversions::get_enum_v2_second_known_value_test::_get_enum_v2_second_known_value_test_input::from_dafny(input.clone());
         let result = self.rt.block_on(crate::operation::get_enum_v2_second_known_value_test::GetEnumV2SecondKnownValueTest::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
@@ -141,7 +141,7 @@ impl crate::r#simple::types::enumv2::internaldafny::types::ISimpleTypesEnumV2Cli
             ),
             Ok(client) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::get_enum_v2_second_known_value_test::_get_enum_v2_output::to_dafny(client),
+                    value: crate::conversions::get_enum_v2_second_known_value_test::_get_enum_v2_second_known_value_test_output::to_dafny(client),
                 },
             ),
         }
@@ -161,7 +161,7 @@ impl crate::r#simple::types::enumv2::internaldafny::types::ISimpleTypesEnumV2Cli
         >,
     >{
         let inner_input =
-            crate::conversions::get_enum_v2_third_known_value_test::_get_enum_v2_input::from_dafny(input.clone());
+            crate::conversions::get_enum_v2_third_known_value_test::_get_enum_v2_third_known_value_test_input::from_dafny(input.clone());
         let result = self.rt.block_on(crate::operation::get_enum_v2_third_known_value_test::GetEnumV2ThirdKnownValueTest::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
@@ -171,7 +171,7 @@ impl crate::r#simple::types::enumv2::internaldafny::types::ISimpleTypesEnumV2Cli
             ),
             Ok(client) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::get_enum_v2_third_known_value_test::_get_enum_v2_output::to_dafny(client),
+                    value: crate::conversions::get_enum_v2_third_known_value_test::_get_enum_v2_third_known_value_test_output::to_dafny(client),
                 },
             ),
         }
