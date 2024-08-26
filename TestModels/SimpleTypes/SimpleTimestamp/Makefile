@@ -36,5 +36,5 @@ INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.timestamp.internal
 INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleTimestamp refines AbstractSimpleTypesTimestampService {"
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleTypesTimestampImpl.dfy
-WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:options \"--function-syntax:4\"} {:extern \"simple.types.timestamp.internaldafny.wrapped\"} WrappedSimpleTypesTimestampService refines WrappedAbstractSimpleTypesTimestampService {"
-WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module {:options \"--function-syntax:4\"} WrappedSimpleTypesTimestampService refines WrappedAbstractSimpleTypesTimestampService {"
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.timestamp.internaldafny.wrapped\"} WrappedSimpleTypesTimestampService refines WrappedAbstractSimpleTypesTimestampService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesTimestampService refines WrappedAbstractSimpleTypesTimestampService {"
