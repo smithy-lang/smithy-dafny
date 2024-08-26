@@ -49,12 +49,13 @@ public class DafnyNameResolver {
                 return "dafny.Map";
             case DOUBLE, STRING, BLOB, LIST:
                 return "dafny.Sequence";
+            // default catches a case where users may author their own classes that implement and extend resource (ExtendableTrait)
+            // ENUM, STRUCTURE, UNION can be removed but for posterity it looks great to see all the shapes being covered.
             case ENUM, STRUCTURE, UNION:
+            default:
                 return DafnyNameResolver.dafnyTypesNamespace(shape)
                                 .concat(DOT)
                                 .concat(symbol.getName());
-            default:
-                throw new IllegalArgumentException("Unexpected shape found") ;
         }
     }
 

@@ -466,19 +466,11 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                                         return CollectionOfErrors_Input_ToDafny(err.($L.CollectionOfErrors))
                                                 
                                                     default:
-                                                        // TODO: Is changing from the commented code to this new one reasonable?
-                                                        // return OpaqueError_Input_ToDafny(err.(*simpleconstraintstypes.OpaqueError))
-
-                                                        // TODO: why is err a pointer?
-                                                        error, ok := err.(*$L.OpaqueError)
-
+                                                        error, ok := err.($L.OpaqueError)
                                                         if !ok {
                                                             panic("Error is not an OpaqueError")
                                                         }
-                                                        if error == nil {
-                                                            panic("Error is nil")
-                                                        }
-                                                        return OpaqueError_Input_ToDafny(*error)
+                                                        return OpaqueError_Input_ToDafny(error)
                                                     }
                                                 }
                                                 """, DafnyNameResolver.dafnyTypesNamespace(serviceShape),
