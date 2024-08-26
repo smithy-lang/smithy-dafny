@@ -1229,7 +1229,7 @@ public class DafnyApiCodegen {
     // then we can not prove freshness of these items
     final TokenTree removeInputs = direction == InputOutput.OUTPUT
       ? OperationModifiesInputs(operationShape.getId(), implementationType)
-        .prependSeperated(Token.of("-"))
+        .prependSeperated(Token.of("\n -"))
       : TokenTree.empty();
 
     // We need to do 3 things here
@@ -1327,12 +1327,15 @@ public class DafnyApiCodegen {
         .lineSeparated();
     } else if (isUnion && member.isRequired()) {
       // Required Union
+
+      final UnionShape union = memberShape
+        .asUnionShape()
+        .get();
+
       return TokenTree
         .of(
           TokenTree.of("\n && (match %s ".formatted(varName)),
-          TokenTree.of(memberShape
-            .asUnionShape()
-            .get()
+          TokenTree.of(union
             .members()
             .stream()
             .filter(this::OnlyReferenceStructures)
@@ -1358,19 +1361,30 @@ public class DafnyApiCodegen {
                 )
                 : TokenTree.empty()
               )
+              .flatten()
+              .dropEmpty()
               .lineSeparated()))
             .lineSeparated(),
-          TokenTree.of("case _ => true)")
+          TokenTree.of(
+            union
+              .members()
+              .stream()
+              .allMatch(this::OnlyReferenceStructures)
+              ? ")"
+              : "case _ => true)")
         )
         .lineSeparated();
     } else if (isUnion && !member.isRequired()) {
       // Optional Union
+
+      final UnionShape union = memberShape
+        .asUnionShape()
+        .get();
+
       return TokenTree
         .of(
           TokenTree.of("\n && ( %1$s.Some? \n ==> match %1$s.value ".formatted(varName)),
-          TokenTree.of(memberShape
-              .asUnionShape()
-              .get()
+          TokenTree.of(union
               .members()
               .stream()
               .filter(this::OnlyReferenceStructures)
@@ -1396,9 +1410,17 @@ public class DafnyApiCodegen {
                   )
                   : TokenTree.empty()
               )
+                .flatten()
+                .dropEmpty()
                 .lineSeparated()))
             .lineSeparated(),
-          TokenTree.of("case _ => true)")
+          TokenTree.of(
+            union
+              .members()
+              .stream()
+              .allMatch(this::OnlyReferenceStructures)
+              ? ")"
+              : "case _ => true)")
         )
         .lineSeparated();
     } else {
@@ -1537,7 +1559,15 @@ public class DafnyApiCodegen {
                   "case %s(o) => o.Modifies"
                     .formatted(s.getMemberName())
                 ))),
-            Token.of("case _ => {})")
+            TokenTree.of(
+              memberShape
+                .asUnionShape()
+                .get()
+                .members()
+                .stream()
+                .allMatch(this::OnlyReferenceStructures)
+                ? ")"
+                : "case _ => {})")
           )
           .flatten()
           .dropEmpty()
@@ -1555,7 +1585,7 @@ public class DafnyApiCodegen {
       return TokenTree.of(
         TokenTree
           .of(
-            Token.of("(if %1$s.Some? then match %1$s.value ".formatted(varName)),
+            Token.of("(if %1$s.Some? then \n match %1$s.value ".formatted(varName)),
             Token.of(memberShape
               .asUnionShape()
               .get()
@@ -1567,7 +1597,15 @@ public class DafnyApiCodegen {
                   "case %s(o) => o.Modifies"
                     .formatted(s.getMemberName())
                 ))),
-            Token.of("case _ => {}"),
+            TokenTree.of(
+              memberShape
+                .asUnionShape()
+                .get()
+                .members()
+                .stream()
+                .allMatch(this::OnlyReferenceStructures)
+                ? ""
+                : "case _ => {}"),
             Token.of("else {})")
           )
           .flatten()
