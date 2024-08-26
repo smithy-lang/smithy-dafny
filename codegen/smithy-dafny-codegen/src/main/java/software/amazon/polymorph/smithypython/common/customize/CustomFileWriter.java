@@ -10,7 +10,6 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 
 /** Interface for writing custom Dafny-Python code to files. */
 public interface CustomFileWriter {
-
   /**
    * Writes code specific to the file targeted by the CustomFileWriter for the provided
    * ServiceShape. The ServiceShape SHOULD be a shape annotated with the
@@ -20,5 +19,7 @@ public interface CustomFileWriter {
    * @param codegenContext
    */
   default void customizeFileForServiceShape(
-      ServiceShape serviceShape, GenerationContext codegenContext) {}
+    ServiceShape serviceShape,
+    GenerationContext codegenContext
+  ) {}
 }

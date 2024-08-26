@@ -43,8 +43,9 @@ public class SmithyNameResolver {
    * @param codegenContext
    * @return
    */
-  public static Set<ShapeId> getLocalServiceConfigShapes(CodegenContext codegenContext) {
-
+  public static Set<ShapeId> getLocalServiceConfigShapes(
+    CodegenContext codegenContext
+  ) {
     return getLocalServiceConfigShapes(codegenContext.model());
   }
 
@@ -56,26 +57,35 @@ public class SmithyNameResolver {
    * @return
    */
   public static Set<ShapeId> getLocalServiceConfigShapes(Model model) {
-
     if (localServiceConfigShapes.isEmpty()) {
       localServiceConfigShapes =
-          model.getServiceShapes().stream()
-              .filter(serviceShape -> serviceShape.hasTrait(LocalServiceTrait.class))
-              .map(serviceShape -> serviceShape.expectTrait(LocalServiceTrait.class))
-              .map(localServiceTrait -> localServiceTrait.getConfigId())
-              .collect(Collectors.toSet());
+        model
+          .getServiceShapes()
+          .stream()
+          .filter(serviceShape -> serviceShape.hasTrait(LocalServiceTrait.class)
+          )
+          .map(serviceShape -> serviceShape.expectTrait(LocalServiceTrait.class)
+          )
+          .map(localServiceTrait -> localServiceTrait.getConfigId())
+          .collect(Collectors.toSet());
     }
     return localServiceConfigShapes;
   }
 
   public static void setSmithyNamespaceToPythonModuleNameMap(
-      Map<String, String> smithyNamespaceToPythonModuleNameMap) {
-    SmithyNameResolver.smithyNamespaceToPythonModuleNameMap = smithyNamespaceToPythonModuleNameMap;
+    Map<String, String> smithyNamespaceToPythonModuleNameMap
+  ) {
+    SmithyNameResolver.smithyNamespaceToPythonModuleNameMap =
+      smithyNamespaceToPythonModuleNameMap;
   }
 
-  public static String getPythonModuleNameForSmithyNamespace(String smithyNamespace) {
+  public static String getPythonModuleNameForSmithyNamespace(
+    String smithyNamespace
+  ) {
     if (!smithyNamespaceToPythonModuleNameMap.containsKey(smithyNamespace)) {
-      throw new IllegalArgumentException("Python module name not found for Smithy namespace: " + smithyNamespace);
+      throw new IllegalArgumentException(
+        "Python module name not found for Smithy namespace: " + smithyNamespace
+      );
     }
     return smithyNamespaceToPythonModuleNameMap.get(smithyNamespace);
   }
@@ -89,9 +99,13 @@ public class SmithyNameResolver {
    */
   public static String clientNameForService(ServiceShape serviceShape) {
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-      return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Client";
+      return (
+        serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Client"
+      );
     } else {
-      throw new UnsupportedOperationException("Non-local services not supported");
+      throw new UnsupportedOperationException(
+        "Non-local services not supported"
+      );
     }
   }
 
@@ -104,9 +118,13 @@ public class SmithyNameResolver {
    */
   public static String shimNameForService(ServiceShape serviceShape) {
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-      return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Shim";
+      return (
+        serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Shim"
+      );
     } else {
-      throw new UnsupportedOperationException("Non-local services not supported");
+      throw new UnsupportedOperationException(
+        "Non-local services not supported"
+      );
     }
   }
 
@@ -117,7 +135,9 @@ public class SmithyNameResolver {
    * @param smithyNamespace
    * @return
    */
-  public static String getServiceSmithygeneratedDirectoryNameForNamespace(String smithyNamespace) {
+  public static String getServiceSmithygeneratedDirectoryNameForNamespace(
+    String smithyNamespace
+  ) {
     return smithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_");
   }
 
@@ -131,8 +151,13 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyGeneratedModelLocationForShape(
-      Shape shape, GenerationContext codegenContext) {
-    return getSmithyGeneratedModelLocationForShape(shape.getId(), codegenContext);
+    Shape shape,
+    GenerationContext codegenContext
+  ) {
+    return getSmithyGeneratedModelLocationForShape(
+      shape.getId(),
+      codegenContext
+    );
   }
 
   /**
@@ -145,11 +170,18 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyGeneratedModelLocationForShape(
-      ShapeId shapeId, GenerationContext codegenContext) {
+    ShapeId shapeId,
+    GenerationContext codegenContext
+  ) {
     String moduleNamespace =
-        getPythonModuleSmithygeneratedPathForSmithyNamespace(
-            shapeId.getNamespace(), codegenContext);
-    String moduleFilename = getSmithyGeneratedModuleFilenameForSmithyShape(shapeId, codegenContext);
+      getPythonModuleSmithygeneratedPathForSmithyNamespace(
+        shapeId.getNamespace(),
+        codegenContext
+      );
+    String moduleFilename = getSmithyGeneratedModuleFilenameForSmithyShape(
+      shapeId,
+      codegenContext
+    );
     return moduleNamespace + moduleFilename;
   }
 
@@ -163,7 +195,10 @@ public class SmithyNameResolver {
    * @param writer
    */
   public static void importSmithyGeneratedTypeForShape(
-      PythonWriter writer, Shape shape, GenerationContext codegenContext) {
+    PythonWriter writer,
+    Shape shape,
+    GenerationContext codegenContext
+  ) {
     importSmithyGeneratedTypeForShape(writer, shape.getId(), codegenContext);
   }
 
@@ -177,9 +212,16 @@ public class SmithyNameResolver {
    * @param writer
    */
   public static void importSmithyGeneratedTypeForShape(
-      PythonWriter writer, ShapeId shapeId, GenerationContext codegenContext) {
+    PythonWriter writer,
+    ShapeId shapeId,
+    GenerationContext codegenContext
+  ) {
     writer.addStdlibImport(
-        SmithyNameResolver.getSmithyGeneratedModelLocationForShape(shapeId, codegenContext));
+      SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
+        shapeId,
+        codegenContext
+      )
+    );
   }
 
   /**
@@ -190,8 +232,13 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyGeneratedModuleFilenameForSmithyShape(
-      Shape shape, GenerationContext codegenContext) {
-    return getSmithyGeneratedModuleFilenameForSmithyShape(shape.getId(), codegenContext);
+    Shape shape,
+    GenerationContext codegenContext
+  ) {
+    return getSmithyGeneratedModuleFilenameForSmithyShape(
+      shape.getId(),
+      codegenContext
+    );
   }
 
   /**
@@ -202,11 +249,15 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyGeneratedModuleFilenameForSmithyShape(
-      ShapeId shapeId, GenerationContext codegenContext) {
+    ShapeId shapeId,
+    GenerationContext codegenContext
+  ) {
     Shape shape = codegenContext.model().expectShape(shapeId);
-    if (shape.hasTrait(ReferenceTrait.class)
-        && shape.isServiceShape()
-        && shape.hasTrait(LocalServiceTrait.class)) {
+    if (
+      shape.hasTrait(ReferenceTrait.class) &&
+      shape.isServiceShape() &&
+      shape.hasTrait(LocalServiceTrait.class)
+    ) {
       // LocalService clients are generated at `my_module.smithygenerated.client`
       return ".client";
     } else if (shape.hasTrait(ErrorTrait.class)) {
@@ -230,8 +281,14 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyGeneratedTypeForUnion(
-      UnionShape unionShape, MemberShape memberShape, GenerationContext context) {
-    return unionShape.getId().getName() + StringUtils.capitalize(memberShape.getMemberName());
+    UnionShape unionShape,
+    MemberShape memberShape,
+    GenerationContext context
+  ) {
+    return (
+      unionShape.getId().getName() +
+      StringUtils.capitalize(memberShape.getMemberName())
+    );
   }
 
   /**
@@ -242,13 +299,16 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyGeneratedTypeForServiceError(
-          ServiceShape serviceShape) {
+    ServiceShape serviceShape
+  ) {
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       return serviceShape.getId().getName();
     } else if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
       return AwsSdkNameResolver.dependencyErrorNameForService(serviceShape);
     } else {
-      throw new IllegalArgumentException("Dependency MUST be a local service or AWS SDK shape: " + serviceShape);
+      throw new IllegalArgumentException(
+        "Dependency MUST be a local service or AWS SDK shape: " + serviceShape
+      );
     }
   }
 
@@ -261,9 +321,13 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(
-      String smithyNamespace, GenerationContext codegenContext) {
+    String smithyNamespace,
+    GenerationContext codegenContext
+  ) {
     return getPythonModuleSmithygeneratedPathForSmithyNamespace(
-        smithyNamespace, codegenContext.settings());
+      smithyNamespace,
+      codegenContext.settings()
+    );
   }
 
   /**
@@ -275,7 +339,9 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(
-      String smithyNamespace, PythonSettings settings) {
+    String smithyNamespace,
+    PythonSettings settings
+  ) {
     String pythonModuleName;
     String namespace;
     // `smithy.api.Unit:`
@@ -286,7 +352,8 @@ public class SmithyNameResolver {
       // and we need a mechanism to override the default modulename.
       // If the smithy.api namespace has a dependency-library-name mapping, use that.
       try {
-        pythonModuleName = getPythonModuleNameForSmithyNamespace(smithyNamespace);
+        pythonModuleName =
+          getPythonModuleNameForSmithyNamespace(smithyNamespace);
       } catch (IllegalArgumentException e) {
         // This is OK; just use the default module name
         pythonModuleName = settings.getModuleName();
@@ -296,7 +363,11 @@ public class SmithyNameResolver {
       pythonModuleName = getPythonModuleNameForSmithyNamespace(smithyNamespace);
       namespace = smithyNamespace;
     }
-    return pythonModuleName + ".smithygenerated." + getServiceSmithygeneratedDirectoryNameForNamespace(namespace);
+    return (
+      pythonModuleName +
+      ".smithygenerated." +
+      getServiceSmithygeneratedDirectoryNameForNamespace(namespace)
+    );
   }
 
   /**
@@ -311,9 +382,10 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getDafnyToSmithyFunctionNameForShape(
-      Shape shape, GenerationContext context) {
+    Shape shape,
+    GenerationContext context
+  ) {
     return getConversionFunctionNameForShape(shape, context);
-
   }
 
   /**
@@ -328,28 +400,39 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyToDafnyFunctionNameForShape(
-      Shape shape, GenerationContext context) {
+    Shape shape,
+    GenerationContext context
+  ) {
     return getConversionFunctionNameForShape(shape, context);
   }
 
-  public static String getConversionFunctionNameForShape(Shape shape, GenerationContext context) {
-    return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            shape.getId().getNamespace())
-            + "_"
-            + shape.getId().getName();
+  public static String getConversionFunctionNameForShape(
+    Shape shape,
+    GenerationContext context
+  ) {
+    return (
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        shape.getId().getNamespace()
+      ) +
+      "_" +
+      shape.getId().getName()
+    );
   }
 
-    /**
-     * Returns true if `shapeId` is a Smithy Unit shape.
-     *
-     * @param shapeId
-     * @return
-     */
-    public static boolean isUnitShape(ShapeId shapeId) {
-      return shapeId.getNamespace().equals("smithy.api") && shapeId.getName().equals("Unit");
-    }
+  /**
+   * Returns true if `shapeId` is a Smithy Unit shape.
+   *
+   * @param shapeId
+   * @return
+   */
+  public static boolean isUnitShape(ShapeId shapeId) {
+    return (
+      shapeId.getNamespace().equals("smithy.api") &&
+      shapeId.getName().equals("Unit")
+    );
+  }
 
-    private static boolean isUnitShape(Shape shape) {
-      return isUnitShape(shape.getId());
-    }
+  private static boolean isUnitShape(Shape shape) {
+    return isUnitShape(shape.getId());
+  }
 }

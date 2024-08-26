@@ -27,6 +27,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  * delegating conversions to functions that recurse at runtime, and not at code generation time.
  */
 public abstract class BaseConversionWriter {
+
   // Store the set of shapes for which the subclass has already generated conversion methods
   final Set<Shape> generatedShapes = new HashSet<>();
   // Queue of shapes to generate
@@ -55,8 +56,10 @@ public abstract class BaseConversionWriter {
    * @param writer
    */
   public void baseWriteConverterForShapeAndMembers(
-      Shape shape, GenerationContext context, PythonWriter writer) {
-
+    Shape shape,
+    GenerationContext context,
+    PythonWriter writer
+  ) {
     this.context = context;
     // Store where this is being written from where the original ShapeVisitor was dispatched (e.g.
     // serialize, shim);
@@ -65,11 +68,13 @@ public abstract class BaseConversionWriter {
     // Do NOT write any converters for wrapped localServices.
     // The wrapped localService should ONLY generate a Shim class.
     // The Shim will use the converters generated as part of the localService.
-    if (context
+    if (
+      context
         .applicationProtocol()
         .equals(
-            DafnyPythonWrappedLocalServiceProtocolGenerator
-                .DAFNY_PYTHON_WRAPPED_LOCAL_SERVICE_PROTOCOL)) {
+          DafnyPythonWrappedLocalServiceProtocolGenerator.DAFNY_PYTHON_WRAPPED_LOCAL_SERVICE_PROTOCOL
+        )
+    ) {
       return;
     }
 
@@ -94,18 +99,26 @@ public abstract class BaseConversionWriter {
         writeStructureShapeConverter(toGenerate.asStructureShape().get());
       } else if (toGenerate.isUnionShape()) {
         writeUnionShapeConverter(toGenerate.asUnionShape().get());
-      } else if (toGenerate.isStringShape() && toGenerate.hasTrait(EnumTrait.class)) {
+      } else if (
+        toGenerate.isStringShape() && toGenerate.hasTrait(EnumTrait.class)
+      ) {
         writeStringEnumShapeConverter(toGenerate.asStringShape().get());
       } else {
-        throw new IllegalArgumentException("Unsupported shape passed to ConversionWriter: " + toGenerate);
+        throw new IllegalArgumentException(
+          "Unsupported shape passed to ConversionWriter: " + toGenerate
+        );
       }
       generating = false;
     }
   }
 
-  protected abstract void writeStructureShapeConverter(StructureShape structureShape);
+  protected abstract void writeStructureShapeConverter(
+    StructureShape structureShape
+  );
 
   protected abstract void writeUnionShapeConverter(UnionShape unionShape);
 
-  protected abstract void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait);
+  protected abstract void writeStringEnumShapeConverter(
+    StringShape stringShapeWithEnumTrait
+  );
 }

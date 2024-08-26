@@ -26,9 +26,12 @@ import software.amazon.smithy.python.codegen.PythonSettings;
  * file as part of its Smithy codegen plugin.
  */
 public class DafnyPythonWrappedLocalServiceSymbolVisitor
-    extends DafnyPythonLocalServiceSymbolVisitor {
+  extends DafnyPythonLocalServiceSymbolVisitor {
 
-  public DafnyPythonWrappedLocalServiceSymbolVisitor(Model model, PythonSettings settings) {
+  public DafnyPythonWrappedLocalServiceSymbolVisitor(
+    Model model,
+    PythonSettings settings
+  ) {
     super(model, settings);
   }
 
@@ -39,18 +42,28 @@ public class DafnyPythonWrappedLocalServiceSymbolVisitor
    * @return
    */
   @Override
-  protected String getSymbolDefinitionFilePathForNamespaceAndFilename(String namespace, String filename) {
+  protected String getSymbolDefinitionFilePathForNamespaceAndFilename(
+    String namespace,
+    String filename
+  ) {
     String directoryFilePath;
     if ("smithy.api".equals(namespace)) {
       directoryFilePath =
-          SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-              settings.getService().getNamespace());
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+          settings.getService().getNamespace()
+        );
     } else {
       directoryFilePath =
-          SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(namespace);
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+          namespace
+        );
     }
 
     // Wrapped codegen deletes this file.
-    return format("%s/%s.py", directoryFilePath, WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME);
+    return format(
+      "%s/%s.py",
+      directoryFilePath,
+      WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+    );
   }
 }

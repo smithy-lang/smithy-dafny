@@ -29,20 +29,30 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 public class ShapeVisitorResolver {
 
   public static ShapeVisitor.Default<String> getToNativeShapeVisitorForShape(
-      Shape shape,
-      GenerationContext context,
-      String dataSource,
-      PythonWriter writer,
-      String filename) {
+    Shape shape,
+    GenerationContext context,
+    String dataSource,
+    PythonWriter writer,
+    String filename
+  ) {
     if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
       return new DafnyToAwsSdkShapeVisitor(context, dataSource, writer);
     } else {
-      return new DafnyToLocalServiceShapeVisitor(context, dataSource, writer, filename);
+      return new DafnyToLocalServiceShapeVisitor(
+        context,
+        dataSource,
+        writer,
+        filename
+      );
     }
   }
 
   public static ShapeVisitor.Default<String> getToNativeShapeVisitorForShape(
-      Shape shape, GenerationContext context, String dataSource, PythonWriter writer) {
+    Shape shape,
+    GenerationContext context,
+    String dataSource,
+    PythonWriter writer
+  ) {
     if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
       return new DafnyToAwsSdkShapeVisitor(context, dataSource, writer);
     } else {
@@ -51,20 +61,30 @@ public class ShapeVisitorResolver {
   }
 
   public static ShapeVisitor.Default<String> getToDafnyShapeVisitorForShape(
-      Shape shape,
-      GenerationContext context,
-      String dataSource,
-      PythonWriter writer,
-      String filename) {
+    Shape shape,
+    GenerationContext context,
+    String dataSource,
+    PythonWriter writer,
+    String filename
+  ) {
     if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
       return new AwsSdkToDafnyShapeVisitor(context, dataSource, writer);
     } else {
-      return new LocalServiceToDafnyShapeVisitor(context, dataSource, writer, filename);
+      return new LocalServiceToDafnyShapeVisitor(
+        context,
+        dataSource,
+        writer,
+        filename
+      );
     }
   }
 
   public static ShapeVisitor.Default<String> getToDafnyShapeVisitorForShape(
-      Shape shape, GenerationContext context, String dataSource, PythonWriter writer) {
+    Shape shape,
+    GenerationContext context,
+    String dataSource,
+    PythonWriter writer
+  ) {
     if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
       return new AwsSdkToDafnyShapeVisitor(context, dataSource, writer);
     } else {

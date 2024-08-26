@@ -33,32 +33,44 @@ public class ReferencesFileWriter implements CustomFileWriter {
   }
 
   public static boolean shouldGenerateResourceForShape(
-      ResourceShape resourceShape, GenerationContext codegenContext) {
-    return !hasGeneratedResourceForShape(resourceShape.getId())
-        && resourceShape
-            .getId()
-            .getNamespace()
-            .equals(codegenContext.settings().getService().getNamespace());
+    ResourceShape resourceShape,
+    GenerationContext codegenContext
+  ) {
+    return (
+      !hasGeneratedResourceForShape(resourceShape.getId()) &&
+      resourceShape
+        .getId()
+        .getNamespace()
+        .equals(codegenContext.settings().getService().getNamespace())
+    );
   }
 
   public void generateResourceInterfaceAndImplementation(
-      ResourceShape resourceShape, GenerationContext codegenContext, PythonWriter writer) {
+    ResourceShape resourceShape,
+    GenerationContext codegenContext,
+    PythonWriter writer
+  ) {
     if (shouldGenerateResourceForShape(resourceShape, codegenContext)) {
       generatedResourceShapes.add(resourceShape.getId());
       if (resourceShape.hasTrait(ExtendableTrait.class)) {
-          generateResourceInterface(resourceShape, codegenContext, writer);
+        generateResourceInterface(resourceShape, codegenContext, writer);
       }
       generateResourceImplementation(resourceShape, codegenContext, writer);
     }
   }
 
   protected void generateResourceInterface(
-      ResourceShape resourceShape, GenerationContext context, PythonWriter writer) {
+    ResourceShape resourceShape,
+    GenerationContext context,
+    PythonWriter writer
+  ) {
     // Only generate resources in the service namespace
-    if (!resourceShape
+    if (
+      !resourceShape
         .getId()
         .getNamespace()
-        .equals(context.settings().getService().getNamespace())) {
+        .equals(context.settings().getService().getNamespace())
+    ) {
       return;
     }
     // Write reference interface.
@@ -76,77 +88,113 @@ public class ReferencesFileWriter implements CustomFileWriter {
     // This is opinionated and may change.
     writer.addStdlibImport("abc");
     writer.write(
-        """
+      """
 
-            class I$L(metaclass=abc.ABCMeta):
-                ${C|}
-                @classmethod
-                def __subclasshook__(cls, subclass):
-                    return (
-                        ${C|}
-                    )
+      class I$L(metaclass=abc.ABCMeta):
+          ${C|}
+          @classmethod
+          def __subclasshook__(cls, subclass):
+              return (
+                  ${C|}
+              )
 
-                ${C|}
+          ${C|}
 
-                ${C|}
+          ${C|}
 
 
-            """,
-        resourceShape.getId().getName(),
-        writer.consumer(w -> writeDocsForResourceOrInterfaceClass(writer, resourceShape, context)),
-        writer.consumer(
-            w -> generateInterfaceSubclasshookExpressionForResource(context, resourceShape, w)),
-        writer.consumer(
-            w ->
-                generateInterfaceOperationFunctionDefinitionForResource(context, resourceShape, w)),
-        writer.consumer(
-            w -> generateNativeWrapperFunctionDefinitionForResource(context, resourceShape, w)));
+      """,
+      resourceShape.getId().getName(),
+      writer.consumer(w ->
+        writeDocsForResourceOrInterfaceClass(writer, resourceShape, context)
+      ),
+      writer.consumer(w ->
+        generateInterfaceSubclasshookExpressionForResource(
+          context,
+          resourceShape,
+          w
+        )
+      ),
+      writer.consumer(w ->
+        generateInterfaceOperationFunctionDefinitionForResource(
+          context,
+          resourceShape,
+          w
+        )
+      ),
+      writer.consumer(w ->
+        generateNativeWrapperFunctionDefinitionForResource(
+          context,
+          resourceShape,
+          w
+        )
+      )
+    );
 
     writer.addStdlibImport("typing", "Any");
   }
 
   protected void generateResourceImplementation(
-      ResourceShape resourceShape, GenerationContext context, PythonWriter writer) {
+    ResourceShape resourceShape,
+    GenerationContext context,
+    PythonWriter writer
+  ) {
     // Only generate resources in the service namespace
-    if (!resourceShape
+    if (
+      !resourceShape
         .getId()
         .getNamespace()
-        .equals(context.settings().getService().getNamespace())) {
+        .equals(context.settings().getService().getNamespace())
+    ) {
       return;
     }
 
     String dafnyInterfaceTypeName =
-        DafnyNameResolver.getDafnyInterfaceTypeForResourceShape(resourceShape);
+      DafnyNameResolver.getDafnyInterfaceTypeForResourceShape(resourceShape);
     writer.addStdlibImport(
-        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceShape, context));
+      DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
+        resourceShape,
+        context
+      )
+    );
 
     // Write implementation for resource shape
     writer.write(
-        """
-        class $1L$6L:
-            ${5C|}
-            _impl: $2L
+      """
+      class $1L$6L:
+          ${5C|}
+          _impl: $2L
 
-            def __init__(self, _impl: $2L):
-                self._impl = _impl
+          def __init__(self, _impl: $2L):
+              self._impl = _impl
 
-            ${3C|}
+          ${3C|}
 
-            ${4C|}
-        """,
-        resourceShape.getId().getName(),
-        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceShape, context)
-            + "."
-            + dafnyInterfaceTypeName,
-        writer.consumer(
-            w -> generateSmithyOperationFunctionDefinitionForResource(context, resourceShape, w)),
-        writer.consumer(w -> generateDictConvertersForResource(resourceShape, w)),
-        writer.consumer(w -> writeDocsForResourceOrInterfaceClass(w, resourceShape, context)),
-        // Only extend interface if extendable;
-        // otherwise doesn't extend anything
-        resourceShape.hasTrait(ExtendableTrait.class)
-            ? "(I%1$s)".formatted(resourceShape.getId().getName())
-            : ""
+          ${4C|}
+      """,
+      resourceShape.getId().getName(),
+      DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
+        resourceShape,
+        context
+      ) +
+      "." +
+      dafnyInterfaceTypeName,
+      writer.consumer(w ->
+        generateSmithyOperationFunctionDefinitionForResource(
+          context,
+          resourceShape,
+          w
+        )
+      ),
+      writer.consumer(w -> generateDictConvertersForResource(resourceShape, w)),
+      writer.consumer(w ->
+        writeDocsForResourceOrInterfaceClass(w, resourceShape, context)
+      ),
+      // Only extend interface if extendable;
+      // otherwise doesn't extend anything
+      resourceShape.hasTrait(ExtendableTrait.class)
+        ? "(I%1$s)".formatted(resourceShape.getId().getName())
+        : ""
     );
   }
 
@@ -159,9 +207,14 @@ public class ReferencesFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateInterfaceSubclasshookExpressionForResource(
-      GenerationContext codegenContext, ResourceShape resourceShape, PythonWriter writer) {
-
-    List<ShapeId> operationList = resourceShape.getOperations().stream().toList();
+    GenerationContext codegenContext,
+    ResourceShape resourceShape,
+    PythonWriter writer
+  ) {
+    List<ShapeId> operationList = resourceShape
+      .getOperations()
+      .stream()
+      .toList();
     Iterator<ShapeId> operationListIterator = operationList.iterator();
 
     // For all but the last operation shape, generate `hasattr and callable and`
@@ -169,10 +222,11 @@ public class ReferencesFileWriter implements CustomFileWriter {
     while (operationListIterator.hasNext()) {
       ShapeId operationShapeId = operationListIterator.next();
       writer.writeInline(
-          """
-              hasattr(subclass, "$L") and callable(subclass.$L)""",
-          operationShapeId.getName(),
-          operationShapeId.getName());
+        """
+        hasattr(subclass, "$L") and callable(subclass.$L)""",
+        operationShapeId.getName(),
+        operationShapeId.getName()
+      );
       if (operationListIterator.hasNext()) {
         writer.write(" and");
       }
@@ -188,38 +242,62 @@ public class ReferencesFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateInterfaceOperationFunctionDefinitionForResource(
-      GenerationContext codegenContext, ResourceShape resourceShape, PythonWriter writer) {
+    GenerationContext codegenContext,
+    ResourceShape resourceShape,
+    PythonWriter writer
+  ) {
     Set<ShapeId> operationShapeIds = resourceShape.getOperations();
 
     for (ShapeId operationShapeId : operationShapeIds) {
       writer.write("@abc.abstractmethod");
 
-      OperationShape operationShape =
-          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+      OperationShape operationShape = codegenContext
+        .model()
+        .expectShape(operationShapeId, OperationShape.class);
 
-      Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
+      Shape targetShapeInput = codegenContext
+        .model()
+        .expectShape(operationShape.getInputShape());
       SmithyNameResolver.importSmithyGeneratedTypeForShape(
-          writer, targetShapeInput, codegenContext);
-      Symbol inputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeInput);
+        writer,
+        targetShapeInput,
+        codegenContext
+      );
+      Symbol inputSymbol = codegenContext
+        .symbolProvider()
+        .toSymbol(targetShapeInput);
 
-      Shape targetShapeOutput = codegenContext.model().expectShape(operationShape.getOutputShape());
+      Shape targetShapeOutput = codegenContext
+        .model()
+        .expectShape(operationShape.getOutputShape());
       SmithyNameResolver.importSmithyGeneratedTypeForShape(
-          writer, targetShapeOutput, codegenContext);
-      Symbol outputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeOutput);
+        writer,
+        targetShapeOutput,
+        codegenContext
+      );
+      Symbol outputSymbol = codegenContext
+        .symbolProvider()
+        .toSymbol(targetShapeOutput);
 
       writer.openBlock(
-          "def $L(self, param: '$L') -> '$L':",
-          "",
-          CaseUtils.toSnakeCase(operationShapeId.getName()),
-          inputSymbol,
-          outputSymbol,
-          () -> {
-            writeDocsForResourceOrInterfaceOperation(
-                writer,
-                codegenContext.model().expectShape(operationShapeId).asOperationShape().get(),
-                codegenContext);
-            writer.write("raise NotImplementedError");
-          });
+        "def $L(self, param: '$L') -> '$L':",
+        "",
+        CaseUtils.toSnakeCase(operationShapeId.getName()),
+        inputSymbol,
+        outputSymbol,
+        () -> {
+          writeDocsForResourceOrInterfaceOperation(
+            writer,
+            codegenContext
+              .model()
+              .expectShape(operationShapeId)
+              .asOperationShape()
+              .get(),
+            codegenContext
+          );
+          writer.write("raise NotImplementedError");
+        }
+      );
 
       writer.addStdlibImport(inputSymbol.getNamespace());
       writer.addStdlibImport(outputSymbol.getNamespace());
@@ -235,33 +313,58 @@ public class ReferencesFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateNativeWrapperFunctionDefinitionForResource(
-      GenerationContext codegenContext, ResourceShape resourceShape, PythonWriter writer) {
+    GenerationContext codegenContext,
+    ResourceShape resourceShape,
+    PythonWriter writer
+  ) {
     Set<ShapeId> operationShapeIds = resourceShape.getOperations();
 
     for (ShapeId operationShapeId : operationShapeIds) {
-      OperationShape operationShape =
-          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+      OperationShape operationShape = codegenContext
+        .model()
+        .expectShape(operationShapeId, OperationShape.class);
 
-      Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
+      Shape targetShapeInput = codegenContext
+        .model()
+        .expectShape(operationShape.getInputShape());
       SmithyNameResolver.importSmithyGeneratedTypeForShape(
-          writer, targetShapeInput, codegenContext);
+        writer,
+        targetShapeInput,
+        codegenContext
+      );
 
-      String dafnyInput = DafnyNameResolver.getDafnyTypeForShape(targetShapeInput);
-      DafnyNameResolver.importDafnyTypeForShape(writer, targetShapeInput.getId(), codegenContext);
+      String dafnyInput = DafnyNameResolver.getDafnyTypeForShape(
+        targetShapeInput
+      );
+      DafnyNameResolver.importDafnyTypeForShape(
+        writer,
+        targetShapeInput.getId(),
+        codegenContext
+      );
 
-      Shape targetShapeOutput = codegenContext.model().expectShape(operationShape.getOutputShape());
+      Shape targetShapeOutput = codegenContext
+        .model()
+        .expectShape(operationShape.getOutputShape());
       SmithyNameResolver.importSmithyGeneratedTypeForShape(
-          writer, targetShapeOutput, codegenContext);
+        writer,
+        targetShapeOutput,
+        codegenContext
+      );
 
-      String dafnyOutput = DafnyNameResolver.getDafnyTypeForShape(targetShapeOutput);
-      DafnyNameResolver.importDafnyTypeForShape(writer, targetShapeOutput.getId(), codegenContext);
+      String dafnyOutput = DafnyNameResolver.getDafnyTypeForShape(
+        targetShapeOutput
+      );
+      DafnyNameResolver.importDafnyTypeForShape(
+        writer,
+        targetShapeOutput.getId(),
+        codegenContext
+      );
 
-      ServiceShape serviceShape =
-          codegenContext
-              .model()
-              .expectShape(codegenContext.settings().getService())
-              .asServiceShape()
-              .get();
+      ServiceShape serviceShape = codegenContext
+        .model()
+        .expectShape(codegenContext.settings().getService())
+        .asServiceShape()
+        .get();
       List<ShapeId> serviceDependencyErrors = serviceShape.getErrors();
       // Services don't specify a "default" error.
       // Pick the first one off its list of errors.
@@ -269,55 +372,72 @@ public class ReferencesFileWriter implements CustomFileWriter {
       // extend well.
       // This will need to be updated.
       if (serviceDependencyErrors.size() > 1) {
-          throw new IllegalArgumentException(
-                  "Only 1 service-modelled error per service supported");
+        throw new IllegalArgumentException(
+          "Only 1 service-modelled error per service supported"
+        );
       }
 
-        writer.addStdlibImport(SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-            serviceShape.getId().getNamespace(), codegenContext.settings()) + ".errors",
-            "_smithy_error_to_dafny_error"
-        );
+      writer.addStdlibImport(
+        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+          serviceShape.getId().getNamespace(),
+          codegenContext.settings()
+        ) +
+        ".errors",
+        "_smithy_error_to_dafny_error"
+      );
 
       writer.openBlock(
-          "def $L(self, dafny_input: '$L') -> '$L':",
-          "",
-          operationShapeId.getName(),
-          dafnyInput,
-          dafnyOutput,
-          () -> {
-            writer.write(
-                """
-                        ""\"
-                        Do not use.
-                        This method allows custom implementations of this interface to interact with generated code.
-                        ""\"
-                        native_input = $L(
-                            dafny_input
-                        )
-                        try:
-                            native_output = self.$L(native_input)
-                            dafny_output = $L(
-                                native_output
-                            )
-                            return Wrappers.Result_Success(dafny_output)
-                        except Exception as e:
-                            error = _smithy_error_to_dafny_error(e)
-                            return Wrappers.Result_Failure(error)
-                        """,
-                SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                        targetShapeInput.getId().getNamespace(), codegenContext)
-                    + ".dafny_to_smithy."
-                    + SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(
-                        targetShapeInput, codegenContext),
-                CaseUtils.toSnakeCase(operationShapeId.getName()),
-                SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                        targetShapeOutput.getId().getNamespace(), codegenContext)
-                    + ".smithy_to_dafny."
-                    + SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(
-                        targetShapeOutput, codegenContext)
-                );
-            writer.addStdlibImport("standard_library.internaldafny.generated", "Wrappers");
-          });
+        "def $L(self, dafny_input: '$L') -> '$L':",
+        "",
+        operationShapeId.getName(),
+        dafnyInput,
+        dafnyOutput,
+        () -> {
+          writer.write(
+            """
+            ""\"
+            Do not use.
+            This method allows custom implementations of this interface to interact with generated code.
+            ""\"
+            native_input = $L(
+                dafny_input
+            )
+            try:
+                native_output = self.$L(native_input)
+                dafny_output = $L(
+                    native_output
+                )
+                return Wrappers.Result_Success(dafny_output)
+            except Exception as e:
+                error = _smithy_error_to_dafny_error(e)
+                return Wrappers.Result_Failure(error)
+            """,
+            SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+              targetShapeInput.getId().getNamespace(),
+              codegenContext
+            ) +
+            ".dafny_to_smithy." +
+            SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(
+              targetShapeInput,
+              codegenContext
+            ),
+            CaseUtils.toSnakeCase(operationShapeId.getName()),
+            SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+              targetShapeOutput.getId().getNamespace(),
+              codegenContext
+            ) +
+            ".smithy_to_dafny." +
+            SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(
+              targetShapeOutput,
+              codegenContext
+            )
+          );
+          writer.addStdlibImport(
+            "standard_library.internaldafny.generated",
+            "Wrappers"
+          );
+        }
+      );
     }
   }
 
@@ -333,127 +453,181 @@ public class ReferencesFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateSmithyOperationFunctionDefinitionForResource(
-      GenerationContext codegenContext, ResourceShape resourceShape, PythonWriter writer) {
+    GenerationContext codegenContext,
+    ResourceShape resourceShape,
+    PythonWriter writer
+  ) {
     Set<ShapeId> operationShapeIds = resourceShape.getOperations();
 
     for (ShapeId operationShapeId : operationShapeIds) {
-      OperationShape operationShape =
-          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
-      Symbol operationSymbol = codegenContext.symbolProvider().toSymbol(operationShape);
+      OperationShape operationShape = codegenContext
+        .model()
+        .expectShape(operationShapeId, OperationShape.class);
+      Symbol operationSymbol = codegenContext
+        .symbolProvider()
+        .toSymbol(operationShape);
 
-      Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
+      Shape targetShapeInput = codegenContext
+        .model()
+        .expectShape(operationShape.getInputShape());
       SmithyNameResolver.importSmithyGeneratedTypeForShape(
-          writer, targetShapeInput, codegenContext);
+        writer,
+        targetShapeInput,
+        codegenContext
+      );
       // Generate code that converts the input from the Dafny type to the corresponding Smithy type
-      String input =
-          targetShapeInput.accept(
-              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
-                  targetShapeInput, codegenContext, "param", writer));
-      Symbol inputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeInput);
+      String input = targetShapeInput.accept(
+        ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
+          targetShapeInput,
+          codegenContext,
+          "param",
+          writer
+        )
+      );
+      Symbol inputSymbol = codegenContext
+        .symbolProvider()
+        .toSymbol(targetShapeInput);
 
-      Shape targetShapeOutput = codegenContext.model().expectShape(operationShape.getOutputShape());
+      Shape targetShapeOutput = codegenContext
+        .model()
+        .expectShape(operationShape.getOutputShape());
       SmithyNameResolver.importSmithyGeneratedTypeForShape(
-          writer, targetShapeOutput, codegenContext);
+        writer,
+        targetShapeOutput,
+        codegenContext
+      );
       // Generate output code converting the return value of the Dafny implementation into
       // its corresponding native-modelled type.
-      String output =
-          targetShapeOutput.accept(
-              ShapeVisitorResolver.getToNativeShapeVisitorForShape(
-                  targetShapeOutput, codegenContext, "dafny_output.value", writer));
+      String output = targetShapeOutput.accept(
+        ShapeVisitorResolver.getToNativeShapeVisitorForShape(
+          targetShapeOutput,
+          codegenContext,
+          "dafny_output.value",
+          writer
+        )
+      );
 
-      Symbol outputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeOutput);
+      Symbol outputSymbol = codegenContext
+        .symbolProvider()
+        .toSymbol(targetShapeOutput);
 
       writer.openBlock(
-          "def $L(self, param: '$L') -> '$L':",
-          "",
-          CaseUtils.toSnakeCase(operationShapeId.getName()),
-          inputSymbol,
-          outputSymbol,
-          () -> {
-            writeDocsForResourceOrInterfaceOperation(writer, operationShape, codegenContext);
+        "def $L(self, param: '$L') -> '$L':",
+        "",
+        CaseUtils.toSnakeCase(operationShapeId.getName()),
+        inputSymbol,
+        outputSymbol,
+        () -> {
+          writeDocsForResourceOrInterfaceOperation(
+            writer,
+            operationShape,
+            codegenContext
+          );
 
-            writer.write("dafny_output = self._impl.$L($L)", operationShapeId.getName(), input);
-            writer.openBlock(
-                "if dafny_output.IsFailure():",
-                "",
-                () -> {
-                  // Import inline to avoid circular dependency
-                  writer.write(
-                      "from $L import $L as $L",
-                      //                        writer.addStdlibImport(
-                      // `from dependency.smithygenerated.deserialize`
-                      SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                              targetShapeOutput.getId().getNamespace(), codegenContext)
-                          + ".deserialize",
-                      // `import _deserialize_error`
-                      "_deserialize_error",
-                      // `as dependency_deserialize_error`
-                      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-                              targetShapeOutput.getId().getNamespace())
-                          + "_deserialize_error");
-                  writer.write(
-                      "raise $L(dafny_output.error)",
-                      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-                              targetShapeOutput.getId().getNamespace())
-                          + "_deserialize_error");
-                });
-            writer.openBlock("else:", "", () -> writer.write("return $L", output));
-          });
+          writer.write(
+            "dafny_output = self._impl.$L($L)",
+            operationShapeId.getName(),
+            input
+          );
+          writer.openBlock(
+            "if dafny_output.IsFailure():",
+            "",
+            () -> {
+              // Import inline to avoid circular dependency
+              writer.write(
+                "from $L import $L as $L",
+                //                        writer.addStdlibImport(
+                // `from dependency.smithygenerated.deserialize`
+                SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                  targetShapeOutput.getId().getNamespace(),
+                  codegenContext
+                ) +
+                ".deserialize",
+                // `import _deserialize_error`
+                "_deserialize_error",
+                // `as dependency_deserialize_error`
+                SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                  targetShapeOutput.getId().getNamespace()
+                ) +
+                "_deserialize_error"
+              );
+              writer.write(
+                "raise $L(dafny_output.error)",
+                SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                  targetShapeOutput.getId().getNamespace()
+                ) +
+                "_deserialize_error"
+              );
+            }
+          );
+          writer.openBlock(
+            "else:",
+            "",
+            () -> writer.write("return $L", output)
+          );
+        }
+      );
       writer.addStdlibImport(inputSymbol.getNamespace());
       writer.addStdlibImport(outputSymbol.getNamespace());
     }
   }
 
   private void writeDocsForResourceOrInterfaceClass(
-      PythonWriter writer, ResourceShape resourceShape, GenerationContext context) {
-
+    PythonWriter writer,
+    ResourceShape resourceShape,
+    GenerationContext context
+  ) {
     if (resourceShape.getTrait(DocumentationTrait.class).isPresent()) {
-      writer.writeDocs(
-          () -> {
-            resourceShape
-                .getTrait(DocumentationTrait.class)
-                .ifPresent(
-                    trait -> {
-                      writer.write(writer.formatDocs(trait.getValue()));
-                    });
+      writer.writeDocs(() -> {
+        resourceShape
+          .getTrait(DocumentationTrait.class)
+          .ifPresent(trait -> {
+            writer.write(writer.formatDocs(trait.getValue()));
           });
+      });
     }
   }
 
   private void writeDocsForResourceOrInterfaceOperation(
-      PythonWriter writer, OperationShape operationShape, GenerationContext context) {
+    PythonWriter writer,
+    OperationShape operationShape,
+    GenerationContext context
+  ) {
+    Shape inputShape = context
+      .model()
+      .expectShape(operationShape.getInputShape());
+    Shape outputShape = context
+      .model()
+      .expectShape(operationShape.getOutputShape());
 
-    Shape inputShape = context.model().expectShape(operationShape.getInputShape());
-    Shape outputShape = context.model().expectShape(operationShape.getOutputShape());
-
-    if (operationShape.getTrait(DocumentationTrait.class).isPresent()
-        || inputShape.getTrait(DocumentationTrait.class).isPresent()
-        || outputShape.getTrait(DocumentationTrait.class).isPresent()) {
-      writer.writeDocs(
-          () -> {
-            operationShape
-                .getTrait(DocumentationTrait.class)
-                .ifPresent(
-                    trait -> {
-                      writer.write(writer.formatDocs(trait.getValue()));
-                    });
-            inputShape
-                .getTrait(DocumentationTrait.class)
-                .ifPresent(
-                    trait -> {
-                      String memberDocs =
-                          writer.formatDocs(String.format(":param param: %s", trait.getValue()));
-                      writer.write(memberDocs);
-                    });
-            outputShape
-                .getTrait(DocumentationTrait.class)
-                .ifPresent(
-                    trait -> {
-                      String memberDocs =
-                          writer.formatDocs(String.format(":returns: %s", trait.getValue()));
-                      writer.write(memberDocs);
-                    });
+    if (
+      operationShape.getTrait(DocumentationTrait.class).isPresent() ||
+      inputShape.getTrait(DocumentationTrait.class).isPresent() ||
+      outputShape.getTrait(DocumentationTrait.class).isPresent()
+    ) {
+      writer.writeDocs(() -> {
+        operationShape
+          .getTrait(DocumentationTrait.class)
+          .ifPresent(trait -> {
+            writer.write(writer.formatDocs(trait.getValue()));
           });
+        inputShape
+          .getTrait(DocumentationTrait.class)
+          .ifPresent(trait -> {
+            String memberDocs = writer.formatDocs(
+              String.format(":param param: %s", trait.getValue())
+            );
+            writer.write(memberDocs);
+          });
+        outputShape
+          .getTrait(DocumentationTrait.class)
+          .ifPresent(trait -> {
+            String memberDocs = writer.formatDocs(
+              String.format(":returns: %s", trait.getValue())
+            );
+            writer.write(memberDocs);
+          });
+      });
     }
   }
 
@@ -464,25 +638,29 @@ public class ReferencesFileWriter implements CustomFileWriter {
    * @param resource
    * @param writer
    */
-  private void generateDictConvertersForResource(Shape resource, PythonWriter writer) {
-
+  private void generateDictConvertersForResource(
+    Shape resource,
+    PythonWriter writer
+  ) {
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Any");
 
     writer.write("@staticmethod");
     writer.openBlock(
-        "def from_dict(d: Dict[str, Any]) -> '$L':",
-        "",
-        resource.getId().getName(),
-        () -> {
-          writer.write("return $L(d['_impl'])", resource.getId().getName());
-        });
+      "def from_dict(d: Dict[str, Any]) -> '$L':",
+      "",
+      resource.getId().getName(),
+      () -> {
+        writer.write("return $L(d['_impl'])", resource.getId().getName());
+      }
+    );
 
     writer.openBlock(
-        "def as_dict(self) -> Dict[str, Any]:",
-        "",
-        () -> {
-          writer.write("return {'_impl': self._impl}");
-        });
+      "def as_dict(self) -> Dict[str, Any]:",
+      "",
+      () -> {
+        writer.write("return {'_impl': self._impl}");
+      }
+    );
   }
 }

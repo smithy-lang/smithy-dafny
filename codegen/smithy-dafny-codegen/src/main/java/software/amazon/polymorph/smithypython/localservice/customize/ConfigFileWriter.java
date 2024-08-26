@@ -30,75 +30,106 @@ public class ConfigFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
-      ServiceShape serviceShape, GenerationContext codegenContext) {
-    final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
-    final StructureShape configShape =
-        codegenContext.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
+    ServiceShape serviceShape,
+    GenerationContext codegenContext
+  ) {
+    final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(
+      LocalServiceTrait.class
+    );
+    final StructureShape configShape = codegenContext
+      .model()
+      .expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
     String moduleName =
-        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            codegenContext.settings().getService().getNamespace());
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        codegenContext.settings().getService().getNamespace()
+      );
     codegenContext
-        .writerDelegator()
-        .useFileWriter(
-            moduleName + "/config.py",
-            "",
-            writer -> {
+      .writerDelegator()
+      .useFileWriter(
+        moduleName + "/config.py",
+        "",
+        writer -> {
+          DafnyNameResolver.importDafnyTypeForShape(
+            writer,
+            configShape.getId(),
+            codegenContext
+          );
 
-              DafnyNameResolver.importDafnyTypeForShape(
-                  writer, configShape.getId(), codegenContext);
+          writer.write(
+            """
+            class $L(Config):
+                ""\"
+                Smithy-modelled localService Config shape for this localService.
+                ""\"
+                ${C|}
 
-              writer.write(
-                  """
-              class $L(Config):
-                  ""\"
-                  Smithy-modelled localService Config shape for this localService.
-                  ""\"
-                  ${C|}
+                def __init__(
+                    self,
+                    ${C|}
+                ):
+                    ${C|}
+                    super().__init__()
+                    ${C|}
 
-                  def __init__(
-                      self,
-                      ${C|}
-                  ):
-                      ${C|}
-                      super().__init__()
-                      ${C|}
+            def dafny_config_to_smithy_config(dafny_config) -> $L:
+                ""\"
+                Converts the provided Dafny shape for this localService's config
+                into the corresponding Smithy-modelled shape.
+                ""\"
+                ${C|}
 
-              def dafny_config_to_smithy_config(dafny_config) -> $L:
-                  ""\"
-                  Converts the provided Dafny shape for this localService's config
-                  into the corresponding Smithy-modelled shape.
-                  ""\"
-                  ${C|}
-
-              def smithy_config_to_dafny_config(smithy_config) -> $L:
-                  ""\"
-                  Converts the provided Smithy-modelled shape for this localService's config
-                  into the corresponding Dafny shape.
-                  ""\"
-                  ${C|}
-              """,
-                  configShape.getId().getName(),
-                  writer.consumer(w -> generateConfigClassFields(configShape, codegenContext, w)),
-                  writer.consumer(
-                      w -> generateConfigConstructorParameters(configShape, codegenContext, w)),
-                  writer.consumer(
-                      w -> generateConfigConstructorDocumentation(configShape, codegenContext, w)),
-                  writer.consumer(
-                      w ->
-                          generateConfigConstructorFieldAssignments(
-                              configShape, codegenContext, w)),
-                  configShape.getId().getName(),
-                  writer.consumer(
-                      w ->
-                          generateDafnyConfigToSmithyConfigFunctionBody(
-                              configShape, codegenContext, w)),
-                  DafnyNameResolver.getDafnyTypeForShape(configShape.getId()),
-                  writer.consumer(
-                      w ->
-                          generateSmithyConfigToDafnyConfigFunctionBody(
-                              configShape, codegenContext, w)));
-            });
+            def smithy_config_to_dafny_config(smithy_config) -> $L:
+                ""\"
+                Converts the provided Smithy-modelled shape for this localService's config
+                into the corresponding Dafny shape.
+                ""\"
+                ${C|}
+            """,
+            configShape.getId().getName(),
+            writer.consumer(w ->
+              generateConfigClassFields(configShape, codegenContext, w)
+            ),
+            writer.consumer(w ->
+              generateConfigConstructorParameters(
+                configShape,
+                codegenContext,
+                w
+              )
+            ),
+            writer.consumer(w ->
+              generateConfigConstructorDocumentation(
+                configShape,
+                codegenContext,
+                w
+              )
+            ),
+            writer.consumer(w ->
+              generateConfigConstructorFieldAssignments(
+                configShape,
+                codegenContext,
+                w
+              )
+            ),
+            configShape.getId().getName(),
+            writer.consumer(w ->
+              generateDafnyConfigToSmithyConfigFunctionBody(
+                configShape,
+                codegenContext,
+                w
+              )
+            ),
+            DafnyNameResolver.getDafnyTypeForShape(configShape.getId()),
+            writer.consumer(w ->
+              generateSmithyConfigToDafnyConfigFunctionBody(
+                configShape,
+                codegenContext,
+                w
+              )
+            )
+          );
+        }
+      );
   }
 
   /**
@@ -110,18 +141,36 @@ public class ConfigFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateConfigClassFields(
-      StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
+    StructureShape configShape,
+    GenerationContext codegenContext,
+    PythonWriter writer
+  ) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
     NullableIndex index = NullableIndex.of(codegenContext.model());
-    for (Entry<String, MemberShape> memberShapeEntry : memberShapeSet.entrySet()) {
+    for (Entry<
+      String,
+      MemberShape
+    > memberShapeEntry : memberShapeSet.entrySet()) {
       MemberShape memberShape = memberShapeEntry.getValue();
-      final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
-      Symbol targetShapeSymbol = codegenContext.symbolProvider().toSymbol(targetShape);
+      final Shape targetShape = codegenContext
+        .model()
+        .expectShape(memberShape.getTarget());
+      Symbol targetShapeSymbol = codegenContext
+        .symbolProvider()
+        .toSymbol(targetShape);
       if (index.isMemberNullable(memberShape)) {
         writer.addStdlibImport("typing", "Optional");
-        writer.write("$L: Optional[$T]", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+        writer.write(
+          "$L: Optional[$T]",
+          CaseUtils.toSnakeCase(memberShape.getMemberName()),
+          targetShapeSymbol
+        );
       } else {
-        writer.write("$L: $T", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+        writer.write(
+          "$L: $T",
+          CaseUtils.toSnakeCase(memberShape.getMemberName()),
+          targetShapeSymbol
+        );
       }
     }
   }
@@ -135,17 +184,32 @@ public class ConfigFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateConfigConstructorParameters(
-      StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
+    StructureShape configShape,
+    GenerationContext codegenContext,
+    PythonWriter writer
+  ) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
     NullableIndex index = NullableIndex.of(codegenContext.model());
     for (MemberShape memberShape : memberShapeSet.values()) {
-      final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
-      Symbol targetShapeSymbol = codegenContext.symbolProvider().toSymbol(targetShape);
+      final Shape targetShape = codegenContext
+        .model()
+        .expectShape(memberShape.getTarget());
+      Symbol targetShapeSymbol = codegenContext
+        .symbolProvider()
+        .toSymbol(targetShape);
       if (index.isMemberNullable(memberShape)) {
         writer.addStdlibImport("typing", "Optional");
-        writer.write("$L: Optional[$T] = None,", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+        writer.write(
+          "$L: Optional[$T] = None,",
+          CaseUtils.toSnakeCase(memberShape.getMemberName()),
+          targetShapeSymbol
+        );
       } else {
-        writer.write("$L: $T,", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+        writer.write(
+          "$L: $T,",
+          CaseUtils.toSnakeCase(memberShape.getMemberName()),
+          targetShapeSymbol
+        );
       }
     }
   }
@@ -159,19 +223,31 @@ public class ConfigFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateConfigConstructorDocumentation(
-          StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
+    StructureShape configShape,
+    GenerationContext codegenContext,
+    PythonWriter writer
+  ) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
-      writer.writeDocs(() -> {
-        var constructorDocs = configShape.getTrait(DocumentationTrait.class)
-                .map(StringTrait::getValue)
-                .orElse(String.format("Constructor for %s.", configShape.getId().getName()));
-        writer.write(constructorDocs + "\n");
+    writer.writeDocs(() -> {
+      var constructorDocs = configShape
+        .getTrait(DocumentationTrait.class)
+        .map(StringTrait::getValue)
+        .orElse(
+          String.format("Constructor for %s.", configShape.getId().getName())
+        );
+      writer.write(constructorDocs + "\n");
       for (MemberShape memberShape : memberShapeSet.values()) {
-        memberShape.getMemberTrait(codegenContext.model(), DocumentationTrait.class).ifPresent(trait -> {
-          String memberName = codegenContext.symbolProvider().toMemberName(memberShape);
-          String memberDocs = writer.formatDocs(String.format(":param %s: %s", memberName, trait.getValue()));
-          writer.write(memberDocs);
-        });
+        memberShape
+          .getMemberTrait(codegenContext.model(), DocumentationTrait.class)
+          .ifPresent(trait -> {
+            String memberName = codegenContext
+              .symbolProvider()
+              .toMemberName(memberShape);
+            String memberDocs = writer.formatDocs(
+              String.format(":param %s: %s", memberName, trait.getValue())
+            );
+            writer.write(memberDocs);
+          });
       }
     });
   }
@@ -185,11 +261,17 @@ public class ConfigFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateConfigConstructorFieldAssignments(
-      StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
+    StructureShape configShape,
+    GenerationContext codegenContext,
+    PythonWriter writer
+  ) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
     for (String memberName : memberShapeSet.keySet()) {
       writer.write(
-          "self.$L = $L", CaseUtils.toSnakeCase(memberName), CaseUtils.toSnakeCase(memberName));
+        "self.$L = $L",
+        CaseUtils.toSnakeCase(memberName),
+        CaseUtils.toSnakeCase(memberName)
+      );
     }
   }
 
@@ -202,11 +284,18 @@ public class ConfigFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateDafnyConfigToSmithyConfigFunctionBody(
-      StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
-    String output =
-        configShape.accept(
-            ShapeVisitorResolver.getToNativeShapeVisitorForShape(
-                configShape, codegenContext, "dafny_config", writer));
+    StructureShape configShape,
+    GenerationContext codegenContext,
+    PythonWriter writer
+  ) {
+    String output = configShape.accept(
+      ShapeVisitorResolver.getToNativeShapeVisitorForShape(
+        configShape,
+        codegenContext,
+        "dafny_config",
+        writer
+      )
+    );
     writer.write("return " + output);
   }
 
@@ -219,10 +308,17 @@ public class ConfigFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateSmithyConfigToDafnyConfigFunctionBody(
-      StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
-    String output =
-        configShape.accept(
-            new LocalServiceToDafnyShapeVisitor(codegenContext, "smithy_config", writer));
+    StructureShape configShape,
+    GenerationContext codegenContext,
+    PythonWriter writer
+  ) {
+    String output = configShape.accept(
+      new LocalServiceToDafnyShapeVisitor(
+        codegenContext,
+        "smithy_config",
+        writer
+      )
+    );
     writer.write("return " + output);
   }
 }

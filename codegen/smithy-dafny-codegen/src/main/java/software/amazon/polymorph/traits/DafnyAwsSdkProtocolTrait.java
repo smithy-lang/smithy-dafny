@@ -26,8 +26,10 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  * new protocol at runtime to fulfill requirements from Smithy that SmithyBuildPlugins have a
  * protocol.
  */
-public class DafnyAwsSdkProtocolTrait extends AbstractTrait
-    implements ToSmithyBuilder<DafnyAwsSdkProtocolTrait> {
+public class DafnyAwsSdkProtocolTrait
+  extends AbstractTrait
+  implements ToSmithyBuilder<DafnyAwsSdkProtocolTrait> {
+
   public static final ShapeId ID = ShapeId.from("aws.polymorph#awsSdk");
 
   private DafnyAwsSdkProtocolTrait(DafnyAwsSdkProtocolTrait.Builder builder) {
@@ -35,6 +37,7 @@ public class DafnyAwsSdkProtocolTrait extends AbstractTrait
   }
 
   public static final class Provider extends AbstractTrait.Provider {
+
     public Provider() {
       super(ID);
     }
@@ -61,7 +64,10 @@ public class DafnyAwsSdkProtocolTrait extends AbstractTrait
 
   /** Builder for {@link DafnyAwsSdkProtocolTrait}. */
   public static final class Builder
-      extends AbstractTraitBuilder<DafnyAwsSdkProtocolTrait, DafnyAwsSdkProtocolTrait.Builder> {
+    extends AbstractTraitBuilder<
+      DafnyAwsSdkProtocolTrait,
+      DafnyAwsSdkProtocolTrait.Builder
+    > {
 
     private Builder() {}
 
