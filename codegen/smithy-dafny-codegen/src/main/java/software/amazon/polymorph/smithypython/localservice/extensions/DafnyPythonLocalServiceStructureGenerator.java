@@ -640,7 +640,6 @@ public class DafnyPythonLocalServiceStructureGenerator
     writer.write("");
   }
 
-
   /**
    * Write assignment from __init__ method parameter to new object's required attribute.
    * Writes any constraint-checking code before writing assignment.
