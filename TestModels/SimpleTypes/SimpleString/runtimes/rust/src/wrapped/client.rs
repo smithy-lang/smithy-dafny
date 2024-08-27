@@ -101,7 +101,7 @@ impl crate::r#simple::types::smithystring::internaldafny::types::ISimpleTypesStr
         >,
     >{
         let inner_input =
-            crate::conversions::get_string_known_value::_get_string_input::from_dafny(input.clone());
+            crate::conversions::get_string_known_value::_get_string_known_value_input::from_dafny(input.clone());
         let result = self.rt.block_on(crate::operation::get_string_known_value::GetStringKnownValue::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
@@ -111,7 +111,7 @@ impl crate::r#simple::types::smithystring::internaldafny::types::ISimpleTypesStr
             ),
             Ok(client) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::get_string_known_value::_get_string_output::to_dafny(client),
+                    value: crate::conversions::get_string_known_value::_get_string_known_value_output::to_dafny(client),
                 },
             ),
         }
@@ -161,7 +161,7 @@ impl crate::r#simple::types::smithystring::internaldafny::types::ISimpleTypesStr
         >,
     >{
         let inner_input =
-            crate::conversions::get_string_utf8_known_value::_get_string_utf8_input::from_dafny(input.clone());
+            crate::conversions::get_string_utf8_known_value::_get_string_utf8_known_value_input::from_dafny(input.clone());
         let result = self.rt.block_on(crate::operation::get_string_utf8_known_value::GetStringUTF8KnownValue::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
@@ -171,7 +171,7 @@ impl crate::r#simple::types::smithystring::internaldafny::types::ISimpleTypesStr
             ),
             Ok(client) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::get_string_utf8_known_value::_get_string_utf8_output::to_dafny(client),
+                    value: crate::conversions::get_string_utf8_known_value::_get_string_utf8_known_value_output::to_dafny(client),
                 },
             ),
         }
