@@ -8,10 +8,10 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
   import SimpleCallingAWSSDKFromLocalServiceImplTest
   import opened Wrappers
   import opened StandardLibrary.UInt
-  method{:test} TestCallDDBGetKey() {
+  method{:test} TestCallDDBGetItem() {
     var client :- expect WrappedSimpleCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
-    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBGetKey_Success(client);
-    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBGetKey_Failure(client);
+    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBGetItem_Success(client);
+    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBGetItem_Failure(client);
   }
 
   method{:test} TestCallKMSEncrypt() {

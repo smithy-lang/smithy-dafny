@@ -28,11 +28,13 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   }
 
   method TestCallDDBGetItem_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+  requires
+        client.ValidState()
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var Key2Get: DDB.Types.Key := map[
-          "partition_key" := DDB.Types.AttributeValue.S("BasicPutGetExample"),
-          "sort_key" := DDB.Types.AttributeValue.N("0")
+          "branch-key-id" := DDB.Types.AttributeValue.S("aws-kms-h"),
+          "version" := DDB.Types.AttributeValue.S("1")
         ];
 
     var input := DDB.Types.GetItemInput(
@@ -53,8 +55,8 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var Key2Get: DDB.Types.Key := map[
-          "partition_key" := DDB.Types.AttributeValue.S("BasicPutGetExampleYo"),
-          "sort_key" := DDB.Types.AttributeValue.N("0")
+          "branch-key-id" := DDB.Types.AttributeValue.S("aws-kms-h"),
+          "version" := DDB.Types.AttributeValue.S("1")
         ];
     var input := DDB.Types.GetItemInput(
             TableName := NONEXISTENT_TABLE_NAME,
