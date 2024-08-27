@@ -705,11 +705,15 @@ public class CodegenEngine {
       generator.generate(outputDir);
     }
 
-    // TODO: This should be part of the StandardLibrary instead,
+    // TODO: These should be part of the StandardLibrary instead,
     // but since the Dafny Rust code generator doesn't yet support multiple crates,
     // we have to inline it instead.
     writeTemplatedFile(
       "runtimes/rust/src/standard_library_conversions.rs",
+      Map.of()
+    );
+    writeTemplatedFile(
+      "runtimes/rust/src/standard_library_externs.rs",
       Map.of()
     );
 
@@ -848,7 +852,10 @@ public class CodegenEngine {
       pub mod operation;
 
       mod conversions;
+
+      /// Copied from StandardLibrary
       mod standard_library_conversions;
+      mod standard_library_externs;
 
       #[cfg(feature = "wrapped-client")]
       pub mod wrapped;
