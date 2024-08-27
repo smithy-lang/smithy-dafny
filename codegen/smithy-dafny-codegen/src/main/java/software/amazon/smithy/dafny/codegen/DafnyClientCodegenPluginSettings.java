@@ -102,6 +102,7 @@ class DafnyClientCodegenPluginSettings {
           case "DOTNET", "CSHARP", "CS" -> Stream.of(
             CodegenEngine.TargetLanguage.DOTNET
           );
+          case "PYTHON" -> Stream.of(CodegenEngine.TargetLanguage.PYTHON);
           case "RUST" -> Stream.of(CodegenEngine.TargetLanguage.RUST);
           case "DAFNY" -> {
             LOGGER.error(

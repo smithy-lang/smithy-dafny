@@ -1,3 +1,5 @@
+**/smithy-dafny-codegen-modules/**
+
 # Codegen templates (often not parsable)
 codegen/smithy-dafny-codegen/src/main/resources/templates/**/*.*
 

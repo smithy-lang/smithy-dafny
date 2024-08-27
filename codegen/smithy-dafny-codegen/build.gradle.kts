@@ -12,7 +12,7 @@ buildscript {
 
     repositories {
         mavenCentral()
-        // For smithy-rust packages
+        // For smithy-rust and smithy-python packages
         mavenLocal()
     }
     dependencies {
@@ -41,6 +41,9 @@ dependencies {
     // For Smithy-Java
     implementation("software.amazon.awssdk:codegen:2.20.26")
     implementation("com.squareup:javapoet:1.13.0")
+
+    // Smithy-Python
+    implementation("software.amazon.smithy.python:smithy-python-codegen:0.1.0")
 
     // Used for parsing-based tests
     testImplementation("org.antlr:antlr4:4.9.2")

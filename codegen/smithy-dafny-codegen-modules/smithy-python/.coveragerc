@@ -1,0 +1,8 @@
+[report]
+exclude_lines =
+    # Ignore lines with no cover
+    pragma: no cover
+    # Ignore functions marked as crt-callback, coverage can't pick up on
+    # callbacks the crt calls
+    pragma: crt-callback
+    raise NotImplementedError
