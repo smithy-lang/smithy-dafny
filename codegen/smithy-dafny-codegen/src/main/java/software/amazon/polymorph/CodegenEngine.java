@@ -48,6 +48,9 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
+import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
+import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
+import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
 import software.amazon.polymorph.smithyrust.generator.RustLibraryShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -56,7 +59,10 @@ import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
+import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.Pair;
@@ -89,6 +95,8 @@ public class CodegenEngine {
   // To be initialized in constructor
   private final Model model;
   private final ServiceShape serviceShape;
+  private final Map<String, String> dependencyLibraryNames;
+  private final Optional<String> libraryName;
 
   /**
    * This should only be called by {@link Builder#build()},
@@ -111,7 +119,9 @@ public class CodegenEngine {
     final Set<GenerationAspect> generationAspects,
     final Path libraryRoot,
     final Optional<Path> patchFilesDir,
-    final boolean updatePatchFiles
+    final boolean updatePatchFiles,
+    final Map<String, String> dependencyLibraryNames,
+    final Optional<String> libraryName
   ) {
     // To be provided to constructor
     this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
@@ -129,6 +139,8 @@ public class CodegenEngine {
     this.libraryRoot = libraryRoot;
     this.patchFilesDir = patchFilesDir;
     this.updatePatchFiles = updatePatchFiles;
+    this.dependencyLibraryNames = dependencyLibraryNames;
+    this.libraryName = libraryName;
 
     this.model =
       this.awsSdkStyle
@@ -175,6 +187,7 @@ public class CodegenEngine {
         case JAVA -> generateJava(outputDir, testOutputDir);
         case DOTNET -> generateDotnet(outputDir);
         case RUST -> generateRust(outputDir);
+        case PYTHON -> generatePython();
         default -> throw new UnsupportedOperationException(
           "Cannot generate code for target language %s".formatted(lang.name())
         );
@@ -785,6 +798,59 @@ public class CodegenEngine {
     }
   }
 
+  private void generatePython() {
+    if (libraryName.isEmpty()) {
+      throw new IllegalArgumentException(
+        "Python codegen requires a module name"
+      );
+    }
+
+    ObjectNode.Builder pythonSettingsBuilder = ObjectNode
+      .builder()
+      .withMember("service", serviceShape.getId().toString())
+      .withMember("module", libraryName.get())
+      // Smithy-Python requires some string to be present here, but this is unused.
+      // Any references to this version are deleted as part of code generation.
+      .withMember("moduleVersion", "0.0.1");
+
+    final PluginContext pluginContext = PluginContext
+      .builder()
+      .model(model)
+      .fileManifest(
+        FileManifest.create(targetLangOutputDirs.get(TargetLanguage.PYTHON))
+      )
+      .settings(pythonSettingsBuilder.build())
+      .build();
+
+    final Map<String, String> smithyNamespaceToPythonModuleNameMap =
+      new HashMap<>();
+    smithyNamespaceToPythonModuleNameMap.put(
+      serviceShape.getId().getNamespace(),
+      libraryName.get()
+    );
+    smithyNamespaceToPythonModuleNameMap.putAll(dependencyLibraryNames);
+
+    if (this.awsSdkStyle) {
+      DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin =
+        new DafnyPythonAwsSdkClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
+      dafnyPythonAwsSdkClientCodegenPlugin.execute(pluginContext);
+    } else if (this.localServiceTest) {
+      DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin =
+        new DafnyPythonWrappedLocalServiceClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
+      pythonClientCodegenPlugin.execute(pluginContext);
+    } else {
+      DafnyPythonLocalServiceClientCodegenPlugin pythonClientCodegenPlugin =
+        new DafnyPythonLocalServiceClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
+      pythonClientCodegenPlugin.execute(pluginContext);
+    }
+  }
+
   public void patchAfterTranspiling() {
     for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
       switch (lang) {
@@ -951,6 +1017,8 @@ public class CodegenEngine {
     private Path libraryRoot;
     private Path patchFilesDir;
     private boolean updatePatchFiles = false;
+    private Map<String, String> dependencyLibraryNames;
+    private String libraryName;
 
     public Builder() {}
 
@@ -975,6 +1043,24 @@ public class CodegenEngine {
      */
     public Builder withNamespace(final String namespace) {
       this.namespace = namespace;
+      return this;
+    }
+
+    /**
+     * Sets the directories in which to search for dependent model file(s).
+     */
+    public Builder withDependencyLibraryNames(
+      final Map<String, String> dependencyLibraryNames
+    ) {
+      this.dependencyLibraryNames = dependencyLibraryNames;
+      return this;
+    }
+
+    /**
+     * Sets the Python module name for any generated Python code.
+     */
+    public Builder withLibraryName(final String libraryName) {
+      this.libraryName = libraryName;
       return this;
     }
 
@@ -1117,6 +1203,11 @@ public class CodegenEngine {
         throw new IllegalStateException("No namespace provided");
       }
 
+      final Map<String, String> dependencyLibraryNames =
+        this.dependencyLibraryNames == null
+          ? new HashMap<>()
+          : this.dependencyLibraryNames;
+
       final Map<TargetLanguage, Path> targetLangOutputDirsRaw =
         Objects.requireNonNull(this.targetLangOutputDirs);
       targetLangOutputDirsRaw.replaceAll((_lang, path) ->
@@ -1161,6 +1252,10 @@ public class CodegenEngine {
         );
       }
 
+      final Optional<String> libraryName = Optional.ofNullable(
+        this.libraryName
+      );
+
       final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
 
       final Optional<Path> patchFilesDir = Optional
@@ -1188,7 +1283,9 @@ public class CodegenEngine {
         this.generationAspects,
         libraryRoot,
         patchFilesDir,
-        updatePatchFiles
+        updatePatchFiles,
+        dependencyLibraryNames,
+        libraryName
       );
     }
   }
@@ -1198,6 +1295,7 @@ public class CodegenEngine {
     JAVA,
     DOTNET,
     RUST,
+    PYTHON,
   }
 
   public enum GenerationAspect {
