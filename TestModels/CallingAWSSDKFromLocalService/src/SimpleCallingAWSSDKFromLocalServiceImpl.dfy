@@ -11,7 +11,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
   {true}
   function ModifiesInternalConfig(config: InternalConfig) : set<object>
   {{}}
-  predicate CallDDBEnsuresPublicly(input: CallDDBInput, output: Result<CallDDBOutput, Error>) {
+  predicate CallDDBGetKeyEnsuresPublicly(input: CallDDBGetKeyInput, output: Result<CallDDBGetKeyOutput, Error>) {
     true
   }
 
@@ -19,11 +19,11 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
     true
   }
 
-  method CallDDB ( config: InternalConfig,  input: CallDDBInput )
-    returns (output: Result<CallDDBOutput, Error>) {
+  method CallDDBGetKey ( config: InternalConfig,  input: CallDDBGetKeyInput )
+    returns (output: Result<CallDDBGetKeyOutput, Error>) {
     var retGetItem := input.ddbClient.GetItem(input.itemInput);
     if retGetItem.Success? {
-        return Success(CallDDBOutput(itemOutput := retGetItem.value));
+        return Success(CallDDBGetKeyOutput(itemOutput := retGetItem.value));
     } else {
         return Failure(SimpleCallingAWSSDKFromLocalServiceException(message := retGetItem.error.message.value));
     }

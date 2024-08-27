@@ -21,13 +21,13 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
 
   import opened SimpleCallingawssdkfromlocalserviceTypes
   import opened Wrappers
-  method{:test} CallDDB(){
+  method{:test} CallDDBGetKey(){
     var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
-    TestCallDDB_Success(client);
-    TestCallDDB_Failure(client);
+    TestCallDDBGetKey_Success(client);
+    TestCallDDBGetKey_Failure(client);
   }
 
-  method TestCallDDB_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+  method TestCallDDBGetKey_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var Key2Get: DDB.Types.Key := map[
@@ -45,11 +45,11 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
             ExpressionAttributeNames := DDB.Wrappers.None
     );
 
-    var resSuccess := client.CallDDB(SimpleCallingAWSSDKFromLocalService.Types.CallDDBInput(ddbClient := ddbClient, itemInput := input));
+    var resSuccess := client.CallDDBGetKey(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetKeyInput(ddbClient := ddbClient, itemInput := input));
     expect resSuccess.Success?;
   }
 
-  method TestCallDDB_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+  method TestCallDDBGetKey_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var Key2Get: DDB.Types.Key := map[
@@ -65,7 +65,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
             ProjectionExpression := DDB.Wrappers.None,
             ExpressionAttributeNames := DDB.Wrappers.None
     );
-    var resFailure := client.CallDDB(SimpleCallingAWSSDKFromLocalService.Types.CallDDBInput(ddbClient := ddbClient, itemInput := input));
+    var resFailure := client.CallDDBGetKey(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetKeyInput(ddbClient := ddbClient, itemInput := input));
 
     expect resFailure.Failure?;
     expect resFailure.error.message == "Requested resource not found";

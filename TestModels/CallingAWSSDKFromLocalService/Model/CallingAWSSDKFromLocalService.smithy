@@ -24,26 +24,26 @@ structure KmsClientReference {}
 service SimpleCallingAWSSDKFromLocalService {
   version: "2021-11-01",
   resources: [],
-  operations: [ CallDDB,
+  operations: [ CallDDBGetKey,
                 CallKMSEncrypt],
   errors: [ SimpleCallingAWSSDKFromLocalServiceException ],
 }
 
 structure SimpleCallingAWSSDKFromLocalServiceConfig {}
 
-operation CallDDB {
-  input: CallDDBInput,
-  output: CallDDBOutput,
+operation CallDDBGetKey {
+  input: CallDDBGetKeyInput,
+  output: CallDDBGetKeyOutput,
 }
 
-structure CallDDBInput {
+structure CallDDBGetKeyInput {
   @required
   ddbClient: DdbClientReference,
   @required
   itemInput: com.amazonaws.dynamodb#GetItemInput
 }
 
-structure CallDDBOutput {
+structure CallDDBGetKeyOutput {
   @required
   itemOutput: com.amazonaws.dynamodb#GetItemOutput
 }
