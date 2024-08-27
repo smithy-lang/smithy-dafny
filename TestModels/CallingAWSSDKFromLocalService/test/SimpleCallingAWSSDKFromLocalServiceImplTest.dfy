@@ -9,7 +9,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   import SimpleCallingAWSSDKFromLocalService
 
   // For call to DDB
-  const TABLE_NAME_SUCCESS_CASE := "BasicPutGetExample"
+  const TABLE_NAME_SUCCESS_CASE := "TestTable"
   const NONEXISTENT_TABLE_NAME := "NONEXISTENT_Table"
   
   // For call to KMS 
@@ -21,13 +21,13 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
 
   import opened SimpleCallingawssdkfromlocalserviceTypes
   import opened Wrappers
-  method{:test} CallDDBGetKey(){
+  method{:test} CallDDBGetItem(){
     var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
-    TestCallDDBGetKey_Success(client);
-    TestCallDDBGetKey_Failure(client);
+    TestCallDDBGetItem_Success(client);
+    TestCallDDBGetItem_Failure(client);
   }
 
-  method TestCallDDBGetKey_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+  method TestCallDDBGetItem_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var Key2Get: DDB.Types.Key := map[
@@ -45,11 +45,11 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
             ExpressionAttributeNames := DDB.Wrappers.None
     );
 
-    var resSuccess := client.CallDDBGetKey(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetKeyInput(ddbClient := ddbClient, itemInput := input));
+    var resSuccess := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
     expect resSuccess.Success?;
   }
 
-  method TestCallDDBGetKey_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+  method TestCallDDBGetItem_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var Key2Get: DDB.Types.Key := map[
@@ -65,7 +65,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
             ProjectionExpression := DDB.Wrappers.None,
             ExpressionAttributeNames := DDB.Wrappers.None
     );
-    var resFailure := client.CallDDBGetKey(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetKeyInput(ddbClient := ddbClient, itemInput := input));
+    var resFailure := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
 
     expect resFailure.Failure?;
     expect resFailure.error.message == "Requested resource not found";
