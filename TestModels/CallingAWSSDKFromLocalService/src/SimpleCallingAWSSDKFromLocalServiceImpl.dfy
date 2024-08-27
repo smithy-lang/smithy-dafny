@@ -15,13 +15,12 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
     true
   }
 
-  predicate CallKMSEnsuresPublicly(input: CallKMSInput, output: Result<CallKMSOutput, Error>) {
+  predicate CallKMSEncryptEnsuresPublicly(input: CallKMSEncryptInput, output: Result<CallKMSEncryptOutput, Error>) {
     true
   }
 
   method CallDDB ( config: InternalConfig,  input: CallDDBInput )
     returns (output: Result<CallDDBOutput, Error>) {
-    print(input.itemInput);
     var retGetItem := input.ddbClient.GetItem(input.itemInput);
     if retGetItem.Success? {
         return Success(CallDDBOutput(itemOutput := retGetItem.value));
@@ -29,8 +28,13 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
         return Failure(SimpleCallingAWSSDKFromLocalServiceException(message := retGetItem.error.message.value));
     }
   }
-  method CallKMS ( config: InternalConfig,  input: CallKMSInput )
-    returns (output: Result<CallKMSOutput, Error>) {
-    return Success(CallKMSOutput(kmsClient := input.kmsClient));
+  method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
+    returns (output: Result<CallKMSEncryptOutput, Error>) {
+      var retEncryptResponse := input.kmsClient.Encrypt(input.encryptInput);
+      if retEncryptResponse.Success? {
+        return Success(CallKMSEncryptOutput(encryptOutput := retEncryptResponse.value));
+      } else {
+          return Failure(SimpleCallingAWSSDKFromLocalServiceException(message := retEncryptResponse.error.message.value));
+      }
   }
 }

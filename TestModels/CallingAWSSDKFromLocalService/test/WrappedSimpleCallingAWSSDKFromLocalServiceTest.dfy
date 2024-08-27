@@ -14,8 +14,9 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
     SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDB_Failure(client);
   }
 
-  method{:test} TestCallKMS() {
+  method{:test} TestCallKMSEncrypt() {
     var client :- expect WrappedSimpleCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
-    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallKMS(client);
+    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallKMSEncrypt_Success(client);
+    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallKMSEncrypt_Failure(client);
   }
 }

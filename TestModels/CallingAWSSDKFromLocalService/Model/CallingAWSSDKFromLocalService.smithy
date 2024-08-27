@@ -25,8 +25,7 @@ service SimpleCallingAWSSDKFromLocalService {
   version: "2021-11-01",
   resources: [],
   operations: [ CallDDB,
-                CallKMS
-             ],
+                CallKMSEncrypt],
   errors: [ SimpleCallingAWSSDKFromLocalServiceException ],
 }
 
@@ -49,19 +48,21 @@ structure CallDDBOutput {
   itemOutput: com.amazonaws.dynamodb#GetItemOutput
 }
 
-operation CallKMS {
-  input: CallKMSInput,
-  output: CallKMSOutput,
+operation CallKMSEncrypt {
+  input: CallKMSEncryptInput,
+  output: CallKMSEncryptOutput,
 }
 
-structure CallKMSInput {
+structure CallKMSEncryptInput {
   @required
   kmsClient: KmsClientReference,
+  @required
+  encryptInput: com.amazonaws.kms#EncryptRequest
 }
 
-structure CallKMSOutput {
+structure CallKMSEncryptOutput {
   @required
-  kmsClient: KmsClientReference,
+  encryptOutput: com.amazonaws.kms#EncryptResponse,
 }
 
 @error("client")

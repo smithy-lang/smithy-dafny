@@ -8,6 +8,17 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   import KMS = Com.Amazonaws.Kms
   import SimpleCallingAWSSDKFromLocalService
 
+  // For call to DDB
+  const TABLE_NAME_SUCCESS_CASE := "BasicPutGetExample"
+  const NONEXISTENT_TABLE_NAME := "NONEXISTENT_Table"
+  
+  // For call to KMS 
+  const KEY_ID_SUCCESS_CASE := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7f"
+  const INVALID_KEY_ID := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-invalidkeyid"
+  const NONEXISTENT_KEY_ID := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7g"
+  // The string "asdf" as bytes
+  const PLAIN_TEXT := [ 97, 115, 100, 102 ]
+
   import opened SimpleCallingawssdkfromlocalserviceTypes
   import opened Wrappers
   method{:test} CallDDB(){
@@ -16,33 +27,16 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     TestCallDDB_Failure(client);
   }
 
-  // method TestCallDDB(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-  //   requires client.ValidState()
-  //   modifies client.Modifies
-  //   ensures client.ValidState()
-  // {
-  //   var resSuccess := TestCallDDB_Success(client);
-  //   expect resSuccess.Success?;
-
-  //   var resFailure := TestCallDDB_Failure(client);
-  //   expect resFailure.Failure?;
-  //   print(resFailure.error);
-  //   expect resFailure.error.ComAmazonawsDynamodb?;
-  //   expect resFailure.error.ComAmazonawsDynamodb.message.Some?;
-  //   expect resFailure.error.ComAmazonawsDynamodb.message.UnwrapOr("") == "Requested resource not found";
-  // }
-
   method TestCallDDB_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
   {
     var ddbClient :- expect DDB.DynamoDBClient();
-    var tableName : DDB.Types.TableName := "BasicPutGetExample";
     var Key2Get: DDB.Types.Key := map[
           "partition_key" := DDB.Types.AttributeValue.S("BasicPutGetExample"),
           "sort_key" := DDB.Types.AttributeValue.N("0")
         ];
 
     var input := DDB.Types.GetItemInput(
-            TableName := tableName,
+            TableName := TABLE_NAME_SUCCESS_CASE,
             Key := Key2Get,
             AttributesToGet := DDB.Wrappers.None,
             ConsistentRead := DDB.Wrappers.None,
@@ -58,13 +52,12 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   method TestCallDDB_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
   {
     var ddbClient :- expect DDB.DynamoDBClient();
-    var tableName : DDB.Types.TableName := "FailureCase";
     var Key2Get: DDB.Types.Key := map[
           "partition_key" := DDB.Types.AttributeValue.S("BasicPutGetExampleYo"),
           "sort_key" := DDB.Types.AttributeValue.N("0")
         ];
     var input := DDB.Types.GetItemInput(
-            TableName := tableName,
+            TableName := NONEXISTENT_TABLE_NAME,
             Key := Key2Get,
             AttributesToGet := DDB.Wrappers.None,
             ConsistentRead := DDB.Wrappers.None,
@@ -75,22 +68,52 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     var resFailure := client.CallDDB(SimpleCallingAWSSDKFromLocalService.Types.CallDDBInput(ddbClient := ddbClient, itemInput := input));
 
     expect resFailure.Failure?;
-    print(resFailure.error);
     expect resFailure.error.message == "Requested resource not found";
   }
 
-  method{:test} CallKMS(){
+  method{:test} CallKMSEncrypt(){
     var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
-    TestCallKMS(client);
+    TestCallKMSEncrypt_Success(client);
   }
 
-  method TestCallKMS(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-    requires client.ValidState()
-    modifies client.Modifies
-    ensures client.ValidState()
+  method TestCallKMSEncrypt_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
   {
     var kmsClient :- expect KMS.KMSClient();
-    var ret := client.CallKMS(SimpleCallingAWSSDKFromLocalService.Types.CallKMSInput(kmsClient := kmsClient));
-    expect ret.Success?;
+    var input := KMS.Types.EncryptRequest(
+      KeyId := KEY_ID_SUCCESS_CASE,
+      Plaintext := [ 97, 115, 100, 102 ],
+      EncryptionContext := Wrappers.None,
+      GrantTokens := Wrappers.None,
+      EncryptionAlgorithm := Wrappers.None
+      );
+    var resSuccess := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, encryptInput := input));
+    expect resSuccess.Success?;
+  }
+
+  method TestCallKMSEncrypt_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+  {
+    var kmsClient :- expect KMS.KMSClient();
+
+    // Test with InvalidKey
+    var input_InvalidKey := KMS.Types.EncryptRequest(
+      KeyId := INVALID_KEY_ID,
+      Plaintext := [ 97, 115, 100, 102 ],
+      EncryptionContext := Wrappers.None,
+      GrantTokens := Wrappers.None,
+      EncryptionAlgorithm := Wrappers.None
+      );
+    var resFailure_InvalidKey := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, encryptInput := input_InvalidKey));
+    expect resFailure_InvalidKey.Failure?;
+
+    // Test with NonExistent
+    var input_NonExistent := KMS.Types.EncryptRequest(
+      KeyId := NONEXISTENT_KEY_ID,
+      Plaintext := [ 97, 115, 100, 102 ],
+      EncryptionContext := Wrappers.None,
+      GrantTokens := Wrappers.None,
+      EncryptionAlgorithm := Wrappers.None
+      );
+    var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, encryptInput := input_NonExistent));
+    expect resFailure_NonExistent.Failure?;
   }
 }
