@@ -37,6 +37,7 @@ module SimpleTimestampImplTest {
         var retTimestamp := ret.value.value;
 
         // It's okay if milliseconds are serialized, so only check for prefix
+        expect |retTimestamp| > 0;
         expect retTimestamp[|retTimestamp| - 1] == 'Z';
         expect dafnyTimestamp[|dafnyTimestamp| - 1] <= retTimestamp[|retTimestamp| - 1];
         print ret;
