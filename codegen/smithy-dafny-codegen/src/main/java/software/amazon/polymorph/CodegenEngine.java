@@ -243,15 +243,7 @@ public class CodegenEngine {
 
     dafnyOtherGeneratedAspects(outputDir);
 
-    LOGGER.info("Formatting Dafny code in {}", outputDir);
-    runCommand(
-      outputDir,
-      "dafny",
-      "format",
-      "--function-syntax:3",
-      "--unicode-char:false",
-      "."
-    );
+    formatDafnyCode(outputDir);
 
     handlePatching(TargetLanguage.DAFNY, outputDir);
   }
@@ -312,16 +304,29 @@ public class CodegenEngine {
     // Perhaps we can make a `smithy init` template for that instead?
 
     if (!generationAspects.isEmpty()) {
-      Path srcDir = outputDir.resolve("../src");
-      LOGGER.info("Formatting Dafny code in {}", srcDir);
-      runCommand(
-        srcDir,
-        "dafny",
-        "format",
-        "--function-syntax:3",
-        "--unicode-char:false",
-        "."
-      );
+      formatDafnyCode(outputDir.resolve("../src"));
+    }
+  }
+
+  /**
+   * Formats the Dafny code in the given path using {@code dafny format},
+   * but does not throw an exception if the command fails.
+   * <p>
+   * This enables generating interdependent Dafny files
+   * across multiple smithy-dafny-codegen invocations.
+   */
+  private void formatDafnyCode(final Path path) {
+    LOGGER.info("Formatting Dafny code in {}", path);
+    final CommandResult formatResult = runCommand(
+      path,
+      "dafny",
+      "format",
+      "--function-syntax:3",
+      "--unicode-char:false",
+      "."
+    );
+    if (formatResult.exitCode != 0) {
+      LOGGER.warn("Formatting failed:\n{}", formatResult.output);
     }
   }
 
@@ -357,7 +362,7 @@ public class CodegenEngine {
     javaOtherGeneratedAspects();
 
     LOGGER.info("Formatting Java code in {}", outputDir);
-    runCommand(
+    runCommandOrThrow(
       outputDir,
       "npm",
       "i",
@@ -365,7 +370,7 @@ public class CodegenEngine {
       "prettier@3",
       "prettier-plugin-java@2.5"
     );
-    runCommand(
+    runCommandOrThrow(
       outputDir,
       "npx",
       "prettier@3",
@@ -541,7 +546,7 @@ public class CodegenEngine {
           .filter(path -> path.toFile().getName().endsWith(".csproj"))
           .map(Path::toString)
       );
-      runCommand(dotnetRoot, args.toArray(String[]::new));
+      runCommandOrThrow(dotnetRoot, args.toArray(String[]::new));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -766,13 +771,14 @@ public class CodegenEngine {
         );
         Path outputDirRelative = libraryRoot.relativize(outputDir);
         // Need to ignore the exit code because diff will return 1 if there is a diff
-        String patchContent = runCommandIgnoringExitCode(
+        String patchContent = runCommand(
           libraryRoot,
           "git",
           "diff",
           "-R",
           outputDirRelative.toString()
-        );
+        )
+          .output;
         if (!patchContent.isBlank()) {
           IOUtils.writeToFile(patchContent, patchFile.toFile());
         }
@@ -788,7 +794,13 @@ public class CodegenEngine {
           if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
             Path patchFile = patchFilePair.getValue();
             LOGGER.info("Applying patch file {}", patchFile);
-            runCommand(libraryRoot, "git", "apply", "-v", patchFile.toString());
+            runCommandOrThrow(
+              libraryRoot,
+              "git",
+              "apply",
+              "-v",
+              patchFile.toString()
+            );
             return;
           }
         }
@@ -939,26 +951,34 @@ public class CodegenEngine {
     );
   }
 
-  private String runCommand(Path workingDir, String... args) {
-    List<String> argsList = List.of(args);
-    StringBuilder output = new StringBuilder();
-    int exitCode = IoUtils.runCommand(
+  private record CommandResult(int exitCode, String output) {}
+
+  /**
+   * Runs the given command and throws an exception if the exit code is nonzero.
+   */
+  private String runCommandOrThrow(Path workingDir, String... args) {
+    final CommandResult result = runCommand(workingDir, args);
+    if (result.exitCode != 0) {
+      throw new RuntimeException(
+        "Command failed: " + List.of(args) + "\n" + result.output
+      );
+    }
+    return result.output;
+  }
+
+  /**
+   * Runs the given command.
+   */
+  private CommandResult runCommand(Path workingDir, String... args) {
+    final List<String> argsList = List.of(args);
+    final StringBuilder output = new StringBuilder();
+    final int exitCode = IoUtils.runCommand(
       argsList,
       workingDir,
       output,
       Collections.emptyMap()
     );
-    if (exitCode != 0) {
-      throw new RuntimeException("Command failed: " + argsList + "\n" + output);
-    }
-    return output.toString();
-  }
-
-  private String runCommandIgnoringExitCode(Path workingDir, String... args) {
-    List<String> argsList = List.of(args);
-    StringBuilder output = new StringBuilder();
-    IoUtils.runCommand(argsList, workingDir, output, Collections.emptyMap());
-    return output.toString();
+    return new CommandResult(exitCode, output.toString());
   }
 
   private Path standardLibraryPath() {
