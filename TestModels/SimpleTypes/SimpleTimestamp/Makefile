@@ -23,6 +23,8 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+POLYMORPH_OPTIONS=--generate client-constructors,project-files
+
 # Constants for languages that drop extern names (Python, Go)
 
 TYPES_FILE_PATH=Model/SimpleTypesTimestampTypes.dfy
