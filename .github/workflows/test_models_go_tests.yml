@@ -15,7 +15,7 @@ jobs:
           TestModels/CodegenPatches,
           TestModels/Constraints,
           TestModels/Constructor,
-          # TestModels/Dependencies,
+          TestModels/Dependencies,
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,
@@ -39,7 +39,7 @@ jobs:
           # TestModels/SimpleTypes/SimpleShort,
           TestModels/SimpleTypes/SimpleString,
           # TestModels/SimpleTypes/SimpleTimestamp,
-          # TestModels/Union,
+          TestModels/Union,
           # TestModels/aws-sdks/ddb,
           # TestModels/aws-sdks/kms
         ]

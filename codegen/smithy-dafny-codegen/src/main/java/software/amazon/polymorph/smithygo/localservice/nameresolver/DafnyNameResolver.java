@@ -2,12 +2,12 @@ package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 
-import software.amazon.smithy.model.shapes.ShapeType;
-import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.shapes.UnionShape;
 
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
@@ -28,25 +28,17 @@ public class DafnyNameResolver {
                     .concat(INTERNAL_DAFNY);
     }
 
+    /**
+     * Returns the Dafny type for a given Shape.
+     *
+     * @param shape The Shape for which the Dafny type needs to be determined.
+     * @param symbol The Symbol representing the Shape.
+     * @return The Dafny type as a String.
+     */
     public static String getDafnyType(final Shape shape, final Symbol symbol) {
-        ShapeType type = shape.getType();
-        if (shape.hasTrait(EnumTrait.class)) {
-            type = ShapeType.ENUM;
-        }
-        switch (type) {
-            case INTEGER, LONG, BOOLEAN: 
-                return symbol.getName();
-            case MAP:
-                return "dafny.Map";
-            case DOUBLE, STRING, BLOB, LIST:
-                return "dafny.Sequence";
-            case ENUM, STRUCTURE, UNION:
-                return DafnyNameResolver.dafnyTypesNamespace(shape)
+        return DafnyNameResolver.dafnyTypesNamespace(shape)
                                 .concat(DOT)
                                 .concat(symbol.getName());
-            default:
-                throw new IllegalArgumentException("Unexpected shape found") ;
-        }
     }
 
     public static String getDafnySubErrorType(final Shape shape, final Symbol symbol) {
@@ -89,6 +81,19 @@ public class DafnyNameResolver {
         return DafnyNameResolver.getDafnyCompanionType(shape, symbol)
                                 .concat(DOT)
                                 .concat("Create_%s_".formatted(symbol.getName()));
+    }
+    
+    /**
+     * Returns the path to Create_ function for creating member shape within a union shape.
+     *
+     * @param unionShape The union shape containing the member shape.
+     * @param memberName The name of the member shape within the union shape.
+     */
+    public static String getDafnyCreateFuncForUnionMemberShape(final UnionShape unionShape, final String memberName) {
+        return "companion"
+                .concat(DOT)
+                .concat(memberName.replace(unionShape.getId().getName() + "Member", "Create_"))
+                .concat("_");
     }
 
     public static String getDafnyClient(final Shape shape, final String sdkId) {

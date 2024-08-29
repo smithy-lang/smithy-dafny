@@ -129,7 +129,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
                 validationCheck = """
                     err := params.Validate()
                     if err != nil {
-                        opaqueErr := &%s.OpaqueError{
+                        opaqueErr := %s.OpaqueError{
                             ErrObject: err,
                         }
                 """.formatted(SmithyNameResolver.smithyTypesNamespace(inputShape));

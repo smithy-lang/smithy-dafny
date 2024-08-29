@@ -211,9 +211,7 @@ func (CompanionStruct_Default___) GetExtern(c Config, input simpledafnyexternint
 
 }
 func (CompanionStruct_Default___) ExternMustError(c Config, input simpledafnyexterninternaldafnytypes.ExternMustErrorInput) Wrappers.Result {
-
 	return Wrappers.Companion_Result_.Create_Failure_(
 		simpledafnyexterninternaldafnytypes.Companion_Error_.Create_Opaque_(simpleexterntypes.OpaqueError{
-			input.Dtor_value()}))
-
+			ErrObject: input.Dtor_value()}))
 }

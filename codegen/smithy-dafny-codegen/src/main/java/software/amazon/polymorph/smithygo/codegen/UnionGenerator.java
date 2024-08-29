@@ -85,9 +85,9 @@ public class UnionGenerator {
      * @param symbolProvider A symbol provider used to get the symbols for the unions.
      */
     public static void generateUnknownUnion(
-            GoWriter writer,
-            Collection<UnionShape> unions,
-            SymbolProvider symbolProvider
+            final GoWriter writer,
+            final Collection<UnionShape> unions,
+            final SymbolProvider symbolProvider
     ) {
         writer.openBlock("type $L struct {", "}", UNKNOWN_MEMBER_NAME, () -> {
             // The tag (member) name received over the wire.
