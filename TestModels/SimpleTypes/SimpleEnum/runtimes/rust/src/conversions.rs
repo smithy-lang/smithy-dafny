@@ -11,6 +11,6 @@ pub mod error;
 
  pub mod get_enum_third_known_value_test;
 
- pub mod simple_enum_config;
-
  pub mod simple_enum_shape;
+
+pub mod simple_enum_config;

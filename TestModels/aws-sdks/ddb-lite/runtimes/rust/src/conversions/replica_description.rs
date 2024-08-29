@@ -17,14 +17,14 @@ pub fn to_dafny(
  ReplicaStatusPercentProgress: crate::standard_library_conversions::ostring_to_dafny(&value.replica_status_percent_progress),
  KMSMasterKeyId: crate::standard_library_conversions::ostring_to_dafny(&value.kms_master_key_id),
  ProvisionedThroughputOverride: ::std::rc::Rc::new(match &value.provisioned_throughput_override {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput_override::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput_override::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  GlobalSecondaryIndexes: ::std::rc::Rc::new(match &value.global_secondary_indexes {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::replica_global_secondary_index_description::to_dafny(&e)
+            |e| crate::conversions::replica_global_secondary_index_description::to_dafny(e)
 ,
         )
     },
@@ -33,7 +33,7 @@ pub fn to_dafny(
 ,
  ReplicaInaccessibleDateTime: crate::standard_library_conversions::otimestamp_to_dafny(&value.replica_inaccessible_date_time),
  ReplicaTableClassSummary: ::std::rc::Rc::new(match &value.replica_table_class_summary {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::table_class_summary::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::table_class_summary::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

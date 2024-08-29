@@ -3,3 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 /// Types for the `SimpleIntegerConfig`
 pub mod simple_integer_config;
+
+pub mod builders;
+
+
