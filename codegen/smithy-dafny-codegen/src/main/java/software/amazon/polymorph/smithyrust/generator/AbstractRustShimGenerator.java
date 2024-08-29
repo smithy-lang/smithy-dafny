@@ -469,14 +469,10 @@ public abstract class AbstractRustShimGenerator {
               )
           );
         } else {
-          TokenTree result = TokenTree.of(dafnyValue);
+          TokenTree result = TokenTree.of(dafnyValue, ".clone()");
           if (isRustOption) {
             result =
-              TokenTree.of(
-                TokenTree.of("Some("),
-                result,
-                TokenTree.of(".clone())")
-              );
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
           }
           yield result;
         }
@@ -489,7 +485,7 @@ public abstract class AbstractRustShimGenerator {
               )
           );
         } else {
-          yield TokenTree.of(dafnyValue);
+          yield TokenTree.of(dafnyValue, ".clone()");
         }
       }
       case LONG -> {
@@ -500,14 +496,10 @@ public abstract class AbstractRustShimGenerator {
               )
           );
         } else {
-          TokenTree result = TokenTree.of(dafnyValue);
+          TokenTree result = TokenTree.of(dafnyValue, ".clone()");
           if (isRustOption) {
             result =
-              TokenTree.of(
-                TokenTree.of("Some("),
-                result,
-                TokenTree.of(".clone())")
-              );
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
           }
           yield result;
         }
@@ -710,6 +702,7 @@ public abstract class AbstractRustShimGenerator {
     );
   }
 
+  // TODO: unify overrides of toDafny by figuring out exactly where clones/borrows can be elided
   /**
    * @param isRustOption Whether the Rust type is an Option<...> or not.
    *                     Rust's structures avoid Options when not strictly necessary depending on context.
@@ -718,293 +711,12 @@ public abstract class AbstractRustShimGenerator {
    *                      We generally trust that Dafny codegen aligns with the constraints,
    *                      and hence is it safe to call unwrap() on Rust options when necessary.
    */
-  private TokenTree toDafny(
+  protected abstract TokenTree toDafny(
     final Shape shape,
     final String rustValue,
     boolean isRustOption,
     boolean isDafnyOption
-  ) {
-    return switch (shape.getType()) {
-      case STRING, ENUM -> {
-        if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
-          var enumShapeName = toSnakeCase(shape.toShapeId().getName());
-          if (isDafnyOption) {
-            yield TokenTree.of(
-              """
-              ::std::rc::Rc::new(match &%s {
-                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
-                  None => crate::_Wrappers_Compile::Option::None { }
-              })
-              """.formatted(rustValue, enumShapeName)
-            );
-          } else if (isRustOption) {
-            yield TokenTree.of(
-              "crate::conversions::%s::to_dafny(%s.clone().unwrap())".formatted(
-                  enumShapeName,
-                  rustValue
-                )
-            );
-          } else {
-            yield TokenTree.of(
-              "crate::conversions::%s::to_dafny(%s.clone())".formatted(
-                  enumShapeName,
-                  rustValue
-                )
-            );
-          }
-        } else if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-          final String rustToDafny =
-            "dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.as_bytes().to_vec(), |b| *b)";
-          String valueToDafny;
-          if (isRustOption) {
-            valueToDafny =
-              """
-              match %s {
-                Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
-                None => crate::_Wrappers_Compile::Option::None {},
-              }""".formatted(rustValue, rustToDafny.formatted("s"));
-            if (!isDafnyOption) {
-              valueToDafny = "(%s).Extract()".formatted(valueToDafny);
-            }
-          } else {
-            valueToDafny = rustToDafny.formatted(rustValue);
-          }
-          yield TokenTree.of("::std::rc::Rc::new(%s)".formatted(valueToDafny));
-        } else {
-          if (isRustOption) {
-            var result = TokenTree.of(
-              "crate::standard_library_conversions::ostring_to_dafny(&%s)".formatted(
-                  rustValue
-                )
-            );
-            if (!isDafnyOption) {
-              result = TokenTree.of(result, TokenTree.of(".Extract()"));
-            }
-            yield result;
-          } else {
-            yield TokenTree.of(
-              "dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&%s)".formatted(
-                  rustValue
-                )
-            );
-          }
-        }
-      }
-      case BOOLEAN -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(rustValue);
-        }
-      }
-      case INTEGER -> {
-        if (isDafnyOption) {
-          if (isRustOption) {
-            yield TokenTree.of(
-              "crate::standard_library_conversions::oint_to_dafny(%s)".formatted(
-                  rustValue
-                )
-            );
-          } else {
-            yield TokenTree.of(
-              "crate::standard_library_conversions::oint_to_dafny(Some(%s))".formatted(
-                  rustValue
-                )
-            );
-          }
-        } else {
-          yield TokenTree.of(rustValue);
-        }
-      }
-      case LONG -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::olong_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(rustValue);
-        }
-      }
-      case DOUBLE -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::odouble_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::double_to_dafny(*%s)".formatted(
-                rustValue
-              )
-          );
-        }
-      }
-      case TIMESTAMP -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::otimestamp_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::timestamp_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        }
-      }
-      case BLOB -> {
-        if (isDafnyOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::oblob_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::oblob_to_dafny(&%s).Extract()".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::blob_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        }
-      }
-      case LIST -> {
-        ListShape listShape = shape.asListShape().get();
-        Shape memberShape = model.expectShape(
-          listShape.getMember().getTarget()
-        );
-        if (!isDafnyOption) {
-          if (isRustOption) {
-            yield TokenTree.of(
-              """
-              ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.clone().unwrap(),
-                  |e| %s,
-              )
-              """.formatted(rustValue, toDafny(memberShape, "e", false, false))
-            );
-          } else {
-            yield TokenTree.of(
-              """
-              ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s,
-                  |e| %s,
-              )
-              """.formatted(rustValue, toDafny(memberShape, "e", false, false))
-            );
-          }
-        } else {
-          yield TokenTree.of(
-            """
-            ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
-                    ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-                        |e| %s,
-                    )
-                },
-                None => crate::r#_Wrappers_Compile::Option::None {}
-            })
-            """.formatted(rustValue, toDafny(memberShape, "e", false, false))
-          );
-        }
-      }
-      case MAP -> {
-        MapShape mapShape = shape.asMapShape().get();
-        Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
-        Shape valueShape = model.expectShape(mapShape.getValue().getTarget());
-        if (!isDafnyOption) {
-          if (isRustOption) {
-            yield TokenTree.of(
-              """
-              ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone().unwrap(),
-                  |k| %s,
-                  |v| %s,
-              )
-              """.formatted(
-                  rustValue,
-                  toDafny(keyShape, "k", false, false),
-                  toDafny(valueShape, "v", false, false)
-                )
-            );
-          } else {
-            yield TokenTree.of(
-              """
-              ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone(),
-                  |k| %s,
-                  |v| %s,
-              )
-              """.formatted(
-                  rustValue,
-                  toDafny(keyShape, "k", false, false),
-                  toDafny(valueShape, "v", false, false)
-                )
-            );
-          }
-        } else {
-          yield TokenTree.of(
-            """
-
-            ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
-                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-                        |k| %s,
-                        |v| %s,
-                    )
-                },
-                None => crate::r#_Wrappers_Compile::Option::None {}
-            })
-            """.formatted(
-                rustValue,
-                toDafny(keyShape, "k", false, false),
-                toDafny(valueShape, "v", false, false)
-              )
-          );
-        }
-      }
-      case STRUCTURE, UNION -> {
-        var structureShapeName = toSnakeCase(shape.getId().getName());
-        if (!isDafnyOption) {
-          if (isRustOption) {
-            yield TokenTree.of(
-              """
-              crate::conversions::%s::to_dafny(&%s.clone().unwrap())
-              """.formatted(structureShapeName, rustValue)
-            );
-          } else {
-            yield TokenTree.of(
-              """
-              crate::conversions::%s::to_dafny(&%s)
-              """.formatted(structureShapeName, rustValue)
-            );
-          }
-        } else {
-          yield TokenTree.of(
-            """
-            ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
-                None => crate::_Wrappers_Compile::Option::None { }
-            })
-            """.formatted(rustValue, structureShapeName)
-          );
-        }
-      }
-      default -> throw new IllegalArgumentException(
-        "Unsupported shape type: %s".formatted(shape.getType())
-      );
-    };
-  }
+  );
 
   protected TokenTree enumToDafnyFunction(final EnumShape enumShape) {
     final Map<String, String> variables = MapUtils.merge(
@@ -1150,18 +862,18 @@ public abstract class AbstractRustShimGenerator {
     final String opName = operationName(operationShape);
     final String opInputName = operationInputName(operationShape);
     final String opOutputName = operationOutputName(operationShape);
+    final String opErrorName = operationErrorTypeName(operationShape);
     final String synOpInputName = syntheticOperationInputName(operationShape);
     final String synOpOutputName = syntheticOperationOutputName(operationShape);
-    final String snakeCaseOpName = toSnakeCase(opName);
 
     final HashMap<String, String> variables = new HashMap<>();
     variables.put("operationName", opName);
     variables.put("operationInputName", opInputName);
     variables.put("operationOutputName", opOutputName);
-    variables.put("operationErrorName", operationErrorTypeName(operationShape));
+    variables.put("operationErrorName", opErrorName);
     variables.put("syntheticOperationInputName", synOpInputName);
     variables.put("syntheticOperationOutputName", synOpOutputName);
-    variables.put("snakeCaseOperationName", snakeCaseOpName);
+    variables.put("snakeCaseOperationName", toSnakeCase(opName));
     variables.put("snakeCaseOperationInputName", toSnakeCase(opInputName));
     variables.put("snakeCaseOperationOutputName", toSnakeCase(opOutputName));
     variables.put(
@@ -1172,6 +884,10 @@ public abstract class AbstractRustShimGenerator {
       "snakeCaseSyntheticOperationOutputName",
       toSnakeCase(synOpOutputName)
     );
+    variables.put("pascalCaseOperationName", toPascalCase(opName));
+    variables.put("pascalCaseOperationInputName", toPascalCase(opInputName));
+    variables.put("pascalCaseOperationOutputName", toPascalCase(opOutputName));
+    variables.put("pascalCaseOperationErrorName", toPascalCase(opErrorName));
     return variables;
   }
 
