@@ -75,7 +75,7 @@ public class ModelUtils {
       .getAllMembers()
       .entrySet()
       .stream()
-      .sorted()
+      .sorted(Map.Entry.comparingByKey())
       .map(Map.Entry::getValue);
   }
 

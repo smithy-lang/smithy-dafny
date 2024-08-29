@@ -191,94 +191,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.toSet());
   }
 
-  private RustFile structureConversionModule(
-    final StructureShape structureShape
-  ) {
-    String structureName = structureShape.getId().getName();
-    String snakeCaseName = toSnakeCase(structureName);
-    Path path = Path.of("src", "conversions", snakeCaseName + ".rs");
-    return new RustFile(
-      path,
-      TokenTree.of(
-        structureToDafnyFunction(structureShape),
-        structureFromDafnyFunction(structureShape)
-      )
-    );
-  }
-
-  private TokenTree structureToDafnyFunction(
-    final StructureShape structureShape
-  ) {
-    String structureName = structureShape.getId().getName();
-    String template =
-      """
-      #[allow(dead_code)]
-      pub fn to_dafny(
-          value: &$rustTypesModuleName:L::$rustStructureName:L,
-      ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
-        ::std::rc::Rc::new(
-          crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
-              $variants:L
-          }
-        )
-      }
-      """;
-    final Map<String, String> variables = serviceVariables();
-    variables.put("structureName", structureName);
-    variables.put("rustStructureName", toPascalCase(structureName));
-    variables.put(
-      "variants",
-      toDafnyVariantsForStructure(structureShape).toString()
-    );
-
-    return TokenTree.of(evalTemplate(template, variables));
-  }
-
-  private TokenTree structureFromDafnyFunction(
-    final StructureShape structureShape
-  ) {
-    String structureName = structureShape.getId().getName();
-    // The builders smithy-rs generates only validate that required fields are provided,
-    // and only produce `Result<...>` values if there are any required fields
-    // (...that aren't structures, for some reason)
-    String unwrapIfNeeded = structureShape
-        .members()
-        .stream()
-        .anyMatch(m ->
-          m.isRequired() && !model.expectShape(m.getTarget()).isStructureShape()
-        )
-      ? ".unwrap()"
-      : "";
-    final Map<String, String> variables = serviceVariables();
-    variables.put("structureName", structureName);
-    variables.put("rustStructureName", toPascalCase(structureName));
-    variables.put("snakeCaseStructureName", toSnakeCase(structureName));
-    variables.put(
-      "fluentMemberSetters",
-      fluentMemberSettersForStructure(structureShape).toString()
-    );
-    variables.put("unwrapIfNeeded", unwrapIfNeeded);
-
-    return TokenTree.of(
-      evalTemplate(
-        """
-        #[allow(dead_code)]
-        pub fn from_dafny(
-            dafny_value: ::std::rc::Rc<
-                crate::r#$dafnyTypesModuleName:L::$structureName:L,
-            >,
-        ) -> $rustTypesModuleName:L::$rustStructureName:L {
-            $rustTypesModuleName:L::$rustStructureName:L::builder()
-                  $fluentMemberSetters:L
-                  .build()
-                  $unwrapIfNeeded:L
-        }
-        """,
-        variables
-      )
-    );
-  }
-
   @Override
   protected TokenTree operationRequestToDafnyFunction(
     final OperationShape operationShape
@@ -316,7 +228,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected boolean isRustFieldRequired(Shape parent, MemberShape member) {
+  protected boolean isRustFieldRequired(
+    final StructureShape parent,
+    final MemberShape member
+  ) {
     // These rules were mostly reverse-engineered from inspection of Rust SDKs,
     // and may not be complete!
     final Shape targetShape = model.expectShape(member.getTarget());
@@ -324,6 +239,21 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       super.isRustFieldRequired(parent, member) ||
       (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape())
     );
+  }
+
+  @Override
+  protected boolean isStructureBuilderFallible(
+    final StructureShape structureShape
+  ) {
+    // The builders smithy-rs generates only validate that required fields are provided,
+    // and only produce `Result<...>` values if there are any required fields
+    // (...that aren't structures, for some reason)
+    return structureShape
+      .members()
+      .stream()
+      .anyMatch(m ->
+        m.isRequired() && !model.expectShape(m.getTarget()).isStructureShape()
+      );
   }
 
   @Override
@@ -522,7 +452,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private RustFile errorConversionModule(final Shape errorStructure) {
+  private RustFile errorConversionModule(final StructureShape errorStructure) {
     String structureName = errorStructure.getId().getName();
     String snakeCaseName = toSnakeCase(structureName);
     String pascalCaseName = toPascalCase(structureName);

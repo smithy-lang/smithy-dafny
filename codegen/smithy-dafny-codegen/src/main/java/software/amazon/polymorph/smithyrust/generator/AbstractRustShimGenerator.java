@@ -75,12 +75,20 @@ public abstract class AbstractRustShimGenerator {
       );
   }
 
+  protected final boolean isInputOrOutputStructure(
+    final StructureShape structureShape
+  ) {
+    return (
+      operationIndex.isInputStructure(structureShape) ||
+      operationIndex.isOutputStructure(structureShape)
+    );
+  }
+
   protected boolean shouldGenerateStructForStructure(
     StructureShape structureShape
   ) {
     return (
-      !operationIndex.isInputStructure(structureShape) &&
-      !operationIndex.isOutputStructure(structureShape) &&
+      !isInputOrOutputStructure(structureShape) &&
       !structureShape.hasTrait(ErrorTrait.class) &&
       !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
       structureShape
@@ -164,6 +172,93 @@ public abstract class AbstractRustShimGenerator {
     return new RustFile(Path.of("src", "conversions.rs"), content);
   }
 
+  protected RustFile structureConversionModule(
+    final StructureShape structureShape
+  ) {
+    String snakeCaseName = toSnakeCase(structureName(structureShape));
+    Path path = Path.of("src", "conversions", snakeCaseName + ".rs");
+    return new RustFile(
+      path,
+      TokenTree.of(
+        structureToDafnyFunction(structureShape),
+        structureFromDafnyFunction(structureShape)
+      )
+    );
+  }
+
+  protected TokenTree structureToDafnyFunction(
+    final StructureShape structureShape
+  ) {
+    final String template =
+      """
+      #[allow(dead_code)]
+      pub fn to_dafny(
+          value: &$rustTypesModuleName:L::$rustStructureName:L,
+      ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
+        ::std::rc::Rc::new(
+          crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+              $variants:L
+          }
+        )
+      }
+      """;
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      structureVariables(structureShape)
+    );
+    variables.put(
+      "variants",
+      toDafnyVariantsForStructure(structureShape).toString()
+    );
+
+    return TokenTree.of(evalTemplate(template, variables));
+  }
+
+  /**
+   * Returns whether the Rust struct builder for the given shape is fallible,
+   * i.e. its {@code build()} function returns {@code Result<T>}.
+   */
+  protected abstract boolean isStructureBuilderFallible(
+    final StructureShape structureShape
+  );
+
+  protected TokenTree structureFromDafnyFunction(
+    final StructureShape structureShape
+  ) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      structureVariables(structureShape)
+    );
+    variables.put(
+      "fluentMemberSetters",
+      fluentMemberSettersForStructure(structureShape).toString()
+    );
+
+    final String unwrapIfNeeded = isStructureBuilderFallible(structureShape)
+      ? ".unwrap()"
+      : "";
+    variables.put("unwrapIfNeeded", unwrapIfNeeded);
+
+    return TokenTree.of(
+      evalTemplate(
+        """
+        #[allow(dead_code)]
+        pub fn from_dafny(
+            dafny_value: ::std::rc::Rc<
+                crate::r#$dafnyTypesModuleName:L::$structureName:L,
+            >,
+        ) -> $rustTypesModuleName:L::$rustStructureName:L {
+            $rustTypesModuleName:L::$rustStructureName:L::builder()
+                  $fluentMemberSetters:L
+                  .build()
+                  $unwrapIfNeeded:L
+        }
+        """,
+        variables
+      )
+    );
+  }
+
   protected RustFile operationRequestConversionModule(
     final OperationShape operationShape
   ) {
@@ -245,17 +340,19 @@ public abstract class AbstractRustShimGenerator {
       .lineSeparated();
   }
 
-  protected TokenTree toDafnyVariantsForStructure(Shape shape) {
+  protected TokenTree toDafnyVariantsForStructure(
+    final StructureShape structureShape
+  ) {
     return TokenTree
       .of(
-        shape
+        structureShape
           .members()
           .stream()
           .map(m ->
             TokenTree.of(
               m.getMemberName() +
               ": " +
-              toDafnyVariantMemberForOperationRequest(shape, m) +
+              toDafnyVariantMember(structureShape, m) +
               ","
             )
           )
@@ -580,12 +677,12 @@ public abstract class AbstractRustShimGenerator {
     };
   }
 
-  private TokenTree toDafnyVariantMemberForOperationRequest(
-    Shape parent,
-    MemberShape member
+  private TokenTree toDafnyVariantMember(
+    final StructureShape parent,
+    final MemberShape member
   ) {
-    Shape targetShape = model.expectShape(member.getTarget());
-    String snakeCaseMemberName = toSnakeCase(member.getMemberName());
+    final Shape targetShape = model.expectShape(member.getTarget());
+    final String snakeCaseMemberName = toSnakeCase(member.getMemberName());
     return toDafny(
       targetShape,
       "value." + snakeCaseMemberName,
@@ -599,7 +696,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected boolean isRustFieldRequired(
-    final Shape parent,
+    final StructureShape parent,
     final MemberShape member
   ) {
     // These rules were mostly reverse-engineered from inspection of Rust SDKs,
@@ -1100,6 +1197,51 @@ public abstract class AbstractRustShimGenerator {
 
   protected String operationErrorTypeName(final OperationShape operationShape) {
     return "%sError".formatted(operationName(operationShape));
+  }
+
+  protected String structureName(final StructureShape structureShape) {
+    return structureShape.getId().getName(service);
+  }
+
+  protected String rustStructureName(final StructureShape structureShape) {
+    return toPascalCase(structureName(structureShape));
+  }
+
+  protected String qualifiedRustStructureType(
+    final StructureShape structureShape
+  ) {
+    return "%s::%s".formatted(
+        getRustTypesModuleName(),
+        rustStructureName(structureShape)
+      );
+  }
+
+  protected HashMap<String, String> structureVariables(
+    final StructureShape structureShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String structureName = structureName(structureShape);
+    variables.put("structureName", structureName);
+    variables.put("snakeCaseStructureName", toSnakeCase(structureName));
+    variables.put("rustStructureName", rustStructureName(structureShape));
+    return variables;
+  }
+
+  /**
+   * Generates values for variables commonly used in templates specific to standard structures
+   * (e.g. not operation-related or {@code @error} structures).
+   */
+  protected HashMap<String, String> standardStructureVariables(
+    final StructureShape structureShape
+  ) {
+    final HashMap<String, String> variables = structureVariables(
+      structureShape
+    );
+    variables.put(
+      "qualifiedRustStructureType",
+      qualifiedRustStructureType(structureShape)
+    );
+    return variables;
   }
 
   protected String enumName(final EnumShape enumShape) {
