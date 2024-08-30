@@ -382,7 +382,7 @@ public abstract class AbstractRustShimGenerator {
    */
   // TODO: There is obviously a lot of duplication here that should be easy to clean up.
   // TODO: Some cases do not handle all combinations of isRustOption and isDafnyOption.
-  private TokenTree fromDafny(
+  protected TokenTree fromDafny(
     final Shape shape,
     final String dafnyValue,
     boolean isRustOption,

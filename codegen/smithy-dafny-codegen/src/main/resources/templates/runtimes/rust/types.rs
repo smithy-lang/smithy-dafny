@@ -6,3 +6,5 @@ pub mod builders;
 $structureModules:L
 
 $enumModules:L
+
+$unionModules:L

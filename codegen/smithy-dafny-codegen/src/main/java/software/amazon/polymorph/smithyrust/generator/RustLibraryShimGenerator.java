@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyrust.generator;
 
 import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
 import java.nio.file.Path;
@@ -28,6 +29,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 /**
@@ -80,6 +82,14 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .map(this::enumTypeModule)
         .toList()
     );
+    result.addAll(
+      model
+        .getUnionShapes()
+        .stream()
+        .filter(this::shouldGenerateEnumForUnion)
+        .map(this::unionTypeModule)
+        .toList()
+    );
 
     // errors
     result.add(errorModule());
@@ -113,7 +123,14 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .map(this::enumConversionModule)
         .toList()
     );
-    // TODO union conversion modules
+    result.addAll(
+      model
+        .getUnionShapes()
+        .stream()
+        .filter(this::shouldGenerateEnumForUnion)
+        .map(this::unionConversionModule)
+        .toList()
+    );
 
     // wrapped client
     result.add(wrappedModule());
@@ -210,7 +227,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .map(memberShape -> {
         final Map<String, String> variables = MapUtils.merge(
           opVariables,
-          memberVariables(memberShape)
+          structureMemberVariables(memberShape)
         );
         return IOUtils.evalTemplate(template, variables);
       })
@@ -234,7 +251,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .map(memberShape -> {
         final Map<String, String> variables = MapUtils.merge(
           opVariables,
-          memberVariables(memberShape)
+          structureMemberVariables(memberShape)
         );
         return IOUtils.evalTemplate(template, variables);
       })
@@ -273,6 +290,22 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       )
       .collect(Collectors.joining("\n"));
     variables.put("enumModules", enumModules);
+
+    final String unionModules = model
+      .getUnionShapes()
+      .stream()
+      .filter(this::shouldGenerateEnumForUnion)
+      .map(unionShape ->
+        IOUtils.evalTemplate(
+          """
+          mod _$snakeCaseUnionName:L;
+          pub use crate::types::_$snakeCaseUnionName:L::$rustUnionName:L;
+          """,
+          unionVariables(unionShape)
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("unionModules", unionModules);
 
     final String content = IOUtils.evalTemplate(
       getClass(),
@@ -350,6 +383,81 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "src",
       "types",
       "_%s.rs".formatted(toSnakeCase(enumName(enumShape)))
+    );
+    return new RustFile(path, TokenTree.of(content));
+  }
+
+  private RustFile unionTypeModule(final UnionShape unionShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      unionVariables(unionShape)
+    );
+
+    final List<MemberShape> memberShapes = unionShape
+      .members()
+      .stream()
+      .toList();
+
+    final String variants = memberShapes
+      .stream()
+      .map(memberName ->
+        IOUtils.evalTemplate(
+          """
+          #[allow(missing_docs)] // documentation missing in model
+          $rustUnionMemberName:L($unionMemberType:L),
+          """,
+          MapUtils.merge(variables, unionMemberVariables(memberName))
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("variants", variants);
+
+    final String asImpls = memberShapes
+      .stream()
+      .map(memberName ->
+        IOUtils.evalTemplate(
+          """
+          /// Tries to convert the enum instance into [`$rustUnionMemberName:L`]($qualifiedRustUnionName:L::$rustUnionMemberName:L), extracting the inner [`$unionMemberType:L`]($unionMemberType:L).
+          /// Returns `Err(&Self)` if it can't be converted.
+          pub fn as_$snakeCaseUnionMemberName:L(&self) -> ::std::result::Result<&$unionMemberType:L, &Self> {
+              if let $qualifiedRustUnionName:L::$rustUnionMemberName:L(val) = &self {
+                  ::std::result::Result::Ok(val)
+              } else {
+                  ::std::result::Result::Err(self)
+              }
+          }
+          """,
+          MapUtils.merge(variables, unionMemberVariables(memberName))
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("asImpls", asImpls);
+
+    final String isImpls = memberShapes
+      .stream()
+      .map(memberName ->
+        IOUtils.evalTemplate(
+          """
+          /// Returns true if this is a [`$rustUnionMemberName:L`]($qualifiedRustUnionName:L::$rustUnionMemberName:L).
+          pub fn is_$snakeCaseUnionMemberName:L(&self) -> ::std::primitive::bool {
+              self.as_$snakeCaseUnionMemberName:L().is_ok()
+          }
+          """,
+          MapUtils.merge(variables, unionMemberVariables(memberName))
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("isImpls", isImpls);
+
+    final String content = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/types/union.rs",
+      variables
+    );
+    final Path path = Path.of(
+      "src",
+      "types",
+      "_%s.rs".formatted(toSnakeCase(unionName(unionShape)))
     );
     return new RustFile(path, TokenTree.of(content));
   }
@@ -489,11 +597,14 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       #[allow(missing_docs)] // documentation missing in model
       pub $fieldName:L: ::std::option::Option<$fieldType:L>,
       """;
-    return IOUtils.evalTemplate(template, memberVariables(memberShape));
+    return IOUtils.evalTemplate(
+      template,
+      structureMemberVariables(memberShape)
+    );
   }
 
   private String structureGetter(final MemberShape memberShape) {
-    final Map<String, String> variables = memberVariables(memberShape);
+    final Map<String, String> variables = structureMemberVariables(memberShape);
     final String template =
       """
       #[allow(missing_docs)] // documentation missing in model
@@ -507,7 +618,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   private String structureBuilderField(final MemberShape memberShape) {
     return IOUtils.evalTemplate(
       "pub(crate) $fieldName:L: ::std::option::Option<$fieldType:L>,",
-      memberVariables(memberShape)
+      structureMemberVariables(memberShape)
     );
   }
 
@@ -529,13 +640,16 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           &self.$fieldName:L
       }
       """;
-    return IOUtils.evalTemplate(template, memberVariables(memberShape));
+    return IOUtils.evalTemplate(
+      template,
+      structureMemberVariables(memberShape)
+    );
   }
 
   private String structureBuilderAssignment(final MemberShape memberShape) {
     return IOUtils.evalTemplate(
       "$fieldName:L: self.$fieldName:L,",
-      memberVariables(memberShape)
+      structureMemberVariables(memberShape)
     );
   }
 
@@ -584,7 +698,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           self.inner.get_$fieldName:L()
       }
       """;
-    return IOUtils.evalTemplate(template, memberVariables(memberShape));
+    return IOUtils.evalTemplate(
+      template,
+      structureMemberVariables(memberShape)
+    );
   }
 
   private RustFile errorModule() {
@@ -681,6 +798,80 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "src",
       "conversions",
       "%s.rs".formatted(toSnakeCase(structureName(structureShape)))
+    );
+    return new RustFile(path, TokenTree.of(content));
+  }
+
+  private RustFile unionConversionModule(final UnionShape unionShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      unionVariables(unionShape)
+    );
+
+    final List<Map<String, String>> perMemberVariables = unionShape
+      .members()
+      .stream()
+      .map(memberShape -> {
+        final Map<String, String> memberVariables = MapUtils.merge(
+          variables,
+          unionMemberVariables(memberShape)
+        );
+        final Shape targetShape = model.expectShape(memberShape.getTarget());
+        memberVariables.put(
+          "innerToDafny",
+          toDafny(targetShape, "x", false, false).toString()
+        );
+        memberVariables.put(
+          "innerFromDafny",
+          fromDafny(targetShape, "x", false, false).toString()
+        );
+        return memberVariables;
+      })
+      .toList();
+
+    variables.put(
+      "toDafnyVariants",
+      perMemberVariables
+        .stream()
+        .map(memberVariables ->
+          IOUtils.evalTemplate(
+            """
+            $qualifiedRustUnionName:L::$rustUnionMemberName:L(x) =>
+                crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
+                    $dafnyUnionMemberName:L: $innerToDafny:L,
+                },
+            """,
+            memberVariables
+          )
+        )
+        .collect(Collectors.joining("\n"))
+    );
+    variables.put(
+      "fromDafnyVariants",
+      perMemberVariables
+        .stream()
+        .map(memberVariables ->
+          IOUtils.evalTemplate(
+            """
+            crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
+                $dafnyUnionMemberName:L: x @ _,
+            } => $qualifiedRustUnionName:L::$rustUnionMemberName:L($innerFromDafny:L),
+            """,
+            memberVariables
+          )
+        )
+        .collect(Collectors.joining("\n"))
+    );
+
+    final String content = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/conversions/union.rs",
+      variables
+    );
+    final Path path = Path.of(
+      "src",
+      "conversions",
+      "%s.rs".formatted(toSnakeCase(unionName(unionShape)))
     );
     return new RustFile(path, TokenTree.of(content));
   }
@@ -920,7 +1111,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   /**
    * Generates values for variables commonly used in structure-member-specific templates.
    */
-  private HashMap<String, String> memberVariables(
+  private HashMap<String, String> structureMemberVariables(
     final MemberShape memberShape
   ) {
     final HashMap<String, String> variables = new HashMap<>();
@@ -931,6 +1122,67 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "fieldType",
       rustTypeForShape(model.expectShape(memberShape.getTarget()))
     );
+    return variables;
+  }
+
+  protected String unionName(final UnionShape unionShape) {
+    return unionShape.getId().getName(service);
+  }
+
+  protected String rustUnionName(final UnionShape unionShape) {
+    return toPascalCase(unionName(unionShape));
+  }
+
+  protected String qualifiedRustUnionName(final UnionShape unionShape) {
+    return "%s::%s".formatted(
+        getRustTypesModuleName(),
+        rustUnionName(unionShape)
+      );
+  }
+
+  /**
+   * Generates values for variables commonly used in union-specific templates.
+   */
+  protected HashMap<String, String> unionVariables(
+    final UnionShape unionShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String unionName = unionName(unionShape);
+    variables.put("unionName", unionName);
+    variables.put("snakeCaseUnionName", toSnakeCase(unionName));
+    variables.put("dafnyUnionName", unionName);
+    variables.put("rustUnionName", rustUnionName(unionShape));
+    variables.put("qualifiedRustUnionName", qualifiedRustUnionName(unionShape));
+    return variables;
+  }
+
+  protected String unionMemberName(final MemberShape memberShape) {
+    return memberShape.getMemberName();
+  }
+
+  protected String rustUnionMemberName(final MemberShape memberShape) {
+    return toPascalCase(unionMemberName(memberShape));
+  }
+
+  protected String dafnyUnionMemberName(final MemberShape memberShape) {
+    return unionMemberName(memberShape);
+  }
+
+  /**
+   * Generates values for variables commonly used in union-member-specific templates.
+   */
+  protected HashMap<String, String> unionMemberVariables(
+    final MemberShape memberShape
+  ) {
+    final String memberName = unionMemberName(memberShape);
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
+
+    final HashMap<String, String> variables = new HashMap<>();
+    variables.put("unionMemberName", memberName);
+    variables.put("snakeCaseUnionMemberName", toSnakeCase(memberName));
+    variables.put("dafnyUnionMemberName", dafnyUnionMemberName(memberShape));
+    variables.put("rustUnionMemberName", rustUnionMemberName(memberShape));
+    variables.put("unionMemberType", rustTypeForShape(targetShape));
     return variables;
   }
 
@@ -992,7 +1244,14 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             valueType
           );
       }
-      // TODO: union
+      case UNION -> {
+        if (ModelUtils.isInServiceNamespace(shape.getId(), service)) {
+          yield qualifiedRustUnionName((UnionShape) shape);
+        }
+        throw new UnsupportedOperationException(
+          "Unsupported type for union: " + shape.getId()
+        );
+      }
       default -> throw new UnsupportedOperationException(
         "Unsupported shape type: " + shape.getType()
       );
