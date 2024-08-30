@@ -208,11 +208,11 @@ public class LocalServiceToDafnyConversionFunctionWriter
     //   an empty optional at runtime
     else if (memberShape.isOptional()) {
       conversionWriter.addStdlibImport(
-        "smithy_dafny_smithy_dafny_standard_library.internaldafny.generated.Wrappers",
+        "smithy_dafny_standard_library.internaldafny.generated.Wrappers",
         "Option_Some"
       );
       conversionWriter.addStdlibImport(
-        "smithy_dafny_smithy_dafny_standard_library.internaldafny.generated.Wrappers",
+        "smithy_dafny_standard_library.internaldafny.generated.Wrappers",
         "Option_None"
       );
       conversionWriter.write(
