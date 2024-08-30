@@ -60,7 +60,7 @@ def _is_outside_bmp(native_char):
   return ord(native_char) > 0xFFFF
 
 # Extend the Dafny-generated class with our extern methods
-class default__(standard_library.internaldafny.generated.UTF8.default__):
+class default__(smithy_dafny_standard_lib rary.internaldafny.generated.UTF8.default__):
 
   @staticmethod
   def Encode(s):
@@ -100,4 +100,4 @@ class default__(standard_library.internaldafny.generated.UTF8.default__):
 
 
 # Export externs
-standard_library.internaldafny.generated.UTF8.default__ = default__
+smithy_dafny_standard_lib rary.internaldafny.generated.UTF8.default__ = default__
