@@ -131,7 +131,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             builder.append("%1$s: %2$s,".formatted(
                     StringUtils.capitalize(memberName),
                     targetShape.accept(
-                            new DafnyToAwsSdkShapeVisitor(context, derivedDataSource, writer, memberShape.isOptional(), shapeName.contains(memberName) || awsSdkGoPointableIndex.isPointable(memberShape))
+                            new DafnyToAwsSdkShapeVisitor(context, derivedDataSource, writer, memberShape.isOptional(), shapeName.contains(memberName) || awsSdkGoPointableIndex.isPointable(targetShape))
                     )
             ));
         }
