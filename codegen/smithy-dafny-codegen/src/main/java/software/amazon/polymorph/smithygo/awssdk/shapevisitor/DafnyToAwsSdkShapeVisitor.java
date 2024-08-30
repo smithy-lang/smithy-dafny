@@ -10,7 +10,6 @@ import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.DafnyGoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -381,70 +380,11 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String unionShape(UnionShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        //writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
-        var nilCheck = "";
-        if (this.isOptional) {
-            if (this.isPointable) {
-                nilCheck = "if %s == nil { return nil }".formatted(dataSource);
-            } else {
-                nilCheck = "if %s == nil { return union}".formatted(dataSource);
-            }
-        }
-        final String functionInit = """
-            func() %s {
-                var union %s
-                %s
-            """.formatted(
-                SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(shape), true),
-                SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(shape), true),
-                nilCheck
-        );
-        StringBuilder eachMemberInUnion = new StringBuilder();
-        for (var member : shape.getAllMembers().values()) {
-            final Shape targetShape = context.model().expectShape(member.getTarget());
-            final String memberName = context.symbolProvider().toMemberName(member);
-            // unwrap union type, assert it then convert it to its member type with Dtor_ (example: Dtor_BlobValue()). unionDataSource is not a wrapper object until now.
-            String unionDataSource = dataSource + ".Dtor_" + memberName.replace(shape.getId().getName() + "Member", "") + "()";
-            final Boolean isMemberShapePointable = (awsSdkGoPointableIndex.isPointable(targetShape) && awsSdkGoPointableIndex.isDereferencable(targetShape)) && !targetShape.isStructureShape();
-            final String pointerForPointableShape = isMemberShapePointable ? "*" : "";
-            final String isMemberCheck = """
-                        if ((%s).%s()) {""".formatted(
-                    dataSource,
-                    memberName.replace(shape.getId().getName() + "Member", "Is_")
-            );
-            String wrappedDataSource = "";
-            if (!(targetShape.isStructureShape())) {
-                // All other shape except structure needs a Wrapper object but unionDataSource is not a Wrapper object.
-                wrappedDataSource = """
-                    var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)""".formatted(unionDataSource);
-                unionDataSource = "dataSource.UnwrapOr(nil)";
-            }
-            eachMemberInUnion.append("""
-                            %s
-                            %s
-                            union = &%s.%s{
-                                    Value: %s(%s),
-                                }
-                            }
-                            """.formatted(
-                    isMemberCheck,
-                    wrappedDataSource,
-                    SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true),
-                    memberName,
-                    pointerForPointableShape,
-                    targetShape.accept(
-                            new DafnyToAwsSdkShapeVisitor(context, unionDataSource, writer, member.isOptional(), isMemberShapePointable)
-                    )));
-        }
-        return
-                """
-                    %s
-                    %s
-                    return union
-                }()""".formatted(
-                        functionInit,
-                        eachMemberInUnion
-                );
+        return """
+                func () types.%s {
+                _ = val
+                return nil
+                }()""".formatted(context.symbolProvider().toSymbol(shape).getName());
     }
 
     @Override
