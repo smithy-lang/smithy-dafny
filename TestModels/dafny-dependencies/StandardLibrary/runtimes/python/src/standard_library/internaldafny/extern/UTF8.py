@@ -40,8 +40,8 @@ then decodes them under the expected decoding.
 import _dafny
 import struct
 
-import standard_library.internaldafny.generated.UTF8
-from standard_library.internaldafny.generated.UTF8 import *
+import smithy_dafny_standard_library.internaldafny.generated.UTF8
+from smithy_dafny_standard_library.internaldafny.generated.UTF8 import *
 
 def _convert_char_outside_bmp_to_unicode_escaped_string(char_outside_bmp):
   # Re-encode the character to UTF-16. This is necessary to get the surrogate pairs.
