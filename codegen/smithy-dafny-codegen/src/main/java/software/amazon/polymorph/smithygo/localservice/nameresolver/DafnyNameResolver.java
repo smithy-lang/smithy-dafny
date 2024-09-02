@@ -7,7 +7,9 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
@@ -36,9 +38,25 @@ public class DafnyNameResolver {
      * @return The Dafny type as a String.
      */
     public static String getDafnyType(final Shape shape, final Symbol symbol) {
-        return DafnyNameResolver.dafnyTypesNamespace(shape)
+        ShapeType type = shape.getType();
+        if (shape.hasTrait(EnumTrait.class)) {
+            type = ShapeType.ENUM;
+        }
+        switch (type) {
+            case INTEGER, LONG, BOOLEAN: 
+                return symbol.getName();
+            case MAP:
+                return "dafny.Map";
+            case DOUBLE, STRING, BLOB, LIST:
+                return "dafny.Sequence";
+            // default catches a case where users may author their own classes that implement and extend resource (ExtendableTrait)
+            // ENUM, STRUCTURE, UNION can be removed but for posterity it looks great to see all the shapes being covered.
+            case ENUM, STRUCTURE, UNION:
+            default:
+                return DafnyNameResolver.dafnyTypesNamespace(shape)
                                 .concat(DOT)
                                 .concat(symbol.getName());
+        }
     }
 
     public static String getDafnySubErrorType(final Shape shape, final Symbol symbol) {
