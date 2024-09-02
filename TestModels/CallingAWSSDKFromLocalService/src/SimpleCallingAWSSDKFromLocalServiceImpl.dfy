@@ -21,11 +21,11 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
 
   method CallDDBGetItem ( config: InternalConfig,  input: CallDDBGetItemInput )
     returns (output: Result<CallDDBGetItemOutput, Error>) {
-    var retGetItem : Result<DDB.GetItemOutput, DDB.Error> := input.ddbClient.GetItem(input.itemInput);
+    var retGetItem := input.ddbClient.GetItem(input.itemInput);
     if retGetItem.Success? {
       return Success(CallDDBGetItemOutput(itemOutput := retGetItem.value));
     } else {
-      return Failure(SimpleCallingAWSSDKFromLocalServiceException(message := retGetItem.error.message.value));
+      return Failure(ComAmazonawsDynamodb(retGetItem.error));
     }
   }
   method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
@@ -34,7 +34,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
       if retEncryptResponse.Success? {
         return Success(CallKMSEncryptOutput(encryptOutput := retEncryptResponse.value));
       } else {
-          return Failure(SimpleCallingAWSSDKFromLocalServiceException(message := retEncryptResponse.error.message.value));
+          return Failure(ComAmazonawsKms(retEncryptResponse.error));
       }
   }
 }
