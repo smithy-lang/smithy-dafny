@@ -10,7 +10,7 @@ async fn test_get_integer() {
 
 #[tokio::test]
 async fn test_get_known_value() {
-    let result = client().get_integer_known_value().value(20).send().await;
+    let result = client().get_integer_known_value_test().value(20).send().await;
     let output = result.unwrap();
     let value = output.value().unwrap();
     assert_eq!(value, 20);

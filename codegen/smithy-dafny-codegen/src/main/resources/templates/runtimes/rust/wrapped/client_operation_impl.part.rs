@@ -12,7 +12,7 @@
         >,
     >{
         let inner_input =
-            crate::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::from_dafny(input.clone());
+            crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone());
         let result = self.rt.block_on(crate::operation::$snakeCaseOperationName:L::$operationName:L::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
@@ -22,7 +22,7 @@
             ),
             Ok(client) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationOutputName:L::to_dafny(client),
+                    value: crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::to_dafny(client),
                 },
             ),
         }
