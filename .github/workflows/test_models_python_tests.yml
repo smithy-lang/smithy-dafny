@@ -1,0 +1,98 @@
+# This workflow performs tests in Python.
+name: Library Python tests
+
+on:
+  workflow_call:
+    inputs:
+      dafny:
+        description: "The Dafny version to run"
+        required: true
+        type: string
+      num_shards:
+        required: false
+        type: number
+        default: 5
+
+jobs:
+  populate-matrix-dimensions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Populate shard list
+        id: populate-shard-list
+        run: echo "shard-list=[`seq -s , 1 ${{ inputs.num_shards }}`]" >> $GITHUB_OUTPUT
+    outputs:
+      shard-list: ${{ steps.populate-shard-list.outputs.shard-list }}
+
+  testPython:
+    needs: populate-matrix-dimensions
+    strategy:
+      fail-fast: false # at least for development; see all errors
+      matrix:
+        shard: ${{ fromJson(needs.populate-matrix-dimensions.outputs.shard-list) }}
+    runs-on: "ubuntu-latest"
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+    steps:
+      - name: Support longpaths on Git checkout
+        run: |
+          git config --global core.longpaths true
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-PolymorphTestModels-Role-us-west-2
+          role-session-name: PythonTests
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.7.0
+        with:
+          dafny-version: ${{ inputs.dafny }}
+
+      - name: Setup Python for running tests
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          architecture: x64
+      - run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade tox
+          pip install poetry
+
+      - name: Setup Java 17 for codegen
+        uses: actions/setup-java@v3
+        with:
+          distribution: "corretto"
+          java-version: 17
+
+      - name: Setup smithy-dafny-conversion
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishToMavenLocal
+          build-root-directory: smithy-dafny-conversion
+
+      - name: Install Smithy-Dafny codegen dependencies
+        uses: ./.github/actions/install_smithy_dafny_codegen_dependencies
+
+      - name: Install smithy-dafny-codegen locally
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :smithy-dafny-codegen:pTML
+          build-root-directory: codegen
+
+      - name: Execute smithy-dafny-codegen-test tests
+        uses: gradle/gradle-build-action@v2
+        env:
+          JUNIT_SHARD: ${{ matrix.shard }}
+          JUNIT_SHARD_COUNT: ${{ inputs.num_shards }}
+        with:
+          arguments: :smithy-dafny-codegen-test:test --tests '*smithypython*' --info
+          build-root-directory: codegen

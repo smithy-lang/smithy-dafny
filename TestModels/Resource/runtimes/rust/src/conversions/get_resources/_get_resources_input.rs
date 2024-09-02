@@ -3,15 +3,15 @@
 pub fn to_dafny(
     value: crate::operation::get_resources::GetResourcesInput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
+    crate::r#simple::resources::internaldafny::types::GetResourcesInput,
 > {
     let dafny_value = match value.value {
-        Some(b) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value:
+        Some(b) => crate::_Wrappers_Compile::Option::Some { value:
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&b)
             },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        None => crate::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput::GetResourcesInput {
+    ::std::rc::Rc::new(crate::r#simple::resources::internaldafny::types::GetResourcesInput::GetResourcesInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -19,12 +19,12 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dresources_dinternaldafny_dtypes::GetResourcesInput,
+        crate::r#simple::resources::internaldafny::types::GetResourcesInput,
     >,
 ) -> crate::operation::get_resources::GetResourcesInput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -33,7 +33,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

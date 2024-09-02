@@ -3,17 +3,17 @@
 pub fn to_dafny(
     value: crate::types::NestedStructure,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
+    crate::r#simple::aggregate::internaldafny::types::NestedStructure,
 > {
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure::NestedStructure {
+    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::NestedStructure::NestedStructure {
     stringStructure: crate::conversions::string_structure::option_to_dafny(value.string_structure),
 })
 }
 
 pub fn to_dafny_plain(
     value: &crate::types::NestedStructure,
-) -> crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure {
-    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure::NestedStructure {
+) -> crate::r#simple::aggregate::internaldafny::types::NestedStructure {
+    crate::r#simple::aggregate::internaldafny::types::NestedStructure::NestedStructure {
   stringStructure: crate::conversions::string_structure::option_to_dafny(value.string_structure.clone()),
 }
 }
@@ -21,15 +21,15 @@ pub fn to_dafny_plain(
 pub fn option_to_dafny(
     value: Option<&crate::types::NestedStructure>,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_Wrappers_Compile::Option<
+    crate::_Wrappers_Compile::Option<
         ::std::rc::Rc<
-            crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
+            crate::r#simple::aggregate::internaldafny::types::NestedStructure,
         >,
     >,
 > {
     let inner = match value {
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
+        None => crate::_Wrappers_Compile::Option::None {},
+        Some(x) => crate::_Wrappers_Compile::Option::Some {
             value: ::std::rc::Rc::new(to_dafny_plain(x)),
         },
     };
@@ -39,11 +39,11 @@ pub fn option_to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
+        crate::r#simple::aggregate::internaldafny::types::NestedStructure,
     >,
 ) -> crate::types::NestedStructure {
     match &*dafny_value {
-    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure::NestedStructure {
+    crate::r#simple::aggregate::internaldafny::types::NestedStructure::NestedStructure {
       stringStructure,
     } =>
     crate::types::NestedStructure {
@@ -54,10 +54,10 @@ pub fn from_dafny(
 
 #[allow(dead_code)]
 pub fn plain_from_dafny(
-    dafny_value: &crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
+    dafny_value: &crate::r#simple::aggregate::internaldafny::types::NestedStructure,
 ) -> crate::types::NestedStructure {
     match dafny_value {
-    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure::NestedStructure {
+    crate::r#simple::aggregate::internaldafny::types::NestedStructure::NestedStructure {
       stringStructure,
     } =>
     crate::types::NestedStructure {
@@ -68,12 +68,12 @@ pub fn plain_from_dafny(
 
 #[allow(dead_code)]
 pub fn option_from_dafny(
-    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::NestedStructure,
+    dafny_value: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::std::rc::Rc<
+        crate::r#simple::aggregate::internaldafny::types::NestedStructure,
     >>>,
 ) -> Option<crate::types::NestedStructure> {
     match &*dafny_value {
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
+        crate::_Wrappers_Compile::Option::Some { value } => {
             Some(plain_from_dafny(value))
         }
         _ => None,

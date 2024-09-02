@@ -20,10 +20,10 @@ impl GetStringKnownValue {
                 input,
             );
         let inner_result =
-            ::dafny_runtime::md!(client.dafny_client.clone()).GetStringUTF8(&inner_input);
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetString(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(crate::conversions::get_string_known_value::_get_string_known_value_output::from_dafny(inner_result.value().clone()))
         } else {

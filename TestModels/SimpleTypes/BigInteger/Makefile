@@ -7,9 +7,9 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.bigInteger
 
-GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/SimpleTypes/BigInteger"
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/BigInteger"
 
-PROJECT_DTR := \
+TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # This project has no dependencies
 # DEPENDENT-MODELS:=

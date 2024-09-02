@@ -3,6 +3,8 @@
 
 CORES=2
 
+ENABLE_EXTERN_PROCESSING=1
+
 include ../SharedMakefile.mk
 
 PROJECT_SERVICES := \
@@ -14,9 +16,9 @@ SERVICE_DEPS_SimpleConstraints :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/Constraints"
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Constraints"
 
-PROJECT_DTR := \
+TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 
 # This project has no dependencies 
@@ -29,3 +31,24 @@ polymorph:
 	make polymorph_dafny
 	make polymorph_java
 	make polymorph_dotnet
+
+# Python
+
+PYTHON_MODULE_NAME=simple_constraints
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleConstraintsTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.constraints.internaldafny.types\" } SimpleConstraintsTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleConstraintsTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.constraints.internaldafny\" } SimpleConstraints refines AbstractSimpleConstraintsService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleConstraints refines AbstractSimpleConstraintsService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleConstraintsImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.constraints.internaldafny.wrapped\"} WrappedSimpleConstraintsService refines WrappedAbstractSimpleConstraintsService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleConstraintsService refines WrappedAbstractSimpleConstraintsService {"

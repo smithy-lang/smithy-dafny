@@ -9,10 +9,12 @@
 **/runtimes/java/src/main/dafny-generated/
 **/runtimes/java/src/test/dafny-generated/
 
+# Dafny Generated Python
+**/runtimes/python/src/**/internaldafny/generated/*.py
+**/runtimes/python/test/internaldafny/generated/*.py
+
 # Dafny Generated Rust
-# (Rust code generation is incomplete so we're patching and checking in for now)
-#**/runtimes/rust
-**/implementation_from_dafny.rs
+**/runtimes/rust/src/implementation_from_dafny.rs
 # Cargo.lock files should only be committed for binaries, not libraries
 **/Cargo.lock
 
@@ -29,9 +31,20 @@
 **/runtimes/java/src/main/smithy-generated/
 **/runtimes/java/src/test/smithy-generated/
 
+# Polymorph Generated Python
+**/runtimes/python/src/**/smithygenerated/
+
 # .NET Artifacts
 **/bin
 **/obj
+
+# Python Artifacts
+**/runtimes/python/src/**.egg-info/
+**/runtimes/python/.pytest_cache
+**/runtimes/python/.tox
+**/runtimes/python/build
+**/runtimes/python/poetry.lock
+**/runtimes/python/**/poetry.lock
 
 # JetBrains
 **/.idea/
