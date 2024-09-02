@@ -3,7 +3,7 @@
 
 include "../Model/ComAmazonawsDynamodbTypes.dfy"
 
-module {:extern "comamazonawsdynamodbinternaldafny"} Com.Amazonaws.Dynamodb refines AbstractComAmazonawsDynamodbService {
+module Com.Amazonaws.Dynamodb refines AbstractComAmazonawsDynamodbService {
 
   function method DefaultDynamoDBClientConfigType() : DynamoDBClientConfigType {
     DynamoDBClientConfigType

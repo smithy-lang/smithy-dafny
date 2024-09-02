@@ -5,7 +5,7 @@ use aws_smithy_types::error::operation::BuildError;
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
     pub(crate) dafny_client: ::dafny_runtime::Object<
-        dyn crate::implementation_from_dafny::r#_simple_dunion_dinternaldafny_dtypes::ISimpleUnionClient,
+        dyn crate::r#simple::union::internaldafny::types::ISimpleUnionClient,
     >,
 }
 
@@ -15,12 +15,12 @@ impl Client {
     pub fn from_conf(
         conf: crate::types::simple_union_config::SimpleUnionConfig,
     ) -> Result<Self, BuildError> {
-        let inner = crate::implementation_from_dafny::_simple_dunion_dinternaldafny::_default::SimpleUnion(
+        let inner = crate::simple::union::internaldafny::_default::SimpleUnion(
             &crate::conversions::simple_union_config::_simple_union_config::to_dafny(conf),
         );
         if matches!(
             inner.as_ref(),
-            crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }
+            crate::_Wrappers_Compile::Result::Failure { .. }
         ) {
             // TODO: convert error - the potential types are not modeled!
             return Err(BuildError::other(

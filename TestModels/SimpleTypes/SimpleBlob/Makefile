@@ -3,6 +3,9 @@
 
 CORES=2
 
+ENABLE_EXTERN_PROCESSING=1
+RUST_BENERATED=1
+
 include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.blob
@@ -16,9 +19,30 @@ SERVICE_DEPS_SimpleBlob :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/SimpleTypes/SimpleBlob"
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleBlob"
 
-PROJECT_DTR := \
+TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+# Python
+
+PYTHON_MODULE_NAME=simple_types_blob
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+
 # This project has no dependencies 
-# DEPENDENT-MODELS:= 
+# DEPENDENT-MODELS:=
+
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleTypesBlobTypes.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.blob.internaldafny.types\" } SimpleTypesBlobTypes"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleTypesBlobTypes"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.blob.internaldafny\" } SimpleBlob refines AbstractSimpleTypesBlobService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleBlob refines AbstractSimpleTypesBlobService {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleBlobImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.blob.internaldafny.wrapped\"} WrappedSimpleTypesBlobService refines WrappedAbstractSimpleTypesBlobService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesBlobService refines WrappedAbstractSimpleTypesBlobService {"
