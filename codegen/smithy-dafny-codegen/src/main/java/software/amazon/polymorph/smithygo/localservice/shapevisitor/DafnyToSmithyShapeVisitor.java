@@ -9,6 +9,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
@@ -148,7 +149,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                                                                        memberShape.isOptional() && targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class) ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
                 builder.append("%1$s: %2$s%3$s,".formatted(
                         StringUtils.capitalize(memberName),
-                        targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class) ? "&" : "",
+                        (targetShape.isStructureShape() && memberShape.isOptional()) && !targetShape.hasTrait(ReferenceTrait.class) ? "&" : "",
                         targetShape.accept(
                                 new DafnyToSmithyShapeVisitor(context, derivedDataSource, writer, isConfigShape, memberShape.isOptional())
                         )
@@ -166,7 +167,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
         MemberShape memberShape = shape.getMember();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-        final var typeName = targetShape.isStructureShape() ? context.symbolProvider().toSymbol(memberShape) : context.symbolProvider().toSymbol(memberShape);
+        var typeName = targetShape.isStructureShape() ? context.symbolProvider().toSymbol(memberShape) : context.symbolProvider().toSymbol(memberShape);
         builder.append("""
                        func() []%s{
                        var fieldValue []%s
@@ -269,6 +270,17 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         }
 
         var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? "uint8" : "dafny.Char";
+        var strConv = "s = s + string(val.(%s))".formatted(underlyingType);
+        if( underlyingType == "uint8" ) {
+            strConv = """
+                // UTF bytes should be always converted from bytes to string in go
+                // Otherwise go treats the string as a unicode codepoint
+                
+                var valUint, _ = val.(%s)
+                var byteSlice = []byte{valUint}
+                s = s + string(byteSlice)
+            """.formatted(underlyingType);
+        }
         if ((boolean)isOptional) {
             return """
                 func() (*string) {
@@ -281,10 +293,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                         if !ok {
                             return &[]string{s}[0]
                         } else {
-                            s = s + string(val.(%s))
+                            %s
                         }
                    }
-               }()""".formatted(dataSource, dataSource, underlyingType);
+               }()""".formatted(dataSource, dataSource, strConv);
         }
         else {
             return """
@@ -295,10 +307,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                         if !ok {
                             return s
                         } else {
-                            s = s + string(val.(%s))
+                            %s
                         }
                    }
-               }()""".formatted(dataSource, underlyingType);
+               }()""".formatted(dataSource, strConv);
         }
     }
 

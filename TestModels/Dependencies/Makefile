@@ -40,10 +40,10 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Dependencies"
 
 GO_DEPENDENCY_MODULE_NAMES := \
-	--dependency-module-name=simple.constraints=github.com/ShubhamChaturvedi7/Constraints \
-	--dependency-module-name=simple.errors=github.com/ShubhamChaturvedi7/Errors \
-	--dependency-module-name=simple.extendable.resources=github.com/ShubhamChaturvedi7/Extendable \
-	--dependency-module-name=simple.resources=github.com/ShubhamChaturvedi7/Resource
+	--dependency-module-name=simple.constraints=github.com/Smithy-dafny/TestModels/Constraints \
+	--dependency-module-name=simple.errors=github.com/Smithy-dafny/TestModels/Errors \
+	--dependency-module-name=simple.extendable.resources=github.com/Smithy-dafny/TestModels/Extendable \
+	--dependency-module-name=simple.resources=github.com/Smithy-dafny/TestModels/Resource
 
 TRANSLATION_RECORD_GO := \
 	Resource/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \

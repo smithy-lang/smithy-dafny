@@ -14,7 +14,7 @@ jobs:
           TestModels/CodegenPatches,
           TestModels/Constraints,
           TestModels/Constructor,
-          # TestModels/Dependencies,
+          TestModels/Dependencies,
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,

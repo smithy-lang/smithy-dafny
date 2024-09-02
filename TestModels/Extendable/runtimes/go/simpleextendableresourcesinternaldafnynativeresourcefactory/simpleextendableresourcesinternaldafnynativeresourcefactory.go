@@ -4,23 +4,21 @@
 package simpleextendableresourcesinternaldafnynativeresourcefactory
 
 import (
-	os "os"
+	"os"
 
-	ExtendableResource "github.com/Smithy-dafny/TestModels/Extendable/ExtendableResource"
-	SimpleExtendableResourcesOperations "github.com/Smithy-dafny/TestModels/Extendable/SimpleExtendableResourcesOperations"
-	simpleextendableresources "github.com/Smithy-dafny/TestModels/Extendable/simpleextendableresources"
-	simpleextendableresourcesinternaldafnytypes "github.com/Smithy-dafny/TestModels/Extendable/simpleextendableresourcesinternaldafnytypes"
-	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
-	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
-	StandardLibrary "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
-	StandardLibraryInterop "github.com/dafny-lang/DafnyStandardLibGo/StandardLibraryInterop"
-	StandardLibrary_UInt "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary_UInt"
-	Wrappers "github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
+	"github.com/Smithy-dafny/TestModels/Extendable/ExtendableResource"
+	"github.com/Smithy-dafny/TestModels/Extendable/SimpleExtendableResourcesOperations"
+	"github.com/Smithy-dafny/TestModels/Extendable/simpleextendableresources"
+	"github.com/Smithy-dafny/TestModels/Extendable/simpleextendableresourcesinternaldafnytypes"
+	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
+	"github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
+	"github.com/dafny-lang/DafnyStandardLibGo/StandardLibraryInterop"
+	"github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary_UInt"
+	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 )
 
 var _ = os.Args
-var _ _dafny.Dummy__
-var _ _System.Dummy__
+var _ dafny.Dummy__
 var _ Wrappers.Dummy__
 var _ StandardLibrary_UInt.Dummy__
 var _ StandardLibrary.Dummy__
@@ -32,6 +30,6 @@ type Dummy__ struct{}
 
 func DafnyFactory() simpleextendableresourcesinternaldafnytypes.IExtendableResource {
 	extendableResource := ExtendableResource.New_ExtendableResource_()
-	extendableResource.OfName(_dafny.SeqOfString("dafny-default"))
-	return &simpleextendableresources.NativeWrapper{Impl: simpleextendableresources.ToNativeExtendableResource(extendableResource)}
+	extendableResource.OfName(dafny.SeqOfString("dafny-default"))
+	return &simpleextendableresources.NativeWrapper{Impl: simpleextendableresources.ExtendableResource_FromDafny(extendableResource)}
 }
