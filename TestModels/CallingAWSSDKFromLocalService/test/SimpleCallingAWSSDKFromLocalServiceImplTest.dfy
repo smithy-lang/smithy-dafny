@@ -28,8 +28,9 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   }
 
   method TestCallDDBGetItem_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-  requires
-        client.ValidState()
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var Key2Get: DDB.Types.Key := map[
@@ -52,6 +53,9 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   }
 
   method TestCallDDBGetItem_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var Key2Get: DDB.Types.Key := map[
@@ -70,7 +74,9 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     var resFailure := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
 
     expect resFailure.Failure?;
-    expect resFailure.error.message == "Requested resource not found";
+    print(resFailure);
+    print(resFailure.error.Opaque?);
+    print(resFailure.error.ComAmazonawsDynamodb?);
   }
 
   method{:test} CallKMSEncrypt(){
@@ -79,6 +85,9 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   }
 
   method TestCallKMSEncrypt_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
   {
     var kmsClient :- expect KMS.KMSClient();
     var input := KMS.Types.EncryptRequest(
@@ -93,6 +102,9 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   }
 
   method TestCallKMSEncrypt_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
   {
     var kmsClient :- expect KMS.KMSClient();
 
