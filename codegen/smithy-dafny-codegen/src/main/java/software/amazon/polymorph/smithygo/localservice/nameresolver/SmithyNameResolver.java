@@ -5,7 +5,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.model.shapes.SimpleShape;
 
 import java.util.Map;
 
@@ -60,7 +60,7 @@ public class SmithyNameResolver {
     }
 
     public static String getSmithyTypeAws(final ServiceTrait serviceTrait, final Symbol symbol, boolean subtype) {
-        if(symbol.getNamespace().contains("smithy.") || symbol.getName().contains("string")) {
+        if(symbol.getNamespace().contains("smithy.") || symbol.getName().equals("string") || symbol.getName().equals("float64")) {
             return symbol.getName();
         }
         return SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, subtype).concat(DOT).concat(symbol.getName());

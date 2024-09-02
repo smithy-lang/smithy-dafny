@@ -3,17 +3,17 @@
 pub fn to_dafny(
     value: crate::operation::get_double::GetDoubleInput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
+    crate::r#simple::types::smithydouble::internaldafny::types::GetDoubleInput,
 > {
     let dafny_value = match value.value {
-        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
+        Some(v) => crate::_Wrappers_Compile::Option::Some {
             value: ::dafny_runtime::Sequence::ArraySequence {
                 values: std::rc::Rc::new(f64::to_be_bytes(v).to_vec()),
             },
         },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        None => crate::_Wrappers_Compile::Option::None {},
     };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput::GetDoubleInput {
+    ::std::rc::Rc::new(crate::r#simple::types::smithydouble::internaldafny::types::GetDoubleInput::GetDoubleInput {
     value: ::std::rc::Rc::new(dafny_value)
   })
 }
@@ -21,12 +21,12 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dtypes_dsmithydouble_dinternaldafny_dtypes::GetDoubleInput,
+        crate::r#simple::types::smithydouble::internaldafny::types::GetDoubleInput,
     >,
 ) -> crate::operation::get_double::GetDoubleInput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         let my_vec = dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
             &dafny_value.value().Extract(),
@@ -37,7 +37,7 @@ pub fn from_dafny(
         ))
     } else if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

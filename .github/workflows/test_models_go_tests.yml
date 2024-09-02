@@ -41,7 +41,7 @@ jobs:
           # TestModels/SimpleTypes/SimpleTimestamp,
           TestModels/Union,
           # TestModels/aws-sdks/ddb,
-          # TestModels/aws-sdks/kms
+          TestModels/aws-sdks/kms
         ]
     runs-on: "macos-12"
     steps:

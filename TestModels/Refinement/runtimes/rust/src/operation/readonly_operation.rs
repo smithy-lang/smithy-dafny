@@ -22,7 +22,7 @@ impl ReadonlyOperation {
             ::dafny_runtime::md!(client.dafny_client.clone()).ReadonlyOperation(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::readonly_operation::_readonly_operation_output::from_dafny(

@@ -53,3 +53,11 @@ runs:
       shell: bash
       run: |
         echo "DAFNY_VERSION=4.7.0" >> $GITHUB_ENV
+
+    # update the copy of the Rust runtime we have inside TestModels
+    # (since it's not published yet)
+    - name: Update dafny_runtime_rust
+      shell: bash
+      run: |
+        rm -rf TestModels/dafny-dependencies/dafny_runtime_rust
+        cp -r dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust
