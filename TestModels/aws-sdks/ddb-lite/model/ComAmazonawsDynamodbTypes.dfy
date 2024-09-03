@@ -58,6 +58,14 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   predicate method IsValid_BackupArn(x: string) {
     ( 37 <= |x| <= 1024 )
   }
+  datatype BatchExecuteStatementInput = | BatchExecuteStatementInput (
+    nameonly Statements: PartiQLBatchRequest ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None
+  )
+  datatype BatchExecuteStatementOutput = | BatchExecuteStatementOutput (
+    nameonly Responses: Option<PartiQLBatchResponse> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None
+  )
   datatype BatchGetItemInput = | BatchGetItemInput (
     nameonly RequestItems: BatchGetRequestMap ,
     nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None
@@ -72,6 +80,46 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ( 1 <= |x| <= 100 )
   }
   type BatchGetResponseMap = map<TableName, ItemList>
+  datatype BatchStatementError = | BatchStatementError (
+    nameonly Code: Option<BatchStatementErrorCodeEnum> := Option.None ,
+    nameonly Message: Option<String> := Option.None
+  )
+  datatype BatchStatementErrorCodeEnum =
+    | ConditionalCheckFailed
+    | ItemCollectionSizeLimitExceeded
+    | RequestLimitExceeded
+    | ValidationError
+    | ProvisionedThroughputExceeded
+    | TransactionConflict
+    | ThrottlingError
+    | InternalServerError
+    | ResourceNotFound
+    | AccessDenied
+    | DuplicateItem
+  datatype BatchStatementRequest = | BatchStatementRequest (
+    nameonly Statement: PartiQLStatement ,
+    nameonly Parameters: Option<PreparedStatementParameters> := Option.None ,
+    nameonly ConsistentRead: Option<ConsistentRead> := Option.None
+  )
+  datatype BatchStatementResponse = | BatchStatementResponse (
+    nameonly Error: Option<BatchStatementError> := Option.None ,
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly Item: Option<AttributeMap> := Option.None
+  )
+  datatype BatchWriteItemInput = | BatchWriteItemInput (
+    nameonly RequestItems: BatchWriteItemRequestMap ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> := Option.None
+  )
+  datatype BatchWriteItemOutput = | BatchWriteItemOutput (
+    nameonly UnprocessedItems: Option<BatchWriteItemRequestMap> := Option.None ,
+    nameonly ItemCollectionMetrics: Option<ItemCollectionMetricsPerTable> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None
+  )
+  type BatchWriteItemRequestMap = x: map<TableName, WriteRequests> | IsValid_BatchWriteItemRequestMap(x) witness *
+  predicate method IsValid_BatchWriteItemRequestMap(x: map<TableName, WriteRequests>) {
+    ( 1 <= |x| <= 25 )
+  }
   datatype BillingMode =
     | PROVISIONED
     | PAY_PER_REQUEST
@@ -188,6 +236,9 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
     nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics> := Option.None
   )
+  datatype DeleteRequest = | DeleteRequest (
+    nameonly Key: Key
+  )
   datatype DescribeTableInput = | DescribeTableInput (
     nameonly TableName: TableName
   )
@@ -196,25 +247,35 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   )
   class IDynamoDBClientCallHistory {
     ghost constructor() {
+      BatchExecuteStatement := [];
       BatchGetItem := [];
+      BatchWriteItem := [];
       CreateTable := [];
       DeleteItem := [];
       DescribeTable := [];
+      ExecuteStatement := [];
+      ExecuteTransaction := [];
       GetItem := [];
       PutItem := [];
       Query := [];
       Scan := [];
+      TransactGetItems := [];
       TransactWriteItems := [];
       UpdateItem := [];
     }
+    ghost var BatchExecuteStatement: seq<DafnyCallEvent<BatchExecuteStatementInput, Result<BatchExecuteStatementOutput, Error>>>
     ghost var BatchGetItem: seq<DafnyCallEvent<BatchGetItemInput, Result<BatchGetItemOutput, Error>>>
+    ghost var BatchWriteItem: seq<DafnyCallEvent<BatchWriteItemInput, Result<BatchWriteItemOutput, Error>>>
     ghost var CreateTable: seq<DafnyCallEvent<CreateTableInput, Result<CreateTableOutput, Error>>>
     ghost var DeleteItem: seq<DafnyCallEvent<DeleteItemInput, Result<DeleteItemOutput, Error>>>
     ghost var DescribeTable: seq<DafnyCallEvent<DescribeTableInput, Result<DescribeTableOutput, Error>>>
+    ghost var ExecuteStatement: seq<DafnyCallEvent<ExecuteStatementInput, Result<ExecuteStatementOutput, Error>>>
+    ghost var ExecuteTransaction: seq<DafnyCallEvent<ExecuteTransactionInput, Result<ExecuteTransactionOutput, Error>>>
     ghost var GetItem: seq<DafnyCallEvent<GetItemInput, Result<GetItemOutput, Error>>>
     ghost var PutItem: seq<DafnyCallEvent<PutItemInput, Result<PutItemOutput, Error>>>
     ghost var Query: seq<DafnyCallEvent<QueryInput, Result<QueryOutput, Error>>>
     ghost var Scan: seq<DafnyCallEvent<ScanInput, Result<ScanOutput, Error>>>
+    ghost var TransactGetItems: seq<DafnyCallEvent<TransactGetItemsInput, Result<TransactGetItemsOutput, Error>>>
     ghost var TransactWriteItems: seq<DafnyCallEvent<TransactWriteItemsInput, Result<TransactWriteItemsOutput, Error>>>
     ghost var UpdateItem: seq<DafnyCallEvent<UpdateItemInput, Result<UpdateItemOutput, Error>>>
   }
@@ -245,6 +306,21 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     predicate ValidState()
       ensures ValidState() ==> History in Modifies
     ghost const History: IDynamoDBClientCallHistory
+    predicate BatchExecuteStatementEnsuresPublicly(input: BatchExecuteStatementInput , output: Result<BatchExecuteStatementOutput, Error>)
+    // The public method to be called by library consumers
+    method BatchExecuteStatement ( input: BatchExecuteStatementInput )
+      returns (output: Result<BatchExecuteStatementOutput, Error>)
+      requires
+        && ValidState()
+      modifies Modifies - {History} ,
+               History`BatchExecuteStatement
+      // Dafny will skip type parameters when generating a default decreases clause.
+      decreases Modifies - {History}
+      ensures
+        && ValidState()
+      ensures BatchExecuteStatementEnsuresPublicly(input, output)
+      ensures History.BatchExecuteStatement == old(History.BatchExecuteStatement) + [DafnyCallEvent(input, output)]
+
     predicate BatchGetItemEnsuresPublicly(input: BatchGetItemInput , output: Result<BatchGetItemOutput, Error>)
     // The public method to be called by library consumers
     method BatchGetItem ( input: BatchGetItemInput )
@@ -259,6 +335,21 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
         && ValidState()
       ensures BatchGetItemEnsuresPublicly(input, output)
       ensures History.BatchGetItem == old(History.BatchGetItem) + [DafnyCallEvent(input, output)]
+
+    predicate BatchWriteItemEnsuresPublicly(input: BatchWriteItemInput , output: Result<BatchWriteItemOutput, Error>)
+    // The public method to be called by library consumers
+    method BatchWriteItem ( input: BatchWriteItemInput )
+      returns (output: Result<BatchWriteItemOutput, Error>)
+      requires
+        && ValidState()
+      modifies Modifies - {History} ,
+               History`BatchWriteItem
+      // Dafny will skip type parameters when generating a default decreases clause.
+      decreases Modifies - {History}
+      ensures
+        && ValidState()
+      ensures BatchWriteItemEnsuresPublicly(input, output)
+      ensures History.BatchWriteItem == old(History.BatchWriteItem) + [DafnyCallEvent(input, output)]
 
     predicate CreateTableEnsuresPublicly(input: CreateTableInput , output: Result<CreateTableOutput, Error>)
     // The public method to be called by library consumers
@@ -304,6 +395,36 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
         && ValidState()
       ensures DescribeTableEnsuresPublicly(input, output)
       ensures History.DescribeTable == old(History.DescribeTable) + [DafnyCallEvent(input, output)]
+
+    predicate ExecuteStatementEnsuresPublicly(input: ExecuteStatementInput , output: Result<ExecuteStatementOutput, Error>)
+    // The public method to be called by library consumers
+    method ExecuteStatement ( input: ExecuteStatementInput )
+      returns (output: Result<ExecuteStatementOutput, Error>)
+      requires
+        && ValidState()
+      modifies Modifies - {History} ,
+               History`ExecuteStatement
+      // Dafny will skip type parameters when generating a default decreases clause.
+      decreases Modifies - {History}
+      ensures
+        && ValidState()
+      ensures ExecuteStatementEnsuresPublicly(input, output)
+      ensures History.ExecuteStatement == old(History.ExecuteStatement) + [DafnyCallEvent(input, output)]
+
+    predicate ExecuteTransactionEnsuresPublicly(input: ExecuteTransactionInput , output: Result<ExecuteTransactionOutput, Error>)
+    // The public method to be called by library consumers
+    method ExecuteTransaction ( input: ExecuteTransactionInput )
+      returns (output: Result<ExecuteTransactionOutput, Error>)
+      requires
+        && ValidState()
+      modifies Modifies - {History} ,
+               History`ExecuteTransaction
+      // Dafny will skip type parameters when generating a default decreases clause.
+      decreases Modifies - {History}
+      ensures
+        && ValidState()
+      ensures ExecuteTransactionEnsuresPublicly(input, output)
+      ensures History.ExecuteTransaction == old(History.ExecuteTransaction) + [DafnyCallEvent(input, output)]
 
     predicate GetItemEnsuresPublicly(input: GetItemInput , output: Result<GetItemOutput, Error>)
     // The public method to be called by library consumers
@@ -365,6 +486,21 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
       ensures ScanEnsuresPublicly(input, output)
       ensures History.Scan == old(History.Scan) + [DafnyCallEvent(input, output)]
 
+    predicate TransactGetItemsEnsuresPublicly(input: TransactGetItemsInput , output: Result<TransactGetItemsOutput, Error>)
+    // The public method to be called by library consumers
+    method TransactGetItems ( input: TransactGetItemsInput )
+      returns (output: Result<TransactGetItemsOutput, Error>)
+      requires
+        && ValidState()
+      modifies Modifies - {History} ,
+               History`TransactGetItems
+      // Dafny will skip type parameters when generating a default decreases clause.
+      decreases Modifies - {History}
+      ensures
+        && ValidState()
+      ensures TransactGetItemsEnsuresPublicly(input, output)
+      ensures History.TransactGetItems == old(History.TransactGetItems) + [DafnyCallEvent(input, output)]
+
     predicate TransactWriteItemsEnsuresPublicly(input: TransactWriteItemsInput , output: Result<TransactWriteItemsOutput, Error>)
     // The public method to be called by library consumers
     method TransactWriteItems ( input: TransactWriteItemsInput )
@@ -397,6 +533,29 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
 
   }
   type ErrorMessage = string
+  datatype ExecuteStatementInput = | ExecuteStatementInput (
+    nameonly Statement: PartiQLStatement ,
+    nameonly Parameters: Option<PreparedStatementParameters> := Option.None ,
+    nameonly ConsistentRead: Option<ConsistentRead> := Option.None ,
+    nameonly NextToken: Option<PartiQLNextToken> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly Limit: Option<PositiveIntegerObject> := Option.None
+  )
+  datatype ExecuteStatementOutput = | ExecuteStatementOutput (
+    nameonly Items: Option<ItemList> := Option.None ,
+    nameonly NextToken: Option<PartiQLNextToken> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
+    nameonly LastEvaluatedKey: Option<Key> := Option.None
+  )
+  datatype ExecuteTransactionInput = | ExecuteTransactionInput (
+    nameonly TransactStatements: ParameterizedStatements ,
+    nameonly ClientRequestToken: Option<ClientRequestToken> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None
+  )
+  datatype ExecuteTransactionOutput = | ExecuteTransactionOutput (
+    nameonly Responses: Option<ItemResponseList> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None
+  )
   type ExpectedAttributeMap = map<AttributeName, ExpectedAttributeValue>
   datatype ExpectedAttributeValue = | ExpectedAttributeValue (
     nameonly Value: Option<AttributeValue> := Option.None ,
@@ -409,6 +568,12 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type ExpressionAttributeValueMap = map<ExpressionAttributeValueVariable, AttributeValue>
   type ExpressionAttributeValueVariable = string
   type FilterConditionMap = map<AttributeName, Condition>
+  datatype Get = | Get (
+    nameonly Key: Key ,
+    nameonly TableName: TableName ,
+    nameonly ProjectionExpression: Option<ProjectionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None
+  )
   datatype GetItemInput = | GetItemInput (
     nameonly TableName: TableName ,
     nameonly Key: Key ,
@@ -464,6 +629,13 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   type ItemCollectionSizeEstimateRange = seq<ItemCollectionSizeEstimateBound>
   type ItemList = seq<AttributeMap>
+  datatype ItemResponse = | ItemResponse (
+    nameonly Item: Option<AttributeMap> := Option.None
+  )
+  type ItemResponseList = x: seq<ItemResponse> | IsValid_ItemResponseList(x) witness *
+  predicate method IsValid_ItemResponseList(x: seq<ItemResponse>) {
+    ( 1 <= |x| <= 25 )
+  }
   type Key = map<AttributeName, AttributeValue>
   type KeyConditions = map<AttributeName, Condition>
   type KeyExpression = string
@@ -528,6 +700,27 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type NullAttributeValue = bool
   type NumberAttributeValue = string
   type NumberSetAttributeValue = seq<NumberAttributeValue>
+  datatype ParameterizedStatement = | ParameterizedStatement (
+    nameonly Statement: PartiQLStatement ,
+    nameonly Parameters: Option<PreparedStatementParameters> := Option.None
+  )
+  type ParameterizedStatements = x: seq<ParameterizedStatement> | IsValid_ParameterizedStatements(x) witness *
+  predicate method IsValid_ParameterizedStatements(x: seq<ParameterizedStatement>) {
+    ( 1 <= |x| <= 25 )
+  }
+  type PartiQLBatchRequest = x: seq<BatchStatementRequest> | IsValid_PartiQLBatchRequest(x) witness *
+  predicate method IsValid_PartiQLBatchRequest(x: seq<BatchStatementRequest>) {
+    ( 1 <= |x| <= 25 )
+  }
+  type PartiQLBatchResponse = seq<BatchStatementResponse>
+  type PartiQLNextToken = x: string | IsValid_PartiQLNextToken(x) witness *
+  predicate method IsValid_PartiQLNextToken(x: string) {
+    ( 1 <= |x| <= 32768 )
+  }
+  type PartiQLStatement = x: string | IsValid_PartiQLStatement(x) witness *
+  predicate method IsValid_PartiQLStatement(x: string) {
+    ( 1 <= |x| <= 8192 )
+  }
   type PositiveIntegerObject = x: int32 | IsValid_PositiveIntegerObject(x) witness *
   predicate method IsValid_PositiveIntegerObject(x: int32) {
     ( 1 <= x  )
@@ -535,6 +728,10 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type PositiveLongObject = x: int64 | IsValid_PositiveLongObject(x) witness *
   predicate method IsValid_PositiveLongObject(x: int64) {
     ( 1 <= x  )
+  }
+  type PreparedStatementParameters = x: seq<AttributeValue> | IsValid_PreparedStatementParameters(x) witness *
+  predicate method IsValid_PreparedStatementParameters(x: seq<AttributeValue>) {
+    ( 1 <= |x|  )
   }
   datatype Projection = | Projection (
     nameonly ProjectionType: Option<ProjectionType> := Option.None ,
@@ -584,6 +781,9 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly Attributes: Option<AttributeMap> := Option.None ,
     nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
     nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics> := Option.None
+  )
+  datatype PutRequest = | PutRequest (
+    nameonly Item: PutItemInputAttributeMap
   )
   datatype QueryInput = | QueryInput (
     nameonly TableName: TableName ,
@@ -801,6 +1001,21 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   predicate method IsValid_TagValueString(x: string) {
     ( 0 <= |x| <= 256 )
   }
+  datatype TransactGetItem = | TransactGetItem (
+    nameonly Get: Get
+  )
+  type TransactGetItemList = x: seq<TransactGetItem> | IsValid_TransactGetItemList(x) witness *
+  predicate method IsValid_TransactGetItemList(x: seq<TransactGetItem>) {
+    ( 1 <= |x| <= 25 )
+  }
+  datatype TransactGetItemsInput = | TransactGetItemsInput (
+    nameonly TransactItems: TransactGetItemList ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None
+  )
+  datatype TransactGetItemsOutput = | TransactGetItemsOutput (
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None ,
+    nameonly Responses: Option<ItemResponseList> := Option.None
+  )
   datatype TransactWriteItem = | TransactWriteItem (
     nameonly ConditionCheck: Option<ConditionCheck> := Option.None ,
     nameonly Put: Option<Put> := Option.None ,
@@ -850,9 +1065,20 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
     nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics> := Option.None
   )
+  datatype WriteRequest = | WriteRequest (
+    nameonly PutRequest: Option<PutRequest> := Option.None ,
+    nameonly DeleteRequest: Option<DeleteRequest> := Option.None
+  )
+  type WriteRequests = x: seq<WriteRequest> | IsValid_WriteRequests(x) witness *
+  predicate method IsValid_WriteRequests(x: seq<WriteRequest>) {
+    ( 1 <= |x| <= 25 )
+  }
   datatype Error =
       // Local Error structures are listed here
     | ConditionalCheckFailedException (
+        nameonly message: Option<ErrorMessage> := Option.None
+      )
+    | DuplicateItemException (
         nameonly message: Option<ErrorMessage> := Option.None
       )
     | IdempotentParameterMismatchException (
@@ -929,6 +1155,22 @@ abstract module AbstractComAmazonawsDynamodbOperations {
   type InternalConfig
   predicate ValidInternalConfig?(config: InternalConfig)
   function ModifiesInternalConfig(config: InternalConfig): set<object>
+  predicate BatchExecuteStatementEnsuresPublicly(input: BatchExecuteStatementInput , output: Result<BatchExecuteStatementOutput, Error>)
+  // The private method to be refined by the library developer
+
+
+  method BatchExecuteStatement ( config: InternalConfig , input: BatchExecuteStatementInput )
+    returns (output: Result<BatchExecuteStatementOutput, Error>)
+    requires
+      && ValidInternalConfig?(config)
+    modifies ModifiesInternalConfig(config)
+    // Dafny will skip type parameters when generating a default decreases clause.
+    decreases ModifiesInternalConfig(config)
+    ensures
+      && ValidInternalConfig?(config)
+    ensures BatchExecuteStatementEnsuresPublicly(input, output)
+
+
   predicate BatchGetItemEnsuresPublicly(input: BatchGetItemInput , output: Result<BatchGetItemOutput, Error>)
   // The private method to be refined by the library developer
 
@@ -943,6 +1185,22 @@ abstract module AbstractComAmazonawsDynamodbOperations {
     ensures
       && ValidInternalConfig?(config)
     ensures BatchGetItemEnsuresPublicly(input, output)
+
+
+  predicate BatchWriteItemEnsuresPublicly(input: BatchWriteItemInput , output: Result<BatchWriteItemOutput, Error>)
+  // The private method to be refined by the library developer
+
+
+  method BatchWriteItem ( config: InternalConfig , input: BatchWriteItemInput )
+    returns (output: Result<BatchWriteItemOutput, Error>)
+    requires
+      && ValidInternalConfig?(config)
+    modifies ModifiesInternalConfig(config)
+    // Dafny will skip type parameters when generating a default decreases clause.
+    decreases ModifiesInternalConfig(config)
+    ensures
+      && ValidInternalConfig?(config)
+    ensures BatchWriteItemEnsuresPublicly(input, output)
 
 
   predicate CreateTableEnsuresPublicly(input: CreateTableInput , output: Result<CreateTableOutput, Error>)
@@ -991,6 +1249,38 @@ abstract module AbstractComAmazonawsDynamodbOperations {
     ensures
       && ValidInternalConfig?(config)
     ensures DescribeTableEnsuresPublicly(input, output)
+
+
+  predicate ExecuteStatementEnsuresPublicly(input: ExecuteStatementInput , output: Result<ExecuteStatementOutput, Error>)
+  // The private method to be refined by the library developer
+
+
+  method ExecuteStatement ( config: InternalConfig , input: ExecuteStatementInput )
+    returns (output: Result<ExecuteStatementOutput, Error>)
+    requires
+      && ValidInternalConfig?(config)
+    modifies ModifiesInternalConfig(config)
+    // Dafny will skip type parameters when generating a default decreases clause.
+    decreases ModifiesInternalConfig(config)
+    ensures
+      && ValidInternalConfig?(config)
+    ensures ExecuteStatementEnsuresPublicly(input, output)
+
+
+  predicate ExecuteTransactionEnsuresPublicly(input: ExecuteTransactionInput , output: Result<ExecuteTransactionOutput, Error>)
+  // The private method to be refined by the library developer
+
+
+  method ExecuteTransaction ( config: InternalConfig , input: ExecuteTransactionInput )
+    returns (output: Result<ExecuteTransactionOutput, Error>)
+    requires
+      && ValidInternalConfig?(config)
+    modifies ModifiesInternalConfig(config)
+    // Dafny will skip type parameters when generating a default decreases clause.
+    decreases ModifiesInternalConfig(config)
+    ensures
+      && ValidInternalConfig?(config)
+    ensures ExecuteTransactionEnsuresPublicly(input, output)
 
 
   predicate GetItemEnsuresPublicly(input: GetItemInput , output: Result<GetItemOutput, Error>)
@@ -1055,6 +1345,22 @@ abstract module AbstractComAmazonawsDynamodbOperations {
     ensures
       && ValidInternalConfig?(config)
     ensures ScanEnsuresPublicly(input, output)
+
+
+  predicate TransactGetItemsEnsuresPublicly(input: TransactGetItemsInput , output: Result<TransactGetItemsOutput, Error>)
+  // The private method to be refined by the library developer
+
+
+  method TransactGetItems ( config: InternalConfig , input: TransactGetItemsInput )
+    returns (output: Result<TransactGetItemsOutput, Error>)
+    requires
+      && ValidInternalConfig?(config)
+    modifies ModifiesInternalConfig(config)
+    // Dafny will skip type parameters when generating a default decreases clause.
+    decreases ModifiesInternalConfig(config)
+    ensures
+      && ValidInternalConfig?(config)
+    ensures TransactGetItemsEnsuresPublicly(input, output)
 
 
   predicate TransactWriteItemsEnsuresPublicly(input: TransactWriteItemsInput , output: Result<TransactWriteItemsOutput, Error>)

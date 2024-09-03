@@ -36,6 +36,11 @@ jobs:
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: "feat-rust"
+  dafny-nightly-python:
+    if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
+    uses: ./.github/workflows/test_models_python_tests.yml
+    with:
+      dafny: "nightly-latest"
 
   cut-issue-on-failure:
     runs-on: ubuntu-latest
@@ -45,6 +50,7 @@ jobs:
         dafny-nightly-java,
         dafny-nightly-net,
         dafny-nightly-rust,
+        dafny-nightly-python,
       ]
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     env:

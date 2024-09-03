@@ -12,10 +12,11 @@ pub fn to_dafny(
             match value.simple_string_list() {
                 Some(val) =>
                     crate::r#_Wrappers_Compile::Option::Some {
-                        value : ::dafny_runtime::Sequence::from_array(
+                        value : ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(
                             &val.iter().map(|x|
                                 dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&x))
-                                .collect()
+                                .collect(),
+                                |x| x.clone()
                         )
                     },
                 None => crate::r#_Wrappers_Compile::Option::None{}
@@ -27,10 +28,11 @@ pub fn to_dafny(
             match value.structure_list() {
                 Some(val) =>
                     crate::r#_Wrappers_Compile::Option::Some {
-                        value : ::dafny_runtime::Sequence::from_array(
+                        value : ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(
                             &val.iter().map(|x|
                                 crate::conversions::structure_list_element::to_dafny(x.clone()))
-                                .collect()
+                                .collect(),
+                                |x| x.clone()
                         )
                     },
                 None => crate::r#_Wrappers_Compile::Option::None{}
