@@ -15,6 +15,7 @@ pub fn to_dafny(
         crate::simple::constructor::internaldafny::types::SimpleConstructorConfig::SimpleConstructorConfig { blobValue: blob_to_dafny(config.blob_value), booleanValue: obool_to_dafny(config.boolean_value), stringValue: ostring_to_dafny(&config.string_value), integerValue: oint_to_dafny(config.integer_value), longValue: olong_to_dafny(config.long_value) })
 }
 
+// TODO: move to standard_library_conversions.rs
 fn blob_to_dafny(
     value: ::std::option::Option<::std::vec::Vec<u8>>,
 ) -> ::std::rc::Rc<
@@ -22,7 +23,7 @@ fn blob_to_dafny(
 > {
     let v = match value {
         Some(v) => crate::_Wrappers_Compile::Option::Some {
-            value: ::dafny_runtime::Sequence::from_array(&v),
+            value: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&v, |x| *x),
         },
         None => crate::_Wrappers_Compile::Option::None {},
     };

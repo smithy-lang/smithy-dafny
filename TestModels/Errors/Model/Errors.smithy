@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 namespace simple.errors
 
+use aws.polymorph#localService
+
 @aws.polymorph#localService(
   sdkId: "SimpleErrors",
   config: SimpleErrorsConfig,
@@ -32,7 +34,7 @@ operation AlwaysMultipleErrors {
   output: GetErrorsOutput,
 }
 
-// This operation MUST ==> native unmodled error
+// This operation MUST ==> native unmodeled error
 operation AlwaysNativeError {
   input: GetErrorsInput,
   output: GetErrorsOutput,

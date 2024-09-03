@@ -11,8 +11,12 @@ jobs:
       - name: Populate Dafny versions list
         id: populate-dafny-versions-list
         run: echo "dafny-versions-list=['4.2.0', '4.4.0']" >> $GITHUB_OUTPUT
+      - name: Populate Dafny versions list for "only new versions" languages (Python)
+        id: populate-only-new-dafny-versions-list
+        run: echo "only-new-dafny-versions-list=['4.7.0']" >> $GITHUB_OUTPUT
     outputs:
       dafny-version-list: ${{ steps.populate-dafny-versions-list.outputs.dafny-versions-list }}
+      only-new-dafny-version-list: ${{ steps.populate-only-new-dafny-versions-list.outputs.only-new-dafny-versions-list }}
 
   pr-ci-verification:
     needs: pr-populate-dafny-versions
@@ -49,7 +53,16 @@ jobs:
         # Rust code generation is under development and depends on pending changes to the
         # Dafny Rust code generation, so we test on a specific commit from the feat-rust feature branch instead.
         dafny-version:
-          - 2412e865d1d04ea70711f4dfaf885fcdc5c338c8
+          - ab5af65d33b7d44905807f6598b0fbccd5fc39c9
     uses: ./.github/workflows/test_models_rust_tests.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
+  pr-ci-python:
+    needs: pr-populate-dafny-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.only-new-dafny-version-list) }}
+    uses: ./.github/workflows/test_models_python_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}

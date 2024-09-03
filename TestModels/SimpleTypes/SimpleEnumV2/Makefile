@@ -3,7 +3,9 @@
 
 CORES=2
 
-RUST_BENERATED=1
+TRANSPILE_TESTS_IN_RUST=1
+
+ENABLE_EXTERN_PROCESSING=1
 
 include ../../SharedMakefile.mk
 
@@ -20,3 +22,24 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies
 # DEPENDENT-MODELS:=
+
+# Python
+
+PYTHON_MODULE_NAME=simple_types_smithyenumv2
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+
+# Constants for languages that drop extern names (Python, Go)
+
+TYPES_FILE_PATH=Model/SimpleTypesEnumV2Types.dfy
+TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.enumv2.internaldafny.types\" } SimpleTypesEnumV2Types"
+TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleTypesEnumV2Types"
+
+INDEX_FILE_PATH=src/Index.dfy
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.enumv2.internaldafny\" } SimpleEnumV2 refines AbstractSimpleTypesEnumV2Service {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleEnumV2 refines AbstractSimpleTypesEnumV2Service {"
+
+WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleEnumImpl.dfy
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.enumv2.internaldafny.wrapped\"} WrappedSimpleTypesEnumV2Service refines WrappedAbstractSimpleTypesEnumV2Service {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesEnumV2Service refines WrappedAbstractSimpleTypesEnumV2Service {"

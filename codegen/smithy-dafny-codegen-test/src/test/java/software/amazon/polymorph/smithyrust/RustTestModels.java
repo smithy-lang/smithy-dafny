@@ -22,10 +22,8 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("Constraints");
     DISABLED_TESTS.add("Dependencies");
     DISABLED_TESTS.add("Documentation");
-    DISABLED_TESTS.add("Errors");
     DISABLED_TESTS.add("Extendable");
     DISABLED_TESTS.add("Extern");
-    DISABLED_TESTS.add("LanguageSpecificLogic");
     DISABLED_TESTS.add("LocalService");
     DISABLED_TESTS.add("MultipleModels");
     DISABLED_TESTS.add("Positional");
@@ -44,7 +42,7 @@ class RustTestModels extends TestModelTest {
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForDotnet(String relativeTestModelPath) {
+  void testModelsForRust(String relativeTestModelPath) {
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);
