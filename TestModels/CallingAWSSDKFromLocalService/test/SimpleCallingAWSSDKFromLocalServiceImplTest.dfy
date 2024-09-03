@@ -74,14 +74,12 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     var resFailure := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
 
     expect resFailure.Failure?;
-    print(resFailure);
-    print(resFailure.error.Opaque?);
-    print(resFailure.error.ComAmazonawsDynamodb?);
   }
 
   method{:test} CallKMSEncrypt(){
     var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
     TestCallKMSEncrypt_Success(client);
+    TestCallKMSEncrypt_Failure(client);
   }
 
   method TestCallKMSEncrypt_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)

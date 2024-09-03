@@ -25,7 +25,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
     if retGetItem.Success? {
       return Success(CallDDBGetItemOutput(itemOutput := retGetItem.value));
     } else {
-      return Failure(ComAmazonawsDynamodb(retGetItem.error));
+      return Failure(ComAmazonawsDynamodb(ComAmazonawsDynamodb := retGetItem.error));
     }
   }
   method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
