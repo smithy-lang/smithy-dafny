@@ -26,6 +26,8 @@
 
     <Compile Include="Extern/**/*.cs" />
     <Compile Include="Generated/**/*.cs" />
+    <Compile Include="./../../aws-sdks/ddb/runtimes/net/Extern/**/*.cs" />
+    <Compile Include="./../../aws-sdks/kms/runtimes/net/Extern/**/*.cs" />
     <Compile Include="ImplementationFromDafny.cs" />
   </ItemGroup>
 
