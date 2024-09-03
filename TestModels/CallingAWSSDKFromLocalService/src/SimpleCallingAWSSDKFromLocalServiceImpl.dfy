@@ -3,8 +3,8 @@
 include "../Model/SimpleCallingawssdkfromlocalserviceTypes.dfy"
 
 module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawssdkfromlocalserviceOperations  {
-  import DDB = ComAmazonawsDynamodbTypes
-  import DDBOperations =  Com.Amazonaws.Dynamodb
+  import ComAmazonawsDynamodbTypes
+  import ComAmazonawsKmsTypes
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)

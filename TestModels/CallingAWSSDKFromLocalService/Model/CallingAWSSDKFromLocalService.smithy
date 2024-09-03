@@ -18,6 +18,7 @@ structure KmsClientReference {}
   config: SimpleCallingAWSSDKFromLocalServiceConfig,
   dependencies: [
     DynamoDB_20120810,
+    TrentService
   ]
 )
 
