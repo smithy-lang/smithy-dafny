@@ -66,3 +66,18 @@ jobs:
     uses: ./.github/workflows/test_models_python_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}
+
+  pr-ci-all-required:
+    if: always()
+    needs:
+      - pr-ci-verification
+      - pr-ci-java
+      - pr-ci-net
+      - pr-ci-rust
+      - pr-ci-python
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all required jobs passed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
