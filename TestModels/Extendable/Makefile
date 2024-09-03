@@ -30,6 +30,13 @@ clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
 
+# Python
+
+PYTHON_MODULE_NAME=simple_extendable_resources
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+
 # Constants for languages that drop extern names (Python, Go)
 
 TYPES_FILE_PATH=Model/SimpleExtendableResourcesTypes.dfy
@@ -43,3 +50,15 @@ INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleExtendableResources refines Abstr
 WRAPPED_INDEX_FILE_PATH=src/WrappedIndex.dfy
 WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.extendable.resources.internaldafny.wrapped\"} WrappedSimpleExtendableResources refines WrappedAbstractSimpleExtendableResourcesService"
 WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleExtendableResources refines WrappedAbstractSimpleExtendableResourcesService"
+
+EXTERN_NATIVE_RESOURCE_FACTORY_FILE_PATH=test/NativeResourceFactory.dfy
+EXTERN_NATIVE_RESOURCE_FACTORY_WITH_EXTERN_STRING="module {:extern \"simple.extendable.resources.internaldafny.nativeresourcefactory\"} NativeResourceFactory"
+EXTERN_NATIVE_RESOURCE_FACTORY_WITHOUT_EXTERN_STRING="module {:extern} NativeResourceFactory"
+
+_sed_index_file_remove_extern:
+	$(MAKE) _sed_file SED_FILE_PATH=$(INDEX_FILE_PATH) SED_BEFORE_STRING=$(INDEX_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(INDEX_FILE_WITHOUT_EXTERN_STRING)
+	$(MAKE) _sed_file SED_FILE_PATH=$(EXTERN_NATIVE_RESOURCE_FACTORY_FILE_PATH) SED_BEFORE_STRING=$(EXTERN_NATIVE_RESOURCE_FACTORY_WITH_EXTERN_STRING) SED_AFTER_STRING=$(EXTERN_NATIVE_RESOURCE_FACTORY_WITHOUT_EXTERN_STRING)
+
+_sed_index_file_add_extern:
+	$(MAKE) _sed_file SED_FILE_PATH=$(INDEX_FILE_PATH) SED_BEFORE_STRING=$(INDEX_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(INDEX_FILE_WITH_EXTERN_STRING)
+	$(MAKE) _sed_file SED_FILE_PATH=$(EXTERN_NATIVE_RESOURCE_FACTORY_FILE_PATH) SED_BEFORE_STRING=$(EXTERN_NATIVE_RESOURCE_FACTORY_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(EXTERN_NATIVE_RESOURCE_FACTORY_WITH_EXTERN_STRING)

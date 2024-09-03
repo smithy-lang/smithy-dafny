@@ -23,6 +23,13 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 POLYMORPH_OPTIONS=--generate project-files,client-constructors
 
+# Python
+
+PYTHON_MODULE_NAME=simple_positional
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+
 # Constants for languages that drop extern names (Python, Go)
 
 TYPES_FILE_PATH=Model/SimplePositionalTypes.dfy
@@ -35,4 +42,4 @@ INDEX_FILE_WITHOUT_EXTERN_STRING="module SimplePositional refines AbstractSimple
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedSimplePositionalImpl.dfy
 WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:options \"--function-syntax:4\"} {:extern \"simple.positional.internaldafny.wrapped\"} WrappedSimplePositionalService refines WrappedAbstractSimplePositionalService {"
-WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module {:options \"--function-syntax:4\" WrappedSimplePositionalService refines WrappedAbstractSimplePositionalService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module {:options \"--function-syntax:4\"} WrappedSimplePositionalService refines WrappedAbstractSimplePositionalService {"
