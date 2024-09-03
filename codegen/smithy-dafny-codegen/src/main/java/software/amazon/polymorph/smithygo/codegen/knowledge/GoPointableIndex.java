@@ -15,7 +15,7 @@
  *
  */
 
- package software.amazon.polymorph.smithygo.codegen.knowledge;
+package software.amazon.polymorph.smithygo.codegen.knowledge;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.KnowledgeIndex;
