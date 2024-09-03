@@ -14,6 +14,8 @@ SERVICE_DEPS_SimpleCallingAWSSDKFromLocalService := \
 	aws-sdks/ddb \
 	aws-sdks/kms
 
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 PROJECT_INDEX := \
 	aws-sdks/ddb/src/Index.dfy \
 	aws-sdks/kms/src/Index.dfy
@@ -21,5 +23,3 @@ PROJECT_INDEX := \
 PROJECT_DEPENDENCIES := \
 	aws-sdks/ddb \
 	aws-sdks/kms 
-
-SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
