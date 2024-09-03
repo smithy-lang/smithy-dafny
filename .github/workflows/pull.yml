@@ -66,10 +66,10 @@ jobs:
     uses: ./.github/workflows/test_models_python_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}
-  
+
   pr-ci-all-required:
     if: always()
-    needs: 
+    needs:
       - pr-ci-verification
       - pr-ci-java
       - pr-ci-net

@@ -50,7 +50,7 @@ jobs:
         dafny-nightly-java,
         dafny-nightly-net,
         dafny-nightly-rust,
-        dafny-nightly-python
+        dafny-nightly-python,
       ]
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     env:
