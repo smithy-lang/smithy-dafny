@@ -17,7 +17,7 @@ public abstract class ForEachDafnyTest {
       new Object[][] {
         { new DafnyVersion(4, 1, 0) },
         { new DafnyVersion(4, 3, 0) },
-        { new DafnyVersion(4, 7, 0) },
+        { new DafnyVersion(4, 8, 0) },
       }
     );
   }
