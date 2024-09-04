@@ -151,15 +151,9 @@ clean-dafny-report:
 # Transpile the entire project's impl
 # For each index file listed in the project Makefile's PROJECT_INDEX variable,
 #   append a `-library:TestModels/$(PROJECT_INDEX) to the transpiliation target
-_transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+_transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 _transpile_implementation_all: transpile_implementation
 
-# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
-# the `transpile_implementation` target should start using the new Dafny CLI,
-# and the `transpile_implementation_new_cli` target should be removed
-# in favor of `transpile_implementation` using the new CLI.
-_transpile_implementation_all_new_cli: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
-_transpile_implementation_all_new_cli: transpile_implementation_new_cli
 
 # The `$(OUT)` and $(TARGET) variables are problematic.
 # Ideally they are different for every target call.
@@ -192,30 +186,6 @@ transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src
 # Also the expectation is that verification happens in the `verify` target
 # `find` looks for `Index.dfy` files in either V1 or V2-styled project directories (single vs. multiple model files).
 transpile_implementation:
-	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		$(DAFNY_OPTIONS) \
-		$(DAFNY_OTHER_FILES) \
-		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-		$(TRANSPILE_DEPENDENCIES)
-
-# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
-# the `transpile_implementation` target should start using the new Dafny CLI,
-# and the `transpile_implementation_new_cli` target should be removed
-# in favor of `transpile_implementation` using the new CLI.
-transpile_implementation_new_cli: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
-transpile_implementation_new_cli:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 	translate $(TARGET) \
 		--stdin \
@@ -250,44 +220,11 @@ _transpile_test_all: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
 #     append `-library:/path/to/Index.dfy` to the transpile target
 # Else: (i.e. single model/service in project), then:
 #   append `-library:/path/to/Index.dfy` to the transpile target
-_transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), -library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
+_transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, --library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), --library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
 # Transpile the entire project's tests
 _transpile_test_all: transpile_test
 
-# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
-# the `transpile_implementation` target should start using the new Dafny CLI,
-# and the `transpile_implementation_new_cli` target should be removed
-# in favor of `transpile_implementation` using the new CLI.
-_transpile_test_all_new_cli: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
-_transpile_test_all_new_cli: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
-_transpile_test_all_new_cli: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, --library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), --library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
-_transpile_test_all_new_cli: transpile_test_new_cli
-
 transpile_test:
-	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-runAllTests:1 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		$(DAFNY_OPTIONS) \
-		$(DAFNY_OTHER_FILES) \
-		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-		$(TRANSPILE_DEPENDENCIES) \
-
-# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
-# the `transpile_implementation` target should start using the new Dafny CLI,
-# and the `transpile_implementation_new_cli` target should be removed
-# in favor of `transpile_implementation` using the new CLI.
-transpile_test_new_cli:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		translate $(TARGET) \
 		--stdin \
