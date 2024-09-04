@@ -229,7 +229,6 @@ transpile_test:
 		--stdin \
 		--no-verify \
 		--cores:$(CORES) \
-		--include-test-runner \
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
