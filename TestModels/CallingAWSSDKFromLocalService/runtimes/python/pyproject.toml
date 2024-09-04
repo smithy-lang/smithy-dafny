@@ -16,8 +16,8 @@ python = "^3.11.0"
 smithy-python = { path = "../../../../codegen/smithy-dafny-codegen-modules/smithy-python/python-packages/smithy-python", develop = false}
 
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
-simple-ComAmazonawsDynamodb = { path = "../../../aws-sdks/ddb/runtimes/python", develop = false}
-simple-ComAmazonawsKms = { path = "../../../aws-sdks/kms/runtimes/python", develop = false}
+simple-amazon-cryptography-internal-dafny-shim-ddb = { path = "../../../aws-sdks/ddb/runtimes/python", develop = false}
+simple-amazon-cryptography-internal-dafny-shim-kms = { path = "../../../aws-sdks/kms/runtimes/python", develop = false}
 DafnyRuntimePython = "^4.7.0"
 
 [tool.poetry.group.test.dependencies]
