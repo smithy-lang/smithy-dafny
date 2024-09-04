@@ -143,7 +143,6 @@ public class DotNetNameResolver {
 
   private static final Set<String> KNOWN_ACRONYMS = Set.of(
     "AWS",
-    "KMS",
     "SDK",
     "AES",
     "RSA"
