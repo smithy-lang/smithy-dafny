@@ -1,6 +1,6 @@
 use aws_smithy_types::error::operation::BuildError;
 
-#[derive(::std::clone::Clone, ::std::fmt::Debug)]
+#[derive(::std::clone::Clone, ::std::fmt::Debug, ::std::cmp::PartialEq)]
 pub struct Client {
     pub(crate) dafny_client: ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient>
 }

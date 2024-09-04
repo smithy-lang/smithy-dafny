@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -91,6 +93,7 @@ public abstract class AbstractRustShimGenerator {
       !isInputOrOutputStructure(structureShape) &&
       !structureShape.hasTrait(ErrorTrait.class) &&
       !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
+      !structureShape.hasTrait(ReferenceTrait.class) &&
       structureShape
         .getId()
         .getNamespace()
@@ -113,6 +116,20 @@ public abstract class AbstractRustShimGenerator {
       .getId()
       .getNamespace()
       .equals(service.getId().getNamespace());
+  }
+
+  protected RustFile conversionsClientModule() {
+    TokenTree clientConversionFunctions = TokenTree.of(
+      evalTemplate(
+        getClass(),
+        "runtimes/rust/conversions/client.rs",
+        serviceVariables()
+      )
+    );
+    return new RustFile(
+      Path.of("src", "conversions", "client.rs"),
+      TokenTree.of(clientConversionFunctions)
+    );
   }
 
   protected RustFile conversionsErrorModule() {
@@ -171,7 +188,8 @@ public abstract class AbstractRustShimGenerator {
           structureModules,
           unionModules,
           enumModules,
-          Stream.of("error")
+          Stream.of("error"),
+          Stream.of("client")
         )
         .flatMap(s -> s)
     );
@@ -646,6 +664,34 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
+        Optional<ReferenceTrait> referenceTrait = shape.getTrait(ReferenceTrait.class);
+        if (referenceTrait.isPresent()) {
+          Shape referent = model.expectShape(referenceTrait.get().getReferentId());
+          // TODO: determine type correctly
+          var shapeName = "client";
+          if (isDafnyOption) {
+            yield TokenTree.of(
+              """
+              match (*%s).as_ref() {
+                  crate::r#_Wrappers_Compile::Option::Some { value } =>
+                      Some(crate::conversions::%s::from_dafny(value.clone())),
+                  _ => None,
+              }
+              """.formatted(dafnyValue, shapeName)
+            );
+          } else {
+            TokenTree result = TokenTree.of(
+              """
+              crate::conversions::%s::from_dafny(%s.clone())
+              """.formatted(shapeName, dafnyValue)
+            );
+            if (isRustOption) {
+              result =
+                TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+            }
+            yield result;
+          }
+        }
         var structureShapeName = toSnakeCase(shape.getId().getName());
         if (isDafnyOption) {
           yield TokenTree.of(
@@ -937,6 +983,19 @@ public abstract class AbstractRustShimGenerator {
         getRustTypesModuleName(),
         rustStructureName(structureShape)
       );
+  }
+
+  protected String qualifiedRustReferenceType(
+    final StructureShape referenceShape
+  ) {
+    var referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
+    if (referenceTrait.isService()) {
+      ServiceShape service = model.expectShape(referenceTrait.getReferentId(), ServiceShape.class);
+      // TODO: Do this if it's the service we're generating for, otherwise qualify by dependent crate
+      return "crate::client::Client";
+    } else {
+      throw new UnsupportedOperationException("@reference(resource: ...) is not yet supported");
+    }
   }
 
   protected HashMap<String, String> structureVariables(

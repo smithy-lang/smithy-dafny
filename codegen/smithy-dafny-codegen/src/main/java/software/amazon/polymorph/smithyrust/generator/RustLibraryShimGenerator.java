@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -104,6 +106,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     // conversions
     result.add(conversionsModule());
     result.add(conversionsErrorModule());
+    result.add(conversionsClientModule());
     result.addAll(configConversionModules());
     result.addAll(allOperationConversionModules());
     result.addAll(
@@ -1208,6 +1211,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         if (shouldGenerateStructForStructure(structureShape)) {
           yield qualifiedRustStructureType(structureShape);
         }
+        if (structureShape.hasTrait(ReferenceTrait.class)) {
+          yield qualifiedRustReferenceType(structureShape);
+        }
         throw new UnsupportedOperationException(
           "Unsupported type for structure: " + shape.getId()
         );
@@ -1503,6 +1509,36 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
+        Optional<ReferenceTrait> referenceTrait = shape.getTrait(ReferenceTrait.class);
+        if (referenceTrait.isPresent()) {
+          Shape referent = model.expectShape(referenceTrait.get().getReferentId());
+          // TODO: determine type correctly
+          var shapeName = "client";
+          if (!isDafnyOption) {
+            if (isRustOption) {
+              yield TokenTree.of(
+                """
+                crate::conversions::%s::to_dafny(&%s.clone().unwrap())
+                """.formatted(shapeName, rustValue)
+              );
+            } else {
+              yield TokenTree.of(
+                """
+                crate::conversions::%s::to_dafny(%s.clone())
+                """.formatted(shapeName, rustValue)
+              );
+            }
+          } else {
+            yield TokenTree.of(
+              """
+              ::std::rc::Rc::new(match &%s {
+                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                  None => crate::_Wrappers_Compile::Option::None { }
+              })
+              """.formatted(rustValue, shapeName)
+            );
+          }
+        }
         var structureShapeName = toSnakeCase(shape.getId().getName());
         if (!isDafnyOption) {
           if (isRustOption) {

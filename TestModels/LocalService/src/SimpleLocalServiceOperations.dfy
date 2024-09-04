@@ -29,11 +29,11 @@ module SimpleLocalServiceOperations refines AbstractSimpleLocalServiceOperations
   predicate SelfReflectionEnsuresPublicly(input: SelfReflectionInput , output: Result<SelfReflectionOutput, Error>) {
     true
   }
- 
+
   method SelfReflection ( config: InternalConfig , input: SelfReflectionInput )
     returns (output: Result<SelfReflectionOutput, Error>) 
   {
-    var innerOutput :- input.self.HelloWorld(HelloWorldInput());
+    var innerOutput :- input.client.HelloWorld(HelloWorldInput());
     output := Success(SelfReflectionOutput(
       greeting := "I looked deep within myself, and I said '" + innerOutput.greeting + "'"));
   }

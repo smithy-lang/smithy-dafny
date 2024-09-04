@@ -25,7 +25,7 @@ module SimpleLocalServiceTest {
     modifies client2.Modifies
     ensures client.ValidState()
   {
-    var ret :- expect client.SelfReflection(Types.SelfReflectionInput(self := client2));
+    var ret :- expect client.SelfReflection(Types.SelfReflectionInput(client := client2));
     expect ret.greeting == "I looked deep within myself, and I said 'Hi there!'";
   }
 

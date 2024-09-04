@@ -28,7 +28,7 @@ structure SimpleLocalServiceReference {}
 operation SelfReflection {
   input := {
     @required
-    self: SimpleLocalServiceReference
+    client: SimpleLocalServiceReference
   }
   output := {
     @required
