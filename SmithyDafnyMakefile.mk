@@ -194,6 +194,7 @@ transpile_implementation:
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
+		--compile-suffix \
 		--output $(OUT) \
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
@@ -230,6 +231,7 @@ transpile_test:
 		--no-verify \
 		--cores:$(CORES) \
 		--optimize-erasable-datatype-wrapper:false \
+		--compile-suffix \
 		--unicode-char:false \
 		--function-syntax:3 \
 		--output $(OUT) \
