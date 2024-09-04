@@ -206,7 +206,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       return enumShape(EnumShape.fromStringShape(shape).get());
     }
 
-    return "Seq(''.join([chr(int.from_bytes(pair, 'big')) for pair in zip(*[iter(%1$s.encode('utf-16-be'))]*2)]))".formatted(dataSource);
+    return "Seq(''.join([chr(int.from_bytes(pair, 'big')) for pair in zip(*[iter(%1$s.encode('utf-16-be'))]*2)]))".formatted(
+        dataSource
+      );
   }
 
   @Override

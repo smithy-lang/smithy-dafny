@@ -246,7 +246,9 @@ public class LocalServiceToDafnyShapeVisitor
       return "Seq(%1$s.encode('utf-8'))".formatted(dataSource);
     }
     // Convert native Python string to Dafny Seq of UTF-16 characters
-    return "Seq(''.join([chr(int.from_bytes(pair, 'big')) for pair in zip(*[iter(%1$s.encode('utf-16-be'))]*2)]))".formatted(dataSource);
+    return "Seq(''.join([chr(int.from_bytes(pair, 'big')) for pair in zip(*[iter(%1$s.encode('utf-16-be'))]*2)]))".formatted(
+        dataSource
+      );
   }
 
   @Override
