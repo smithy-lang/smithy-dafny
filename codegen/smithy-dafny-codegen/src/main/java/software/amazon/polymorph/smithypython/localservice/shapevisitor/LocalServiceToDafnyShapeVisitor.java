@@ -242,20 +242,11 @@ public class LocalServiceToDafnyShapeVisitor
   public String stringShape(StringShape shape) {
     writer.addStdlibImport("_dafny", "Seq");
     if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-      writer.addStdlibImport(
-        "smithy_dafny_standard_library.internaldafny.generated",
-        "UTF8"
-      );
-      // Convert to Dafny type, then UTF8 encode
-      return "UTF8.default__.Encode(Seq(%1$s)).value".formatted(dataSource);
+      // Convert native Python string to Dafny Seq of UTF-8 bytes
+      return "Seq(%1$s.encode('utf-8'))".formatted(dataSource);
     }
-    // Note: Other Smithy-Dafny code generators would treat enums here,
-    // as Polymorph-compatible Smithy models often define an enum
-    // as a StringShape with an EnumTrait.
-    // Smithy-Dafny-Python converts these StringShapes to EnumShapes
-    // at model load time, so those shapes are not handled here.
-    writer.addStdlibImport("_dafny", "Seq");
-    return "Seq(" + dataSource + ")";
+    // Convert native Python string to Dafny Seq of UTF-16 characters
+    return "Seq(''.join([chr(int.from_bytes(pair, 'big')) for pair in zip(*[iter(%1$s.encode('utf-16-be'))]*2)]))".formatted(dataSource);
   }
 
   @Override
