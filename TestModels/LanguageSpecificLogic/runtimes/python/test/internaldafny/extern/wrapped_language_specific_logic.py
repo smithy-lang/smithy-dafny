@@ -5,7 +5,7 @@
 from language_specific_logic.smithygenerated.language_specific_logic.client import LanguageSpecificLogic
 from language_specific_logic.smithygenerated.language_specific_logic.shim import LanguageSpecificLogicShim
 from language_specific_logic.smithygenerated.language_specific_logic.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
 import WrappedLanguageSpecificLogicService

@@ -50,7 +50,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
         writer -> {
           writer.write(
             """
-            import standard_library.internaldafny.generated.Wrappers as Wrappers
+            import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
             from botocore.exceptions import ClientError
             import $L
 
