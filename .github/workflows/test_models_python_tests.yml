@@ -61,7 +61,7 @@ jobs:
         id: set-options
         run: |
           if [ "${{inputs.dafny}}" == "4.8.0" ]; then
-            echo "DAFNY_OPTIONS=--allow-warnings" >> $GITHUB_ENV
+            echo "DAFNY_OPTIONS=--allow-warnings --include-test-runner" >> $GITHUB_ENV
           else
             echo "no options"
           fi
