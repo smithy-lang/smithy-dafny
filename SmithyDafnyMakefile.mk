@@ -767,6 +767,10 @@ clean_go:
 	rm -rf $(LIBRARY_ROOT)/runtimes/go/ImplementationFromDafny-go
 	rm -rf $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go
 
+test_go:
+	cd runtimes/go/TestFromDafny-go
+	go run TestsFromDafny.go
+
 ########################## Python targets
 
 # Python MUST transpile dependencies first to generate .dtr files
