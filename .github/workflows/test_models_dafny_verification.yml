@@ -55,7 +55,7 @@ jobs:
       - name: Setup Dafny options
         id: set-options
         run: |
-          if [ "${{ matrix.dafny-version}}" == "4.8.0"]; then
+          if [ "${{matrix.dafny-version}}" == "4.8.0" ]; then
             echo "DAFNY_OPTIONS=--allow-warnings" >> $GITHUB_ENV
           else
             echo "no options"
