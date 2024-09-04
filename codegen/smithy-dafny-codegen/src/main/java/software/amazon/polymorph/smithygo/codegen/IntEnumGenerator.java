@@ -32,60 +32,87 @@ import software.amazon.smithy.utils.StringUtils;
  * Renders intEnums and their constants.
  */
 public final class IntEnumGenerator implements Runnable {
-    private static final Logger LOGGER = Logger.getLogger(IntEnumGenerator.class.getName());
 
-    private final SymbolProvider symbolProvider;
-    private final GoWriter writer;
-    private final IntEnumShape shape;
+  private static final Logger LOGGER = Logger.getLogger(
+    IntEnumGenerator.class.getName()
+  );
 
-    public IntEnumGenerator(SymbolProvider symbolProvider, GoWriter writer, IntEnumShape shape) {
-        this.symbolProvider = symbolProvider;
-        this.writer = writer;
-        this.shape = shape;
-    }
+  private final SymbolProvider symbolProvider;
+  private final GoWriter writer;
+  private final IntEnumShape shape;
 
-    @Override
-    public void run() {
-        Symbol symbol = symbolProvider.toSymbol(shape);
+  public IntEnumGenerator(
+    SymbolProvider symbolProvider,
+    GoWriter writer,
+    IntEnumShape shape
+  ) {
+    this.symbolProvider = symbolProvider;
+    this.writer = writer;
+    this.shape = shape;
+  }
 
-// TODO(smithy): Use type alias instead of type definition until refactoring
-// protocol generators is prioritized.
-        writer.write("type $L = int32", symbol.getName()).write("");
+  @Override
+  public void run() {
+    Symbol symbol = symbolProvider.toSymbol(shape);
 
-        Set<String> constants = new LinkedHashSet<>();
-        writer.openBlock("const (", ")", () -> {
-            for (Map.Entry<String, MemberShape> entry : shape.getAllMembers().entrySet()) {
-                StringBuilder labelBuilder = new StringBuilder(symbol.getName());
-                String name = entry.getKey();
+    // TODO(smithy): Use type alias instead of type definition until refactoring
+    // protocol generators is prioritized.
+    writer.write("type $L = int32", symbol.getName()).write("");
 
-                for (String part : name.split("(?U)[\\W_]")) {
-                    if (part.matches(".*[a-z].*") && part.matches(".*[A-Z].*")) {
-// Mixed case names should not be changed other than first letter capitalized.
-                        labelBuilder.append(StringUtils.capitalize(part));
-                    } else {
-// For all non-mixed case parts title case first letter, followed by all other lower cased.
-                        labelBuilder.append(StringUtils.capitalize(part.toLowerCase(Locale.US)));
-                    }
-                }
-                String label = labelBuilder.toString();
+    Set<String> constants = new LinkedHashSet<>();
+    writer
+      .openBlock(
+        "const (",
+        ")",
+        () -> {
+          for (Map.Entry<String, MemberShape> entry : shape
+            .getAllMembers()
+            .entrySet()) {
+            StringBuilder labelBuilder = new StringBuilder(symbol.getName());
+            String name = entry.getKey();
 
-// If camel-casing would cause a conflict, don't camel-case this enum value.
-                if (constants.contains(label)) {
-                    LOGGER.warning(String.format(
-                            "Multiple enums resolved to the same name, `%s`, using unaltered value for: %s",
-                            label, name));
-                    label = name;
-                }
-                constants.add(label);
-
-                writer.write("$L $L = $L", label, symbol.getName(),
-                             entry.getValue().expectTrait(EnumValueTrait.class).expectIntValue());
+            for (String part : name.split("(?U)[\\W_]")) {
+              if (part.matches(".*[a-z].*") && part.matches(".*[A-Z].*")) {
+                // Mixed case names should not be changed other than first letter capitalized.
+                labelBuilder.append(StringUtils.capitalize(part));
+              } else {
+                // For all non-mixed case parts title case first letter, followed by all other lower cased.
+                labelBuilder.append(
+                  StringUtils.capitalize(part.toLowerCase(Locale.US))
+                );
+              }
             }
-        }).write("");
+            String label = labelBuilder.toString();
 
-// TODO(smithy): type aliases don't allow defining methods on base types (e.g. int32).
-// Uncomment generating the Value() method when the type alias is migrated to type definition.
-/*
+            // If camel-casing would cause a conflict, don't camel-case this enum value.
+            if (constants.contains(label)) {
+              LOGGER.warning(
+                String.format(
+                  "Multiple enums resolved to the same name, `%s`, using unaltered value for: %s",
+                  label,
+                  name
+                )
+              );
+              label = name;
+            }
+            constants.add(label);
+
+            writer.write(
+              "$L $L = $L",
+              label,
+              symbol.getName(),
+              entry
+                .getValue()
+                .expectTrait(EnumValueTrait.class)
+                .expectIntValue()
+            );
+          }
+        }
+      )
+      .write("");
+    // TODO(smithy): type aliases don't allow defining methods on base types (e.g. int32).
+    // Uncomment generating the Value() method when the type alias is migrated to type definition.
+    /*
    writer.writeDocs(String.format("Values returns all known values for %s. Note that this can be expanded in the "
            + "future, and so it is only as up to date as the client.%n%nThe ordering of this slice is not "
            + "guaranteed to be stable across updates.", symbol.getName()));
@@ -97,5 +124,5 @@ public final class IntEnumGenerator implements Runnable {
        });
    });
 */
-    }
+  }
 }

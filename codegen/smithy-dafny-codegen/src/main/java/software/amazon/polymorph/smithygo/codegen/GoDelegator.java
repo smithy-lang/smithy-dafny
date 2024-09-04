@@ -24,7 +24,8 @@ import software.amazon.smithy.codegen.core.WriterDelegator;
  * for getting shape specific GoWriters.
  */
 public final class GoDelegator extends WriterDelegator<GoWriter> {
-    public GoDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
-        super(fileManifest, symbolProvider, new GoWriter.GoWriterFactory());
-    }
+
+  public GoDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
+    super(fileManifest, symbolProvider, new GoWriter.GoWriterFactory());
+  }
 }

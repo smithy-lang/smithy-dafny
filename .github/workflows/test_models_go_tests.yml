@@ -58,7 +58,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.21'
+          go-version: "1.21"
 
       - name: Install Go imports
         run: |
@@ -67,10 +67,10 @@ jobs:
       - name: Add go mod to Dafny Runtime Go
         shell: bash
         working-directory: ./DafnyRuntimeGo
-        run: | 
+        run: |
           go mod init github.com/dafny-lang/DafnyRuntimeGo
           go mod tidy
-      
+
       - name: Setup Java 17 for codegen
         uses: actions/setup-java@v3
         with:
@@ -91,7 +91,7 @@ jobs:
         with:
           arguments: :smithy-dafny-codegen:pTML
           build-root-directory: codegen
-      
+
       - name: Execute smithy-dafny-codegen-test tests
         uses: gradle/gradle-build-action@v2
         env:
