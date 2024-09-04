@@ -10,12 +10,10 @@ module WrappedTest {
   import opened Types = SimpleLocalServiceTypes
   import opened Wrappers
 
-  method TestWrappedClient(config: Types.SimpleLocalServiceConfig)
-  {
-    var client :- expect WrappedSimpleLocalService.WrappedSimpleLocalService(config);
-  }
-
   method {:test} WrappedTest() {
-    TestWrappedClient(WrappedSimpleLocalService.WrappedDefaultSimpleLocalServiceConfig());
+
+    var client :- expect WrappedSimpleLocalService.WrappedSimpleLocalService(WrappedSimpleLocalService.WrappedDefaultSimpleLocalServiceConfig());
+    SimpleLocalServiceTest.TestClientDirect(client);
+    SimpleLocalServiceTest.TestClientSelfReference(client);
   }
 }
