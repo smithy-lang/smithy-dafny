@@ -7,16 +7,16 @@ pub fn to_dafny(
     value: aws_sdk_kms::types::SigningAlgorithmSpec,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec>{
     ::std::rc::Rc::new(match value {
- aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_256 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha384 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_384 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha512 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_512 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_256 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha384 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_384 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha512 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_512 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_256 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha384 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_384 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha512 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_512 {},
- aws_sdk_kms::types::SigningAlgorithmSpec::Sm2Dsa => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::SM2DSA {},
+        aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_256 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha384 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_384 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha512 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_512 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_256 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha384 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_384 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha512 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_512 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_256 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha384 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_384 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha512 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_512 {},
+aws_sdk_kms::types::SigningAlgorithmSpec::Sm2Dsa => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::SM2DSA {},
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
@@ -25,15 +25,15 @@ pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec,
 ) -> aws_sdk_kms::types::SigningAlgorithmSpec {
     match dafny_value {
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha256,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha384,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha512,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha256,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha384,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha512,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha256,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha384,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha512,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::SM2DSA {} => aws_sdk_kms::types::SigningAlgorithmSpec::Sm2Dsa,
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha256,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha384,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PSS_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPssSha512,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha256,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha384,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::RSASSA_PKCS1_V1_5_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::RsassaPkcs1V15Sha512,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_256 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha256,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_384 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha384,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::ECDSA_SHA_512 {} => aws_sdk_kms::types::SigningAlgorithmSpec::EcdsaSha512,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec::SM2DSA {} => aws_sdk_kms::types::SigningAlgorithmSpec::Sm2Dsa,
     }
 }
