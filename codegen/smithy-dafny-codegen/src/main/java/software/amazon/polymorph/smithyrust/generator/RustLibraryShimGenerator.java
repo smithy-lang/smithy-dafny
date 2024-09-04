@@ -644,12 +644,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   private RustFile operationBuildersModule(
     final OperationShape operationShape
   ) {
-    final StructureShape outputShape = model.expectShape(
-      operationShape.getOutputShape(),
+    final StructureShape inputShape = model.expectShape(
+      operationShape.getInputShape(),
       StructureShape.class
     );
     final String accessors = ModelUtils
-      .streamStructureMembersSorted(outputShape)
+      .streamStructureMembersSorted(inputShape)
       .map(this::operationFluentBuilderFieldAccessors)
       .collect(Collectors.joining("\n"));
 
