@@ -434,7 +434,7 @@ _polymorph_dafny: OUTPUT_DAFNY=\
 		--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_dafny: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
-_polymorph_dafny: _polymorph removeDots
+_polymorph_dafny: _polymorph
 
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_dotnet
@@ -866,9 +866,3 @@ local_transpile_test_single: TRANSPILE_DEPENDENCIES= \
 		$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX)) \
 		-library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 local_transpile_test_single: transpile_test
-
-removeDots:
-	chmod +x ./removeDotFromExtern.sh
-	./removeDotFromExtern.sh
-
-transpile_implementation_go: removeDots
