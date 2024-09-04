@@ -10,8 +10,8 @@ pub value: ::std::option::Option<::aws_smithy_types::Blob>,
 }
 impl GetBlobInput {
     #[allow(missing_docs)] // documentation missing in model
-pub fn value(&self) -> ::std::option::Option<::aws_smithy_types::Blob> {
-    self.value.clone()
+pub fn value(&self) -> &::std::option::Option<::aws_smithy_types::Blob> {
+    &self.value
 }
 }
 impl GetBlobInput {

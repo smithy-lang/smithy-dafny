@@ -8,22 +8,22 @@ pub fn to_dafny(
   ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactWriteItem::TransactWriteItem {
         ConditionCheck: ::std::rc::Rc::new(match &value.condition_check {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::condition_check::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::condition_check::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  Put: ::std::rc::Rc::new(match &value.put {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::put::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::put::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  Delete: ::std::rc::Rc::new(match &value.delete {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::delete::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::delete::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  Update: ::std::rc::Rc::new(match &value.update {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::update::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::update::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

@@ -22,7 +22,7 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::StreamSpecification {
     aws_sdk_dynamodb::types::StreamSpecification::builder()
-          .set_stream_enabled(Some( dafny_value.StreamEnabled() .clone()))
+          .set_stream_enabled(Some( dafny_value.StreamEnabled() .clone() ))
  .set_stream_view_type(match &**dafny_value.StreamViewType() {
     crate::r#_Wrappers_Compile::Option::Some { value } => Some(
         crate::conversions::stream_view_type::from_dafny(value)
