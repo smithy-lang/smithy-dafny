@@ -13,7 +13,8 @@ module WrappedTest {
   method {:test} WrappedTest() {
 
     var client :- expect WrappedSimpleLocalService.WrappedSimpleLocalService(WrappedSimpleLocalService.WrappedDefaultSimpleLocalServiceConfig());
+    var client2 :- expect WrappedSimpleLocalService.WrappedSimpleLocalService(WrappedSimpleLocalService.WrappedDefaultSimpleLocalServiceConfig());
     SimpleLocalServiceTest.TestClientDirect(client);
-    SimpleLocalServiceTest.TestClientSelfReference(client);
+    SimpleLocalServiceTest.TestClientSelfReference(client, client2);
   }
 }

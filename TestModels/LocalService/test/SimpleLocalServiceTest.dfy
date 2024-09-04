@@ -17,26 +17,24 @@ module SimpleLocalServiceTest {
     expect ret.greeting == "Hi there!";
   }
 
-  method TestClientSelfReference(client: Types.ISimpleLocalServiceClient)
+  method TestClientSelfReference(client: Types.ISimpleLocalServiceClient, client2: Types.ISimpleLocalServiceClient)
     requires client.ValidState()
+    requires client2.ValidState()
+    requires client.Modifies !! client2.Modifies
     modifies client.Modifies
+    modifies client2.Modifies
     ensures client.ValidState()
   {
-    // This is a flat out lie and directly contradicts client.ValidState().
-    // But otherwise it's not possible to call other client methods like this.
-    // Since this test model is only using self-reference in order to
-    // avoid extra dependencies, and self-reference isn't that useful a use case in reality,
-    // lying to get around the specification restrictions in a test is not terribly risky.
-    assume {:axiom} client.Modifies !! {client.History};
-    var ret :- expect client.SelfReflection(Types.SelfReflectionInput(self := client));
+    var ret :- expect client.SelfReflection(Types.SelfReflectionInput(self := client2));
     expect ret.greeting == "I looked deep within myself, and I said 'Hi there!'";
   }
 
   method {:test} Test()
   {
     var client :- expect SimpleLocalService.SimpleLocalService(SimpleLocalService.DefaultSimpleLocalServiceConfig());
+    var client2 :- expect SimpleLocalService.SimpleLocalService(SimpleLocalService.DefaultSimpleLocalServiceConfig());
     TestClientDirect(client);
-    TestClientSelfReference(client);
+    TestClientSelfReference(client, client2);
   }
 
 }
