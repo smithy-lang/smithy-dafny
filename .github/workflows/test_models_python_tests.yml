@@ -57,6 +57,15 @@ jobs:
         with:
           dafny-version: ${{ inputs.dafny }}
 
+      - name: Setup Dafny options
+        id: set-options
+        run: |
+          if [ "${{inputs.dafny}}" == "4.8.0" ]; then
+            echo "DAFNY_OPTIONS=--allow-warnings" >> $GITHUB_ENV
+          else
+            echo "no options"
+          fi
+
       - name: Setup Python for running tests
         uses: actions/setup-python@v4
         with:
