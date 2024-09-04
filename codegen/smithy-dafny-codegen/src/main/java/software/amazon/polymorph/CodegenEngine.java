@@ -42,6 +42,8 @@ import software.amazon.polymorph.smithydotnet.TypeConversionDirection;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedConversionCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedShimCodegen;
+import software.amazon.polymorph.smithygo.awssdk.DafnyGoAwsSdkClientCodegenPlugin;
+import software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceCodegenPlugin;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
@@ -186,6 +188,7 @@ public class CodegenEngine {
         case DAFNY -> generateDafny(outputDir);
         case JAVA -> generateJava(outputDir, testOutputDir);
         case DOTNET -> generateDotnet(outputDir);
+        case GO -> generateGo();
         case RUST -> generateRust(outputDir);
         case PYTHON -> generatePython();
         default -> throw new UnsupportedOperationException(
@@ -810,6 +813,41 @@ public class CodegenEngine {
     }
   }
 
+  private void generateGo() {
+    if (libraryName.isEmpty()) {
+      throw new IllegalArgumentException("Go codegen requires a library name");
+    }
+
+    ObjectNode.Builder goSettingsBuilder = ObjectNode
+      .builder()
+      .withMember("service", serviceShape.getId().toString())
+      .withMember("moduleName", libraryName.get());
+
+    final PluginContext pluginContext = PluginContext
+      .builder()
+      .model(model)
+      .fileManifest(
+        FileManifest.create(targetLangOutputDirs.get(TargetLanguage.GO))
+      )
+      .settings(goSettingsBuilder.build())
+      .build();
+
+    final Map<String, String> smithyNamespaceToGoModuleNameMap = new HashMap<>(
+      dependencyLibraryNames
+    );
+    smithyNamespaceToGoModuleNameMap.put(
+      serviceShape.getId().getNamespace(),
+      libraryName.get()
+    );
+    if (this.awsSdkStyle) {
+      new DafnyGoAwsSdkClientCodegenPlugin(smithyNamespaceToGoModuleNameMap)
+        .run(pluginContext);
+    } else {
+      new DafnyLocalServiceCodegenPlugin(smithyNamespaceToGoModuleNameMap)
+        .run(pluginContext);
+    }
+  }
+
   private void generatePython() {
     if (libraryName.isEmpty()) {
       throw new IllegalArgumentException(
@@ -1314,6 +1352,7 @@ public class CodegenEngine {
     DAFNY,
     JAVA,
     DOTNET,
+    GO,
     RUST,
     PYTHON,
   }

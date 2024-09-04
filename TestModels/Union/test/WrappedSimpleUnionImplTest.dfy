@@ -11,7 +11,15 @@ module WrappedSimpleUnionTest {
         var client :- expect WrappedSimpleUnionService.WrappedSimpleUnion();
         SimpleUnionImplTest.TestMyUnionInteger(client);
         SimpleUnionImplTest.TestMyUnionString(client);
+        SimpleUnionImplTest.TestMyUnionBoolean(client);
+        SimpleUnionImplTest.TestMyUnionBlob(client);
+        SimpleUnionImplTest.TestMyUnionDouble(client);
+        SimpleUnionImplTest.TestMyUnionList(client);
+        SimpleUnionImplTest.TestMyUnionMap(client);
+        SimpleUnionImplTest.TestMyUnionLong(client);
+        SimpleUnionImplTest.TestMyUnionStructure(client);
         SimpleUnionImplTest.TestKnownValueUnionString(client);
+        SimpleUnionImplTest.TestMyUnioninsideMyUnion(client);
 
     }
 }

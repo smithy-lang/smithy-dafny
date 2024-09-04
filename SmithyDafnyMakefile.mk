@@ -278,7 +278,7 @@ transpile_test:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
+		-compileSuffix:0 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
@@ -309,6 +309,7 @@ transpile_test_new_cli:
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSLATION_RECORD) \
 		$(SOURCE_TRANSLATION_RECORD) \
+		$(TRANSPILE_MODULE_NAME) \
 		$(TRANSPILE_DEPENDENCIES) \
 
 # If we are not the StandardLibrary, transpile the StandardLibrary.
@@ -345,6 +346,7 @@ _polymorph:
 	$(OUTPUT_JAVA) \
 	$(OUTPUT_JAVA_TEST) \
 	$(OUTPUT_DOTNET) \
+	$(OUTPUT_GO) \
 	$(OUTPUT_PYTHON) \
 	$(MODULE_NAME) \
 	$(OUTPUT_RUST) \
@@ -356,7 +358,7 @@ _polymorph:
 	$(OUTPUT_LOCAL_SERVICE_$(SERVICE)) \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS) \
-	";
+    ";
 
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
@@ -369,6 +371,7 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
+	$(OUTPUT_GO_WRAPPED) \
 	$(OUTPUT_PYTHON_WRAPPED) \
 	$(MODULE_NAME) \
 	$(OUTPUT_RUST_WRAPPED) \
@@ -408,6 +411,7 @@ _polymorph_code_gen: INPUT_DAFNY=\
 _polymorph_code_gen: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_code_gen: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_code_gen: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_code_gen: _polymorph
 
@@ -512,6 +516,54 @@ _polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 # For those, make polymorph_rust should just be a no-op.
 _polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
 
+###########################
+
+.PHONY: polymorph_go
+polymorph_go: POLYMORPH_LANGUAGE_TARGET=go
+polymorph_go: _polymorph_dependencies
+polymorph_go:
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_go ; \
+	done
+
+_polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
+_polymorph_go: MODULE_NAME=--library-name $(GO_MODULE_NAME)
+_polymorph_go: DEPENDENCY_MODULE_NAMES = $(GO_DEPENDENCY_MODULE_NAMES)
+_polymorph_go: _polymorph _mv_polymorph_go run_goimports
+
+run_goimports:
+	cd runtimes/go/ImplementationFromDafny-go && goimports -w .
+	@if [ -d runtimes/go/TestsFromDafny-go ]; then \
+		cd runtimes/go/TestsFromDafny-go && goimports -w . ; \
+	fi
+
+_gomod_init:
+	#TODO: Think about handwritten go.mod
+	@(cd $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go && \
+		if [ -f go.mod ]; then rm -f go.mod; fi && \
+		go mod init $(GO_MODULE_NAME) && \
+		echo "require github.com/dafny-lang/DafnyStandardLibGo v0.0.0" >> go.mod && \
+		echo "require github.com/dafny-lang/DafnyRuntimeGo v0.0.0" >> go.mod && \
+		if [ $$(basename $$(dirname $(LIBRARY_ROOT))) == "SimpleTypes" ]; then \
+			echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../../DafnyRuntimeGo/" >> go.mod; \
+			echo "replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/" >> go.mod; \
+		else \
+			echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod; \
+			echo "replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/" >> go.mod; \
+		fi && \
+		go mod tidy)
+
+_mv_polymorph_go:
+	@for dir in $(LIBRARY_ROOT)/runtimes/go/* ; do \
+        if [ "$$(basename $$dir)" != "ImplementationFromDafny-go" ] && [ "$$(basename $$dir)" != "TestsFromDafny-go" ]; then \
+			cp -Rf $$dir runtimes/go/ImplementationFromDafny-go/; \
+			cp -Rf $$dir runtimes/go/TestsFromDafny-go; \
+			rm -r $$dir; \
+		fi \
+    done
 ########################## .NET targets
 
 transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
@@ -688,6 +740,36 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
 
 clean: _clean
+
+########################## Go targets
+transpile_go: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_pre_transpile, )
+transpile_go: | transpile_dependencies_go transpile_implementation_go transpile_test_go
+transpile_go: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_post_transpile, )
+
+transpile_implementation_go: TARGET=go
+transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
+transpile_implementation_go: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+transpile_implementation_go: TRANSLATION_RECORD=$(patsubst %, --translation-record:$(PROJECT_ROOT)/%, $(TRANSLATION_RECORD_GO))
+transpile_implementation_go: TRANSPILE_MODULE_NAME=--go-module-name $(GO_MODULE_NAME)
+transpile_implementation_go: _transpile_implementation_all_new_cli
+
+transpile_test_go: TARGET=go
+transpile_test_go: OUT=runtimes/go/TestsFromDafny
+transpile_test_go: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+transpile_test_go: TRANSLATION_RECORD=$(patsubst %, --translation-record:$(PROJECT_ROOT)/%, $(TRANSLATION_RECORD_GO))
+transpile_test_go: TRANSPILE_MODULE_NAME=--go-module-name $(GO_MODULE_NAME)
+transpile_test_go: _transpile_test_all_new_cli
+
+transpile_dependencies_go: LANG=go
+transpile_dependencies_go: transpile_dependencies
+
+clean_go:
+	rm -rf $(LIBRARY_ROOT)/runtimes/go/ImplementationFromDafny-go
+	rm -rf $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go
+
+test_go:
+	cd runtimes/go/TestFromDafny-go
+	go run TestsFromDafny.go
 
 ########################## Python targets
 

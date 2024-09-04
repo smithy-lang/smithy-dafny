@@ -11,6 +11,8 @@ MAX_RESOURCE_COUNT=500000000
 PYTHON_MODULE_NAME=standard_library
 LIBRARIES :=
 
+GO_MODULE_NAME="github.com/dafny-lang/DafnyStandardLibGo"
+
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
 	RED          := $(shell tput -Txterm setaf 1)
@@ -43,6 +45,9 @@ polymorph_java :
 polymorph_python :
 	echo "Skipping polymorph_python for StandardLibrary"
 
+polymorph_go :
+	echo "Skipping polymorph_go for StandardLibrary"
+
 # Using this target for the side-effect of maintaining patches,
 # Since Dafny Rust code generation is incomplete and also needs to be patched.
 # That only works if you run transpile_rust first.
@@ -63,6 +68,10 @@ transpile_java: | transpile_implementation_java transpile_test_java
 # Override SharedMakefile's transpile_python to not transpile
 # StandardLibrary as a dependency
 transpile_python: | transpile_implementation_python transpile_test_python
+
+# Override SharedMakefile's transpile_go to not transpile
+# StandardLibrary as a dependency
+transpile_go: | transpile_implementation_go transpile_test_go
 
 ########################## Rust targets
 # Override SharedMakefile's transpile_java to not transpile

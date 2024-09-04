@@ -43,7 +43,7 @@ echo "Using sed-like command for OS $OS"
 # macOS
 if [ "$OS" = "Darwin" ]; then
     echo "Replacing in $SED_FILE_PATH using macOS-formatted sed"
-    sed -i "" "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" $SED_FILE_PATH
+    sed -i "s/$SED_BEFORE_STRING/$SED_AFTER_STRING/g" $SED_FILE_PATH
 
 # Windows
 elif [[ "$OS" == *"NT"* ]] || [ "$OS" = "MINGW64_NT" ]; then
