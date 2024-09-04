@@ -10,8 +10,8 @@ pub value: ::std::option::Option<crate::types::SimpleEnumShape>,
 }
 impl GetEnumOutput {
     #[allow(missing_docs)] // documentation missing in model
-pub fn value(&self) -> ::std::option::Option<crate::types::SimpleEnumShape> {
-    self.value.clone()
+pub fn value(&self) -> &::std::option::Option<crate::types::SimpleEnumShape> {
+    &self.value
 }
 }
 impl GetEnumOutput {

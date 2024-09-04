@@ -11,4 +11,4 @@ pub mod error;
 
  pub mod get_string_utf8_known_value;
 
- pub mod simple_string_config;
+pub mod simple_string_config;

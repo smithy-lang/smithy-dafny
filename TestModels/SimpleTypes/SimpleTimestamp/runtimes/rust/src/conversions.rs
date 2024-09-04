@@ -5,4 +5,4 @@ pub mod error;
 
  pub mod get_timestamp;
 
- pub mod simple_timestamp_config;
+pub mod simple_timestamp_config;

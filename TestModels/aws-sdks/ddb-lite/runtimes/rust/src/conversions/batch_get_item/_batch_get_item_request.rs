@@ -10,7 +10,7 @@ pub fn to_dafny(
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput::BatchGetItemInput {
         RequestItems: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.request_items.clone().unwrap(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
-    |v| crate::conversions::keys_and_attributes::to_dafny(&v)
+    |v| crate::conversions::keys_and_attributes::to_dafny(v)
 ,
 )
 ,

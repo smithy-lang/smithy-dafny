@@ -5,4 +5,4 @@ pub mod error;
 
  pub mod get_double;
 
- pub mod simple_double_config;
+pub mod simple_double_config;

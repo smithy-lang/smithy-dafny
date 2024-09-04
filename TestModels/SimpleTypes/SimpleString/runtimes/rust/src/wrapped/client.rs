@@ -132,7 +132,7 @@ impl crate::r#simple::types::smithystring::internaldafny::types::ISimpleTypesStr
     >{
         let inner_input =
             crate::conversions::get_string_utf8::_get_string_utf8_input::from_dafny(input.clone());
-        let result = self.rt.block_on(crate::operation::get_string_utf8::GetStringUTF8::send(&self.wrapped, inner_input));
+        let result = self.rt.block_on(crate::operation::get_string_utf8::GetStringUtf8::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Failure {
@@ -162,7 +162,7 @@ impl crate::r#simple::types::smithystring::internaldafny::types::ISimpleTypesStr
     >{
         let inner_input =
             crate::conversions::get_string_utf8_known_value::_get_string_utf8_known_value_input::from_dafny(input.clone());
-        let result = self.rt.block_on(crate::operation::get_string_utf8_known_value::GetStringUTF8KnownValue::send(&self.wrapped, inner_input));
+        let result = self.rt.block_on(crate::operation::get_string_utf8_known_value::GetStringUtf8KnownValue::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Failure {

@@ -7,4 +7,4 @@ pub mod error;
 
  pub mod get_integer_known_value_test;
 
- pub mod simple_integer_config;
+pub mod simple_integer_config;

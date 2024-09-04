@@ -11,7 +11,7 @@ pub fn to_dafny(
         TableName: crate::standard_library_conversions::ostring_to_dafny(&value.table_name) .Extract(),
  Key: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.key.clone().unwrap(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
-    |v| crate::conversions::attribute_value::to_dafny(&v)
+    |v| crate::conversions::attribute_value::to_dafny(v)
 ,
 )
 ,

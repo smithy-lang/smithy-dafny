@@ -9,20 +9,20 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableInput::CreateTableInput {
         AttributeDefinitions: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.attribute_definitions.clone().unwrap(),
-    |e| crate::conversions::attribute_definition::to_dafny(&e)
+    |e| crate::conversions::attribute_definition::to_dafny(e)
 ,
 )
 ,
  TableName: crate::standard_library_conversions::ostring_to_dafny(&value.table_name) .Extract(),
  KeySchema: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.key_schema.clone().unwrap(),
-    |e| crate::conversions::key_schema_element::to_dafny(&e)
+    |e| crate::conversions::key_schema_element::to_dafny(e)
 ,
 )
 ,
  LocalSecondaryIndexes: ::std::rc::Rc::new(match &value.local_secondary_indexes {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::local_secondary_index::to_dafny(&e)
+            |e| crate::conversions::local_secondary_index::to_dafny(e)
 ,
         )
     },
@@ -32,7 +32,7 @@ pub fn to_dafny(
  GlobalSecondaryIndexes: ::std::rc::Rc::new(match &value.global_secondary_indexes {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::global_secondary_index::to_dafny(&e)
+            |e| crate::conversions::global_secondary_index::to_dafny(e)
 ,
         )
     },
@@ -45,24 +45,24 @@ pub fn to_dafny(
 })
 ,
  ProvisionedThroughput: ::std::rc::Rc::new(match &value.provisioned_throughput {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  StreamSpecification: ::std::rc::Rc::new(match &value.stream_specification {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::stream_specification::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::stream_specification::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  SSESpecification: ::std::rc::Rc::new(match &value.sse_specification {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::sse_specification::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::sse_specification::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  Tags: ::std::rc::Rc::new(match &value.tags {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::tag::to_dafny(&e)
+            |e| crate::conversions::tag::to_dafny(e)
 ,
         )
     },

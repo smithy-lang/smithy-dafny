@@ -10,8 +10,8 @@ pub value: ::std::option::Option<::std::primitive::f64>,
 }
 impl GetDoubleOutput {
     #[allow(missing_docs)] // documentation missing in model
-pub fn value(&self) -> ::std::option::Option<::std::primitive::f64> {
-    self.value
+pub fn value(&self) -> &::std::option::Option<::std::primitive::f64> {
+    &self.value
 }
 }
 impl GetDoubleOutput {

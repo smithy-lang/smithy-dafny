@@ -10,8 +10,8 @@ pub value: ::std::option::Option<::std::primitive::i64>,
 }
 impl GetLongInput {
     #[allow(missing_docs)] // documentation missing in model
-pub fn value(&self) -> ::std::option::Option<::std::primitive::i64> {
-    self.value
+pub fn value(&self) -> &::std::option::Option<::std::primitive::i64> {
+    &self.value
 }
 }
 impl GetLongInput {
