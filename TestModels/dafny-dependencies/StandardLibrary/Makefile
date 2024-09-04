@@ -82,29 +82,8 @@ transpile_dependencies:
 
 # Override SharedMakefile's transpile_implementation to not reference
 # StandardLibrary as a Library
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
-	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		$(DAFNY_OPTIONS) \
-		$(DAFNY_OTHER_FILES) \
-		-out $(OUT)
-
-# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
-# the `transpile_implementation` target should start using the new Dafny CLI,
-# and the `transpile_implementation_new_cli` target should be removed
-# in favor of `transpile_implementation` using the new CLI.
-transpile_implementation_new_cli: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
-transpile_implementation_new_cli:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 	translate $(TARGET) \
 		--stdin \
@@ -113,7 +92,6 @@ transpile_implementation_new_cli:
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
-		--allow-warnings \
 		--output $(OUT) \
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
