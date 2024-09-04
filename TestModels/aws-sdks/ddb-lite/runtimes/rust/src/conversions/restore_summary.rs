@@ -23,7 +23,7 @@ pub fn from_dafny(
           .set_source_backup_arn(crate::standard_library_conversions::ostring_from_dafny(dafny_value.SourceBackupArn().clone()))
  .set_source_table_arn(crate::standard_library_conversions::ostring_from_dafny(dafny_value.SourceTableArn().clone()))
  .set_restore_date_time(Some(crate::standard_library_conversions::timestamp_from_dafny(dafny_value.RestoreDateTime().clone())))
- .set_restore_in_progress(Some( dafny_value.RestoreInProgress() .clone()))
+ .set_restore_in_progress(Some( dafny_value.RestoreInProgress() .clone() ))
           .build()
           .unwrap()
 }

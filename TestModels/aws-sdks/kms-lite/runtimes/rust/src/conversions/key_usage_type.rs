@@ -7,10 +7,10 @@ pub fn to_dafny(
     value: aws_sdk_kms::types::KeyUsageType,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType>{
     ::std::rc::Rc::new(match value {
- aws_sdk_kms::types::KeyUsageType::SignVerify => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::SIGN_VERIFY {},
- aws_sdk_kms::types::KeyUsageType::EncryptDecrypt => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::ENCRYPT_DECRYPT {},
- aws_sdk_kms::types::KeyUsageType::GenerateVerifyMac => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::GENERATE_VERIFY_MAC {},
- aws_sdk_kms::types::KeyUsageType::KeyAgreement => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::KEY_AGREEMENT {},
+        aws_sdk_kms::types::KeyUsageType::SignVerify => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::SIGN_VERIFY {},
+aws_sdk_kms::types::KeyUsageType::EncryptDecrypt => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::ENCRYPT_DECRYPT {},
+aws_sdk_kms::types::KeyUsageType::GenerateVerifyMac => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::GENERATE_VERIFY_MAC {},
+aws_sdk_kms::types::KeyUsageType::KeyAgreement => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::KEY_AGREEMENT {},
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
@@ -19,9 +19,9 @@ pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType,
 ) -> aws_sdk_kms::types::KeyUsageType {
     match dafny_value {
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::SIGN_VERIFY {} => aws_sdk_kms::types::KeyUsageType::SignVerify,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::ENCRYPT_DECRYPT {} => aws_sdk_kms::types::KeyUsageType::EncryptDecrypt,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::GENERATE_VERIFY_MAC {} => aws_sdk_kms::types::KeyUsageType::GenerateVerifyMac,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::KEY_AGREEMENT {} => aws_sdk_kms::types::KeyUsageType::KeyAgreement,
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::SIGN_VERIFY {} => aws_sdk_kms::types::KeyUsageType::SignVerify,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::ENCRYPT_DECRYPT {} => aws_sdk_kms::types::KeyUsageType::EncryptDecrypt,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::GENERATE_VERIFY_MAC {} => aws_sdk_kms::types::KeyUsageType::GenerateVerifyMac,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyUsageType::KEY_AGREEMENT {} => aws_sdk_kms::types::KeyUsageType::KeyAgreement,
     }
 }

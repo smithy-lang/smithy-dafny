@@ -9,7 +9,7 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchExecuteStatementInput::BatchExecuteStatementInput {
         Statements: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.statements.clone().unwrap(),
-    |e| crate::conversions::batch_statement_request::to_dafny(&e)
+    |e| crate::conversions::batch_statement_request::to_dafny(e)
 ,
 )
 ,

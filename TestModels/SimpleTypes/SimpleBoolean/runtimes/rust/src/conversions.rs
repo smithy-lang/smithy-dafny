@@ -5,4 +5,4 @@ pub mod error;
 
  pub mod get_boolean;
 
- pub mod simple_boolean_config;
+pub mod simple_boolean_config;

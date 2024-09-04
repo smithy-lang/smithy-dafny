@@ -1,20 +1,20 @@
-/// Orchestration and serialization glue logic for `$operationName:L`.
+/// Orchestration and serialization glue logic for `$pascalCaseOperationName:L`.
 #[derive(::std::clone::Clone, ::std::default::Default, ::std::fmt::Debug)]
 #[non_exhaustive]
-pub struct $operationName:L;
-impl $operationName:L {
-    /// Creates a new `$operationName:L`
+pub struct $pascalCaseOperationName:L;
+impl $pascalCaseOperationName:L {
+    /// Creates a new `$pascalCaseOperationName:L`
     pub fn new() -> Self {
         Self
     }
     pub(crate) async fn send(
         client: &crate::client::Client,
-        input: crate::operation::$snakeCaseOperationName:L::$operationInputName:L,
+        input: crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L,
     ) -> ::std::result::Result<
-        crate::operation::$snakeCaseOperationName:L::$operationOutputName:L,
-        crate::operation::$snakeCaseOperationName:L::$operationErrorName:L,
+        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
+        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L,
     > {
-        let inner_input = crate::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::to_dafny(input);
+        let inner_input = crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::to_dafny(input);
         let inner_result =
             ::dafny_runtime::md!(client.dafny_client.clone()).$operationName:L(&inner_input);
         if matches!(
@@ -22,7 +22,7 @@ impl $operationName:L {
             crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
-                crate::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationOutputName:L::from_dafny(
+                crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::from_dafny(
                     inner_result.value().clone(),
                 ),
             )
@@ -37,7 +37,7 @@ impl $operationName:L {
 /// Error type for the `$operationName:L` operation.
 #[non_exhaustive]
 #[derive(::std::fmt::Debug)]
-pub enum $operationErrorName:L {
+pub enum $pascalCaseOperationErrorName:L {
     /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
     #[deprecated(
         note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
@@ -49,8 +49,8 @@ pub enum $operationErrorName:L {
     )]
     Unhandled(crate::error::sealed_unhandled::Unhandled),
 }
-impl $operationErrorName:L {
-    /// Creates the `$operationErrorName:L::Unhandled` variant from any error type.
+impl $pascalCaseOperationErrorName:L {
+    /// Creates the `$pascalCaseOperationErrorName:L::Unhandled` variant from any error type.
     pub fn unhandled(
         err: impl ::std::convert::Into<
             ::std::boxed::Box<
@@ -64,7 +64,7 @@ impl $operationErrorName:L {
         })
     }
 
-    /// Creates the `$operationErrorName:L::Unhandled` variant from an [`ErrorMetadata`](::aws_smithy_types::error::ErrorMetadata).
+    /// Creates the `$pascalCaseOperationErrorName:L::Unhandled` variant from an [`ErrorMetadata`](::aws_smithy_types::error::ErrorMetadata).
     pub fn generic(err: ::aws_smithy_types::error::ErrorMetadata) -> Self {
         Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
             source: err.clone().into(),
@@ -81,14 +81,14 @@ impl $operationErrorName:L {
         }
     }
 }
-impl ::std::error::Error for $operationErrorName:L {
+impl ::std::error::Error for $pascalCaseOperationErrorName:L {
     fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
         match self {
             Self::Unhandled(_inner) => ::std::option::Option::Some(&*_inner.source),
         }
     }
 }
-impl ::std::fmt::Display for $operationErrorName:L {
+impl ::std::fmt::Display for $pascalCaseOperationErrorName:L {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
             Self::Unhandled(_inner) => {
@@ -103,7 +103,7 @@ impl ::std::fmt::Display for $operationErrorName:L {
         }
     }
 }
-impl ::aws_smithy_types::retry::ProvideErrorKind for $operationErrorName:L {
+impl ::aws_smithy_types::retry::ProvideErrorKind for $pascalCaseOperationErrorName:L {
     fn code(&self) -> ::std::option::Option<&str> {
         ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
     }
@@ -111,14 +111,14 @@ impl ::aws_smithy_types::retry::ProvideErrorKind for $operationErrorName:L {
         ::std::option::Option::None
     }
 }
-impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for $operationErrorName:L {
+impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for $pascalCaseOperationErrorName:L {
     fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
         match self {
             Self::Unhandled(_inner) => &_inner.meta,
         }
     }
 }
-impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for $operationErrorName:L {
+impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for $pascalCaseOperationErrorName:L {
     fn create_unhandled_error(
         source: ::std::boxed::Box<
             dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -132,9 +132,9 @@ impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for $operati
     }
 }
 
-pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationOutputName:L::$operationOutputName:L;
+pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationOutputName:L::$pascalCaseOperationOutputName:L;
 
-pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::$operationInputName:L;
+pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::$pascalCaseOperationInputName:L;
 
 pub(crate) mod _$snakeCaseOperationOutputName:L;
 
