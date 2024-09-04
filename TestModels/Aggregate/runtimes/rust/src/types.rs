@@ -6,12 +6,12 @@ pub mod simple_aggregate_config;
 
 pub mod builders;
 
-mod _structure_list_element;
-pub use crate::types::_structure_list_element::StructureListElement;
 mod _nested_structure;
 pub use crate::types::_nested_structure::NestedStructure;
 mod _string_structure;
 pub use crate::types::_string_structure::StringStructure;
+mod _structure_list_element;
+pub use crate::types::_structure_list_element::StructureListElement;
 
 
 
