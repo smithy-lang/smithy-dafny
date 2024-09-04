@@ -187,10 +187,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected Set<RustFile> allStructureConversionModules() {
-    return model
-      .getStructureShapes()
-      .stream()
-      .filter(this::shouldGenerateStructForStructure)
+    return streamStructuresToGenerateStructsFor()
       .map(this::structureConversionModule)
       .collect(Collectors.toSet());
   }

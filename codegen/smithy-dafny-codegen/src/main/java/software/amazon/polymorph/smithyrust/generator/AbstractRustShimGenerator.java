@@ -98,6 +98,16 @@ public abstract class AbstractRustShimGenerator {
     );
   }
 
+  protected final Stream<
+    StructureShape
+  > streamStructuresToGenerateStructsFor() {
+    return model
+      .getStructureShapes()
+      .stream()
+      .filter(this::shouldGenerateStructForStructure)
+      .sorted();
+  }
+
   protected boolean shouldGenerateEnumForUnion(UnionShape unionShape) {
     return unionShape
       .getId()
@@ -142,10 +152,7 @@ public abstract class AbstractRustShimGenerator {
     // smithy-dafny generally generates code for all shapes in the same namespace,
     // whereas most smithy code generators generate code for all shapes in the service closure.
     // Here we filter to "normal" structures and unions.
-    Stream<String> structureModules = model
-      .getStructureShapes()
-      .stream()
-      .filter(this::shouldGenerateStructForStructure)
+    Stream<String> structureModules = streamStructuresToGenerateStructsFor()
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
     Stream<String> unionModules = model
       .getUnionShapes()

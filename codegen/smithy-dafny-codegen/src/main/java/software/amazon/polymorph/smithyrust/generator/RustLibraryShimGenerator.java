@@ -69,10 +69,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(typesConfigModule());
     result.add(typesBuildersModule());
     result.addAll(
-      model
-        .getStructureShapes()
-        .stream()
-        .filter(this::shouldGenerateStructForStructure)
+      streamStructuresToGenerateStructsFor()
         .map(this::standardStructureModule)
         .toList()
     );
@@ -110,10 +107,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.addAll(configConversionModules());
     result.addAll(allOperationConversionModules());
     result.addAll(
-      model
-        .getStructureShapes()
-        .stream()
-        .filter(this::shouldGenerateStructForStructure)
+      streamStructuresToGenerateStructsFor()
         .map(this::standardStructureConversionModule)
         .toList()
     );
@@ -261,10 +255,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   private RustFile typesModule() {
     final Map<String, String> variables = serviceVariables();
 
-    final String structureModules = model
-      .getStructureShapes()
-      .stream()
-      .filter(this::shouldGenerateStructForStructure)
+    final String structureModules = streamStructuresToGenerateStructsFor()
       .map(structureShape ->
         IOUtils.evalTemplate(
           """
@@ -332,10 +323,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile typesBuildersModule() {
     final Map<String, String> variables = serviceVariables();
-    final String content = model
-      .getStructureShapes()
-      .stream()
-      .filter(this::shouldGenerateStructForStructure)
+    final String content = streamStructuresToGenerateStructsFor()
       .map(structureShape ->
         IOUtils.evalTemplate(
           "pub use $rustTypesModuleName:L::_$snakeCaseStructureName:L::$rustStructureName:LBuilder;",
