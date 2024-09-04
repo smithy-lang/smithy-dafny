@@ -243,7 +243,7 @@ public class LocalServiceToDafnyShapeVisitor
     writer.addStdlibImport("_dafny", "Seq");
     if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
       writer.addStdlibImport(
-        "standard_library.internaldafny.generated",
+        "smithy_dafny_standard_library.internaldafny.generated",
         "UTF8"
       );
       // Convert to Dafny type, then UTF8 encode

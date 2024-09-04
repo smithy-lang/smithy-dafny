@@ -9,7 +9,7 @@ pub fn to_dafny(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReplicaGlobalSecondaryIndexDescription::ReplicaGlobalSecondaryIndexDescription {
         IndexName: crate::standard_library_conversions::ostring_to_dafny(&value.index_name),
  ProvisionedThroughputOverride: ::std::rc::Rc::new(match &value.provisioned_throughput_override {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput_override::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput_override::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

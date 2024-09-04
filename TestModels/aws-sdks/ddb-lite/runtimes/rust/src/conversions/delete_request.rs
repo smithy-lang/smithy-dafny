@@ -9,7 +9,7 @@ pub fn to_dafny(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DeleteRequest::DeleteRequest {
         Key: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.key.clone(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
-    |v| crate::conversions::attribute_value::to_dafny(&v)
+    |v| crate::conversions::attribute_value::to_dafny(v)
 ,
 )
 ,

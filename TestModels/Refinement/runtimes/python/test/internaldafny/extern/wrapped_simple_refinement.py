@@ -5,7 +5,7 @@
 from simple_refinement.smithygenerated.simple_refinement.client import SimpleRefinement
 from simple_refinement.smithygenerated.simple_refinement.shim import SimpleRefinementShim
 from simple_refinement.smithygenerated.simple_refinement.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
 import WrappedSimpleRefinementService

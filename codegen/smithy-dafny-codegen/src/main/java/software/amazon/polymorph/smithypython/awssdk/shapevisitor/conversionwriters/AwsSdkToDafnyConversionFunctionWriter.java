@@ -276,11 +276,11 @@ public class AwsSdkToDafnyConversionFunctionWriter
     //   an empty optional at runtime
     if (memberShape.isOptional()) {
       conversionWriter.addStdlibImport(
-        "standard_library.internaldafny.generated.Wrappers",
+        "smithy_dafny_standard_library.internaldafny.generated.Wrappers",
         "Option_Some"
       );
       conversionWriter.addStdlibImport(
-        "standard_library.internaldafny.generated.Wrappers",
+        "smithy_dafny_standard_library.internaldafny.generated.Wrappers",
         "Option_None"
       );
       conversionWriter.write(

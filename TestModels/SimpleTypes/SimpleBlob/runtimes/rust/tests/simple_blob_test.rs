@@ -35,8 +35,8 @@ async fn test_get_blob() {
     let s = aws_smithy_types::Blob::new(vec![0x0, 0x1, 0x2]);
     let result = client().get_blob().value(s.clone()).send().await;
     let output = result.unwrap();
-    let value = output.value().unwrap();
-    assert_eq!(value, s);
+    let value = output.value().as_ref().unwrap();
+    assert_eq!(value, &s);
 }
 
 /*
@@ -71,8 +71,8 @@ async fn test_get_known_value() {
         .send()
         .await;
     let output = result.unwrap();
-    let value = output.value().unwrap();
-    assert_eq!(value, s);
+    let value = output.value().as_ref().unwrap();
+    assert_eq!(value, &s);
 }
 
 pub fn client() -> Client {

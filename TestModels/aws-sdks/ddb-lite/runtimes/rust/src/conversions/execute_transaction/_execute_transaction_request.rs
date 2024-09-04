@@ -9,7 +9,7 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteTransactionInput::ExecuteTransactionInput {
         TransactStatements: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.transact_statements.clone().unwrap(),
-    |e| crate::conversions::parameterized_statement::to_dafny(&e)
+    |e| crate::conversions::parameterized_statement::to_dafny(e)
 ,
 )
 ,

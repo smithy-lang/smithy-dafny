@@ -10,8 +10,8 @@ pub value: ::std::option::Option<::std::primitive::bool>,
 }
 impl GetBooleanInput {
     #[allow(missing_docs)] // documentation missing in model
-pub fn value(&self) -> ::std::option::Option<::std::primitive::bool> {
-    self.value
+pub fn value(&self) -> &::std::option::Option<::std::primitive::bool> {
+    &self.value
 }
 }
 impl GetBooleanInput {

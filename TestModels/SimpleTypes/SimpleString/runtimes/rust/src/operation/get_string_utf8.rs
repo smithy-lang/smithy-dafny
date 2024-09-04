@@ -1,21 +1,21 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-/// Orchestration and serialization glue logic for `GetStringUTF8`.
+/// Orchestration and serialization glue logic for `GetStringUtf8`.
 #[derive(::std::clone::Clone, ::std::default::Default, ::std::fmt::Debug)]
 #[non_exhaustive]
-pub struct GetStringUTF8;
-impl GetStringUTF8 {
-    /// Creates a new `GetStringUTF8`
+pub struct GetStringUtf8;
+impl GetStringUtf8 {
+    /// Creates a new `GetStringUtf8`
     pub fn new() -> Self {
         Self
     }
     pub(crate) async fn send(
         client: &crate::client::Client,
-        input: crate::operation::get_string_utf8::GetStringUTF8Input,
+        input: crate::operation::get_string_utf8::GetStringUtf8Input,
     ) -> ::std::result::Result<
-        crate::operation::get_string_utf8::GetStringUTF8Output,
-        crate::operation::get_string_utf8::GetStringUTF8Error,
+        crate::operation::get_string_utf8::GetStringUtf8Output,
+        crate::operation::get_string_utf8::GetStringUtf8Error,
     > {
         let inner_input = crate::conversions::get_string_utf8::_get_string_utf8_input::to_dafny(input);
         let inner_result =
@@ -40,7 +40,7 @@ impl GetStringUTF8 {
 /// Error type for the `GetStringUTF8` operation.
 #[non_exhaustive]
 #[derive(::std::fmt::Debug)]
-pub enum GetStringUTF8Error {
+pub enum GetStringUtf8Error {
     /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
     #[deprecated(
         note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
@@ -52,8 +52,8 @@ pub enum GetStringUTF8Error {
     )]
     Unhandled(crate::error::sealed_unhandled::Unhandled),
 }
-impl GetStringUTF8Error {
-    /// Creates the `GetStringUTF8Error::Unhandled` variant from any error type.
+impl GetStringUtf8Error {
+    /// Creates the `GetStringUtf8Error::Unhandled` variant from any error type.
     pub fn unhandled(
         err: impl ::std::convert::Into<
             ::std::boxed::Box<
@@ -67,7 +67,7 @@ impl GetStringUTF8Error {
         })
     }
 
-    /// Creates the `GetStringUTF8Error::Unhandled` variant from an [`ErrorMetadata`](::aws_smithy_types::error::ErrorMetadata).
+    /// Creates the `GetStringUtf8Error::Unhandled` variant from an [`ErrorMetadata`](::aws_smithy_types::error::ErrorMetadata).
     pub fn generic(err: ::aws_smithy_types::error::ErrorMetadata) -> Self {
         Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
             source: err.clone().into(),
@@ -84,14 +84,14 @@ impl GetStringUTF8Error {
         }
     }
 }
-impl ::std::error::Error for GetStringUTF8Error {
+impl ::std::error::Error for GetStringUtf8Error {
     fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
         match self {
             Self::Unhandled(_inner) => ::std::option::Option::Some(&*_inner.source),
         }
     }
 }
-impl ::std::fmt::Display for GetStringUTF8Error {
+impl ::std::fmt::Display for GetStringUtf8Error {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
             Self::Unhandled(_inner) => {
@@ -106,7 +106,7 @@ impl ::std::fmt::Display for GetStringUTF8Error {
         }
     }
 }
-impl ::aws_smithy_types::retry::ProvideErrorKind for GetStringUTF8Error {
+impl ::aws_smithy_types::retry::ProvideErrorKind for GetStringUtf8Error {
     fn code(&self) -> ::std::option::Option<&str> {
         ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
     }
@@ -114,14 +114,14 @@ impl ::aws_smithy_types::retry::ProvideErrorKind for GetStringUTF8Error {
         ::std::option::Option::None
     }
 }
-impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for GetStringUTF8Error {
+impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for GetStringUtf8Error {
     fn meta(&self) -> &::aws_smithy_types::error::ErrorMetadata {
         match self {
             Self::Unhandled(_inner) => &_inner.meta,
         }
     }
 }
-impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetStringUTF8Error {
+impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetStringUtf8Error {
     fn create_unhandled_error(
         source: ::std::boxed::Box<
             dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -135,9 +135,9 @@ impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetStrin
     }
 }
 
-pub use crate::operation::get_string_utf8::_get_string_utf8_output::GetStringUTF8Output;
+pub use crate::operation::get_string_utf8::_get_string_utf8_output::GetStringUtf8Output;
 
-pub use crate::operation::get_string_utf8::_get_string_utf8_input::GetStringUTF8Input;
+pub use crate::operation::get_string_utf8::_get_string_utf8_input::GetStringUtf8Input;
 
 pub(crate) mod _get_string_utf8_output;
 

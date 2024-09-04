@@ -10,8 +10,8 @@ pub value: ::std::option::Option<::std::string::String>,
 }
 impl GetStringInput {
     #[allow(missing_docs)] // documentation missing in model
-pub fn value(&self) -> ::std::option::Option<::std::string::String> {
-    self.value.clone()
+pub fn value(&self) -> &::std::option::Option<::std::string::String> {
+    &self.value
 }
 }
 impl GetStringInput {

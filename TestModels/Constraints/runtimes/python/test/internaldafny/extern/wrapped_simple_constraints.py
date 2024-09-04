@@ -5,7 +5,7 @@
 from simple_constraints.smithygenerated.simple_constraints.client import SimpleConstraints
 from simple_constraints.smithygenerated.simple_constraints.shim import SimpleConstraintsShim
 from simple_constraints.smithygenerated.simple_constraints.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
 import WrappedSimpleConstraintsService
