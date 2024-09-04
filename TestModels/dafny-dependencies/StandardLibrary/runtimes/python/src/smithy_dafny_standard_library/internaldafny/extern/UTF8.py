@@ -40,8 +40,8 @@ then decodes them under the expected decoding.
 import _dafny
 import struct
 
-import standard_library.internaldafny.generated.UTF8
-from standard_library.internaldafny.generated.UTF8 import *
+import smithy_dafny_standard_library.internaldafny.generated.UTF8
+from smithy_dafny_standard_library.internaldafny.generated.UTF8 import *
 
 def _convert_char_outside_bmp_to_unicode_escaped_string(char_outside_bmp):
   # Re-encode the character to UTF-16. This is necessary to get the surrogate pairs.
@@ -60,7 +60,7 @@ def _is_outside_bmp(native_char):
   return ord(native_char) > 0xFFFF
 
 # Extend the Dafny-generated class with our extern methods
-class default__(standard_library.internaldafny.generated.UTF8.default__):
+class default__(smithy_dafny_standard_library.internaldafny.generated.UTF8.default__):
 
   @staticmethod
   def Encode(s):
@@ -100,4 +100,4 @@ class default__(standard_library.internaldafny.generated.UTF8.default__):
 
 
 # Export externs
-standard_library.internaldafny.generated.UTF8.default__ = default__
+smithy_dafny_standard_library.internaldafny.generated.UTF8.default__ = default__

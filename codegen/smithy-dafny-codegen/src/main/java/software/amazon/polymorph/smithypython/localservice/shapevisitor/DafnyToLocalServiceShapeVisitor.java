@@ -242,7 +242,7 @@ public class DafnyToLocalServiceShapeVisitor
     // If shape has @DafnyUtf8BytesTrait, use bytes converter
     if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
       writer.addStdlibImport(
-        "standard_library.internaldafny.generated",
+        "smithy_dafny_standard_library.internaldafny.generated",
         "UTF8"
       );
       // Decode, then convert to native type

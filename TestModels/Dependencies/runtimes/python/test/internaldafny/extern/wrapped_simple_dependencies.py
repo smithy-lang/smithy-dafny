@@ -5,7 +5,7 @@
 from simple_dependencies.smithygenerated.simple_dependencies.client import SimpleDependencies
 from simple_dependencies.smithygenerated.simple_dependencies.shim import SimpleDependenciesShim
 from simple_dependencies.smithygenerated.simple_dependencies.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 import simple_dependencies.internaldafny.generated.SimpleDependencies as DafnySimpleDependencies
 
 # test imports, not qualified since this isn't in a package

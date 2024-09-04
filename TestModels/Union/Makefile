@@ -32,7 +32,7 @@ GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Union"
 PYTHON_MODULE_NAME=simple_union
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 transpile_net_dependencies:
 

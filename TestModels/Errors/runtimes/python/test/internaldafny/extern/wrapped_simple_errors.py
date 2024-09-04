@@ -5,7 +5,7 @@
 from simple_errors.smithygenerated.simple_errors.client import SimpleErrors
 from simple_errors.smithygenerated.simple_errors.shim import SimpleErrorsShim
 from simple_errors.smithygenerated.simple_errors.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
 import WrappedSimpleErrorsService
