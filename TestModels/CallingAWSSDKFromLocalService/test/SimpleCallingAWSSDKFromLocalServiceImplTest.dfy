@@ -88,14 +88,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
       ensures client.ValidState()
   {
     var kmsClient :- expect KMS.KMSClient();
-    var input := KMS.Types.EncryptRequest(
-      KeyId := KEY_ID_SUCCESS_CASE,
-      Plaintext := [ 97, 115, 100, 102 ],
-      EncryptionContext := Wrappers.None,
-      GrantTokens := Wrappers.None,
-      EncryptionAlgorithm := Wrappers.None
-      );
-    var resSuccess := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, encryptInput := input));
+    var resSuccess := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := KEY_ID_SUCCESS_CASE, Plaintext := [ 97, 115, 100, 102 ]));
     expect resSuccess.Success?;
   }
 
@@ -114,7 +107,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
       GrantTokens := Wrappers.None,
       EncryptionAlgorithm := Wrappers.None
       );
-    var resFailure_InvalidKey := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, encryptInput := input_InvalidKey));
+    var resFailure_InvalidKey := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := INVALID_KEY_ID, Plaintext := [ 97, 115, 100, 102 ]));
     expect resFailure_InvalidKey.Failure?;
 
     // Test with NonExistent
@@ -125,7 +118,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
       GrantTokens := Wrappers.None,
       EncryptionAlgorithm := Wrappers.None
       );
-    var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, encryptInput := input_NonExistent));
+    var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := NONEXISTENT_KEY_ID, Plaintext := [ 97, 115, 100, 102 ]));
     expect resFailure_NonExistent.Failure?;
   }
 }

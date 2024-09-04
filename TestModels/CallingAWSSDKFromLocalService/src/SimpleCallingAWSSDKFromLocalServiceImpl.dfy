@@ -5,6 +5,7 @@ include "../Model/SimpleCallingawssdkfromlocalserviceTypes.dfy"
 module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawssdkfromlocalserviceOperations  {
   import ComAmazonawsDynamodbTypes
   import ComAmazonawsKmsTypes
+  import KMS = Com.Amazonaws.Kms
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)
@@ -30,9 +31,16 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
   }
   method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
     returns (output: Result<CallKMSEncryptOutput, Error>) {
-      var retEncryptResponse := input.kmsClient.Encrypt(input.encryptInput);
+      var input := KMS.Types.EncryptRequest(
+      KeyId := input.keyId,
+      Plaintext := input.plaintext,
+      EncryptionContext := Wrappers.None,
+      GrantTokens := Wrappers.None,
+      EncryptionAlgorithm := Wrappers.None
+      );
+      var retEncryptResponse := input.kmsClient.Encrypt(input);
       if retEncryptResponse.Success? {
-        return Success(CallKMSEncryptOutput(encryptOutput := retEncryptResponse.value));
+        return Success(CallKMSEncryptOutput(encryptOutput := "retEncryptResponse.value"));
       } else {
           return Failure(ComAmazonawsKms(retEncryptResponse.error));
       }

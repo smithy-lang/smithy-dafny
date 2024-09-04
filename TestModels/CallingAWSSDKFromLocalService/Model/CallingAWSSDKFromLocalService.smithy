@@ -58,12 +58,14 @@ structure CallKMSEncryptInput {
   @required
   kmsClient: KmsClientReference,
   @required
-  encryptInput: com.amazonaws.kms#EncryptRequest
+  keyId: com.amazonaws.kms#KeyIdType,
+  @required
+  plaintext: com.amazonaws.kms#PlaintextType
 }
 
 structure CallKMSEncryptOutput {
   @required
-  encryptOutput: com.amazonaws.kms#EncryptResponse,
+  encryptOutput: String,
 }
 
 @error("client")
