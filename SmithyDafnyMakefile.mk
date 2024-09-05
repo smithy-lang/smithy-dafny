@@ -56,7 +56,7 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
 GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
-include $(SMITHY_DAFNY_ROOT)/SmithyDafnySedMakefile.mk
+# include $(SMITHY_DAFNY_ROOT)/SmithyDafnySedMakefile.mk
 
 # This flag enables pre-processing on extern module names.
 # This pre-processing is required to compile to Python and Go.
@@ -146,13 +146,15 @@ dafny-reportgenerator:
 clean-dafny-report:
 	rm TestResults/*.csv
 
+check_dafny_version:
+	DAFNY_VERSION=$(shell ./check_dafny_version.sh)
 # Dafny helper targets
 
 # Transpile the entire project's impl
 # For each index file listed in the project Makefile's PROJECT_INDEX variable,
 #   append a `-library:TestModels/$(PROJECT_INDEX) to the transpiliation target
 _transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
-_transpile_implementation_all: transpile_implementation
+_transpile_implementation_all: check_dafny_version transpile_implementation 
 
 
 # The `$(OUT)` and $(TARGET) variables are problematic.
@@ -222,7 +224,7 @@ _transpile_test_all: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
 #   append `-library:/path/to/Index.dfy` to the transpile target
 _transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, --library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), --library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
 # Transpile the entire project's tests
-_transpile_test_all: transpile_test
+_transpile_test_all: check_dafny_version transpile_test
 
 transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
@@ -323,7 +325,7 @@ _polymorph_dependencies:
 # Not including Rust until is it more fully implemented.
 .PHONY: polymorph_code_gen
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
-polymorph_code_gen: _polymorph_dependencies
+polymorph_code_gen: check_dafny_version _polymorph_dependencies
 polymorph_code_gen:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -348,7 +350,7 @@ check_polymorph_diff:
 # Generates dafny code for all namespaces in this project
 .PHONY: polymorph_dafny
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
-polymorph_dafny: _polymorph_dependencies
+polymorph_dafny: check_dafny_version _polymorph_dependencies
 polymorph_dafny:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -366,7 +368,7 @@ _polymorph_dafny: _polymorph
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_dotnet
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
-polymorph_dotnet: _polymorph_dependencies
+polymorph_dotnet: check_dafny_version _polymorph_dependencies
 polymorph_dotnet:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -384,7 +386,7 @@ _polymorph_dotnet: _polymorph
 # Generates java code for all namespaces in this project
 .PHONY: polymorph_java
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
-polymorph_java: _polymorph_dependencies
+polymorph_java: check_dafny_version _polymorph_dependencies
 polymorph_java:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -402,7 +404,7 @@ _polymorph_java: _polymorph
 # Generates python code for all namespaces in this project
 .PHONY: polymorph_python
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
-polymorph_python: _polymorph_dependencies
+polymorph_python: check_dafny_version _polymorph_dependencies
 polymorph_python:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -428,7 +430,7 @@ setup_prettier:
 # so we assume that is run first!
 .PHONY: polymorph_rust
 polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
-polymorph_rust: _polymorph_dependencies
+polymorph_rust: check_dafny_version _polymorph_dependencies
 polymorph_rust:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \

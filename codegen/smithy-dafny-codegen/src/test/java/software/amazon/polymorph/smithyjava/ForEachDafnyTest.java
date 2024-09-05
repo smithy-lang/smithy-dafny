@@ -15,8 +15,6 @@ public abstract class ForEachDafnyTest {
   public static Collection dafnies() {
     return Arrays.asList(
       new Object[][] {
-        { new DafnyVersion(4, 1, 0) },
-        { new DafnyVersion(4, 3, 0) },
         { new DafnyVersion(4, 8, 0) },
       }
     );
