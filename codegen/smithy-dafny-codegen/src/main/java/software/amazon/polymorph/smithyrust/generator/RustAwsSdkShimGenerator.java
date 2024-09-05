@@ -62,6 +62,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     result.addAll(allOperationConversionModules());
     result.addAll(allStructureConversionModules());
     result.add(conversionsErrorModule());
+    result.add(conversionsClientModule());
     // TODO union conversion modules
 
     return result;
@@ -183,6 +184,14 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         """,
         variables
       )
+    );
+  }
+
+  protected RustFile conversionsClientModule() {
+    // TODO
+    return new RustFile(
+      Path.of("src", "conversions", "client.rs"),
+      TokenTree.of("")
     );
   }
 

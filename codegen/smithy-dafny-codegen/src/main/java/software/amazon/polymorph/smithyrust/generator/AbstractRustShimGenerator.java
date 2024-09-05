@@ -118,20 +118,6 @@ public abstract class AbstractRustShimGenerator {
       .equals(service.getId().getNamespace());
   }
 
-  protected RustFile conversionsClientModule() {
-    TokenTree clientConversionFunctions = TokenTree.of(
-      evalTemplate(
-        getClass(),
-        "runtimes/rust/conversions/client.rs",
-        serviceVariables()
-      )
-    );
-    return new RustFile(
-      Path.of("src", "conversions", "client.rs"),
-      TokenTree.of(clientConversionFunctions)
-    );
-  }
-
   protected RustFile conversionsErrorModule() {
     TokenTree modulesDeclarations = declarePubModules(
       allErrorShapes()

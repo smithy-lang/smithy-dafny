@@ -178,6 +178,20 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(Path.of("src", "client.rs"), TokenTree.of(content));
   }
 
+  protected RustFile conversionsClientModule() {
+    TokenTree clientConversionFunctions = TokenTree.of(
+      evalTemplate(
+        getClass(),
+        "runtimes/rust/conversions/client_localservice.rs",
+        serviceVariables()
+      )
+    );
+    return new RustFile(
+      Path.of("src", "conversions", "client.rs"),
+      TokenTree.of(clientConversionFunctions)
+    );
+  }
+
   private Set<RustFile> serviceOperationClientBuilders() {
     return serviceOperationShapes()
       .map(this::operationClientBuilder)
