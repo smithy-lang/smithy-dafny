@@ -59,11 +59,7 @@ jobs:
       - name: Setup Dafny options
         id: set-options
         run: |
-          if [ "${{inputs.dafny}}" == "4.8.0" ]; then
-            echo "DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-module-names" >> $GITHUB_ENV
-          else
-            echo "no options"
-          fi
+          echo "DAFNY_OPTIONS=--allow-warnings --include-test-runner" >> $GITHUB_ENV
 
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
