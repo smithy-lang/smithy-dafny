@@ -56,7 +56,7 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
 GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
-# include $(SMITHY_DAFNY_ROOT)/SmithyDafnySedMakefile.mk
+include $(SMITHY_DAFNY_ROOT)/SmithyDafnySedMakefile.mk
 
 # This flag enables pre-processing on extern module names.
 # This pre-processing is required to compile to Python and Go.
