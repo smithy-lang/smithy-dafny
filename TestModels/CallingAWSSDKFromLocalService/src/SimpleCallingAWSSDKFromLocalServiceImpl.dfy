@@ -31,16 +31,16 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
   }
   method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
     returns (output: Result<CallKMSEncryptOutput, Error>) {
-      var input := KMS.Types.EncryptRequest(
+      var encryptInput := KMS.Types.EncryptRequest(
       KeyId := input.keyId,
       Plaintext := input.plaintext,
       EncryptionContext := Wrappers.None,
       GrantTokens := Wrappers.None,
       EncryptionAlgorithm := Wrappers.None
       );
-      var retEncryptResponse := input.kmsClient.Encrypt(input);
+      var retEncryptResponse := input.kmsClient.Encrypt(encryptInput);
       if retEncryptResponse.Success? {
-        return Success(CallKMSEncryptOutput(encryptOutput := "retEncryptResponse.value"));
+        return Success(CallKMSEncryptOutput(encryptOutput := retEncryptResponse.KeyId));
       } else {
           return Failure(ComAmazonawsKms(retEncryptResponse.error));
       }
