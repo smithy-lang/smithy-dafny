@@ -650,26 +650,36 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
-        Optional<ReferenceTrait> referenceTrait = shape.getTrait(ReferenceTrait.class);
-        if (referenceTrait.isPresent()) {
-          Shape referent = model.expectShape(referenceTrait.get().getReferentId());
-          // TODO: determine type correctly
-          var shapeName = "client";
+        Optional<ReferenceTrait> referenceTraitOpt = shape.getTrait(
+          ReferenceTrait.class
+        );
+        if (referenceTraitOpt.isPresent()) {
+          ReferenceTrait referenceTrait = referenceTraitOpt.get();
+          if (!referenceTrait.isService()) {
+            throw new UnsupportedOperationException(
+              "@reference(resource: ...) is not yet supported"
+            );
+          }
+          ServiceShape referent = model.expectShape(
+            referenceTrait.getReferentId(),
+            ServiceShape.class
+          );
+          String prefix = topLevelScopeForService(referent);
           if (isDafnyOption) {
             yield TokenTree.of(
               """
               match (*%s).as_ref() {
                   crate::r#_Wrappers_Compile::Option::Some { value } =>
-                      Some(crate::conversions::%s::from_dafny(value.clone())),
+                      Some(%s::conversions::client::from_dafny(value.clone())),
                   _ => None,
               }
-              """.formatted(dafnyValue, shapeName)
+              """.formatted(dafnyValue, prefix)
             );
           } else {
             TokenTree result = TokenTree.of(
               """
-              crate::conversions::%s::from_dafny(%s.clone())
-              """.formatted(shapeName, dafnyValue)
+              %s::conversions::client::from_dafny(%s.clone())
+              """.formatted(prefix, dafnyValue)
             );
             if (isRustOption) {
               result =
@@ -971,16 +981,30 @@ public abstract class AbstractRustShimGenerator {
       );
   }
 
+  protected String topLevelScopeForService(final ServiceShape serviceShape) {
+    // If the service is the one we're generating for now,
+    // then we want the client for this crate. Otherwise it's a dependency.
+    // TODO: The dependency case is really just a guess that can't be tested directly,
+    // since we don't actually support multiple crates for Rust yet.
+    return serviceShape.equals(service)
+      ? "crate"
+      : "::" + toSnakeCase(serviceShape.getId().getName());
+  }
+
   protected String qualifiedRustReferenceType(
     final StructureShape referenceShape
   ) {
     var referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
     if (referenceTrait.isService()) {
-      ServiceShape service = model.expectShape(referenceTrait.getReferentId(), ServiceShape.class);
-      // TODO: Do this if it's the service we're generating for, otherwise qualify by dependent crate
-      return "crate::client::Client";
+      ServiceShape referencedService = model.expectShape(
+        referenceTrait.getReferentId(),
+        ServiceShape.class
+      );
+      return topLevelScopeForService(referencedService) + "::client::Client";
     } else {
-      throw new UnsupportedOperationException("@reference(resource: ...) is not yet supported");
+      throw new UnsupportedOperationException(
+        "@reference(resource: ...) is not yet supported"
+      );
     }
   }
 

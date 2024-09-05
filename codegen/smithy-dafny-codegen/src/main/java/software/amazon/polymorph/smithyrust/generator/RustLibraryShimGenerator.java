@@ -1533,33 +1533,43 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
-        Optional<ReferenceTrait> referenceTrait = shape.getTrait(ReferenceTrait.class);
-        if (referenceTrait.isPresent()) {
-          Shape referent = model.expectShape(referenceTrait.get().getReferentId());
-          // TODO: determine type correctly
-          var shapeName = "client";
+        Optional<ReferenceTrait> referenceTraitOpt = shape.getTrait(
+          ReferenceTrait.class
+        );
+        if (referenceTraitOpt.isPresent()) {
+          ReferenceTrait referenceTrait = referenceTraitOpt.get();
+          if (!referenceTrait.isService()) {
+            throw new UnsupportedOperationException(
+              "@reference(resource: ...) is not yet supported"
+            );
+          }
+          ServiceShape referent = model.expectShape(
+            referenceTrait.getReferentId(),
+            ServiceShape.class
+          );
+          String prefix = topLevelScopeForService(referent);
           if (!isDafnyOption) {
             if (isRustOption) {
               yield TokenTree.of(
                 """
-                crate::conversions::%s::to_dafny(&%s.clone().unwrap())
-                """.formatted(shapeName, rustValue)
+                %s::conversions::client::to_dafny(&%s.clone().unwrap())
+                """.formatted(prefix, rustValue)
               );
             } else {
               yield TokenTree.of(
                 """
-                crate::conversions::%s::to_dafny(%s.clone())
-                """.formatted(shapeName, rustValue)
+                %s::conversions::client::to_dafny(%s.clone())
+                """.formatted(prefix, rustValue)
               );
             }
           } else {
             yield TokenTree.of(
               """
               ::std::rc::Rc::new(match &%s {
-                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::client::to_dafny(x.clone()) },
                   None => crate::_Wrappers_Compile::Option::None { }
               })
-              """.formatted(rustValue, shapeName)
+              """.formatted(rustValue, prefix)
             );
           }
         }
