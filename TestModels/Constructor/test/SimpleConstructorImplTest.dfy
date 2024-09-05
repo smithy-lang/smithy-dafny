@@ -42,7 +42,7 @@ module SimpleConstructorImplTest {
         TestGetConstructor(client, expectedOutput);
     }
 
-    method TestGetConstructor(client: ISimpleConstructorClient, expectedOutput: GetConstructorOutput)
+    method {:test} TestGetConstructor(client: ISimpleConstructorClient, expectedOutput: GetConstructorOutput)
         requires client.ValidState()
         modifies client.Modifies
         ensures client.ValidState()
