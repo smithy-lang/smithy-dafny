@@ -9,8 +9,8 @@ impl $configName:L {
 }
 impl $configName:L {
     /// Creates a new builder-style object to manufacture [`$configName:L`]($qualifiedRustStructureType:L).
-    pub fn builder() -> crate::types::builders::$configName:LBuilder {
-        crate::types::builders::$configName:LBuilder::default()
+    pub fn builder() -> crate::types::$snakeCaseStructureName:L::$configName:LBuilder {
+        crate::types::$snakeCaseStructureName:L::$configName:LBuilder::default()
     }
 }
 
@@ -28,10 +28,10 @@ impl $configName:LBuilder {
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        $qualifiedRustStructureType:L,
+        crate::types::$snakeCaseStructureName:L::$configName:L,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok($qualifiedRustStructureType:L {
+        ::std::result::Result::Ok(crate::types::$snakeCaseStructureName:L::$configName:L {
             $builderAssignments:L
         })
     }

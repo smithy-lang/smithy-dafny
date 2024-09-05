@@ -40,12 +40,11 @@ pub fn string_value(&self) -> &::std::option::Option<::std::string::String> {
 }
 impl SimpleConstructorConfig {
     /// Creates a new builder-style object to manufacture [`SimpleConstructorConfig`](crate::types::SimpleConstructorConfig).
-    pub fn builder() -> crate::types::builders::SimpleConstructorConfigBuilder {
-        crate::types::builders::SimpleConstructorConfigBuilder::default()
+    pub fn builder() -> crate::types::simple_constructor_config::SimpleConstructorConfigBuilder {
+        crate::types::simple_constructor_config::SimpleConstructorConfigBuilder::default()
     }
 }
 
-//simple_constructor_config
 /// A builder for [`SimpleConstructorConfig`](crate::types::SimpleConstructorConfig).
 #[non_exhaustive]
 #[derive(
@@ -133,10 +132,10 @@ pub fn get_string_value(&self) -> &::std::option::Option<::std::string::String> 
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::types::SimpleConstructorConfig,
+        crate::types::simple_constructor_config::SimpleConstructorConfig,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::types::SimpleConstructorConfig {
+        ::std::result::Result::Ok(crate::types::simple_constructor_config::SimpleConstructorConfig {
             blob_value: self.blob_value,
 boolean_value: self.boolean_value,
 integer_value: self.integer_value,
