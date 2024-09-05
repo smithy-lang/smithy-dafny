@@ -45,7 +45,7 @@ pub fn string_value(&self) -> &::std::option::Option<::std::string::String> {
 }
 }
 impl GetConstructorOutput {
-    /// Creates a new builder-style object to manufacture [`GetConstructorOutput`](crate::operation::operation::GetConstructorOutput).
+    /// Creates a new builder-style object to manufacture [`GetConstructorOutput`](crate::operation::get_constructor::builders::GetConstructorOutput).
     pub fn builder() -> crate::operation::get_constructor::builders::GetConstructorOutputBuilder {
         crate::operation::get_constructor::builders::GetConstructorOutputBuilder::default()
     }

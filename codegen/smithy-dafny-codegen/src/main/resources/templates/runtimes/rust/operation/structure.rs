@@ -8,7 +8,7 @@ impl $rustStructureName:L {
     $getters:L
 }
 impl $rustStructureName:L {
-    /// Creates a new builder-style object to manufacture [`$rustStructureName:L`](crate::operation::operation::$rustStructureName:L).
+    /// Creates a new builder-style object to manufacture [`$rustStructureName:L`](crate::operation::$snakeCaseOperationName:L::builders::$rustStructureName:L).
     pub fn builder() -> crate::operation::$snakeCaseOperationName:L::builders::$rustStructureName:LBuilder {
         crate::operation::$snakeCaseOperationName:L::builders::$rustStructureName:LBuilder::default()
     }
