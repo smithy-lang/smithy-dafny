@@ -108,6 +108,9 @@ public class CodegenCli {
     cliArguments.outputDotnetDir.ifPresent(path ->
       outputDirs.put(TargetLanguage.DOTNET, path)
     );
+    cliArguments.outputGoDir.ifPresent(path ->
+      outputDirs.put(TargetLanguage.GO, path)
+    );
     cliArguments.outputRustDir.ifPresent(path ->
       outputDirs.put(TargetLanguage.RUST, path)
     );
@@ -226,6 +229,14 @@ public class CodegenCli {
           .builder()
           .longOpt("output-java")
           .desc("<optional> output directory for generated Java files")
+          .hasArg()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("output-go")
+          .desc("<optional> output directory for generated Go files")
           .hasArg()
           .build()
       )
@@ -446,6 +457,7 @@ public class CodegenCli {
     Optional<String> libraryName,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
+    Optional<Path> outputGoDir,
     Optional<Path> testOutputJavaDir,
     Optional<Path> outputRustDir,
     Optional<Path> outputPythonDir,
@@ -541,6 +553,9 @@ public class CodegenCli {
       final Optional<Path> outputDotnetDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dotnet"))
         .map(Paths::get);
+      final Optional<Path> outputGoDir = Optional
+        .ofNullable(commandLine.getOptionValue("output-go"))
+        .map(Paths::get);
       final Optional<Path> outputRustDir = Optional
         .ofNullable(commandLine.getOptionValue("output-rust"))
         .map(Paths::get);
@@ -612,6 +627,7 @@ public class CodegenCli {
           libraryName,
           outputDotnetDir,
           outputJavaDir,
+          outputGoDir,
           testOutputJavaDir,
           outputRustDir,
           outputPythonDir,

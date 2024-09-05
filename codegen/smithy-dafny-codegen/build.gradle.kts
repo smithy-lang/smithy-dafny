@@ -1,6 +1,8 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+import java.util.regex.Pattern.compile
+
 description = "Generates Dafny code from Smithy models"
 extra["displayName"] = "Smithy :: Dafny :: Codegen"
 extra["moduleName"] = "software.amazon.smithy.dafny.codegen"
