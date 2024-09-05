@@ -90,7 +90,6 @@ transpile_implementation:
 		--no-verify \
 		--cores:$(CORES) \
 		--optimize-erasable-datatype-wrapper:false \
-		--compile-suffix \
 		--unicode-char:false \
 		--function-syntax:3 \
 		--output $(OUT) \
