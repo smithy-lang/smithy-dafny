@@ -5,7 +5,7 @@
 from codegen_patches.smithygenerated.simple_codegenpatches.client import CodegenPatches
 from codegen_patches.smithygenerated.simple_codegenpatches.shim import CodegenPatchesShim
 from codegen_patches.smithygenerated.simple_codegenpatches.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
 import WrappedSimpleCodegenPatchesService

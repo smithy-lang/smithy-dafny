@@ -1,12 +1,17 @@
-use tokio::runtime::Runtime;
+use std::sync::LazyLock;
 
 pub struct Client {
-    wrapped: crate::client::Client,
-
-    /// A `current_thread` runtime for executing operations on the
-    /// asynchronous client in a blocking manner.
-    rt: Runtime
+    wrapped: crate::client::Client
 }
+
+/// A runtime for executing operations on the asynchronous client in a blocking manner.
+/// Necessary because Dafny only generates synchronous code.
+static dafny_tokio_runtime: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {
+    tokio::runtime::Builder::new_multi_thread()
+          .enable_all()
+          .build()
+          .unwrap()
+});
 
 impl dafny_runtime::UpcastObject<dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient> for Client {
   ::dafny_runtime::UpcastObjectFn!(dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient);
@@ -24,13 +29,6 @@ impl Client {
   ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient>,
   ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
 >> {
-    let rt_result = tokio::runtime::Builder::new_current_thread()
-          .enable_all()
-          .build();
-    let rt = match rt_result {
-        Ok(x) => x,
-        Err(error) => return crate::conversions::error::to_opaque_error_result(error),
-    };
     let result = crate::client::Client::from_conf(
       crate::conversions::$snakeCaseConfigName:L::_$snakeCaseConfigName:L::from_dafny(
           config.clone(),
@@ -39,8 +37,7 @@ impl Client {
     match result {
       Ok(client) =>  {
         let wrap = crate::wrapped::client::Client {
-          wrapped: client,
-          rt
+          wrapped: client
         };
         std::rc::Rc::new(
           crate::_Wrappers_Compile::Result::Success {

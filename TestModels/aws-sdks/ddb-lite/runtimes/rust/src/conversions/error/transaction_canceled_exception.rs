@@ -11,7 +11,7 @@ pub fn to_dafny(
  CancellationReasons: ::std::rc::Rc::new(match &value.cancellation_reasons {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::cancellation_reason::to_dafny(&e)
+            |e| crate::conversions::cancellation_reason::to_dafny(e)
 ,
         )
     },

@@ -3,6 +3,7 @@
 
 CORES=2
 
+TRANSPILE_TESTS_IN_RUST=1
 ENABLE_EXTERN_PROCESSING=1
 
 include ../SharedMakefile.mk
@@ -53,4 +54,4 @@ clean:
 PYTHON_MODULE_NAME=simple_localservice
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr

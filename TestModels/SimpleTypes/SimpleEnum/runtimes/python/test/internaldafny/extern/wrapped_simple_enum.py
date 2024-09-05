@@ -5,7 +5,7 @@
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.client import SimpleTypesEnum
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.shim import SimpleEnumShim
 from simple_types_smithyenum.smithygenerated.simple_types_smithyenum.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
 import WrappedSimpleTypesEnumService

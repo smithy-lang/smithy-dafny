@@ -9,14 +9,14 @@ pub fn to_dafny(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::GlobalSecondaryIndex::GlobalSecondaryIndex {
         IndexName: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&value.index_name),
  KeySchema: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.key_schema,
-    |e| crate::conversions::key_schema_element::to_dafny(&e)
+    |e| crate::conversions::key_schema_element::to_dafny(e)
 ,
 )
 ,
  Projection: crate::conversions::projection::to_dafny(&value.projection.clone().unwrap())
 ,
  ProvisionedThroughput: ::std::rc::Rc::new(match &value.provisioned_throughput {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

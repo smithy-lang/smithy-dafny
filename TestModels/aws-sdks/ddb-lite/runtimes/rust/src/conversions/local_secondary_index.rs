@@ -9,7 +9,7 @@ pub fn to_dafny(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::LocalSecondaryIndex::LocalSecondaryIndex {
         IndexName: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&value.index_name),
  KeySchema: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.key_schema,
-    |e| crate::conversions::key_schema_element::to_dafny(&e)
+    |e| crate::conversions::key_schema_element::to_dafny(e)
 ,
 )
 ,

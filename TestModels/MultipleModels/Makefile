@@ -38,7 +38,7 @@ PYTHON_DEPENDENCY_MODULE_NAMES := \
 	--dependency-library-name=simple.multiplemodels.dependencyproject=multiple_models
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 PRIMARY_PROJECT_TYPES_FILE_PATH=dafny/PrimaryProject/Model/SimpleMultiplemodelsPrimaryprojectTypes.dfy
 PRIMARY_PROJECT_TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.multiplemodels.primaryproject.internaldafny.types\" } SimpleMultiplemodelsPrimaryprojectTypes"

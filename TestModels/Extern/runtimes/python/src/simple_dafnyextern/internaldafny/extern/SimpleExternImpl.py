@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from simple_dafnyextern.internaldafny.generated.SimpleExternImpl import *
 from simple_dafnyextern.internaldafny.generated import SimpleDafnyExternTypes
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 @staticmethod
 def GetExtern(config, input):
