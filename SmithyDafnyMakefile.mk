@@ -82,6 +82,7 @@ ENABLE_EXTERN_PROCESSING?=
 # Verify the entire project
 verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
 verify:DAFNY_PROCESSES=$(shell echo $$(( ($(CORES) - 1 ) / ($(CORES) >= 3 ? 2 : 1))))
+verify:DAFNY_OPTIONS=--allow-warnings
 verify:
 	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny verify \
 		--cores $(Z3_PROCESSES) \
@@ -96,6 +97,7 @@ verify:
 # Verify single file FILE with text logger.
 # This is useful for debugging resource count usage within a file.
 # Use PROC to further scope the verification
+verify_single:DAFNY_OPTIONS=--allow-warnings
 verify_single:
 	dafny \
 		--cores $(CORES) \
@@ -109,6 +111,7 @@ verify_single:
 		$(FILE)
 
 #Verify only a specific namespace at env var $(SERVICE)
+verify_service:DAFNY_OPTIONS=--allow-warnings
 verify_service:
 	@: $(if ${SERVICE},,$(error You must pass the SERVICE to generate for));
 	dafny \
@@ -451,13 +454,13 @@ transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
-transpile_implementation_net: DAFNY_OPTIONS=DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-module-names --compile-suffix
+transpile_implementation_net: DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-module-names --compile-suffix
 transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: _transpile_implementation_all
 
 transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
-transpile_test_net: DAFNY_OPTIONS=DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-module-names --compile-suffix
+transpile_test_net: DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-module-names --compile-suffix
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
 transpile_test_net: _transpile_test_all
