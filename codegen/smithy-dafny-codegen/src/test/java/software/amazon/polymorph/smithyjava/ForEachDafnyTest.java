@@ -13,10 +13,6 @@ public abstract class ForEachDafnyTest {
 
   @Parameterized.Parameters(name = "dafnyVersion = {0}")
   public static Collection dafnies() {
-    return Arrays.asList(
-      new Object[][] {
-        { new DafnyVersion(4, 8, 0) },
-      }
-    );
+    return Arrays.asList(new Object[][] { { new DafnyVersion(4, 8, 0) } });
   }
 }
