@@ -7,4 +7,4 @@ pub mod error;
 
  pub mod get_blob_known_value_test;
 
- pub mod simple_blob_config;
+pub mod simple_blob_config;

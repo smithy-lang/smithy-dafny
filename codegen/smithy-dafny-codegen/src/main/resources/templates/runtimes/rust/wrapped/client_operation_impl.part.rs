@@ -13,7 +13,7 @@
     >{
         let inner_input =
             crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone());
-        let result = self.rt.block_on(crate::operation::$snakeCaseOperationName:L::$operationName:L::send(&self.wrapped, inner_input));
+        let result = self.rt.block_on(crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Failure {

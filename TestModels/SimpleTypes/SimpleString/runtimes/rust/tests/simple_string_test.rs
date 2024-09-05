@@ -25,8 +25,8 @@ mod simple_string_test {
             .send()
             .await;
         let output = result.unwrap();
-        let value = output.value().unwrap();
-        assert_eq!(value, "TEST_SIMPLE_STRING_VALUE");
+        let value = output.value().as_ref().unwrap();
+        assert_eq!(value, &"TEST_SIMPLE_STRING_VALUE");
     }
 
     #[tokio::test]
@@ -37,8 +37,8 @@ mod simple_string_test {
             .send()
             .await;
         let output = result.unwrap();
-        let value = output.value().unwrap();
-        assert_eq!(value, "TEST_SIMPLE_STRING_KNOWN_VALUE");
+        let value = output.value().as_ref().unwrap();
+        assert_eq!(value, &"TEST_SIMPLE_STRING_KNOWN_VALUE");
     }
 
     /*method TestGetStringNonAscii(client: ISimpleTypesStringClient)
@@ -58,8 +58,8 @@ mod simple_string_test {
             .send()
             .await;
         let output = result.unwrap();
-        let value = output.value().unwrap();
-        assert_eq!(value, utf8_encoded_string);
+        let value = output.value().as_ref().unwrap();
+        assert_eq!(value, &utf8_encoded_string);
     }
 
     /*method TestGetStringUTF8(client: ISimpleTypesStringClient)
@@ -85,8 +85,8 @@ mod simple_string_test {
             .send()
             .await;
         let output = result.unwrap();
-        let value = output.value().unwrap();
-        assert_eq!(value, utf8_encoded_string);
+        let value = output.value().as_ref().unwrap();
+        assert_eq!(value, &utf8_encoded_string);
     }
 
     /*method TestGetStringUTF8KnownValue(client: ISimpleTypesStringClient)
@@ -108,8 +108,8 @@ mod simple_string_test {
             .send()
             .await;
         let output = result.unwrap();
-        let value = output.value().unwrap();
-        assert_eq!(value, "Hello");
+        let value = output.value().as_ref().unwrap();
+        assert_eq!(value, &"Hello");
     }
 
     pub fn client() -> Client {

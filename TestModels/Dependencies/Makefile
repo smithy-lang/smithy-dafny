@@ -53,7 +53,7 @@ PYTHON_DEPENDENCY_MODULE_NAMES := \
 	--dependency-library-name=simple.constraints=simple_constraints
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr \
     --translation-record ../Resource/runtimes/python/src/simple_resources/internaldafny/generated/dafny_src-py.dtr \
     --translation-record ../Errors/runtimes/python/src/simple_errors/internaldafny/generated/dafny_src-py.dtr \
     --translation-record ../Extendable/runtimes/python/src/simple_extendable_resources/internaldafny/generated/dafny_src-py.dtr \

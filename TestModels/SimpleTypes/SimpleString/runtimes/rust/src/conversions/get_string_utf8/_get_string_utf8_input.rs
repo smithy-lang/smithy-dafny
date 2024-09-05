@@ -3,7 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: crate::operation::get_string_utf8::GetStringUTF8Input,
+    value: crate::operation::get_string_utf8::GetStringUtf8Input,
 ) -> ::std::rc::Rc<
     crate::r#simple::types::smithystring::internaldafny::types::GetStringUTF8Input,
 >{
@@ -19,8 +19,8 @@ pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#simple::types::smithystring::internaldafny::types::GetStringUTF8Input,
     >,
-) -> crate::operation::get_string_utf8::GetStringUTF8Input {
-    crate::operation::get_string_utf8::GetStringUTF8Input::builder()
+) -> crate::operation::get_string_utf8::GetStringUtf8Input {
+    crate::operation::get_string_utf8::GetStringUtf8Input::builder()
         .set_value(match dafny_value.value().as_ref() {
   crate::_Wrappers_Compile::Option::Some { .. } => ::std::option::Option::Some(::std::string::String::from_utf8(dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(&dafny_value.value().Extract(), |b| *b)).unwrap()),
   _ => ::std::option::Option::None,

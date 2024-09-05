@@ -8,12 +8,12 @@ pub fn to_dafny(
   ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::WriteRequest::WriteRequest {
         PutRequest: ::std::rc::Rc::new(match &value.put_request {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::put_request::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::put_request::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  DeleteRequest: ::std::rc::Rc::new(match &value.delete_request {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::delete_request::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::delete_request::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

@@ -5,7 +5,7 @@
 from simple_resources.smithygenerated.simple_resources.client import SimpleResources
 from simple_resources.smithygenerated.simple_resources.shim import SimpleResourcesShim
 from simple_resources.smithygenerated.simple_resources.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
 import WrappedSimpleResources

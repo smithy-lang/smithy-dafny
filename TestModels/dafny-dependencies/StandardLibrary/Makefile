@@ -8,7 +8,7 @@ TRANSPILE_TESTS_IN_RUST=true
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
-PYTHON_MODULE_NAME=standard_library
+PYTHON_MODULE_NAME=smithy_dafny_standard_library
 LIBRARIES :=
 
 # define standard colors

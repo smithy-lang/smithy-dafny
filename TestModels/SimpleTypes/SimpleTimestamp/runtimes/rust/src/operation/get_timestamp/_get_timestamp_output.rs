@@ -10,8 +10,8 @@ pub value: ::std::option::Option<::aws_smithy_types::DateTime>,
 }
 impl GetTimestampOutput {
     #[allow(missing_docs)] // documentation missing in model
-pub fn value(&self) -> ::std::option::Option<::aws_smithy_types::DateTime> {
-    self.value
+pub fn value(&self) -> &::std::option::Option<::aws_smithy_types::DateTime> {
+    &self.value
 }
 }
 impl GetTimestampOutput {

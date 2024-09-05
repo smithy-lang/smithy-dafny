@@ -5,7 +5,7 @@
 from simple_types_boolean.smithygenerated.simple_types_boolean.client import SimpleTypesBoolean
 from simple_types_boolean.smithygenerated.simple_types_boolean.shim import SimpleBooleanShim
 from simple_types_boolean.smithygenerated.simple_types_boolean.config import dafny_config_to_smithy_config
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 # test imports, not qualified since this isn't in a package
 import WrappedSimpleTypesBooleanService

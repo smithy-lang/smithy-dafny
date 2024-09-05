@@ -433,7 +433,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
             )
           );
           writer.addStdlibImport(
-            "standard_library.internaldafny.generated",
+            "smithy_dafny_standard_library.internaldafny.generated",
             "Wrappers"
           );
         }
