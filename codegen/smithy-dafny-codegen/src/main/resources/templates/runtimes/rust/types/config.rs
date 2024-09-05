@@ -1,24 +1,38 @@
-#[derive(::std::clone::Clone, ::std::fmt::Debug)]
-pub struct $configName:L {}
-
+#[allow(missing_docs)] // documentation missing in model
+#[non_exhaustive]
+#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
+pub struct $configName:L {
+    $fields:L
+}
 impl $configName:L {
-    pub fn builder() -> $configName:LBuilder {
-        $configName:LBuilder::new()
+    $getters:L
+}
+impl $configName:L {
+    /// Creates a new builder-style object to manufacture [`$configName:L`]($qualifiedRustStructureType:L).
+    pub fn builder() -> crate::types::builders::$configName:LBuilder {
+        crate::types::builders::$configName:LBuilder::default()
     }
 }
 
-#[derive(::std::clone::Clone, ::std::fmt::Debug)]
-pub struct $configName:LBuilder {}
-
+/// A builder for [`$configName:L`]($qualifiedRustStructureType:L).
+#[non_exhaustive]
+#[derive(
+    ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
+)]
+pub struct $configName:LBuilder {
+    $builderFields:L
+}
 impl $configName:LBuilder {
-    /// Creates a new `$configName:LBuilder`.
-    pub(crate) fn new() -> Self {
-        Self {}
-    }
+    $builderAccessors:L
+    /// Consumes the builder and constructs a [`$configName:L`]($qualifiedRustStructureType:L).
     pub fn build(
         self,
-    ) -> ::std::result::Result<$configName:L, ::aws_smithy_types::error::operation::BuildError>
-    {
-        ::std::result::Result::Ok($configName:L {})
+    ) -> ::std::result::Result<
+        $qualifiedRustStructureType:L,
+        ::aws_smithy_types::error::operation::BuildError,
+    > {
+        ::std::result::Result::Ok($qualifiedRustStructureType:L {
+            $builderAssignments:L
+        })
     }
 }
