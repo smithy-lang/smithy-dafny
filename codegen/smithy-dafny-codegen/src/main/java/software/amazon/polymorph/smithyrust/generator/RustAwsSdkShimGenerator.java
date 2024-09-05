@@ -62,6 +62,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     result.addAll(allOperationConversionModules());
     result.addAll(allStructureConversionModules());
     result.add(conversionsErrorModule());
+    result.add(conversionsClientModule());
     // TODO union conversion modules
 
     return result;
@@ -72,13 +73,21 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     var preamble = TokenTree.of(
       evalTemplate(
         """
+        use std::sync::LazyLock;
         use crate::conversions;
 
         struct Client {
-            inner: $sdkCrate:L::Client,
-
-            rt: tokio::runtime::Runtime,
+            inner: $sdkCrate:L::Client
         }
+
+        /// A runtime for executing operations on the asynchronous client in a blocking manner.
+        /// Necessary because Dafny only generates synchronous code.
+        static dafny_tokio_runtime: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {
+            tokio::runtime::Builder::new_multi_thread()
+                  .enable_all()
+                  .build()
+                  .unwrap()
+        });
 
         impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
             ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
@@ -120,17 +129,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
               ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
               >
             > {
-            let rt_result = tokio::runtime::Builder::new_current_thread()
-              .enable_all()
-              .build();
-            if rt_result.is_err() {
-              return conversions::error::to_opaque_error_result(rt_result.err());
-            }
-            let rt = rt_result.unwrap();
-
-            let shared_config = rt.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+            let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
             let inner = $sdkCrate:L::Client::new(&shared_config);
-            let client = Client { inner, rt };
+            let client = Client { inner };
             let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
             std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
           }
@@ -175,7 +176,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           >
         > {
           let native_result =\s
-            self.rt.block_on(conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone(), self.inner.clone()).send());
+            dafny_tokio_runtime.block_on(conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone(), self.inner.clone()).send());
           crate::standard_library_conversions::result_to_dafny(&native_result,\s
             conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_response::to_dafny,
             conversions::$snakeCaseOperationName:L::to_dafny_error)
@@ -183,6 +184,16 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         """,
         variables
       )
+    );
+  }
+
+  protected RustFile conversionsClientModule() {
+    // Just defining an empty file for now - we will need
+    // these functions for AWS SDK clients as well but they will
+    // be quite different from the local service versions.
+    return new RustFile(
+      Path.of("src", "conversions", "client.rs"),
+      TokenTree.of("")
     );
   }
 

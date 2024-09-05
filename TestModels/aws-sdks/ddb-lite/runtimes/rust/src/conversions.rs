@@ -33,6 +33,8 @@ pub mod archival_summary;
 
  pub mod capacity;
 
+ pub mod client;
+
  pub mod comparison_operator;
 
  pub mod condition;
