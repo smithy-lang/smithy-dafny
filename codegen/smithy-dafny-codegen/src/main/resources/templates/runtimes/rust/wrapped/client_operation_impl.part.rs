@@ -13,7 +13,9 @@
     >{
         let inner_input =
             crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone());
-        let result = self.rt.block_on(crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.wrapped, inner_input));
+        let result = tokio::task::block_in_place(|| {
+            dafny_tokio_runtime.block_on(crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.wrapped, inner_input))
+        });
         match result {
             Err(error) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Failure {

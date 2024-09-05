@@ -18,6 +18,7 @@ class PythonTestModels extends TestModelTest {
   static {
     DISABLED_TESTS.add("AggregateReferences");
     DISABLED_TESTS.add("LanguageSpecificLogic");
+    DISABLED_TESTS.add("LocalService"); // https://github.com/smithy-lang/smithy-dafny/issues/566
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
