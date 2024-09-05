@@ -56,11 +56,6 @@ jobs:
         with:
           dafny: ${{ inputs.dafny }}
 
-      - name: Setup Dafny options
-        id: set-options
-        run: |
-          echo "DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix --legacy-data-constructors" >> $GITHUB_ENV
-
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
