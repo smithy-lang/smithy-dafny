@@ -19,7 +19,6 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.shapes.EnumShape;
@@ -33,66 +32,101 @@ import software.amazon.smithy.utils.StringUtils;
  * Renders enums and their constants.
  */
 public final class EnumGenerator implements Runnable {
-    private static final Logger LOGGER = Logger.getLogger(EnumGenerator.class.getName());
 
-    private final SymbolProvider symbolProvider;
-    private final GoWriter writer;
-    private final Shape shape;
+  private static final Logger LOGGER = Logger.getLogger(
+    EnumGenerator.class.getName()
+  );
 
-    public EnumGenerator(SymbolProvider symbolProvider, GoWriter writer, Shape shape) {
-        this.symbolProvider = symbolProvider;
-        this.writer = writer;
-        this.shape = shape;
+  private final SymbolProvider symbolProvider;
+  private final GoWriter writer;
+  private final Shape shape;
+
+  public EnumGenerator(
+    SymbolProvider symbolProvider,
+    GoWriter writer,
+    Shape shape
+  ) {
+    this.symbolProvider = symbolProvider;
+    this.writer = writer;
+    this.shape = shape;
+  }
+
+  @Override
+  public void run() {
+    Symbol symbol = symbolProvider.toSymbol(shape);
+    EnumTrait enumTrait = shape.expectTrait(EnumTrait.class);
+
+    writer.write("type $L string", symbol.getName()).write("");
+
+    // Don't generate constants if there are no explicitly modeled names. We only need to
+    // look at one, since Smithy validates that if one has a name then they must all have
+    // a name.
+    if (enumTrait.getValues().get(0).getName().isPresent()) {
+      Set<String> constants = new LinkedHashSet<>();
+      writer
+        .openBlock(
+          "const (",
+          ")",
+          () -> {
+            for (EnumDefinition definition : enumTrait.getValues()) {
+              StringBuilder labelBuilder = new StringBuilder(symbol.getName());
+              String name = definition.getName().get();
+
+              for (String part : name.split("(?U)[\\W_]")) {
+                if (part.matches(".*[a-z].*") && part.matches(".*[A-Z].*")) {
+                  // Mixed case names should not be changed other than first letter capitalized.
+                  labelBuilder.append(StringUtils.capitalize(part));
+                } else {
+                  // For all non-mixed case parts title case first letter, followed by all other lower cased.
+                  labelBuilder.append(
+                    StringUtils.capitalize(part.toLowerCase(Locale.US))
+                  );
+                }
+              }
+              String label = labelBuilder.toString();
+
+              // If camel-casing would cause a conflict, don't camel-case this enum value.
+              if (constants.contains(label)) {
+                LOGGER.warning(
+                  String.format(
+                    "Multiple enums resolved to the same name, `%s`, using unaltered value for: %s",
+                    label,
+                    name
+                  )
+                );
+                label = name;
+              }
+              constants.add(label);
+
+              writer.write(
+                "$L $L = $S",
+                label,
+                symbol.getName(),
+                definition.getValue()
+              );
+            }
+          }
+        )
+        .write("");
     }
 
-    @Override
-    public void run() {
-        Symbol symbol = symbolProvider.toSymbol(shape);
-        EnumTrait enumTrait = shape.expectTrait(EnumTrait.class);
-
-        writer.write("type $L string", symbol.getName()).write("");
-
-        // Don't generate constants if there are no explicitly modeled names. We only need to
-        // look at one, since Smithy validates that if one has a name then they must all have
-        // a name.
-        if (enumTrait.getValues().get(0).getName().isPresent()) {
-            Set<String> constants = new LinkedHashSet<>();
-            writer.openBlock("const (", ")", () -> {
-                for (EnumDefinition definition : enumTrait.getValues()) {
-                    StringBuilder labelBuilder = new StringBuilder(symbol.getName());
-                    String name = definition.getName().get();
-
-                    for (String part : name.split("(?U)[\\W_]")) {
-                        if (part.matches(".*[a-z].*") && part.matches(".*[A-Z].*")) {
-                            // Mixed case names should not be changed other than first letter capitalized.
-                            labelBuilder.append(StringUtils.capitalize(part));
-                        } else {
-                            // For all non-mixed case parts title case first letter, followed by all other lower cased.
-                            labelBuilder.append(StringUtils.capitalize(part.toLowerCase(Locale.US)));
-                        }
-                    }
-                    String label = labelBuilder.toString();
-
-                    // If camel-casing would cause a conflict, don't camel-case this enum value.
-                    if (constants.contains(label)) {
-                        LOGGER.warning(String.format(
-                                "Multiple enums resolved to the same name, `%s`, using unaltered value for: %s",
-                                label, name));
-                        label = name;
-                    }
-                    constants.add(label);
-
-                    writer.write("$L $L = $S", label, symbol.getName(), definition.getValue());
-                }
-            }).write("");
-        }
-
-        writer.openBlock("func ($L) Values() []$L {", "}", symbol.getName(), symbol.getName(), () -> {
-            writer.openBlock("return []$L{", "}", symbol.getName(), () -> {
-                for (EnumDefinition definition : enumTrait.getValues()) {
-                    writer.write("$S,", definition.getValue());
-                }
-            });
-        });
-    }
+    writer.openBlock(
+      "func ($L) Values() []$L {",
+      "}",
+      symbol.getName(),
+      symbol.getName(),
+      () -> {
+        writer.openBlock(
+          "return []$L{",
+          "}",
+          symbol.getName(),
+          () -> {
+            for (EnumDefinition definition : enumTrait.getValues()) {
+              writer.write("$S,", definition.getValue());
+            }
+          }
+        );
+      }
+    );
+  }
 }

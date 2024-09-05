@@ -7,10 +7,10 @@ pub fn to_dafny(
     value: aws_sdk_dynamodb::types::IndexStatus,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus>{
     ::std::rc::Rc::new(match value {
- aws_sdk_dynamodb::types::IndexStatus::Creating => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::CREATING {},
- aws_sdk_dynamodb::types::IndexStatus::Updating => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::UPDATING {},
- aws_sdk_dynamodb::types::IndexStatus::Deleting => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::DELETING {},
- aws_sdk_dynamodb::types::IndexStatus::Active => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::ACTIVE {},
+        aws_sdk_dynamodb::types::IndexStatus::Creating => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::CREATING {},
+aws_sdk_dynamodb::types::IndexStatus::Updating => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::UPDATING {},
+aws_sdk_dynamodb::types::IndexStatus::Deleting => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::DELETING {},
+aws_sdk_dynamodb::types::IndexStatus::Active => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::ACTIVE {},
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
@@ -19,9 +19,9 @@ pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus,
 ) -> aws_sdk_dynamodb::types::IndexStatus {
     match dafny_value {
- crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::CREATING {} => aws_sdk_dynamodb::types::IndexStatus::Creating,
- crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::UPDATING {} => aws_sdk_dynamodb::types::IndexStatus::Updating,
- crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::DELETING {} => aws_sdk_dynamodb::types::IndexStatus::Deleting,
- crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::ACTIVE {} => aws_sdk_dynamodb::types::IndexStatus::Active,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::CREATING {} => aws_sdk_dynamodb::types::IndexStatus::Creating,
+crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::UPDATING {} => aws_sdk_dynamodb::types::IndexStatus::Updating,
+crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::DELETING {} => aws_sdk_dynamodb::types::IndexStatus::Deleting,
+crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IndexStatus::ACTIVE {} => aws_sdk_dynamodb::types::IndexStatus::Active,
     }
 }
