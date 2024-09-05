@@ -49,11 +49,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .expectTrait(LocalServiceTrait.class)
       .getConfigId();
     configShape = model.expectShape(configId, StructureShape.class);
-    if (!configShape.getMemberNames().isEmpty()) {
-      throw new UnsupportedOperationException(
-        "localService config structures with members aren't supported yet"
-      );
-    }
   }
 
   @Override
@@ -307,7 +302,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private RustFile typesConfigModule() {
-    final Map<String, String> variables = serviceVariables();
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      standardStructureVariables(configShape),
+      structureModuleVariables(configShape)
+    );
     final String content = IOUtils.evalTemplate(
       getClass(),
       "runtimes/rust/types/config.rs",
@@ -724,7 +723,18 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private Set<RustFile> configConversionModules() {
-    final Map<String, String> variables = serviceVariables();
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      standardStructureVariables(configShape)
+    );
+    variables.put(
+      "variants",
+      toDafnyVariantsForStructure(configShape).toString()
+    );
+    variables.put(
+      "fluentMemberSetters",
+      fluentMemberSettersForStructure(configShape).toString()
+    );
     final String snakeCaseConfigName = variables.get("snakeCaseConfigName");
 
     final String outerContent = IOUtils.evalTemplate(
