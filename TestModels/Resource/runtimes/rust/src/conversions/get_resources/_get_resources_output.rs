@@ -7,7 +7,7 @@ pub fn to_dafny(
     crate::r#simple::resources::internaldafny::types::GetResourcesOutput,
 > {
     ::std::rc::Rc::new(crate::r#simple::resources::internaldafny::types::GetResourcesOutput::GetResourcesOutput {
-        output: crate::conversions::simple_resource::_simple_resource::to_dafny(value.output)
+        output: crate::conversions::simple_resource::to_dafny(value.output)
     })
 }
 
@@ -18,6 +18,6 @@ pub fn from_dafny(
     >,
 ) -> crate::operation::get_resources::GetResourcesOutput {
     crate::operation::get_resources::GetResourcesOutput {
-        output: crate::conversions::simple_resource::_simple_resource::from_dafny(dafny_value.output().clone()),
+        output: crate::conversions::simple_resource::from_dafny(dafny_value.output().clone()),
     }
 }
