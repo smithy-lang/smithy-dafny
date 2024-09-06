@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REQUIRED_VERSION=4.8.0
+REQUIRED_VERSION=4.5.0
 
 INSTALLED_VERSION=$(dafny --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
 
