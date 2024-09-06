@@ -1,0 +1,12 @@
+file_format_version = "1.0"
+dafny_version = "4.6.0.0"
+[options_by_module.SimpleAggregateTypes]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"
+[options_by_module.AbstractSimpleAggregateOperations]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"
+[options_by_module.AbstractSimpleAggregateService]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"
+[options_by_module.SimpleAggregateImpl]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"
+[options_by_module.SimpleAggregate]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"

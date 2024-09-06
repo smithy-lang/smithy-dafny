@@ -1,0 +1,10 @@
+file_format_version = "1.0"
+dafny_version = "4.6.0.0"
+[options_by_module.SimpleAggregateImplTest]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"
+[options_by_module.WrappedAbstractSimpleAggregateService]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"
+[options_by_module.WrappedSimpleAggregateService]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"
+[options_by_module.WrappedSimpleTypesStringTest]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/Aggregate"
