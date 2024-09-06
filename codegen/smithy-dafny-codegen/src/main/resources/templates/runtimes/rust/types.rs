@@ -3,6 +3,8 @@ pub mod $snakeCaseConfigName:L;
 
 pub mod builders;
 
+$resourceModules:L
+
 $structureModules:L
 
 $enumModules:L

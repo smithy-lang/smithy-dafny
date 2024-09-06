@@ -27,6 +27,7 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -108,6 +109,19 @@ public abstract class AbstractRustShimGenerator {
       .getStructureShapes()
       .stream()
       .filter(this::shouldGenerateStructForStructure)
+      .sorted();
+  }
+
+  protected final Stream<
+    ResourceShape
+  > streamResourcesToGenerateTraitsFor() {
+    return model
+      .getStructureShapes()
+      .stream()
+      .filter(s -> s.hasTrait(ReferenceTrait.class))
+      .map(s -> s.expectTrait(ReferenceTrait.class))
+      .filter(t -> !t.isService())
+      .map(t -> model.expectShape(t.getReferentId(), ResourceShape.class))
       .sorted();
   }
 
@@ -1002,9 +1016,12 @@ public abstract class AbstractRustShimGenerator {
       );
       return topLevelScopeForService(referencedService) + "::client::Client";
     } else {
-      throw new UnsupportedOperationException(
-        "@reference(resource: ...) is not yet supported"
+      ResourceShape referencedResource = model.expectShape(
+        referenceTrait.getReferentId(),
+        ResourceShape.class
       );
+      return evalTemplate("crate::types::$snakeCaseResourceName:L::rustResourceName:L",
+        resourceVariables(referencedResource));
     }
   }
 
@@ -1016,6 +1033,18 @@ public abstract class AbstractRustShimGenerator {
     variables.put("structureName", structureName);
     variables.put("snakeCaseStructureName", toSnakeCase(structureName));
     variables.put("rustStructureName", rustStructureName(structureShape));
+    return variables;
+  }
+
+  protected HashMap<String, String> resourceVariables(
+    final ResourceShape resourceShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String resourceName = resourceName(resourceShape);
+    variables.put("resourceName", resourceName);
+    variables.put("snakeCaseResourceName", toSnakeCase(resourceName));
+    variables.put("rustResourceName", rustResourceTraitName(resourceShape));
+    variables.put("dafnyResourceName", dafnyResourceTraitName(resourceShape));
     return variables;
   }
 
@@ -1077,5 +1106,17 @@ public abstract class AbstractRustShimGenerator {
     variables.put("dafnyEnumMemberName", dafnyEnumMemberName(memberName));
     variables.put("rustEnumMemberName", rustEnumMemberName(memberName));
     return variables;
+  }
+
+  protected String resourceName(final ResourceShape resource) {
+    return resource.getId().getName(service);
+  }
+
+  protected String rustResourceTraitName(final ResourceShape resource) {
+    return toPascalCase(resourceName(resource));
+  }
+
+  protected String dafnyResourceTraitName(final ResourceShape resource) {
+    return "I" + resourceName(resource);
   }
 }
