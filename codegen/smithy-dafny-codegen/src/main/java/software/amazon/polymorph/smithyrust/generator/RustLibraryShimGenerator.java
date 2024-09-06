@@ -1673,7 +1673,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(&%s.clone().unwrap())
+              crate::conversions::%s::to_dafny(%s.clone().unwrap())
               """.formatted(resourceShapeName, rustValue)
             );
           } else {

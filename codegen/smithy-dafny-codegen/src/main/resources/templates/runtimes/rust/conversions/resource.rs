@@ -28,7 +28,9 @@ pub fn from_dafny(
     let wrap = $dafnyResourceName:LDafnyWrapper {
         obj: dafny_value.clone(),
     };
-    ::std::rc::Rc::new(::std::cell::RefCell::new(wrap))
+    crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef {
+      inner: ::std::rc::Rc::new(::std::cell::RefCell::new(wrap))
+    }
 }
 
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
