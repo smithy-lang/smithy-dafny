@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -91,6 +93,7 @@ public abstract class AbstractRustShimGenerator {
       !isInputOrOutputStructure(structureShape) &&
       !structureShape.hasTrait(ErrorTrait.class) &&
       !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
+      !structureShape.hasTrait(ReferenceTrait.class) &&
       structureShape
         .getId()
         .getNamespace()
@@ -171,7 +174,8 @@ public abstract class AbstractRustShimGenerator {
           structureModules,
           unionModules,
           enumModules,
-          Stream.of("error")
+          Stream.of("error"),
+          Stream.of("client")
         )
         .flatMap(s -> s)
     );
@@ -646,6 +650,44 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
+        Optional<ReferenceTrait> referenceTraitOpt = shape.getTrait(
+          ReferenceTrait.class
+        );
+        if (referenceTraitOpt.isPresent()) {
+          ReferenceTrait referenceTrait = referenceTraitOpt.get();
+          if (!referenceTrait.isService()) {
+            throw new UnsupportedOperationException(
+              "@reference(resource: ...) is not yet supported"
+            );
+          }
+          ServiceShape referent = model.expectShape(
+            referenceTrait.getReferentId(),
+            ServiceShape.class
+          );
+          String prefix = topLevelScopeForService(referent);
+          if (isDafnyOption) {
+            yield TokenTree.of(
+              """
+              match (*%s).as_ref() {
+                  crate::r#_Wrappers_Compile::Option::Some { value } =>
+                      Some(%s::conversions::client::from_dafny(value.clone())),
+                  _ => None,
+              }
+              """.formatted(dafnyValue, prefix)
+            );
+          } else {
+            TokenTree result = TokenTree.of(
+              """
+              %s::conversions::client::from_dafny(%s.clone())
+              """.formatted(prefix, dafnyValue)
+            );
+            if (isRustOption) {
+              result =
+                TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+            }
+            yield result;
+          }
+        }
         var structureShapeName = toSnakeCase(shape.getId().getName());
         if (isDafnyOption) {
           yield TokenTree.of(
@@ -937,6 +979,33 @@ public abstract class AbstractRustShimGenerator {
         getRustTypesModuleName(),
         rustStructureName(structureShape)
       );
+  }
+
+  protected String topLevelScopeForService(final ServiceShape serviceShape) {
+    // If the service is the one we're generating for now,
+    // then we want the client for this crate. Otherwise it's a dependency.
+    // TODO: The dependency case is really just a guess that can't be tested directly,
+    // since we don't actually support multiple crates for Rust yet.
+    return serviceShape.equals(service)
+      ? "crate"
+      : "::" + toSnakeCase(serviceShape.getId().getName());
+  }
+
+  protected String qualifiedRustReferenceType(
+    final StructureShape referenceShape
+  ) {
+    var referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
+    if (referenceTrait.isService()) {
+      ServiceShape referencedService = model.expectShape(
+        referenceTrait.getReferentId(),
+        ServiceShape.class
+      );
+      return topLevelScopeForService(referencedService) + "::client::Client";
+    } else {
+      throw new UnsupportedOperationException(
+        "@reference(resource: ...) is not yet supported"
+      );
+    }
   }
 
   protected HashMap<String, String> structureVariables(

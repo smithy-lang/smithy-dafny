@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -99,6 +101,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     // conversions
     result.add(conversionsModule());
     result.add(conversionsErrorModule());
+    result.add(conversionsClientModule());
     result.addAll(configConversionModules());
     result.addAll(allOperationConversionModules());
     result.addAll(
@@ -168,6 +171,20 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables
     );
     return new RustFile(Path.of("src", "client.rs"), TokenTree.of(content));
+  }
+
+  protected RustFile conversionsClientModule() {
+    TokenTree clientConversionFunctions = TokenTree.of(
+      evalTemplate(
+        getClass(),
+        "runtimes/rust/conversions/client_localservice.rs",
+        serviceVariables()
+      )
+    );
+    return new RustFile(
+      Path.of("src", "conversions", "client.rs"),
+      TokenTree.of(clientConversionFunctions)
+    );
   }
 
   private Set<RustFile> serviceOperationClientBuilders() {
@@ -1218,6 +1235,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         if (shouldGenerateStructForStructure(structureShape)) {
           yield qualifiedRustStructureType(structureShape);
         }
+        if (structureShape.hasTrait(ReferenceTrait.class)) {
+          yield qualifiedRustReferenceType(structureShape);
+        }
         throw new UnsupportedOperationException(
           "Unsupported type for structure: " + shape.getId()
         );
@@ -1513,6 +1533,46 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
+        Optional<ReferenceTrait> referenceTraitOpt = shape.getTrait(
+          ReferenceTrait.class
+        );
+        if (referenceTraitOpt.isPresent()) {
+          ReferenceTrait referenceTrait = referenceTraitOpt.get();
+          if (!referenceTrait.isService()) {
+            throw new UnsupportedOperationException(
+              "@reference(resource: ...) is not yet supported"
+            );
+          }
+          ServiceShape referent = model.expectShape(
+            referenceTrait.getReferentId(),
+            ServiceShape.class
+          );
+          String prefix = topLevelScopeForService(referent);
+          if (!isDafnyOption) {
+            if (isRustOption) {
+              yield TokenTree.of(
+                """
+                %s::conversions::client::to_dafny(&%s.clone().unwrap())
+                """.formatted(prefix, rustValue)
+              );
+            } else {
+              yield TokenTree.of(
+                """
+                %s::conversions::client::to_dafny(%s.clone())
+                """.formatted(prefix, rustValue)
+              );
+            }
+          } else {
+            yield TokenTree.of(
+              """
+              ::std::rc::Rc::new(match &%s {
+                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::client::to_dafny(x.clone()) },
+                  None => crate::_Wrappers_Compile::Option::None { }
+              })
+              """.formatted(rustValue, prefix)
+            );
+          }
+        }
         var structureShapeName = toSnakeCase(shape.getId().getName());
         if (!isDafnyOption) {
           if (isRustOption) {

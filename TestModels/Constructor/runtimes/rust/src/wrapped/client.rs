@@ -1,15 +1,20 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-use tokio::runtime::Runtime;
+use std::sync::LazyLock;
 
 pub struct Client {
-    wrapped: crate::client::Client,
-
-    /// A `current_thread` runtime for executing operations on the
-    /// asynchronous client in a blocking manner.
-    rt: Runtime
+    wrapped: crate::client::Client
 }
+
+/// A runtime for executing operations on the asynchronous client in a blocking manner.
+/// Necessary because Dafny only generates synchronous code.
+static dafny_tokio_runtime: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {
+    tokio::runtime::Builder::new_multi_thread()
+          .enable_all()
+          .build()
+          .unwrap()
+});
 
 impl dafny_runtime::UpcastObject<dyn crate::r#simple::constructor::internaldafny::types::ISimpleConstructorClient> for Client {
   ::dafny_runtime::UpcastObjectFn!(dyn crate::r#simple::constructor::internaldafny::types::ISimpleConstructorClient);
@@ -27,13 +32,6 @@ impl Client {
   ::dafny_runtime::Object<dyn crate::r#simple::constructor::internaldafny::types::ISimpleConstructorClient>,
   ::std::rc::Rc<crate::r#simple::constructor::internaldafny::types::Error>
 >> {
-    let rt_result = tokio::runtime::Builder::new_current_thread()
-          .enable_all()
-          .build();
-    let rt = match rt_result {
-        Ok(x) => x,
-        Err(error) => return crate::conversions::error::to_opaque_error_result(error),
-    };
     let result = crate::client::Client::from_conf(
       crate::conversions::simple_constructor_config::_simple_constructor_config::from_dafny(
           config.clone(),
@@ -42,8 +40,7 @@ impl Client {
     match result {
       Ok(client) =>  {
         let wrap = crate::wrapped::client::Client {
-          wrapped: client,
-          rt
+          wrapped: client
         };
         std::rc::Rc::new(
           crate::_Wrappers_Compile::Result::Success {
@@ -72,7 +69,9 @@ impl crate::r#simple::constructor::internaldafny::types::ISimpleConstructorClien
     >{
         let inner_input =
             crate::conversions::get_constructor::_get_constructor_input::from_dafny(input.clone());
-        let result = self.rt.block_on(crate::operation::get_constructor::GetConstructor::send(&self.wrapped, inner_input));
+        let result = tokio::task::block_in_place(|| {
+            dafny_tokio_runtime.block_on(crate::operation::get_constructor::GetConstructor::send(&self.wrapped, inner_input))
+        });
         match result {
             Err(error) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Failure {
