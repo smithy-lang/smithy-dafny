@@ -46,7 +46,7 @@ public class ValidationGenerator {
     final boolean isInputStructure
   ) {
     Symbol symbol = symbolProvider.toSymbol(shape);
-    writer.openBlock("func (input $L) Validate() (error) {", symbol.getName());
+    writer.openBlock("func (input $L) Validate() (error) {", symbol.getName().concat("_smithygenerated"));
     renderValidatorHelper(shape, isInputStructure, "input");
     writer.write("return nil");
     writer.closeBlock("}").write("");

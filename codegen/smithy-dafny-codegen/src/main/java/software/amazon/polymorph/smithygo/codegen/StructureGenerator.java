@@ -99,7 +99,7 @@ public final class StructureGenerator implements Runnable {
   public void renderStructure(Runnable runnable, boolean isInputStructure) {
     writer.addImport("fmt");
     Symbol symbol = symbolProvider.toSymbol(shape);
-    writer.openBlock("type $L struct {", symbol.getName());
+    writer.openBlock("type $L struct {", symbol.getName().concat("_smithygenerated"));
     CodegenUtils.SortedMembers sortedMembers = new CodegenUtils.SortedMembers(
       symbolProvider
     );

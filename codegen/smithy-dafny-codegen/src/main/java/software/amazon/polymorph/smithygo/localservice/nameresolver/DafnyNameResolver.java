@@ -14,16 +14,21 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
+import software.amazon.smithy.utils.CaseUtils;
 
 public class DafnyNameResolver {
 
   public static String dafnyTypesNamespace(final Shape shape) {
-    return shape
-      .toShapeId()
-      .getNamespace()
-      .replace(DOT, BLANK)
-      .toLowerCase()
-      .concat(INTERNAL_DAFNY_TYPES);
+    return(CaseUtils.toPascalCase(shape
+    .toShapeId()
+    .getNamespace()
+    .replace(DOT, " ")));
+    // return shape
+    //   .toShapeId()
+    //   .getNamespace()
+    //   .replace(DOT, BLANK)
+    //   .toLowerCase()
+    //   .concat(INTERNAL_DAFNY_TYPES);
   }
 
   public static String dafnyNamespace(final Shape shape) {
@@ -61,7 +66,8 @@ public class DafnyNameResolver {
         return DafnyNameResolver
           .dafnyTypesNamespace(shape)
           .concat(DOT)
-          .concat(symbol.getName());
+          .concat(symbol.getName())
+          .concat("_smithygenerated");
     }
   }
 

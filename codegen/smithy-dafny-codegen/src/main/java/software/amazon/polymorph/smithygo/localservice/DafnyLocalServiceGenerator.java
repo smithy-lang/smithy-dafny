@@ -222,7 +222,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
             """
                 err := params.Validate()
                 if err != nil {
-                    opaqueErr := %s.OpaqueError{
+                    opaqueErr := %s.OpaqueError_smithygenerated{
                         ErrObject: err,
                     }
             """.formatted(SmithyNameResolver.smithyTypesNamespace(inputShape));
@@ -526,12 +526,12 @@ public class DafnyLocalServiceGenerator implements Runnable {
           	return fmt.Sprintf("message: %s\\n err %v", e.Message, e.ListOfErrors)
           }
 
-          type OpaqueError struct {
+          type OpaqueError_smithygenerated struct {
              $LBaseException
              ErrObject interface{}
           }
 
-          func (e OpaqueError) Error() string {
+          func (e OpaqueError_smithygenerated) Error() string {
              return fmt.Sprintf("message: %v", e.ErrObject )
           }
           """,

@@ -205,6 +205,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             .smithyTypesNamespace(shape)
             .concat(".")
             .concat(shape.getId().getName())
+            .concat("_smithygenerated")
         )
     );
     String fieldSeparator = ",";
