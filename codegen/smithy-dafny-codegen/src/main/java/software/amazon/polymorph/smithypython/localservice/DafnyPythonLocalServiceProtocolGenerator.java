@@ -144,7 +144,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
 
           writer.write(
             """
-            async def $L(input, config: $T) -> $L:
+            def $L(input, config: $T) -> $L:
                 ${C|}
             """,
             serFunction.getName(),
@@ -291,7 +291,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
 
           writer.write(
             """
-            async def $L(input: $L, config: $T):
+            def $L(input: $L, config: $T):
               ${C|}
             """,
             deserFunction.getName(),
