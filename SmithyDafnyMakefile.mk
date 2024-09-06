@@ -456,13 +456,13 @@ transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
-transpile_implementation_net: DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-module-names --compile-suffix
+transpile_implementation_net: DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix
 transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: _transpile_implementation_all
 
 transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
-transpile_test_net: DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-module-names --compile-suffix
+transpile_test_net: DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
 transpile_test_net: _transpile_test_all
@@ -507,12 +507,12 @@ transpile_java: | transpile_implementation_java transpile_test_java transpile_de
 transpile_java: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_java: TARGET=java
-transpile_implementation_java: DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-data-constructors --legacy-module-names --compile-suffix
+transpile_implementation_java: DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
 transpile_implementation_java: _transpile_implementation_all _mv_implementation_java
 
 transpile_test_java: TARGET=java
-transpile_test_java: DAFNY_OPTIONS=--allow-warnings --include-test-runner --legacy-data-constructors --legacy-module-names --compile-suffix
+transpile_test_java: DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix
 transpile_test_java: OUT=runtimes/java/TestsFromDafny
 transpile_test_java: _transpile_test_all _mv_test_java
 
