@@ -6,15 +6,9 @@ pub fn to_dafny(
 ) -> ::std::rc::Rc<
     crate::r#simple::resources::internaldafny::types::GetResourcesOutput,
 > {
-    let wrap = SimpleResourceWrapper {
-        obj: value.output.clone(),
-    };
-    let inner : ::std::rc::Rc<::std::cell::UnsafeCell<dyn crate::r#simple::resources::internaldafny::types::ISimpleResource>>
-    = ::std::rc::Rc::new(::std::cell::UnsafeCell::new(wrap));
-
     ::std::rc::Rc::new(crate::r#simple::resources::internaldafny::types::GetResourcesOutput::GetResourcesOutput {
-    output: ::dafny_runtime::Object (Some(inner) )
-  })
+        output: crate::conversions::simple_resource::_simple_resource::to_dafny(value.output)
+    })
 }
 
 #[allow(dead_code)]
@@ -23,89 +17,7 @@ pub fn from_dafny(
         crate::r#simple::resources::internaldafny::types::GetResourcesOutput,
     >,
 ) -> crate::operation::get_resources::GetResourcesOutput {
-    let wrap = SimpleResourceDafnyWrapper {
-        obj: dafny_value.output().clone(),
-    };
     crate::operation::get_resources::GetResourcesOutput {
-        output: ::std::rc::Rc::new(::std::cell::RefCell::new(wrap)),
-    }
-}
-
-pub struct SimpleResourceWrapper {
-    obj: crate::types::simple_resource::SimpleResourceRef,
-}
-
-impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for SimpleResourceWrapper {
-    ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
-}
-
-impl crate::r#simple::resources::internaldafny::types::ISimpleResource
-    for SimpleResourceWrapper
-{
-    fn r#_GetResourceData_k(
-        &mut self,
-        input: &::std::rc::Rc<
-            crate::r#simple::resources::internaldafny::types::GetResourceDataInput,
-        >,
-    ) -> ::std::rc::Rc<
-        crate::r#_Wrappers_Compile::Result<
-            ::std::rc::Rc<
-                crate::r#simple::resources::internaldafny::types::GetResourceDataOutput,
-            >,
-            ::std::rc::Rc<crate::r#simple::resources::internaldafny::types::Error>,
-        >,
-    >
-    {
-        let inner_input =
-            crate::conversions::get_resource_data::_get_resource_data_input::from_dafny(
-                input.clone(),
-            );
-        let inner_result = self.obj.borrow_mut().get_resource_data(inner_input);
-        let result = match inner_result {
-            Ok(x) => crate::r#_Wrappers_Compile::Result::Success {
-                value: crate::conversions::get_resource_data::_get_resource_data_output::to_dafny(
-                    x,
-                ),
-            },
-            Err(x) => crate::r#_Wrappers_Compile::Result::Failure {
-                error: crate::conversions::get_resource_data::to_dafny_error(x),
-            },
-        };
-        ::std::rc::Rc::new(result)
-    }
-}
-
-#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-pub struct SimpleResourceDafnyWrapper {
-    pub(crate) obj: ::dafny_runtime::Object<
-        dyn crate::r#simple::resources::internaldafny::types::ISimpleResource,
-    >,
-}
-
-impl SimpleResource for SimpleResourceDafnyWrapper {
-    fn get_resource_data(
-        &mut self,
-        input: crate::operation::get_resource_data::GetResourceDataInput,
-    ) -> Result<
-        crate::operation::get_resource_data::GetResourceDataOutput,
-        crate::operation::get_resource_data::GetResourceDataError,
-    > {
-        let inner_input =
-            crate::conversions::get_resource_data::_get_resource_data_input::to_dafny(input);
-        let inner_result = ::dafny_runtime::md!(self.obj.clone()).GetResourceData(&inner_input);
-        if matches!(
-            inner_result.as_ref(),
-            crate::r#_Wrappers_Compile::Result::Success { .. }
-        ) {
-            Ok(
-                crate::conversions::get_resource_data::_get_resource_data_output::from_dafny(
-                    inner_result.value().clone(),
-                ),
-            )
-        } else {
-            Err(crate::conversions::get_resource_data::from_dafny_error(
-                inner_result.error().clone(),
-            ))
-        }
+        output: crate::conversions::simple_resource::_simple_resource::from_dafny(dafny_value.output().clone()),
     }
 }

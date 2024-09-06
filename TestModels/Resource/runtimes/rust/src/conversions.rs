@@ -4,3 +4,5 @@ pub mod get_resources;
 pub mod get_resource_data;
 
 pub mod simple_resources_config;
+
+pub mod simple_resource;
