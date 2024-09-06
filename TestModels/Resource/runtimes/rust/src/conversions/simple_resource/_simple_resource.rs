@@ -1,4 +1,3 @@
-use crate::types::simple_resource::SimpleResource;
 #[allow(dead_code)]
 pub fn to_dafny(
     value: crate::types::simple_resource::SimpleResourceRef,
@@ -76,7 +75,7 @@ pub struct SimpleResourceDafnyWrapper {
   >,
 }
 
-impl SimpleResource for SimpleResourceDafnyWrapper {
+impl crate::types::simple_resource::SimpleResource for SimpleResourceDafnyWrapper {
   fn get_resource_data(
       &mut self,
       input: crate::operation::get_resource_data::GetResourceDataInput,
