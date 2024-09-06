@@ -322,7 +322,7 @@ func Error_FromDafny(err SimpleAggregateTypes.Error) error {
 	return OpaqueError_Output_FromDafny(err)
 }
 
-func SimpleAggregateConfig_FromDafny(dafnyOutput SimpleAggregateTypes.SimpleAggregateConfig_smithygenerated) SimpleAggregateTypes.SimpleAggregateConfig_smithygenerated {
+func SimpleAggregateConfig_FromDafny(dafnyOutput SimpleAggregateTypes.SimpleAggregateConfig) SimpleAggregateTypes.SimpleAggregateConfig_smithygenerated {
 	return SimpleAggregateTypes.SimpleAggregateConfig_smithygenerated{}
 
 }

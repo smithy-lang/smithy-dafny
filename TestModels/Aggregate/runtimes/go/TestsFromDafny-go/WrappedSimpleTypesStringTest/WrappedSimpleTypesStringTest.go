@@ -76,7 +76,7 @@ func (_static *CompanionStruct_Default___) GetAggregate() {
 	_ = _17_valueOrError0
 	var _out3 Wrappers.Result
 	_ = _out3
-	_out3 = WrappedSimpleAggregateService.Companion_Default___.WrappedSimpleAggregate(WrappedSimpleAggregateService.Companion_Default___.WrappedDefaultSimpleAggregateConfig())
+	_out3 = WrappedSimpleAggregateService.WrappedSimpleAggregate(WrappedSimpleAggregateService.Companion_Default___.WrappedDefaultSimpleAggregateConfig())
 	_17_valueOrError0 = _out3
 	if !(!((_17_valueOrError0).IsFailure())) {
 		panic("test/WrappedSimpleAggregateImplTest.dfy(11,22): " + (_17_valueOrError0).String())

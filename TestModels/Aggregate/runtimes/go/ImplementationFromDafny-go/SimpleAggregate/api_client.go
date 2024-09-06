@@ -12,7 +12,7 @@ type Client struct {
 	DafnyClient *SimpleAggregateClient
 }
 
-func NewClient(clientConfig SimpleAggregateTypes.SimpleAggregateConfig) (*Client, error) {
+func NewClient(clientConfig SimpleAggregateTypes.SimpleAggregateConfig_smithygenerated) (*Client, error) {
 	var dafnyConfig = SimpleAggregateConfig_ToDafny(clientConfig)
 	var dafny_response = Companion_Default___.SimpleAggregate(dafnyConfig)
 	if dafny_response.Is_Failure() {
@@ -23,7 +23,7 @@ func NewClient(clientConfig SimpleAggregateTypes.SimpleAggregateConfig) (*Client
 	return client, nil
 }
 
-func (client *Client) GetAggregate(ctx context.Context, params SimpleAggregateTypes.GetAggregateInput_smithygenerated) (*SimpleAggregateTypes.GetAggregateOutput, error) {
+func (client *Client) GetAggregate(ctx context.Context, params SimpleAggregateTypes.GetAggregateInput_smithygenerated) (*SimpleAggregateTypes.GetAggregateOutput_smithygenerated, error) {
 	err := params.Validate()
 	if err != nil {
 		opaqueErr := SimpleAggregateTypes.OpaqueError_smithygenerated{
@@ -31,19 +31,19 @@ func (client *Client) GetAggregate(ctx context.Context, params SimpleAggregateTy
 		}
 		return nil, opaqueErr
 	}
-	var dafny_request SimpleAggregateTypes.GetAggregateInput_smithygenerated = GetAggregateInput_ToDafny(params)
+	var dafny_request SimpleAggregateTypes.GetAggregateInput = GetAggregateInput_ToDafny(params)
 	var dafny_response = client.DafnyClient.GetAggregate(dafny_request)
 
 	if dafny_response.Is_Failure() {
 		err := dafny_response.Dtor_error().(SimpleAggregateTypes.Error)
 		return nil, Error_FromDafny(err)
 	}
-	var native_response = GetAggregateOutput_FromDafny(dafny_response.Extract().(SimpleAggregateTypes.GetAggregateOutput_smithygenerated))
+	var native_response = GetAggregateOutput_FromDafny(dafny_response.Extract().(SimpleAggregateTypes.GetAggregateOutput))
 	return &native_response, nil
 
 }
 
-func (client *Client) GetAggregateKnownValueTest(ctx context.Context, params SimpleAggregateTypes.GetAggregateInput_smithygenerated) (*SimpleAggregateTypes.GetAggregateOutput, error) {
+func (client *Client) GetAggregateKnownValueTest(ctx context.Context, params SimpleAggregateTypes.GetAggregateInput_smithygenerated) (*SimpleAggregateTypes.GetAggregateOutput_smithygenerated, error) {
 	err := params.Validate()
 	if err != nil {
 		opaqueErr := SimpleAggregateTypes.OpaqueError_smithygenerated{
@@ -51,14 +51,14 @@ func (client *Client) GetAggregateKnownValueTest(ctx context.Context, params Sim
 		}
 		return nil, opaqueErr
 	}
-	var dafny_request SimpleAggregateTypes.GetAggregateInput_smithygenerated = GetAggregateInput_ToDafny(params)
+	var dafny_request SimpleAggregateTypes.GetAggregateInput = GetAggregateInput_ToDafny(params)
 	var dafny_response = client.DafnyClient.GetAggregateKnownValueTest(dafny_request)
 
 	if dafny_response.Is_Failure() {
 		err := dafny_response.Dtor_error().(SimpleAggregateTypes.Error)
 		return nil, Error_FromDafny(err)
 	}
-	var native_response = GetAggregateOutput_FromDafny(dafny_response.Extract().(SimpleAggregate.GetAggregateOutput_smithygenerated))
+	var native_response = GetAggregateOutput_FromDafny(dafny_response.Extract().(SimpleAggregateTypes.GetAggregateOutput))
 	return &native_response, nil
 
 }

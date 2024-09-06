@@ -31,9 +31,9 @@ func GetAggregateInput_ToDafny(nativeInput SimpleAggregateTypes.GetAggregateInpu
 			}
 			var fieldValue []interface{} = make([]interface{}, 0)
 			for _, val := range nativeInput.StructureList {
-				element := func() SimpleAggregate.StructureListElement {
+				element := func() SimpleAggregateTypes.StructureListElement {
 
-					return SimpleAggregate.Companion_StructureListElement_.Create_StructureListElement_(func() Wrappers.Option {
+					return SimpleAggregateTypes.Companion_StructureListElement_.Create_StructureListElement_(func() Wrappers.Option {
 						if val.StringValue == nil {
 							return Wrappers.Companion_Option_.Create_None_()
 						}
@@ -82,11 +82,11 @@ func GetAggregateInput_ToDafny(nativeInput SimpleAggregateTypes.GetAggregateInpu
 			if nativeInput.NestedStructure == nil {
 				return Wrappers.Companion_Option_.Create_None_()
 			}
-			return Wrappers.Companion_Option_.Create_Some_(SimpleAggregate.Companion_NestedStructure_.Create_NestedStructure_(func() Wrappers.Option {
+			return Wrappers.Companion_Option_.Create_Some_(SimpleAggregateTypes.Companion_NestedStructure_.Create_NestedStructure_(func() Wrappers.Option {
 				if nativeInput.NestedStructure.StringStructure == nil {
 					return Wrappers.Companion_Option_.Create_None_()
 				}
-				return Wrappers.Companion_Option_.Create_Some_(SimpleAggregate.Companion_StringStructure_.Create_StringStructure_(func() Wrappers.Option {
+				return Wrappers.Companion_Option_.Create_Some_(SimpleAggregateTypes.Companion_StringStructure_.Create_StringStructure_(func() Wrappers.Option {
 					if nativeInput.NestedStructure.StringStructure.Value == nil {
 						return Wrappers.Companion_Option_.Create_None_()
 					}
@@ -219,7 +219,7 @@ func Error_ToDafny(err error) SimpleAggregateTypes.Error {
 	}
 }
 
-func SimpleAggregateConfig_ToDafny(nativeInput SimpleAggregateTypes.SimpleAggregateConfig) SimpleAggregateTypes.SimpleAggregateConfig {
+func SimpleAggregateConfig_ToDafny(nativeInput SimpleAggregateTypes.SimpleAggregateConfig_smithygenerated) SimpleAggregateTypes.SimpleAggregateConfig {
 	return func() SimpleAggregateTypes.SimpleAggregateConfig {
 
 		return SimpleAggregateTypes.Companion_SimpleAggregateConfig_.Create_SimpleAggregateConfig_()
