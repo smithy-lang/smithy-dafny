@@ -68,6 +68,13 @@ public abstract class AbstractRustShimGenerator {
       .map(shapeId -> model.expectShape(shapeId, OperationShape.class));
   }
 
+  protected Stream<OperationShape> allOperationShapes() {
+    return model
+      .getOperationShapes()
+      .stream()
+      .sorted();
+  }
+
   protected Stream<StructureShape> allErrorShapes() {
     return model
       .getOperationShapes()
@@ -165,6 +172,8 @@ public abstract class AbstractRustShimGenerator {
       .getOperationShapes()
       .stream()
       .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
+    Stream<String> resourceModules = streamResourcesToGenerateTraitsFor()
+      .map(resourceShape -> toSnakeCase(resourceShape.getId().getName()));
 
     // smithy-dafny generally generates code for all shapes in the same namespace,
     // whereas most smithy code generators generate code for all shapes in the service closure.
@@ -184,6 +193,7 @@ public abstract class AbstractRustShimGenerator {
     TokenTree content = declarePubModules(
       Stream
         .of(
+          resourceModules,
           operationModules,
           structureModules,
           unionModules,
@@ -408,11 +418,16 @@ public abstract class AbstractRustShimGenerator {
   // TODO: There is obviously a lot of duplication here that should be easy to clean up.
   // TODO: Some cases do not handle all combinations of isRustOption and isDafnyOption.
   protected TokenTree fromDafny(
-    final Shape shape,
+    final Shape originalShape,
     final String dafnyValue,
     boolean isRustOption,
     boolean isDafnyOption
   ) {
+    // First handle the indirection of @reference to service or resource shapes
+    final Shape shape = originalShape.getTrait(ReferenceTrait.class)
+      .map(referenceTrait -> model.expectShape(referenceTrait.getReferentId()))
+      .orElse(originalShape);
+
     return switch (shape.getType()) {
       case STRING, ENUM -> {
         if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
@@ -664,44 +679,6 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
-        Optional<ReferenceTrait> referenceTraitOpt = shape.getTrait(
-          ReferenceTrait.class
-        );
-        if (referenceTraitOpt.isPresent()) {
-          ReferenceTrait referenceTrait = referenceTraitOpt.get();
-          if (!referenceTrait.isService()) {
-            throw new UnsupportedOperationException(
-              "@reference(resource: ...) is not yet supported"
-            );
-          }
-          ServiceShape referent = model.expectShape(
-            referenceTrait.getReferentId(),
-            ServiceShape.class
-          );
-          String prefix = topLevelScopeForService(referent);
-          if (isDafnyOption) {
-            yield TokenTree.of(
-              """
-              match (*%s).as_ref() {
-                  crate::r#_Wrappers_Compile::Option::Some { value } =>
-                      Some(%s::conversions::client::from_dafny(value.clone())),
-                  _ => None,
-              }
-              """.formatted(dafnyValue, prefix)
-            );
-          } else {
-            TokenTree result = TokenTree.of(
-              """
-              %s::conversions::client::from_dafny(%s.clone())
-              """.formatted(prefix, dafnyValue)
-            );
-            if (isRustOption) {
-              result =
-                TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
-            }
-            yield result;
-          }
-        }
         var structureShapeName = toSnakeCase(shape.getId().getName());
         if (isDafnyOption) {
           yield TokenTree.of(
@@ -718,6 +695,56 @@ public abstract class AbstractRustShimGenerator {
             """
             crate::conversions::%s::from_dafny(%s.clone())
             """.formatted(structureShapeName, dafnyValue)
+          );
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
+        }
+      }
+      case RESOURCE -> {
+        var resourceShapeName = toSnakeCase(shape.getId().getName());
+        if (isDafnyOption) {
+          yield TokenTree.of(
+            """
+            match (*%s).as_ref() {
+                crate::r#_Wrappers_Compile::Option::Some { value } =>
+                    Some(crate::conversions::%s::from_dafny(value.clone())),
+                _ => None,
+            }
+            """.formatted(dafnyValue, resourceShapeName)
+          );
+        } else {
+          TokenTree result = TokenTree.of(
+            """
+            crate::conversions::%s::from_dafny(%s.clone())
+            """.formatted(resourceShapeName, dafnyValue)
+          );
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
+        }
+      }
+      case SERVICE -> {
+        String prefix = topLevelScopeForService(shape.asServiceShape().get());
+        if (isDafnyOption) {
+          yield TokenTree.of(
+            """
+            match (*%s).as_ref() {
+                crate::r#_Wrappers_Compile::Option::Some { value } =>
+                    Some(%s::conversions::client::from_dafny(value.clone())),
+                _ => None,
+            }
+            """.formatted(dafnyValue, prefix)
+          );
+        } else {
+          TokenTree result = TokenTree.of(
+            """
+            %s::conversions::client::from_dafny(%s.clone())
+            """.formatted(prefix, dafnyValue)
           );
           if (isRustOption) {
             result =
@@ -860,7 +887,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected Set<RustFile> allOperationConversionModules() {
-    return serviceOperationShapes()
+    return allOperationShapes()
       .map(this::operationConversionModules)
       .flatMap(Collection::stream)
       .collect(Collectors.toSet());
@@ -1020,7 +1047,7 @@ public abstract class AbstractRustShimGenerator {
         referenceTrait.getReferentId(),
         ResourceShape.class
       );
-      return evalTemplate("crate::types::$snakeCaseResourceName:L::rustResourceName:L",
+      return evalTemplate("crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
         resourceVariables(referencedResource));
     }
   }

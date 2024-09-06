@@ -1,5 +1,5 @@
 
-impl $dafnyTypesModuleName:L::$dafnyResourceName:L
+impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
   for $rustResourceName:LWrapper
 {
   fn r#_GetResourceData_k(
@@ -35,7 +35,7 @@ impl $dafnyTypesModuleName:L::$dafnyResourceName:L
   }
 }
 
-impl crate::types::simple_resource::SimpleResource for SimpleResourceDafnyWrapper {
+impl crate::types::$snakeCaseResourceName:L::$rustResourceName:L for $dafnyResourceName:LDafnyWrapper {
   fn get_resource_data(
       &mut self,
       input: crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L,

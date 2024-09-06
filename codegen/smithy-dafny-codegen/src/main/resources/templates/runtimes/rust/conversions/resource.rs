@@ -37,3 +37,5 @@ pub struct $dafnyResourceName:LDafnyWrapper {
       dyn crate::r#$dafnyTypesModuleName:L::$dafnyResourceName:L,
   >,
 }
+
+$resourceOperations:L
