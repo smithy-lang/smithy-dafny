@@ -19,3 +19,5 @@ impl ::std::fmt::Debug for $rustResourceName:LRef {
         write!(f, "<$rustResourceName:LRef>")
     }
 }
+
+$operationModules:L

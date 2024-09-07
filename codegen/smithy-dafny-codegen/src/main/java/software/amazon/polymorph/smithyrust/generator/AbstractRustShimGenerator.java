@@ -19,6 +19,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.OperationBindingIndex;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
@@ -42,11 +43,13 @@ public abstract class AbstractRustShimGenerator {
   protected final Model model;
   protected final ServiceShape service;
   protected final OperationIndex operationIndex;
+  protected final OperationBindingIndex operationBindingIndex;
 
   public AbstractRustShimGenerator(Model model, ServiceShape service) {
     this.model = model;
     this.service = service;
     this.operationIndex = new OperationIndex(model);
+    this.operationBindingIndex = new OperationBindingIndex(model);
   }
 
   public void generate(final Path outputDir) {
@@ -978,6 +981,19 @@ public abstract class AbstractRustShimGenerator {
     variables.put("pascalCaseOperationInputName", toPascalCase(opInputName));
     variables.put("pascalCaseOperationOutputName", toPascalCase(opOutputName));
     variables.put("pascalCaseOperationErrorName", toPascalCase(opErrorName));
+
+    final Shape bindingShape = operationBindingIndex.getBindingShape(operationShape).get();
+    if (bindingShape.isServiceShape()) {
+      variables.put("operationTargetName", "client");
+      variables.put("operationTargetType", "crate::client::Client");
+    } else {
+      Map<String, String> resourceVariables = resourceVariables(bindingShape.asResourceShape().get());
+      variables.put("operationTargetName", resourceVariables.get("snakeCaseResourceName"));
+      variables.put("operationTargetType", evalTemplate(
+"crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
+        resourceVariables));
+    }
+
     return variables;
   }
 
