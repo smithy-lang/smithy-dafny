@@ -1405,6 +1405,15 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     };
   }
 
+  protected boolean isRustFieldRequired(
+    final StructureShape parent,
+    final MemberShape member
+  ) {
+    // We're currently always wrapping all structure members with Option<...>,
+    // but this may change with https://github.com/smithy-lang/smithy-dafny/issues/533.
+    return false;
+  }
+
   @Override
   protected TokenTree toDafny(
     final Shape originalShape,
