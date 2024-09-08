@@ -1,18 +1,18 @@
 package software.amazon.polymorph.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.KnowledgeIndex;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ToShapeId;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 public class OperationBindingIndex implements KnowledgeIndex {
+
   private final Map<ShapeId, Shape> operationBindings = new HashMap();
 
   public OperationBindingIndex(Model model) {

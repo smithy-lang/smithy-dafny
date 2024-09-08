@@ -72,10 +72,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected Stream<OperationShape> allOperationShapes() {
-    return model
-      .getOperationShapes()
-      .stream()
-      .sorted();
+    return model.getOperationShapes().stream().sorted();
   }
 
   protected Stream<StructureShape> allErrorShapes() {
@@ -122,9 +119,7 @@ public abstract class AbstractRustShimGenerator {
       .sorted();
   }
 
-  protected final Stream<
-    ResourceShape
-  > streamResourcesToGenerateTraitsFor() {
+  protected final Stream<ResourceShape> streamResourcesToGenerateTraitsFor() {
     return model
       .getStructureShapes()
       .stream()
@@ -427,7 +422,8 @@ public abstract class AbstractRustShimGenerator {
     boolean isDafnyOption
   ) {
     // First handle the indirection of @reference to service or resource shapes
-    final Shape shape = originalShape.getTrait(ReferenceTrait.class)
+    final Shape shape = originalShape
+      .getTrait(ReferenceTrait.class)
       .map(referenceTrait -> model.expectShape(referenceTrait.getReferentId()))
       .orElse(originalShape);
 
@@ -982,16 +978,27 @@ public abstract class AbstractRustShimGenerator {
     variables.put("pascalCaseOperationOutputName", toPascalCase(opOutputName));
     variables.put("pascalCaseOperationErrorName", toPascalCase(opErrorName));
 
-    final Shape bindingShape = operationBindingIndex.getBindingShape(operationShape).get();
+    final Shape bindingShape = operationBindingIndex
+      .getBindingShape(operationShape)
+      .get();
     if (bindingShape.isServiceShape()) {
       variables.put("operationTargetName", "client");
       variables.put("operationTargetType", "crate::client::Client");
     } else {
-      Map<String, String> resourceVariables = resourceVariables(bindingShape.asResourceShape().get());
-      variables.put("operationTargetName", resourceVariables.get("snakeCaseResourceName"));
-      variables.put("operationTargetType", evalTemplate(
-"crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
-        resourceVariables));
+      Map<String, String> resourceVariables = resourceVariables(
+        bindingShape.asResourceShape().get()
+      );
+      variables.put(
+        "operationTargetName",
+        resourceVariables.get("snakeCaseResourceName")
+      );
+      variables.put(
+        "operationTargetType",
+        evalTemplate(
+          "crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
+          resourceVariables
+        )
+      );
     }
 
     return variables;
@@ -1063,8 +1070,10 @@ public abstract class AbstractRustShimGenerator {
         referenceTrait.getReferentId(),
         ResourceShape.class
       );
-      return evalTemplate("crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
-        resourceVariables(referencedResource));
+      return evalTemplate(
+        "crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
+        resourceVariables(referencedResource)
+      );
     }
   }
 
