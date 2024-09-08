@@ -1,8 +1,11 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
     value: crate::types::simple_resource::SimpleResourceRef,
 ) -> ::dafny_runtime::Object<
-  dyn crate::simple::resources::internaldafny::types::ISimpleResource,
+  dyn crate::r#simple::resources::internaldafny::types::ISimpleResource,
 > {
   let wrap = SimpleResourceWrapper {
       obj: value.clone(),
@@ -10,19 +13,6 @@ pub fn to_dafny(
   let inner = ::std::rc::Rc::new(::std::cell::UnsafeCell::new(wrap));
   ::dafny_runtime::Object (Some(inner) )
 }
-
-#[allow(dead_code)]
-pub fn from_dafny(
-    dafny_value: ::dafny_runtime::Object<
-      dyn crate::simple::resources::internaldafny::types::ISimpleResource,
-    >,
-) -> crate::types::simple_resource::SimpleResourceRef {
-    let wrap = SimpleResourceDafnyWrapper {
-        obj: dafny_value.clone(),
-    };
-    ::std::rc::Rc::new(::std::cell::RefCell::new(wrap))
-}
-
 
 pub struct SimpleResourceWrapper {
   obj: crate::types::simple_resource::SimpleResourceRef,
@@ -32,18 +22,40 @@ impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for SimpleResourceWrappe
   ::dafny_runtime::UpcastObjectFn!(dyn ::std::any::Any);
 }
 
-impl crate::r#simple::resources::internaldafny::types::ISimpleResource
+#[allow(dead_code)]
+pub fn from_dafny(
+    dafny_value: ::dafny_runtime::Object<
+      dyn crate::r#simple::resources::internaldafny::types::ISimpleResource,
+    >,
+) -> crate::types::simple_resource::SimpleResourceRef {
+    let wrap = ISimpleResourceDafnyWrapper {
+        obj: dafny_value.clone(),
+    };
+    crate::types::simple_resource::SimpleResourceRef {
+      inner: ::std::rc::Rc::new(::std::cell::RefCell::new(wrap))
+    }
+}
+
+#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
+pub struct ISimpleResourceDafnyWrapper {
+  pub(crate) obj: ::dafny_runtime::Object<
+      dyn crate::r#simple::resources::internaldafny::types::ISimpleResource,
+  >,
+}
+
+
+impl crate::simple::resources::internaldafny::types::ISimpleResource
   for SimpleResourceWrapper
 {
   fn r#_GetResourceData_k(
       &mut self,
       input: &::std::rc::Rc<
-          crate::r#simple::resources::internaldafny::types::GetResourceDataInput,
+      crate::r#simple::resources::internaldafny::types::GetResourceDataInput,
       >,
   ) -> ::std::rc::Rc<
       crate::r#_Wrappers_Compile::Result<
           ::std::rc::Rc<
-              crate::r#simple::resources::internaldafny::types::GetResourceDataOutput,
+          crate::r#simple::resources::internaldafny::types::GetResourceDataOutput,
           >,
           ::std::rc::Rc<crate::r#simple::resources::internaldafny::types::Error>,
       >,
@@ -53,7 +65,7 @@ impl crate::r#simple::resources::internaldafny::types::ISimpleResource
           crate::conversions::get_resource_data::_get_resource_data_input::from_dafny(
               input.clone(),
           );
-      let inner_result = self.obj.borrow_mut().get_resource_data(inner_input);
+      let inner_result = self.obj.inner.borrow_mut().get_resource_data(inner_input);
       let result = match inner_result {
           Ok(x) => crate::r#_Wrappers_Compile::Result::Success {
               value: crate::conversions::get_resource_data::_get_resource_data_output::to_dafny(
@@ -68,14 +80,7 @@ impl crate::r#simple::resources::internaldafny::types::ISimpleResource
   }
 }
 
-#[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-pub struct SimpleResourceDafnyWrapper {
-  pub(crate) obj: ::dafny_runtime::Object<
-      dyn crate::r#simple::resources::internaldafny::types::ISimpleResource,
-  >,
-}
-
-impl crate::types::simple_resource::SimpleResource for SimpleResourceDafnyWrapper {
+impl crate::types::simple_resource::SimpleResource for ISimpleResourceDafnyWrapper {
   fn get_resource_data(
       &mut self,
       input: crate::operation::get_resource_data::GetResourceDataInput,
