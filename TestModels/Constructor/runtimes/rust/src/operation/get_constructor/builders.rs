@@ -9,7 +9,7 @@ impl GetConstructorInputBuilder {
     /// Sends a request with this input using the given client.
     pub async fn send_with(
         self,
-        client: &crate::Client,
+        client: &crate::client::Client,
     ) -> ::std::result::Result<
         crate::operation::get_constructor::GetConstructorOutput,
         crate::operation::get_constructor::GetConstructorError,
