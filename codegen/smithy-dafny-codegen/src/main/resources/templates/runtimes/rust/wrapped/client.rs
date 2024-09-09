@@ -45,7 +45,7 @@ impl Client {
           }
         )
       },
-      Err(error) => crate::conversions::error::to_opaque_error_result(error)
+      Err(error) => crate::conversions::error::to_dafny(error)
     }
   }
 }

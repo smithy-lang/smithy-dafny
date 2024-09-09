@@ -9,5 +9,3 @@ pub use ::aws_smithy_types::error::operation::BuildError;
 pub use ::aws_smithy_types::error::display::DisplayErrorContext;
 pub use ::aws_smithy_types::error::metadata::ErrorMetadata;
 pub use ::aws_smithy_types::error::metadata::ProvideErrorMetadata;
-
-pub(crate) mod sealed_unhandled;

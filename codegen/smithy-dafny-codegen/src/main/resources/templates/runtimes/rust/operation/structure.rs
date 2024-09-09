@@ -29,7 +29,7 @@ impl $rustStructureName:LBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::$snakeCaseOperationName:L::$rustStructureName:L,
-        ::aws_smithy_types::error::operation::BuildError,
+        crate::types::error::Error,
     > {
         ::std::result::Result::Ok(crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
             $builderAssignments:L

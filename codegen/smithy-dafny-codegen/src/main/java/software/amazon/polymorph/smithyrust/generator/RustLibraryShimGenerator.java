@@ -87,7 +87,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     // errors
     result.add(errorModule());
-    result.add(sealedUnhandledErrorModule());
+    result.add(typesErrorModule());
     result.addAll(
       allErrorShapes()
         .map(errorShape -> errorConversionModule(service, errorShape))
@@ -717,25 +717,46 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(Path.of("src", "error.rs"), TokenTree.of(content));
   }
 
-  private RustFile sealedUnhandledErrorModule() {
-    final String content = IOUtils.evalTemplate(
-      getClass(),
-      "runtimes/rust/error/sealed_unhandled.rs",
-      Map.of()
-    );
-    return new RustFile(
-      Path.of("src", "error", "sealed_unhandled.rs"),
-      TokenTree.of(content)
-    );
-  }
-
   @SuppressWarnings("unused")
   private RustFile errorConversionModule(
     final ServiceShape service,
-    final Shape errorStructure
+    final StructureShape errorStructure
   ) {
-    throw new UnsupportedOperationException(
-      "Error conversion is not yet implemented for library services"
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      standardStructureVariables(errorStructure)
+    );
+    variables.put(
+      "variants",
+      toDafnyVariantsForStructure(errorStructure).toString()
+    );
+    variables.put(
+      "fluentMemberSetters",
+      fluentMemberSettersForStructure(errorStructure).toString()
+    );
+    final String content = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/conversions/standard_structure.rs",
+      variables
+    );
+
+    final Path path = Path.of(
+      "src",
+      "conversions",
+      "%s.rs".formatted(toSnakeCase(structureName(errorStructure)))
+    );
+    return new RustFile(path, TokenTree.of(content));
+  }
+
+  private RustFile typesErrorModule() {
+    final String content = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/types/error.rs",
+      Map.of()
+    );
+    return new RustFile(
+      Path.of("src", "types", "error.rs"),
+      TokenTree.of(content)
     );
   }
 

@@ -9,7 +9,7 @@ impl $pascalCaseOperationInputName:LBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L,
+        crate::types::error::Error,
     > {
         let mut fluent_builder = client.$snakeCaseOperationName:L();
         fluent_builder.inner = self;
@@ -40,17 +40,9 @@ impl $pascalCaseOperationName:LFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L,
+        crate::types::error::Error,
     > {
-        let input = self
-            .inner
-            .build()
-            // Using unhandled since $pascalCaseOperationName:L doesn't declare any validation,
-            // and smithy-rs seems to not generate a ValidationError case unless there is
-            // (but isn't that a backwards compatibility problem for output structures?)
-            // Vanilla smithy-rs uses SdkError::construction_failure,
-            // but we aren't using SdkError.
-            .map_err(crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L::unhandled)?;
+        let input = self.inner.build()?;
         crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.client, input).await
     }
 

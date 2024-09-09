@@ -119,10 +119,6 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected RustFile conversionsErrorModule() {
-    TokenTree modulesDeclarations = declarePubModules(
-      allErrorShapes()
-        .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
-    );
     TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(
       evalTemplate(
         getClass(),
@@ -132,7 +128,7 @@ public abstract class AbstractRustShimGenerator {
     );
     return new RustFile(
       Path.of("src", "conversions", "error.rs"),
-      TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions)
+      TokenTree.of(toDafnyOpaqueErrorFunctions)
     );
   }
 
