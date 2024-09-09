@@ -1,4 +1,4 @@
-impl super::Client {
+impl $operationTargetType:L {
     /// Constructs a fluent builder for the [`$operationName:L`](crate::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationName:LFluentBuilder) operation.
     ///
     /// - The fluent builder is configurable:

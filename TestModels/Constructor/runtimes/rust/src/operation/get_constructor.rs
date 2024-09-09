@@ -17,7 +17,7 @@ impl GetConstructor {
         crate::operation::get_constructor::GetConstructorOutput,
         crate::operation::get_constructor::GetConstructorError,
     > {
-        let inner_input = crate::conversions::get_constructor::_get_constructor_input::to_dafny(input);
+                let inner_input = crate::conversions::get_constructor::_get_constructor_input::to_dafny(input);
         let inner_result =
             ::dafny_runtime::md!(client.dafny_client.clone()).GetConstructor(&inner_input);
         if matches!(
