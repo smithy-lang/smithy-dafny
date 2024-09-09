@@ -94,14 +94,23 @@ public abstract class AbstractRustShimGenerator {
     );
   }
 
+  /**
+   * "Regular" here just means not an @error or @trait or @reference.
+   */
+  protected boolean isRegularStructure(StructureShape structureShape) {
+    return (
+      !structureShape.hasTrait(ErrorTrait.class) &&
+      !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
+      !structureShape.hasTrait(ReferenceTrait.class)
+    );
+  }
+
   protected boolean shouldGenerateStructForStructure(
     StructureShape structureShape
   ) {
     return (
+      isRegularStructure(structureShape) &&
       !isInputOrOutputStructure(structureShape) &&
-      !structureShape.hasTrait(ErrorTrait.class) &&
-      !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
-      !structureShape.hasTrait(ReferenceTrait.class) &&
       structureShape
         .getId()
         .getNamespace()

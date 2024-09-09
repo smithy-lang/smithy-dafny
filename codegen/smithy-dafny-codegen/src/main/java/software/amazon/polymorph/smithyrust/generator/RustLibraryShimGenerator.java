@@ -1390,7 +1390,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       // aggregates
       case STRUCTURE -> {
         final StructureShape structureShape = (StructureShape) shape;
-        if (shouldGenerateStructForStructure(structureShape)) {
+        if (isRegularStructure(structureShape)) {
           yield qualifiedRustStructureType(structureShape);
         }
         if (structureShape.hasTrait(ReferenceTrait.class)) {
