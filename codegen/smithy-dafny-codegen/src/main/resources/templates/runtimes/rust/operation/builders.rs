@@ -6,12 +6,12 @@ impl $pascalCaseOperationInputName:LBuilder {
     /// Sends a request with this input using the given client.
     pub async fn send_with(
         self,
-        client: &crate::Client,
+        $operationTargetName:L: &$operationTargetType:L,
     ) -> ::std::result::Result<
         crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
         crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L,
     > {
-        let mut fluent_builder = client.$snakeCaseOperationName:L();
+        let mut fluent_builder = $operationTargetName:L.$snakeCaseOperationName:L();
         fluent_builder.inner = self;
         fluent_builder.send().await
     }
@@ -20,14 +20,14 @@ impl $pascalCaseOperationInputName:LBuilder {
 ///
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct $pascalCaseOperationName:LFluentBuilder {
-    client: crate::client::Client,
+    $operationTargetName:L: $operationTargetType:L,
     pub(crate) inner: crate::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationInputName:LBuilder,
 }
 impl $pascalCaseOperationName:LFluentBuilder {
     /// Creates a new `$pascalCaseOperationName:L`.
-    pub(crate) fn new(client: crate::client::Client) -> Self {
+    pub(crate) fn new($operationTargetName:L: $operationTargetType:L) -> Self {
         Self {
-            client,
+            $operationTargetName:L,
             inner: ::std::default::Default::default(),
         }
     }
@@ -51,7 +51,7 @@ impl $pascalCaseOperationName:LFluentBuilder {
             // Vanilla smithy-rs uses SdkError::construction_failure,
             // but we aren't using SdkError.
             .map_err(crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L::unhandled)?;
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.client, input).await
+        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.$operationTargetName:L, input).await
     }
 
     $accessors:L
