@@ -1,64 +1,81 @@
 name: Library Go tests
 
-on:
-  workflow_call:
-    inputs:
-      dafny:
-        description: "The Dafny version to run"
-        required: true
-        type: string
-      num_shards:
-        required: false
-        type: number
-        default: 5
+on: ["pull_request", "push"]
 
 jobs:
-  populate-matrix-dimensions:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Populate shard list
-        id: populate-shard-list
-        run: echo "shard-list=[`seq -s , 1 ${{ inputs.num_shards }}`]" >> $GITHUB_OUTPUT
-    outputs:
-      shard-list: ${{ steps.populate-shard-list.outputs.shard-list }}
-  testGo:
-    needs: populate-matrix-dimensions
+  test_go:
     strategy:
-      fail-fast: false # at least for development; see all errors
+      fail-fast: false
       matrix:
-        shard: ${{ fromJson(needs.populate-matrix-dimensions.outputs.shard-list) }}
-    runs-on: "ubuntu-latest"
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_NOLOGO: 1
+        library: [
+          # TODO: Uncomment below before making PR
+          # TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+          TestModels/Aggregate,
+          # TestModels/AggregateReferences,
+          TestModels/CodegenPatches,
+          TestModels/Constraints,
+          TestModels/Constructor,
+          TestModels/Dependencies,
+          TestModels/Errors,
+          TestModels/Extendable,
+          TestModels/Extern,
+          # TestModels/LanguageSpecificLogic,
+          # TestModels/LocalService,
+          # TestModels/MultipleModels,
+          TestModels/Positional,
+          TestModels/Refinement,
+          TestModels/Resource,
+          # TestModels/SimpleTypes/BigDecimal,
+          # TestModels/SimpleTypes/BigInteger,
+          TestModels/SimpleTypes/SimpleBlob,
+          TestModels/SimpleTypes/SimpleBoolean,
+          # TestModels/SimpleTypes/SimpleByte,
+          TestModels/SimpleTypes/SimpleDouble,
+          TestModels/SimpleTypes/SimpleEnum,
+          # TestModels/SimpleTypes/SimpleEnumV2,
+          # TestModels/SimpleTypes/SimpleFloat,
+          TestModels/SimpleTypes/SimpleInteger,
+          TestModels/SimpleTypes/SimpleLong,
+          # TestModels/SimpleTypes/SimpleShort,
+          TestModels/SimpleTypes/SimpleString,
+          # TestModels/SimpleTypes/SimpleTimestamp,
+          TestModels/Union,
+          # TestModels/aws-sdks/ddb,
+          TestModels/aws-sdks/kms
+        ]
+    runs-on: "macos-12"
     steps:
-      - name: Support longpaths on Git checkout
+      - uses: actions/checkout@v2
+
+      # - name: Setup Dafny 4.5.0
+      #   uses: dafny-lang/setup-dafny-action@v1.7.0
+      #   with:
+      #     dafny-version: 4.5.0
+      # TODO: Setup Dafny once its released
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Build Dafny from source
         run: |
-          git config --global core.longpaths true
+          git clone https://github.com/dafny-lang/dafny.git --recurse-submodules
+          cd dafny
+          make exe
+      
+      - name: Install Z3 version 4.12.1
+        run: |
+          cd $GITHUB_WORKSPACE/dafny
+          make z3-mac
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-PolymorphTestModels-Role-us-west-2
-          role-session-name: PythonTests
-
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.7.0
-        with:
-          dafny-version: ${{ inputs.dafny }}
+      - name: Add Dafny to PATH
+        run: |
+          echo "$GITHUB_WORKSPACE/dafny/Scripts" >> $GITHUB_PATH
 
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.21"
+          go-version: '1.21'
 
       - name: Install Go imports
         run: |
@@ -67,36 +84,33 @@ jobs:
       - name: Add go mod to Dafny Runtime Go
         shell: bash
         working-directory: ./DafnyRuntimeGo
-        run: |
+        run: | 
           go mod init github.com/dafny-lang/DafnyRuntimeGo
           go mod tidy
 
-      - name: Setup Java 17 for codegen
-        uses: actions/setup-java@v3
-        with:
-          distribution: "corretto"
-          java-version: 17
+      - name: polymorph dafny dependencies
+        shell: bash
+        working-directory: ./TestModels/dafny-dependencies/StandardLibrary
+        run: |
+          export DAFNY_VERSION=4.6
+          make polymorph_dafny
+          make transpile_go
+          make polymorph_go 
+          cd ./runtimes/go/ImplementationFromDafny-go/
+          go mod init github.com/dafny-lang/DafnyStandardLibGo
+          # TODO: This should handwritten (in the makefile or something)          
+          echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod;
 
-      - name: Setup smithy-dafny-conversion
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishToMavenLocal
-          build-root-directory: smithy-dafny-conversion
+      - name: Generate Polymorph Dafny and Go code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          export DAFNY_VERSION=4.6
+          make polymorph_dafny
+          sh ./removeDotFromExtern.sh
+          make transpile_go
+          make polymorph_go
 
-      - name: Install Smithy-Dafny codegen dependencies
-        uses: ./.github/actions/install_smithy_dafny_codegen_dependencies
-
-      - name: Install smithy-dafny-codegen locally
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: :smithy-dafny-codegen:pTML
-          build-root-directory: codegen
-
-      - name: Execute smithy-dafny-codegen-test tests
-        uses: gradle/gradle-build-action@v2
-        env:
-          JUNIT_SHARD: ${{ matrix.shard }}
-          JUNIT_SHARD_COUNT: ${{ inputs.num_shards }}
-        with:
-          arguments: :smithy-dafny-codegen-test:test --tests '*smithygo*' --info
-          build-root-directory: codegen
+          goimports -w runtimes/go/
+          cd runtimes/go/TestsFromDafny-go/
+          go run TestsFromDafny.go

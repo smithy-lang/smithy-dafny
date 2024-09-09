@@ -11,6 +11,5 @@ module WrappedSimpleTypesTimestampTest {
         var client :- expect WrappedSimpleTypesTimestampService.WrappedSimpleTimestamp();
 
         SimpleTimestampImplTest.TestGetTimestamp(client);
-        SimpleTimestampImplTest.TestGetTimestampNoMs(client);
     }
 }

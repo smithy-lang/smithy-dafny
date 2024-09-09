@@ -21,11 +21,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.loader.ModelAssembler;
+
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.validation.ValidatedResult;
 import software.amazon.smithy.model.validation.ValidationEvent;
 
@@ -233,12 +235,12 @@ public class CodegenCli {
           .build()
       )
       .addOption(
-        Option
-          .builder()
-          .longOpt("output-go")
-          .desc("<optional> output directory for generated Go files")
-          .hasArg()
-          .build()
+         Option
+           .builder()
+           .longOpt("output-go")
+           .desc("<optional> output directory for generated Go files")
+           .hasArg()
+           .build()
       )
       .addOption(
         Option
@@ -352,7 +354,8 @@ public class CodegenCli {
           .valueSeparator(',')
           .build()
       );
-  }
+    }
+
 
   private static Options getCliOptionsForPatchAfterTranspile() {
     return new Options()
@@ -554,8 +557,8 @@ public class CodegenCli {
         .ofNullable(commandLine.getOptionValue("output-dotnet"))
         .map(Paths::get);
       final Optional<Path> outputGoDir = Optional
-        .ofNullable(commandLine.getOptionValue("output-go"))
-        .map(Paths::get);
+         .ofNullable(commandLine.getOptionValue("output-go"))
+         .map(Paths::get);
       final Optional<Path> outputRustDir = Optional
         .ofNullable(commandLine.getOptionValue("output-rust"))
         .map(Paths::get);

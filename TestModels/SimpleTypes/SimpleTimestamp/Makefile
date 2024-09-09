@@ -3,9 +3,8 @@
 
 CORES=2
 
-TRANSPILE_TESTS_IN_RUST=1
-
 ENABLE_EXTERN_PROCESSING=1
+RUST_BENERATED=1
 
 include ../../SharedMakefile.mk
 
@@ -23,7 +22,9 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+
 POLYMORPH_OPTIONS=--generate client-constructors,project-files
+
 
 # Constants for languages that drop extern names (Python, Go)
 

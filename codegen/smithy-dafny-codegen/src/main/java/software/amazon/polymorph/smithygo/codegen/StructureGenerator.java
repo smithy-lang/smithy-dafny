@@ -15,21 +15,14 @@
 
 package software.amazon.polymorph.smithygo.codegen;
 
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
@@ -38,134 +31,48 @@ import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.SetUtils;
 
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 /**
  * Renders structures.
  */
 public final class StructureGenerator implements Runnable {
+    private static final Set<String> ERROR_MEMBER_NAMES = SetUtils.of("ErrorMessage", "Message", "ErrorCodeOverride");
 
-  private static final Set<String> ERROR_MEMBER_NAMES = SetUtils.of(
-    "ErrorMessage",
-    "Message",
-    "ErrorCodeOverride"
-  );
+    private final Model model;
+    private final SymbolProvider symbolProvider;
+    private final GoWriter writer;
+    private final StructureShape shape;
+    private final GenerationContext context;
+    private final ValidationGenerator validationGenerator;
 
-  private final Model model;
-  private final SymbolProvider symbolProvider;
-  private final GoWriter writer;
-  private final StructureShape shape;
-  private final GenerationContext context;
-  private final ValidationGenerator validationGenerator;
-
-  public StructureGenerator(
-    final GenerationContext context,
-    GoWriter writer,
-    StructureShape shape
-  ) {
-    this.context = context;
-    this.model = context.model();
-    this.symbolProvider = context.symbolProvider();
-    this.writer = writer;
-    this.shape = shape;
-    this.validationGenerator =
-      new ValidationGenerator(model, symbolProvider, writer);
-  }
-
-  @Override
-  public void run() {
-    if (!shape.hasTrait(ErrorTrait.class)) {
-      renderStructure(() -> {});
-    } else {
-      renderErrorStructure();
+    public StructureGenerator(
+            final GenerationContext context,
+            GoWriter writer,
+            StructureShape shape) {
+        this.context = context;
+        this.model = context.model();
+        this.symbolProvider = context.symbolProvider();
+        this.writer = writer;
+        this.shape = shape;
+        this.validationGenerator = new ValidationGenerator(model, symbolProvider, writer);
     }
-  }
 
-  /**
-   * Renders a non-error structure.
-   *
-   * @param runnable A runnable that runs before the structure definition is closed. This can be used to write
-   *                 additional members.
-   */
-  public void renderStructure(Runnable runnable) {
-    renderStructure(runnable, false);
-  }
-
-  /**
-   * Renders a non-error structure.
-   *
-   * @param runnable         A runnable that runs before the structure definition is closed. This can be used to write
-   *                         additional members.
-   * @param isInputStructure A boolean indicating if input variants for member symbols should be used.
-   */
-  public void renderStructure(Runnable runnable, boolean isInputStructure) {
-    writer.addImport("fmt");
-    Symbol symbol = symbolProvider.toSymbol(shape);
-    writer.openBlock("type $L struct {", symbol.getName());
-    CodegenUtils.SortedMembers sortedMembers = new CodegenUtils.SortedMembers(
-      symbolProvider
-    );
-    shape
-      .getAllMembers()
-      .values()
-      .stream()
-      .filter(memberShape -> !StreamingTrait.isEventStream(model, memberShape))
-      .sorted(sortedMembers)
-      .forEach(member -> {
-        writer.write("");
-
-        String memberName = symbolProvider.toMemberName(member);
-
-        Symbol memberSymbol = symbolProvider.toSymbol(member);
-
-        var targetShape = model.expectShape(member.getTarget());
-
-        if (isInputStructure) {
-          memberSymbol =
-            memberSymbol
-              .getProperty(SymbolUtils.INPUT_VARIANT, Symbol.class)
-              .orElse(memberSymbol);
-        }
-        var namespace = SmithyNameResolver.smithyTypesNamespace(targetShape);
-
-        if (targetShape.hasTrait(ReferenceTrait.class)) {
-          memberSymbol =
-            memberSymbol.getProperty("Referred", Symbol.class).get();
-          var refShape = targetShape.expectTrait(ReferenceTrait.class);
-          if (refShape.isService()) {
-            namespace =
-              SmithyNameResolver.shapeNamespace(
-                model.expectShape(refShape.getReferentId())
-              );
-          }
-          if (
-            !member
-              .toShapeId()
-              .getNamespace()
-              .equals(refShape.getReferentId().getNamespace())
-          ) {
-            writer.addImportFromModule(
-              SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                refShape.getReferentId().getNamespace()
-              ),
-              namespace
-            );
-          }
+    @Override
+    public void run() {
+        if (!shape.hasTrait(ErrorTrait.class)) {
+            renderStructure(() -> {
+            });
         } else {
-          if (
-            !member
-              .toShapeId()
-              .getNamespace()
-              .equals(targetShape.toShapeId().getNamespace()) &&
-            !targetShape.toShapeId().getNamespace().startsWith("smithy") &&
-            targetShape.asStructureShape().isPresent()
-          ) {
-            writer.addImportFromModule(
-              SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                targetShape.toShapeId().getNamespace()
-              ),
-              namespace
-            );
-          }
+            renderErrorStructure();
         }
+    }
 
     /**
      * Renders a non-error structure.

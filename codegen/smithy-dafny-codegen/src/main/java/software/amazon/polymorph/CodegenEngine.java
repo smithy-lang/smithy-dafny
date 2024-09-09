@@ -43,7 +43,6 @@ import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWr
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedConversionCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedShimCodegen;
 import software.amazon.polymorph.smithygo.awssdk.DafnyGoAwsSdkClientCodegenPlugin;
-import software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceCodegenPlugin;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
@@ -67,6 +66,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceCodegenPlugin;
 import software.amazon.smithy.utils.Pair;
 
 public class CodegenEngine {
@@ -246,7 +246,15 @@ public class CodegenEngine {
 
     dafnyOtherGeneratedAspects(outputDir);
 
-    formatDafnyCode(outputDir);
+    LOGGER.info("Formatting Dafny code in {}", outputDir);
+    runCommand(
+      outputDir,
+      "dafny",
+      "format",
+      "--function-syntax:3",
+      "--unicode-char:false",
+      "."
+    );
 
     handlePatching(TargetLanguage.DAFNY, outputDir);
   }
@@ -307,29 +315,16 @@ public class CodegenEngine {
     // Perhaps we can make a `smithy init` template for that instead?
 
     if (!generationAspects.isEmpty()) {
-      formatDafnyCode(outputDir.resolve("../src"));
-    }
-  }
-
-  /**
-   * Formats the Dafny code in the given path using {@code dafny format},
-   * but does not throw an exception if the command fails.
-   * <p>
-   * This enables generating interdependent Dafny files
-   * across multiple smithy-dafny-codegen invocations.
-   */
-  private void formatDafnyCode(final Path path) {
-    LOGGER.info("Formatting Dafny code in {}", path);
-    final CommandResult formatResult = runCommand(
-      path,
-      "dafny",
-      "format",
-      "--function-syntax:3",
-      "--unicode-char:false",
-      "."
-    );
-    if (formatResult.exitCode != 0) {
-      LOGGER.warn("Formatting failed:\n{}", formatResult.output);
+      Path srcDir = outputDir.resolve("../src");
+      LOGGER.info("Formatting Dafny code in {}", srcDir);
+      runCommand(
+        srcDir,
+        "dafny",
+        "format",
+        "--function-syntax:3",
+        "--unicode-char:false",
+        "."
+      );
     }
   }
 
@@ -365,7 +360,7 @@ public class CodegenEngine {
     javaOtherGeneratedAspects();
 
     LOGGER.info("Formatting Java code in {}", outputDir);
-    runCommandOrThrow(
+    runCommand(
       outputDir,
       "npm",
       "i",
@@ -373,7 +368,7 @@ public class CodegenEngine {
       "prettier@3",
       "prettier-plugin-java@2.5"
     );
-    runCommandOrThrow(
+    runCommand(
       outputDir,
       "npx",
       "prettier@3",
@@ -549,7 +544,7 @@ public class CodegenEngine {
           .filter(path -> path.toFile().getName().endsWith(".csproj"))
           .map(Path::toString)
       );
-      runCommandOrThrow(dotnetRoot, args.toArray(String[]::new));
+      runCommand(dotnetRoot, args.toArray(String[]::new));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -726,15 +721,11 @@ public class CodegenEngine {
       generator.generate(outputDir);
     }
 
-    // TODO: These should be part of the StandardLibrary instead,
+    // TODO: This should be part of the StandardLibrary instead,
     // but since the Dafny Rust code generator doesn't yet support multiple crates,
     // we have to inline it instead.
     writeTemplatedFile(
       "runtimes/rust/src/standard_library_conversions.rs",
-      Map.of()
-    );
-    writeTemplatedFile(
-      "runtimes/rust/src/standard_library_externs.rs",
       Map.of()
     );
 
@@ -774,14 +765,13 @@ public class CodegenEngine {
         );
         Path outputDirRelative = libraryRoot.relativize(outputDir);
         // Need to ignore the exit code because diff will return 1 if there is a diff
-        String patchContent = runCommand(
+        String patchContent = runCommandIgnoringExitCode(
           libraryRoot,
           "git",
           "diff",
           "-R",
           outputDirRelative.toString()
-        )
-          .output;
+        );
         if (!patchContent.isBlank()) {
           IOUtils.writeToFile(patchContent, patchFile.toFile());
         }
@@ -797,13 +787,7 @@ public class CodegenEngine {
           if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
             Path patchFile = patchFilePair.getValue();
             LOGGER.info("Applying patch file {}", patchFile);
-            runCommandOrThrow(
-              libraryRoot,
-              "git",
-              "apply",
-              "-v",
-              patchFile.toString()
-            );
+            runCommand(libraryRoot, "git", "apply", "-v", patchFile.toString());
             return;
           }
         }
@@ -815,36 +799,25 @@ public class CodegenEngine {
 
   private void generateGo() {
     if (libraryName.isEmpty()) {
-      throw new IllegalArgumentException("Go codegen requires a library name");
+      throw new IllegalArgumentException("Python codegen requires a module name");
     }
 
-    ObjectNode.Builder goSettingsBuilder = ObjectNode
-      .builder()
-      .withMember("service", serviceShape.getId().toString())
-      .withMember("moduleName", libraryName.get());
+    ObjectNode.Builder goSettingsBuilder = ObjectNode.builder()
+                                                     .withMember("service", serviceShape.getId().toString())
+                                                     .withMember("moduleName", libraryName.get());
 
-    final PluginContext pluginContext = PluginContext
-      .builder()
-      .model(model)
-      .fileManifest(
-        FileManifest.create(targetLangOutputDirs.get(TargetLanguage.GO))
-      )
-      .settings(goSettingsBuilder.build())
-      .build();
+    final PluginContext pluginContext = PluginContext.builder()
+                                                     .model(model)
+                                                     .fileManifest(FileManifest.create(targetLangOutputDirs.get(TargetLanguage.GO)))
+                                                     .settings(goSettingsBuilder.build())
+                                                     .build();
 
-    final Map<String, String> smithyNamespaceToGoModuleNameMap = new HashMap<>(
-      dependencyLibraryNames
-    );
-    smithyNamespaceToGoModuleNameMap.put(
-      serviceShape.getId().getNamespace(),
-      libraryName.get()
-    );
+    final Map<String, String> smithyNamespaceToGoModuleNameMap = new HashMap<>(dependencyLibraryNames);
+    smithyNamespaceToGoModuleNameMap.put(serviceShape.getId().getNamespace(), libraryName.get());
     if (this.awsSdkStyle) {
-      new DafnyGoAwsSdkClientCodegenPlugin(smithyNamespaceToGoModuleNameMap)
-        .run(pluginContext);
+      new DafnyGoAwsSdkClientCodegenPlugin(smithyNamespaceToGoModuleNameMap).run(pluginContext);
     } else {
-      new DafnyLocalServiceCodegenPlugin(smithyNamespaceToGoModuleNameMap)
-        .run(pluginContext);
+      new DafnyLocalServiceCodegenPlugin(smithyNamespaceToGoModuleNameMap).run(pluginContext);
     }
   }
 
@@ -968,10 +941,7 @@ public class CodegenEngine {
       pub mod operation;
 
       mod conversions;
-
-      /// Copied from StandardLibrary
       mod standard_library_conversions;
-      mod standard_library_externs;
 
       #[cfg(feature = "wrapped-client")]
       pub mod wrapped;
@@ -989,34 +959,26 @@ public class CodegenEngine {
     );
   }
 
-  private record CommandResult(int exitCode, String output) {}
-
-  /**
-   * Runs the given command and throws an exception if the exit code is nonzero.
-   */
-  private String runCommandOrThrow(Path workingDir, String... args) {
-    final CommandResult result = runCommand(workingDir, args);
-    if (result.exitCode != 0) {
-      throw new RuntimeException(
-        "Command failed: " + List.of(args) + "\n" + result.output
-      );
-    }
-    return result.output;
-  }
-
-  /**
-   * Runs the given command.
-   */
-  private CommandResult runCommand(Path workingDir, String... args) {
-    final List<String> argsList = List.of(args);
-    final StringBuilder output = new StringBuilder();
-    final int exitCode = IoUtils.runCommand(
+  private String runCommand(Path workingDir, String... args) {
+    List<String> argsList = List.of(args);
+    StringBuilder output = new StringBuilder();
+    int exitCode = IoUtils.runCommand(
       argsList,
       workingDir,
       output,
       Collections.emptyMap()
     );
-    return new CommandResult(exitCode, output.toString());
+    if (exitCode != 0) {
+      throw new RuntimeException("Command failed: " + argsList + "\n" + output);
+    }
+    return output.toString();
+  }
+
+  private String runCommandIgnoringExitCode(Path workingDir, String... args) {
+    List<String> argsList = List.of(args);
+    StringBuilder output = new StringBuilder();
+    IoUtils.runCommand(argsList, workingDir, output, Collections.emptyMap());
+    return output.toString();
   }
 
   private Path standardLibraryPath() {
