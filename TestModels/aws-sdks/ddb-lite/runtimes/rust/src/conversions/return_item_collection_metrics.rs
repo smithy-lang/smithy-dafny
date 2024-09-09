@@ -7,8 +7,8 @@ pub fn to_dafny(
     value: aws_sdk_dynamodb::types::ReturnItemCollectionMetrics,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics>{
     ::std::rc::Rc::new(match value {
- aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::Size => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::SIZE {},
- aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::None => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::NONE {},
+        aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::Size => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::SIZE {},
+aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::None => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::NONE {},
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
@@ -17,7 +17,7 @@ pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics,
 ) -> aws_sdk_dynamodb::types::ReturnItemCollectionMetrics {
     match dafny_value {
- crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::SIZE {} => aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::Size,
- crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::NONE {} => aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::None,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::SIZE {} => aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::Size,
+crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ReturnItemCollectionMetrics::NONE {} => aws_sdk_dynamodb::types::ReturnItemCollectionMetrics::None,
     }
 }

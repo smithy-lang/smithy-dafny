@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithygo.localservice;
 
+import java.util.Map;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoSettings;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -9,51 +10,58 @@ import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 
-import java.util.Map;
-
 public class DafnyLocalServiceCodegenPlugin implements SmithyBuildPlugin {
 
-    public DafnyLocalServiceCodegenPlugin(final Map<String, String> smithyNamespaceToPythonModuleNameMap) {
-        super();
-        SmithyNameResolver.setSmithyNamespaceToGoModuleNameMap(smithyNamespaceToPythonModuleNameMap);
-    }
-    public void run(PluginContext context) {
-        CodegenDirector<GoWriter, GoIntegration, GenerationContext, GoSettings> runner
-                = new CodegenDirector<>();
+  public DafnyLocalServiceCodegenPlugin(
+    final Map<String, String> smithyNamespaceToPythonModuleNameMap
+  ) {
+    super();
+    SmithyNameResolver.setSmithyNamespaceToGoModuleNameMap(
+      smithyNamespaceToPythonModuleNameMap
+    );
+  }
 
-        runner.directedCodegen(new DafnyLocalServiceDirectedCodegen());
+  public void run(PluginContext context) {
+    CodegenDirector<
+      GoWriter,
+      GoIntegration,
+      GenerationContext,
+      GoSettings
+    > runner = new CodegenDirector<>();
 
-        // Set the SmithyIntegration class to look for and apply using SPI.
-        runner.integrationClass(GoIntegration.class);
+    runner.directedCodegen(new DafnyLocalServiceDirectedCodegen());
 
-        // Set the FileManifest and Model from the plugin.
-        runner.fileManifest(context.getFileManifest());
-        runner.model(context.getModel());
+    // Set the SmithyIntegration class to look for and apply using SPI.
+    runner.integrationClass(GoIntegration.class);
 
-        // Create the GoSettings object from the plugin settings.
-        GoSettings settings = GoSettings.from(context.getSettings());
-        runner.settings(settings);
+    // Set the FileManifest and Model from the plugin.
+    runner.fileManifest(context.getFileManifest());
+    runner.model(context.getModel());
 
-        runner.service(settings.getService());
+    // Create the GoSettings object from the plugin settings.
+    GoSettings settings = GoSettings.from(context.getSettings());
+    runner.settings(settings);
 
-        // Configure the director to perform some common model transforms.
-        runner.performDefaultCodegenTransforms();
+    runner.service(settings.getService());
 
-        // TODO: Not using below because it would break existing AWS SDKs. Maybe it should be configurable
-        // so generic SDKs call this by default, but AWS SDKs can opt-out of it via a setting.
-        // runner.createDedicatedInputsAndOutputs();
+    // Configure the director to perform some common model transforms.
+    runner.performDefaultCodegenTransforms();
 
-        // Run it!
-        runner.run();
-    }
+    // TODO: Not using below because it would break existing AWS SDKs. Maybe it should be configurable
+    // so generic SDKs call this by default, but AWS SDKs can opt-out of it via a setting.
+    // runner.createDedicatedInputsAndOutputs();
 
-    @Override
-    public String getName() {
-        return "go-client-codegen";
-    }
+    // Run it!
+    runner.run();
+  }
 
-    @Override
-    public void execute(PluginContext context) {
-        this.run(context);
-    }
+  @Override
+  public String getName() {
+    return "go-client-codegen";
+  }
+
+  @Override
+  public void execute(PluginContext context) {
+    this.run(context);
+  }
 }

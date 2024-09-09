@@ -111,6 +111,36 @@ public class ModelUtils {
   }
 
   /**
+   * Returns a stream of enum shapes in the given namespace.
+   * These include both Smithy v2 enums,
+   * and Smithy v1 @enum strings converted to {@link EnumShape}s.
+   */
+  public static Stream<EnumShape> streamEnumShapes(
+    final Model model,
+    final String namespace
+  ) {
+    @SuppressWarnings("deprecation")
+    final Stream<EnumShape> v1Enums = model
+      .getStringShapesWithTrait(EnumTrait.class)
+      .stream()
+      .map(ModelUtils::stringToEnumShape);
+    final Stream<EnumShape> v2Enums = model.getEnumShapes().stream();
+    return Stream
+      .concat(v1Enums, v2Enums)
+      .filter(shape -> shape.getId().getNamespace().equals(namespace));
+  }
+
+  public static EnumShape stringToEnumShape(final StringShape stringShape) {
+    return EnumShape
+      .fromStringShape(stringShape)
+      .orElseThrow(() ->
+        new UnsupportedOperationException(
+          "Could not convert %s to an enum".formatted(stringShape.getId())
+        )
+      );
+  }
+
+  /**
    * @return true if the given shape ID is in the given service's namespace
    */
   public static boolean isInServiceNamespace(

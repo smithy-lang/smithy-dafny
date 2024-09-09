@@ -7,7 +7,10 @@ import software.amazon.smithy.model.traits.RequiredTrait;
 
 public class DafnyGoPointableIndex {
 
-    public static boolean isNillable(final Model model, final Shape shape) {
-        return !shape.hasTrait(RequiredTrait.class) && !GoCodegenUtils.isOperationStruct(model, shape);
-    }
+  public static boolean isNillable(final Model model, final Shape shape) {
+    return (
+      !shape.hasTrait(RequiredTrait.class) &&
+      !GoCodegenUtils.isOperationStruct(model, shape)
+    );
+  }
 }

@@ -7,8 +7,8 @@ pub fn to_dafny(
     value: aws_sdk_kms::types::DataKeySpec,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec>{
     ::std::rc::Rc::new(match value {
- aws_sdk_kms::types::DataKeySpec::Aes256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_256 {},
- aws_sdk_kms::types::DataKeySpec::Aes128 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_128 {},
+        aws_sdk_kms::types::DataKeySpec::Aes256 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_256 {},
+aws_sdk_kms::types::DataKeySpec::Aes128 => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_128 {},
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
@@ -17,7 +17,7 @@ pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec,
 ) -> aws_sdk_kms::types::DataKeySpec {
     match dafny_value {
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_256 {} => aws_sdk_kms::types::DataKeySpec::Aes256,
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_128 {} => aws_sdk_kms::types::DataKeySpec::Aes128,
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_256 {} => aws_sdk_kms::types::DataKeySpec::Aes256,
+crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DataKeySpec::AES_128 {} => aws_sdk_kms::types::DataKeySpec::Aes128,
     }
 }

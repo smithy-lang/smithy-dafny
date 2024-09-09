@@ -10,7 +10,7 @@ async fn test_get_long() {
 
 #[tokio::test]
 async fn test_get_known_value() {
-    let result = client().get_long_known_value().value(33i64).send().await;
+    let result = client().get_long_known_value_test().value(33i64).send().await;
     let output = result.unwrap();
     let value = output.value().unwrap();
     assert_eq!(value, 33i64);

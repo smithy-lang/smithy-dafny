@@ -7,8 +7,8 @@ pub fn to_dafny(
     value: aws_sdk_dynamodb::types::BillingMode,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode>{
     ::std::rc::Rc::new(match value {
- aws_sdk_dynamodb::types::BillingMode::Provisioned => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode::PROVISIONED {},
- aws_sdk_dynamodb::types::BillingMode::PayPerRequest => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode::PAY_PER_REQUEST {},
+        aws_sdk_dynamodb::types::BillingMode::Provisioned => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode::PROVISIONED {},
+aws_sdk_dynamodb::types::BillingMode::PayPerRequest => crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode::PAY_PER_REQUEST {},
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
@@ -17,7 +17,7 @@ pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode,
 ) -> aws_sdk_dynamodb::types::BillingMode {
     match dafny_value {
- crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode::PROVISIONED {} => aws_sdk_dynamodb::types::BillingMode::Provisioned,
- crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode::PAY_PER_REQUEST {} => aws_sdk_dynamodb::types::BillingMode::PayPerRequest,
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode::PROVISIONED {} => aws_sdk_dynamodb::types::BillingMode::Provisioned,
+crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BillingMode::PAY_PER_REQUEST {} => aws_sdk_dynamodb::types::BillingMode::PayPerRequest,
     }
 }
