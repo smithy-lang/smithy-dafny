@@ -13,9 +13,6 @@ public class NamespaceHelper {
     final String smithyNamespace
   ) {
     final String[] components = smithyNamespace.split("\\.");
-    if (components.length == 0) {
-      throw new IllegalArgumentException("WTF: " + smithyNamespace);
-    }
     final String lastComponent = components[components.length - 1];
     return toSnakeCase(lastComponent);
   }
