@@ -407,7 +407,7 @@ _polymorph_java: _polymorph
 # Generates python code for all namespaces in this project
 .PHONY: polymorph_python
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
-polymorph_python: get_dafny_version _polymorph_dependencies
+polymorph_python: _polymorph_dependencies
 polymorph_python:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
