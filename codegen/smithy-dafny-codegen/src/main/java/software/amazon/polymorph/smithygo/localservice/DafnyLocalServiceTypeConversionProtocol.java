@@ -11,9 +11,13 @@ import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafn
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
@@ -178,7 +182,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                         writer.write("""
                                              func $L(dafnyInput $L)($L) {
                                                  ${C|}
-                                             }""", inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(input, inputSymbol),
+                                             """, inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(input, inputSymbol),
                                      SmithyNameResolver.getSmithyType(input, inputSymbol),
                                      writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
                     });
@@ -198,14 +202,14 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                         writer.write("""
                                              func $L(dafnyOutput $L)($L) {
                                                  ${C|}
-                                             }""", outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
+                                             """, outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
                                      SmithyNameResolver.getSmithyType(output, outputSymbol),
                                      writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
                     });
                 }
             }
-        });
-
+            
+        });        
         var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
         for (var refResource : refResources) {
             final var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
@@ -227,7 +231,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 writer.write("""
                                                      func $L(dafnyInput $L)($L) {
                                                          ${C|}
-                                                     }""", inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(input, inputSymbol),
+                                                     """, inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(input, inputSymbol),
                                              SmithyNameResolver.getSmithyType(input, inputSymbol),
                                              writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
                             });
@@ -247,7 +251,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 writer.write("""
                                                      func $L(dafnyOutput $L)($L) {
                                                          ${C|}
-                                                     }""", outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
+                                                     """, outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
                                              SmithyNameResolver.getSmithyType(output, outputSymbol),
                                              writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
                             });
@@ -282,6 +286,34 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
             generateConfigDeserializer(context);
         }
 
+        delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+            for (Shape visitingShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
+                // Get the value for the current key
+                String type;
+                if (visitingShape.isMapShape()) { 
+                    MapShape mapShapeCast = (MapShape) visitingShape;
+                    MemberShape valueMemberShape = mapShapeCast.getValue();
+                    final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
+                    type = "map[string]".concat(SmithyNameResolver.getSmithyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape)));
+                } else if (visitingShape.isListShape()) {
+                    ListShape listShapeCast = (ListShape) visitingShape;
+                    MemberShape memberShape = listShapeCast.getMember();
+                    type = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(memberShape));
+                } else {
+                    type = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
+                }
+                String implementation = DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingShape);
+                writer.write("""
+                            func $L(input interface{})($L) {
+                                $L           
+                            """,
+                                (visitingShape.getId().getName()).concat("_FromDafny"),
+                                // DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape)),
+                                type,
+                                implementation
+                            );
+            }
+        });
     }
 
     private void generateRequestSerializer(
@@ -344,7 +376,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
             ));
 
             writer.write("""
-                                 return $L
+                                 $L
                                  """, input);
         });
     }
@@ -367,7 +399,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
             ));
 
             writer.write("""
-                                 return $L
+                                 $L
                                  """, output);
         });
     }
@@ -511,7 +543,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
             writer.write("""
                                  func $L(dafnyOutput $L)($L) {
                                      ${C|}
-                                 }""",
+                                 """,
                          getOutputFromDafnyMethodName, DafnyNameResolver.getDafnyType(configShape, context.symbolProvider().toSymbol(configShape)), SmithyNameResolver.getSmithyType(configShape, context.symbolProvider().toSymbol(configShape)),
                          writer.consumer(w -> {
                              String output = configShape.accept(new DafnyToSmithyShapeVisitor(
@@ -521,7 +553,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                      true
                              ));
                              writer.write("""
-                                                  return $L
+                                                  $L
                                                   """, output);
                          }));
         });
