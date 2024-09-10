@@ -5,3 +5,6 @@ pub mod get_resource;
 
 /// Types for the `GetResourcePositional` operation.
 pub mod get_resource_positional;
+
+/// Types for the `GetName` operation.
+pub mod get_name;

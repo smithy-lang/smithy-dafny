@@ -27,7 +27,3 @@ pub fn from_dafny_error(
     crate::operation::get_resource_positional::GetResourcePositionalError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message("Opaque error").build())
   }
 }
-
-pub mod _get_resource_positional_input;
-
-pub mod _get_resource_positional_output;

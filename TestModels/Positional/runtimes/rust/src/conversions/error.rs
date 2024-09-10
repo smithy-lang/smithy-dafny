@@ -17,7 +17,7 @@ pub fn to_opaque_error<E: std::error::Error + 'static>(
 pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: std::error::Error + 'static>(
     value: E,
 ) -> ::std::rc::Rc<
-    dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result<
+    crate::_Wrappers_Compile::Result<
         T,
         ::std::rc::Rc<
             crate::simple::positional::internaldafny::types::Error,
@@ -25,7 +25,7 @@ pub fn to_opaque_error_result<T: dafny_runtime::DafnyType, E: std::error::Error 
     >,
 > {
     ::std::rc::Rc::new(
-        dafny_standard_library::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+        crate::_Wrappers_Compile::Result::Failure {
             error: to_opaque_error(value),
         },
     )
