@@ -12,7 +12,7 @@ public class NamespaceHelper {
   public static String rustModuleForSmithyNamespace(
     final String smithyNamespace
   ) {
-    final String[] components = smithyNamespace.split(".");
+    final String[] components = smithyNamespace.split("\\.");
     if (components.length == 0) {
       throw new IllegalArgumentException("WTF: " + smithyNamespace);
     }
