@@ -5,7 +5,9 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
 public class NamespaceHelper {
 
   /**
-   * TODO
+   * TODO: This is only hypothetical and untested at present,
+   * because smithy-dafny doesn't yet support building multiple Smithy models
+   * into either separate related crates or a single merged crate.
    */
   public static String rustModuleForSmithyNamespace(
     final String smithyNamespace
