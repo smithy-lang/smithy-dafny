@@ -302,7 +302,6 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                 } else {
                     type = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
                 }
-                String implementation = DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingShape);
                 writer.write("""
                             func $L(input interface{})($L) {
                                 $L           
@@ -310,7 +309,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 (visitingShape.getId().getName()).concat("_FromDafny"),
                                 // DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape)),
                                 type,
-                                implementation
+                                DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingShape)
                             );
             }
         });
