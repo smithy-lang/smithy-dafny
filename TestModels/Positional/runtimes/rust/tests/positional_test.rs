@@ -40,22 +40,28 @@ use positional::*;
     }
 */
 
-#[tokio::test]
-async fn test_client() {
-    todo!()
+async fn test_client(client: &Client) {
+    test_get_resource(client).await;
+    test_get_resource_positional(client).await;
 }
 
-#[tokio::test]
-async fn test_get_resource() {
-    todo!()
+async fn test_get_resource(client: &Client) {
+    let output = client.get_resource().name("Test").send().await;
+    let resource = output.unwrap().output.unwrap();
+    let get_name_output = resource.get_name().send().await.unwrap();
+    assert_eq!(Some("Test"), get_name_output.name().as_deref());
 }
 
-#[tokio::test]
-async fn test_get_resource_positional() {
-    todo!()
+async fn test_get_resource_positional(client: &Client) {
+    let output = client.get_resource_positional().name("Test").send().await;
+    let resource = output.unwrap();
+    let get_name_output = resource.get_name().send().await.unwrap();
+    assert_eq!(Some("Test"), get_name_output.name().as_deref());
 }
 
 #[tokio::test]
 async fn test_default_config() {
-    todo!()
+    let config = SimplePositionalConfig::builder().build().unwrap();
+    let client = Client::from_conf(config).unwrap();
+    test_client(&client);
 }
