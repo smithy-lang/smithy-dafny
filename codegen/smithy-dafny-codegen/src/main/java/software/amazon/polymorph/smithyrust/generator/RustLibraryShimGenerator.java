@@ -1307,7 +1307,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected String qualifiedRustUnionName(final UnionShape unionShape) {
-    return "%s::%s".formatted(
+    return "%s::types::%s".formatted(
         topLevelNameForShape(unionShape),
         rustUnionName(unionShape)
       );

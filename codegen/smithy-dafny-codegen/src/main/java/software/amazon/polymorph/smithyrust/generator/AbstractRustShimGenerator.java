@@ -1045,7 +1045,7 @@ public abstract class AbstractRustShimGenerator {
   protected String qualifiedRustStructureType(
     final StructureShape structureShape
   ) {
-    return "%s::%s".formatted(
+    return "%s::types::%s".formatted(
         topLevelNameForShape(structureShape),
         rustStructureName(structureShape)
       );
@@ -1125,7 +1125,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String qualifiedRustEnumType(final EnumShape enumShape) {
-    return "%s::%s".formatted(
+    return "%s::types::%s".formatted(
         topLevelNameForShape(enumShape),
         rustEnumName(enumShape)
       );
