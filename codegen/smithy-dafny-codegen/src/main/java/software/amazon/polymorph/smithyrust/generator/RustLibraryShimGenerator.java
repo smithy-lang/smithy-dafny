@@ -1308,7 +1308,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   protected String qualifiedRustUnionName(final UnionShape unionShape) {
     return "%s::%s".formatted(
-        getRustTypesModuleName(),
+        topLevelNameForShape(unionShape),
         rustUnionName(unionShape)
       );
   }
@@ -1359,7 +1359,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return variables;
   }
 
-  private String rustTypeForShape(final Shape shape) {
+  private String rustTypeForShape(final Shape originalShape) {
+    // First handle indirection like @reference
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(originalShape, model);
+    final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
+
     return switch (shape.getType()) {
       case BOOLEAN -> "::std::primitive::bool";
       // integral
@@ -1390,15 +1394,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       // aggregates
       case STRUCTURE -> {
         final StructureShape structureShape = (StructureShape) shape;
-        if (shouldGenerateStructForStructure(structureShape)) {
-          yield qualifiedRustStructureType(structureShape);
-        }
-        if (structureShape.hasTrait(ReferenceTrait.class)) {
-          yield qualifiedRustReferenceType(structureShape);
-        }
-        throw new UnsupportedOperationException(
-          "Unsupported type for structure: " + shape.getId()
-        );
+        yield qualifiedRustStructureType(structureShape);
       }
       case LIST -> {
         final ListShape listShape = (ListShape) shape;
@@ -1420,14 +1416,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             valueType
           );
       }
-      case UNION -> {
-        if (ModelUtils.isInServiceNamespace(shape.getId(), service)) {
-          yield qualifiedRustUnionName((UnionShape) shape);
-        }
-        throw new UnsupportedOperationException(
-          "Unsupported type for union: " + shape.getId()
-        );
-      }
+      case UNION ->  qualifiedRustUnionName((UnionShape) shape);
+      case RESOURCE -> qualifiedRustResourceType((ResourceShape) shape);
+      case SERVICE -> qualifiedRustServiceType((ServiceShape) shape);
       default -> throw new UnsupportedOperationException(
         "Unsupported shape type: " + shape.getType()
       );
@@ -1451,34 +1442,35 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     boolean isDafnyOption
   ) {
     // First handle the indirection of @reference to service or resource shapes
-    final Shape shape = originalShape
-      .getTrait(ReferenceTrait.class)
-      .map(referenceTrait -> model.expectShape(referenceTrait.getReferentId()))
-      .orElse(originalShape);
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(originalShape, model);
+    final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
 
     return switch (shape.getType()) {
       case STRING, ENUM -> {
         if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
           var enumShapeName = toSnakeCase(shape.toShapeId().getName());
+          String prefix = topLevelNameForShape(shape.asServiceShape().get());
           if (isDafnyOption) {
             yield TokenTree.of(
               """
               ::std::rc::Rc::new(match &%s {
-                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                   None => crate::_Wrappers_Compile::Option::None { }
               })
-              """.formatted(rustValue, enumShapeName)
+              """.formatted(rustValue, prefix, enumShapeName)
             );
           } else if (isRustOption) {
             yield TokenTree.of(
-              "crate::conversions::%s::to_dafny(%s.clone().unwrap())".formatted(
+              "%s::conversions::%s::to_dafny(%s.clone().unwrap())".formatted(
+                  prefix,
                   enumShapeName,
                   rustValue
                 )
             );
           } else {
             yield TokenTree.of(
-              "crate::conversions::%s::to_dafny(%s.clone())".formatted(
+              "%s::conversions::%s::to_dafny(%s.clone())".formatted(
+                  prefix,
                   enumShapeName,
                   rustValue
                 )
@@ -1707,28 +1699,29 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       }
       case STRUCTURE, UNION -> {
         var structureShapeName = toSnakeCase(shape.getId().getName());
+        String prefix = topLevelNameForShape(shape.asServiceShape().get());
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(&%s.clone().unwrap())
-              """.formatted(structureShapeName, rustValue)
+              %s::conversions::%s::to_dafny(&%s.clone().unwrap())
+              """.formatted(prefix, structureShapeName, rustValue)
             );
           } else {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(%s.clone())
-              """.formatted(structureShapeName, rustValue)
+              %s::conversions::%s::to_dafny(%s.clone())
+              """.formatted(prefix, structureShapeName, rustValue)
             );
           }
         } else {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
-            """.formatted(rustValue, structureShapeName)
+            """.formatted(rustValue, prefix, structureShapeName)
           );
         }
       }
@@ -1736,33 +1729,34 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         String resourceShapeName = toSnakeCase(
           resourceName(shape.asResourceShape().get())
         );
+        String prefix = topLevelNameForShape(shape.asServiceShape().get());
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(%s.clone().unwrap())
-              """.formatted(resourceShapeName, rustValue)
+              %s::conversions::%s::to_dafny(%s.clone().unwrap())
+              """.formatted(prefix, resourceShapeName, rustValue)
             );
           } else {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(%s.clone())
-              """.formatted(resourceShapeName, rustValue)
+              %s::conversions::%s::to_dafny(%s.clone())
+              """.formatted(prefix, resourceShapeName, rustValue)
             );
           }
         } else {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
-            """.formatted(rustValue, resourceShapeName)
+            """.formatted(rustValue, prefix, resourceShapeName)
           );
         }
       }
       case SERVICE -> {
-        String prefix = topLevelScopeForService(shape.asServiceShape().get());
+        String prefix = topLevelNameForShape(shape.asServiceShape().get());
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(
