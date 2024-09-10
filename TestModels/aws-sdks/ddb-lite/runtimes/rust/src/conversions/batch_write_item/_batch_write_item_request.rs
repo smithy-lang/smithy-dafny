@@ -11,7 +11,7 @@ pub fn to_dafny(
         RequestItems: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.request_items.clone().unwrap(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
     |v| ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&v,
-    |e| crate::conversions::write_request::to_dafny(&e)
+    |e| crate::conversions::write_request::to_dafny(e)
 ,
 )
 ,

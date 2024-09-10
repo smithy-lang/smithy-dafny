@@ -9,7 +9,7 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::CreateTableOutput::CreateTableOutput {
         TableDescription: ::std::rc::Rc::new(match &value.table_description {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::table_description::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::table_description::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

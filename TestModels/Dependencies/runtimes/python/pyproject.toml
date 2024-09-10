@@ -15,7 +15,7 @@ python = "^3.11.0"
 # TODO: Depend on PyPi once Smithy-Python publishes their Python package there
 smithy-python = { path = "../../../../codegen/smithy-dafny-codegen-modules/smithy-python/python-packages/smithy-python", develop = false}
 
-standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
+smithy-dafny-standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
 simple-resources = { path = "../../../Resource/runtimes/python", develop = false}
 simple-errors = { path = "../../../Errors/runtimes/python", develop = false}
 simple-extendable-resources = { path = "../../../Extendable/runtimes/python", develop = false}
