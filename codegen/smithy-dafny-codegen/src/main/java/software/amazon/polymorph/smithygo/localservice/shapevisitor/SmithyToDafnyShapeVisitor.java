@@ -30,6 +30,9 @@ import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;
@@ -38,6 +41,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     private final boolean isOptional;
     protected boolean isPointerType;
+    public static final Map<Shape, String> visitorFuncMap = new HashMap<>();
 
     public void setPointerType() {
         this.isPointerType = false;
@@ -183,6 +187,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                                                           writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
                             )), fieldSeparator
             ));
+            System.out.println(targetShape);
+            System.out.println(targetShape.accept(
+                new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
+                                              writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
+                )));
+            System.out.println("\n\n");
         }
 
 

@@ -153,7 +153,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 builder.append("%1$s: %2$s%3$s,".formatted(
                         StringUtils.capitalize(memberName),
                         (targetShape.isStructureShape() && memberShape.isOptional()) && !targetShape.hasTrait(ReferenceTrait.class) ? "&" : "",
-                        ShapeVisitorHelper.recursiveShapeHelper(memberShape, context, derivedDataSource, false, writer, isConfigShape)
+                        ShapeVisitorHelper.toNativeContainerShapeHelper(memberShape, context, derivedDataSource, false, writer, isConfigShape)
                 ));
         }
 
@@ -225,7 +225,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                                }""".formatted(type, type, dataSource, dataSource, keyTargetShape.accept(
                 new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
         ),
-        ShapeVisitorHelper.recursiveShapeHelper(valueMemberShape, context, valueDataSource, true, writer, isConfigShape)
+        ShapeVisitorHelper.toNativeContainerShapeHelper(valueMemberShape, context, valueDataSource, true, writer, isConfigShape)
                 // valueTargetShape.accept(
                 //         new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(1)).(%s)".formatted(DafnyNameResolver.getDafnyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape))), writer, isConfigShape)
                 // )
@@ -448,7 +448,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             SmithyNameResolver.smithyTypesNamespace(shape),
                             memberName,
                             pointerForPointableShape,
-                            ShapeVisitorHelper.recursiveShapeHelper(member, context, unionDataSource, false, writer, isConfigShape)
+                            ShapeVisitorHelper.toNativeContainerShapeHelper(member, context, unionDataSource, false, writer, isConfigShape)
                             // targetShape.accept(
                             //         new DafnyToSmithyShapeVisitor(context, unionDataSource, writer, isConfigShape, isMemberShapePointable)
                                 ));
