@@ -1056,6 +1056,9 @@ public abstract class AbstractRustShimGenerator {
     if (ModelUtils.isInServiceNamespace(shapeId, service)) {
       return "crate";
     } else {
+      if (shapeId.getNamespace().length() == 0) {
+        throw new IllegalArgumentException("Empty namespace for shape id: " + shapeId);
+      }
       return NamespaceHelper.rustModuleForSmithyNamespace(
         shapeId.getNamespace()
       );
