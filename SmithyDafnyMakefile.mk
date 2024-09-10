@@ -153,8 +153,6 @@ dafny-reportgenerator:
 clean-dafny-report:
 	rm TestResults/*.csv
 
-get_dafny_version:
-	DAFNY_VERSION=$(shell $(SMITHY_DAFNY_ROOT)/scripts/check_dafny_version.sh)
 # Dafny helper targets
 
 # Transpile the entire project's impl
@@ -332,7 +330,6 @@ _polymorph_dependencies:
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
 polymorph_code_gen: _polymorph_dependencies
 polymorph_code_gen:
-	echo $(DAFNY_VERSION)
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
