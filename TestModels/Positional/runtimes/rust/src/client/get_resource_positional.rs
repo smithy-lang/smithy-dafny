@@ -9,10 +9,12 @@ impl super::Client {
     /// - On failure, responds with [`SdkError<GetResourcePositionalError>`](crate::operation::get_resource_positional::GetResourcePositionalError)
     pub fn get_resource_positional(
         &self,
+        name: ::std::option::Option<::std::string::String>
     ) -> crate::operation::get_resource_positional::builders::GetResourcePositionalFluentBuilder
     {
         crate::operation::get_resource_positional::builders::GetResourcePositionalFluentBuilder::new(
             self.clone(),
         )
+        .set_name(name)
     }
 }
