@@ -1361,7 +1361,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private String rustTypeForShape(final Shape originalShape) {
     // First handle indirection like @reference
-    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(originalShape, model);
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
+      originalShape,
+      model
+    );
     final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
 
     return switch (shape.getType()) {
@@ -1416,7 +1419,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             valueType
           );
       }
-      case UNION ->  qualifiedRustUnionName((UnionShape) shape);
+      case UNION -> qualifiedRustUnionName((UnionShape) shape);
       case RESOURCE -> qualifiedRustResourceType((ResourceShape) shape);
       case SERVICE -> qualifiedRustServiceType((ServiceShape) shape);
       default -> throw new UnsupportedOperationException(
@@ -1442,14 +1445,17 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     boolean isDafnyOption
   ) {
     // First handle the indirection of @reference to service or resource shapes
-    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(originalShape, model);
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
+      originalShape,
+      model
+    );
     final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
 
     return switch (shape.getType()) {
       case STRING, ENUM -> {
         if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
           var enumShapeName = toSnakeCase(shape.toShapeId().getName());
-          String prefix = topLevelNameForShape(shape.asServiceShape().get());
+          String prefix = topLevelNameForShape(shape);
           if (isDafnyOption) {
             yield TokenTree.of(
               """
@@ -1699,7 +1705,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       }
       case STRUCTURE, UNION -> {
         var structureShapeName = toSnakeCase(shape.getId().getName());
-        String prefix = topLevelNameForShape(shape.asServiceShape().get());
+        String prefix = topLevelNameForShape(shape);
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(
@@ -1729,7 +1735,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         String resourceShapeName = toSnakeCase(
           resourceName(shape.asResourceShape().get())
         );
-        String prefix = topLevelNameForShape(shape.asServiceShape().get());
+        String prefix = topLevelNameForShape(shape);
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(
@@ -1756,7 +1762,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case SERVICE -> {
-        String prefix = topLevelNameForShape(shape.asServiceShape().get());
+        String prefix = topLevelNameForShape(shape);
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(

@@ -423,7 +423,10 @@ public abstract class AbstractRustShimGenerator {
     boolean isDafnyOption
   ) {
     // First handle the indirection of @reference to service or resource shapes
-    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(originalShape, model);
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
+      originalShape,
+      model
+    );
     final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
 
     return switch (shape.getType()) {
@@ -1053,19 +1056,22 @@ public abstract class AbstractRustShimGenerator {
     if (ModelUtils.isInServiceNamespace(shapeId, service)) {
       return "crate";
     } else {
-      return NamespaceHelper.rustModuleForSmithyNamespace(shapeId.getNamespace());
+      return NamespaceHelper.rustModuleForSmithyNamespace(
+        shapeId.getNamespace()
+      );
     }
   }
 
-  protected String qualifiedRustServiceType(
-    final ServiceShape serviceShape
-  ) {
+  protected String qualifiedRustServiceType(final ServiceShape serviceShape) {
     return topLevelNameForShape(serviceShape) + "::client::Client";
   }
 
-  protected String qualifiedRustResourceType(final ResourceShape resourceShape) {
+  protected String qualifiedRustResourceType(
+    final ResourceShape resourceShape
+  ) {
     return evalTemplate(
-      topLevelNameForShape(resourceShape) + "::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
+      topLevelNameForShape(resourceShape) +
+      "::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
       resourceVariables(resourceShape)
     );
   }

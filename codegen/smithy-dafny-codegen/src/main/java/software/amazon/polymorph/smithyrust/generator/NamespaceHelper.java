@@ -7,7 +7,9 @@ public class NamespaceHelper {
   /**
    * TODO
    */
-  public static String rustModuleForSmithyNamespace(final String smithyNamespace) {
+  public static String rustModuleForSmithyNamespace(
+    final String smithyNamespace
+  ) {
     final String[] components = smithyNamespace.split(".");
     final String lastComponeent = components[components.length - 1];
     return toSnakeCase(lastComponeent);
