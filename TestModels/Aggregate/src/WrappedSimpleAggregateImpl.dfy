@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleAggregateTypesWrapped.dfy"
 
-module {:extern "simple.aggregate.internaldafny.wrapped"} WrappedSimpleAggregateService refines WrappedAbstractSimpleAggregateService {
+module {:extern "simpleaggregateinternaldafnywrapped"} WrappedSimpleAggregateService refines WrappedAbstractSimpleAggregateService {
     import WrappedService = SimpleAggregate
     function method WrappedDefaultSimpleAggregateConfig(): SimpleAggregateConfig {
         SimpleAggregateConfig

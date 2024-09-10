@@ -26,50 +26,24 @@ operation GetAggregateKnownValueTest {
 }
 
 structure GetAggregateInput {
-  simpleStringList: SimpleStringList,
-  structureList: StructureList,
-  simpleStringMap: SimpleStringMap,
-  simpleIntegerMap: SimpleIntegerMap,
-  nestedStructure: NestedStructure,
+  recursiveUnion: RecursiveUnion
 }
 
 structure GetAggregateOutput {
-  simpleStringList: SimpleStringList,
-  structureList: StructureList,
-  simpleStringMap: SimpleStringMap,
-  simpleIntegerMap: SimpleIntegerMap,
-  nestedStructure: NestedStructure,
+  recursiveUnion: RecursiveUnion
 }
 
-list SimpleStringList {
-  member: String
+union RecursiveUnion {
+  IntegerValue: Integer,
+  StringValue: String,
+  DataMap: StructuredDataMap
 }
 
-list StructureList {
-  member: StructureListElement
+map StructuredDataMap {
+    key: String,
+    value: StructuredData
 }
 
-// More elements SHOULD be added
-structure StructureListElement {
-  stringValue: String,
-  integerValue: Integer,
-}
-
-map SimpleStringMap {
-  key: String,
-  value: String,
-}
-
-// Other map combinations SHOULD be added
-map SimpleIntegerMap {
-  key: String,
-  value: Integer,
-}
-
-structure NestedStructure {
-  stringStructure: StringStructure
-}
-
-structure StringStructure {
-  value: String,
+structure StructuredData {
+    content: Integer
 }
