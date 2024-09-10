@@ -328,6 +328,7 @@ _polymorph_dependencies:
 # Not including Rust until is it more fully implemented.
 .PHONY: polymorph_code_gen
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
+polymorph_code_gen: DAFNY_VERSION=$(shell $(SMITHY_DAFNY_ROOT)/scripts/check_dafny_version.sh)
 polymorph_code_gen: get_dafny_version _polymorph_dependencies
 polymorph_code_gen:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
@@ -353,7 +354,8 @@ check_polymorph_diff:
 # Generates dafny code for all namespaces in this project
 .PHONY: polymorph_dafny
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
-polymorph_dafny: get_dafny_version _polymorph_dependencies
+polymorph_dafny: DAFNY_VERSION=$(shell $(SMITHY_DAFNY_ROOT)/scripts/check_dafny_version.sh)
+polymorph_dafny: _polymorph_dependencies
 polymorph_dafny:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -371,7 +373,8 @@ _polymorph_dafny: _polymorph
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_dotnet
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
-polymorph_dotnet: get_dafny_version _polymorph_dependencies
+polymorph_dotnet: DAFNY_VERSION=$(shell $(SMITHY_DAFNY_ROOT)/scripts/check_dafny_version.sh)
+polymorph_dotnet: _polymorph_dependencies
 polymorph_dotnet:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -389,7 +392,8 @@ _polymorph_dotnet: _polymorph
 # Generates java code for all namespaces in this project
 .PHONY: polymorph_java
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
-polymorph_java: get_dafny_version _polymorph_dependencies
+polymorph_java: DAFNY_VERSION=$(shell $(SMITHY_DAFNY_ROOT)/scripts/check_dafny_version.sh)
+polymorph_java: _polymorph_dependencies
 polymorph_java:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -407,6 +411,7 @@ _polymorph_java: _polymorph
 # Generates python code for all namespaces in this project
 .PHONY: polymorph_python
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
+polymorph_python: DAFNY_VERSION=$(shell $(SMITHY_DAFNY_ROOT)/scripts/check_dafny_version.sh)
 polymorph_python: get_dafny_version _polymorph_dependencies
 polymorph_python:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
@@ -433,7 +438,7 @@ setup_prettier:
 # so we assume that is run first!
 .PHONY: polymorph_rust
 polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
-polymorph_rust: get_dafny_version _polymorph_dependencies
+polymorph_rust: _polymorph_dependencies
 polymorph_rust:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
