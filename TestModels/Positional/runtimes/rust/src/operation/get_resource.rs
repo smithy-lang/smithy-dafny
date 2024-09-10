@@ -20,7 +20,7 @@ impl GetResource {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetResource(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_resource::_get_resource_output::from_dafny(

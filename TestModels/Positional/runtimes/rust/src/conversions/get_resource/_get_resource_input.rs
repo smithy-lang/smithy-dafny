@@ -3,13 +3,13 @@
 pub fn to_dafny(
     value: crate::operation::get_resource::GetResourceInput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceInput,
+    crate::r#simple::positional::internaldafny::types::GetResourceInput,
 > {
     let name = value.name().unwrap();
     let name =
         dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(name);
 
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceInput::GetResourceInput {
+    ::std::rc::Rc::new(crate::r#simple::positional::internaldafny::types::GetResourceInput::GetResourceInput {
         name,
     })
 }
@@ -17,7 +17,7 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceInput,
+        crate::r#simple::positional::internaldafny::types::GetResourceInput,
     >,
 ) -> crate::operation::get_resource::GetResourceInput {
     let name =

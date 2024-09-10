@@ -23,7 +23,7 @@ impl GetResourcePositional {
             ::dafny_runtime::md!(client.dafny_client.clone()).GetResourcePositional(&inner_input);
         if matches!(
             inner_result.as_ref(),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { .. }
+            crate::r#_Wrappers_Compile::Result::Success { .. }
         ) {
             Ok(
                 crate::conversions::get_resource_positional::_get_resource_positional_output::from_dafny(

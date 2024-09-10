@@ -8,8 +8,8 @@ pub struct Client {
     rt: Runtime,
 }
 
-impl dafny_runtime::UpcastObject<dyn crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient> for Client {
-  ::dafny_runtime::UpcastObjectFn!(dyn crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient);
+impl dafny_runtime::UpcastObject<dyn crate::simple::positional::internaldafny::types::ISimplePositionalClient> for Client {
+  ::dafny_runtime::UpcastObjectFn!(dyn crate::simple::positional::internaldafny::types::ISimplePositionalClient);
 }
 
 impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
@@ -18,11 +18,11 @@ impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
 
 impl Client {
     pub fn from_conf(config: &::std::rc::Rc<
-    crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient,
+    dyn crate::simple::positional::internaldafny::types::ISimplePositionalClient,
   >) ->
-::std::rc::Rc<crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
-  ::dafny_runtime::Object<dyn crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient>,
-  ::std::rc::Rc<crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::Error>
+::std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+  ::dafny_runtime::Object<dyn crate::simple::positional::internaldafny::types::ISimplePositionalClient>,
+  ::std::rc::Rc<crate::simple::positional::internaldafny::types::Error>
     >>{
         let rt_result = tokio::runtime::Builder::new_current_thread()
             .enable_all()
@@ -43,7 +43,7 @@ impl Client {
                     rt,
                 };
                 std::rc::Rc::new(
-                    crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
+                    crate::_Wrappers_Compile::Result::Success {
                         value: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(wrap)),
                     },
                 )
@@ -53,20 +53,20 @@ impl Client {
     }
 }
 
-impl crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient
+impl crate::simple::positional::internaldafny::types::ISimplePositionalClient
     for Client
 {
     fn GetResource(
         &mut self,
         input: &std::rc::Rc<
-            crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::GetResourceInput,
+            crate::simple::positional::internaldafny::types::GetResourceInput,
         >,
     ) -> std::rc::Rc<
-        crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+        crate::r#_Wrappers_Compile::Result<
             std::rc::Rc<
-                crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::GetResourceInput,
+                crate::simple::positional::internaldafny::types::GetResourceInput,
             >,
-            std::rc::Rc<crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::Error>,
+            std::rc::Rc<crate::simple::positional::internaldafny::types::Error>,
         >,
     >{
         let inner_input =
@@ -74,12 +74,12 @@ impl crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes
         let result = self.rt.block_on(crate::operation::get_resource::GetResource::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::std::rc::Rc::new(
-                crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure {
+                crate::_Wrappers_Compile::Result::Failure {
                     error: crate::conversions::get_resource::to_dafny_error(error),
                 },
             ),
             Ok(client) => ::std::rc::Rc::new(
-                crate::implementation_from_dafny::_Wrappers_Compile::Result::Success {
+                crate::_Wrappers_Compile::Result::Success {
                     value: crate::conversions::get_resource::_get_resource_output::to_dafny(client),
                 },
             ),
@@ -90,11 +90,11 @@ impl crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes
         &mut self,
         input: &dafny_runtime::Sequence<dafny_runtime::DafnyCharUTF16>,
     ) -> std::rc::Rc<
-        crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+        crate::r#_Wrappers_Compile::Result<
             dafny_runtime::Object<
-                dyn crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource,
+                dyn crate::r#simple::positional::internaldafny::types::ISimpleResource,
             >,
-            std::rc::Rc<crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+            std::rc::Rc<crate::r#simple::positional::internaldafny::types::Error>,
         >,
     > {
         todo!()

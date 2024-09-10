@@ -10,7 +10,7 @@ pub mod r#_SimplePositionalImplTest_Compile {
         }
         pub fn TestClient(
             client: &::dafny_runtime::Object<
-                dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient,
+                dyn super::r#simple::positional::internaldafny::types::ISimplePositionalClient,
             >,
         ) -> () {
             super::r#_SimplePositionalImplTest_Compile::_default::TestGetResource(client);
@@ -19,19 +19,19 @@ pub mod r#_SimplePositionalImplTest_Compile {
         }
         pub fn TestGetResource(
             client: &::dafny_runtime::Object<
-                dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient,
+                dyn super::r#simple::positional::internaldafny::types::ISimplePositionalClient,
             >,
         ) -> () {
-            let mut input: ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceInput> = ::std::rc::Rc::new(super::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceInput::GetResourceInput {
+            let mut input: ::std::rc::Rc<super::r#simple::positional::internaldafny::types::GetResourceInput> = ::std::rc::Rc::new(super::r#simple::positional::internaldafny::types::GetResourceInput::GetResourceInput {
             name: ::dafny_runtime::string_utf16_of("Test")
           });
             let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput,
+                            super::r#simple::positional::internaldafny::types::GetResourceOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -39,30 +39,30 @@ pub mod r#_SimplePositionalImplTest_Compile {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput,
+                            super::r#simple::positional::internaldafny::types::GetResourceOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
-            _out0 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient::GetResource(::dafny_runtime::md!(client.clone()), &input));
+            _out0 = ::dafny_runtime::MaybePlacebo::from(super::r#simple::positional::internaldafny::types::ISimplePositionalClient::GetResource(::dafny_runtime::md!(client.clone()), &input));
             valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out0.read());
             if !(!valueOrError0.read().IsFailure()) {
                 panic!("Halt")
             };
             let mut output: ::std::rc::Rc<
-                super::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput,
+                super::r#simple::positional::internaldafny::types::GetResourceOutput,
             > = valueOrError0.read().Extract();
             let mut resource: ::dafny_runtime::Object<
-                dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource,
+                dyn super::r#simple::positional::internaldafny::types::ISimpleResource,
             > = output.output().clone();
             let mut valueOrError1 = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_dpositional_dinternaldafny_dtypes::GetNameOutput,
+                            super::r#simple::positional::internaldafny::types::GetNameOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -70,19 +70,19 @@ pub mod r#_SimplePositionalImplTest_Compile {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_dpositional_dinternaldafny_dtypes::GetNameOutput,
+                            super::r#simple::positional::internaldafny::types::GetNameOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
-            _out1 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource::GetName(::dafny_runtime::md!(resource.clone()), &::std::rc::Rc::new(super::r#_simple_dpositional_dinternaldafny_dtypes::GetNameInput::GetNameInput {})));
+            _out1 = ::dafny_runtime::MaybePlacebo::from(super::r#simple::positional::internaldafny::types::ISimpleResource::GetName(::dafny_runtime::md!(resource.clone()), &::std::rc::Rc::new(super::r#simple::positional::internaldafny::types::GetNameInput::GetNameInput {})));
             valueOrError1 = ::dafny_runtime::MaybePlacebo::from(_out1.read());
             if !(!valueOrError1.read().IsFailure()) {
                 panic!("Halt")
             };
             let mut getNameOutput: ::std::rc::Rc<
-                super::r#_simple_dpositional_dinternaldafny_dtypes::GetNameOutput,
+                super::r#simple::positional::internaldafny::types::GetNameOutput,
             > = valueOrError1.read().Extract();
             if !(getNameOutput.name().clone() == ::dafny_runtime::string_utf16_of("Test")) {
                 panic!("Halt")
@@ -91,7 +91,7 @@ pub mod r#_SimplePositionalImplTest_Compile {
         }
         pub fn TestGetResourcePositional(
             client: &::dafny_runtime::Object<
-                dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient,
+                dyn super::r#simple::positional::internaldafny::types::ISimplePositionalClient,
             >,
         ) -> () {
             let mut input: ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16> =
@@ -100,9 +100,9 @@ pub mod r#_SimplePositionalImplTest_Compile {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource,
+                            dyn super::r#simple::positional::internaldafny::types::ISimpleResource,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -110,27 +110,27 @@ pub mod r#_SimplePositionalImplTest_Compile {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource,
+                            dyn super::r#simple::positional::internaldafny::types::ISimpleResource,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
-            _out2 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient::GetResourcePositional(::dafny_runtime::md!(client.clone()), &input));
+            _out2 = ::dafny_runtime::MaybePlacebo::from(super::r#simple::positional::internaldafny::types::ISimplePositionalClient::GetResourcePositional(::dafny_runtime::md!(client.clone()), &input));
             valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out2.read());
             if !(!valueOrError0.read().IsFailure()) {
                 panic!("Halt")
             };
             let mut resource: ::dafny_runtime::Object<
-                dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource,
+                dyn super::r#simple::positional::internaldafny::types::ISimpleResource,
             > = valueOrError0.read().Extract();
             let mut valueOrError1 = ::dafny_runtime::MaybePlacebo::<
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_dpositional_dinternaldafny_dtypes::GetNameOutput,
+                            super::r#simple::positional::internaldafny::types::GetNameOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -138,19 +138,19 @@ pub mod r#_SimplePositionalImplTest_Compile {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::std::rc::Rc<
-                            super::r#_simple_dpositional_dinternaldafny_dtypes::GetNameOutput,
+                            super::r#simple::positional::internaldafny::types::GetNameOutput,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
-            _out3 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource::GetName(::dafny_runtime::md!(resource.clone()), &::std::rc::Rc::new(super::r#_simple_dpositional_dinternaldafny_dtypes::GetNameInput::GetNameInput {})));
+            _out3 = ::dafny_runtime::MaybePlacebo::from(super::r#simple::positional::internaldafny::types::ISimpleResource::GetName(::dafny_runtime::md!(resource.clone()), &::std::rc::Rc::new(super::r#simple::positional::internaldafny::types::GetNameInput::GetNameInput {})));
             valueOrError1 = ::dafny_runtime::MaybePlacebo::from(_out3.read());
             if !(!valueOrError1.read().IsFailure()) {
                 panic!("Halt")
             };
             let mut getNameOutput: ::std::rc::Rc<
-                super::r#_simple_dpositional_dinternaldafny_dtypes::GetNameOutput,
+                super::r#simple::positional::internaldafny::types::GetNameOutput,
             > = valueOrError1.read().Extract();
             if !(getNameOutput.name().clone() == ::dafny_runtime::string_utf16_of("TestPositional"))
             {
@@ -163,9 +163,9 @@ pub mod r#_SimplePositionalImplTest_Compile {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            super::r#_simple_dpositional_dinternaldafny::SimplePositionalClient,
+                            super::r#simple::positional::internaldafny::SimplePositionalClient,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
@@ -173,24 +173,24 @@ pub mod r#_SimplePositionalImplTest_Compile {
                 ::std::rc::Rc<
                     super::r#_Wrappers_Compile::Result<
                         ::dafny_runtime::Object<
-                            super::r#_simple_dpositional_dinternaldafny::SimplePositionalClient,
+                            super::r#simple::positional::internaldafny::SimplePositionalClient,
                         >,
-                        ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+                        ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>,
                     >,
                 >,
             >::new();
-            _out4 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dpositional_dinternaldafny::_default::SimplePositional(&super::r#_simple_dpositional_dinternaldafny::_default::DefaultSimplePositionalConfig()));
+            _out4 = ::dafny_runtime::MaybePlacebo::from(super::r#simple::positional::internaldafny::_default::SimplePositional(&super::r#simple::positional::internaldafny::_default::DefaultSimplePositionalConfig()));
             valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out4.read());
             if !(!valueOrError0.read().IsFailure()) {
                 panic!("Halt")
             };
             let mut client: ::dafny_runtime::Object<
-                super::r#_simple_dpositional_dinternaldafny::SimplePositionalClient,
+                super::r#simple::positional::internaldafny::SimplePositionalClient,
             > = valueOrError0.read().Extract();
             super::r#_SimplePositionalImplTest_Compile::_default::TestClient(
                 &::dafny_runtime::upcast_object::<
-                    super::r#_simple_dpositional_dinternaldafny::SimplePositionalClient,
-                    dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient,
+                    super::r#simple::positional::internaldafny::SimplePositionalClient,
+                    dyn super::r#simple::positional::internaldafny::types::ISimplePositionalClient,
                 >()(client.clone()),
             );
             return ();
@@ -203,7 +203,7 @@ pub mod r#_SimplePositionalImplTest_Compile {
         ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
     }
 }
-pub mod r#_simple_dpositional_dinternaldafny_dwrapped {
+pub mod r#simple::positional::internaldafny_dwrapped {
     pub struct _default {}
 
     impl _default {
@@ -211,14 +211,14 @@ pub mod r#_simple_dpositional_dinternaldafny_dwrapped {
             ::dafny_runtime::allocate_object::<Self>()
         }
         pub fn WrappedDefaultSimplePositionalConfig(
-        ) -> ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::SimplePositionalConfig>
+        ) -> ::std::rc::Rc<super::r#simple::positional::internaldafny::types::SimplePositionalConfig>
         {
-            ::std::rc::Rc::new(super::r#_simple_dpositional_dinternaldafny_dtypes::SimplePositionalConfig::SimplePositionalConfig {})
+            ::std::rc::Rc::new(super::r#simple::positional::internaldafny::types::SimplePositionalConfig::SimplePositionalConfig {})
         }
     }
 
     impl ::dafny_runtime::UpcastObject<dyn::std::any::Any>
-        for super::r#_simple_dpositional_dinternaldafny_dwrapped::_default
+        for super::r#simple::positional::internaldafny_dwrapped::_default
     {
         ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
     }
@@ -231,15 +231,15 @@ pub mod r#_WrappedSimplePositionalTest_Compile {
             ::dafny_runtime::allocate_object::<Self>()
         }
         pub fn TestWrappedClient() -> () {
-            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient>, ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>>>>::new();
-            let mut _out5 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient>, ::std::rc::Rc<super::r#_simple_dpositional_dinternaldafny_dtypes::Error>>>>::new();
-            _out5 = ::dafny_runtime::MaybePlacebo::from(super::r#_simple_dpositional_dinternaldafny_dwrapped::_default::WrappedSimplePositional(&super::r#_simple_dpositional_dinternaldafny_dwrapped::_default::WrappedDefaultSimplePositionalConfig()));
+            let mut valueOrError0 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#simple::positional::internaldafny::types::ISimplePositionalClient>, ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>>>>::new();
+            let mut _out5 = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<super::r#_Wrappers_Compile::Result<::dafny_runtime::Object<dyn super::r#simple::positional::internaldafny::types::ISimplePositionalClient>, ::std::rc::Rc<super::r#simple::positional::internaldafny::types::Error>>>>::new();
+            _out5 = ::dafny_runtime::MaybePlacebo::from(super::r#simple::positional::internaldafny_dwrapped::_default::WrappedSimplePositional(&super::r#simple::positional::internaldafny_dwrapped::_default::WrappedDefaultSimplePositionalConfig()));
             valueOrError0 = ::dafny_runtime::MaybePlacebo::from(_out5.read());
             if !(!valueOrError0.read().IsFailure()) {
                 panic!("Halt")
             };
             let mut client: ::dafny_runtime::Object<
-                dyn super::r#_simple_dpositional_dinternaldafny_dtypes::ISimplePositionalClient,
+                dyn super::r#simple::positional::internaldafny::types::ISimplePositionalClient,
             > = valueOrError0.read().Extract();
             super::r#_SimplePositionalImplTest_Compile::_default::TestClient(&client);
             return ();

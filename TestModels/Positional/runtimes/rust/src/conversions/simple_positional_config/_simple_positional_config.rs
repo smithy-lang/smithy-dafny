@@ -4,15 +4,15 @@
 pub fn to_dafny(
     value: crate::types::simple_positional_config::SimplePositionalConfig,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::SimplePositionalConfig,
+    crate::simple::positional::internaldafny::types::SimplePositionalConfig,
 >{
-    ::std::rc::Rc::new(crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::SimplePositionalConfig::SimplePositionalConfig {})
+    ::std::rc::Rc::new(crate::simple::positional::internaldafny::types::SimplePositionalConfig::SimplePositionalConfig {})
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::_simple_dpositional_dinternaldafny_dtypes::SimplePositionalConfig,
+        crate::simple::positional::internaldafny::types::SimplePositionalConfig,
     >,
 ) -> crate::types::simple_positional_config::SimplePositionalConfig {
     crate::types::simple_positional_config::SimplePositionalConfig {}

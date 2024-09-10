@@ -3,21 +3,21 @@
 pub fn to_dafny(
     value: crate::operation::get_resource_positional::GetResourcePositionalOutput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput,
+    crate::r#simple::positional::internaldafny::types::GetResourceOutput,
 >{
     let output = dafny_runtime::Object(todo!());
 
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::GetResourceOutput::GetResourceOutput { output })
+    ::std::rc::Rc::new(crate::r#simple::positional::internaldafny::types::GetResourceOutput::GetResourceOutput { output })
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
     _dafny_value: ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_Wrappers_Compile::Result<
+    crate::r#_Wrappers_Compile::Result<
         ::dafny_runtime::Object<
-            dyn crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::ISimpleResource,
+            dyn crate::r#simple::positional::internaldafny::types::ISimpleResource,
             >,
-        ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dpositional_dinternaldafny_dtypes::Error>,
+        ::std::rc::Rc<crate::r#simple::positional::internaldafny::types::Error>,
         >
     >,
 ) -> crate::operation::get_resource_positional::GetResourcePositionalOutput {
