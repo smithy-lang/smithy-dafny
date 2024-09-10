@@ -152,14 +152,14 @@ clean-dafny-report:
 	rm TestResults/*.csv
 
 get_dafny_version:
-	DAFNY_VERSION=$(shell ./scripts/check_dafny_version.sh)
+	DAFNY_VERSION=$(shell $(SMITHY_DAFNY_ROOT)/scripts/check_dafny_version.sh)
 # Dafny helper targets
 
 # Transpile the entire project's impl
 # For each index file listed in the project Makefile's PROJECT_INDEX variable,
 #   append a `-library:TestModels/$(PROJECT_INDEX) to the transpiliation target
 _transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
-_transpile_implementation_all: get_dafny_version transpile_implementation 
+_transpile_implementation_all: transpile_implementation 
 
 
 # The `$(OUT)` and $(TARGET) variables are problematic.
@@ -228,7 +228,7 @@ _transpile_test_all: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
 #   append `-library:/path/to/Index.dfy` to the transpile target
 _transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, --library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), --library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
 # Transpile the entire project's tests
-_transpile_test_all: get_dafny_version transpile_test
+_transpile_test_all: transpile_test
 
 transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
