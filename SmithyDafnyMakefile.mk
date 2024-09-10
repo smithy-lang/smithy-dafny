@@ -86,7 +86,7 @@ verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
 verify:DAFNY_PROCESSES=$(shell echo $$(( ($(CORES) - 1 ) / ($(CORES) >= 3 ? 2 : 1))))
 # TODO: remove dafny_options from all targets in the future
 # and leave it up to the UX to decide which options they want to add
-verify:DAFNY_OPTIONS=--allow-warnings
+verify:DAFNY_OPTIONS=--allow-warnings --allow-external-contracts
 verify:
 	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny verify \
 		--cores $(Z3_PROCESSES) \
@@ -101,7 +101,7 @@ verify:
 # Verify single file FILE with text logger.
 # This is useful for debugging resource count usage within a file.
 # Use PROC to further scope the verification
-verify_single:DAFNY_OPTIONS=--allow-warnings
+verify_single:DAFNY_OPTIONS=--allow-warnings --allow-external-contracts
 verify_single:
 	dafny verify \
 		--cores $(CORES) \
@@ -115,7 +115,7 @@ verify_single:
 		$(FILE)
 
 #Verify only a specific namespace at env var $(SERVICE)
-verify_service:DAFNY_OPTIONS=--allow-warnings
+verify_service:DAFNY_OPTIONS=--allow-warnings --allow-external-contracts
 verify_service:
 	@: $(if ${SERVICE},,$(error You must pass the SERVICE to generate for));
 	dafny verify \
@@ -456,13 +456,13 @@ transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
-transpile_implementation_net: DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix
+transpile_implementation_net: DAFNY_OPTIONS=--allow-warnings --allow-external-contracts --include-test-runner --compile-suffix
 transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: _transpile_implementation_all
 
 transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
-transpile_test_net: DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix
+transpile_test_net: DAFNY_OPTIONS=--allow-warnings --allow-external-contracts --include-test-runner --compile-suffix
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
 transpile_test_net: _transpile_test_all
@@ -507,12 +507,12 @@ transpile_java: | transpile_implementation_java transpile_test_java transpile_de
 transpile_java: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
 
 transpile_implementation_java: TARGET=java
-transpile_implementation_java: DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix
+transpile_implementation_java: DAFNY_OPTIONS=--allow-warnings --allow-external-contracts --include-test-runner --compile-suffix
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
 transpile_implementation_java: _transpile_implementation_all _mv_implementation_java
 
 transpile_test_java: TARGET=java
-transpile_test_java: DAFNY_OPTIONS=--allow-warnings --include-test-runner --compile-suffix
+transpile_test_java: DAFNY_OPTIONS=--allow-warnings --allow-external-contracts --include-test-runner --compile-suffix
 transpile_test_java: OUT=runtimes/java/TestsFromDafny
 transpile_test_java: _transpile_test_all _mv_test_java
 
@@ -563,7 +563,7 @@ transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
 transpile_implementation_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 # The Dafny Rust code generator is not complete yet,
 # so we want to emit code even if there are unsupported features in the input.
-transpile_implementation_rust: DAFNY_OPTIONS=--emit-uncompilable-code --allow-warnings --compile-suffix
+transpile_implementation_rust: DAFNY_OPTIONS=--emit-uncompilable-code --allow-warnings --allow-external-contracts --compile-suffix
 # The Dafny Rust code generator only supports a single crate for everything,
 # so we inline all dependencies by not passing `-library` to Dafny.
 transpile_implementation_rust: TRANSPILE_DEPENDENCIES=
@@ -636,7 +636,7 @@ transpile_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_pre_transpile, )
 transpile_python: | transpile_dependencies_python transpile_implementation_python transpile_test_python
 transpile_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_post_transpile, )
 
-transpile_implementation_python: DAFNY_OPTIONS=--allow-warnings --include-test-runner
+transpile_implementation_python: DAFNY_OPTIONS=--allow-warnings --allow-external-contracts --include-test-runner
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
 transpile_implementation_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
@@ -646,7 +646,7 @@ transpile_implementation_python: _transpile_implementation_all _mv_implementatio
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/dafny_test
-transpile_test_python: DAFNY_OPTIONS=--allow-warnings --include-test-runner
+transpile_test_python: DAFNY_OPTIONS=--allow-warnings --allow-external-contracts --include-test-runner
 transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
 transpile_test_python: TRANSLATION_RECORD=$(TRANSLATION_RECORD_PYTHON)
