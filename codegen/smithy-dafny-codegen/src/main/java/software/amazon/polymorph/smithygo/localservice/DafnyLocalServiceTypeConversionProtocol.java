@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameRes
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.smithygo.localservice.shapevisitor.ShapeVisitorHelper;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -159,6 +160,41 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
         if (serviceShape.hasTrait(LocalServiceTrait.class)) {
             generateConfigSerializer(context);
         }
+
+        writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+            for (Shape visitingShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+                // Get the value for the current key
+                String type;
+                type = DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
+                String inputType;
+                String outputType = ShapeVisitorHelper.shapeOptionalityMap.get(visitingShape)? "Wrappers.Option": DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
+                if (visitingShape.isMapShape()) {
+                    MemberShape valueMemberShape = ((MapShape) visitingShape).getValue();
+                    Shape valueShape = model.expectShape(valueMemberShape.getTarget());
+                    inputType = "map[string]".concat(SmithyNameResolver.getSmithyType(valueShape, context.symbolProvider().toSymbol(valueShape)));
+                }
+                else if (visitingShape.isListShape()) {
+                    MemberShape memberShape = ((ListShape) visitingShape).getMember();
+                    Shape memberShapeTarget = model.expectShape(memberShape.getTarget());
+                    inputType = "[]".concat(SmithyNameResolver.getSmithyType(memberShapeTarget, context.symbolProvider().toSymbol(memberShapeTarget)));
+                }
+                else {
+                    inputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
+                }                
+                writer.write("""
+                            func $L(input $L)($L) {
+                                return $L
+                            }        
+                            """,
+                                (visitingShape.getId().getName()).concat("_ToDafny"),
+                                inputType,
+                                outputType,
+                                // DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape)),
+                                // type,
+                                SmithyToDafnyShapeVisitor.visitorFuncMap.get(visitingShape)
+                            );
+            }
+        });
     }
 
     @Override
