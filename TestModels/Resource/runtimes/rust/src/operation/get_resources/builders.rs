@@ -52,9 +52,6 @@ impl GetResourcesFluentBuilder {
             // Operations' models don't declare their own validation error,
             // and smithy-rs seems to not generate a ValidationError case unless there is.
             // Vanilla smithy-rs uses SdkError::construction_failure, but we aren't using SdkError.
-//             .map_err(|e| crate::types::error::Error::Opaque {
-//                 obj: ::dafny_runtime::object::new(e)
-//             })?;
             .map_err(|mut e| crate::types::error::Error::Opaque {
                 obj: ::dafny_runtime::Object::from_ref(&mut e as &mut dyn ::std::any::Any)
             })?;
