@@ -53,7 +53,7 @@ async fn test_get_resource(client: &Client) {
 }
 
 async fn test_get_resource_positional(client: &Client) {
-    let output = client.get_resource_positional(Some("Test".to_owned())).send().await;
+    let output = client.get_resource_positional().name("Test").send().await;
     let resource = output.unwrap();
     let get_name_output = resource.get_name().send().await.unwrap();
     assert_eq!(Some("Test"), get_name_output.name().as_deref());

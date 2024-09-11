@@ -10,7 +10,7 @@ impl crate::operation::get_resource_positional::builders::GetResourcePositionalI
         crate::types::simple_resource::SimpleResourceRef,
         crate::operation::get_resource_positional::GetResourcePositionalError,
     > {
-        let mut fluent_builder = client.get_resource_positional(self.name.clone());
+        let mut fluent_builder = client.get_resource_positional();
         fluent_builder.inner = self;
         fluent_builder.send().await
     }

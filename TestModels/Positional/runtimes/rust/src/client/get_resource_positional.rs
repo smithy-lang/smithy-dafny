@@ -8,13 +8,11 @@ impl super::Client {
     ///   - [`output(SimpleResourceReference)`](crate::operation::get_resource_positional::GetResourcePositionalOutput::output): (undocumented)
     /// - On failure, responds with [`SdkError<GetResourcePositionalError>`](crate::operation::get_resource_positional::GetResourcePositionalError)
     pub fn get_resource_positional(
-        &self,
-        name: ::std::option::Option<::std::string::String>
+        &self
     ) -> crate::operation::get_resource_positional::builders::GetResourcePositionalFluentBuilder
     {
         crate::operation::get_resource_positional::builders::GetResourcePositionalFluentBuilder::new(
             self.clone(),
         )
-        .set_name(name)
     }
 }
