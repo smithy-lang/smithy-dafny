@@ -11,5 +11,7 @@ pub use simple_resource::SimpleResource;
 
 
 
+pub mod error;
+
 
 

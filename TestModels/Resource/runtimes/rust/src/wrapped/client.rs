@@ -75,7 +75,7 @@ impl crate::r#simple::resources::internaldafny::types::ISimpleResourcesClient fo
         match result {
             Err(error) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Failure {
-                    error: crate::conversions::get_resources::to_dafny_error(error),
+                    error: crate::conversions::error::to_dafny(error),
                 },
             ),
             Ok(client) => ::std::rc::Rc::new(
