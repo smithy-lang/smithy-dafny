@@ -11,7 +11,7 @@
                 ),
             )
         } else {
-            Err(crate::conversions::$snakeCaseOperationName:L::from_dafny_error(
+            Err(crate::conversions::error::from_dafny(
                 inner_result.error().clone(),
             ))
         }

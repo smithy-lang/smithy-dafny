@@ -9,7 +9,7 @@ impl $pascalCaseOperationInputName:LBuilder {
         $operationTargetName:L: &$operationTargetType:L,
     ) -> ::std::result::Result<
         crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L,
+        $qualifiedRustServiceErrorType:L,
     > {
         let mut fluent_builder = $operationTargetName:L.$snakeCaseOperationName:L();
         fluent_builder.inner = self;
@@ -40,17 +40,21 @@ impl $pascalCaseOperationName:LFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L,
+        $qualifiedRustServiceErrorType:L,
     > {
         let input = self
             .inner
             .build()
-            // Using unhandled since $pascalCaseOperationName:L doesn't declare any validation,
-            // and smithy-rs seems to not generate a ValidationError case unless there is
-            // (but isn't that a backwards compatibility problem for output structures?)
-            // Vanilla smithy-rs uses SdkError::construction_failure,
-            // but we aren't using SdkError.
-            .map_err(crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L::unhandled)?;
+            // Using Opaque since we don't have a validation-specific error yet.
+            // Operations' models don't declare their own validation error,
+            // and smithy-rs seems to not generate a ValidationError case unless there is.
+            // Vanilla smithy-rs uses SdkError::construction_failure, but we aren't using SdkError.
+//             .map_err(|e| $qualifiedRustServiceErrorType:L::Opaque {
+//                 obj: ::dafny_runtime::object::new(e)
+//             })?;
+            .map_err(|mut e| $qualifiedRustServiceErrorType:L::Opaque {
+                obj: ::dafny_runtime::Object::from_ref(&mut e as &mut dyn ::std::any::Any)
+            })?;
         crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.$operationTargetName:L, input).await
     }
 

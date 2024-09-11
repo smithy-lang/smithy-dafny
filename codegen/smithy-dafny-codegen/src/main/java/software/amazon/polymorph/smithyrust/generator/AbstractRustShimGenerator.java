@@ -137,24 +137,6 @@ public abstract class AbstractRustShimGenerator {
       .equals(service.getId().getNamespace());
   }
 
-  protected RustFile conversionsErrorModule() {
-    TokenTree modulesDeclarations = declarePubModules(
-      allErrorShapes()
-        .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
-    );
-    TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(
-      evalTemplate(
-        getClass(),
-        "runtimes/rust/conversions/error.rs",
-        serviceVariables()
-      )
-    );
-    return new RustFile(
-      Path.of("src", "conversions", "error.rs"),
-      TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions)
-    );
-  }
-
   protected TokenTree declarePubModules(Stream<String> moduleNames) {
     return TokenTree
       .of(
