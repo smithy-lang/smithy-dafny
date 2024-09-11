@@ -7,12 +7,14 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -26,6 +28,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 /**
@@ -61,9 +64,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     result.add(conversionsModule());
     result.addAll(allOperationConversionModules());
     result.addAll(allStructureConversionModules());
+    result.addAll(allUnionConversionModules());
     result.add(conversionsErrorModule());
     result.add(conversionsClientModule());
-    // TODO union conversion modules
 
     return result;
   }
@@ -200,6 +203,15 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   protected Set<RustFile> allStructureConversionModules() {
     return streamStructuresToGenerateStructsFor()
       .map(this::structureConversionModule)
+      .collect(Collectors.toSet());
+  }
+
+  protected Set<RustFile> allUnionConversionModules() {
+    return model
+      .getUnionShapes()
+      .stream()
+      .filter(this::shouldGenerateEnumForUnion)
+      .map(this::unionConversionModule)
       .collect(Collectors.toSet());
   }
 
