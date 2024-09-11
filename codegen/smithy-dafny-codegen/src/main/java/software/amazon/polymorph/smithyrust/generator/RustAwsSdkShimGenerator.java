@@ -197,6 +197,24 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
+  protected RustFile conversionsErrorModule() {
+    TokenTree modulesDeclarations = declarePubModules(
+      allErrorShapes()
+        .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
+    );
+    TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(
+      evalTemplate(
+        getClass(),
+        "runtimes/rust/conversions/error_common.rs",
+        serviceVariables()
+      )
+    );
+    return new RustFile(
+      Path.of("src", "conversions", "error.rs"),
+      TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions)
+    );
+  }
+
   protected Set<RustFile> allStructureConversionModules() {
     return streamStructuresToGenerateStructsFor()
       .map(this::structureConversionModule)

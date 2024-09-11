@@ -145,10 +145,8 @@ public class CodegenCli {
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
     final CodegenEngine engine = engineBuilder.build();
     switch (cliArguments.command) {
-      case GENERATE:
-        engine.run();
-      case PATCH_AFTER_TRANSPILE:
-        engine.patchAfterTranspiling();
+      case GENERATE -> engine.run();
+      case PATCH_AFTER_TRANSPILE -> engine.patchAfterTranspiling();
     }
   }
 
