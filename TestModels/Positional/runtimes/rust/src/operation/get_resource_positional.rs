@@ -15,9 +15,9 @@ impl GetResourcePositional {
         crate::types::simple_resource::SimpleResourceRef,
         crate::operation::get_resource_positional::GetResourcePositionalError,
     > {
-        let inner_input = crate::conversions::get_resource_positional::_get_resource_positional_input::to_dafny(input);
+        let inner_input = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&input.name.unwrap());
         let inner_result =
-            ::dafny_runtime::md!(client.dafny_client.clone()).GetResourcePositional(&inner_input.name());
+            ::dafny_runtime::md!(client.dafny_client.clone()).GetResourcePositional(&inner_input);
         if matches!(
             inner_result.as_ref(),
             crate::r#_Wrappers_Compile::Result::Success { .. }
