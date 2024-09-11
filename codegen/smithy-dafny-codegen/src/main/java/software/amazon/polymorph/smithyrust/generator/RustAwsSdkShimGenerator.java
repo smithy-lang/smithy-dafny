@@ -9,10 +9,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -404,9 +406,15 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
 
     RustFile requestModule = operationRequestConversionModule(operationShape);
-    RustFile responseModule = operationResponseConversionModule(operationShape);
+    Set<RustFile> result = new HashSet<>(Set.of(outerModule, requestModule));
 
-    return Set.of(outerModule, requestModule, responseModule);
+    final Optional<StructureShape> outputStructure = operationIndex.getOutputShape(operationShape);
+    if (outputStructure.isPresent() && !outputStructure.get().hasTrait(PositionalTrait.class)) {
+      RustFile responseModule = operationResponseConversionModule(operationShape);
+      result.add(responseModule);
+    }
+
+    return result;
   }
 
   protected TokenTree operationErrorToDafnyFunction(
