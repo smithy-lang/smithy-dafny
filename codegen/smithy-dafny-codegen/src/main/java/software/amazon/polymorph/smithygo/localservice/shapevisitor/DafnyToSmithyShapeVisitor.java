@@ -435,11 +435,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             memberName.replace(shape.getId().getName() + "Member", "Is_")
                         );
             String wrappedDataSource = "";
+            boolean requireAssertion = true;
             if (!(targetShape.isStructureShape())) {
                 // All other shape except structure needs a Wrapper object but unionDataSource is not a Wrapper object. 
                 wrappedDataSource = """
                     var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)""".formatted(unionDataSource);
                 unionDataSource = "dataSource.UnwrapOr(nil)";
+                requireAssertion =false;
             }
             eachMemberInUnion.append("""
                             %s
@@ -454,7 +456,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             SmithyNameResolver.smithyTypesNamespace(shape),
                             memberName,
                             pointerForPointableShape,
-                            ShapeVisitorHelper.toNativeContainerShapeHelper(member, context, unionDataSource, false, writer, isConfigShape, isMemberShapePointable)
+                            ShapeVisitorHelper.toNativeContainerShapeHelper(member, context, unionDataSource, requireAssertion, writer, isConfigShape, isMemberShapePointable)
                             // targetShape.accept(
                             //         new DafnyToSmithyShapeVisitor(context, unionDataSource, writer, isConfigShape, isMemberShapePointable)
                                 ));

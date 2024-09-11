@@ -289,8 +289,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
         delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
             for (Shape visitingShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
                 // Get the value for the current key
-                String type, inputType;
-                inputType = "interface{}";
+                String type;
                 if (visitingShape.isMapShape()) { 
                     MapShape mapShapeCast = (MapShape) visitingShape;
                     MemberShape valueMemberShape = mapShapeCast.getValue();
@@ -301,17 +300,14 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                     MemberShape memberShape = listShapeCast.getMember();
                     type = "[]".concat(SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(memberShape)));
                 } else {
-                    if (visitingShape.isStructureShape())
-                        inputType = DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
                     type = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
                 }
                 
                 writer.write("""
-                            func $L(input $L)($L) {
+                            func $L(input interface{})($L) {
                                 $L           
                             """,
                                 (visitingShape.getId().getName()).concat("_FromDafny"),
-                                inputType,
                                 // DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape)),
                                 type,
                                 DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingShape)
