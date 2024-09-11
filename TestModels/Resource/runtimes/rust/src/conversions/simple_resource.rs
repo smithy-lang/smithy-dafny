@@ -73,7 +73,7 @@ impl crate::simple::resources::internaldafny::types::ISimpleResource
               ),
           },
           Err(x) => crate::r#_Wrappers_Compile::Result::Failure {
-              error: crate::conversions::get_resource_data::to_dafny_error(x),
+              error: crate::conversions::error::to_dafny(x),
           },
       };
       ::std::rc::Rc::new(result)
@@ -86,7 +86,7 @@ impl crate::types::simple_resource::SimpleResource for ISimpleResourceDafnyWrapp
       input: crate::operation::get_resource_data::GetResourceDataInput,
   ) -> Result<
       crate::operation::get_resource_data::GetResourceDataOutput,
-      crate::operation::get_resource_data::GetResourceDataError,
+      crate::types::error::Error,
   > {
       let inner_input =
           crate::conversions::get_resource_data::_get_resource_data_input::to_dafny(input);
@@ -101,7 +101,7 @@ impl crate::types::simple_resource::SimpleResource for ISimpleResourceDafnyWrapp
               ),
           )
       } else {
-          Err(crate::conversions::get_resource_data::from_dafny_error(
+          Err(crate::conversions::error::from_dafny(
               inner_result.error().clone(),
           ))
       }

@@ -12,7 +12,7 @@ impl GetResourceDataInputBuilder {
         simple_resource: &crate::types::simple_resource::SimpleResourceRef,
     ) -> ::std::result::Result<
         crate::operation::get_resource_data::GetResourceDataOutput,
-        crate::operation::get_resource_data::GetResourceDataError,
+        crate::types::error::Error,
     > {
         let mut fluent_builder = simple_resource.get_resource_data();
         fluent_builder.inner = self;
@@ -43,17 +43,21 @@ impl GetResourceDataFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::get_resource_data::GetResourceDataOutput,
-        crate::operation::get_resource_data::GetResourceDataError,
+        crate::types::error::Error,
     > {
         let input = self
             .inner
             .build()
-            // Using unhandled since GetResourceData doesn't declare any validation,
-            // and smithy-rs seems to not generate a ValidationError case unless there is
-            // (but isn't that a backwards compatibility problem for output structures?)
-            // Vanilla smithy-rs uses SdkError::construction_failure,
-            // but we aren't using SdkError.
-            .map_err(crate::operation::get_resource_data::GetResourceDataError::unhandled)?;
+            // Using Opaque since we don't have a validation-specific error yet.
+            // Operations' models don't declare their own validation error,
+            // and smithy-rs seems to not generate a ValidationError case unless there is.
+            // Vanilla smithy-rs uses SdkError::construction_failure, but we aren't using SdkError.
+//             .map_err(|e| crate::types::error::Error::Opaque {
+//                 obj: ::dafny_runtime::object::new(e)
+//             })?;
+            .map_err(|mut e| crate::types::error::Error::Opaque {
+                obj: ::dafny_runtime::Object::from_ref(&mut e as &mut dyn ::std::any::Any)
+            })?;
         crate::operation::get_resource_data::GetResourceData::send(&self.simple_resource, input).await
     }
 

@@ -12,7 +12,7 @@ impl GetResourcesInputBuilder {
         client: &crate::client::Client,
     ) -> ::std::result::Result<
         crate::operation::get_resources::GetResourcesOutput,
-        crate::operation::get_resources::GetResourcesError,
+        crate::types::error::Error,
     > {
         let mut fluent_builder = client.get_resources();
         fluent_builder.inner = self;
@@ -43,17 +43,21 @@ impl GetResourcesFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::get_resources::GetResourcesOutput,
-        crate::operation::get_resources::GetResourcesError,
+        crate::types::error::Error,
     > {
         let input = self
             .inner
             .build()
-            // Using unhandled since GetResources doesn't declare any validation,
-            // and smithy-rs seems to not generate a ValidationError case unless there is
-            // (but isn't that a backwards compatibility problem for output structures?)
-            // Vanilla smithy-rs uses SdkError::construction_failure,
-            // but we aren't using SdkError.
-            .map_err(crate::operation::get_resources::GetResourcesError::unhandled)?;
+            // Using Opaque since we don't have a validation-specific error yet.
+            // Operations' models don't declare their own validation error,
+            // and smithy-rs seems to not generate a ValidationError case unless there is.
+            // Vanilla smithy-rs uses SdkError::construction_failure, but we aren't using SdkError.
+//             .map_err(|e| crate::types::error::Error::Opaque {
+//                 obj: ::dafny_runtime::object::new(e)
+//             })?;
+            .map_err(|mut e| crate::types::error::Error::Opaque {
+                obj: ::dafny_runtime::Object::from_ref(&mut e as &mut dyn ::std::any::Any)
+            })?;
         crate::operation::get_resources::GetResources::send(&self.client, input).await
     }
 
