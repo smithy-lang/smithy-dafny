@@ -153,7 +153,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 builder.append("%1$s: %2$s%3$s,".formatted(
                         StringUtils.capitalize(memberName),
                         (targetShape.isStructureShape() && memberShape.isOptional()) && !targetShape.hasTrait(ReferenceTrait.class) ? "&" : "",
-                        ShapeVisitorHelper.toNativeContainerShapeHelper(memberShape, context, derivedDataSource, false, writer, isConfigShape)
+                        ShapeVisitorHelper.toNativeContainerShapeHelper(memberShape, context, derivedDataSource, false, writer, isConfigShape, memberShape.isOptional())
                 ));
         }
 
@@ -186,11 +186,17 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 				break
 			}
 			fieldValue = append(fieldValue, %s)}
-			""".formatted(SmithyNameResolver.getSmithyType(shape, typeName), SmithyNameResolver.getSmithyType(shape, typeName), dataSource, dataSource,
-                targetShape.accept(
-                        new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
-                )));
-
+			""".formatted(SmithyNameResolver.getSmithyType(shape, typeName), dataSource, dataSource,
+            ShapeVisitorHelper.toNativeContainerShapeHelper(memberShape, context, "val", true, writer, isConfigShape, false)
+                // targetShape.accept(
+                //         new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
+                // )
+                ));
+            System.out.println(targetShape);
+            System.out.println(targetShape.accept(
+                    new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
+            ));
+            System.out.println("\n\n");
         // Close structure
         return builder.append("return fieldValue }%s".formatted(funcParenthesis)).toString();
     }
@@ -206,7 +212,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
         final var type = SmithyNameResolver.getSmithyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape));
         if (!visitorFuncMap.containsKey(shape)){
-            builder.append("func() map[string]%s {");
+            builder.append("func() map[string]%s {".formatted(type));
         }
         String valueDataSource = "(*val.(dafny.Tuple).IndexInt(1))";
         builder.append("""
@@ -225,7 +231,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                                }""".formatted(type, type, dataSource, dataSource, keyTargetShape.accept(
                 new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
         ),
-        ShapeVisitorHelper.toNativeContainerShapeHelper(valueMemberShape, context, valueDataSource, true, writer, isConfigShape)
+        ShapeVisitorHelper.toNativeContainerShapeHelper(valueMemberShape, context, valueDataSource, true, writer, isConfigShape, false)
                 // valueTargetShape.accept(
                 //         new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(1)).(%s)".formatted(DafnyNameResolver.getDafnyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape))), writer, isConfigShape)
                 // )
@@ -448,7 +454,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             SmithyNameResolver.smithyTypesNamespace(shape),
                             memberName,
                             pointerForPointableShape,
-                            ShapeVisitorHelper.toNativeContainerShapeHelper(member, context, unionDataSource, false, writer, isConfigShape)
+                            ShapeVisitorHelper.toNativeContainerShapeHelper(member, context, unionDataSource, false, writer, isConfigShape, isMemberShapePointable)
                             // targetShape.accept(
                             //         new DafnyToSmithyShapeVisitor(context, unionDataSource, writer, isConfigShape, isMemberShapePointable)
                                 ));
