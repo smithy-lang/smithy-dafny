@@ -31,7 +31,6 @@ import software.amazon.smithy.utils.StringUtils;
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
@@ -41,7 +40,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     private final boolean isOptional;
     protected boolean isPointerType;
-    public static final Map<Shape, String> visitorFuncMap = new HashMap<>();
+    public static final HashMap<Shape, String> visitorFuncMap = new HashMap<>();
 
     public void setPointerType() {
         this.isPointerType = false;
@@ -180,21 +179,17 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
             final var memberName = memberShapeEntry.getKey();
             final var memberShape = memberShapeEntry.getValue();
-            final var targetShape = context.model().expectShape(memberShape.getTarget());
             builder.append("%1$s%2$s".formatted(
-                    targetShape.accept(
-                            new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
-                                                          writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
-                            )), fieldSeparator
+                ShapeVisitorHelper.toDafnyContainerShapeHelper(memberShape, context, dataSource + "." + StringUtils.capitalize(memberName), writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false))
+                    // targetShape.accept(
+                    //         new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
+                    //                                       writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
+                    //         ))
+                            , fieldSeparator
             ));
-            System.out.println(targetShape);
-            System.out.println(targetShape.accept(
-                new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
-                                              writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
-                )));
-            System.out.println("\n\n");
         }
-
+        
+       
 
         return goCodeBlock.formatted(returnType, nilCheck, someWrapIfRequired.formatted(builder.append(")").toString()));
     }
@@ -228,8 +223,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                                }()""".formatted(returnType, dataSource, nilWrapIfRequired, dataSource,
                                                 keyTargetShape.accept(
                                                         new SmithyToDafnyShapeVisitor(context, "key", writer, isConfigShape, false, false)),
-                                                valueTargetShape.accept(
-                                                        new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)),
+                                                // valueTargetShape.accept(
+                                                //         new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)),
+                                                ShapeVisitorHelper.toDafnyContainerShapeHelper(valueMemberShape, context, "val" , writer, isConfigShape, false, false),
                                                 someWrapIfRequired.formatted("fieldValue.ToMap()")
                        )
         );
@@ -267,9 +263,11 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                                       }
                                       return %s
                                }()""".formatted(returnType, dataSource, nilWrapIfRequired, dataSource,
-                                                targetShape.accept(
-                                                        new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)
-                                                ), someWrapIfRequired.formatted("dafny.SeqOf(fieldValue...)")));
+                                                // targetShape.accept(
+                                                //         new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)
+                                                // ), 
+                                                ShapeVisitorHelper.toDafnyContainerShapeHelper(memberShape, context, "val" , writer, isConfigShape, false, false),
+                                                someWrapIfRequired.formatted("dafny.SeqOf(fieldValue...)")));
 
         // Close structure
         return builder.toString();
@@ -485,11 +483,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                                 SmithyNameResolver.smithyTypesNamespace(shape),
                                 context.symbolProvider().toMemberName(member),
                                 internalDafnyType.replace(shape.getId().getName(), "CompanionStruct_" + shape.getId().getName() + "_{}"),
-                                targetShape.accept(
-                                        new SmithyToDafnyShapeVisitor(
-                                            context,dataSource + ".(*" + SmithyNameResolver.smithyTypesNamespace(shape) + "." + context.symbolProvider().toMemberName(member) + ").Value", writer, isConfigShape, true, false
-                                        )
-                                    ),
+                                // targetShape.accept(
+                                //         new SmithyToDafnyShapeVisitor(
+                                //             context,dataSource + ".(*" + SmithyNameResolver.smithyTypesNamespace(shape) + "." + context.symbolProvider().toMemberName(member) + ").Value", writer, isConfigShape, true, false
+                                //         )
+                                //     ),
+                                ShapeVisitorHelper.toDafnyContainerShapeHelper(member, context, dataSource + ".(*" + SmithyNameResolver.smithyTypesNamespace(shape) + "." + context.symbolProvider().toMemberName(member) + ").Value", writer, isConfigShape, true, false),
                                 someWrapIfRequired.formatted(
                                     DafnyNameResolver.getDafnyCreateFuncForUnionMemberShape(shape, memberName),
                                     "inputToConversion.UnwrapOr(nil)%s".formatted(baseType != "" ? ".(" + baseType + ")" : "")
