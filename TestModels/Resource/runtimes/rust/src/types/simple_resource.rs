@@ -8,7 +8,7 @@ pub trait SimpleResource {
     input: crate::operation::get_resource_data::GetResourceDataInput,
   ) -> Result<
     crate::operation::get_resource_data::GetResourceDataOutput,
-    crate::operation::get_resource_data::GetResourceDataError,
+    crate::types::error::Error,
   >;
 }
 
