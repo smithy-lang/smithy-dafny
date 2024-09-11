@@ -45,5 +45,5 @@ map StructuredDataMap {
 }
 
 structure StructuredData {
-    content: Integer
+    content: RecursiveUnion
 }
