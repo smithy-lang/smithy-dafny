@@ -76,10 +76,13 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected Stream<StructureShape> allErrorShapes() {
-    return model
+    final var commonErrors = service.getErrors().stream();
+    final var operationErrors = model
       .getOperationShapes()
       .stream()
-      .flatMap(operationShape -> operationShape.getErrors().stream())
+      .flatMap(operationShape -> operationShape.getErrors().stream());
+    return Stream
+      .concat(commonErrors, operationErrors)
       .distinct()
       .map(errorShapeId -> model.expectShape(errorShapeId, StructureShape.class)
       );
