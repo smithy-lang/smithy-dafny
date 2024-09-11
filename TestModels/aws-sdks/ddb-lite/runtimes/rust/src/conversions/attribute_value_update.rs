@@ -8,7 +8,7 @@ pub fn to_dafny(
   ::std::rc::Rc::new(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValueUpdate::AttributeValueUpdate {
         Value: ::std::rc::Rc::new(match &value.value {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_value::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::attribute_value::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

@@ -75,7 +75,7 @@ public class ModelUtils {
       .getAllMembers()
       .entrySet()
       .stream()
-      .sorted()
+      .sorted(Map.Entry.comparingByKey())
       .map(Map.Entry::getValue);
   }
 
@@ -107,6 +107,36 @@ public class ModelUtils {
       .stream()
       .filter(structureShape ->
         structureShape.getId().getNamespace().equals(namespace)
+      );
+  }
+
+  /**
+   * Returns a stream of enum shapes in the given namespace.
+   * These include both Smithy v2 enums,
+   * and Smithy v1 @enum strings converted to {@link EnumShape}s.
+   */
+  public static Stream<EnumShape> streamEnumShapes(
+    final Model model,
+    final String namespace
+  ) {
+    @SuppressWarnings("deprecation")
+    final Stream<EnumShape> v1Enums = model
+      .getStringShapesWithTrait(EnumTrait.class)
+      .stream()
+      .map(ModelUtils::stringToEnumShape);
+    final Stream<EnumShape> v2Enums = model.getEnumShapes().stream();
+    return Stream
+      .concat(v1Enums, v2Enums)
+      .filter(shape -> shape.getId().getNamespace().equals(namespace));
+  }
+
+  public static EnumShape stringToEnumShape(final StringShape stringShape) {
+    return EnumShape
+      .fromStringShape(stringShape)
+      .orElseThrow(() ->
+        new UnsupportedOperationException(
+          "Could not convert %s to an enum".formatted(stringShape.getId())
+        )
       );
   }
 
@@ -544,10 +574,11 @@ public class ModelUtils {
   }
 
   /**
-   * @param shapeId ShapeId that might have positional or reference trait
+   * @param toShapeId ToShapeId that might have positional or reference trait
    * @return Fully de-referenced shapeId and naive shapeId as a ResolvedShapeId
    */
-  public static ResolvedShapeId resolveShape(ShapeId shapeId, Model model) {
+  public static ResolvedShapeId resolveShape(ToShapeId toShapeId, Model model) {
+    final ShapeId shapeId = toShapeId.toShapeId();
     if (shapeId.equals(SMITHY_API_UNIT)) {
       return new ResolvedShapeId(shapeId, shapeId);
     }

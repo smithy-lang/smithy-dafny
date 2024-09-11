@@ -36,7 +36,7 @@ pub fn to_dafny(
 })
 ,
  Recipient: ::std::rc::Rc::new(match &value.recipient {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

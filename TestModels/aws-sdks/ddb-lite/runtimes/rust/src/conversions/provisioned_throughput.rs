@@ -18,8 +18,8 @@ pub fn from_dafny(
     >,
 ) -> aws_sdk_dynamodb::types::ProvisionedThroughput {
     aws_sdk_dynamodb::types::ProvisionedThroughput::builder()
-          .set_read_capacity_units(Some( dafny_value.ReadCapacityUnits() .clone()))
- .set_write_capacity_units(Some( dafny_value.WriteCapacityUnits() .clone()))
+          .set_read_capacity_units(Some( dafny_value.ReadCapacityUnits() .clone() ))
+ .set_write_capacity_units(Some( dafny_value.WriteCapacityUnits() .clone() ))
           .build()
           .unwrap()
 }

@@ -10,7 +10,7 @@ pub fn to_dafny(
         AttributeDefinitions: ::std::rc::Rc::new(match &value.attribute_definitions {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::attribute_definition::to_dafny(&e)
+            |e| crate::conversions::attribute_definition::to_dafny(e)
 ,
         )
     },
@@ -21,7 +21,7 @@ pub fn to_dafny(
  KeySchema: ::std::rc::Rc::new(match &value.key_schema {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::key_schema_element::to_dafny(&e)
+            |e| crate::conversions::key_schema_element::to_dafny(e)
 ,
         )
     },
@@ -35,7 +35,7 @@ pub fn to_dafny(
 ,
  CreationDateTime: crate::standard_library_conversions::otimestamp_to_dafny(&value.creation_date_time),
  ProvisionedThroughput: ::std::rc::Rc::new(match &value.provisioned_throughput {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput_description::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::provisioned_throughput_description::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
@@ -44,14 +44,14 @@ pub fn to_dafny(
  TableArn: crate::standard_library_conversions::ostring_to_dafny(&value.table_arn),
  TableId: crate::standard_library_conversions::ostring_to_dafny(&value.table_id),
  BillingModeSummary: ::std::rc::Rc::new(match &value.billing_mode_summary {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::billing_mode_summary::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::billing_mode_summary::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  LocalSecondaryIndexes: ::std::rc::Rc::new(match &value.local_secondary_indexes {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::local_secondary_index_description::to_dafny(&e)
+            |e| crate::conversions::local_secondary_index_description::to_dafny(e)
 ,
         )
     },
@@ -61,7 +61,7 @@ pub fn to_dafny(
  GlobalSecondaryIndexes: ::std::rc::Rc::new(match &value.global_secondary_indexes {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::global_secondary_index_description::to_dafny(&e)
+            |e| crate::conversions::global_secondary_index_description::to_dafny(e)
 ,
         )
     },
@@ -69,7 +69,7 @@ pub fn to_dafny(
 })
 ,
  StreamSpecification: ::std::rc::Rc::new(match &value.stream_specification {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::stream_specification::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::stream_specification::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
@@ -79,7 +79,7 @@ pub fn to_dafny(
  Replicas: ::std::rc::Rc::new(match &value.replicas {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::replica_description::to_dafny(&e)
+            |e| crate::conversions::replica_description::to_dafny(e)
 ,
         )
     },
@@ -87,22 +87,22 @@ pub fn to_dafny(
 })
 ,
  RestoreSummary: ::std::rc::Rc::new(match &value.restore_summary {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::restore_summary::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::restore_summary::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  SSEDescription: ::std::rc::Rc::new(match &value.sse_description {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::sse_description::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::sse_description::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  ArchivalSummary: ::std::rc::Rc::new(match &value.archival_summary {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::archival_summary::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::archival_summary::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
  TableClassSummary: ::std::rc::Rc::new(match &value.table_class_summary {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::table_class_summary::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::table_class_summary::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,

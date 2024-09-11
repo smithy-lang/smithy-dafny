@@ -138,6 +138,7 @@ public class UnionGenerator implements Runnable {
         // Since the underlying value is unknown and un-comparable, that is the only
         // realistic implementation.
         var unknownSymbol = symbolProvider.toSymbol(shape).expectProperty("unknown", Symbol.class);
+        String unknownSymbolName = unknownSymbol.getName() + "Unknown";
         writer.write("""
                 class $1L():
                     \"""Represents an unknown variant.
@@ -162,8 +163,8 @@ public class UnionGenerator implements Runnable {
 
                     def __repr__(self) -> str:
                         return f"$1L(tag={self.tag})"
-                """, unknownSymbol.getName());
-        memberNames.add(unknownSymbol.getName());
+                """, unknownSymbolName);
+        memberNames.add(unknownSymbolName);
 
         shape.getTrait(DocumentationTrait.class).ifPresent(trait -> writer.writeComment(trait.getValue()));
         writer.addStdlibImport("typing", "Union");

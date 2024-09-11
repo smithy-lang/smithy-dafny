@@ -4,7 +4,7 @@ import _dafny
 from botocore.config import Config
 from boto3.session import Session
 
-from standard_library.internaldafny.generated.Wrappers import Option_Some
+from smithy_dafny_standard_library.internaldafny.generated.Wrappers import Option_Some
 from com_amazonaws_dynamodb.smithygenerated.com_amazonaws_dynamodb.shim import DynamoDBClientShim
 from com_amazonaws_dynamodb.internaldafny.generated.Com_Amazonaws_Dynamodb import *
 import com_amazonaws_dynamodb.internaldafny.generated.Com_Amazonaws_Dynamodb

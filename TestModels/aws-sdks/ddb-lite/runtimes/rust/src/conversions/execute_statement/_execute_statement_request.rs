@@ -12,7 +12,7 @@ pub fn to_dafny(
  Parameters: ::std::rc::Rc::new(match &value.parameters {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::attribute_value::to_dafny(&e)
+            |e| crate::conversions::attribute_value::to_dafny(e)
 ,
         )
     },

@@ -193,7 +193,10 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     if (shape.hasTrait(EnumTrait.class)) {
       return enumShape(EnumShape.fromStringShape(shape).get());
     }
-    return dataSource + ".VerbatimString(False)";
+    // Convert Dafny Seq of UTF-16 characters to native Python string
+    return "b''.join(ord(c).to_bytes(2, 'big') for c in %1$s).decode('utf-16-be')".formatted(
+        dataSource
+      );
   }
 
   @Override

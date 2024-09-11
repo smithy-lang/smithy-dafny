@@ -4,7 +4,7 @@ import _dafny
 from botocore.config import Config
 from boto3.session import Session
 
-from standard_library.internaldafny.generated.Wrappers import Option_Some
+from smithy_dafny_standard_library.internaldafny.generated.Wrappers import Option_Some
 from com_amazonaws_kms.smithygenerated.com_amazonaws_kms.shim import KMSClientShim
 from com_amazonaws_kms.internaldafny.generated.Com_Amazonaws_Kms import *
 import com_amazonaws_kms.internaldafny.generated.Com_Amazonaws_Kms

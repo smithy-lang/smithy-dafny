@@ -23,14 +23,14 @@ use simple_union::*;
 async fn test_myunion_integer() {
     let result = client()
         .get_union()
-        .value(crate::types::_my_union::MyUnion::IntegerValue(100))
+        .union(crate::types::MyUnion::IntegerValue(100))
         .send()
         .await;
     let output = result.unwrap();
-    let value = output.value().unwrap();
+    let value = output.union().as_ref().unwrap();
 
     match value {
-        crate::types::_my_union::MyUnion::IntegerValue(n) => assert_eq!(*n, 100),
+        crate::types::MyUnion::IntegerValue(n) => assert_eq!(*n, 100),
         _ => panic!("unexpected variant"),
     }
 }
@@ -52,16 +52,16 @@ async fn test_myunion_integer() {
 async fn test_myunion_string() {
     let result = client()
         .get_union()
-        .value(crate::types::_my_union::MyUnion::StringValue(
+        .union(crate::types::MyUnion::StringValue(
             "TestString".to_string(),
         ))
         .send()
         .await;
     let output = result.unwrap();
-    let value = output.value().unwrap();
+    let value = output.union().as_ref().unwrap();
 
     match value {
-        crate::types::_my_union::MyUnion::StringValue(s) => assert_eq!(s, "TestString"),
+        crate::types::MyUnion::StringValue(s) => assert_eq!(s, "TestString"),
         _ => panic!("unexpected variant"),
     }
 }
@@ -81,15 +81,15 @@ async fn test_myunion_string() {
 #[tokio::test]
 async fn test_known_value_union_string() {
     let result = client()
-        .get_union_known_value()
-        .value(crate::types::_known_value_union::KnownValueUnion::Value(10))
+        .get_known_value_union()
+        .union(crate::types::KnownValueUnion::Value(10))
         .send()
         .await;
     let output = result.unwrap();
-    let value = output.value().unwrap();
+    let value = output.union().as_ref().unwrap();
 
     match value {
-        crate::types::_known_value_union::KnownValueUnion::Value(n) => assert_eq!(*n, 10),
+        crate::types::KnownValueUnion::Value(n) => assert_eq!(*n, 10),
         _ => panic!("unexpected variant"),
     }
 }
