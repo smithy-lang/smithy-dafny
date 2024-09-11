@@ -10,5 +10,7 @@ pub mod builders;
 
 
 
+pub mod error;
+
 
 

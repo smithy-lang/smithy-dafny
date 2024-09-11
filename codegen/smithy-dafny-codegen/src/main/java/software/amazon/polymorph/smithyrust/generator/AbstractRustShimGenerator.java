@@ -77,10 +77,13 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected Stream<StructureShape> allErrorShapes() {
-    return model
+    final var commonErrors = service.getErrors().stream();
+    final var operationErrors = model
       .getOperationShapes()
       .stream()
-      .flatMap(operationShape -> operationShape.getErrors().stream())
+      .flatMap(operationShape -> operationShape.getErrors().stream());
+    return Stream
+      .concat(commonErrors, operationErrors)
       .distinct()
       .map(errorShapeId -> model.expectShape(errorShapeId, StructureShape.class)
       );
@@ -136,24 +139,6 @@ public abstract class AbstractRustShimGenerator {
       .getId()
       .getNamespace()
       .equals(service.getId().getNamespace());
-  }
-
-  protected RustFile conversionsErrorModule() {
-    TokenTree modulesDeclarations = declarePubModules(
-      allErrorShapes()
-        .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
-    );
-    TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(
-      evalTemplate(
-        getClass(),
-        "runtimes/rust/conversions/error.rs",
-        serviceVariables()
-      )
-    );
-    return new RustFile(
-      Path.of("src", "conversions", "error.rs"),
-      TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions)
-    );
   }
 
   protected TokenTree declarePubModules(Stream<String> moduleNames) {
