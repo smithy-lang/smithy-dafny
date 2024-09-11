@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
@@ -992,6 +993,21 @@ public abstract class AbstractRustShimGenerator {
       );
     }
 
+    final StructureShape inputShape = operationIndex.getInputShape(operationShape).get();
+    variables.put("operationInputType", evalTemplate(
+      "crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L",
+      variables
+    ));
+    final StructureShape outputShape = operationIndex.getOutputShape(operationShape).get();
+    if (inputShape.hasTrait(PositionalTrait.class)) {
+      variables.put("operationOutputType", rustTypeForShape(outputShape));
+    } else {
+      variables.put("operationOutputType", evalTemplate(
+        "crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L",
+        variables
+      ));
+    }
+
     return variables;
   }
 
@@ -1159,5 +1175,136 @@ public abstract class AbstractRustShimGenerator {
 
   protected String dafnyResourceTraitName(final ResourceShape resource) {
     return "I" + resourceName(resource);
+  }
+
+
+  protected String unionName(final UnionShape unionShape) {
+    return unionShape.getId().getName(service);
+  }
+
+  protected String rustUnionName(final UnionShape unionShape) {
+    return toPascalCase(unionName(unionShape));
+  }
+
+  protected String qualifiedRustUnionName(final UnionShape unionShape) {
+    return "%s::types::%s".formatted(
+      topLevelNameForShape(unionShape),
+      rustUnionName(unionShape)
+    );
+  }
+
+  /**
+   * Generates values for variables commonly used in union-specific templates.
+   */
+  protected HashMap<String, String> unionVariables(
+    final UnionShape unionShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String unionName = unionName(unionShape);
+    variables.put("unionName", unionName);
+    variables.put("snakeCaseUnionName", toSnakeCase(unionName));
+    variables.put("dafnyUnionName", unionName);
+    variables.put("rustUnionName", rustUnionName(unionShape));
+    variables.put("qualifiedRustUnionName", qualifiedRustUnionName(unionShape));
+    return variables;
+  }
+
+  protected String unionMemberName(final MemberShape memberShape) {
+    return memberShape.getMemberName();
+  }
+
+  protected String rustUnionMemberName(final MemberShape memberShape) {
+    return toPascalCase(unionMemberName(memberShape));
+  }
+
+  protected String dafnyUnionMemberName(final MemberShape memberShape) {
+    return unionMemberName(memberShape);
+  }
+
+  /**
+   * Generates values for variables commonly used in union-member-specific templates.
+   */
+  protected HashMap<String, String> unionMemberVariables(
+    final MemberShape memberShape
+  ) {
+    final String memberName = unionMemberName(memberShape);
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
+
+    final HashMap<String, String> variables = new HashMap<>();
+    variables.put("unionMemberName", memberName);
+    variables.put("snakeCaseUnionMemberName", toSnakeCase(memberName));
+    variables.put("dafnyUnionMemberName", dafnyUnionMemberName(memberShape));
+    variables.put("rustUnionMemberName", rustUnionMemberName(memberShape));
+    variables.put("unionMemberType", rustTypeForShape(targetShape));
+    return variables;
+  }
+
+  protected String rustTypeForShape(final Shape originalShape) {
+    // First handle indirection like @reference
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
+      originalShape,
+      model
+    );
+    final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
+
+    return switch (shape.getType()) {
+      case BOOLEAN -> "::std::primitive::bool";
+      // integral
+      case BYTE -> "::std::primitive::i8";
+      case SHORT -> "::std::primitive::i16";
+      case INTEGER -> "::std::primitive::i32";
+      case LONG -> "::std::primitive::i64";
+      // floats
+      case FLOAT -> "::std::primitive::f32";
+      case DOUBLE -> "::std::primitive::f64";
+      // special numerics
+      case BIG_INTEGER -> "::num::bigint::BigInt";
+      case BIG_DECIMAL -> "::num::rational::BigRational";
+      // special collections
+      case BLOB -> "::aws_smithy_types::Blob";
+      case STRING -> {
+        //noinspection deprecation
+        if (shape.hasTrait(EnumTrait.class)) {
+          yield qualifiedRustEnumType(
+            ModelUtils.stringToEnumShape(shape.asStringShape().orElseThrow())
+          );
+        }
+        yield "::std::string::String";
+      }
+      case ENUM -> qualifiedRustEnumType(shape.asEnumShape().orElseThrow());
+      // other simple shapes
+      case TIMESTAMP -> "::aws_smithy_types::DateTime";
+      // aggregates
+      case STRUCTURE -> {
+        final StructureShape structureShape = (StructureShape) shape;
+        yield qualifiedRustStructureType(structureShape);
+      }
+      case LIST -> {
+        final ListShape listShape = (ListShape) shape;
+        final String memberType = rustTypeForShape(
+          model.expectShape(listShape.getMember().getTarget())
+        );
+        yield "::std::vec::Vec<%s>".formatted(memberType);
+      }
+      case MAP -> {
+        final MapShape mapShape = (MapShape) shape;
+        final String keyType = rustTypeForShape(
+          model.expectShape(mapShape.getKey().getTarget())
+        );
+        final String valueType = rustTypeForShape(
+          model.expectShape(mapShape.getValue().getTarget())
+        );
+        yield "::std::collections::HashMap<%s, %s>".formatted(
+          keyType,
+          valueType
+        );
+      }
+      case UNION -> qualifiedRustUnionName((UnionShape) shape);
+      case RESOURCE -> qualifiedRustResourceType((ResourceShape) shape);
+      case SERVICE -> qualifiedRustServiceType((ServiceShape) shape);
+      default -> throw new UnsupportedOperationException(
+        "Unsupported shape type: " + shape.getType()
+      );
+    };
   }
 }

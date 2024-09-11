@@ -406,15 +406,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
 
     RustFile requestModule = operationRequestConversionModule(operationShape);
-    Set<RustFile> result = new HashSet<>(Set.of(outerModule, requestModule));
+    RustFile responseModule = operationResponseConversionModule(operationShape);
 
-    final Optional<StructureShape> outputStructure = operationIndex.getOutputShape(operationShape);
-    if (outputStructure.isPresent() && !outputStructure.get().hasTrait(PositionalTrait.class)) {
-      RustFile responseModule = operationResponseConversionModule(operationShape);
-      result.add(responseModule);
-    }
-
-    return result;
+    return Set.of(outerModule, requestModule, responseModule);
   }
 
   protected TokenTree operationErrorToDafnyFunction(
