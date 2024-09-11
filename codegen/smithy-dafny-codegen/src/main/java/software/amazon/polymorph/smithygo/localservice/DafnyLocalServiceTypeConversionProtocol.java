@@ -13,14 +13,17 @@ import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmith
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+import software.amazon.smithy.codegen.core.Symbol;
 
 public class DafnyLocalServiceTypeConversionProtocol
   implements ProtocolGenerator {
@@ -150,122 +153,59 @@ public class DafnyLocalServiceTypeConversionProtocol
         }
       });
 
-    final var refResources = context
-      .model()
-      .getShapesWithTrait(ReferenceTrait.class);
-    for (var refResource : refResources) {
-      final var resource = refResource
-        .expectTrait(ReferenceTrait.class)
-        .getReferentId();
-      if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
-        var resourceShape = model.expectShape(resource, ResourceShape.class);
-        resourceShape
-          .getOperations()
-          .forEach(eachOperation -> {
-            final var operation = model.expectShape(
-              eachOperation,
-              OperationShape.class
-            );
-            final var input = model.expectShape(operation.getInputShape());
+    @Override
+    public void generateSerializers(GenerationContext context) {
+        final Set<ShapeId> alreadyVisited = new HashSet<>();
+        final var model = context.model();
+        final var serviceShape = model.expectShape(context.settings().getService(), ServiceShape.class);
+        final var symbolProvider = context.symbolProvider();
+        final var writerDelegator = context.writerDelegator();
+        serviceShape.getOperations().forEach(eachOperation -> {
+            final var operation = model.expectShape(eachOperation, OperationShape.class);
+            final Shape input = model.expectShape(operation.getInputShape());
             if (!alreadyVisited.contains(input.toShapeId())) {
-              alreadyVisited.add(input.toShapeId());
-              if (
-                !input.hasTrait(UnitTypeTrait.class) &&
-                input
-                  .toShapeId()
-                  .getNamespace()
-                  .equals(serviceShape.toShapeId().getNamespace())
-              ) {
-                final var inputToDafnyMethodName =
-                  SmithyNameResolver.getToDafnyMethodName(
-                    serviceShape,
-                    input,
-                    ""
-                  );
-                final var inputSymbol = symbolProvider.toSymbol(input);
-                writerDelegator.useFileWriter(
-                  "%s/%s".formatted(
-                      SmithyNameResolver.shapeNamespace(serviceShape),
-                      TO_DAFNY
-                    ),
-                  SmithyNameResolver.shapeNamespace(serviceShape),
-                  writer -> {
-                    writer.addImportFromModule(
-                      SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                        input.toShapeId().getNamespace()
-                      ),
-                      SmithyNameResolver.smithyTypesNamespace(input)
-                    );
-                    writer.write(
-                      """
-                      func $L(nativeInput $L)($L) {
-                          ${C|}
-                      }""",
-                      inputToDafnyMethodName,
-                      SmithyNameResolver.getSmithyType(input, inputSymbol),
-                      DafnyNameResolver.getDafnyType(input, inputSymbol),
-                      writer.consumer(w ->
-                        generateRequestSerializer(
-                          context,
-                          operation,
-                          context.writerDelegator()
-                        )
-                      )
-                    );
-                  }
-                );
-              }
+                alreadyVisited.add(input.toShapeId());
+                if (!input.hasTrait(UnitTypeTrait.class) && input.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
+                    final var inputToDafnyMethodName = SmithyNameResolver.getToDafnyMethodName(serviceShape, input, "");
+                    final var inputSymbol = symbolProvider.toSymbol(input);
+                    final String outputType;
+                    if (input.hasTrait(PositionalTrait.class)) {
+                        // Output type in To Dafny should be unwrapped
+                        Shape inputForPositional = model.expectShape(input.getAllMembers().values().stream().findFirst().get().getTarget());
+                        Symbol symbolForPositional = symbolProvider.toSymbol(inputForPositional);
+                        outputType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
+                    } else {
+                        outputType = DafnyNameResolver.getDafnyType(input, inputSymbol);
+                    }
+                    writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+                        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(input.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespace(input));
+                        writer.write("""
+                                             func $L(nativeInput $L)($L) {
+                                                 ${C|}
+                                             }""", inputToDafnyMethodName, SmithyNameResolver.getSmithyType(input, inputSymbol),
+                                             outputType,
+                                     writer.consumer(w -> generateRequestSerializer(context, operation, context.writerDelegator())));
+                    });
+                }
             }
 
             final var output = model.expectShape(operation.getOutputShape());
-            if (!alreadyVisited.contains(output.toShapeId())) {
-              alreadyVisited.add(output.toShapeId());
-              if (
-                !output.hasTrait(UnitTypeTrait.class) &&
-                output
-                  .toShapeId()
-                  .getNamespace()
-                  .equals(serviceShape.toShapeId().getNamespace())
-              ) {
-                final var outputToDafnyMethodName =
-                  SmithyNameResolver.getToDafnyMethodName(
-                    serviceShape,
-                    output,
-                    ""
-                  );
-                final var outputSymbol = symbolProvider.toSymbol(output);
-                writerDelegator.useFileWriter(
-                  "%s/%s".formatted(
-                      SmithyNameResolver.shapeNamespace(serviceShape),
-                      TO_DAFNY
-                    ),
-                  SmithyNameResolver.shapeNamespace(serviceShape),
-                  writer -> {
-                    writer.addImportFromModule(
-                      SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                        output.toShapeId().getNamespace()
-                      ),
-                      SmithyNameResolver.smithyTypesNamespace(output)
-                    );
-                    writer.write(
-                      """
-                      func $L(nativeOutput $L)($L) {
-                          ${C|}
-                      }""",
-                      outputToDafnyMethodName,
-                      SmithyNameResolver.getSmithyType(output, outputSymbol),
-                      DafnyNameResolver.getDafnyType(output, outputSymbol),
-                      writer.consumer(w ->
-                        generateResponseSerializer(
-                          context,
-                          operation,
-                          context.writerDelegator()
-                        )
-                      )
-                    );
-                  }
-                );
-              }
+            if (!alreadyVisited.contains(output.toShapeId()) && !output.hasTrait(PositionalTrait.class)) {
+                alreadyVisited.add(output.toShapeId());
+                if (!output.hasTrait(UnitTypeTrait.class) && output.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
+                    final var outputToDafnyMethodName = SmithyNameResolver.getToDafnyMethodName(serviceShape, output, "");
+                    final var outputSymbol = symbolProvider.toSymbol(output);
+                    writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+                        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(output.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespace(output));
+                        writer.write("""
+                                             func $L(nativeOutput $L)($L) {
+                                                 ${C|}
+                                             }""", outputToDafnyMethodName,
+                                     SmithyNameResolver.getSmithyType(output, outputSymbol),
+                                     DafnyNameResolver.getDafnyType(output, outputSymbol),
+                                     writer.consumer(w -> generateResponseSerializer(context, operation, context.writerDelegator())));
+                    });
+                }
             }
             if (
               !alreadyVisited.contains(resourceShape.toShapeId()) &&
@@ -467,114 +407,51 @@ public class DafnyLocalServiceTypeConversionProtocol
               .model()
               .expectShape(operation.getInputShape());
             if (!alreadyVisited.contains(input.toShapeId())) {
-              alreadyVisited.add(input.toShapeId());
-              if (
-                !input.hasTrait(UnitTypeTrait.class) &&
-                input
-                  .toShapeId()
-                  .getNamespace()
-                  .equals(serviceShape.toShapeId().getNamespace())
-              ) {
-                final var inputFromDafnyMethodName =
-                  SmithyNameResolver.getFromDafnyMethodName(
-                    serviceShape,
-                    input,
-                    ""
-                  );
-                final var inputSymbol = context
-                  .symbolProvider()
-                  .toSymbol(input);
+                alreadyVisited.add(input.toShapeId());
+                if (!input.hasTrait(UnitTypeTrait.class) && input.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
+                    final var inputFromDafnyMethodName = SmithyNameResolver.getFromDafnyMethodName(serviceShape, input, "");
+                    final var inputSymbol = context.symbolProvider().toSymbol(input);
+                    final String inputType;
+                    if (input.hasTrait(PositionalTrait.class)) {
+                        // Input type in To native should be unwrapped
+                        Shape inputForPositional = context.model().expectShape(input.getAllMembers().values().stream().findFirst().get().getTarget());
+                        Symbol symbolForPositional = context.symbolProvider().toSymbol(inputForPositional);
+                        inputType = DafnyNameResolver.getDafnyType(inputForPositional, symbolForPositional);
+                    }
+                    else {
+                        inputType = DafnyNameResolver.getDafnyType(input, inputSymbol);
+                    }
+                    delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+                        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(input.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespace(input));
 
-                delegator.useFileWriter(
-                  "%s/%s".formatted(
-                      SmithyNameResolver.shapeNamespace(serviceShape),
-                      TO_NATIVE
-                    ),
-                  SmithyNameResolver.shapeNamespace(serviceShape),
-                  writer -> {
-                    writer.addImportFromModule(
-                      SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                        input.toShapeId().getNamespace()
-                      ),
-                      SmithyNameResolver.smithyTypesNamespace(input)
-                    );
-
-                    writer.write(
-                      """
-                      func $L(dafnyInput $L)($L) {
-                          ${C|}
-                      }""",
-                      inputFromDafnyMethodName,
-                      DafnyNameResolver.getDafnyType(input, inputSymbol),
-                      SmithyNameResolver.getSmithyType(input, inputSymbol),
-                      writer.consumer(w ->
-                        generateRequestDeserializer(
-                          context,
-                          operation,
-                          context.writerDelegator()
-                        )
-                      )
-                    );
-                  }
-                );
-              }
+                        writer.write("""
+                                             func $L(dafnyInput $L)($L) {
+                                                 ${C|}
+                                             }""", inputFromDafnyMethodName, inputType,
+                                     SmithyNameResolver.getSmithyType(input, inputSymbol),
+                                     writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
+                    });
+                }
             }
 
-            final var output = context
-              .model()
-              .expectShape(operation.getOutputShape());
-            if (!alreadyVisited.contains(output.toShapeId())) {
-              alreadyVisited.add(output.toShapeId());
-              if (
-                !output.hasTrait(UnitTypeTrait.class) &&
-                output
-                  .toShapeId()
-                  .getNamespace()
-                  .equals(serviceShape.toShapeId().getNamespace())
-              ) {
-                final var outputFromDafnyMethodName =
-                  SmithyNameResolver.getFromDafnyMethodName(
-                    serviceShape,
-                    output,
-                    ""
-                  );
-                final var outputSymbol = context
-                  .symbolProvider()
-                  .toSymbol(output);
+            final var output = context.model().expectShape(operation.getOutputShape());
+            if (!alreadyVisited.contains(output.toShapeId()) && !output.hasTrait(PositionalTrait.class)) {
+                alreadyVisited.add(output.toShapeId());
+                if (!output.hasTrait(UnitTypeTrait.class) && output.toShapeId().getNamespace().equals(serviceShape.toShapeId().getNamespace())) {
+                    final var outputFromDafnyMethodName = SmithyNameResolver.getFromDafnyMethodName(serviceShape, output, "");
+                    final var outputSymbol = context.symbolProvider().toSymbol(output);
 
-                delegator.useFileWriter(
-                  "%s/%s".formatted(
-                      SmithyNameResolver.shapeNamespace(serviceShape),
-                      TO_NATIVE
-                    ),
-                  SmithyNameResolver.shapeNamespace(serviceShape),
-                  writer -> {
-                    writer.addImportFromModule(
-                      SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                        output.toShapeId().getNamespace()
-                      ),
-                      SmithyNameResolver.smithyTypesNamespace(output)
-                    );
+                    delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
+                        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(output.toShapeId().getNamespace()), SmithyNameResolver.smithyTypesNamespace(output));
 
-                    writer.write(
-                      """
-                      func $L(dafnyOutput $L)($L) {
-                          ${C|}
-                      }""",
-                      outputFromDafnyMethodName,
-                      DafnyNameResolver.getDafnyType(output, outputSymbol),
-                      SmithyNameResolver.getSmithyType(output, outputSymbol),
-                      writer.consumer(w ->
-                        generateResponseDeserializer(
-                          context,
-                          operation,
-                          context.writerDelegator()
-                        )
-                      )
-                    );
-                  }
-                );
-              }
+                        writer.write("""
+                                             func $L(dafnyOutput $L)($L) {
+                                                 ${C|}
+                                             }""", outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
+                                     SmithyNameResolver.getSmithyType(output, outputSymbol),
+                                     writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
+                    });
+                }
             }
             if (
               !alreadyVisited.contains(resourceShape.toShapeId()) &&

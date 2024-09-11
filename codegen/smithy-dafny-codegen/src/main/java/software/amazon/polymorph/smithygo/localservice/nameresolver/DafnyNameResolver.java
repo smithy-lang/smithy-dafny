@@ -16,7 +16,6 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 
 public class DafnyNameResolver {
-
   public static String dafnyTypesNamespace(final Shape shape) {
     return shape
       .toShapeId()

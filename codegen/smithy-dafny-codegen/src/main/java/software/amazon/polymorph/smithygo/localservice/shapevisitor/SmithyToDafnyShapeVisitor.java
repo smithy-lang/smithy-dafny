@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -218,10 +219,71 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       returnType = "Wrappers.Option";
     }
 
-    var nilCheck = "";
-    if (isPointerType) {
-      nilCheck =
-        "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
+    @Override
+    public String structureShape(final StructureShape shape) {
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            return referenceStructureShape(shape);
+        }
+        final var builder = new StringBuilder();
+        writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
+        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(shape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(shape));
+
+        String someWrapIfRequired = "%s";
+
+        String companionStruct;
+        String returnType;
+        if (shape.hasTrait(ErrorTrait.class)) {
+            companionStruct = DafnyNameResolver.getDafnyErrorCompanionCreate(shape, context.symbolProvider().toSymbol(shape));
+            returnType = DafnyNameResolver.getDafnyBaseErrorType(shape);
+        } else {
+            companionStruct = DafnyNameResolver.getDafnyCompanionTypeCreate(shape, context.symbolProvider().toSymbol(shape));
+            returnType = DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape));
+        }
+        String nilWrapIfRequired = returnType.concat("{}");
+
+        if (this.isOptional) {
+            nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
+            someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
+            returnType = "Wrappers.Option";
+        }
+
+        var nilCheck = "";
+        if (isPointerType) {
+            nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
+        }
+        String goCodeBlock = "";
+        String fieldSeparator = ",";
+        if (!shape.hasTrait(PositionalTrait.class)){
+            builder.append("%1$s(".formatted(companionStruct));
+            goCodeBlock = """
+                func () %s {
+                    %s
+                    return %s
+                }()""";
+        }
+        else {
+            // Positional trait can only have one variable.
+            fieldSeparator = "";
+            // Don't unwrap position trait shape
+            goCodeBlock = """
+                    %s
+            """;
+        }
+        for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
+            final var memberName = memberShapeEntry.getKey();
+            final var memberShape = memberShapeEntry.getValue();
+            final var targetShape = context.model().expectShape(memberShape.getTarget());
+            builder.append("%1$s%2$s".formatted(
+                    targetShape.accept(
+                            new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
+                                                          writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
+                            )), fieldSeparator
+            ));
+        }
+        if (shape.hasTrait(PositionalTrait.class)){
+            return goCodeBlock.formatted(builder.toString());
+        }
+        return goCodeBlock.formatted(returnType, nilCheck, someWrapIfRequired.formatted(builder.append(")").toString()));
     }
     var goCodeBlock =
       """

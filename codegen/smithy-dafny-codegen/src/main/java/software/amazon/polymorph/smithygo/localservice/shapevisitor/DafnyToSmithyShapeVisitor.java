@@ -9,6 +9,7 @@ import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -251,8 +252,40 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       );
     }
 
-    return builder.append("}").toString();
-  }
+    @Override
+    public String structureShape(final StructureShape shape) {
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            return referenceStructureShape(shape);
+        }
+        final var builder = new StringBuilder();
+        writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(shape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(shape));
+
+        builder.append("%1$s{".formatted(SmithyNameResolver.smithyTypesNamespace(shape).concat(".").concat(shape.getId().getName())));
+        String fieldSeparator = ",";
+        for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
+            final var memberName = memberShapeEntry.getKey();
+            final var memberShape = memberShapeEntry.getValue();
+            final var targetShape = context.model().expectShape(memberShape.getTarget());
+            final String DtorConversion; 
+            if (!shape.hasTrait(PositionalTrait.class)) {
+                DtorConversion = ".Dtor_%s()".formatted(memberName);
+            } else {
+                // Shapes with PositionalTrait already gets input unwrapped so no conversion needed.
+                DtorConversion = "";
+            }
+            //TODO: Is it ever possible for structure to be nil?
+            final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
+                                                                       DtorConversion,
+                                                                       memberShape.isOptional() ? ".UnwrapOr(nil)" : "",
+                                                                       memberShape.isOptional() && targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class) ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
+                builder.append("%1$s: %2$s%3$s,".formatted(
+                        StringUtils.capitalize(memberName),
+                        (targetShape.isStructureShape() && memberShape.isOptional()) && !targetShape.hasTrait(ReferenceTrait.class) ? "&" : "",
+                        targetShape.accept(
+                                new DafnyToSmithyShapeVisitor(context, derivedDataSource, writer, isConfigShape, memberShape.isOptional())
+                        )
+                ));
+        }
 
   // TODO: smithy-dafny-conversion library
   @Override
