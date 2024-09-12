@@ -571,8 +571,7 @@ transpile_implementation_rust: STD_LIBRARY=
 transpile_implementation_rust: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation_rust: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
 transpile_implementation_rust: DAFNY_OTHER_FILES=$(RUST_OTHER_FILES)
-# transpile_test is not a typo! See above.
-transpile_implementation_rust: transpile_test _mv_implementation_rust patch_after_transpile_rust
+transpile_implementation_rust: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust patch_after_transpile_rust
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies

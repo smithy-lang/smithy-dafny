@@ -3,6 +3,8 @@
 
 CORES=2
 
+TRANSPILE_TESTS_IN_RUST=1
+
 include ../../SharedMakefile.mk
 
 NAMESPACE=com.amazonaws.kms
