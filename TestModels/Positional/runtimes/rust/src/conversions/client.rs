@@ -9,7 +9,7 @@
 pub fn to_dafny(
     value: &crate::client::Client,
 ) ->
-  ::dafny_runtime::Object<dyn crate::r#simple::constructor::internaldafny::types::ISimpleConstructorClient>
+  ::dafny_runtime::Object<dyn crate::r#simple::positional::internaldafny::types::ISimplePositionalClient>
 {
     value.dafny_client.clone()
 }
@@ -17,7 +17,7 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::dafny_runtime::Object<
-      dyn crate::r#simple::constructor::internaldafny::types::ISimpleConstructorClient
+      dyn crate::r#simple::positional::internaldafny::types::ISimplePositionalClient
     >,
 ) -> crate::client::Client {
   crate::client::Client { dafny_client: dafny_value }

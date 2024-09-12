@@ -8,6 +8,7 @@ pub fn to_dafny(
     crate::r#simple::positional::internaldafny::types::GetNameInput,
 >{
     ::std::rc::Rc::new(crate::r#simple::positional::internaldafny::types::GetNameInput::GetNameInput {
+
     })
 }
  #[allow(dead_code)]
@@ -17,6 +18,7 @@ pub fn from_dafny(
     >,
 ) -> crate::operation::get_name::GetNameInput {
     crate::operation::get_name::GetNameInput::builder()
+
         .build()
         .unwrap()
 }

@@ -8,7 +8,7 @@ impl $pascalCaseOperationInputName:LBuilder {
         self,
         $operationTargetName:L: &$operationTargetType:L,
     ) -> ::std::result::Result<
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
+        $operationOutputType:L,
         $qualifiedRustServiceErrorType:L,
     > {
         let mut fluent_builder = $operationTargetName:L.$snakeCaseOperationName:L();
@@ -39,7 +39,7 @@ impl $pascalCaseOperationName:LFluentBuilder {
     pub async fn send(
         self,
     ) -> ::std::result::Result<
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
+        $operationOutputType:L,
         $qualifiedRustServiceErrorType:L,
     > {
         let input = self
