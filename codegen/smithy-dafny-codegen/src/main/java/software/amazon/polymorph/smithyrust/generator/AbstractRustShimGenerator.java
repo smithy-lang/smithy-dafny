@@ -508,14 +508,19 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case INTEGER -> {
-        if (isRustOption) {
+        if (isDafnyOption) {
           yield TokenTree.of(
             "crate::standard_library_conversions::oint_from_dafny(%s.clone())".formatted(
                 dafnyValue
               )
           );
         } else {
-          yield TokenTree.of(dafnyValue, ".clone()");
+          TokenTree result = TokenTree.of(dafnyValue, ".clone()");
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
         }
       }
       case LONG -> {
