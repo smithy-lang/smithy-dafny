@@ -1367,12 +1367,20 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     StructureShape inputShape = operationIndex.getInputShape(operationShape).get();
     if (inputShape.hasTrait(PositionalTrait.class)) {
-      // Need to fetch the single member and then convert,
+      // Need to wrap the single member after converting,
       // since on the Rust side there is still an input structure
       // but not on the Dafny side.
       final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
-      final String rustValue = "input." + toSnakeCase(onlyMember.getMemberName());
-      variables.put("inputFromDafny", fromDafny(inputShape, rustValue, true, false).toString());
+      variables.put("memberName", toSnakeCase(onlyMember.getMemberName()));
+      variables.put("dafnyValue", fromDafny(inputShape, "input", true, false).toString());
+      variables.put("inputFromDafny", evalTemplate(
+        """
+        crate::operation::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::$syntheticOperationInputName:L {
+          $memberName:L: $dafnyValue:L
+        }
+        """,
+        variables
+      ));
     } else {
       variables.put("inputFromDafny", evalTemplate(
         "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone())",
