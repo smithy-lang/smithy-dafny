@@ -79,26 +79,6 @@ jobs:
         run: |
           go install golang.org/x/tools/cmd/goimports@latest
 
-      - name: Add go mod to Dafny Runtime Go
-        shell: bash
-        working-directory: ./DafnyRuntimeGo
-        run: | 
-          go mod init github.com/dafny-lang/DafnyRuntimeGo
-          go mod tidy
-
-      - name: polymorph dafny dependencies
-        shell: bash
-        working-directory: ./TestModels/dafny-dependencies/StandardLibrary
-        run: |
-          export DAFNY_VERSION=4.6
-          make polymorph_dafny
-          make transpile_go
-          make polymorph_go 
-          cd ./runtimes/go/ImplementationFromDafny-go/
-          go mod init github.com/dafny-lang/DafnyStandardLibGo
-          # TODO: This should handwritten (in the makefile or something)          
-          echo "replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/" >> go.mod;
-
       - name: Generate Polymorph Dafny and Go code
         shell: bash
         working-directory: ./${{ matrix.library }}
