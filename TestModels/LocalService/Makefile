@@ -3,7 +3,6 @@
 
 CORES=2
 
-TRANSPILE_TESTS_IN_RUST=1
 ENABLE_EXTERN_PROCESSING=1
 
 include ../SharedMakefile.mk
