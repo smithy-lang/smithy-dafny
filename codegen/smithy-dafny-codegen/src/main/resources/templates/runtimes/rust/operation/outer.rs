@@ -9,9 +9,9 @@ impl $pascalCaseOperationName:L {
     }
     pub(crate) async fn send(
         $operationTargetName:L: &$operationTargetType:L,
-        input: crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L,
+        input: $operationInputType:L,
     ) -> ::std::result::Result<
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
+        $operationOutputType:L,
         $qualifiedRustServiceErrorType:L,
     > {
         $operationSendBody:L

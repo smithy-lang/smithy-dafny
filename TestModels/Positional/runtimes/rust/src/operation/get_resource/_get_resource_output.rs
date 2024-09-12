@@ -15,13 +15,13 @@ pub fn output(&self) -> &::std::option::Option<crate::types::simple_resource::Si
 }
 }
 impl GetResourceOutput {
-    /// Creates a new builder-style object to manufacture [`GetResourcesOutput`](crate::operation::get_resources::builders::GetResourcesOutput).
+    /// Creates a new builder-style object to manufacture [`GetResourceOutput`](crate::operation::get_resource::builders::GetResourceOutput).
     pub fn builder() -> crate::operation::get_resource::builders::GetResourceOutputBuilder {
         crate::operation::get_resource::builders::GetResourceOutputBuilder::default()
     }
 }
 
-/// A builder for [`GetResourcesOutput`](crate::operation::operation::GetResourcesOutput).
+/// A builder for [`GetResourceOutput`](crate::operation::operation::GetResourceOutput).
 #[non_exhaustive]
 #[derive(
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
@@ -44,7 +44,7 @@ pub fn set_output(mut self, input: ::std::option::Option<crate::types::simple_re
 pub fn get_output(&self) -> &::std::option::Option<crate::types::simple_resource::SimpleResourceRef> {
     &self.output
 }
-    /// Consumes the builder and constructs a [`GetResourcesOutput`](crate::operation::operation::GetResourcesOutput).
+    /// Consumes the builder and constructs a [`GetResourceOutput`](crate::operation::operation::GetResourceOutput).
     pub fn build(
         self,
     ) -> ::std::result::Result<

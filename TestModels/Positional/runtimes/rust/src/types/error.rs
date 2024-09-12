@@ -3,7 +3,9 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[derive(::std::clone::Clone, ::std::fmt::Debug, ::std::cmp::PartialEq)]
 pub enum Error {
-
+    SimplePositionalException {
+    message: ::std::string::String,
+},
     CollectionOfErrors {
         list: ::std::vec::Vec<Error>,
         message: ::std::string::String,
