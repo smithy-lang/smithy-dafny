@@ -1307,7 +1307,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       structureId,
       StructureShape.class
     );
-    final boolean isPositional = structureShape.hasTrait(PositionalTrait.class);
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
       operationVariables(operationShape),
@@ -1318,46 +1317,24 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       fluentMemberSettersForStructure(structureShape).toString()
     );
 
-    if (isPositional) {
-      return TokenTree.of(
-        evalTemplate(
-          """
-          #[allow(dead_code)]
-          pub fn from_dafny(
-              dafny_value: ::std::rc::Rc<
-                  crate::r#$dafnyTypesModuleName:L::$structureName:L,
-              >,
-          ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
-              crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
-                  $fluentMemberSetters:L
-                  .build()
-                  .unwrap()
-          }
-          """,
-          variables
-        )
-      );
-    } else {
-      // unwrap() is safe as long as the builder is infallible
-      return TokenTree.of(
-        evalTemplate(
-          """
-          #[allow(dead_code)]
-          pub fn from_dafny(
-              dafny_value: ::std::rc::Rc<
-                  crate::r#$dafnyTypesModuleName:L::$structureName:L,
-              >,
-          ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
-              crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
-                  $fluentMemberSetters:L
-                  .build()
-                  .unwrap()
-          }
-          """,
-          variables
-        )
-      );
-    }
+    return TokenTree.of(
+      evalTemplate(
+        """
+        #[allow(dead_code)]
+        pub fn from_dafny(
+            dafny_value: ::std::rc::Rc<
+                crate::r#$dafnyTypesModuleName:L::$structureName:L,
+            >,
+        ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
+            crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
+                $fluentMemberSetters:L
+                .build()
+                .unwrap()
+        }
+        """,
+        variables
+      )
+    );
   }
 
   private RustFile wrappedModule() {
@@ -1830,7 +1807,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              %s::conversions::%s::to_dafny(&%s.clone().unwrap())
+              %s::conversions::%s::to_dafny(%s.clone().unwrap())
               """.formatted(prefix, structureShapeName, rustValue)
             );
           } else {
