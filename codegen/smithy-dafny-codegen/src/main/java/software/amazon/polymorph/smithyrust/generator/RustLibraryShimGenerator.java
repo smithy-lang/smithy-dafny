@@ -657,7 +657,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       StructureShape outputShape = operationIndex
         .getOutputShape(operationShape)
         .get();
-      if (inputShape.hasTrait(PositionalTrait.class)) {
+      if (outputShape.hasTrait(PositionalTrait.class)) {
         variables.put(
           "outputFromDafny",
           fromDafny(outputShape, "inner_result.value()", false, false)
@@ -1175,7 +1175,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       operationName(operationShape)
     );
 
-    Optional<StructureShape> inputStructure = operationIndex.getOutputShape(
+    Optional<StructureShape> inputStructure = operationIndex.getInputShape(
       operationShape
     );
     final boolean hasInputStructure =
@@ -1307,7 +1307,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       structureId,
       StructureShape.class
     );
-    final boolean isPositional = structureShape.hasTrait(PositionalTrait.class);
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
       operationVariables(operationShape),
@@ -1318,46 +1317,24 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       fluentMemberSettersForStructure(structureShape).toString()
     );
 
-    if (isPositional) {
-      return TokenTree.of(
-        evalTemplate(
-          """
-          #[allow(dead_code)]
-          pub fn from_dafny(
-              dafny_value: ::std::rc::Rc<
-                  crate::r#$dafnyTypesModuleName:L::$structureName:L,
-              >,
-          ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
-              crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
-                  $fluentMemberSetters:L
-                  .build()
-                  .unwrap()
-          }
-          """,
-          variables
-        )
-      );
-    } else {
-      // unwrap() is safe as long as the builder is infallible
-      return TokenTree.of(
-        evalTemplate(
-          """
-          #[allow(dead_code)]
-          pub fn from_dafny(
-              dafny_value: ::std::rc::Rc<
-                  crate::r#$dafnyTypesModuleName:L::$structureName:L,
-              >,
-          ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
-              crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
-                  $fluentMemberSetters:L
-                  .build()
-                  .unwrap()
-          }
-          """,
-          variables
-        )
-      );
-    }
+    return TokenTree.of(
+      evalTemplate(
+        """
+        #[allow(dead_code)]
+        pub fn from_dafny(
+            dafny_value: ::std::rc::Rc<
+                crate::r#$dafnyTypesModuleName:L::$structureName:L,
+            >,
+        ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
+            crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
+                $fluentMemberSetters:L
+                .build()
+                .unwrap()
+        }
+        """,
+        variables
+      )
+    );
   }
 
   private RustFile wrappedModule() {
@@ -1434,7 +1411,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     StructureShape outputShape = operationIndex
       .getOutputShape(operationShape)
       .get();
-    if (inputShape.hasTrait(PositionalTrait.class)) {
+    if (outputShape.hasTrait(PositionalTrait.class)) {
       variables.put(
         "outputToDafny",
         toDafny(outputShape, "inner_result", false, false).toString()
@@ -1641,14 +1618,26 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case BOOLEAN -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
+                  rustValue
+                )
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(Some(%s))".formatted(
+                  rustValue
+                )
+            );
+          }
         } else {
-          yield TokenTree.of("%s.clone()".formatted(rustValue));
+          if (isRustOption) {
+            yield TokenTree.of("%s.clone().unwrap()".formatted(rustValue));
+          } else {
+            yield TokenTree.of("%s.clone()".formatted(rustValue));
+          }
         }
       }
       case INTEGER -> {
@@ -1667,7 +1656,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             );
           }
         } else {
-          yield TokenTree.of("%s.clone()".formatted(rustValue));
+          if (isRustOption) {
+            yield TokenTree.of("%s.clone().unwrap()".formatted(rustValue));
+          } else {
+            yield TokenTree.of("%s.clone()".formatted(rustValue));
+          }
         }
       }
       case LONG -> {
@@ -1830,7 +1823,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              %s::conversions::%s::to_dafny(&%s.clone().unwrap())
+              %s::conversions::%s::to_dafny(%s.clone().unwrap())
               """.formatted(prefix, structureShapeName, rustValue)
             );
           } else {
