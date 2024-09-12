@@ -727,3 +727,15 @@ local_transpile_test_single: TRANSPILE_DEPENDENCIES= \
 		$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX)) \
 		-library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 local_transpile_test_single: transpile_test
+
+# Targets to polymorph a single local service for convenience.
+# Specify the local service to build by passing a SERVICE env var.
+
+local_polymorph_rust_single: POLYMORPH_LANGUAGE_TARGET=rust
+local_polymorph_rust_single: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+local_polymorph_rust_single: local_polymorph_single
+
+local_polymorph_single: service_deps_var=SERVICE_DEPS_$(SERVICE)
+local_polymorph_single: namespace_var=SERVICE_NAMESPACE_$(SERVICE)
+local_polymorph_single: PROJECT_DEPENDENCIES=
+local_polymorph_single: _polymorph
