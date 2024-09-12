@@ -144,10 +144,13 @@ public class ModelUtils {
    * @return true if the given shape ID is in the given service's namespace
    */
   public static boolean isInServiceNamespace(
-    final ShapeId shapeId,
+    final ToShapeId shapeId,
     final ServiceShape serviceShape
   ) {
-    return shapeId.getNamespace().equals(serviceShape.getId().getNamespace());
+    return shapeId
+      .toShapeId()
+      .getNamespace()
+      .equals(serviceShape.getId().getNamespace());
   }
 
   /**
