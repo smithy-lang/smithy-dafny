@@ -1653,9 +1653,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           }
         } else {
           if (isRustOption) {
-            yield TokenTree.of("%s.clone()".formatted(rustValue));
-          } else {
             yield TokenTree.of("%s.clone().unwrap()".formatted(rustValue));
+          } else {
+            yield TokenTree.of("%s.clone()".formatted(rustValue));
           }
         }
       }
