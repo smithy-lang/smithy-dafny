@@ -198,6 +198,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private Set<RustFile> allOperationClientBuilders() {
     return allOperationShapes()
+      .filter(this::shouldGenerateOperation)
       .map(this::operationClientBuilder)
       .collect(Collectors.toSet());
   }
@@ -586,6 +587,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       pub mod $snakeCaseOperationName:L;
       """;
     final String content = allOperationShapes()
+      .filter(this::shouldGenerateOperation)
       .map(this::operationVariables)
       .map(opVariables -> IOUtils.evalTemplate(opTemplate, opVariables))
       .collect(Collectors.joining("\n\n"));
@@ -594,6 +596,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private Set<RustFile> allOperationImplementationModules() {
     return allOperationShapes()
+      .filter(this::shouldGenerateOperation)
       .map(this::operationImplementationModules)
       .flatMap(Collection::stream)
       .collect(Collectors.toSet());

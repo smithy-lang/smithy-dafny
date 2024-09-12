@@ -77,6 +77,10 @@ public abstract class AbstractRustShimGenerator {
     return model.getOperationShapes().stream().sorted();
   }
 
+  protected boolean shouldGenerateOperation(OperationShape operationShape) {
+    return ModelUtils.isInServiceNamespace(operationShape, service);
+  }
+
   protected Stream<StructureShape> allErrorShapes() {
     final var commonErrors = service.getErrors().stream();
     final var operationErrors = model
@@ -107,10 +111,7 @@ public abstract class AbstractRustShimGenerator {
       !structureShape.hasTrait(ErrorTrait.class) &&
       !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
       !structureShape.hasTrait(ReferenceTrait.class) &&
-      structureShape
-        .getId()
-        .getNamespace()
-        .equals(service.getId().getNamespace())
+      ModelUtils.isInServiceNamespace(structureShape, service)
     );
   }
 
@@ -136,10 +137,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected boolean shouldGenerateEnumForUnion(UnionShape unionShape) {
-    return unionShape
-      .getId()
-      .getNamespace()
-      .equals(service.getId().getNamespace());
+    return ModelUtils.isInServiceNamespace(unionShape, service);
   }
 
   protected TokenTree declarePubModules(Stream<String> moduleNames) {
@@ -879,6 +877,7 @@ public abstract class AbstractRustShimGenerator {
 
   protected Set<RustFile> allOperationConversionModules() {
     return allOperationShapes()
+      .filter(this::shouldGenerateOperation)
       .map(this::operationConversionModules)
       .flatMap(Collection::stream)
       .collect(Collectors.toSet());
