@@ -657,7 +657,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       StructureShape outputShape = operationIndex
         .getOutputShape(operationShape)
         .get();
-      if (inputShape.hasTrait(PositionalTrait.class)) {
+      if (outputShape.hasTrait(PositionalTrait.class)) {
         variables.put(
           "outputFromDafny",
           fromDafny(outputShape, "inner_result.value()", false, false)
