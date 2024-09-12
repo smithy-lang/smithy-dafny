@@ -911,24 +911,19 @@ public abstract class AbstractRustShimGenerator {
   protected HashMap<String, String> serviceVariables() {
     final HashMap<String, String> variables = new HashMap<>();
     variables.put("serviceName", service.getId().getName(service));
-    variables.put("dafnyModuleName", getDafnyModuleName());
     variables.put("dafnyInternalModuleName", getDafnyInternalModuleName());
     variables.put("dafnyTypesModuleName", getDafnyTypesModuleName());
     variables.put("rustTypesModuleName", getRustTypesModuleName());
     return variables;
   }
 
-  protected String getDafnyModuleName() {
+  protected String getDafnyInternalModuleName() {
     String dafnyExternName = DafnyNameResolver.dafnyExternNamespace(
       service.getId().getNamespace()
     );
     return dafnyExternName
       .replace(".", "::")
       .toLowerCase(Locale.ROOT);
-  }
-
-  protected String getDafnyInternalModuleName() {
-    return "%s::internaldafny".formatted(getDafnyModuleName());
   }
 
   protected String getDafnyTypesModuleName() {
