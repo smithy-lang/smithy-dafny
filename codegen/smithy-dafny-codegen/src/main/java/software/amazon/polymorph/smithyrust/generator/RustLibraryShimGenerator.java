@@ -1582,21 +1582,17 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         } else if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
           final String rustToDafny =
             "dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.as_bytes().to_vec(), |b| *b)";
-          String valueToDafny;
-          if (isRustOption) {
-            valueToDafny =
-              """
-              match %s {
-                Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
-                None => crate::_Wrappers_Compile::Option::None {},
-              }""".formatted(rustValue, rustToDafny.formatted("s"));
-            if (!isDafnyOption) {
-              valueToDafny = "(%s).Extract()".formatted(valueToDafny);
-            }
-          } else {
-            valueToDafny = rustToDafny.formatted(rustValue);
+          if (!isRustOption) {
+            yield TokenTree.of(rustToDafny.formatted(rustValue));
           }
-          yield TokenTree.of("::std::rc::Rc::new(%s)".formatted(valueToDafny));
+          final String coercion = isDafnyOption ? "into()" : "Extract()";
+          yield TokenTree.of(
+            """
+            (match %s {
+              Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
+              None => crate::_Wrappers_Compile::Option::None {},
+            }).%s""".formatted(rustValue, rustToDafny.formatted("s"), coercion)
+          );
         } else {
           if (isRustOption) {
             var result = TokenTree.of(
