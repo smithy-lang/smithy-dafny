@@ -1,15 +1,23 @@
-use tokio::runtime::Runtime;
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+use std::sync::LazyLock;
 
 pub struct Client {
-    wrapped: crate::client::Client,
-
-    /// A `current_thread` runtime for executing operations on the
-    /// asynchronous client in a blocking manner.
-    rt: Runtime,
+    wrapped: crate::client::Client
 }
 
-impl dafny_runtime::UpcastObject<dyn crate::simple::positional::internaldafny::types::ISimplePositionalClient> for Client {
-  ::dafny_runtime::UpcastObjectFn!(dyn crate::simple::positional::internaldafny::types::ISimplePositionalClient);
+/// A runtime for executing operations on the asynchronous client in a blocking manner.
+/// Necessary because Dafny only generates synchronous code.
+static dafny_tokio_runtime: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {
+    tokio::runtime::Builder::new_multi_thread()
+          .enable_all()
+          .build()
+          .unwrap()
+});
+
+impl dafny_runtime::UpcastObject<dyn crate::r#simple::positional::internaldafny::types::ISimplePositionalClient> for Client {
+  ::dafny_runtime::UpcastObjectFn!(dyn crate::r#simple::positional::internaldafny::types::ISimplePositionalClient);
 }
 
 impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
@@ -17,70 +25,57 @@ impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
 }
 
 impl Client {
-    pub fn from_conf(config: &::std::rc::Rc<
-    crate::simple::positional::internaldafny::types::SimplePositionalConfig,
+  pub fn from_conf(config: &::std::rc::Rc<
+    crate::r#simple::positional::internaldafny::types::SimplePositionalConfig,
   >) ->
 ::std::rc::Rc<crate::r#_Wrappers_Compile::Result<
-  ::dafny_runtime::Object<dyn crate::simple::positional::internaldafny::types::ISimplePositionalClient>,
-  ::std::rc::Rc<crate::simple::positional::internaldafny::types::Error>
-    >>{
-        let rt_result = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build();
-        let rt = match rt_result {
-            Ok(x) => x,
-            Err(error) => return crate::conversions::error::to_opaque_error_result(error),
+  ::dafny_runtime::Object<dyn crate::r#simple::positional::internaldafny::types::ISimplePositionalClient>,
+  ::std::rc::Rc<crate::r#simple::positional::internaldafny::types::Error>
+>> {
+    let result = crate::client::Client::from_conf(
+      crate::conversions::simple_positional_config::_simple_positional_config::from_dafny(
+          config.clone(),
+      ),
+    );
+    match result {
+      Ok(client) =>  {
+        let wrap = crate::wrapped::client::Client {
+          wrapped: client
         };
-        let result = crate::client::Client::from_conf(
-            crate::conversions::simple_positional_config::_simple_positional_config::from_dafny(
-                config.clone(),
-            ),
-        );
-        match result {
-            Ok(client) => {
-                let wrap = crate::wrapped::client::Client {
-                    wrapped: client,
-                    rt,
-                };
-                std::rc::Rc::new(
-                    crate::_Wrappers_Compile::Result::Success {
-                        value: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(wrap)),
-                    },
-                )
-            }
-            Err(error) => crate::conversions::error::to_opaque_error_result(error),
-        }
+        std::rc::Rc::new(
+          crate::_Wrappers_Compile::Result::Success {
+            value: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(wrap))
+          }
+        )
+      },
+      Err(error) => crate::conversions::error::to_opaque_error_result(error)
     }
+  }
 }
 
-impl crate::simple::positional::internaldafny::types::ISimplePositionalClient
-    for Client
-{
+impl crate::r#simple::positional::internaldafny::types::ISimplePositionalClient for Client {
     fn GetResource(
         &mut self,
-        input: &std::rc::Rc<
-            crate::simple::positional::internaldafny::types::GetResourceInput,
-        >,
+        input: &::std::rc::Rc<crate::r#simple::positional::internaldafny::types::GetResourceInput>,
     ) -> std::rc::Rc<
         crate::r#_Wrappers_Compile::Result<
-            std::rc::Rc<
-                crate::simple::positional::internaldafny::types::GetResourceOutput,
-            >,
-            std::rc::Rc<crate::simple::positional::internaldafny::types::Error>,
+            ::std::rc::Rc<crate::r#simple::positional::internaldafny::types::GetResourceOutput>,
+            std::rc::Rc<crate::r#simple::positional::internaldafny::types::Error>,
         >,
     >{
-        let inner_input =
-            crate::conversions::get_resource::_get_resource_input::from_dafny(input.clone());
-        let result = self.rt.block_on(crate::operation::get_resource::GetResource::send(&self.wrapped, inner_input));
+        let inner_input = crate::conversions::get_resource::_get_resource_input::from_dafny(input.clone());
+        let result = tokio::task::block_in_place(|| {
+            dafny_tokio_runtime.block_on(crate::operation::get_resource::GetResource::send(&self.wrapped, inner_input))
+        });
         match result {
             Err(error) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Failure {
-                    error: crate::conversions::get_resource::to_dafny_error(error),
+                    error: crate::conversions::error::to_dafny(error),
                 },
             ),
-            Ok(client) => ::std::rc::Rc::new(
+            Ok(inner_result) => ::std::rc::Rc::new(
                 crate::_Wrappers_Compile::Result::Success {
-                    value: crate::conversions::get_resource::_get_resource_output::to_dafny(client),
+                    value: crate::conversions::get_resource::_get_resource_output::to_dafny(inner_result),
                 },
             ),
         }
@@ -88,15 +83,31 @@ impl crate::simple::positional::internaldafny::types::ISimplePositionalClient
 
     fn GetResourcePositional(
         &mut self,
-        input: &dafny_runtime::Sequence<dafny_runtime::DafnyCharUTF16>,
+        input: &::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>,
     ) -> std::rc::Rc<
         crate::r#_Wrappers_Compile::Result<
-            dafny_runtime::Object<
-                dyn crate::r#simple::positional::internaldafny::types::ISimpleResource,
-            >,
+            ::dafny_runtime::Object<dyn crate::r#simple::positional::internaldafny::types::ISimpleResource>,
             std::rc::Rc<crate::r#simple::positional::internaldafny::types::Error>,
         >,
-    > {
-        todo!()
+    >{
+        let inner_input = crate::operation::get_resource_positional::_get_resource_positional_input::GetResourcePositionalInput {
+  name: Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(input) )
+};
+        let result = tokio::task::block_in_place(|| {
+            dafny_tokio_runtime.block_on(crate::operation::get_resource_positional::GetResourcePositional::send(&self.wrapped, inner_input))
+        });
+        match result {
+            Err(error) => ::std::rc::Rc::new(
+                crate::_Wrappers_Compile::Result::Failure {
+                    error: crate::conversions::error::to_dafny(error),
+                },
+            ),
+            Ok(inner_result) => ::std::rc::Rc::new(
+                crate::_Wrappers_Compile::Result::Success {
+                    value: crate::conversions::simple_resource::to_dafny(inner_result.clone())
+,
+                },
+            ),
+        }
     }
 }

@@ -4,12 +4,12 @@
 
 pub trait SimpleResource {
     fn get_name(
-        &mut self,
-        input: crate::operation::get_name::GetNameInput,
-      ) -> Result<
-        crate::operation::get_name::GetNameOutput,
-        crate::operation::get_name::GetNameError,
-      >;
+    &mut self,
+    input: crate::operation::get_name::GetNameInput,
+  ) -> Result<
+    crate::operation::get_name::GetNameOutput,
+    crate::types::error::Error,
+  >;
 }
 
 #[derive(::std::clone::Clone)]
@@ -29,4 +29,4 @@ impl ::std::fmt::Debug for SimpleResourceRef {
     }
 }
 
-pub mod get_name;
+mod get_name;

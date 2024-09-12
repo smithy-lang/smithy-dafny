@@ -9,7 +9,7 @@ pub struct GetNameOutput {
 pub name: ::std::option::Option<::std::string::String>,
 }
 impl GetNameOutput {
-#[allow(missing_docs)] // documentation missing in model
+    #[allow(missing_docs)] // documentation missing in model
 pub fn name(&self) -> &::std::option::Option<::std::string::String> {
     &self.name
 }
@@ -30,7 +30,7 @@ pub struct GetNameOutputBuilder {
     pub(crate) name: ::std::option::Option<::std::string::String>,
 }
 impl GetNameOutputBuilder {
-#[allow(missing_docs)] // documentation missing in model
+    #[allow(missing_docs)] // documentation missing in model
 pub fn name(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
     self.name = ::std::option::Option::Some(input.into());
     self

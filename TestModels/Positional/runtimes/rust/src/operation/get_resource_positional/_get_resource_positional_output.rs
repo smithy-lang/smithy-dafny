@@ -4,32 +4,32 @@
 #[allow(missing_docs)] // documentation missing in model
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-pub struct GetResourceOutput {
+pub struct GetResourcePositionalOutput {
     #[allow(missing_docs)] // documentation missing in model
 pub output: ::std::option::Option<crate::types::simple_resource::SimpleResourceRef>,
 }
-impl GetResourceOutput {
+impl GetResourcePositionalOutput {
     #[allow(missing_docs)] // documentation missing in model
 pub fn output(&self) -> &::std::option::Option<crate::types::simple_resource::SimpleResourceRef> {
     &self.output
 }
 }
-impl GetResourceOutput {
-    /// Creates a new builder-style object to manufacture [`GetResourceOutput`](crate::operation::get_resource::builders::GetResourceOutput).
-    pub fn builder() -> crate::operation::get_resource::builders::GetResourceOutputBuilder {
-        crate::operation::get_resource::builders::GetResourceOutputBuilder::default()
+impl GetResourcePositionalOutput {
+    /// Creates a new builder-style object to manufacture [`GetResourcePositionalOutput`](crate::operation::get_resource_positional::builders::GetResourcePositionalOutput).
+    pub fn builder() -> crate::operation::get_resource_positional::builders::GetResourcePositionalOutputBuilder {
+        crate::operation::get_resource_positional::builders::GetResourcePositionalOutputBuilder::default()
     }
 }
 
-/// A builder for [`GetResourceOutput`](crate::operation::operation::GetResourceOutput).
+/// A builder for [`GetResourcePositionalOutput`](crate::operation::operation::GetResourcePositionalOutput).
 #[non_exhaustive]
 #[derive(
     ::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug,
 )]
-pub struct GetResourceOutputBuilder {
+pub struct GetResourcePositionalOutputBuilder {
     pub(crate) output: ::std::option::Option<crate::types::simple_resource::SimpleResourceRef>,
 }
-impl GetResourceOutputBuilder {
+impl GetResourcePositionalOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
 pub fn output(mut self, input: impl ::std::convert::Into<crate::types::simple_resource::SimpleResourceRef>) -> Self {
     self.output = ::std::option::Option::Some(input.into());
@@ -44,14 +44,14 @@ pub fn set_output(mut self, input: ::std::option::Option<crate::types::simple_re
 pub fn get_output(&self) -> &::std::option::Option<crate::types::simple_resource::SimpleResourceRef> {
     &self.output
 }
-    /// Consumes the builder and constructs a [`GetResourceOutput`](crate::operation::operation::GetResourceOutput).
+    /// Consumes the builder and constructs a [`GetResourcePositionalOutput`](crate::operation::operation::GetResourcePositionalOutput).
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::get_resource::GetResourceOutput,
+        crate::operation::get_resource_positional::GetResourcePositionalOutput,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::get_resource::GetResourceOutput {
+        ::std::result::Result::Ok(crate::operation::get_resource_positional::GetResourcePositionalOutput {
             output: self.output,
         })
     }
