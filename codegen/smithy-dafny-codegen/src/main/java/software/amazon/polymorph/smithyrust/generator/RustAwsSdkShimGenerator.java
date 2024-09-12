@@ -511,8 +511,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected String getDafnyModuleName() {
-    return "software::amazon::cryptography::services::%s".formatted(
+  protected String getDafnyInternalModuleName() {
+    return "software::amazon::cryptography::services::%s::internaldafny".formatted(
         getSdkId().toLowerCase()
       );
   }
