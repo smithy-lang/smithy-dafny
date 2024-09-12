@@ -82,7 +82,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             return nil;
                         }
                         return %s
-                    }()""".formatted(SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), dataSource,
+                    }()
+                }""".formatted(SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), dataSource,
                                      "%s_FromDafny(%s.(%s.I%s))".formatted(namespace.concat(resourceShape.toShapeId().getName()), dataSource,
                                                                          DafnyNameResolver.dafnyTypesNamespace(resourceShape), resourceShape.getId().getName()));
         } else {
@@ -100,7 +101,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             return nil;
                         }
                         return &%s{%s.(*%s)}
-                    }()""".formatted(namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()), dataSource, namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()),
+                    }()
+            }""".formatted(namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()), dataSource, namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()),
                                      dataSource, DafnyNameResolver.getDafnyClient(serviceShape, serviceShape.toShapeId().getName()));
         }
     }
@@ -192,11 +194,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 //         new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
                 // )
                 ));
-            System.out.println(targetShape);
-            System.out.println(targetShape.accept(
-                    new DafnyToSmithyShapeVisitor(context, "val%s".formatted(targetShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape))) : ""), writer, isConfigShape)
-            ));
-            System.out.println("\n\n");
         // Close structure
         return builder.append("return fieldValue }%s".formatted(funcParenthesis)).toString();
     }
