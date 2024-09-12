@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -628,29 +627,47 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .getBindingShape(operationShape)
       .get();
     if (bindingShape.isServiceShape()) {
-      StructureShape inputShape = operationIndex.getInputShape(operationShape).get();
+      StructureShape inputShape = operationIndex
+        .getInputShape(operationShape)
+        .get();
       if (inputShape.hasTrait(PositionalTrait.class)) {
         // Need to fetch the single member and then convert,
         // since on the Rust side there is still an input structure
         // but not on the Dafny side.
         final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
-        final String rustValue = "input." + toSnakeCase(onlyMember.getMemberName());
-        variables.put("inputToDafny", toDafny(inputShape, rustValue, true, false).toString());
+        final String rustValue =
+          "input." + toSnakeCase(onlyMember.getMemberName());
+        variables.put(
+          "inputToDafny",
+          toDafny(inputShape, rustValue, true, false).toString()
+        );
       } else {
-        variables.put("inputToDafny", evalTemplate(
-          "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::to_dafny(input)",
-          variables
-        ));
+        variables.put(
+          "inputToDafny",
+          evalTemplate(
+            "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::to_dafny(input)",
+            variables
+          )
+        );
       }
 
-      StructureShape outputShape = operationIndex.getOutputShape(operationShape).get();
+      StructureShape outputShape = operationIndex
+        .getOutputShape(operationShape)
+        .get();
       if (inputShape.hasTrait(PositionalTrait.class)) {
-        variables.put("outputFromDafny", fromDafny(outputShape, "inner_result.value()", false, false).toString());
+        variables.put(
+          "outputFromDafny",
+          fromDafny(outputShape, "inner_result.value()", false, false)
+            .toString()
+        );
       } else {
-        variables.put("outputFromDafny", evalTemplate(
-          "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::from_dafny(inner_result.value().clone())",
-          variables
-        ));
+        variables.put(
+          "outputFromDafny",
+          evalTemplate(
+            "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::from_dafny(inner_result.value().clone())",
+            variables
+          )
+        );
       }
       variables.put(
         "operationSendBody",
@@ -1155,17 +1172,29 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       operationName(operationShape)
     );
 
-    Optional<StructureShape> inputStructure = operationIndex.getOutputShape(operationShape);
-    final boolean hasInputStructure = inputStructure.isPresent() && !inputStructure.get().hasTrait(PositionalTrait.class);
-    Optional<StructureShape> outputStructure = operationIndex.getOutputShape(operationShape);
-    final boolean hasOutputStructure = outputStructure.isPresent() && !outputStructure.get().hasTrait(PositionalTrait.class);
+    Optional<StructureShape> inputStructure = operationIndex.getOutputShape(
+      operationShape
+    );
+    final boolean hasInputStructure =
+      inputStructure.isPresent() &&
+      !inputStructure.get().hasTrait(PositionalTrait.class);
+    Optional<StructureShape> outputStructure = operationIndex.getOutputShape(
+      operationShape
+    );
+    final boolean hasOutputStructure =
+      outputStructure.isPresent() &&
+      !outputStructure.get().hasTrait(PositionalTrait.class);
 
     final Set<String> childModules = new HashSet<>();
     if (hasInputStructure) {
-      childModules.add("_" + variables.get("snakeCaseSyntheticOperationInputName"));
+      childModules.add(
+        "_" + variables.get("snakeCaseSyntheticOperationInputName")
+      );
     }
     if (hasOutputStructure) {
-      childModules.add("_" + variables.get("snakeCaseSyntheticOperationOutputName"));
+      childModules.add(
+        "_" + variables.get("snakeCaseSyntheticOperationOutputName")
+      );
     }
     final RustFile outerModule = new RustFile(
       Path.of("src", "conversions", operationModuleName + ".rs"),
@@ -1290,39 +1319,38 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       return TokenTree.of(
         evalTemplate(
           """
-            #[allow(dead_code)]
-            pub fn from_dafny(
-                dafny_value: ::std::rc::Rc<
-                    crate::r#$dafnyTypesModuleName:L::$structureName:L,
-                >,
-            ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
-                crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
-                    $fluentMemberSetters:L
-                    .build()
-                    .unwrap()
-            }
-            """,
+          #[allow(dead_code)]
+          pub fn from_dafny(
+              dafny_value: ::std::rc::Rc<
+                  crate::r#$dafnyTypesModuleName:L::$structureName:L,
+              >,
+          ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
+              crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
+                  $fluentMemberSetters:L
+                  .build()
+                  .unwrap()
+          }
+          """,
           variables
         )
       );
     } else {
-
       // unwrap() is safe as long as the builder is infallible
       return TokenTree.of(
         evalTemplate(
           """
-            #[allow(dead_code)]
-            pub fn from_dafny(
-                dafny_value: ::std::rc::Rc<
-                    crate::r#$dafnyTypesModuleName:L::$structureName:L,
-                >,
-            ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
-                crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
-                    $fluentMemberSetters:L
-                    .build()
-                    .unwrap()
-            }
-            """,
+          #[allow(dead_code)]
+          pub fn from_dafny(
+              dafny_value: ::std::rc::Rc<
+                  crate::r#$dafnyTypesModuleName:L::$structureName:L,
+              >,
+          ) -> crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
+              crate::operation::$snakeCaseOperationName:L::$rustStructureName:L::builder()
+                  $fluentMemberSetters:L
+                  .build()
+                  .unwrap()
+          }
+          """,
           variables
         )
       );
@@ -1365,38 +1393,57 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       operationVariables(operationShape)
     );
 
-    StructureShape inputShape = operationIndex.getInputShape(operationShape).get();
+    StructureShape inputShape = operationIndex
+      .getInputShape(operationShape)
+      .get();
     if (inputShape.hasTrait(PositionalTrait.class)) {
       // Need to wrap the single member after converting,
       // since on the Rust side there is still an input structure
       // but not on the Dafny side.
       final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
       variables.put("memberName", toSnakeCase(onlyMember.getMemberName()));
-      variables.put("dafnyValue", fromDafny(inputShape, "input", true, false).toString());
-      variables.put("inputFromDafny", evalTemplate(
-        """
-        crate::operation::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::$syntheticOperationInputName:L {
-          $memberName:L: $dafnyValue:L
-        }
-        """,
-        variables
-      ));
+      variables.put(
+        "dafnyValue",
+        fromDafny(inputShape, "input", true, false).toString()
+      );
+      variables.put(
+        "inputFromDafny",
+        evalTemplate(
+          """
+          crate::operation::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::$syntheticOperationInputName:L {
+            $memberName:L: $dafnyValue:L
+          }
+          """,
+          variables
+        )
+      );
     } else {
-      variables.put("inputFromDafny", evalTemplate(
-        "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone())",
-        variables
-      ));
+      variables.put(
+        "inputFromDafny",
+        evalTemplate(
+          "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone())",
+          variables
+        )
+      );
     }
     variables.put("operationInputDafnyType", dafnyTypeForShape(inputShape));
 
-    StructureShape outputShape = operationIndex.getOutputShape(operationShape).get();
+    StructureShape outputShape = operationIndex
+      .getOutputShape(operationShape)
+      .get();
     if (inputShape.hasTrait(PositionalTrait.class)) {
-      variables.put("outputToDafny", toDafny(outputShape, "inner_result", false, false).toString());
+      variables.put(
+        "outputToDafny",
+        toDafny(outputShape, "inner_result", false, false).toString()
+      );
     } else {
-      variables.put("outputToDafny", evalTemplate(
-        "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::to_dafny(inner_result)",
-        variables
-      ));
+      variables.put(
+        "outputToDafny",
+        evalTemplate(
+          "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::to_dafny(inner_result)",
+          variables
+        )
+      );
     }
     variables.put("operationOutputDafnyType", dafnyTypeForShape(outputShape));
 
