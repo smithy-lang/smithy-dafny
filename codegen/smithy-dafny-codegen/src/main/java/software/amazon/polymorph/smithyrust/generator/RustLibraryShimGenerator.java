@@ -1175,7 +1175,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       operationName(operationShape)
     );
 
-    Optional<StructureShape> inputStructure = operationIndex.getOutputShape(
+    Optional<StructureShape> inputStructure = operationIndex.getInputShape(
       operationShape
     );
     final boolean hasInputStructure =
