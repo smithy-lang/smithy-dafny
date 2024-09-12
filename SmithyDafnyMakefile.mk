@@ -560,7 +560,7 @@ _mv_polymorph_go:
 	@for dir in $(LIBRARY_ROOT)/runtimes/go/* ; do \
         if [ "$$(basename $$dir)" != "ImplementationFromDafny-go" ] && [ "$$(basename $$dir)" != "TestsFromDafny-go" ]; then \
 			cp -Rf $$dir runtimes/go/ImplementationFromDafny-go/; \
-			cp -Rf $$dir runtimes/go/TestsFromDafny-go; \
+			cp -Rf $$dir runtimes/go/TestsFromDafny-go/; \
 			rm -r $$dir; \
 		fi \
     done
@@ -757,7 +757,7 @@ transpile_test_go: TARGET=go
 transpile_test_go: OUT=runtimes/go/TestsFromDafny
 transpile_test_go: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 transpile_test_go: TRANSLATION_RECORD=$(patsubst %, --translation-record:$(PROJECT_ROOT)/%, $(TRANSLATION_RECORD_GO)) $(patsubst %, --translation-record:$(LIBRARY_ROOT)/%, runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr)
-transpile_test_go: TRANSPILE_MODULE_NAME=--go-module-name $(GO_MODULE_NAME)
+transpile_test_go: TRANSPILE_MODULE_NAME=--go-module-name $(GO_MODULE_NAME)/test
 transpile_test_go: _transpile_test_all_new_cli
 
 transpile_dependencies_go: LANG=go

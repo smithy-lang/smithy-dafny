@@ -1,6 +1,6 @@
-module github.com/Smithy-dafny/TestModels/Aggregate
+module github.com/smithy-lang/smithy-dafny/TestModels/Aggregate
 
-go 1.22.2
+go 1.23.0
 
 require github.com/dafny-lang/DafnyStandardLibGo v0.0.0
 
