@@ -16,7 +16,7 @@ SERVICE_DEPS_CodegenPatches :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/CodegenPatches"
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/CodegenPatches"
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

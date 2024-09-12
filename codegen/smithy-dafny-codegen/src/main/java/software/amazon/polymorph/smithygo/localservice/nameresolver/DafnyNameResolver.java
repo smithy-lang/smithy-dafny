@@ -4,6 +4,7 @@ import static software.amazon.polymorph.smithygo.localservice.nameresolver.Const
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DAFNY_TYPES;
 
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -21,6 +22,15 @@ public class DafnyNameResolver {
 
   public static String dafnyNamespace(final Shape shape) {
     return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(shape.toShapeId().getNamespace());
+  }
+
+  public static String dafnyNamespace(final ServiceTrait serviceTrait) {
+    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceTrait.getSdkId());
+  }
+
+
+  public static String dafnyNamespace(final LocalServiceTrait localServiceTrait) {
+    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(localServiceTrait.getSdkId());
   }
 
   /**
