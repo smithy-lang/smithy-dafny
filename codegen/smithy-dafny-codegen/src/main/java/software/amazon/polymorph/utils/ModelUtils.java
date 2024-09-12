@@ -147,7 +147,10 @@ public class ModelUtils {
     final ToShapeId shapeId,
     final ServiceShape serviceShape
   ) {
-    return shapeId.toShapeId().getNamespace().equals(serviceShape.getId().getNamespace());
+    return shapeId
+      .toShapeId()
+      .getNamespace()
+      .equals(serviceShape.getId().getNamespace());
   }
 
   /**
