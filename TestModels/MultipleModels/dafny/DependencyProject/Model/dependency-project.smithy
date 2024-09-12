@@ -5,7 +5,8 @@ namespace simple.multiplemodels.dependencyproject
 @aws.polymorph#localService(
   sdkId: "DependencyProject",
   config: DependencyProjectConfig,
-) service DependencyProject {
+)
+service DependencyProject {
   version: "2021-11-01",
   resources: [],
   operations: [ SomeDependencyOperation ],
