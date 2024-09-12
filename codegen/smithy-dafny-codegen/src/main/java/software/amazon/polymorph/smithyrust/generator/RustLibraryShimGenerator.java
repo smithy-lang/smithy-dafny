@@ -1618,12 +1618,20 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case BOOLEAN -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
                 rustValue
               )
-          );
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(Some(%s))".formatted(
+                rustValue
+              )
+            );
+          }
         } else {
           yield TokenTree.of("%s.clone()".formatted(rustValue));
         }
