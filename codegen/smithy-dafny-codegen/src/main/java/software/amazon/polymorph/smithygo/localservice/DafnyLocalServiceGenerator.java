@@ -108,7 +108,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
       SmithyNameResolver.getGoModuleNameForSmithyNamespace(
         context.settings().getService().getNamespace()
       ),
-      DafnyNameResolver.dafnyNamespace(service)
+      DafnyNameResolver.dafnyNamespace(serviceTrait)
     );
     writer.addImportFromModule(
       SmithyNameResolver.getGoModuleNameForSmithyNamespace(
@@ -307,7 +307,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
 
   void generateShim() {
     final var namespace =
-      "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(service));
+      "Wrapped%sService".formatted(DafnyNameResolver.dafnyNamespace(service.expectTrait(LocalServiceTrait.class)));
 
     writerDelegator.useFileWriter(
       "%s/shim.go".formatted(namespace),
@@ -355,7 +355,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
 
           writer.write(
             """
-            func Wrapped$L(inputConfig $L) Wrappers.Result {
+            func (_static *CompanionStruct_Default___) Wrapped$L(inputConfig $L) Wrappers.Result {
                 var nativeConfig = $L.$L(inputConfig)
                 var nativeClient, nativeError = $L.NewClient(nativeConfig)
                 if nativeError != nil {

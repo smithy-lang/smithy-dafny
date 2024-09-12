@@ -34,7 +34,7 @@ public class SmithyNameResolver {
   }
 
   public static String shapeNamespace(final Shape shape) {
-    return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase();
+    return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase().concat("smithygenerated");
   }
 
   public static String smithyTypesNamespace(final Shape shape) {
@@ -43,7 +43,7 @@ public class SmithyNameResolver {
       .getNamespace()
       .replace(DOT, BLANK)
       .toLowerCase()
-      .concat("types");
+      .concat("smithygeneratedtypes");
   }
 
   public static String getGoModuleNameForSdkNamespace(
