@@ -284,10 +284,11 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected RustFile operationRequestConversionModule(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
-    var toDafnyFunction = operationRequestToDafnyFunction(operationShape);
-    var fromDafnyFunction = operationRequestFromDafnyFunction(operationShape);
+    var toDafnyFunction = operationRequestToDafnyFunction(bindingShape, operationShape);
+    var fromDafnyFunction = operationRequestFromDafnyFunction(bindingShape, operationShape);
     var content = TokenTree
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
@@ -307,10 +308,11 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected RustFile operationResponseConversionModule(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
-    var toDafnyFunction = operationResponseToDafnyFunction(operationShape);
-    var fromDafnyFunction = operationResponseFromDafnyFunction(operationShape);
+    var toDafnyFunction = operationResponseToDafnyFunction(bindingShape, operationShape);
+    var fromDafnyFunction = operationResponseFromDafnyFunction(bindingShape, operationShape);
     var content = TokenTree
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
@@ -330,18 +332,22 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected abstract TokenTree operationRequestToDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
   protected abstract TokenTree operationRequestFromDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
   protected abstract TokenTree operationResponseToDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
   protected abstract TokenTree operationResponseFromDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
@@ -889,7 +895,17 @@ public abstract class AbstractRustShimGenerator {
       .collect(Collectors.toSet());
   }
 
-  protected abstract Set<RustFile> operationConversionModules(
+  protected Set<RustFile> operationConversionModules(
+    final OperationShape operationShape
+  ) {
+    return operationBindingIndex.getBindingShapes(operationShape)
+      .stream()
+      .flatMap(bindingShape -> boundOperationConversionModules(bindingShape, operationShape).stream())
+      .collect(Collectors.toSet());
+  }
+
+  protected abstract Set<RustFile> boundOperationConversionModules(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
@@ -943,6 +959,7 @@ public abstract class AbstractRustShimGenerator {
    * Generates values for variables commonly used in operation-specific templates.
    */
   protected HashMap<String, String> operationVariables(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
     final String opName = operationName(operationShape);
@@ -975,9 +992,6 @@ public abstract class AbstractRustShimGenerator {
     variables.put("pascalCaseOperationOutputName", toPascalCase(opOutputName));
     variables.put("pascalCaseOperationErrorName", toPascalCase(opErrorName));
 
-    final Shape bindingShape = operationBindingIndex
-      .getBindingShape(operationShape)
-      .get();
     if (bindingShape.isServiceShape()) {
       variables.put("operationTargetName", "client");
       variables.put("operationTargetType", "crate::client::Client");

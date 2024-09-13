@@ -44,7 +44,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   @Override
   protected Set<RustFile> rustFiles() {
     Set<RustFile> result = new HashSet<>();
-    result.add(clientModule());
+    result.add(clientModule(service));
     result.addAll(
       allErrorShapes()
         .map(this::errorConversionModule)
@@ -68,7 +68,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     return result;
   }
 
-  private RustFile clientModule() {
+  private RustFile clientModule(ServiceShape serviceShape) {
     final Map<String, String> variables = serviceVariables();
     var preamble = TokenTree.of(
       evalTemplate(
@@ -111,7 +111,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           .getOperations()
           .stream()
           .map(id ->
-            operationClientFunction(model.expectShape(id, OperationShape.class))
+            operationClientFunction(
+              serviceShape,
+              model.expectShape(id, OperationShape.class))
           )
       )
       .lineSeparated();
@@ -148,11 +150,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   private TokenTree operationClientFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      operationVariables(operationShape)
+      operationVariables(bindingShape, operationShape)
     );
 
     final ShapeId outputShapeId = operationShape.getOutputShape();
@@ -223,11 +226,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected TokenTree operationRequestToDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      operationVariables(operationShape)
+      operationVariables(bindingShape, operationShape)
     );
     StructureShape inputShape = model.expectShape(
       operationShape.getInputShape(),
@@ -288,11 +292,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected TokenTree operationRequestFromDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      operationVariables(operationShape)
+      operationVariables(bindingShape, operationShape)
     );
     StructureShape inputShape = model.expectShape(
       operationShape.getInputShape(),
@@ -324,11 +329,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected TokenTree operationResponseToDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      operationVariables(operationShape)
+      operationVariables(bindingShape, operationShape)
     );
     StructureShape outputShape = model.expectShape(
       operationShape.getOutputShape(),
@@ -378,6 +384,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected TokenTree operationResponseFromDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
     // No need for Dafny-to-Rust conversion
@@ -385,9 +392,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected Set<RustFile> operationConversionModules(
+  protected Set<RustFile> boundOperationConversionModules(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
+    // bindingShape should always be a service
+
     var operationModuleName = toSnakeCase(operationName(operationShape));
     var operationModuleContent = declarePubModules(
       Stream.of(
@@ -396,20 +406,21 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       )
     );
 
-    var errorToDafnyFunction = operationErrorToDafnyFunction(operationShape);
+    var errorToDafnyFunction = operationErrorToDafnyFunction(bindingShape, operationShape);
 
     RustFile outerModule = new RustFile(
       Path.of("src", "conversions", operationModuleName + ".rs"),
       TokenTree.of(operationModuleContent, errorToDafnyFunction)
     );
 
-    RustFile requestModule = operationRequestConversionModule(operationShape);
-    RustFile responseModule = operationResponseConversionModule(operationShape);
+    RustFile requestModule = operationRequestConversionModule(bindingShape, operationShape);
+    RustFile responseModule = operationResponseConversionModule(bindingShape, operationShape);
 
     return Set.of(outerModule, requestModule, responseModule);
   }
 
   protected TokenTree operationErrorToDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
     TokenTree errorCases = TokenTree
@@ -419,6 +430,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           .stream()
           .map(id ->
             errorVariantToDafny(
+              bindingShape,
               operationShape,
               model.expectShape(id, StructureShape.class)
             )
@@ -428,7 +440,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      operationVariables(operationShape)
+      operationVariables(bindingShape, operationShape)
     );
     variables.put("errorCases", errorCases.toString());
 
@@ -460,12 +472,13 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected TokenTree errorVariantToDafny(
+    final Shape bindingShape,
     final OperationShape operationShape,
     final StructureShape errorShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
-      operationVariables(operationShape)
+      operationVariables(bindingShape, operationShape)
     );
     String errorName = toPascalCase(errorShape.getId().getName());
     variables.put("errorName", errorName);
@@ -560,9 +573,11 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected HashMap<String, String> operationVariables(
-    OperationShape operationShape
+    final Shape bindingShape,
+    final OperationShape operationShape
   ) {
     final HashMap<String, String> variables = super.operationVariables(
+      bindingShape,
       operationShape
     );
     variables.put(
