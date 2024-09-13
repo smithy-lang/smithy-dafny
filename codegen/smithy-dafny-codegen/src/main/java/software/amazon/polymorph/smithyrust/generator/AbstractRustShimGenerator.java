@@ -67,14 +67,6 @@ public abstract class AbstractRustShimGenerator {
 
   protected abstract Set<RustFile> rustFiles();
 
-  protected Stream<OperationShape> serviceOperationShapes() {
-    return service
-      .getOperations()
-      .stream()
-      .sorted()
-      .map(shapeId -> model.expectShape(shapeId, OperationShape.class));
-  }
-
   protected Stream<OperationShape> allOperationShapes() {
     return model.getOperationShapes().stream().sorted();
   }
@@ -152,7 +144,8 @@ public abstract class AbstractRustShimGenerator {
       .lineSeparated();
   }
 
-  protected RustFile conversionsModule(String namespace) {
+  protected RustFile conversionsModule(final ServiceShape serviceShape) {
+    final String namespace = serviceShape.getId().getNamespace();
     Stream<String> operationModules = model
       .getOperationShapes()
       .stream()
@@ -300,14 +293,12 @@ public abstract class AbstractRustShimGenerator {
     final String snakeCaseOperationName = toSnakeCase(
       operationName(operationShape)
     );
-    final Path path = Path.of(
-      "src",
-      "conversions",
-      snakeCaseOperationName,
-      "_%s.rs".formatted(
-          toSnakeCase(syntheticOperationInputName(operationShape))
-        )
-    );
+    final Path path = rootPathForShape(bindingShape)
+      .resolve("conversions")
+      .resolve(snakeCaseOperationName)
+      .resolve("_%s.rs".formatted(
+        toSnakeCase(syntheticOperationInputName(operationShape))
+      ));
     return new RustFile(path, content);
   }
 
@@ -324,14 +315,12 @@ public abstract class AbstractRustShimGenerator {
     final String snakeCaseOperationName = toSnakeCase(
       operationName(operationShape)
     );
-    final Path path = Path.of(
-      "src",
-      "conversions",
-      snakeCaseOperationName,
-      "_%s.rs".formatted(
-          toSnakeCase(syntheticOperationOutputName(operationShape))
-        )
-    );
+    final Path path = rootPathForShape(bindingShape)
+      .resolve("conversions")
+      .resolve(snakeCaseOperationName)
+      .resolve("_%s.rs".formatted(
+        toSnakeCase(syntheticOperationOutputName(operationShape))
+      ));
     return new RustFile(path, content);
   }
 

@@ -42,18 +42,11 @@ import software.amazon.smithy.model.traits.EnumTrait;
  */
 public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
-  private final StructureShape configShape;
-
   public RustLibraryShimGenerator(
     final Model model,
     final ServiceShape service
   ) {
     super(model, service);
-    // Check assumptions
-    final ShapeId configId = service
-      .expectTrait(LocalServiceTrait.class)
-      .getConfigId();
-    configShape = model.expectShape(configId, StructureShape.class);
   }
 
   @Override
@@ -61,14 +54,18 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Set<RustFile> result = new HashSet<>();
 
     // client
-    result.add(clientModule());
+    streamServicesToGenerateFor(model)
+      .forEach(serviceShape -> result.add(clientModule(serviceShape)));
     result.addAll(allOperationClientBuilders());
 
     // types
-    streamNamespacesToGenerateFor(model)
-      .forEach(namespace -> result.add(typesModule(namespace)));
-    result.add(typesConfigModule());
-    result.add(typesBuildersModule());
+    streamServicesToGenerateFor(model)
+      .forEach(serviceShape -> {
+        result.add(typesModule(serviceShape));
+        result.add(typesConfigModule(serviceShape));
+        result.add(typesBuildersModule(serviceShape));
+      });
+
     result.addAll(
       streamStructuresToGenerateStructsFor()
         .filter(s -> shouldGenerateForNamespace(s.getId().getNamespace()))
@@ -102,8 +99,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
 
     // errors
-    result.add(errorModule());
-    result.add(sealedUnhandledErrorModule());
+    streamServicesToGenerateFor(model)
+      .forEach(s -> {
+          result.add(errorModule(s));
+          result.add(sealedUnhandledErrorModule(s));
+        });
 
     // operations
     allOperationShapes()
@@ -113,12 +113,14 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.addAll(allOperationImplementationModules());
 
     // conversions
-    allOperationShapes()
-      .map(o -> o.getId().getNamespace())
-      .forEach(n -> result.add(conversionsModule(n)));
-    result.add(conversionsErrorModule());
-    result.add(conversionsClientModule());
-    result.addAll(configConversionModules());
+    streamServicesToGenerateFor(model)
+      .forEach(s -> {
+        result.add(conversionsModule(s));
+        result.add(conversionsErrorModule(s));
+        result.add(conversionsClientModule(s));
+        result.addAll(configConversionModules(s));
+      });
+
     result.addAll(allOperationConversionModules());
     result.addAll(
       streamStructuresToGenerateStructsFor()
@@ -152,7 +154,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     // dependencies
     if (GENERATE_DEPENDENCIES) {
-      result.add(depsModule());
+      streamServicesToGenerateFor(model)
+        .forEach(s -> result.add(depsModule(s)));
       streamNamespacesToGenerateFor(model)
         .filter(n -> !n.equals(service.getId().getNamespace()))
         .forEach(n -> result.add(depModule(n)));
@@ -188,13 +191,17 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
 
-  private RustFile depsModule() {
-    final var content = declarePubModules(
-      streamNamespacesToGenerateFor(model)
-        .filter(n -> !n.equals(service.getId().getNamespace()))
-        .map(NamespaceHelper::rustModuleForSmithyNamespace)
-    );
-    return new RustFile(Path.of("src", "deps.rs"), content);
+  private RustFile depsModule(final ServiceShape serviceShape) {
+    final TokenTree content;
+    if (serviceShape.equals(service)) {
+      content = declarePubModules(
+        streamNamespacesToGenerateFor(model)
+          .filter(n -> !n.equals(service.getId().getNamespace()))
+          .map(NamespaceHelper::rustModuleForSmithyNamespace));
+    } else {
+      content = declarePubModules(Stream.empty());
+    }
+    return new RustFile(rootPathForShape(serviceShape).resolve("deps.rs"), content);
   }
 
   private RustFile depModule(final String namespace) {
@@ -229,8 +236,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected RustFile conversionsModule(String namespace) {
-    final RustFile file = super.conversionsModule(namespace);
+  protected RustFile conversionsModule(final ServiceShape serviceShape) {
+    final RustFile file = super.conversionsModule(serviceShape);
+    final StructureShape configShape = ModelUtils.getConfigShape(model, serviceShape);
     final TokenTree content = file
       .content()
       .append(
@@ -241,11 +249,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(file.path(), content);
   }
 
-  private RustFile clientModule() {
-    final Map<String, String> variables = serviceVariables();
+  private RustFile clientModule(final ServiceShape serviceShape) {
+    final Map<String, String> variables = serviceVariables(serviceShape);
     variables.put(
       "operationModules",
-      serviceOperationShapes()
+      operationBindingIndex.getOperations(serviceShape)
+        .stream()
         .map(operationShape ->
           "mod %s;".formatted(toSnakeCase(operationName(operationShape)))
         )
@@ -256,19 +265,19 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/client.rs",
       variables
     );
-    return new RustFile(Path.of("src", "client.rs"), TokenTree.of(content));
+    return new RustFile(rootPathForShape(serviceShape).resolve("client.rs"), TokenTree.of(content));
   }
 
-  protected RustFile conversionsClientModule() {
+  protected RustFile conversionsClientModule(final ServiceShape serviceShape) {
     TokenTree clientConversionFunctions = TokenTree.of(
       evalTemplate(
         getClass(),
         "runtimes/rust/conversions/client_localservice.rs",
-        serviceVariables()
+        serviceVariables(serviceShape)
       )
     );
     return new RustFile(
-      Path.of("src", "conversions", "client.rs"),
+      rootPathForShape(serviceShape).resolve("conversions").resolve("client.rs"),
       TokenTree.of(clientConversionFunctions)
     );
   }
@@ -364,8 +373,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n"));
   }
 
-  private RustFile typesModule(String namespace) {
-    final Map<String, String> variables = serviceVariables();
+  private RustFile typesModule(final ServiceShape serviceShape) {
+    final Map<String, String> variables = serviceVariables(serviceShape);
+    final String namespace = serviceShape.getId().getNamespace();
 
     final String resourceModules = streamResourcesToGenerateTraitsFor()
       .filter(o -> o.getId().getNamespace().equals(namespace))
@@ -435,9 +445,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(rootPathForNamespace(namespace).resolve("types.rs"), TokenTree.of(content));
   }
 
-  private RustFile typesConfigModule() {
+  private RustFile typesConfigModule(final ServiceShape serviceShape) {
+    final StructureShape configShape = ModelUtils.getConfigShape(model, serviceShape);
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(),
+      serviceVariables(serviceShape),
       standardStructureVariables(configShape),
       structureModuleVariables(configShape)
     );
@@ -446,17 +457,16 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/types/config.rs",
       variables
     );
-    final Path path = Path.of(
-      "src",
-      "types",
-      "%s.rs".formatted(variables.get("snakeCaseConfigName"))
-    );
+    final Path path = rootPathForShape(serviceShape)
+      .resolve("types")
+      .resolve("%s.rs".formatted(variables.get("snakeCaseConfigName")));
     return new RustFile(path, TokenTree.of(content));
   }
 
-  private RustFile typesBuildersModule() {
-    final Map<String, String> variables = serviceVariables();
+  private RustFile typesBuildersModule(final ServiceShape serviceShape) {
+    final Map<String, String> variables = serviceVariables(serviceShape);
     final String content = streamStructuresToGenerateStructsFor()
+      .filter(s -> ModelUtils.isInServiceNamespace(s, serviceShape))
       .map(structureShape ->
         IOUtils.evalTemplate(
           "pub use $rustTypesModuleName:L::_$snakeCaseStructureName:L::$rustStructureName:LBuilder;",
@@ -464,7 +474,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         )
       )
       .collect(Collectors.joining("\n\n"));
-    final Path path = Path.of("src", "types", "builders.rs");
+    final Path path = rootPathForShape(serviceShape).resolve("types").resolve("builders.rs");
     return new RustFile(path, TokenTree.of(content));
   }
 
@@ -1014,29 +1024,29 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private RustFile errorModule() {
+  private RustFile errorModule(final ServiceShape serviceShape) {
     final String content = IOUtils.evalTemplate(
       getClass(),
       "runtimes/rust/error.rs",
       Map.of()
     );
-    return new RustFile(Path.of("src", "error.rs"), TokenTree.of(content));
+    return new RustFile(rootPathForShape(serviceShape).resolve("error.rs"), TokenTree.of(content));
   }
 
-  private RustFile sealedUnhandledErrorModule() {
+  private RustFile sealedUnhandledErrorModule(final ServiceShape serviceShape) {
     final String content = IOUtils.evalTemplate(
       getClass(),
       "runtimes/rust/error/sealed_unhandled.rs",
       Map.of()
     );
     return new RustFile(
-      Path.of("src", "error", "sealed_unhandled.rs"),
+      rootPathForShape(serviceShape).resolve("error").resolve("sealed_unhandled.rs"),
       TokenTree.of(content)
     );
   }
 
-  protected RustFile conversionsErrorModule() {
-    final Map<String, String> variables = serviceVariables();
+  protected RustFile conversionsErrorModule(final ServiceShape serviceShape) {
+    final Map<String, String> variables = serviceVariables(serviceShape);
 
     final String toDafnyArms = allErrorShapes()
       .map(errorShape ->
@@ -1079,14 +1089,15 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables
     );
     return new RustFile(
-      Path.of("src", "conversions", "error.rs"),
+      rootPathForShape(serviceShape).resolve("conversions").resolve("error.rs"),
       TokenTree.of(commonContent, libraryContent)
     );
   }
 
-  private Set<RustFile> configConversionModules() {
+  private Set<RustFile> configConversionModules(final ServiceShape serviceShape) {
+    final StructureShape configShape = ModelUtils.getConfigShape(model, serviceShape);
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(),
+      serviceVariables(serviceShape),
       standardStructureVariables(configShape)
     );
     variables.put(
@@ -1104,11 +1115,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/conversions/config.rs",
       variables
     );
-    final Path outerPath = Path.of(
-      "src",
-      "conversions",
-      "%s.rs".formatted(snakeCaseConfigName)
-    );
+    final Path outerPath = rootPathForShape(serviceShape)
+      .resolve("conversions")
+      .resolve("%s.rs".formatted(snakeCaseConfigName));
     final RustFile outerModule = new RustFile(
       outerPath,
       TokenTree.of(outerContent)
@@ -1119,12 +1128,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/conversions/config/_config.rs",
       variables
     );
-    final Path innerPath = Path.of(
-      "src",
-      "conversions",
-      snakeCaseConfigName,
-      "_%s.rs".formatted(snakeCaseConfigName)
-    );
+    final Path innerPath = rootPathForShape(serviceShape)
+      .resolve("conversions")
+      .resolve(snakeCaseConfigName)
+      .resolve("_%s.rs".formatted(snakeCaseConfigName));
     final RustFile innerModule = new RustFile(
       innerPath,
       TokenTree.of(innerContent)
@@ -1502,7 +1509,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Map<String, String> variables = serviceVariables();
     variables.put(
       "operationImpls",
-      serviceOperationShapes()
+      operationBindingIndex.getOperations(service)
+        .stream()
         .map(this::wrappedClientOperationImpl)
         .collect(Collectors.joining("\n\n"))
     );
@@ -1600,21 +1608,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected HashMap<String, String> serviceVariables() {
-    final HashMap<String, String> variables = super.serviceVariables();
-
-    final LocalServiceTrait localServiceTrait = localServiceTrait();
-    final String sdkId = localServiceTrait.getSdkId();
-    // TODO: needs to be config shape of the passed in service
-    final String configName = configShape.getId().getName(service);
-    variables.put("sdkId", sdkId);
-    variables.put("configName", configName);
-    variables.put("snakeCaseConfigName", toSnakeCase(configName));
-    variables.put(
-      "qualifiedRustServiceErrorType",
-      qualifiedRustServiceErrorType(service)
-    );
-
-    return variables;
+    return serviceVariables(service);
   }
 
   @Override
@@ -1623,8 +1617,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     final LocalServiceTrait localServiceTrait = localServiceTrait();
     final String sdkId = localServiceTrait.getSdkId();
-    // TODO: needs to be config shape of the passed in service
-    final String configName = configShape.getId().getName(service);
+
+    final StructureShape configShape = ModelUtils.getConfigShape(model, serviceShape);
+    final String configName = configShape.getId().getName(serviceShape);
     variables.put("sdkId", sdkId);
     variables.put("configName", configName);
     variables.put("snakeCaseConfigName", toSnakeCase(configName));

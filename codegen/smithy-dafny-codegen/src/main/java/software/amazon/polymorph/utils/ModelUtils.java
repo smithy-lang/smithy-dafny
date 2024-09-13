@@ -727,4 +727,9 @@ public class ModelUtils {
 
     return dependentIds.stream().map(id -> model.expectShape(id, ServiceShape.class));
   }
+
+  public static StructureShape getConfigShape(final Model model, final ServiceShape serviceShape) {
+    final Optional<LocalServiceTrait> localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
+    return model.expectShape(localServiceTrait.get().getConfigId(), StructureShape.class);
+  }
 }

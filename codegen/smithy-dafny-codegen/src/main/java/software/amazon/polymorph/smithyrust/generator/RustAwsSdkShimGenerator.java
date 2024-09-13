@@ -58,7 +58,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         .toList()
     );
 
-    result.add(conversionsModule(service.getId().getNamespace()));
+    result.add(conversionsModule(service));
     result.addAll(allOperationConversionModules());
     result.addAll(allStructureConversionModules());
     result.add(conversionsErrorModule());
