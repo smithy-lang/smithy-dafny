@@ -41,9 +41,15 @@ pub fn to_dafny(
                 message: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&message),
                 list: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&list, |e| to_dafny(e.clone()))
             },
-        crate::types::error::Error::ValidationError(mut inner) =>
+        crate::types::error::Error::ValidationError(inner) =>
             crate::r#simple::positional::internaldafny::types::Error::Opaque {
-                obj: ::dafny_runtime::Object::from_ref(&mut inner as &mut dyn ::std::any::Any)
+                obj: {
+                    let rc = ::std::rc::Rc::new(inner) as ::std::rc::Rc<dyn ::std::any::Any>;
+                    // safety: `rc` is new, ensuring it has refcount 1 and is uniquely owned.
+                    // we should use `dafny_runtime_conversions::rc_struct_to_dafny_class` once it
+                    // accepts unsized types (https://github.com/dafny-lang/dafny/pull/5769)
+                    unsafe { ::dafny_runtime::Object::from_rc(rc) }
+                },
             },
         crate::types::error::Error::Opaque { obj } =>
             crate::r#simple::positional::internaldafny::types::Error::Opaque {
@@ -76,11 +82,12 @@ pub fn from_dafny(
             {
                 use ::std::any::Any;
                 if ::dafny_runtime::is_object!(obj, crate::types::error::ValidationError) {
+                    let typed = ::dafny_runtime::cast_object!(obj.clone(), crate::types::error::ValidationError);
                     crate::types::error::Error::ValidationError(
-                        ::dafny_runtime::cast_object!(
-                            obj.clone(),
-                            crate::types::error::ValidationError
-                        ).as_ref().clone()
+                        // safety: dafny_class_to_struct will increment ValidationError's Rc
+                        unsafe {
+                            ::dafny_runtime::dafny_runtime_conversions::object::dafny_class_to_struct(typed)
+                        }
                     )
                 } else {
                     crate::types::error::Error::Opaque {
