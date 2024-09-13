@@ -1616,6 +1616,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
+  protected String getRustConversionsModuleName(final String namespace) {
+    return namespace.equals(service.getId().getNamespace())
+      ? "crate::conversions"
+      : "crate::deps::" + NamespaceHelper.rustModuleForSmithyNamespace(namespace) + "::conversions";
+  }
+
+  @Override
   protected String syntheticOperationInputName(OperationShape operationShape) {
     return operationName(operationShape) + "Input";
   }

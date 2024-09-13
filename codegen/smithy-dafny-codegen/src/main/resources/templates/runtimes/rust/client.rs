@@ -9,11 +9,11 @@ impl Client {
     /// Creates a new client from the service [`Config`](crate::Config).
     #[track_caller]
     pub fn from_conf(
-        conf: crate::types::$snakeCaseConfigName:L::$configName:L,
+        conf: $rustTypesModuleName:L::$snakeCaseConfigName:L::$configName:L,
     ) -> Result<Self, BuildError> {
         let inner =
             crate::$dafnyInternalModuleName:L::_default::$sdkId:L(
-                &crate::conversions::$snakeCaseConfigName:L::_$snakeCaseConfigName:L::to_dafny(conf),
+                &$rustConversionsModuleName:L::$snakeCaseConfigName:L::_$snakeCaseConfigName:L::to_dafny(conf),
             );
         if matches!(
             inner.as_ref(),

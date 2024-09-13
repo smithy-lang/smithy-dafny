@@ -540,6 +540,14 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     return "%s::types".formatted(getSdkCrate());
   }
 
+  @Override
+  protected String getRustConversionsModuleName(final String namespace) {
+    if (!namespace.equals(service.getId().getNamespace())) {
+      throw new IllegalArgumentException("aws-sdk style libraries only support the original service namespace, but was passed " + namespace);
+    }
+    return "%s::conversions".formatted(getSdkCrate());
+  }
+
   private String getSdkId() {
     return service.expectTrait(ServiceTrait.class).getSdkId();
   }
