@@ -24,3 +24,16 @@ impl ::std::fmt::Display for Error {
 }
 
 impl ::std::error::Error for Error {}
+
+impl Error {
+    pub fn wrap_err<E, T>(err: T) -> Self
+        where
+            E: ::std::error::Error + 'static,
+            T: ::std::borrow::Borrow<E>,
+    {
+        Error::CollectionOfErrors {
+            list: ::std::vec::Vec::new(),
+            message: ::std::borrow::Borrow::borrow(&err).to_string(),
+        }
+    }
+}

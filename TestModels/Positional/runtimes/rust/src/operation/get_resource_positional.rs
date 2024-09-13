@@ -10,6 +10,7 @@ impl GetResourcePositional {
     pub fn new() -> Self {
         Self
     }
+
     pub(crate) async fn send(
         client: &crate::client::Client,
         input: crate::operation::get_resource_positional::GetResourcePositionalInput,
@@ -17,6 +18,12 @@ impl GetResourcePositional {
         crate::types::simple_resource::SimpleResourceRef,
         crate::types::error::Error,
     > {
+        if input.name.is_none() {
+    return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::missing_field(
+        "name",
+        "name was not specified but it is required when building GetResourcePositionalInput",
+    )).map_err(crate::types::error::Error::wrap_err);
+}
                 let inner_input = crate::standard_library_conversions::ostring_to_dafny(&input.name) .Extract();
         let inner_result =
             ::dafny_runtime::md!(client.dafny_client.clone()).GetResourcePositional(&inner_input);
