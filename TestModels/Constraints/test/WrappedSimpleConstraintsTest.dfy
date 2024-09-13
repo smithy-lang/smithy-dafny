@@ -25,12 +25,15 @@ module WrappedSimpleConstraintsTest {
     TestGetConstraintWithMyList(client);
     TestGetConstraintWithNonEmptyList(client);
     TestGetConstraintWithListLessThanOrEqualToTen(client);
+    TestGetConstraintWithListWithConstraint(client);
     TestGetConstraintWithMyMap(client);
     TestGetConstraintWithNonEmptyMap(client);
     TestGetConstraintWithMapLessThanOrEqualToTen(client);
+    TestGetConstraintWithMapWithConstraint(client);
     TestGetConstraintWithGreaterThanOne(client);
     TestGetConstraintWithUtf8Bytes(client);
     TestGetConstraintWithListOfUtf8Bytes(client);
+    TestGetConstraintWithMyUnionWithConstraint(client);
   }
 
   method TestGetConstraintWithValidInputs(client: ISimpleConstraintsClient)
@@ -367,6 +370,25 @@ module WrappedSimpleConstraintsTest {
     expect ret.Failure?;
   }
 
+  method TestGetConstraintWithListWithConstraint(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(ListWithConstraint := Some(ForceListWithConstraint(["1"])));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(ListWithConstraint := Some(ForceListWithConstraint(["0", "1", "0123456789"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(ListWithConstraint := Some(ForceListWithConstraint(["0", "1", "MoreThen10Character"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+  }
+
   // @length(min: 1, max: 10)
   method TestGetConstraintWithMyMap(client: ISimpleConstraintsClient)
     requires client.ValidState()
@@ -402,7 +424,7 @@ module WrappedSimpleConstraintsTest {
     var ret := client.GetConstraints(input := input);
     expect ret.Failure?;
 
-    input := input.(NonEmptyMap := Some(ForceNonEmptyMap(map["1" := "a"])));
+    input := input.(NonEmptyMap := Some(ForceNonEmptyMap(map["01234567890" := "a"])));
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
 
@@ -435,6 +457,25 @@ module WrappedSimpleConstraintsTest {
     expect ret.Success?;
 
     input := input.(MapLessThanOrEqualToTen := Some(ForceMapLessThanOrEqualToTen(map["1" := "a", "2" := "a", "3" := "a", "4" := "a", "5" := "a", "6" := "a", "7" := "a", "8" := "a", "9" := "a", "0" := "a", "a" := "a"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+  }
+
+  method TestGetConstraintWithMapWithConstraint(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(MapWithConstraint := Some(ForceMapWithConstraint(map["1" := "a"])));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(MapWithConstraint := Some(ForceMapWithConstraint(map["0123456789" := "a", "b" := "abcdefghij", "IamAtTenCh" := "Metooooooo"])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(MapWithConstraint := Some(ForceMapWithConstraint(map["0123456789012" := "a", "b" := "abcdefghijklm", "IamAtMoreThenTenCh" := "Metooooooooooo"])));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
   }
@@ -562,6 +603,45 @@ module WrappedSimpleConstraintsTest {
     expect ret.Failure?;
 
     input := input.(MyListOfUtf8Bytes := Some(ForceListOfUtf8Bytes([good, bad])));
+    ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+  }
+
+  method TestGetConstraintWithMyUnionWithConstraint(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(MyUnionWithConstraint := Some(IntegerValue(0)));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(MyUnionWithConstraint := Some(IntegerValue(5)));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(MyUnionWithConstraint := Some(IntegerValue(10)));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+    
+    input := input.(MyUnionWithConstraint := Some(StringValue("0")));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(MyUnionWithConstraint := Some(StringValue("IamAtTenCh")));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(MyUnionWithConstraint := Some(IntegerValue(1000)));
+     ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+
+    input := input.(MyUnionWithConstraint := Some(IntegerValue(-1000)));
+    ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+
+    input := input.(MyUnionWithConstraint := Some(StringValue("MoreThen10Character")));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
   }
