@@ -71,6 +71,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(typesBuildersModule());
     result.addAll(
       streamStructuresToGenerateStructsFor()
+        .filter(s -> shouldGenerateForNamespace(s.getId().getNamespace()))
         .map(this::standardStructureModule)
         .toList()
     );
@@ -78,6 +79,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.addAll(
       ModelUtils
         .streamEnumShapes(model, service.getId().getNamespace())
+        .filter(s -> shouldGenerateForNamespace(s.getId().getNamespace()))
         .map(this::enumTypeModule)
         .toList()
     );
@@ -86,11 +88,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .getUnionShapes()
         .stream()
         .filter(this::shouldGenerateEnumForUnion)
+        .filter(s -> shouldGenerateForNamespace(s.getId().getNamespace()))
         .map(this::unionTypeModule)
         .toList()
     );
     result.addAll(
       streamResourcesToGenerateTraitsFor()
+        .filter(s -> shouldGenerateForNamespace(s.getId().getNamespace()))
         .map(this::resourceTypeModule)
         .toList()
     );
