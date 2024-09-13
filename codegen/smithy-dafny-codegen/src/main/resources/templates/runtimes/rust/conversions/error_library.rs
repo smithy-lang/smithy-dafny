@@ -9,6 +9,10 @@ pub fn to_dafny(
                 message: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&message),
                 list: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&list, |e| to_dafny(e.clone()))
             },
+        $qualifiedRustServiceErrorType:L::ValidationError(mut inner) =>
+            crate::r#$dafnyTypesModuleName:L::Error::Opaque {
+                obj: ::dafny_runtime::Object::from_ref(&mut inner as &mut dyn ::std::any::Any)
+            },
         $qualifiedRustServiceErrorType:L::Opaque { obj } =>
             crate::r#$dafnyTypesModuleName:L::Error::Opaque {
                 obj: ::dafny_runtime::Object(obj.0)
@@ -32,6 +36,22 @@ pub fn from_dafny(
         crate::r#$dafnyTypesModuleName:L::Error::Opaque { obj } =>
             $qualifiedRustServiceErrorType:L::Opaque {
                 obj: obj.clone()
+            },
+        crate::r#$dafnyTypesModuleName:L::Error::Opaque { obj } =>
+            {
+                use ::std::any::Any;
+                if ::dafny_runtime::is_object!(obj, $rustErrorModuleName:L::ValidationError) {
+                    $qualifiedRustServiceErrorType:L::ValidationError(
+                        ::dafny_runtime::cast_object!(
+                            obj.clone(),
+                            $rustErrorModuleName:L::ValidationError
+                        ).as_ref().clone()
+                    )
+                } else {
+                    $qualifiedRustServiceErrorType:L::Opaque {
+                        obj: obj.clone()
+                    }
+                }
             },
     }
 }

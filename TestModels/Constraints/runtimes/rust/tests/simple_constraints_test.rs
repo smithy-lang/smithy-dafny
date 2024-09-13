@@ -18,8 +18,16 @@ mod simple_constraints_test {
     #[tokio::test]
     async fn test_short_string() {
         let result = client().get_constraints().my_string("").send().await;
-        let message = result.err().expect("error").to_string();
-        assert!(message.contains("my_string"));
+        let error = result.err().expect("error");
+        assert!(matches!(
+            error,
+            simple_constraints::types::error::Error::ValidationError(..)
+        ));
+        assert!(error.to_string().contains("my_string"));
+
+        use std::error::Error;
+        let source_message = error.source().expect("source").to_string();
+        assert!(source_message.contains("my_string"));
     }
 
     #[tokio::test]
@@ -30,7 +38,11 @@ mod simple_constraints_test {
 
     #[tokio::test]
     async fn test_long_string() {
-        let result = client().get_constraints().my_string("too many chararacters").send().await;
+        let result = client()
+            .get_constraints()
+            .my_string("too many characters")
+            .send()
+            .await;
         let message = result.err().expect("error").to_string();
         assert!(message.contains("my_string"));
     }

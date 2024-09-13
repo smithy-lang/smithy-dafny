@@ -14,11 +14,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
@@ -733,7 +731,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::missing_field(
                 "$fieldName:L",
                 "$fieldName:L was not specified but it is required when building $pascalCaseOperationInputName:L",
-            )).map_err($qualifiedRustServiceErrorType:L::wrap_err);
+            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
         }
         """,
         MapUtils.merge(commonVariables, structureMemberVariables(memberShape))
@@ -768,7 +766,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "$fieldName:L",
                 "$fieldName:L failed to satisfy constraint: Member must be %s",
-            )).map_err($qualifiedRustServiceErrorType:L::wrap_err);
+            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
         }
         """.formatted(conditionTemplate, rangeDescription),
         variables
@@ -810,7 +808,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "$fieldName:L",
                 "$fieldName:L failed to satisfy constraint: Member must have length %s",
-            )).map_err($qualifiedRustServiceErrorType:L::wrap_err);
+            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
         }
         """.formatted(conditionTemplate, rangeDescription),
         variables
@@ -1596,6 +1594,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put("sdkId", sdkId);
     variables.put("configName", configName);
     variables.put("snakeCaseConfigName", toSnakeCase(configName));
+    variables.put("rustErrorModuleName", rustErrorModuleName());
     variables.put(
       "qualifiedRustServiceErrorType",
       qualifiedRustServiceErrorType()
@@ -1636,8 +1635,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return variables;
   }
 
+  protected String rustErrorModuleName() {
+    return "%s::error".formatted(getRustTypesModuleName());
+  }
+
   protected String qualifiedRustServiceErrorType() {
-    return "%s::error::Error".formatted(getRustTypesModuleName());
+    return "%s::Error".formatted(rustErrorModuleName());
   }
 
   protected String errorName(final StructureShape errorShape) {
