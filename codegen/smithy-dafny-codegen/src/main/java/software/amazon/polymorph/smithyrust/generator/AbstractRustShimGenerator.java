@@ -159,7 +159,6 @@ public abstract class AbstractRustShimGenerator {
       .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
     Stream<String> resourceModules = streamResourcesToGenerateTraitsFor()
-      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(resourceShape -> toSnakeCase(resourceShape.getId().getName()));
 
     // smithy-dafny generally generates code for all shapes in the same namespace,

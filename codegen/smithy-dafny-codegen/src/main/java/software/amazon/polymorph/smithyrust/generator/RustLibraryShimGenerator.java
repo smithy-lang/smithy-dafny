@@ -65,7 +65,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.addAll(allOperationClientBuilders());
 
     // types
-    result.add(typesModule());
+    streamNamespacesToGenerateFor(model)
+      .forEach(namespace -> result.add(typesModule(namespace)));
     result.add(typesConfigModule());
     result.add(typesBuildersModule());
     result.addAll(
@@ -129,6 +130,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .getUnionShapes()
         .stream()
         .filter(this::shouldGenerateEnumForUnion)
+        .filter(u -> shouldGenerateForNamespace(u.getId().getNamespace()))
         .map(this::unionConversionModule)
         .toList()
     );
@@ -146,6 +148,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     if (GENERATE_DEPENDENCIES) {
       result.add(depsModule());
       streamNamespacesToGenerateFor(model)
+        .filter(n -> !n.equals(service.getId().getNamespace()))
         .forEach(n -> result.add(depModule(n)));
     }
 
@@ -157,20 +160,24 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       return model.shapes()
         .map(s -> s.getId().getNamespace())
         .distinct()
-        .filter(n -> !n.equals(service.getId().getNamespace()))
-        // TODO: This is sloppy, but only necessary until we
-        // can put different services in different crates
-        // and therefore stop inferring what dependencies to generate for.
-        .filter(n -> !n.startsWith("aws") && !n.startsWith("smithy"));
+        .filter(this::shouldGenerateForNamespace);
     } else {
       return Stream.of(service.getId().getNamespace());
     }
+  }
+
+  private boolean shouldGenerateForNamespace(final String namespace) {
+    // TODO: This is sloppy, but only necessary until we
+    // can put different services in different crates
+    // and therefore stop inferring what dependencies to generate for.
+    return !namespace.startsWith("aws") && !namespace.startsWith("smithy");
   }
 
 
   private RustFile depsModule() {
     final var content = declarePubModules(
       streamNamespacesToGenerateFor(model)
+        .filter(n -> !n.equals(service.getId().getNamespace()))
         .map(NamespaceHelper::rustModuleForSmithyNamespace)
     );
     return new RustFile(Path.of("src", "deps.rs"), content);
@@ -340,10 +347,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n"));
   }
 
-  private RustFile typesModule() {
+  private RustFile typesModule(String namespace) {
     final Map<String, String> variables = serviceVariables();
 
     final String resourceModules = streamResourcesToGenerateTraitsFor()
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(resourceShape ->
         IOUtils.evalTemplate(
           """
@@ -357,6 +365,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put("resourceModules", resourceModules);
 
     final String structureModules = streamStructuresToGenerateStructsFor()
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape ->
         IOUtils.evalTemplate(
           """
@@ -371,6 +380,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     final String enumModules = ModelUtils
       .streamEnumShapes(model, service.getId().getNamespace())
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(enumShape ->
         IOUtils.evalTemplate(
           """
@@ -387,6 +397,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .getUnionShapes()
       .stream()
       .filter(this::shouldGenerateEnumForUnion)
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(unionShape ->
         IOUtils.evalTemplate(
           """
@@ -404,7 +415,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/types.rs",
       variables
     );
-    return new RustFile(Path.of("src", "types.rs"), TokenTree.of(content));
+    return new RustFile(rootPathForNamespace(namespace).resolve("types.rs"), TokenTree.of(content));
   }
 
   private RustFile typesConfigModule() {
@@ -642,7 +653,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       """;
     final String content = allOperationShapes()
       .filter(this::shouldGenerateOperation)
-      .filter(n -> n.getId().getNamespace().equals(n))
+      .filter(n -> n.getId().getNamespace().equals(namespace))
       .map(this::operationVariables)
       .map(opVariables -> IOUtils.evalTemplate(opTemplate, opVariables))
       .collect(Collectors.joining("\n\n"));
