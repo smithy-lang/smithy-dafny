@@ -22,7 +22,7 @@ impl GetResourcePositional {
     return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::missing_field(
         "name",
         "name was not specified but it is required when building GetResourcePositionalInput",
-    )).map_err(crate::types::error::Error::wrap_err);
+    )).map_err(crate::types::error::Error::wrap_validation_err);
 }
                 let inner_input = crate::standard_library_conversions::ostring_to_dafny(&input.name) .Extract();
         let inner_result =

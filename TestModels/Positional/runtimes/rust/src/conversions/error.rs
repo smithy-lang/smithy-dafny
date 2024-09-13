@@ -41,6 +41,10 @@ pub fn to_dafny(
                 message: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&message),
                 list: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&list, |e| to_dafny(e.clone()))
             },
+        crate::types::error::Error::ValidationError(mut inner) =>
+            crate::r#simple::positional::internaldafny::types::Error::Opaque {
+                obj: ::dafny_runtime::Object::from_ref(&mut inner as &mut dyn ::std::any::Any)
+            },
         crate::types::error::Error::Opaque { obj } =>
             crate::r#simple::positional::internaldafny::types::Error::Opaque {
                 obj: ::dafny_runtime::Object(obj.0)
@@ -67,6 +71,22 @@ pub fn from_dafny(
         crate::r#simple::positional::internaldafny::types::Error::Opaque { obj } =>
             crate::types::error::Error::Opaque {
                 obj: obj.clone()
+            },
+        crate::r#simple::positional::internaldafny::types::Error::Opaque { obj } =>
+            {
+                use ::std::any::Any;
+                if ::dafny_runtime::is_object!(obj, crate::types::error::ValidationError) {
+                    crate::types::error::Error::ValidationError(
+                        ::dafny_runtime::cast_object!(
+                            obj.clone(),
+                            crate::types::error::ValidationError
+                        ).as_ref().clone()
+                    )
+                } else {
+                    crate::types::error::Error::Opaque {
+                        obj: obj.clone()
+                    }
+                }
             },
     }
 }

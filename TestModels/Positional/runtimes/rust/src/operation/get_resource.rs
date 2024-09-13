@@ -22,7 +22,7 @@ impl GetResource {
     return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::missing_field(
         "name",
         "name was not specified but it is required when building GetResourceInput",
-    )).map_err(crate::types::error::Error::wrap_err);
+    )).map_err(crate::types::error::Error::wrap_validation_err);
 }
                 let inner_input = crate::conversions::get_resource::_get_resource_input::to_dafny(input);
         let inner_result =
