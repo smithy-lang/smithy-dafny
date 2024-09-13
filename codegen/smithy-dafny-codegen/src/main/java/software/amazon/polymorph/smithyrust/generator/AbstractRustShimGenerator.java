@@ -14,9 +14,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -510,14 +512,19 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case INTEGER -> {
-        if (isRustOption) {
+        if (isDafnyOption) {
           yield TokenTree.of(
             "crate::standard_library_conversions::oint_from_dafny(%s.clone())".formatted(
                 dafnyValue
               )
           );
         } else {
-          yield TokenTree.of(dafnyValue, ".clone()");
+          TokenTree result = TokenTree.of(dafnyValue, ".clone()");
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
         }
       }
       case LONG -> {
