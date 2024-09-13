@@ -32,6 +32,9 @@ module WrappedSimpleConstraintsTest {
     TestGetConstraintWithUtf8Bytes(client);
     TestGetConstraintWithListOfUtf8Bytes(client);
 
+    TestGetConstraintWithNestedShallow(client);
+    TestGetConstraintWithNestedDeep(client);
+
     var allowBadUtf8BytesFromDafny := true;
     if (allowBadUtf8BytesFromDafny) {
       TestGetConstraintWithBadUtf8Bytes(client);
@@ -587,6 +590,31 @@ module WrappedSimpleConstraintsTest {
 
     input := input.(MyListOfUtf8Bytes := Some(ForceListOfUtf8Bytes([good, bad])));
     ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+  }
+
+  method TestGetConstraintWithNestedShallow(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := input.(NonEmptyListOfNonEmptyStrings := Some(EmptyListOfNonEmptyStrings()));
+    ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+  }
+
+  method TestGetConstraintWithNestedDeep(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(NonEmptyListOfNonEmptyStrings := Some(NonEmptyListOfEmptyString()));
+    var ret := client.GetConstraints(input := input);
     expect ret.Failure?;
   }
 }

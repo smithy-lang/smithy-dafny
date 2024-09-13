@@ -146,6 +146,11 @@ integer LessThanTen
 //   blob: Blob,
 // }
 
+@length(min: 1)
+list NonEmptyListOfNonEmptyStrings {
+  member: NonEmptyString,
+}
+
 structure GetConstraintsInput {
   MyString: MyString,
   NonEmptyString: NonEmptyString,
@@ -168,6 +173,7 @@ structure GetConstraintsInput {
   // MyComplexUniqueList: MyComplexUniqueList,
   MyUtf8Bytes: Utf8Bytes,
   MyListOfUtf8Bytes: ListOfUtf8Bytes,
+  NonEmptyListOfNonEmptyStrings: NonEmptyListOfNonEmptyStrings,
 }
 
 structure GetConstraintsOutput {

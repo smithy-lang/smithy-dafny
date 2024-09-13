@@ -44,7 +44,8 @@ module Helpers {
       // MyUniqueList := Some(["one", "two"]),
       // MyComplexUniqueList := Some(myComplexUniqueList),
       MyUtf8Bytes := Some(PROVIDER_ID),
-      MyListOfUtf8Bytes := Some([PROVIDER_ID, PROVIDER_ID])
+      MyListOfUtf8Bytes := Some([PROVIDER_ID, PROVIDER_ID]),
+      NonEmptyListOfNonEmptyStrings := Some(["good"])
     )
   }
 
@@ -191,5 +192,21 @@ module Helpers {
     assume {:axiom} IsValid_GreaterThanOne(v32);
     var myGreaterThanOne: GreaterThanOne := v32;
     myGreaterThanOne
+  }
+
+  function method EmptyListOfNonEmptyStrings(): NonEmptyListOfNonEmptyStrings
+  {
+    var value := [];
+    assume {:axiom} IsValid_NonEmptyListOfNonEmptyStrings(value);
+    var forced: NonEmptyListOfNonEmptyStrings := value;
+    forced
+  }
+
+  function method NonEmptyListOfEmptyString(): NonEmptyListOfNonEmptyStrings
+  {
+    var value := [ForceNonEmptyString("")];
+    assume {:axiom} IsValid_NonEmptyListOfNonEmptyStrings(value);
+    var forced: NonEmptyListOfNonEmptyStrings := value;
+    forced
   }
 }
