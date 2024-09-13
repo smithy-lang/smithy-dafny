@@ -698,12 +698,28 @@ local_transpile_impl_net_single: TARGET=cs
 local_transpile_impl_net_single: OUT=runtimes/net/ImplementationFromDafny
 local_transpile_impl_net_single: local_transpile_impl_single
 
+local_transpile_impl_rust_single: TARGET=rs
+local_transpile_impl_rust_single: OUT=implementation_from_dafny
+local_transpile_impl_rust_single: SRC_INDEX=$(RUST_SRC_INDEX)
+local_transpile_impl_rust_single: TEST_INDEX=$(RUST_TEST_INDEX)
+local_transpile_impl_rust_single: DAFNY_OPTIONS=--emit-uncompilable-code --allow-warnings --compile-suffix
+local_transpile_impl_rust_single: TRANSPILE_DEPENDENCIES=
+local_transpile_impl_rust_single: STD_LIBRARY=
+local_transpile_impl_rust_single: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+local_transpile_impl_rust_single: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
+local_transpile_impl_rust_single: DAFNY_OTHER_FILES=$(RUST_OTHER_FILES)
+local_transpile_impl_rust_single: deps_var=SERVICE_DEPS_$(SERVICE)
+local_transpile_impl_rust_single: service_deps_var=SERVICE_DEPS_$(SERVICE)
+local_transpile_impl_rust_single: namespace_var=SERVICE_NAMESPACE_$(SERVICE)
+local_transpile_impl_rust_single: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust _patch_after_transpile_rust
+
+
 local_transpile_impl_single: deps_var=SERVICE_DEPS_$(SERVICE)
 local_transpile_impl_single: TRANSPILE_TARGETS=./dafny/$(SERVICE)/src/$(FILE)
 local_transpile_impl_single: TRANSPILE_DEPENDENCIES= \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $($(deps_var))) \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX)) \
-		-library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $($(deps_var))) \
+		$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX)) \
+		--library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 local_transpile_impl_single: transpile_implementation
 
 # Targets to transpile single local service for convenience.
