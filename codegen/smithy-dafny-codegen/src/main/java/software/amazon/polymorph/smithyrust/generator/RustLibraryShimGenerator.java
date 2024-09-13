@@ -756,10 +756,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       final var max = rangeTrait
         .getMax()
         .map(bound -> asLiteral(bound, targetShape));
-      final var conditionTemplate = Stream
-        .of(min.map("(x < %s)"::formatted), max.map("(x > %s)"::formatted))
-        .flatMap(Optional::stream)
-        .collect(Collectors.joining(" || "));
+      final var conditionTemplate =
+        "!(%s..%s).contains(&x)".formatted(
+            min.orElse(""),
+            max.map(val -> "=" + val).orElse("")
+          );
       final var rangeDescription = describeMinMax(min, max);
       return IOUtils.evalTemplate(
         """
@@ -796,13 +797,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       );
       final var min = lengthTrait.getMin().map(Object::toString);
       final var max = lengthTrait.getMax().map(Object::toString);
-      final var conditionTemplate = Stream
-        .of(
-          min.map(args -> "(%s < %s)".formatted(len, args)),
-          max.map(args -> "(%s > %s)".formatted(len, args))
-        )
-        .flatMap(Optional::stream)
-        .collect(Collectors.joining(" || "));
+      final var conditionTemplate =
+        "!(%s..%s).contains(&%s)".formatted(
+            min.orElse(""),
+            max.map(val -> "=" + val).orElse(""),
+            len
+          );
       final var rangeDescription = describeMinMax(min, max);
       return IOUtils.evalTemplate(
         """
