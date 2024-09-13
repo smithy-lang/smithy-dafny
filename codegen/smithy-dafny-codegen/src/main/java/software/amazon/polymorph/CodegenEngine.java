@@ -51,6 +51,7 @@ import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
+import software.amazon.polymorph.smithyrust.generator.AbstractRustShimGenerator;
 import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
 import software.amazon.polymorph.smithyrust.generator.RustLibraryShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -916,16 +917,7 @@ public class CodegenEngine {
       """
       // (extra-declarations)
 
-      pub mod client;
-      pub mod types;
-
-      /// Common errors and error handling utilities.
-      pub mod error;
-
-      /// All operations that this crate can perform.
-      pub mod operation;
-
-      mod conversions;
+      $sharedTopLevelDecls:L
 
       /// Copied from StandardLibrary
       mod standard_library_conversions;
@@ -942,7 +934,9 @@ public class CodegenEngine {
         "configSnakeCase",
         configSnakeCase,
         "configStructName",
-        configStructName
+        configStructName,
+        "sharedTopLevelDecls",
+        RustLibraryShimGenerator.TOP_LEVEL_MOD_DECLS
       )
     );
   }

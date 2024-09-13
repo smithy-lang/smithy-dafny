@@ -99,11 +99,16 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(sealedUnhandledErrorModule());
 
     // operations
-    result.add(operationModule());
+    allOperationShapes()
+      .map(o -> o.getId().getNamespace())
+      .distinct()
+      .forEach(n -> result.add(operationModule(n)));
     result.addAll(allOperationImplementationModules());
 
     // conversions
-    result.add(conversionsModule());
+    allOperationShapes()
+      .map(o -> o.getId().getNamespace())
+      .forEach(n -> result.add(conversionsModule(n)));
     result.add(conversionsErrorModule());
     result.add(conversionsClientModule());
     result.addAll(configConversionModules());
@@ -137,8 +142,57 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(wrappedModule());
     result.add(wrappedClientModule());
 
+    // dependencies
+    if (GENERATE_DEPENDENCIES) {
+      result.add(depsModule());
+      streamNamespacesToGenerateFor(model)
+        .forEach(n -> result.add(depModule(n)));
+    }
+
     return result;
   }
+
+  private Stream<String> streamNamespacesToGenerateFor(Model model) {
+    if (GENERATE_DEPENDENCIES) {
+      return model.shapes()
+        .map(s -> s.getId().getNamespace())
+        .distinct()
+        .filter(n -> !n.equals(service.getId().getNamespace()))
+        // TODO: This is sloppy, but only necessary until we
+        // can put different services in different crates
+        // and therefore stop inferring what dependencies to generate for.
+        .filter(n -> !n.startsWith("aws") && !n.startsWith("smithy"));
+    } else {
+      return Stream.of(service.getId().getNamespace());
+    }
+  }
+
+
+  private RustFile depsModule() {
+    final var content = declarePubModules(
+      streamNamespacesToGenerateFor(model)
+        .map(NamespaceHelper::rustModuleForSmithyNamespace)
+    );
+    return new RustFile(Path.of("src", "deps.rs"), content);
+  }
+
+  private RustFile depModule(final String namespace) {
+    final String rustModule = NamespaceHelper.rustModuleForSmithyNamespace(namespace);
+    return new RustFile(Path.of("src", "deps", rustModule + ".rs"), TokenTree.of(TOP_LEVEL_MOD_DECLS));
+  }
+
+  public static final String TOP_LEVEL_MOD_DECLS = """
+    pub mod client;
+    pub mod types;
+        
+    /// Common errors and error handling utilities.
+    pub mod error;
+        
+    /// All operations that this crate can perform.
+    pub mod operation;
+        
+    mod conversions;
+    """;
 
   @Override
   protected boolean shouldGenerateStructForStructure(
@@ -152,8 +206,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected RustFile conversionsModule() {
-    final RustFile file = super.conversionsModule();
+  protected RustFile conversionsModule(String namespace) {
+    final RustFile file = super.conversionsModule(namespace);
     final TokenTree content = file
       .content()
       .append(
@@ -580,7 +634,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(path, TokenTree.of(content));
   }
 
-  private RustFile operationModule() {
+  private RustFile operationModule(String namespace) {
     final String opTemplate =
       """
       /// Types for the `$operationName:L` operation.
@@ -588,10 +642,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       """;
     final String content = allOperationShapes()
       .filter(this::shouldGenerateOperation)
+      .filter(n -> n.getId().getNamespace().equals(n))
       .map(this::operationVariables)
       .map(opVariables -> IOUtils.evalTemplate(opTemplate, opVariables))
       .collect(Collectors.joining("\n\n"));
-    return new RustFile(Path.of("src", "operation.rs"), TokenTree.of(content));
+    return new RustFile(rootPathForNamespace(namespace).resolve("operation.rs"), TokenTree.of(content));
   }
 
   private Set<RustFile> allOperationImplementationModules() {
@@ -700,7 +755,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
 
     final String snakeCaseOpName = toSnakeCase(operationName(operationShape));
-    final Path path = operationsModuleFilePath()
+    final Path path = operationsModuleFilePath(operationShape)
       .resolve(snakeCaseOpName + ".rs");
     return new RustFile(path, TokenTree.of(content));
   }
@@ -1200,7 +1255,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       );
     }
     final RustFile outerModule = new RustFile(
-      Path.of("src", "conversions", operationModuleName + ".rs"),
+      rootPathForShape(operationShape).resolve("conversions").resolve(operationModuleName + ".rs"),
       declarePubModules(childModules.stream())
     );
 
@@ -1457,12 +1512,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private Path operationsModuleFilePath() {
-    return Path.of("src", "operation");
+  private Path operationsModuleFilePath(final OperationShape operationShape) {
+    return rootPathForShape(operationShape).resolve("operation");
   }
 
   private Path operationModuleFilePath(final OperationShape operationShape) {
-    return operationsModuleFilePath()
+    return operationsModuleFilePath(operationShape)
       .resolve(toSnakeCase(operationName(operationShape)));
   }
 

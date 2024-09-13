@@ -42,6 +42,8 @@ import software.amazon.smithy.model.traits.RequiredTrait;
 
 public abstract class AbstractRustShimGenerator {
 
+  protected static final boolean GENERATE_DEPENDENCIES = true;
+
   protected final Model model;
   protected final ServiceShape service;
   protected final OperationIndex operationIndex;
@@ -78,7 +80,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected boolean shouldGenerateOperation(OperationShape operationShape) {
-    return ModelUtils.isInServiceNamespace(operationShape, service);
+    return GENERATE_DEPENDENCIES || ModelUtils.isInServiceNamespace(operationShape, service);
   }
 
   protected Stream<StructureShape> allErrorShapes() {
@@ -137,7 +139,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected boolean shouldGenerateEnumForUnion(UnionShape unionShape) {
-    return ModelUtils.isInServiceNamespace(unionShape, service);
+    return GENERATE_DEPENDENCIES || ModelUtils.isInServiceNamespace(unionShape, service);
   }
 
   protected TokenTree declarePubModules(Stream<String> moduleNames) {
@@ -150,27 +152,32 @@ public abstract class AbstractRustShimGenerator {
       .lineSeparated();
   }
 
-  protected RustFile conversionsModule() {
+  protected RustFile conversionsModule(String namespace) {
     Stream<String> operationModules = model
       .getOperationShapes()
       .stream()
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
     Stream<String> resourceModules = streamResourcesToGenerateTraitsFor()
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(resourceShape -> toSnakeCase(resourceShape.getId().getName()));
 
     // smithy-dafny generally generates code for all shapes in the same namespace,
     // whereas most smithy code generators generate code for all shapes in the service closure.
     // Here we filter to "normal" structures and unions.
     Stream<String> structureModules = streamStructuresToGenerateStructsFor()
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
     Stream<String> unionModules = model
       .getUnionShapes()
       .stream()
       .filter(this::shouldGenerateEnumForUnion)
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
     Stream<String> enumModules = ModelUtils
       .streamEnumShapes(model, service.getId().getNamespace())
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
     TokenTree content = declarePubModules(
@@ -187,7 +194,7 @@ public abstract class AbstractRustShimGenerator {
         .flatMap(s -> s)
     );
 
-    return new RustFile(Path.of("src", "conversions.rs"), content);
+    return new RustFile(rootPathForNamespace(namespace).resolve("conversions.rs"), content);
   }
 
   protected RustFile structureConversionModule(
@@ -1095,15 +1102,24 @@ public abstract class AbstractRustShimGenerator {
     if (ModelUtils.isInServiceNamespace(shapeId, service)) {
       return "crate";
     } else {
-      if (shapeId.getNamespace().length() == 0) {
-        throw new IllegalArgumentException(
-          "Empty namespace for shape id: " + shapeId
-        );
-      }
-      return NamespaceHelper.rustModuleForSmithyNamespace(
+      return "crate::" + NamespaceHelper.rustModuleForSmithyNamespace(
         shapeId.getNamespace()
       );
     }
+  }
+
+  protected Path rootPathForNamespace(final String namespace) {
+    if (namespace.equals(service.getId().getNamespace())) {
+      return Path.of("src");
+    } else {
+      return Path.of("src", "deps", NamespaceHelper.rustModuleForSmithyNamespace(
+        namespace
+      ));
+    }
+  }
+
+  protected Path rootPathForShape(final ToShapeId toShapeId) {
+    return rootPathForNamespace(toShapeId.toShapeId().getNamespace());
   }
 
   protected String qualifiedRustServiceType(final ServiceShape serviceShape) {
