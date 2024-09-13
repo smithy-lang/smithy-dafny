@@ -151,8 +151,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
 
     // wrapped client
-    result.add(wrappedModule());
-    result.add(wrappedClientModule());
+    streamServicesToGenerateFor(model)
+      .forEach(serviceShape -> {
+          result.add(wrappedModule(serviceShape));
+          result.add(wrappedClientModule(serviceShape));
+      });
 
     // dependencies
     if (GENERATE_DEPENDENCIES) {
@@ -1497,22 +1500,22 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private RustFile wrappedModule() {
+  private RustFile wrappedModule(final ServiceShape serviceShape) {
     final String content = IOUtils.evalTemplate(
       getClass(),
       "runtimes/rust/wrapped.rs",
-      serviceVariables()
+      serviceVariables(serviceShape)
     );
-    return new RustFile(Path.of("src", "wrapped.rs"), TokenTree.of(content));
+    return new RustFile(rootPathForShape(serviceShape).resolve("wrapped.rs"), TokenTree.of(content));
   }
 
-  private RustFile wrappedClientModule() {
-    final Map<String, String> variables = serviceVariables();
+  private RustFile wrappedClientModule(final ServiceShape serviceShape) {
+    final Map<String, String> variables = serviceVariables(serviceShape);
     variables.put(
       "operationImpls",
-      operationBindingIndex.getOperations(service)
+      operationBindingIndex.getOperations(serviceShape)
         .stream()
-        .map(this::wrappedClientOperationImpl)
+        .map(o -> wrappedClientOperationImpl(serviceShape, o))
         .collect(Collectors.joining("\n\n"))
     );
     final String content = IOUtils.evalTemplate(
@@ -1521,17 +1524,18 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables
     );
     return new RustFile(
-      Path.of("src", "wrapped", "client.rs"),
+      rootPathForShape(serviceShape).resolve("wrapped").resolve("client.rs"),
       TokenTree.of(content)
     );
   }
 
   private String wrappedClientOperationImpl(
+    final ServiceShape serviceShape,
     final OperationShape operationShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(),
-      operationVariables(service, operationShape)
+      serviceVariables(serviceShape),
+      operationVariables(serviceShape, operationShape)
     );
 
     StructureShape inputShape = operationIndex
