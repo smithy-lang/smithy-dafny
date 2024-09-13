@@ -14,6 +14,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -219,7 +221,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     /// All operations that this crate can perform.
     pub mod operation;
         
-    mod conversions;
+    pub mod conversions;
     
     pub mod deps;
     """;
@@ -481,7 +483,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile typesErrorModule(final ServiceShape serviceShape) {
     final Map<String, String> variables = serviceVariables(serviceShape);
-    final Stream<String> directErrorVariants = allErrorShapes()
+    final Stream<String> directErrorVariants = allErrorShapes(serviceShape)
       .map(errorShape ->
         IOUtils.evalTemplate(
           """
@@ -495,14 +497,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Stream<ServiceShape> dependencies = ModelUtils.streamLocalServiceDependencies(model, serviceShape);
     final Stream<String> dependencyErrorVariants = dependencies
         .map(dependentService -> {
-          Map<String, String> dependentServiceVariables = serviceVariables(dependentService);
           return IOUtils.evalTemplate(
             """
-            $serviceName:LError {
-                error: $qualifiedRustServiceErrorType:L,
+            $rustErrorName:L {
+                error: $rustDependentRootModuleName:L::types::error::Error,
             },
             """,
-            MapUtils.merge(dependentServiceVariables)
+            MapUtils.merge(variables, dependentServiceErrorVariables(dependentService))
           );
         });
     final String modeledErrorVariants = Stream.concat(directErrorVariants, dependencyErrorVariants)
@@ -1049,7 +1050,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   protected RustFile conversionsErrorModule(final ServiceShape serviceShape) {
     final Map<String, String> variables = serviceVariables(serviceShape);
 
-    final String toDafnyArms = allErrorShapes()
+    final Stream<String> directToDafnyArms = allErrorShapes(serviceShape)
       .map(errorShape ->
         IOUtils.evalTemplate(
           """
@@ -1060,11 +1061,22 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           """,
           MapUtils.merge(variables, errorVariables(errorShape))
         )
-      )
+      );
+    final Stream<String> dependencyToDafnyArms = ModelUtils.streamLocalServiceDependencies(model, serviceShape)
+      .map(dependentService -> IOUtils.evalTemplate(
+        """
+        $qualifiedRustErrorVariant:L { error } =>
+            crate::r#$dafnyTypesModuleName:L::Error::$errorName:L {
+                $errorName:L: $rustDependentRootModuleName:L::conversions::error::to_dafny(error),
+            },
+        """,
+        MapUtils.merge(variables, dependentServiceErrorVariables(dependentService))
+      ));
+    final String toDafnyArms = Stream.concat(directToDafnyArms, dependencyToDafnyArms)
       .collect(Collectors.joining("\n"));
     variables.put("toDafnyArms", toDafnyArms);
 
-    final String fromDafnyArms = allErrorShapes()
+    final Stream<String> directFromDafnyArms = allErrorShapes(serviceShape)
       .map(errorShape ->
         IOUtils.evalTemplate(
           """
@@ -1075,7 +1087,18 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           """,
           MapUtils.merge(variables, errorVariables(errorShape))
         )
-      )
+      );
+    final Stream<String> dependencyFromDafnyArms = ModelUtils.streamLocalServiceDependencies(model, serviceShape)
+      .map(dependentService -> IOUtils.evalTemplate(
+        """
+        crate::r#$dafnyTypesModuleName:L::Error::$errorName:L { $errorName:L } =>
+            $qualifiedRustErrorVariant:L {
+                error: $rustDependentRootModuleName:L::conversions::error::from_dafny($errorName:L.clone()),
+            },
+        """,
+        MapUtils.merge(variables, dependentServiceErrorVariables(dependentService))
+      ));
+    final String fromDafnyArms = Stream.concat(directFromDafnyArms, dependencyFromDafnyArms)
       .collect(Collectors.joining("\n"));
     variables.put("fromDafnyArms", fromDafnyArms);
 
@@ -1677,6 +1700,19 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put("errorName", errorName);
     variables.put("snakeCaseErrorName", toSnakeCase(errorName));
     variables.put("rustErrorName", rustErrorName);
+    variables.put(
+      "qualifiedRustErrorVariant",
+      "%s::%s".formatted(qualifiedRustServiceErrorType(serviceForShape(model, errorShape)), rustErrorName)
+    );
+    return variables;
+  }
+
+  private Map<String, String> dependentServiceErrorVariables(final ServiceShape serviceShape) {
+    final Map<String, String> variables = new HashMap<>();
+    final String rustErrorName = serviceShape.getId().getName() + "Error";
+    variables.put("errorName", DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace()));
+    variables.put("rustErrorName", rustErrorName);
+    variables.put("rustDependentRootModuleName", getRustRootModuleName(serviceShape.getId().getNamespace()));
     variables.put(
       "qualifiedRustErrorVariant",
       "%s::%s".formatted(qualifiedRustServiceErrorType(service), rustErrorName)

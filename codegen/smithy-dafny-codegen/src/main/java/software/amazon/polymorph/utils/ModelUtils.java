@@ -719,7 +719,6 @@ public class ModelUtils {
       return Stream.empty();
     }
 
-
     final Set<ShapeId> dependentIds = localServiceTrait.get().getDependencies();
     if (dependentIds == null) {
       return Stream.empty();

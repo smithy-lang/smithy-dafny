@@ -77,8 +77,8 @@ public abstract class AbstractRustShimGenerator {
     return GENERATE_DEPENDENCIES || ModelUtils.isInServiceNamespace(operationShape, service);
   }
 
-  protected Stream<StructureShape> allErrorShapes() {
-    final var commonErrors = service.getErrors().stream();
+  protected Stream<StructureShape> allErrorShapes(final ServiceShape serviceShape) {
+    final var commonErrors = serviceShape.getErrors().stream();
     final var operationErrors = model
       .getOperationShapes()
       .stream()
