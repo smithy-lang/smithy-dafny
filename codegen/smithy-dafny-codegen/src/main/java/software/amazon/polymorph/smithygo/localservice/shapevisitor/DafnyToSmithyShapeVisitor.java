@@ -159,7 +159,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 ));
         }
 
-        return builder.append("}}").toString();
+        return builder.append("}").toString();
     }
 
     // TODO: smithy-dafny-conversion library
@@ -174,7 +174,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         String funcParenthesis = "";
         if (!visitorFuncMap.containsKey(shape)){
             builder.append("func() []%s{".formatted(SmithyNameResolver.getSmithyType(shape, typeName)));
-            funcParenthesis = "()";
+            funcParenthesis = "}()";
         }
         
         builder.append("""
@@ -195,7 +195,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 // )
                 ));
         // Close structure
-        return builder.append("return fieldValue }%s".formatted(funcParenthesis)).toString();
+        return builder.append("return fieldValue %s".formatted(funcParenthesis)).toString();
     }
 
     @Override
@@ -213,7 +213,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         }
         String valueDataSource = "(*val.(dafny.Tuple).IndexInt(1))";
         builder.append("""
-                               var m map[string]%s = make(map[string]%s)
+                var m map[string]%s = make(map[string]%s)
                 if %s == nil {
                     return nil
                 }
@@ -225,7 +225,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 		m[%s] = %s
 	}
 	return m
-                               }""".formatted(type, type, dataSource, dataSource, keyTargetShape.accept(
+                               """.formatted(type, type, dataSource, dataSource, keyTargetShape.accept(
                 new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
         ),
         ShapeVisitorHelper.toNativeContainerShapeHelper(valueMemberShape, context, valueDataSource, true, writer, isConfigShape, false)
@@ -234,7 +234,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 // )
         ));
         if (!visitorFuncMap.containsKey(shape)){
-            builder.append("()");
+            builder.append("}()");
         }
         return builder.toString();
     }
@@ -406,7 +406,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         String funcParenthesis = "";
         if (!visitorFuncMap.containsKey(shape)){
             funcSignature = "func() %s {".formatted(context.symbolProvider().toSymbol(shape));
-            funcParenthesis = "()";
+            funcParenthesis = "}()";
         }
         final String functionInit = """
                 %s
@@ -463,7 +463,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             %s
             %s
             return union
-        }%s""".formatted(
+        %s""".formatted(
             functionInit,
             eachMemberInUnion,
             funcParenthesis
