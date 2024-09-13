@@ -156,7 +156,11 @@ public abstract class AbstractRustShimGenerator {
     Stream<String> operationModules = model
       .getOperationShapes()
       .stream()
-      .filter(o -> o.getId().getNamespace().equals(namespace))
+      .filter(this::shouldGenerateOperation)
+      // Need to filter by the binding shape, not the operation shape
+      .filter(o -> operationBindingIndex.getBindingShapes(o).stream().anyMatch(
+        b -> b.getId().getNamespace().equals(namespace))
+      )
       .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
     Stream<String> resourceModules = streamResourcesToGenerateTraitsFor()
       .map(resourceShape -> toSnakeCase(resourceShape.getId().getName()));
@@ -928,29 +932,28 @@ public abstract class AbstractRustShimGenerator {
    * Generates values for variables commonly used in service-specific templates.
    */
   protected HashMap<String, String> serviceVariables() {
+    final String namespace = service.getId().getNamespace();
     final HashMap<String, String> variables = new HashMap<>();
     variables.put("serviceName", service.getId().getName(service));
-    variables.put("dafnyModuleName", getDafnyModuleName());
-    variables.put("dafnyInternalModuleName", getDafnyInternalModuleName());
-    variables.put("dafnyTypesModuleName", getDafnyTypesModuleName());
+    variables.put("dafnyModuleName", getDafnyModuleName(namespace));
+    variables.put("dafnyInternalModuleName", getDafnyInternalModuleName(namespace));
+    variables.put("dafnyTypesModuleName", getDafnyTypesModuleName(namespace));
     variables.put("rustTypesModuleName", getRustTypesModuleName());
     return variables;
   }
 
-  protected String getDafnyModuleName() {
-    return service
-      .getId()
-      .getNamespace()
+  protected String getDafnyModuleName(final String namespace) {
+    return namespace
       .replace(".", "::")
       .toLowerCase(Locale.ROOT);
   }
 
-  protected String getDafnyInternalModuleName() {
-    return "%s::internaldafny".formatted(getDafnyModuleName());
+  protected String getDafnyInternalModuleName(final String namespace) {
+    return "%s::internaldafny".formatted(getDafnyModuleName(namespace));
   }
 
-  protected String getDafnyTypesModuleName() {
-    return "%s::types".formatted(getDafnyInternalModuleName());
+  protected String getDafnyTypesModuleName(final String namespace) {
+    return "%s::types".formatted(getDafnyInternalModuleName(namespace));
   }
 
   protected abstract String getRustTypesModuleName();
@@ -1157,6 +1160,8 @@ public abstract class AbstractRustShimGenerator {
     variables.put("structureName", structureName);
     variables.put("snakeCaseStructureName", toSnakeCase(structureName));
     variables.put("rustStructureName", rustStructureName(structureShape));
+    // TODO: Risky...
+    variables.put("dafnyTypesModuleName", getDafnyTypesModuleName(structureShape.getId().getNamespace()));
     return variables;
   }
 
@@ -1406,7 +1411,7 @@ public abstract class AbstractRustShimGenerator {
         }
         yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>";
       }
-      case ENUM -> getDafnyTypesModuleName() +
+      case ENUM -> getDafnyTypesModuleName(shape.getId().getNamespace()) +
       "::" +
       enumName((EnumShape) shape);
       // other simple shapes
@@ -1435,24 +1440,24 @@ public abstract class AbstractRustShimGenerator {
           );
       }
       case STRUCTURE -> "::std::rc::Rc<crate::r#" +
-      getDafnyTypesModuleName() +
+      getDafnyTypesModuleName(shape.getId().getNamespace()) +
       "::" +
       structureName((StructureShape) shape) +
       ">";
       case UNION -> "::std::rc::Rc<crate::r#" +
-      getDafnyTypesModuleName() +
+      getDafnyTypesModuleName(shape.getId().getNamespace()) +
       "::" +
       unionName((UnionShape) shape) +
       ">";
       case RESOURCE -> "::dafny_runtime::Object<dyn crate::r#" +
-      getDafnyTypesModuleName() +
+      getDafnyTypesModuleName(shape.getId().getNamespace()) +
       "::I" +
       resourceName((ResourceShape) shape) +
       ">";
       case SERVICE -> {
         ServiceShape service = (ServiceShape) shape;
         yield "::dafny_runtime::Object<dyn crate::r#" +
-        getDafnyTypesModuleName() +
+        getDafnyTypesModuleName(shape.getId().getNamespace()) +
         "::I" +
         service.getId().getName(service) +
         "Client>";

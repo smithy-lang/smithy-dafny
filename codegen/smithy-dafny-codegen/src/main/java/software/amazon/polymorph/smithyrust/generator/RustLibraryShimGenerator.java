@@ -787,7 +787,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
 
     final String snakeCaseOpName = toSnakeCase(operationName(operationShape));
-    final Path path = operationsModuleFilePath(operationShape)
+    final Path path = operationsModuleFilePath(bindingShape)
       .resolve(snakeCaseOpName + ".rs");
     return new RustFile(path, TokenTree.of(content));
   }
@@ -808,7 +808,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/operation/structure.rs",
       variables
     );
-    final Path path = operationModuleFilePath(operationShape)
+    final Path path = operationModuleFilePath(bindingShape, operationShape)
       .resolve("_%s.rs".formatted(toSnakeCase(structureName(structureShape))));
     return new RustFile(path, TokenTree.of(content));
   }
@@ -956,7 +956,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/operation/builders.rs",
       variables
     );
-    final Path path = operationModuleFilePath(operationShape)
+    final Path path = operationModuleFilePath(bindingShape, operationShape)
       .resolve("builders.rs");
     return new RustFile(path, TokenTree.of(content));
   }
@@ -1290,7 +1290,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       );
     }
     final RustFile outerModule = new RustFile(
-      rootPathForShape(operationShape).resolve("conversions").resolve(operationModuleName + ".rs"),
+      rootPathForShape(bindingShape).resolve("conversions").resolve(operationModuleName + ".rs"),
       declarePubModules(childModules.stream())
     );
 
@@ -1559,12 +1559,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private Path operationsModuleFilePath(final OperationShape operationShape) {
-    return rootPathForShape(operationShape).resolve("operation");
+  private Path operationsModuleFilePath(final Shape bindingShape) {
+    return rootPathForShape(bindingShape).resolve("operation");
   }
 
-  private Path operationModuleFilePath(final OperationShape operationShape) {
-    return operationsModuleFilePath(operationShape)
+  private Path operationModuleFilePath(final Shape bindingShape, final OperationShape operationShape) {
+    return operationsModuleFilePath(bindingShape)
       .resolve(toSnakeCase(operationName(operationShape)));
   }
 
