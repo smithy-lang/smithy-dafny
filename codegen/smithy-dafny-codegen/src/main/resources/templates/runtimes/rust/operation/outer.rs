@@ -18,9 +18,9 @@ impl $pascalCaseOperationName:L {
     }
 }
 
-pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationOutputName:L::$pascalCaseOperationOutputName:L;
+pub use $rustRootModuleName:L::operation::$snakeCaseOperationName:L::_$snakeCaseOperationOutputName:L::$pascalCaseOperationOutputName:L;
 
-pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::$pascalCaseOperationInputName:L;
+pub use $rustRootModuleName:L::operation::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::$pascalCaseOperationInputName:L;
 
 pub(crate) mod _$snakeCaseOperationOutputName:L;
 

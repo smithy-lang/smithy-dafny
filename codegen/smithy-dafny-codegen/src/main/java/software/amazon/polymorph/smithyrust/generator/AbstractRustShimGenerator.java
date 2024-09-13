@@ -939,6 +939,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("dafnyModuleName", getDafnyModuleName(namespace));
     variables.put("dafnyInternalModuleName", getDafnyInternalModuleName(namespace));
     variables.put("dafnyTypesModuleName", getDafnyTypesModuleName(namespace));
+    variables.put("rustRootModuleName", getRustRootModuleName(namespace));
     variables.put("rustTypesModuleName", getRustTypesModuleName(namespace));
     variables.put("rustConversionsModuleName", getRustConversionsModuleName(namespace));
     return variables;
@@ -958,9 +959,15 @@ public abstract class AbstractRustShimGenerator {
     return "%s::types".formatted(getDafnyInternalModuleName(namespace));
   }
 
-  protected abstract String getRustTypesModuleName(final String namespace);
+  protected abstract String getRustRootModuleName(final String namespace);
 
-  protected abstract String getRustConversionsModuleName(final String namespace);
+  protected String getRustTypesModuleName(final String namespace) {
+    return getRustRootModuleName(namespace) + "::types";
+  }
+
+  protected String getRustConversionsModuleName(final String namespace) {
+    return getRustRootModuleName(namespace) + "::conversions";
+  }
 
   /**
    * Generates values for variables commonly used in operation-specific templates.
@@ -977,6 +984,7 @@ public abstract class AbstractRustShimGenerator {
     final String synOpOutputName = syntheticOperationOutputName(operationShape);
 
     final HashMap<String, String> variables = new HashMap<>();
+    variables.put("rustRootModuleName", topLevelNameForShape(bindingShape));
     variables.put("operationName", opName);
     variables.put("operationInputName", opInputName);
     variables.put("operationOutputName", opOutputName);
@@ -1001,7 +1009,7 @@ public abstract class AbstractRustShimGenerator {
 
     if (bindingShape.isServiceShape()) {
       variables.put("operationTargetName", "client");
-      variables.put("operationTargetType", "crate::client::Client");
+      variables.put("operationTargetType", qualifiedRustServiceType((ServiceShape) bindingShape));
     } else {
       Map<String, String> resourceVariables = resourceVariables(
         bindingShape.asResourceShape().get()
@@ -1025,7 +1033,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put(
       "operationInputType",
       evalTemplate(
-        "crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L",
+        "$rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L",
         variables
       )
     );
@@ -1042,7 +1050,7 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationDafnyInputType",
         evalTemplate(
-          "crate::r#$dafnyTypesModuleName:L::$structureName:L",
+          "$rustRootModuleName:L::r#$dafnyTypesModuleName:L::$structureName:L",
           inputShapeVariables
         )
       );
@@ -1057,7 +1065,7 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationOutputType",
         evalTemplate(
-          "crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L",
+          "$rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L",
           variables
         )
       );
@@ -1067,7 +1075,7 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationDafnyOutputType",
         evalTemplate(
-          "crate::r#$dafnyTypesModuleName:L::$structureName:L",
+          "$rustRootModuleName:L::r#$dafnyTypesModuleName:L::$structureName:L",
           outputShapeVariables
         )
       );

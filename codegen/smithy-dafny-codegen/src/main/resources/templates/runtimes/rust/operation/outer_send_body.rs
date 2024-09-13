@@ -9,7 +9,7 @@
                 $outputFromDafny:L,
             )
         } else {
-            Err(crate::conversions::error::from_dafny(
+            Err($rustRootModuleName:L::conversions::error::from_dafny(
                 inner_result.error().clone(),
             ))
         }
