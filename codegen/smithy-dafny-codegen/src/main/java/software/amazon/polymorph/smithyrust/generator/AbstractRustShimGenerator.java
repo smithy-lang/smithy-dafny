@@ -932,13 +932,17 @@ public abstract class AbstractRustShimGenerator {
    * Generates values for variables commonly used in service-specific templates.
    */
   protected HashMap<String, String> serviceVariables() {
-    final String namespace = service.getId().getNamespace();
+    return serviceVariables(service);
+  }
+
+  protected HashMap<String, String> serviceVariables(final ServiceShape serviceShape) {
+    final String namespace = serviceShape.getId().getNamespace();
     final HashMap<String, String> variables = new HashMap<>();
-    variables.put("serviceName", service.getId().getName(service));
+    variables.put("serviceName", serviceShape.getId().getName(serviceShape));
     variables.put("dafnyModuleName", getDafnyModuleName(namespace));
     variables.put("dafnyInternalModuleName", getDafnyInternalModuleName(namespace));
     variables.put("dafnyTypesModuleName", getDafnyTypesModuleName(namespace));
-    variables.put("rustTypesModuleName", getRustTypesModuleName());
+    variables.put("rustTypesModuleName", getRustTypesModuleName(namespace));
     return variables;
   }
 
@@ -956,7 +960,7 @@ public abstract class AbstractRustShimGenerator {
     return "%s::types".formatted(getDafnyInternalModuleName(namespace));
   }
 
-  protected abstract String getRustTypesModuleName();
+  protected abstract String getRustTypesModuleName(final String namespace);
 
   /**
    * Generates values for variables commonly used in operation-specific templates.

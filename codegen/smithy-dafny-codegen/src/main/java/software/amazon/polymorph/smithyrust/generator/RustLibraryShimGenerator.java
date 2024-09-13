@@ -75,7 +75,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .map(this::standardStructureModule)
         .toList()
     );
-    result.add(typesErrorModule());
+    streamServicesToGenerateFor(model)
+      .forEach(serviceShape -> result.add(typesErrorModule(serviceShape)));
+
     result.addAll(
       ModelUtils
         .streamEnumShapes(model, service.getId().getNamespace())
@@ -170,6 +172,14 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     }
   }
 
+  private Stream<ServiceShape> streamServicesToGenerateFor(Model model) {
+    if (GENERATE_DEPENDENCIES) {
+      return model.getServiceShapes().stream();
+    } else {
+      return Stream.of(service);
+    }
+  }
+
   private boolean shouldGenerateForNamespace(final String namespace) {
     // TODO: This is sloppy, but only necessary until we
     // can put different services in different crates
@@ -203,6 +213,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     pub mod operation;
         
     mod conversions;
+    
+    pub mod deps;
     """;
 
   @Override
@@ -456,9 +468,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(path, TokenTree.of(content));
   }
 
-  private RustFile typesErrorModule() {
-    final Map<String, String> variables = serviceVariables();
-    final String modeledErrorVariants = allErrorShapes()
+  private RustFile typesErrorModule(final ServiceShape serviceShape) {
+    final Map<String, String> variables = serviceVariables(serviceShape);
+    final Stream<String> directErrorVariants = allErrorShapes()
       .map(errorShape ->
         IOUtils.evalTemplate(
           """
@@ -468,8 +480,22 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           """,
           MapUtils.merge(variables, errorVariables(errorShape))
         )
-      )
-      .collect(Collectors.joining("\n\n"));
+      );
+    final Stream<ServiceShape> dependencies = ModelUtils.streamLocalServiceDependencies(model, serviceShape);
+    final Stream<String> dependencyErrorVariants = dependencies
+        .map(dependentService -> {
+          Map<String, String> dependentServiceVariables = serviceVariables(dependentService);
+          return IOUtils.evalTemplate(
+            """
+            $serviceName:LError {
+                error: $qualifiedRustServiceErrorType:L,
+            },
+            """,
+            MapUtils.merge(dependentServiceVariables)
+          );
+        });
+    final String modeledErrorVariants = Stream.concat(directErrorVariants, dependencyErrorVariants)
+        .collect(Collectors.joining("\n\n"));
     variables.put("modeledErrorVariants", modeledErrorVariants);
 
     final String content = IOUtils.evalTemplate(
@@ -478,7 +504,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables
     );
 
-    final Path path = Path.of("src", "types", "error.rs");
+    final Path path = rootPathForShape(serviceShape).resolve("types").resolve("error.rs");
+
     return new RustFile(path, TokenTree.of(content));
   }
 
@@ -1572,27 +1599,48 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return service.expectTrait(LocalServiceTrait.class);
   }
 
-  @Override
   protected HashMap<String, String> serviceVariables() {
     final HashMap<String, String> variables = super.serviceVariables();
 
     final LocalServiceTrait localServiceTrait = localServiceTrait();
     final String sdkId = localServiceTrait.getSdkId();
+    // TODO: needs to be config shape of the passed in service
     final String configName = configShape.getId().getName(service);
     variables.put("sdkId", sdkId);
     variables.put("configName", configName);
     variables.put("snakeCaseConfigName", toSnakeCase(configName));
     variables.put(
       "qualifiedRustServiceErrorType",
-      qualifiedRustServiceErrorType()
+      qualifiedRustServiceErrorType(service)
     );
 
     return variables;
   }
 
   @Override
-  protected String getRustTypesModuleName() {
-    return "crate::types";
+  protected HashMap<String, String> serviceVariables(final ServiceShape serviceShape) {
+    final HashMap<String, String> variables = super.serviceVariables(serviceShape);
+
+    final LocalServiceTrait localServiceTrait = localServiceTrait();
+    final String sdkId = localServiceTrait.getSdkId();
+    // TODO: needs to be config shape of the passed in service
+    final String configName = configShape.getId().getName(service);
+    variables.put("sdkId", sdkId);
+    variables.put("configName", configName);
+    variables.put("snakeCaseConfigName", toSnakeCase(configName));
+    variables.put(
+      "qualifiedRustServiceErrorType",
+      qualifiedRustServiceErrorType(serviceShape)
+    );
+
+    return variables;
+  }
+
+  @Override
+  protected String getRustTypesModuleName(final String namespace) {
+    return namespace.equals(service.getId().getNamespace())
+      ? "crate::types"
+      : "crate::deps::" + NamespaceHelper.rustModuleForSmithyNamespace(namespace) + "::types";
   }
 
   @Override
@@ -1622,8 +1670,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return variables;
   }
 
-  protected String qualifiedRustServiceErrorType() {
-    return "%s::error::Error".formatted(getRustTypesModuleName());
+  protected String qualifiedRustServiceErrorType(final ServiceShape serviceShape) {
+    return "%s::error::Error".formatted(getRustTypesModuleName(serviceShape.getId().getNamespace()));
   }
 
   protected String errorName(final StructureShape errorShape) {
@@ -1645,7 +1693,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put("rustErrorName", rustErrorName);
     variables.put(
       "qualifiedRustErrorVariant",
-      "%s::%s".formatted(qualifiedRustServiceErrorType(), rustErrorName)
+      "%s::%s".formatted(qualifiedRustServiceErrorType(service), rustErrorName)
     );
     return variables;
   }
