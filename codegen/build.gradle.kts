@@ -58,8 +58,8 @@ subprojects {
      */
 
     when (subproject.name) {
-        "smithy-dafny-codegen-test" -> print("Skipping publish for smithy-dafny-codegen-test")
-        "smithy-python-codegen" -> print("Skipping publish for smithy-python-codegen")
+        "smithy-dafny-codegen-test" -> println("Skipping publish for smithy-dafny-codegen-test")
+        "smithy-python-codegen" -> println("Skipping publish for smithy-python-codegen")
         else -> {
             if (subproject.name == "smithy-dafny-codegen-cli") {
                 apply(plugin = "application")

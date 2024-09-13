@@ -2,7 +2,7 @@
 impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
   for $rustResourceName:LWrapper
 {
-  fn r#_GetResourceData_k(
+  fn r#_$operationName:L_k(
       &mut self,
       input: &::std::rc::Rc<
       crate::r#$dafnyTypesModuleName:L::$pascalCaseOperationInputName:L,
@@ -36,7 +36,7 @@ impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
 }
 
 impl crate::types::$snakeCaseResourceName:L::$rustResourceName:L for $dafnyResourceName:LDafnyWrapper {
-  fn get_resource_data(
+  fn $snakeCaseOperationName:L(
       &mut self,
       input: crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L,
   ) -> Result<
