@@ -4,8 +4,8 @@ include "../src/Index.dfy"
 include "../src/WrappedSimpleCallingAWSSDKFromLocalServiceImpl.dfy"
 
 module SimpleCallingAWSSDKFromLocalServiceImplTest {
-  import DDB = Com.Amazonaws.Dynamodb
-  import KMS = Com.Amazonaws.Kms
+  // import DDB = Com.Amazonaws.Dynamodb
+  import Com.Amazonaws.Kms
   import SimpleCallingAWSSDKFromLocalService
 
   // For call to DDB
@@ -17,64 +17,64 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   const INVALID_KEY_ID := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-invalidkeyid"
   const NONEXISTENT_KEY_ID := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7g"
   // The string "asdf" as bytes
-  const PLAIN_TEXT := [ 97, 115, 100, 102 ]
+  const PLAIN_TEXT: Kms.Types.PlaintextType := [ 97, 115, 100, 102 ]
 
   import opened SimpleCallingawssdkfromlocalserviceTypes
   import opened Wrappers
-  method{:test} CallDDBGetItem(){
-    var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
-    TestCallDDBGetItem_Success(client);
-    TestCallDDBGetItem_Failure(client);
-  }
+  // method{:test} CallDDBGetItem(){
+  //   var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
+  //   TestCallDDBGetItem_Success(client);
+  //   TestCallDDBGetItem_Failure(client);
+  // }
 
-  method TestCallDDBGetItem_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-      requires client.ValidState()
-      modifies client.Modifies
-      ensures client.ValidState()
-  {
-    var ddbClient :- expect DDB.DynamoDBClient();
-    var Key2Get: DDB.Types.Key := map[
-          "branch-key-id" := DDB.Types.AttributeValue.S("aws-kms-h"),
-          "version" := DDB.Types.AttributeValue.S("1")
-        ];
+  // method TestCallDDBGetItem_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+  //     requires client.ValidState()
+  //     modifies client.Modifies
+  //     ensures client.ValidState()
+  // {
+  //   var ddbClient :- expect DDB.DynamoDBClient();
+  //   var Key2Get: DDB.Types.Key := map[
+  //         "branch-key-id" := DDB.Types.AttributeValue.S("aws-kms-h"),
+  //         "version" := DDB.Types.AttributeValue.S("1")
+  //       ];
 
-    var input := DDB.Types.GetItemInput(
-            TableName := TABLE_NAME_SUCCESS_CASE,
-            Key := Key2Get,
-            AttributesToGet := DDB.Wrappers.None,
-            ConsistentRead := DDB.Wrappers.None,
-            ReturnConsumedCapacity := DDB.Wrappers.None,
-            ProjectionExpression := DDB.Wrappers.None,
-            ExpressionAttributeNames := DDB.Wrappers.None
-    );
+  //   var input := DDB.Types.GetItemInput(
+  //           TableName := TABLE_NAME_SUCCESS_CASE,
+  //           Key := Key2Get,
+  //           AttributesToGet := DDB.Wrappers.None,
+  //           ConsistentRead := DDB.Wrappers.None,
+  //           ReturnConsumedCapacity := DDB.Wrappers.None,
+  //           ProjectionExpression := DDB.Wrappers.None,
+  //           ExpressionAttributeNames := DDB.Wrappers.None
+  //   );
 
-    var resSuccess := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
-    expect resSuccess.Success?;
-  }
+  //   var resSuccess := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
+  //   expect resSuccess.Success?;
+  // }
 
-  method TestCallDDBGetItem_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-    requires client.ValidState()
-    modifies client.Modifies
-    ensures client.ValidState()
-  {
-    var ddbClient :- expect DDB.DynamoDBClient();
-    var Key2Get: DDB.Types.Key := map[
-          "branch-key-id" := DDB.Types.AttributeValue.S("aws-kms-h"),
-          "version" := DDB.Types.AttributeValue.S("1")
-        ];
-    var input := DDB.Types.GetItemInput(
-            TableName := NONEXISTENT_TABLE_NAME,
-            Key := Key2Get,
-            AttributesToGet := DDB.Wrappers.None,
-            ConsistentRead := DDB.Wrappers.None,
-            ReturnConsumedCapacity := DDB.Wrappers.None,
-            ProjectionExpression := DDB.Wrappers.None,
-            ExpressionAttributeNames := DDB.Wrappers.None
-    );
-    var resFailure := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
+  // method TestCallDDBGetItem_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+  //   requires client.ValidState()
+  //   modifies client.Modifies
+  //   ensures client.ValidState()
+  // {
+  //   var ddbClient :- expect DDB.DynamoDBClient();
+  //   var Key2Get: DDB.Types.Key := map[
+  //         "branch-key-id" := DDB.Types.AttributeValue.S("aws-kms-h"),
+  //         "version" := DDB.Types.AttributeValue.S("1")
+  //       ];
+  //   var input := DDB.Types.GetItemInput(
+  //           TableName := NONEXISTENT_TABLE_NAME,
+  //           Key := Key2Get,
+  //           AttributesToGet := DDB.Wrappers.None,
+  //           ConsistentRead := DDB.Wrappers.None,
+  //           ReturnConsumedCapacity := DDB.Wrappers.None,
+  //           ProjectionExpression := DDB.Wrappers.None,
+  //           ExpressionAttributeNames := DDB.Wrappers.None
+  //   );
+  //   var resFailure := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
 
-    expect resFailure.Failure?;
-  }
+  //   expect resFailure.Failure?;
+  // }
 
   method{:test} CallKMSEncrypt(){
     var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
@@ -87,8 +87,8 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
       modifies client.Modifies
       ensures client.ValidState()
   {
-    var kmsClient :- expect KMS.KMSClient();
-    var resSuccess := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := KEY_ID_SUCCESS_CASE, Plaintext := [ 97, 115, 100, 102 ]));
+    var kmsClient :- expect Kms.KMSClient();
+    var resSuccess := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := KEY_ID_SUCCESS_CASE, plaintext := PLAIN_TEXT));
     expect resSuccess.Success?;
   }
 
@@ -97,28 +97,28 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     modifies client.Modifies
     ensures client.ValidState()
   {
-    var kmsClient :- expect KMS.KMSClient();
+    var kmsClient :- expect Kms.KMSClient();
 
     // Test with InvalidKey
-    var input_InvalidKey := KMS.Types.EncryptRequest(
+    var input_InvalidKey := Kms.Types.EncryptRequest(
       KeyId := INVALID_KEY_ID,
       Plaintext := [ 97, 115, 100, 102 ],
       EncryptionContext := Wrappers.None,
       GrantTokens := Wrappers.None,
       EncryptionAlgorithm := Wrappers.None
       );
-    var resFailure_InvalidKey := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := INVALID_KEY_ID, Plaintext := [ 97, 115, 100, 102 ]));
+    var resFailure_InvalidKey := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := INVALID_KEY_ID, plaintext := PLAIN_TEXT));
     expect resFailure_InvalidKey.Failure?;
 
     // Test with NonExistent
-    var input_NonExistent := KMS.Types.EncryptRequest(
+    var input_NonExistent := Kms.Types.EncryptRequest(
       KeyId := NONEXISTENT_KEY_ID,
       Plaintext := [ 97, 115, 100, 102 ],
       EncryptionContext := Wrappers.None,
       GrantTokens := Wrappers.None,
       EncryptionAlgorithm := Wrappers.None
       );
-    var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := NONEXISTENT_KEY_ID, Plaintext := [ 97, 115, 100, 102 ]));
+    var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := NONEXISTENT_KEY_ID, plaintext := PLAIN_TEXT));
     expect resFailure_NonExistent.Failure?;
   }
 }

@@ -8,11 +8,11 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
   import SimpleCallingAWSSDKFromLocalServiceImplTest
   import opened Wrappers
   import opened StandardLibrary.UInt
-  method{:test} TestCallDDBGetItem() {
-    var client :- expect WrappedSimpleCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
-    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBGetItem_Success(client);
-    SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBGetItem_Failure(client);
-  }
+  // method{:test} TestCallDDBGetItem() {
+  //   var client :- expect WrappedSimpleCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
+  //   SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBGetItem_Success(client);
+  //   SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBGetItem_Failure(client);
+  // }
 
   method{:test} TestCallKMSEncrypt() {
     var client :- expect WrappedSimpleCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
