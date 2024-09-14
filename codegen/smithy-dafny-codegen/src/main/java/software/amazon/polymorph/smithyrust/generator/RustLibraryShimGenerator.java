@@ -227,6 +227,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     pub mod conversions;
     
     pub mod deps;
+    
+    #[cfg(feature = "wrapped-client")]
+    pub mod wrapped;
     """;
 
   @Override
@@ -1555,7 +1558,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         "inputFromDafny",
         evalTemplate(
           """
-          crate::operation::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::$syntheticOperationInputName:L {
+          $rustRootModuleName:L::operation::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::$syntheticOperationInputName:L {
             $memberName:L: $dafnyValue:L
           }
           """,
@@ -1566,7 +1569,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables.put(
         "inputFromDafny",
         evalTemplate(
-          "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone())",
+          "$rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone())",
           variables
         )
       );
@@ -1585,7 +1588,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables.put(
         "outputToDafny",
         evalTemplate(
-          "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::to_dafny(inner_result)",
+          "$rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::to_dafny(inner_result)",
           variables
         )
       );

@@ -923,9 +923,6 @@ public class CodegenEngine {
       mod standard_library_conversions;
       mod standard_library_externs;
 
-      #[cfg(feature = "wrapped-client")]
-      pub mod wrapped;
-
       pub use client::Client;
       pub use types::$configSnakeCase:L::$configStructName:L;
 
