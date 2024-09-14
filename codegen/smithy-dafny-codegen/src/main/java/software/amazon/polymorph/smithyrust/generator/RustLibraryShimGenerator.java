@@ -455,7 +455,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put("structureModules", structureModules);
 
     final String enumModules = ModelUtils
-      .streamEnumShapes(model, service.getId().getNamespace())
+      .streamEnumShapes(model, serviceShape.getId().getNamespace())
       .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(enumShape ->
         IOUtils.evalTemplate(
@@ -560,7 +560,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           """,
           MapUtils.merge(
             variables,
-            dependentServiceErrorVariables(dependentService)
+            dependentServiceErrorVariables(serviceShape, dependentService)
           )
         );
       });
@@ -1151,7 +1151,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           """,
           MapUtils.merge(
             variables,
-            dependentServiceErrorVariables(dependentService)
+            dependentServiceErrorVariables(serviceShape, dependentService)
           )
         )
       );
@@ -1184,7 +1184,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           """,
           MapUtils.merge(
             variables,
-            dependentServiceErrorVariables(dependentService)
+            dependentServiceErrorVariables(serviceShape, dependentService)
           )
         )
       );
@@ -1719,19 +1719,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected ServiceShape serviceForShape(final Model model, final Shape shape) {
-    // TODO: A bit of a hack to need this at all
     if (shape.isServiceShape()) {
       return (ServiceShape) shape;
     } else {
       final String namespace = shape.getId().getNamespace();
-      return streamServicesToGenerateFor(model)
-        .filter(s -> s.getId().getNamespace().equals(namespace))
-        .reduce((a, b) -> {
-          throw new IllegalArgumentException(
-            "Found multiple services in namespace: " + namespace
-          );
-        })
-        .get();
+      return ModelUtils.serviceFromNamespace(model, namespace);
     }
   }
 
@@ -1806,7 +1798,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected String errorName(final StructureShape errorShape) {
-    return errorShape.getId().getName(service);
+    return errorShape.getId().getName(serviceForShape(model, errorShape));
   }
 
   protected String rustErrorName(final StructureShape errorShape) {
@@ -1833,22 +1825,23 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private Map<String, String> dependentServiceErrorVariables(
-    final ServiceShape serviceShape
+    final ServiceShape serviceShape,
+    final ServiceShape dependentServiceShape
   ) {
     final Map<String, String> variables = new HashMap<>();
-    final String rustErrorName = serviceShape.getId().getName() + "Error";
+    final String rustErrorName = dependentServiceShape.getId().getName() + "Error";
     variables.put(
       "errorName",
-      DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace())
+      DafnyNameResolver.dafnyBaseModuleName(dependentServiceShape.getId().getNamespace())
     );
     variables.put("rustErrorName", rustErrorName);
     variables.put(
       "rustDependentRootModuleName",
-      getRustRootModuleName(serviceShape.getId().getNamespace())
+      getRustRootModuleName(dependentServiceShape.getId().getNamespace())
     );
     variables.put(
       "qualifiedRustErrorVariant",
-      "%s::%s".formatted(qualifiedRustServiceErrorType(service), rustErrorName)
+      "%s::%s".formatted(qualifiedRustServiceErrorType(serviceShape), rustErrorName)
     );
     return variables;
   }

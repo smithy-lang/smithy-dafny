@@ -5,9 +5,11 @@ package software.amazon.polymorph;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -126,7 +128,7 @@ public class CodegenCli {
       .withServiceModel(serviceModel)
       .withDependentModelPaths(cliArguments.dependentModelPaths)
       .withDependencyLibraryNames(cliArguments.dependencyLibraryNames)
-      .withNamespace(cliArguments.namespace)
+      .withNamespaces(cliArguments.namespaces)
       .withTargetLangOutputDirs(outputDirs)
       .withTargetLangTestOutputDirs(testOutputDirs)
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
@@ -440,7 +442,7 @@ public class CodegenCli {
     Path modelPath,
     Path[] dependentModelPaths,
     Map<String, String> dependencyLibraryNames,
-    String namespace,
+    Set<String> namespaces,
     Optional<String> libraryName,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
@@ -512,7 +514,10 @@ public class CodegenCli {
             .collect(Collectors.toMap(i -> i[0], i -> i[1]))
           : new HashMap<>();
 
-      final String namespace = commandLine.getOptionValue('n');
+      final Set<String> namespaces = Optional
+        .ofNullable(commandLine.getOptionValues("namespace"))
+        .<Set<String>>map(ns -> new HashSet<>(Arrays.asList(ns)))
+        .orElse(Collections.emptySet());
 
       final Optional<String> libraryName = Optional.ofNullable(
         commandLine.getOptionValue("library-name")
@@ -606,7 +611,7 @@ public class CodegenCli {
           modelPath,
           dependentModelPaths,
           dependencyNamespacesToLibraryNamesMap,
-          namespace,
+          namespaces,
           libraryName,
           outputDotnetDir,
           outputJavaDir,

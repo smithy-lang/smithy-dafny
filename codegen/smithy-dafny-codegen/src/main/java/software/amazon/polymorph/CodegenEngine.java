@@ -7,6 +7,7 @@ import static software.amazon.smithy.utils.CaseUtils.toSnakeCase;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Streams;
 import com.squareup.javapoet.ClassName;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class CodegenEngine {
   private final boolean fromSmithyBuildPlugin;
   private final Path libraryRoot;
   private final Path[] dependentModelPaths;
-  private final String namespace;
+  private final Set<String> namespaces;
   private final Map<TargetLanguage, Path> targetLangOutputDirs;
   private final Map<TargetLanguage, Path> targetLangTestOutputDirs;
   private final DafnyVersion dafnyVersion;
@@ -108,7 +109,7 @@ public class CodegenEngine {
     final boolean fromSmithyBuildPlugin,
     final Model serviceModel,
     final Path[] dependentModelPaths,
-    final String namespace,
+    final Set<String> namespaces,
     final Map<TargetLanguage, Path> targetLangOutputDirs,
     final Map<TargetLanguage, Path> targetLangTestOutputDirs,
     final DafnyVersion dafnyVersion,
@@ -127,7 +128,7 @@ public class CodegenEngine {
     // To be provided to constructor
     this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
     this.dependentModelPaths = dependentModelPaths;
-    this.namespace = namespace;
+    this.namespaces = namespaces;
     this.targetLangOutputDirs = targetLangOutputDirs;
     this.targetLangTestOutputDirs = targetLangTestOutputDirs;
     this.dafnyVersion = dafnyVersion;
@@ -149,8 +150,10 @@ public class CodegenEngine {
         ? ModelUtils.addMissingErrorMessageMembers(serviceModel)
         : serviceModel;
 
+    // TODO: This should not be used by Rust since it supports (or really requires)
+    // generating for multiple namespaces.
     this.serviceShape =
-      ModelUtils.serviceFromNamespace(this.model, this.namespace);
+      ModelUtils.serviceFromNamespace(this.model, this.namespaces.stream().findFirst().get());
   }
 
   /**
@@ -1009,7 +1012,7 @@ public class CodegenEngine {
     private boolean fromSmithyBuildPlugin = false;
     private Model serviceModel;
     private Path[] dependentModelPaths;
-    private String namespace;
+    private Set<String> namespaces;
     private Map<TargetLanguage, Path> targetLangOutputDirs =
       Collections.emptyMap();
     private Map<TargetLanguage, Path> targetLangTestOutputDirs =
@@ -1046,10 +1049,10 @@ public class CodegenEngine {
     }
 
     /**
-     * Sets the Smithy namespace for which to generate code (e.g. "com.foo").
+     * Sets the Smithy namespaces for which to generate code (e.g. "com.foo").
      */
-    public Builder withNamespace(final String namespace) {
-      this.namespace = namespace;
+    public Builder withNamespaces(final Set<String> namespaces) {
+      this.namespaces = namespaces;
       return this;
     }
 
@@ -1203,12 +1206,25 @@ public class CodegenEngine {
 
     public CodegenEngine build() {
       final Model serviceModel = Objects.requireNonNull(this.serviceModel);
+
+      if (this.namespaces.isEmpty()) {
+        throw new IllegalStateException(
+          "at least one namespace must be provided"
+        );
+      }
+      if (this.namespaces.size() > 1) {
+        for (final TargetLanguage targetLanguage : this.targetLangOutputDirs.keySet()) {
+          if (!targetLanguage.equals(TargetLanguage.RUST)) {
+            throw new IllegalStateException(
+              "generating for %s does not support multiple namespaces".formatted(targetLanguage)
+            );
+          }
+        }
+      }
+
       final Path[] dependentModelPaths = this.dependentModelPaths == null
         ? new Path[] {}
         : this.dependentModelPaths.clone();
-      if (Strings.isNullOrEmpty(this.namespace)) {
-        throw new IllegalStateException("No namespace provided");
-      }
 
       final Map<String, String> dependencyLibraryNames =
         this.dependencyLibraryNames == null
@@ -1278,7 +1294,7 @@ public class CodegenEngine {
         fromSmithyBuildPlugin,
         serviceModel,
         dependentModelPaths,
-        this.namespace,
+        this.namespaces,
         targetLangOutputDirs,
         targetLangTestOutputDirs,
         dafnyVersion,
