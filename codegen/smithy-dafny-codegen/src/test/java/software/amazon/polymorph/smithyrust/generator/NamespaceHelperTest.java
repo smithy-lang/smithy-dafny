@@ -9,11 +9,11 @@ public class NamespaceHelperTest {
   @Test
   public void testRustModuleForSmithyNamespace() {
     assertEquals(
-      "string",
+      "simple_string",
       NamespaceHelper.rustModuleForSmithyNamespace("simple.string")
     );
     assertEquals(
-      "foobar",
+      "aws_cryptography_foobar",
       NamespaceHelper.rustModuleForSmithyNamespace("aws.cryptography.foobar")
     );
   }
