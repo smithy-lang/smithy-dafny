@@ -197,7 +197,6 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 // type,
                                 SmithyToDafnyShapeVisitor.visitorFuncMap.get(visitingShape)
                             );
-                System.out.println(writer);
             }
         });
     }
