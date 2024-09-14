@@ -351,7 +351,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                 writer.write("""
                             func $L(input interface{})($L) {
                                 $L           
-                            """,
+                            }""",
                                 (visitingShape.getId().getName()).concat("_FromDafny"),
                                 // DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape)),
                                 outputType,
