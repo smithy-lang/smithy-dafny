@@ -524,9 +524,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected String getDafnyInternalModuleName(final String namespace) {
-      if (!namespace.equals(service.getId().getNamespace())) {
-        throw new IllegalArgumentException("aws-sdk style libraries only support the original service namespace, but was passed " + namespace);
-      }
       return "software::amazon::cryptography::services::%s::internaldafny".formatted(
         getSdkId().toLowerCase()
       );
@@ -534,9 +531,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected String getRustRootModuleName(final String namespace) {
-    if (!namespace.equals(service.getId().getNamespace())) {
-      throw new IllegalArgumentException("aws-sdk style libraries only support the original service namespace, but was passed " + namespace);
-    }
     return getSdkCrate();
   }
 
