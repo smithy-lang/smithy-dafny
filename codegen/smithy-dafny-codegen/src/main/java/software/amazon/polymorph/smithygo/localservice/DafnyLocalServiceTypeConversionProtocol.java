@@ -162,16 +162,14 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
         }
 
         writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
-            for (Shape visitingShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
-                if (alreadyVisited.contains(visitingShape.toShapeId())) {
+            for (MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+                final Shape visitingShape = context.model().expectShape(visitingMemberShape.getTarget());
+                if (alreadyVisited.contains(visitingShape.toShapeId()) || alreadyVisited.contains(visitingMemberShape.getId())) {
                     continue;
                 }
-                alreadyVisited.add(visitingShape.toShapeId());
-                // Get the value for the current key
-                String type;
-                type = DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
+                alreadyVisited.add(visitingMemberShape.toShapeId());
                 String inputType;
-                String outputType = ShapeVisitorHelper.shapeOptionalityMap.get(visitingShape)? "Wrappers.Option": DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
+                String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(visitingMemberShape)? "Wrappers.Option": DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
                 if (visitingShape.isMapShape()) {
                     MemberShape valueMemberShape = ((MapShape) visitingShape).getValue();
                     Shape valueShape = model.expectShape(valueMemberShape.getTarget());
@@ -190,12 +188,10 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 return $L
                             }        
                             """,
-                                (visitingShape.getId().getName()).concat("_ToDafny"),
+                                ShapeVisitorHelper.funcNameGenerator(visitingMemberShape, "ToDafny"),
                                 inputType,
                                 outputType,
-                                // DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape)),
-                                // type,
-                                SmithyToDafnyShapeVisitor.visitorFuncMap.get(visitingShape)
+                                SmithyToDafnyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
                             );
             }
         });
@@ -325,14 +321,14 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
         if (serviceShape.hasTrait(LocalServiceTrait.class)) {
             generateConfigDeserializer(context);
         }
-
+        
         delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
-            for (Shape visitingShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
-                if (alreadyVisited.contains(visitingShape.toShapeId())) {
+            for (MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
+                final Shape visitingShape = context.model().expectShape(visitingMemberShape.getTarget());
+                if (alreadyVisited.contains(visitingShape.toShapeId()) || alreadyVisited.contains(visitingMemberShape.getId())) {
                     continue;
                 }
-                alreadyVisited.add(visitingShape.toShapeId());
-                // Get the value for the current key
+                alreadyVisited.add(visitingMemberShape.toShapeId());
                 String outputType;
                 if (visitingShape.isMapShape()) { 
                     MapShape mapShapeCast = (MapShape) visitingShape;
@@ -351,10 +347,9 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                             func $L(input interface{})($L) {
                                 $L           
                             }""",
-                                (visitingShape.getId().getName()).concat("_FromDafny"),
-                                // DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape)),
+                                ShapeVisitorHelper.funcNameGenerator(visitingMemberShape, "FromDafny"),
                                 outputType,
-                                DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingShape)
+                                DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
                             );
             }
         });

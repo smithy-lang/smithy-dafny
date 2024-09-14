@@ -40,7 +40,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     private final boolean isOptional;
     protected boolean isPointerType;
-    public static final HashMap<Shape, String> visitorFuncMap = new HashMap<>();
+    public static final HashMap<MemberShape, String> visitorFuncMap = new HashMap<>();
 
     public void setPointerType() {
         this.isPointerType = false;

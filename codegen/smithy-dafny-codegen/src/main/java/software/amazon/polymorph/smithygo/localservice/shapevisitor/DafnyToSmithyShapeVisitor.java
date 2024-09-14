@@ -9,7 +9,6 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
@@ -27,8 +26,6 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.utils.StringUtils;
 
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +35,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GoWriter writer;
     private final boolean isConfigShape;
     private final boolean isOptional;
-    public static final Map<Shape, String> visitorFuncMap = new HashMap<>();
+    public static final Map<MemberShape, String> visitorFuncMap = new HashMap<>();
 
     public DafnyToSmithyShapeVisitor(
             final GenerationContext context,
@@ -376,10 +373,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String unionShape(UnionShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        String nilCheck;
-        if (GoPointableIndex.of(context.model()).isPointable(shape) == false) {
-            nilCheck = "";
-        } else {
+        String nilCheck = "";
+        if ((boolean) isOptional) {
             nilCheck = """
                 if %s == nil {
                         return nil
