@@ -163,6 +163,10 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
 
         writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
             for (Shape visitingShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+                if (alreadyVisited.contains(visitingShape.toShapeId())) {
+                    continue;
+                }
+                alreadyVisited.add(visitingShape.toShapeId());
                 // Get the value for the current key
                 String type;
                 type = DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
@@ -193,6 +197,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 // type,
                                 SmithyToDafnyShapeVisitor.visitorFuncMap.get(visitingShape)
                             );
+                System.out.println(writer);
             }
         });
     }
@@ -218,7 +223,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                         writer.write("""
                                              func $L(dafnyInput $L)($L) {
                                                  ${C|}
-                                             """, inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(input, inputSymbol),
+                                            }""", inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(input, inputSymbol),
                                      SmithyNameResolver.getSmithyType(input, inputSymbol),
                                      writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
                     });
@@ -238,7 +243,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                         writer.write("""
                                              func $L(dafnyOutput $L)($L) {
                                                  ${C|}
-                                             """, outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
+                                            }""", outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
                                      SmithyNameResolver.getSmithyType(output, outputSymbol),
                                      writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
                     });
@@ -267,7 +272,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 writer.write("""
                                                      func $L(dafnyInput $L)($L) {
                                                          ${C|}
-                                                     """, inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(input, inputSymbol),
+                                                    }""", inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(input, inputSymbol),
                                              SmithyNameResolver.getSmithyType(input, inputSymbol),
                                              writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
                             });
@@ -287,7 +292,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 writer.write("""
                                                      func $L(dafnyOutput $L)($L) {
                                                          ${C|}
-                                                     """, outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
+                                                    }""", outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(output, outputSymbol),
                                              SmithyNameResolver.getSmithyType(output, outputSymbol),
                                              writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
                             });
@@ -324,19 +329,23 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
 
         delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
             for (Shape visitingShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
+                if (alreadyVisited.contains(visitingShape.toShapeId())) {
+                    continue;
+                }
+                alreadyVisited.add(visitingShape.toShapeId());
                 // Get the value for the current key
-                String type;
+                String outputType;
                 if (visitingShape.isMapShape()) { 
                     MapShape mapShapeCast = (MapShape) visitingShape;
                     MemberShape valueMemberShape = mapShapeCast.getValue();
                     final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
-                    type = "map[string]".concat(SmithyNameResolver.getSmithyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape)));
+                    outputType = "map[string]".concat(SmithyNameResolver.getSmithyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape)));
                 } else if (visitingShape.isListShape()) {
                     ListShape listShapeCast = (ListShape) visitingShape;
                     MemberShape memberShape = listShapeCast.getMember();
-                    type = "[]".concat(SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(memberShape)));
+                    outputType = "[]".concat(SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(memberShape)));
                 } else {
-                    type = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
+                    outputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
                 }
                 
                 writer.write("""
@@ -345,7 +354,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                             """,
                                 (visitingShape.getId().getName()).concat("_FromDafny"),
                                 // DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape)),
-                                type,
+                                outputType,
                                 DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingShape)
                             );
             }
@@ -579,7 +588,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
             writer.write("""
                                  func $L(dafnyOutput $L)($L) {
                                      ${C|}
-                                 """,
+                                }""",
                          getOutputFromDafnyMethodName, DafnyNameResolver.getDafnyType(configShape, context.symbolProvider().toSymbol(configShape)), SmithyNameResolver.getSmithyType(configShape, context.symbolProvider().toSymbol(configShape)),
                          writer.consumer(w -> {
                              String output = configShape.accept(new DafnyToSmithyShapeVisitor(
@@ -611,7 +620,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                     writer.write("""
                                          func $L(dafnyOutput $L)($L) {
                                              ${C|}
-                                         """,
+                                        }""",
                                  getOutputFromDafnyMethodName, DafnyNameResolver.getDafnyBaseErrorType(errorShape), SmithyNameResolver.getSmithyType(errorShape, context.symbolProvider().toSymbol(errorShape)),
                                  writer.consumer(w -> {
                                      String output = errorShape.accept(new DafnyToSmithyShapeVisitor(
