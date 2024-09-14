@@ -32,9 +32,6 @@ import software.amazon.smithy.model.traits.EnumTrait;
  * Generates all Rust modules needed to wrap
  * a Rust AWS SDK into a Dafny SDK.
  */
-// TODO: There is a lot of duplication in the various calls to evalTemplate.
-// The best way to clean this up is to thread SimpleCodeWriters through the methods and use the stateful
-// putContext method, instead of trying to work purely functionality with map literals.
 public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   public RustAwsSdkShimGenerator(Model model, ServiceShape service) {
