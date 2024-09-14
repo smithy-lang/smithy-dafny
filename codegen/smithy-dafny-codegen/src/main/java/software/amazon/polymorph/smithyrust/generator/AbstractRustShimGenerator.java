@@ -74,10 +74,15 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected boolean shouldGenerateOperation(OperationShape operationShape) {
-    return GENERATE_DEPENDENCIES || ModelUtils.isInServiceNamespace(operationShape, service);
+    return (
+      GENERATE_DEPENDENCIES ||
+      ModelUtils.isInServiceNamespace(operationShape, service)
+    );
   }
 
-  protected Stream<StructureShape> allErrorShapes(final ServiceShape serviceShape) {
+  protected Stream<StructureShape> allErrorShapes(
+    final ServiceShape serviceShape
+  ) {
     final var commonErrors = serviceShape.getErrors().stream();
     final var operationErrors = model
       .getOperationShapes()
@@ -133,7 +138,10 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected boolean shouldGenerateEnumForUnion(UnionShape unionShape) {
-    return GENERATE_DEPENDENCIES || ModelUtils.isInServiceNamespace(unionShape, service);
+    return (
+      GENERATE_DEPENDENCIES ||
+      ModelUtils.isInServiceNamespace(unionShape, service)
+    );
   }
 
   protected TokenTree declarePubModules(Stream<String> moduleNames) {
@@ -153,8 +161,11 @@ public abstract class AbstractRustShimGenerator {
       .stream()
       .filter(this::shouldGenerateOperation)
       // Need to filter by the binding shape, not the operation shape
-      .filter(o -> operationBindingIndex.getBindingShapes(o).stream().anyMatch(
-        b -> b.getId().getNamespace().equals(namespace))
+      .filter(o ->
+        operationBindingIndex
+          .getBindingShapes(o)
+          .stream()
+          .anyMatch(b -> b.getId().getNamespace().equals(namespace))
       )
       .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
     Stream<String> resourceModules = streamResourcesToGenerateTraitsFor()
@@ -192,7 +203,10 @@ public abstract class AbstractRustShimGenerator {
         .flatMap(s -> s)
     );
 
-    return new RustFile(rootPathForNamespace(namespace).resolve("conversions.rs"), content);
+    return new RustFile(
+      rootPathForNamespace(namespace).resolve("conversions.rs"),
+      content
+    );
   }
 
   protected RustFile structureConversionModule(
@@ -286,8 +300,14 @@ public abstract class AbstractRustShimGenerator {
     final Shape bindingShape,
     final OperationShape operationShape
   ) {
-    var toDafnyFunction = operationRequestToDafnyFunction(bindingShape, operationShape);
-    var fromDafnyFunction = operationRequestFromDafnyFunction(bindingShape, operationShape);
+    var toDafnyFunction = operationRequestToDafnyFunction(
+      bindingShape,
+      operationShape
+    );
+    var fromDafnyFunction = operationRequestFromDafnyFunction(
+      bindingShape,
+      operationShape
+    );
     var content = TokenTree
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
@@ -298,9 +318,11 @@ public abstract class AbstractRustShimGenerator {
     final Path path = rootPathForShape(bindingShape)
       .resolve("conversions")
       .resolve(snakeCaseOperationName)
-      .resolve("_%s.rs".formatted(
-        toSnakeCase(syntheticOperationInputName(operationShape))
-      ));
+      .resolve(
+        "_%s.rs".formatted(
+            toSnakeCase(syntheticOperationInputName(operationShape))
+          )
+      );
     return new RustFile(path, content);
   }
 
@@ -308,8 +330,14 @@ public abstract class AbstractRustShimGenerator {
     final Shape bindingShape,
     final OperationShape operationShape
   ) {
-    var toDafnyFunction = operationResponseToDafnyFunction(bindingShape, operationShape);
-    var fromDafnyFunction = operationResponseFromDafnyFunction(bindingShape, operationShape);
+    var toDafnyFunction = operationResponseToDafnyFunction(
+      bindingShape,
+      operationShape
+    );
+    var fromDafnyFunction = operationResponseFromDafnyFunction(
+      bindingShape,
+      operationShape
+    );
     var content = TokenTree
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
@@ -320,9 +348,11 @@ public abstract class AbstractRustShimGenerator {
     final Path path = rootPathForShape(bindingShape)
       .resolve("conversions")
       .resolve(snakeCaseOperationName)
-      .resolve("_%s.rs".formatted(
-        toSnakeCase(syntheticOperationOutputName(operationShape))
-      ));
+      .resolve(
+        "_%s.rs".formatted(
+            toSnakeCase(syntheticOperationOutputName(operationShape))
+          )
+      );
     return new RustFile(path, content);
   }
 
@@ -898,9 +928,12 @@ public abstract class AbstractRustShimGenerator {
   protected Set<RustFile> operationConversionModules(
     final OperationShape operationShape
   ) {
-    return operationBindingIndex.getBindingShapes(operationShape)
+    return operationBindingIndex
+      .getBindingShapes(operationShape)
       .stream()
-      .flatMap(bindingShape -> boundOperationConversionModules(bindingShape, operationShape).stream())
+      .flatMap(bindingShape ->
+        boundOperationConversionModules(bindingShape, operationShape).stream()
+      )
       .collect(Collectors.toSet());
   }
 
@@ -931,24 +964,30 @@ public abstract class AbstractRustShimGenerator {
     return serviceVariables(service);
   }
 
-  protected HashMap<String, String> serviceVariables(final ServiceShape serviceShape) {
+  protected HashMap<String, String> serviceVariables(
+    final ServiceShape serviceShape
+  ) {
     final String namespace = serviceShape.getId().getNamespace();
     final HashMap<String, String> variables = new HashMap<>();
     variables.put("serviceName", serviceShape.getId().getName(serviceShape));
     variables.put("rustClientType", qualifiedRustServiceType(serviceShape));
     variables.put("dafnyModuleName", getDafnyModuleName(namespace));
-    variables.put("dafnyInternalModuleName", getDafnyInternalModuleName(namespace));
+    variables.put(
+      "dafnyInternalModuleName",
+      getDafnyInternalModuleName(namespace)
+    );
     variables.put("dafnyTypesModuleName", getDafnyTypesModuleName(namespace));
     variables.put("rustRootModuleName", getRustRootModuleName(namespace));
     variables.put("rustTypesModuleName", getRustTypesModuleName(namespace));
-    variables.put("rustConversionsModuleName", getRustConversionsModuleName(namespace));
+    variables.put(
+      "rustConversionsModuleName",
+      getRustConversionsModuleName(namespace)
+    );
     return variables;
   }
 
   protected String getDafnyModuleName(final String namespace) {
-    return namespace
-      .replace(".", "::")
-      .toLowerCase(Locale.ROOT);
+    return namespace.replace(".", "::").toLowerCase(Locale.ROOT);
   }
 
   protected String getDafnyInternalModuleName(final String namespace) {
@@ -1009,7 +1048,10 @@ public abstract class AbstractRustShimGenerator {
 
     if (bindingShape.isServiceShape()) {
       variables.put("operationTargetName", "client");
-      variables.put("operationTargetType", qualifiedRustServiceType((ServiceShape) bindingShape));
+      variables.put(
+        "operationTargetType",
+        qualifiedRustServiceType((ServiceShape) bindingShape)
+      );
     } else {
       Map<String, String> resourceVariables = resourceVariables(
         bindingShape.asResourceShape().get()
@@ -1130,8 +1172,9 @@ public abstract class AbstractRustShimGenerator {
     if (ModelUtils.isInServiceNamespace(shapeId, service)) {
       return "crate";
     } else {
-      return "crate::deps::" + NamespaceHelper.rustModuleForSmithyNamespace(
-        shapeId.getNamespace()
+      return (
+        "crate::deps::" +
+        NamespaceHelper.rustModuleForSmithyNamespace(shapeId.getNamespace())
       );
     }
   }
@@ -1140,9 +1183,11 @@ public abstract class AbstractRustShimGenerator {
     if (namespace.equals(service.getId().getNamespace())) {
       return Path.of("src");
     } else {
-      return Path.of("src", "deps", NamespaceHelper.rustModuleForSmithyNamespace(
-        namespace
-      ));
+      return Path.of(
+        "src",
+        "deps",
+        NamespaceHelper.rustModuleForSmithyNamespace(namespace)
+      );
     }
   }
 
@@ -1173,7 +1218,10 @@ public abstract class AbstractRustShimGenerator {
     variables.put("snakeCaseStructureName", toSnakeCase(structureName));
     variables.put("rustStructureName", rustStructureName(structureShape));
     // TODO: Risky...
-    variables.put("dafnyTypesModuleName", getDafnyTypesModuleName(structureShape.getId().getNamespace()));
+    variables.put(
+      "dafnyTypesModuleName",
+      getDafnyTypesModuleName(structureShape.getId().getNamespace())
+    );
     return variables;
   }
 

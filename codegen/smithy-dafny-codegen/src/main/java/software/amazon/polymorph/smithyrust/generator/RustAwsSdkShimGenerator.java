@@ -113,7 +113,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           .map(id ->
             operationClientFunction(
               serviceShape,
-              model.expectShape(id, OperationShape.class))
+              model.expectShape(id, OperationShape.class)
+            )
           )
       )
       .lineSeparated();
@@ -406,15 +407,24 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       )
     );
 
-    var errorToDafnyFunction = operationErrorToDafnyFunction(bindingShape, operationShape);
+    var errorToDafnyFunction = operationErrorToDafnyFunction(
+      bindingShape,
+      operationShape
+    );
 
     RustFile outerModule = new RustFile(
       Path.of("src", "conversions", operationModuleName + ".rs"),
       TokenTree.of(operationModuleContent, errorToDafnyFunction)
     );
 
-    RustFile requestModule = operationRequestConversionModule(bindingShape, operationShape);
-    RustFile responseModule = operationResponseConversionModule(bindingShape, operationShape);
+    RustFile requestModule = operationRequestConversionModule(
+      bindingShape,
+      operationShape
+    );
+    RustFile responseModule = operationResponseConversionModule(
+      bindingShape,
+      operationShape
+    );
 
     return Set.of(outerModule, requestModule, responseModule);
   }
@@ -524,7 +534,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected String getDafnyInternalModuleName(final String namespace) {
-      return "software::amazon::cryptography::services::%s::internaldafny".formatted(
+    return "software::amazon::cryptography::services::%s::internaldafny".formatted(
         getSdkId().toLowerCase()
       );
   }

@@ -713,8 +713,13 @@ public class ModelUtils {
       .or(() -> shape.getTrait(JavaDocTrait.class).map(StringTrait::getValue));
   }
 
-  public static Stream<ServiceShape> streamLocalServiceDependencies(final Model model, final ServiceShape serviceShape) {
-    final Optional<LocalServiceTrait> localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
+  public static Stream<ServiceShape> streamLocalServiceDependencies(
+    final Model model,
+    final ServiceShape serviceShape
+  ) {
+    final Optional<LocalServiceTrait> localServiceTrait = serviceShape.getTrait(
+      LocalServiceTrait.class
+    );
     if (!localServiceTrait.isPresent()) {
       return Stream.empty();
     }
@@ -724,11 +729,21 @@ public class ModelUtils {
       return Stream.empty();
     }
 
-    return dependentIds.stream().map(id -> model.expectShape(id, ServiceShape.class));
+    return dependentIds
+      .stream()
+      .map(id -> model.expectShape(id, ServiceShape.class));
   }
 
-  public static StructureShape getConfigShape(final Model model, final ServiceShape serviceShape) {
-    final Optional<LocalServiceTrait> localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
-    return model.expectShape(localServiceTrait.get().getConfigId(), StructureShape.class);
+  public static StructureShape getConfigShape(
+    final Model model,
+    final ServiceShape serviceShape
+  ) {
+    final Optional<LocalServiceTrait> localServiceTrait = serviceShape.getTrait(
+      LocalServiceTrait.class
+    );
+    return model.expectShape(
+      localServiceTrait.get().getConfigId(),
+      StructureShape.class
+    );
   }
 }
