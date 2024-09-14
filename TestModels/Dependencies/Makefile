@@ -12,6 +12,8 @@ include ../SharedMakefile.mk
 PROJECT_SERVICES := \
 	SimpleDependencies
 
+MAIN_SERVICE_FOR_RUST := SimpleDependencies
+
 # Dependencies external to this project
 # Order is important
 # In java they MUST be built

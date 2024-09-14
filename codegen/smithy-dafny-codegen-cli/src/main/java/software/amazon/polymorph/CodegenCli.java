@@ -200,7 +200,7 @@ public class CodegenCli {
           .longOpt("namespace")
           .desc("smithy namespace to generate code for, such as 'com.foo'")
           .hasArg()
-          .required()
+          .valueSeparator(',')
           .build()
       )
       .addOption(

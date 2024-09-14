@@ -713,19 +713,7 @@ public class CodegenEngine {
       throw new RuntimeException(e);
     }
 
-    if (awsSdkStyle) {
-      RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(
-        model,
-        serviceShape
-      );
-      generator.generate(outputDir);
-    } else {
-      RustLibraryShimGenerator generator = new RustLibraryShimGenerator(
-        model,
-        serviceShape
-      );
-      generator.generate(outputDir);
-    }
+    AbstractRustShimGenerator.generateAllNamespaces(model, namespaces, outputDir);
 
     // TODO: These should be part of the StandardLibrary instead,
     // but since the Dafny Rust code generator doesn't yet support multiple crates,

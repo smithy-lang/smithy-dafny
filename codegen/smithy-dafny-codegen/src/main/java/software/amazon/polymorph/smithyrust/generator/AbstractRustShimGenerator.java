@@ -24,6 +24,7 @@ import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.OperationBindingIndex;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.EnumShape;
@@ -50,6 +51,32 @@ public abstract class AbstractRustShimGenerator {
   protected final ServiceShape service;
   protected final OperationIndex operationIndex;
   protected final OperationBindingIndex operationBindingIndex;
+
+  protected static final Map<String, AbstractRustShimGenerator> GENERATORS_BY_NAMESPACE = new HashMap<>();
+
+  protected static AbstractRustShimGenerator generatorForNamespace(final Model model, final String namespace) {
+    return GENERATORS_BY_NAMESPACE.computeIfAbsent(namespace, n ->
+      generatorFor(model, ModelUtils.serviceFromNamespace(model, n)));
+  }
+
+  public static void generateAllNamespaces(final Model model, final Set<String> namespaces, final Path outputDir) {
+    namespaces.stream()
+      .map(namespace -> generatorForNamespace(model, namespace))
+      .forEach(generator -> generator.generate(outputDir));
+  }
+
+  public static AbstractRustShimGenerator generatorFor(Model model, ServiceShape serviceShape) {
+    if (serviceShape.hasTrait(ServiceTrait.class)) {
+      return new RustAwsSdkShimGenerator(model,
+        serviceShape
+      );
+    } else {
+      return new RustLibraryShimGenerator(
+        model,
+        serviceShape
+      );
+    }
+  }
 
   public AbstractRustShimGenerator(Model model, ServiceShape service) {
     this.model = model;

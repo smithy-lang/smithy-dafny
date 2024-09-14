@@ -15,6 +15,8 @@ PROJECT_SERVICES := \
 	DependencyProject \
 	PrimaryProject \
 
+MAIN_SERVICE_FOR_RUST := PrimaryProject
+
 SERVICE_NAMESPACE_PrimaryProject=simple.multiplemodels.primaryproject
 SERVICE_NAMESPACE_DependencyProject=simple.multiplemodels.dependencyproject
 

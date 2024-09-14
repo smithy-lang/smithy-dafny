@@ -288,7 +288,7 @@ _polymorph:
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	$(DEPENDENCY_MODULE_NAMES) \
-	--namespace $($(namespace_var)) \
+	$(patsubst %, --namespace %, $($(namespace_var))) \
 	$(OUTPUT_LOCAL_SERVICE_$(SERVICE)) \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS) \
@@ -428,25 +428,17 @@ setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
 
 # Generates rust code for all namespaces in this project
-# Note that we rely on the patching feature of polymorph
-# to also patch the results of transpile_rust,
-# so we assume that is run first!
 .PHONY: polymorph_rust
 polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
-polymorph_rust: _polymorph_dependencies
-polymorph_rust:
-	set -e; for service in $(PROJECT_SERVICES) ; do \
-		export service_deps_var=SERVICE_DEPS_$${service} ; \
-		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
-		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_rust ; \
-	done
-
-_polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+# TODO: merging all namespaces into one crate
+polymorph_rust: service_deps_var=SERVICE_DEPS_$(MAIN_SERVICE_FOR_RUST)
+polymorph_rust: namespace_var=SERVICE_NAMESPACE_$(MAIN_SERVICE_FOR_RUST)
+polymorph_rust: SERVICE=$(MAIN_SERVICE_FOR_RUST)
+polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 # For several TestModels we've just manually written the code generation target,
 # So we just want to ensure we can transpile and pass the tests in CI.
 # For those, make polymorph_rust should just be a no-op.
-_polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
+polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
 
 ########################## .NET targets
 
@@ -555,7 +547,7 @@ test_java:
 
 # The Dafny Rust code generator only supports a single crate for everything,
 # so (among other consequences) we compile src and test code together.
-transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
+transpile_rust: | transpile_implementation_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
@@ -587,12 +579,10 @@ _mv_implementation_rust:
 	rm -rf implementation_from_dafny-rust
 
 patch_after_transpile_rust:
-	set -e; for service in $(PROJECT_SERVICES) ; do \
-		export service_deps_var=SERVICE_DEPS_$${service} ; \
-		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
-		export SERVICE=$${service} ; \
-		$(MAKE) _patch_after_transpile_rust ; \
-	done
+	export service_deps_var=SERVICE_DEPS_$(MAIN_SERVICE_FOR_RUST) ; \
+  export namespace_var=SERVICE_NAMESPACE_$(MAIN_SERVICE_FOR_RUST) ; \
+	export SERVICE=$(MAIN_SERVICE_FOR_RUST) ; \
+	$(MAKE) _patch_after_transpile_rust ; \
 
 _patch_after_transpile_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 _patch_after_transpile_rust:
