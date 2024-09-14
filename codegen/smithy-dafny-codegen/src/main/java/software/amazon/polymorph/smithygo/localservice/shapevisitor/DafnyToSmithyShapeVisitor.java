@@ -170,13 +170,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
         MemberShape memberShape = shape.getMember();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-        var typeName = targetShape.isStructureShape() ? context.symbolProvider().toSymbol(memberShape) : context.symbolProvider().toSymbol(memberShape);
-        String funcParenthesis = "";
-        if (!visitorFuncMap.containsKey(shape)){
-            builder.append("func() []%s{".formatted(SmithyNameResolver.getSmithyType(shape, typeName)));
-            funcParenthesis = "}()";
-        }
-        
+        var typeName = targetShape.isStructureShape() ? context.symbolProvider().toSymbol(memberShape) : context.symbolProvider().toSymbol(memberShape);  
         builder.append("""
                        var fieldValue []%s
                 if %s == nil {
@@ -195,7 +189,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 // )
                 ));
         // Close structure
-        return builder.append("return fieldValue %s".formatted(funcParenthesis)).toString();
+        return builder.append("return fieldValue").toString();
     }
 
     @Override
@@ -208,9 +202,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         MemberShape valueMemberShape = shape.getValue();
         final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
         final var type = SmithyNameResolver.getSmithyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape));
-        if (!visitorFuncMap.containsKey(shape)){
-            builder.append("func() map[string]%s {".formatted(type));
-        }
         String valueDataSource = "(*val.(dafny.Tuple).IndexInt(1))";
         builder.append("""
                 var m map[string]%s = make(map[string]%s)
@@ -229,13 +220,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
         ),
         ShapeVisitorHelper.toNativeContainerShapeHelper(valueMemberShape, context, valueDataSource, true, writer, isConfigShape, false)
-                // valueTargetShape.accept(
-                //         new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(1)).(%s)".formatted(DafnyNameResolver.getDafnyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape))), writer, isConfigShape)
-                // )
         ));
-        if (!visitorFuncMap.containsKey(shape)){
-            builder.append("}()");
-        }
         return builder.toString();
     }
 
@@ -402,18 +387,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                         dataSource
                 );
         }
-        String funcSignature = "";
-        String funcParenthesis = "";
-        if (!visitorFuncMap.containsKey(shape)){
-            funcSignature = "func() %s {".formatted(context.symbolProvider().toSymbol(shape));
-            funcParenthesis = "}()";
-        }
         final String functionInit = """
-                %s
                 var union %s
                 %s
             """.formatted(
-                funcSignature, 
                 context.symbolProvider().toSymbol(shape),
                 nilCheck
             );
@@ -463,10 +440,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             %s
             %s
             return union
-        %s""".formatted(
+        """.formatted(
             functionInit,
-            eachMemberInUnion,
-            funcParenthesis
+            eachMemberInUnion
         );
     }
 
