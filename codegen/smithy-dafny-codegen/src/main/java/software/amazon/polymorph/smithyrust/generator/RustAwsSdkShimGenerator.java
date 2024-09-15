@@ -711,7 +711,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
               )
           );
         } else {
-          yield TokenTree.of("%s.as_ref()".formatted(rustValue));
+          yield TokenTree.of(rustValue);
         }
       }
       case DOUBLE -> {
