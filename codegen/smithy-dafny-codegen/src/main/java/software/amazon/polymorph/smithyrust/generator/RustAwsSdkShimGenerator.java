@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.rust.codegen.core.smithy.traits.RustBoxTrait;
 
@@ -262,7 +263,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final Shape targetShape = model.expectShape(member.getTarget());
     return (
       super.isRustFieldRequired(parent, member) ||
-      (!operationIndex.isInputStructure(parent) && targetShape.isBooleanShape())
+      (!operationIndex.isInputStructure(parent) && targetShape.isBooleanShape() && targetShape.hasTrait(DefaultTrait.class))
     );
   }
 
@@ -464,7 +465,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
     String errorName = toPascalCase(errorShape.getId().getName());
     variables.put("errorName", errorName);
-    variables.put("snakeCaseErrorName", toSnakeCase(errorName));
+    variables.put("snakeCaseErrorName", toSnakeCase(errorShape.getId().getName()));
 
     return TokenTree.of(
       evalTemplate(
