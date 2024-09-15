@@ -47,7 +47,8 @@ public class MergedServicesGenerator {
 
     streamNamespacesToGenerateFor(model)
       .filter(n -> !isMainNamespace(n))
-      .map(n -> depTopLevelModule(n))
+      .map(namespace -> generatorForNamespace(model, namespace, namespaces))
+      .map(g -> g.depTopLevelModule())
       .forEach(rustFiles::add);
 
     rustFiles.add(topLevelDepsModule());
@@ -100,16 +101,6 @@ public class MergedServicesGenerator {
 
   public Stream<ServiceShape> streamServicesToGenerateFor(Model model) {
     return model.getServiceShapes().stream();
-  }
-
-  private RustFile depTopLevelModule(final String namespace) {
-    final String rustModule = RustUtils.rustModuleForSmithyNamespace(
-      namespace
-    );
-    return new RustFile(
-      Path.of("src", "deps", rustModule + ".rs"),
-      TokenTree.of(RustLibraryShimGenerator.TOP_LEVEL_MOD_DECLS)
-    );
   }
 
   // TODO: overlap with library version

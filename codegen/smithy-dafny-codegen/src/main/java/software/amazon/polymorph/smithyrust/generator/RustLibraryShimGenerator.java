@@ -2127,4 +2127,15 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     // For simplicity and ease of migration, always make builders fallible.
     return true;
   }
+
+  @Override
+  public RustFile depTopLevelModule() {
+    final String rustModule = RustUtils.rustModuleForSmithyNamespace(
+      service.getId().getNamespace()
+    );
+    return new RustFile(
+      Path.of("src", "deps", rustModule + ".rs"),
+      TokenTree.of(RustLibraryShimGenerator.TOP_LEVEL_MOD_DECLS)
+    );
+  }
 }

@@ -1505,4 +1505,6 @@ public abstract class AbstractRustShimGenerator {
       );
     };
   }
+
+  public abstract RustFile depTopLevelModule();
 }

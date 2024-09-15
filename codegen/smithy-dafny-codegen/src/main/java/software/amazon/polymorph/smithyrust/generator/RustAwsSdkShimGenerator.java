@@ -65,7 +65,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         use std::sync::LazyLock;
         use $rustRootModuleName:L::conversions;
 
-        struct Client {
+        pub struct Client {
             inner: $sdkCrate:L::Client
         }
 
@@ -891,5 +891,21 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         "Unsupported shape type: %s".formatted(shape.getType())
       );
     };
+  }
+
+  @Override
+  public RustFile depTopLevelModule() {
+    final String rustModule = RustUtils.rustModuleForSmithyNamespace(
+      service.getId().getNamespace()
+    );
+    final TokenTree content = TokenTree.of(
+    """
+    pub mod client;
+    pub mod conversions;
+    """);
+    return new RustFile(
+      Path.of("src", "deps", rustModule + ".rs"),
+      content
+    );
   }
 }
