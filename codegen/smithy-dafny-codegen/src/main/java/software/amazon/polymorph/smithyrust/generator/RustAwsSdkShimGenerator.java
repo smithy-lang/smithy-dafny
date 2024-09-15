@@ -281,6 +281,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final Shape targetShape = model.expectShape(member.getTarget());
     return (
       super.isRustFieldRequired(parent, member) ||
+      (operationIndex.isOutputStructure(parent) &&
+        (targetShape.isIntegerShape() || targetShape.isLongShape() || targetShape.isListShape())) ||
       (!operationIndex.isInputStructure(parent) && targetShape.isBooleanShape() && targetShape.hasTrait(DefaultTrait.class))
     );
   }
@@ -709,21 +711,29 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
               )
           );
         } else {
-          yield TokenTree.of(rustValue);
+          yield TokenTree.of("%s.as_ref()".formatted(rustValue));
         }
       }
       case DOUBLE -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::odouble_to_dafny(&%s)".formatted(
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::odouble_to_dafny(&%s)".formatted(
                 rustValue
               )
-          );
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::double_to_dafny(&Some(%s))".formatted(
+                rustValue
+              )
+            );
+          }
         } else {
           yield TokenTree.of(
-            "crate::standard_library_conversions::double_to_dafny(*%s)".formatted(
-                rustValue
-              )
+            "crate::standard_library_conversions::double_to_dafny(%s.clone())".formatted(
+              rustValue
+            )
           );
         }
       }

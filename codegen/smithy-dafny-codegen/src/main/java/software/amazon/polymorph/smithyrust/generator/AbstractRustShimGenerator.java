@@ -540,18 +540,23 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case DOUBLE -> {
-        if (isRustOption) {
+        if (isDafnyOption) {
           yield TokenTree.of(
             "crate::standard_library_conversions::odouble_from_dafny(%s.clone())".formatted(
                 dafnyValue
               )
           );
         } else {
-          yield TokenTree.of(
+          TokenTree result = TokenTree.of(
             "crate::standard_library_conversions::double_from_dafny(&%s.clone())".formatted(
                 dafnyValue
               )
           );
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
         }
       }
       case TIMESTAMP -> {
