@@ -34,7 +34,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::batch_execute_statement::_batch_execute_statement_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::batch_execute_statement::_batch_execute_statement_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::batch_execute_statement::_batch_execute_statement_response::to_dafny,
     conversions::batch_execute_statement::to_dafny_error)
@@ -46,7 +46,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::batch_get_item::_batch_get_item_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::batch_get_item::_batch_get_item_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::batch_get_item::_batch_get_item_response::to_dafny,
     conversions::batch_get_item::to_dafny_error)
@@ -58,7 +58,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::batch_write_item::_batch_write_item_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::batch_write_item::_batch_write_item_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::batch_write_item::_batch_write_item_response::to_dafny,
     conversions::batch_write_item::to_dafny_error)
@@ -70,7 +70,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::create_table::_create_table_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::create_table::_create_table_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::create_table::_create_table_response::to_dafny,
     conversions::create_table::to_dafny_error)
@@ -82,7 +82,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::delete_item::_delete_item_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::delete_item::_delete_item_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::delete_item::_delete_item_response::to_dafny,
     conversions::delete_item::to_dafny_error)
@@ -94,7 +94,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::describe_table::_describe_table_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::describe_table::_describe_table_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::describe_table::_describe_table_response::to_dafny,
     conversions::describe_table::to_dafny_error)
@@ -106,7 +106,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::execute_statement::_execute_statement_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::execute_statement::_execute_statement_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::execute_statement::_execute_statement_response::to_dafny,
     conversions::execute_statement::to_dafny_error)
@@ -118,7 +118,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::execute_transaction::_execute_transaction_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::execute_transaction::_execute_transaction_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::execute_transaction::_execute_transaction_response::to_dafny,
     conversions::execute_transaction::to_dafny_error)
@@ -130,7 +130,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::get_item::_get_item_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::get_item::_get_item_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::get_item::_get_item_response::to_dafny,
     conversions::get_item::to_dafny_error)
@@ -142,7 +142,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::put_item::_put_item_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::put_item::_put_item_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::put_item::_put_item_response::to_dafny,
     conversions::put_item::to_dafny_error)
@@ -154,7 +154,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::query::_query_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::query::_query_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::query::_query_response::to_dafny,
     conversions::query::to_dafny_error)
@@ -166,7 +166,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::scan::_scan_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::scan::_scan_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::scan::_scan_response::to_dafny,
     conversions::scan::to_dafny_error)
@@ -178,7 +178,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::transact_get_items::_transact_get_items_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::transact_get_items::_transact_get_items_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::transact_get_items::_transact_get_items_response::to_dafny,
     conversions::transact_get_items::to_dafny_error)
@@ -190,7 +190,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::transact_write_items::_transact_write_items_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::transact_write_items::_transact_write_items_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::transact_write_items::_transact_write_items_response::to_dafny,
     conversions::transact_write_items::to_dafny_error)
@@ -202,7 +202,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   >
 > {
   let native_result =
-    dafny_tokio_runtime.block_on(conversions::update_item::_update_item_request::from_dafny(input.clone(), self.inner.clone()).send());
+    dafny_tokio_runtime.block_on(crate::conversions::update_item::_update_item_request::from_dafny(input.clone(), self.inner.clone()).send());
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::update_item::_update_item_response::to_dafny,
     conversions::update_item::to_dafny_error)
