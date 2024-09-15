@@ -714,7 +714,12 @@ public class CodegenEngine {
       throw new RuntimeException(e);
     }
 
-    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespaces);
+    // TODO: Can't get makefile working yet
+    final var namespacesToGenerate = model.getServiceShapes().stream()
+      .map(s -> s.getId().getNamespace())
+      .collect(Collectors.toSet());
+
+    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespacesToGenerate);
     generator.generateAllNamespaces(outputDir);
 
     // TODO: These should be part of the StandardLibrary instead,

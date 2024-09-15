@@ -134,6 +134,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(wrappedClientModule());
 
     // deps module
+    result.add(depsModule());
 
     return result;
   }
@@ -1679,7 +1680,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected String getRustRootModuleName(final String namespace) {
-    return namespace.equals(service.getId().getNamespace())
+    return mergedGenerator.isMainNamespace(namespace)
       ? "crate"
       : "crate::deps::" +
       RustUtils.rustModuleForSmithyNamespace(namespace);

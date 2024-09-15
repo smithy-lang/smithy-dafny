@@ -35,6 +35,10 @@ public class MergedServicesGenerator {
     return mainService.equals(serviceShape);
   }
 
+  public boolean isMainNamespace(String namespace) {
+    return isMainService(ModelUtils.serviceFromNamespace(model, namespace));
+  }
+
   public Set<RustFile> rustFiles() {
     Set<RustFile> rustFiles = new HashSet<>();
 
@@ -44,7 +48,7 @@ public class MergedServicesGenerator {
       .forEach(rustFiles::add);
 
     streamNamespacesToGenerateFor(model)
-      .filter(n -> !n.equals(mainService.getId().getNamespace()))
+      .filter(n -> !isMainNamespace(n))
       .map(n -> depTopLevelModule(n))
       .forEach(rustFiles::add);
 

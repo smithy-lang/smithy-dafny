@@ -1173,7 +1173,7 @@ public abstract class AbstractRustShimGenerator {
 
   protected String topLevelNameForShape(final ToShapeId toShapeId) {
     final ShapeId shapeId = toShapeId.toShapeId();
-    if (ModelUtils.isInServiceNamespace(shapeId, service)) {
+    if (mergedGenerator.isMainNamespace(shapeId.getNamespace())) {
       return "crate";
     } else {
       return (
@@ -1184,7 +1184,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   public Path rootPathForNamespace(final String namespace) {
-    if (namespace.equals(service.getId().getNamespace())) {
+    if (mergedGenerator.isMainNamespace(namespace)) {
       return Path.of("src");
     } else {
       return Path.of(
