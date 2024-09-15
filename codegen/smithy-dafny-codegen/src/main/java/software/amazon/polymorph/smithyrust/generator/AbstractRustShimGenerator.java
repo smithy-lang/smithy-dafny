@@ -1007,11 +1007,9 @@ public abstract class AbstractRustShimGenerator {
       "runtimes/rust/conversions/union.rs",
       variables
     );
-    final Path path = Path.of(
-      "src",
-      "conversions",
-      "%s.rs".formatted(toSnakeCase(unionName(unionShape)))
-    );
+    final Path path = rootPathForShape(service)
+      .resolve("conversions")
+      .resolve("%s.rs".formatted(toSnakeCase(unionName(unionShape))));
     return new RustFile(path, TokenTree.of(content));
   }
 
