@@ -617,10 +617,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             yield TokenTree.of(
               """
               ::std::rc::Rc::new(match &%s {
-                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                   None => crate::_Wrappers_Compile::Option::None { }
               })
-              """.formatted(rustValue, enumShapeName)
+              """.formatted(rustValue, rootRustModuleName, enumShapeName)
             );
           } else if (isRustOption) {
             yield TokenTree.of(
