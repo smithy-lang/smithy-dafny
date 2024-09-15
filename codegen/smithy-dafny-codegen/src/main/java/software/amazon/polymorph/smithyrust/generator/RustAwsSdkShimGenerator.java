@@ -134,7 +134,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
 
     return new RustFile(
-      Path.of("src", "client.rs"),
+      rootPathForShape(service).resolve("client.rs"),
       TokenTree.of(preamble, operations, postamble)
     );
   }
@@ -185,7 +185,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     // these functions for AWS SDK clients as well but they will
     // be quite different from the local service versions.
     return new RustFile(
-      Path.of("src", "conversions", "client.rs"),
+      rootPathForShape(service).resolve("conversions").resolve("client.rs"),
       TokenTree.of("")
     );
   }
@@ -415,7 +415,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
 
     RustFile outerModule = new RustFile(
-      Path.of("src", "conversions", operationModuleName + ".rs"),
+      rootPathForShape(service).resolve("conversions").resolve(operationModuleName + ".rs"),
       TokenTree.of(operationModuleContent, errorToDafnyFunction)
     );
 
@@ -511,7 +511,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     String structureName = errorStructure.getId().getName();
     String snakeCaseName = toSnakeCase(structureName);
     String pascalCaseName = toPascalCase(structureName);
-    Path path = Path.of("src", "conversions", "error", snakeCaseName + ".rs");
+    Path path = rootPathForShape(service).resolve("conversions").resolve("error").resolve(snakeCaseName + ".rs");
     String template =
       """
       #[allow(dead_code)]

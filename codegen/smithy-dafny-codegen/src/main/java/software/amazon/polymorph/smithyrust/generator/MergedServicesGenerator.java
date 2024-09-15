@@ -8,11 +8,9 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -32,7 +30,7 @@ public class MergedServicesGenerator {
   }
 
   public boolean isMainService(ServiceShape serviceShape) {
-    return mainService.equals(serviceShape);
+    return serviceShape.equals(mainService);
   }
 
   public boolean isMainNamespace(String namespace) {

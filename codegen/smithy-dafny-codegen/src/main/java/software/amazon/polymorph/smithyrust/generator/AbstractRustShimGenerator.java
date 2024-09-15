@@ -205,7 +205,7 @@ public abstract class AbstractRustShimGenerator {
     final StructureShape structureShape
   ) {
     String snakeCaseName = toSnakeCase(structureName(structureShape));
-    Path path = Path.of("src", "conversions", snakeCaseName + ".rs");
+    Path path = rootPathForShape(service).resolve("conversions").resolve(snakeCaseName + ".rs");
     return new RustFile(
       path,
       TokenTree.of(
@@ -921,11 +921,9 @@ public abstract class AbstractRustShimGenerator {
   );
 
   protected RustFile enumConversionModule(final EnumShape enumShape) {
-    Path path = Path.of(
-      "src",
-      "conversions",
-      toSnakeCase(enumName(enumShape)) + ".rs"
-    );
+    Path path = rootPathForShape(service)
+      .resolve("conversions")
+      .resolve(toSnakeCase(enumName(enumShape)) + ".rs");
 
     return new RustFile(
       path,
