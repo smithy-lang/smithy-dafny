@@ -30,6 +30,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.rust.codegen.core.smithy.traits.RustBoxTrait;
 
 /**
  * Generates all Rust modules needed to wrap
@@ -261,7 +262,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final Shape targetShape = model.expectShape(member.getTarget());
     return (
       super.isRustFieldRequired(parent, member) ||
-      (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape())
+      (!operationIndex.isInputStructure(parent) && targetShape.isBooleanShape())
     );
   }
 
@@ -644,12 +645,20 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case BOOLEAN -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
                 rustValue
               )
-          );
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(&Some(%s))".formatted(
+                rustValue
+              )
+            );
+          }
         } else {
           yield TokenTree.of("%s.clone()".formatted(rustValue));
         }
