@@ -41,9 +41,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   @Override
   protected Set<RustFile> rustFiles() {
     Set<RustFile> result = new HashSet<>();
-    result.add(clientModule(service));
+    result.add(clientModule());
     result.addAll(
-      allErrorShapes(service)
+      allErrorShapes()
         .map(this::errorConversionModule)
         .collect(Collectors.toSet())
     );
@@ -55,23 +55,23 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         .toList()
     );
 
-    result.add(conversionsModule(service));
+    result.add(conversionsModule());
     result.addAll(allOperationConversionModules());
     result.addAll(allStructureConversionModules());
-    result.add(conversionsErrorModule(service));
+    result.add(conversionsErrorModule());
     result.add(conversionsClientModule());
     // TODO union conversion modules
 
     return result;
   }
 
-  private RustFile clientModule(ServiceShape serviceShape) {
+  private RustFile clientModule() {
     final Map<String, String> variables = serviceVariables();
     var preamble = TokenTree.of(
       evalTemplate(
         """
         use std::sync::LazyLock;
-        use crate::conversions;
+        use $rootRustModuleName::conversions;
 
         struct Client {
             inner: $sdkCrate:L::Client
@@ -109,7 +109,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           .stream()
           .map(id ->
             operationClientFunction(
-              serviceShape,
+              service,
               model.expectShape(id, OperationShape.class)
             )
           )
@@ -198,9 +198,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  protected RustFile conversionsErrorModule(final ServiceShape serviceShape) {
+  protected RustFile conversionsErrorModule() {
     TokenTree modulesDeclarations = declarePubModules(
-      allErrorShapes(serviceShape)
+      allErrorShapes()
         .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
     );
     TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(
@@ -211,7 +211,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       )
     );
     return new RustFile(
-      rootPathForShape(serviceShape).resolve("conversions").resolve("error.rs"),
+      rootPathForShape(service).resolve("conversions").resolve("error.rs"),
       TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions)
     );
   }

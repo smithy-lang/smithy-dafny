@@ -7,6 +7,7 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -45,38 +46,30 @@ import software.amazon.smithy.model.traits.RequiredTrait;
 
 public abstract class AbstractRustShimGenerator {
 
-  protected static final boolean GENERATE_DEPENDENCIES = true;
-
   protected final Model model;
   protected final ServiceShape service;
+
   protected final OperationIndex operationIndex;
   protected final OperationBindingIndex operationBindingIndex;
 
-  protected static final Map<String, AbstractRustShimGenerator> GENERATORS_BY_NAMESPACE = new HashMap<>();
+  private static final String TOP_LEVEL_MOD_DECLS =
+    """
+    pub mod client;
+    pub mod types;
 
-  protected static AbstractRustShimGenerator generatorForNamespace(final Model model, final String namespace) {
-    return GENERATORS_BY_NAMESPACE.computeIfAbsent(namespace, n ->
-      generatorFor(model, ModelUtils.serviceFromNamespace(model, n)));
-  }
+    /// Common errors and error handling utilities.
+    pub mod error;
 
-  public static void generateAllNamespaces(final Model model, final Set<String> namespaces, final Path outputDir) {
-    namespaces.stream()
-      .map(namespace -> generatorForNamespace(model, namespace))
-      .forEach(generator -> generator.generate(outputDir));
-  }
+    /// All operations that this crate can perform.
+    pub mod operation;
 
-  public static AbstractRustShimGenerator generatorFor(Model model, ServiceShape serviceShape) {
-    if (serviceShape.hasTrait(ServiceTrait.class)) {
-      return new RustAwsSdkShimGenerator(model,
-        serviceShape
-      );
-    } else {
-      return new RustLibraryShimGenerator(
-        model,
-        serviceShape
-      );
-    }
-  }
+    pub mod conversions;
+
+    pub mod deps;
+
+    #[cfg(feature = "wrapped-client")]
+    pub mod wrapped;
+    """;
 
   public AbstractRustShimGenerator(Model model, ServiceShape service) {
     this.model = model;
@@ -102,15 +95,13 @@ public abstract class AbstractRustShimGenerator {
 
   protected boolean shouldGenerateOperation(OperationShape operationShape) {
     return (
-      GENERATE_DEPENDENCIES ||
       ModelUtils.isInServiceNamespace(operationShape, service)
     );
   }
 
   protected Stream<StructureShape> allErrorShapes(
-    final ServiceShape serviceShape
   ) {
-    final var commonErrors = serviceShape.getErrors().stream();
+    final var commonErrors = service.getErrors().stream();
     final var operationErrors = model
       .getOperationShapes()
       .stream()
@@ -165,10 +156,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected boolean shouldGenerateEnumForUnion(UnionShape unionShape) {
-    return (
-      GENERATE_DEPENDENCIES ||
-      ModelUtils.isInServiceNamespace(unionShape, service)
-    );
+    return ModelUtils.isInServiceNamespace(unionShape, service);
   }
 
   protected TokenTree declarePubModules(Stream<String> moduleNames) {
@@ -181,8 +169,8 @@ public abstract class AbstractRustShimGenerator {
       .lineSeparated();
   }
 
-  protected RustFile conversionsModule(final ServiceShape serviceShape) {
-    final String namespace = serviceShape.getId().getNamespace();
+  protected RustFile conversionsModule() {
+    final String namespace = service.getId().getNamespace();
     Stream<String> operationModules = model
       .getOperationShapes()
       .stream()

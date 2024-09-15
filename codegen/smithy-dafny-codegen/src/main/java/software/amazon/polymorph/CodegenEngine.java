@@ -53,6 +53,7 @@ import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSd
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithyrust.generator.AbstractRustShimGenerator;
+import software.amazon.polymorph.smithyrust.generator.MergedServicesGenerator;
 import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
 import software.amazon.polymorph.smithyrust.generator.RustLibraryShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -713,7 +714,8 @@ public class CodegenEngine {
       throw new RuntimeException(e);
     }
 
-    AbstractRustShimGenerator.generateAllNamespaces(model, namespaces, outputDir);
+    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespaces);
+    generator.generateAllNamespaces(outputDir);
 
     // TODO: These should be part of the StandardLibrary instead,
     // but since the Dafny Rust code generator doesn't yet support multiple crates,
