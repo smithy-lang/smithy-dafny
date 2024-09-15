@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.BoundOperationShape;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -88,14 +89,11 @@ public abstract class AbstractRustShimGenerator {
 
   protected abstract Set<RustFile> rustFiles();
 
-  protected Stream<OperationShape> allOperationShapes() {
-    return model.getOperationShapes().stream().sorted();
-  }
-
-  protected boolean shouldGenerateOperation(OperationShape operationShape) {
-    return (
-      ModelUtils.isInServiceNamespace(operationShape, service)
-    );
+  protected Stream<BoundOperationShape> streamAllBoundOperationShapes() {
+    return operationBindingIndex.getAllBindingShapes()
+      .stream()
+      .filter(s -> ModelUtils.isInServiceNamespace(s, service))
+      .flatMap(s -> operationBindingIndex.getOperations(s).stream());
   }
 
   protected Stream<StructureShape> allErrorShapes(
@@ -160,18 +158,8 @@ public abstract class AbstractRustShimGenerator {
 
   protected RustFile conversionsModule() {
     final String namespace = service.getId().getNamespace();
-    Stream<String> operationModules = model
-      .getOperationShapes()
-      .stream()
-      .filter(this::shouldGenerateOperation)
-      // Need to filter by the binding shape, not the operation shape
-      .filter(o ->
-        operationBindingIndex
-          .getBindingShapes(o)
-          .stream()
-          .anyMatch(b -> b.getId().getNamespace().equals(namespace))
-      )
-      .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
+    Stream<String> operationModules = streamAllBoundOperationShapes()
+      .map(operationShape -> toSnakeCase(operationShape.operationShape() .getId().getName()));
     Stream<String> resourceModules = streamResourcesToGenerateTraitsFor()
       .map(resourceShape -> toSnakeCase(resourceShape.getId().getName()));
 
@@ -922,28 +910,14 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected Set<RustFile> allOperationConversionModules() {
-    return allOperationShapes()
-      .filter(this::shouldGenerateOperation)
-      .map(this::operationConversionModules)
+    return streamAllBoundOperationShapes()
+      .map(this::boundOperationConversionModules)
       .flatMap(Collection::stream)
       .collect(Collectors.toSet());
   }
 
-  protected Set<RustFile> operationConversionModules(
-    final OperationShape operationShape
-  ) {
-    return operationBindingIndex
-      .getBindingShapes(operationShape)
-      .stream()
-      .flatMap(bindingShape ->
-        boundOperationConversionModules(bindingShape, operationShape).stream()
-      )
-      .collect(Collectors.toSet());
-  }
-
   protected abstract Set<RustFile> boundOperationConversionModules(
-    final Shape bindingShape,
-    final OperationShape operationShape
+    final BoundOperationShape operationShape
   );
 
   protected RustFile enumConversionModule(final EnumShape enumShape) {

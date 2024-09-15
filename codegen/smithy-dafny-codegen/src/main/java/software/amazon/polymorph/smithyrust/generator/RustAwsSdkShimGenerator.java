@@ -13,8 +13,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.utils.BoundOperationShape;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.OperationBindingIndex;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
@@ -391,10 +393,11 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   @Override
   protected Set<RustFile> boundOperationConversionModules(
-    final Shape bindingShape,
-    final OperationShape operationShape
+    final BoundOperationShape boundOperationShape
   ) {
     // bindingShape should always be a service
+    final Shape bindingShape = boundOperationShape.bindingShape();
+    final OperationShape operationShape = boundOperationShape.operationShape();
 
     var operationModuleName = toSnakeCase(operationName(operationShape));
     var operationModuleContent = RustUtils.declarePubModules(
