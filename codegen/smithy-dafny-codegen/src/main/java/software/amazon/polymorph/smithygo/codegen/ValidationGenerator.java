@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithygo.codegen;
 
+import java.lang.reflect.Member;
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -77,19 +78,11 @@ public class ValidationGenerator {
                         if ((boolean) symbol.getProperty(POINTABLE, Boolean.class).orElse(false) && memberShape.isOptional()){
                             pointableString = "*";
                         }
-                    }                    
-                    if (currentShape.hasTrait(RangeTrait.class)) {
-                        addRangeCheck(currentShape, dataSource, pointableString);
                     }
-                    if (currentShape.hasTrait(LengthTrait.class)) {
-                        addLengthCheck(currentShape, dataSource, pointableString);
-                    }
-                    if (currentShape.hasTrait(RequiredTrait.class)) {
-                        addRequiredCheck(symbol, currentShape, dataSource);
-                    }
-                    if (currentShape.hasTrait(DafnyUtf8BytesTrait.class)) {
-                        addUTFCheck(currentShape, dataSource, pointableString);
-                    }
+                    addRangeCheck(memberShape, dataSource, pointableString);
+                    addLengthCheck(memberShape, dataSource, pointableString);
+                    addRequiredCheck(symbol, memberShape, dataSource);
+                    addUTFCheck(memberShape, dataSource, pointableString);
                     // Broke list and map into two different if else because for _, item := range %s looked good for list
                     // And for key, value := range %s looked good for map
                     if (currentShape.isListShape()) {
@@ -143,7 +136,18 @@ public class ValidationGenerator {
                     }
     }
 
-    private void addRangeCheck(final Shape currentShape, final String dataSource, final String pointableString) {
+    private void addRangeCheck(final MemberShape memberShape, final String dataSource, final String pointableString) {
+        Shape targetShape = model.expectShape(memberShape.getTarget());
+        Shape currentShape;
+        if (memberShape.hasTrait(RangeTrait.class)) {
+            currentShape = memberShape;
+        }
+        else if (targetShape.hasTrait(RangeTrait.class)){
+            currentShape = model.expectShape(memberShape.getTarget());
+        }
+        else {
+            return;
+        }
         StringBuilder rangeCheck = new StringBuilder();
         RangeTrait rangeTraitShape = currentShape.expectTrait(RangeTrait.class);
         Optional<BigDecimal> min = rangeTraitShape.getMin();
@@ -189,7 +193,18 @@ public class ValidationGenerator {
         writer.write(rangeCheck);
     }
 
-    private void addLengthCheck(final Shape currentShape, final String dataSource, final String pointableString) {
+    private void addLengthCheck(final MemberShape memberShape, final String dataSource, final String pointableString) {
+        Shape targetShape = model.expectShape(memberShape.getTarget());
+        Shape currentShape;
+        if (memberShape.hasTrait(LengthTrait.class)) {
+            currentShape = memberShape;
+        }
+        else if (targetShape.hasTrait(LengthTrait.class)){
+            currentShape = model.expectShape(memberShape.getTarget());
+        }
+        else {
+            return;
+        }
         StringBuilder lengthCheck = new StringBuilder();
         LengthTrait lengthTraitShape = currentShape.expectTrait(LengthTrait.class);
         Optional<Long> min = lengthTraitShape.getMin();
@@ -267,7 +282,11 @@ public class ValidationGenerator {
         writer.write(lengthCheck);
     }
 
-    private void addRequiredCheck(final Symbol memberSymbol, final Shape currentShape, final String dataSource) {
+    private void addRequiredCheck(final Symbol memberSymbol, final MemberShape memberShape, final String dataSource) {
+        Shape targetShape = model.expectShape(memberShape.getTarget());
+        if (!(memberShape.hasTrait(RequiredTrait.class) || targetShape.hasTrait(RequiredTrait.class))) {
+            return;
+        }
         StringBuilder RequiredCheck = new StringBuilder();
         if( memberSymbol.getProperty(POINTABLE).isPresent() && (boolean) memberSymbol.getProperty(POINTABLE).get()) 
             RequiredCheck.append("""
@@ -280,7 +299,11 @@ public class ValidationGenerator {
         writer.write(RequiredCheck);
     }
 
-    private void addUTFCheck(final Shape currentShape, final String dataSource, final String pointableString) {
+    private void addUTFCheck(final MemberShape memberShape, final String dataSource, final String pointableString) {
+        Shape targetShape = model.expectShape(memberShape.getTarget());
+        if (!(memberShape.hasTrait(DafnyUtf8BytesTrait.class) || targetShape.hasTrait(DafnyUtf8BytesTrait.class))) {
+            return;
+        }
         StringBuilder UTFCheck = new StringBuilder();
         if (pointableString.equals("*")){
             UTFCheck.append("""
