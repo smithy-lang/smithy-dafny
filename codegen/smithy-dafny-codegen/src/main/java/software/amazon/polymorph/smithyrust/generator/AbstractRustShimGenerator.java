@@ -939,16 +939,10 @@ public abstract class AbstractRustShimGenerator {
    * Generates values for variables commonly used in service-specific templates.
    */
   protected HashMap<String, String> serviceVariables() {
-    return serviceVariables(service);
-  }
-
-  protected HashMap<String, String> serviceVariables(
-    final ServiceShape serviceShape
-  ) {
-    final String namespace = serviceShape.getId().getNamespace();
+    final String namespace = service.getId().getNamespace();
     final HashMap<String, String> variables = new HashMap<>();
-    variables.put("serviceName", serviceShape.getId().getName(serviceShape));
-    variables.put("rustClientType", qualifiedRustServiceType(serviceShape));
+    variables.put("serviceName", service.getId().getName(service));
+    variables.put("rustClientType", qualifiedRustServiceType(service));
     variables.put("dafnyModuleName", getDafnyModuleName(namespace));
     variables.put(
       "dafnyInternalModuleName",
@@ -956,7 +950,7 @@ public abstract class AbstractRustShimGenerator {
     );
     variables.put("dafnyTypesModuleName", getDafnyTypesModuleName(namespace));
     variables.put("rustRootModuleName", getRustRootModuleName(namespace));
-    variables.put("rustTypesModuleName", getRustTypesModuleName(namespace));
+    variables.put("rustTypesModuleName", getRustTypesModuleName());
     variables.put(
       "rustConversionsModuleName",
       getRustConversionsModuleName(namespace)
@@ -976,11 +970,14 @@ public abstract class AbstractRustShimGenerator {
     return "%s::types".formatted(getDafnyInternalModuleName(namespace));
   }
 
-  protected abstract String getRustRootModuleName(final String namespace);
-
-  protected String getRustTypesModuleName(final String namespace) {
-    return getRustRootModuleName(namespace) + "::types";
+  protected String getRustRootModuleName(final String namespace) {
+    return mergedGenerator.isMainNamespace(namespace)
+      ? "crate"
+      : "crate::deps::" +
+      RustUtils.rustModuleForSmithyNamespace(namespace);
   }
+
+  protected abstract String getRustTypesModuleName();
 
   protected String getRustConversionsModuleName(final String namespace) {
     return getRustRootModuleName(namespace) + "::conversions";

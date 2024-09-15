@@ -141,6 +141,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return result;
   }
 
+  @Override
+  protected String getRustTypesModuleName() {
+    return getRustRootModuleName(service.getId().getNamespace()) + "::types";
+  }
+
   public static final String TOP_LEVEL_MOD_DECLS =
     """
     pub mod client;
@@ -253,7 +258,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final OperationShape operationShape = boundOperationShape.operationShape();
 
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, bindingShape)),
+      serviceVariables(),
       operationVariables(bindingShape, operationShape)
     );
     variables.put(
@@ -502,7 +507,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile enumTypeModule(final EnumShape enumShape) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, enumShape)),
+      serviceVariables(),
       enumVariables(enumShape)
     );
 
@@ -542,7 +547,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile unionTypeModule(final UnionShape unionShape) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, unionShape)),
+      serviceVariables(),
       unionVariables(unionShape)
     );
 
@@ -617,7 +622,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile resourceTypeModule(final ResourceShape resourceShape) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, resourceShape)),
+      serviceVariables(),
       resourceVariables(resourceShape)
     );
 
@@ -729,7 +734,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final OperationShape operationShape
   ) {
     Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, bindingShape)),
+      serviceVariables(),
       operationVariables(bindingShape, operationShape)
     );
     if (bindingShape.isServiceShape()) {
@@ -814,7 +819,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final StructureShape structureShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, bindingShape)),
+      serviceVariables(),
       operationVariables(bindingShape, operationShape),
       structureVariables(structureShape),
       structureModuleVariables(structureShape)
@@ -833,7 +838,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final StructureShape structureShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, structureShape)),
+      serviceVariables(),
       standardStructureVariables(structureShape),
       structureModuleVariables(structureShape)
     );
@@ -962,7 +967,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n"));
 
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, bindingShape)),
+      serviceVariables(),
       operationVariables(bindingShape, operationShape)
     );
     variables.put("accessors", accessors);
@@ -1167,7 +1172,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final StructureShape structureShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, structureShape)),
+      serviceVariables(),
       standardStructureVariables(structureShape)
     );
     variables.put(
@@ -1194,7 +1199,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile unionConversionModule(final UnionShape unionShape) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, unionShape)),
+      serviceVariables(),
       unionVariables(unionShape)
     );
 
@@ -1268,7 +1273,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile resourceConversionModule(final ResourceShape resourceShape) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, resourceShape)),
+      serviceVariables(),
       resourceVariables(resourceShape)
     );
 
@@ -1316,7 +1321,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final OperationShape operationShape = boundOperationShape.operationShape();
 
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, bindingShape)),
+      serviceVariables(),
       operationVariables(bindingShape, operationShape)
     );
 
@@ -1409,7 +1414,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       StructureShape.class
     );
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, bindingShape)),
+      serviceVariables(),
       operationVariables(bindingShape, operationShape),
       structureVariables(structureShape)
     );
@@ -1471,7 +1476,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       StructureShape.class
     );
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceForShape(model, bindingShape)),
+      serviceVariables(),
       operationVariables(bindingShape, operationShape),
       structureVariables(structureShape)
     );
@@ -1538,7 +1543,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final OperationShape operationShape
   ) {
     final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(serviceShape),
+      serviceVariables(),
       operationVariables(serviceShape, operationShape)
     );
 
@@ -1619,10 +1624,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return serviceShape.expectTrait(LocalServiceTrait.class);
   }
 
-  protected HashMap<String, String> serviceVariables() {
-    return serviceVariables(service);
-  }
-
   protected ServiceShape serviceForShape(final Model model, final Shape shape) {
     if (shape.isServiceShape()) {
       return (ServiceShape) shape;
@@ -1633,38 +1634,26 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected HashMap<String, String> serviceVariables(
-    final ServiceShape serviceShape
-  ) {
-    final HashMap<String, String> variables = super.serviceVariables(
-      serviceShape
-    );
+  protected HashMap<String, String> serviceVariables() {
+    final HashMap<String, String> variables = super.serviceVariables();
 
-    final LocalServiceTrait localServiceTrait = localServiceTrait(serviceShape);
+    final LocalServiceTrait localServiceTrait = localServiceTrait(service);
     final String sdkId = localServiceTrait.getSdkId();
 
     final StructureShape configShape = ModelUtils.getConfigShape(
       model,
-      serviceShape
+      service
     );
-    final String configName = configShape.getId().getName(serviceShape);
+    final String configName = configShape.getId().getName(service);
     variables.put("sdkId", sdkId);
     variables.put("configName", configName);
     variables.put("snakeCaseConfigName", toSnakeCase(configName));
     variables.put(
       "qualifiedRustServiceErrorType",
-      qualifiedRustServiceErrorType(serviceShape)
+      qualifiedRustServiceErrorType()
     );
 
     return variables;
-  }
-
-  @Override
-  protected String getRustRootModuleName(final String namespace) {
-    return mergedGenerator.isMainNamespace(namespace)
-      ? "crate"
-      : "crate::deps::" +
-      RustUtils.rustModuleForSmithyNamespace(namespace);
   }
 
   @Override
@@ -1694,11 +1683,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return variables;
   }
 
-  protected String qualifiedRustServiceErrorType(
-    final ServiceShape serviceShape
-  ) {
+  protected String qualifiedRustServiceErrorType() {
     return "%s::error::Error".formatted(
-        getRustTypesModuleName(serviceShape.getId().getNamespace())
+        getRustTypesModuleName()
       );
   }
 
@@ -1722,7 +1709,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put(
       "qualifiedRustErrorVariant",
       "%s::%s".formatted(
-          qualifiedRustServiceErrorType(serviceForShape(model, errorShape)),
+          qualifiedRustServiceErrorType(),
           rustErrorName
         )
     );
@@ -1746,7 +1733,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
     variables.put(
       "qualifiedRustErrorVariant",
-      "%s::%s".formatted(qualifiedRustServiceErrorType(serviceShape), rustErrorName)
+      "%s::%s".formatted(qualifiedRustServiceErrorType(), rustErrorName)
     );
     return variables;
   }

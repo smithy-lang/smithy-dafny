@@ -73,7 +73,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       evalTemplate(
         """
         use std::sync::LazyLock;
-        use $rootRustModuleName::conversions;
+        use $rustRootModuleName:L::conversions;
 
         struct Client {
             inner: $sdkCrate:L::Client
@@ -539,9 +539,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       );
   }
 
-  @Override
-  protected String getRustRootModuleName(final String namespace) {
-    return getSdkCrate();
+  protected String getRustTypesModuleName() {
+    return "%s::types".formatted(getSdkCrate());
   }
 
   private String getSdkId() {
