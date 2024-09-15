@@ -144,10 +144,13 @@ public class ModelUtils {
    * @return true if the given shape ID is in the given service's namespace
    */
   public static boolean isInServiceNamespace(
-    final ShapeId shapeId,
+    final ToShapeId shapeId,
     final ServiceShape serviceShape
   ) {
-    return shapeId.getNamespace().equals(serviceShape.getId().getNamespace());
+    return shapeId
+      .toShapeId()
+      .getNamespace()
+      .equals(serviceShape.getId().getNamespace());
   }
 
   /**
@@ -574,10 +577,11 @@ public class ModelUtils {
   }
 
   /**
-   * @param shapeId ShapeId that might have positional or reference trait
+   * @param toShapeId ToShapeId that might have positional or reference trait
    * @return Fully de-referenced shapeId and naive shapeId as a ResolvedShapeId
    */
-  public static ResolvedShapeId resolveShape(ShapeId shapeId, Model model) {
+  public static ResolvedShapeId resolveShape(ToShapeId toShapeId, Model model) {
+    final ShapeId shapeId = toShapeId.toShapeId();
     if (shapeId.equals(SMITHY_API_UNIT)) {
       return new ResolvedShapeId(shapeId, shapeId);
     }
