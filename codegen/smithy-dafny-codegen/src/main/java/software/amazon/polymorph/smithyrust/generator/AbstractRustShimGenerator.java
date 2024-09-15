@@ -1165,8 +1165,8 @@ public abstract class AbstractRustShimGenerator {
   protected String qualifiedRustStructureType(
     final StructureShape structureShape
   ) {
-    return "%s::types::%s".formatted(
-        topLevelNameForShape(structureShape),
+    return "%s::%s".formatted(
+        getRustTypesModuleName(),
         rustStructureName(structureShape)
       );
   }
@@ -1305,8 +1305,8 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String qualifiedRustUnionName(final UnionShape unionShape) {
-    return "%s::types::%s".formatted(
-        topLevelNameForShape(unionShape),
+    return "%s::%s".formatted(
+        getRustTypesModuleName(),
         rustUnionName(unionShape)
       );
   }
