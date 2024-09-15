@@ -7,25 +7,21 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.OperationBindingIndex;
 import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.EnumShape;
@@ -45,6 +41,8 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 
 public abstract class AbstractRustShimGenerator {
+
+  protected MergedServicesGenerator mergedGenerator;
 
   protected final Model model;
   protected final ServiceShape service;
@@ -71,7 +69,8 @@ public abstract class AbstractRustShimGenerator {
     pub mod wrapped;
     """;
 
-  public AbstractRustShimGenerator(Model model, ServiceShape service) {
+  public AbstractRustShimGenerator(final MergedServicesGenerator mergedGenerator, Model model, ServiceShape service) {
+    this.mergedGenerator = mergedGenerator;
     this.model = model;
     this.service = service;
     this.operationIndex = new OperationIndex(model);
@@ -159,16 +158,6 @@ public abstract class AbstractRustShimGenerator {
     return ModelUtils.isInServiceNamespace(unionShape, service);
   }
 
-  protected TokenTree declarePubModules(Stream<String> moduleNames) {
-    return TokenTree
-      .of(
-        moduleNames
-          .sorted()
-          .map(module -> TokenTree.of("pub mod " + module + ";\n"))
-      )
-      .lineSeparated();
-  }
-
   protected RustFile conversionsModule() {
     final String namespace = service.getId().getNamespace();
     Stream<String> operationModules = model
@@ -204,7 +193,7 @@ public abstract class AbstractRustShimGenerator {
       .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
-    TokenTree content = declarePubModules(
+    TokenTree content = RustUtils.declarePubModules(
       Stream
         .of(
           resourceModules,
@@ -1189,24 +1178,24 @@ public abstract class AbstractRustShimGenerator {
     } else {
       return (
         "crate::deps::" +
-        NamespaceHelper.rustModuleForSmithyNamespace(shapeId.getNamespace())
+        RustUtils.rustModuleForSmithyNamespace(shapeId.getNamespace())
       );
     }
   }
 
-  protected Path rootPathForNamespace(final String namespace) {
+  public Path rootPathForNamespace(final String namespace) {
     if (namespace.equals(service.getId().getNamespace())) {
       return Path.of("src");
     } else {
       return Path.of(
         "src",
         "deps",
-        NamespaceHelper.rustModuleForSmithyNamespace(namespace)
+        RustUtils.rustModuleForSmithyNamespace(namespace)
       );
     }
   }
 
-  protected Path rootPathForShape(final ToShapeId toShapeId) {
+  public Path rootPathForShape(final ToShapeId toShapeId) {
     return rootPathForNamespace(toShapeId.toShapeId().getNamespace());
   }
 

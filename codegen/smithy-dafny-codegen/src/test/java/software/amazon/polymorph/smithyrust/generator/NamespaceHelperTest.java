@@ -10,11 +10,11 @@ public class NamespaceHelperTest {
   public void testRustModuleForSmithyNamespace() {
     assertEquals(
       "simple_string",
-      NamespaceHelper.rustModuleForSmithyNamespace("simple.string")
+      RustUtils.rustModuleForSmithyNamespace("simple.string")
     );
     assertEquals(
       "aws_cryptography_foobar",
-      NamespaceHelper.rustModuleForSmithyNamespace("aws.cryptography.foobar")
+      RustUtils.rustModuleForSmithyNamespace("aws.cryptography.foobar")
     );
   }
 }

@@ -34,8 +34,8 @@ import software.amazon.smithy.model.traits.EnumTrait;
  */
 public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
-  public RustAwsSdkShimGenerator(Model model, ServiceShape service) {
-    super(model, service);
+  public RustAwsSdkShimGenerator(MergedServicesGenerator mergedGenerator, Model model, ServiceShape service) {
+    super(mergedGenerator, model, service);
   }
 
   @Override
@@ -199,7 +199,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected RustFile conversionsErrorModule() {
-    TokenTree modulesDeclarations = declarePubModules(
+    TokenTree modulesDeclarations = RustUtils.declarePubModules(
       allErrorShapes()
         .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
     );
@@ -397,7 +397,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     // bindingShape should always be a service
 
     var operationModuleName = toSnakeCase(operationName(operationShape));
-    var operationModuleContent = declarePubModules(
+    var operationModuleContent = RustUtils.declarePubModules(
       Stream.of(
         "_" + toSnakeCase(operationName(operationShape) + "Request"),
         "_" + toSnakeCase(operationName(operationShape) + "Response")

@@ -5,7 +5,6 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCa
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,6 @@ import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -44,10 +42,11 @@ import software.amazon.smithy.model.traits.EnumTrait;
 public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   public RustLibraryShimGenerator(
+    final MergedServicesGenerator mergedGenerator,
     final Model model,
     final ServiceShape service
   ) {
-    super(model, service);
+    super(mergedGenerator, model, service);
   }
 
   @Override
@@ -134,6 +133,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(wrappedModule());
     result.add(wrappedClientModule());
 
+    // deps module
+
     return result;
   }
 
@@ -150,6 +151,25 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     #[cfg(feature = "wrapped-client")]
     pub mod wrapped;
     """;
+
+  private RustFile depsModule() {
+    final TokenTree content;
+    if (mergedGenerator.isMainService(service)) {
+      content =
+        RustUtils.declarePubModules(
+          mergedGenerator.streamServicesToGenerateFor(model)
+            .filter(s -> !mergedGenerator.isMainService(s))
+            .map(s -> s.getId().getNamespace())
+            .map(RustUtils::rustModuleForSmithyNamespace)
+        );
+    } else {
+      content = RustUtils.declarePubModules(Stream.empty());
+    }
+    return new RustFile(
+      rootPathForShape(service).resolve("deps.rs"),
+      content
+    );
+  }
 
 
   @Override
@@ -1350,7 +1370,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       rootPathForShape(bindingShape)
         .resolve("conversions")
         .resolve(operationModuleName + ".rs"),
-      declarePubModules(childModules.stream())
+      RustUtils.declarePubModules(childModules.stream())
     );
 
     Set<RustFile> result = new HashSet<>(Set.of(outerModule));
@@ -1662,7 +1682,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return namespace.equals(service.getId().getNamespace())
       ? "crate"
       : "crate::deps::" +
-      NamespaceHelper.rustModuleForSmithyNamespace(namespace);
+      RustUtils.rustModuleForSmithyNamespace(namespace);
   }
 
   @Override

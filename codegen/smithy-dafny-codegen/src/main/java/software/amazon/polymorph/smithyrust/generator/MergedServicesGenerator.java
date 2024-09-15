@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithyrust.generator;
 
+import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -7,7 +8,11 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -26,10 +31,34 @@ public class MergedServicesGenerator {
     this.mainService = mainService;
   }
 
-  public void generateAllNamespaces(final Path outputDir) {
+  public boolean isMainService(ServiceShape serviceShape) {
+    return mainService.equals(serviceShape);
+  }
+
+  public Set<RustFile> rustFiles() {
+    Set<RustFile> rustFiles = new HashSet<>();
+
     namespaces.stream()
       .map(namespace -> generatorForNamespace(model, namespace, namespaces))
-      .forEach(generator -> generator.generate(outputDir));
+      .flatMap(generator -> generator.rustFiles().stream())
+      .forEach(rustFiles::add);
+
+    streamNamespacesToGenerateFor(model)
+      .filter(n -> !n.equals(mainService.getId().getNamespace()))
+      .map(n -> depTopLevelModule(n))
+      .forEach(rustFiles::add);
+
+    return rustFiles;
+  }
+
+  public void generateAllNamespaces(final Path outputDir) {
+    Set<RustFile> rustFiles = rustFiles();
+
+    final LinkedHashMap<Path, TokenTree> tokenTreeMap = new LinkedHashMap<>();
+    for (RustFile rustFile : rustFiles) {
+      tokenTreeMap.put(rustFile.path(), rustFile.content());
+    }
+    IOUtils.writeTokenTreesIntoDir(tokenTreeMap, outputDir);
   }
 
   protected AbstractRustShimGenerator generatorForNamespace(final Model model, final String namespace, final Set<String> namespaces) {
@@ -37,20 +66,23 @@ public class MergedServicesGenerator {
       generatorFor(model, ModelUtils.serviceFromNamespace(model, n), namespaces));
   }
 
-  public static AbstractRustShimGenerator generatorFor(Model model, ServiceShape serviceShape, Set<String> namespaces) {
+  public AbstractRustShimGenerator generatorFor(Model model, ServiceShape serviceShape, Set<String> namespaces) {
     if (serviceShape.hasTrait(ServiceTrait.class)) {
-      return new RustAwsSdkShimGenerator(model,
+      return new RustAwsSdkShimGenerator(
+        this,
+        model,
         serviceShape
       );
     } else {
       return new RustLibraryShimGenerator(
+        this,
         model,
         serviceShape
       );
     }
   }
 
-  private Stream<String> streamNamespacesToGenerateFor(Model model) {
+  public Stream<String> streamNamespacesToGenerateFor(Model model) {
     return model
       .shapes()
       .map(s -> s.getId().getNamespace())
@@ -62,30 +94,12 @@ public class MergedServicesGenerator {
     return namespaces.contains(namespace);
   }
 
-  private Stream<ServiceShape> streamServicesToGenerateFor(Model model) {
+  public Stream<ServiceShape> streamServicesToGenerateFor(Model model) {
     return model.getServiceShapes().stream();
   }
 
-  private RustFile depsModule(final ServiceShape serviceShape) {
-    final TokenTree content;
-    if (serviceShape.equals(mainService)) {
-      content =
-        declarePubModules(
-          streamNamespacesToGenerateFor(model)
-            .filter(n -> !n.equals(mainService.getId().getNamespace()))
-            .map(NamespaceHelper::rustModuleForSmithyNamespace)
-        );
-    } else {
-      content = declarePubModules(Stream.empty());
-    }
-    return new RustFile(
-      rootPathForShape(serviceShape).resolve("deps.rs"),
-      content
-    );
-  }
-
-  private RustFile depModule(final String namespace) {
-    final String rustModule = NamespaceHelper.rustModuleForSmithyNamespace(
+  private RustFile depTopLevelModule(final String namespace) {
+    final String rustModule = RustUtils.rustModuleForSmithyNamespace(
       namespace
     );
     return new RustFile(
