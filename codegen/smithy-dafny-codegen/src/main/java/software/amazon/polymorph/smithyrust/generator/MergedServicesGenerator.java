@@ -50,6 +50,8 @@ public class MergedServicesGenerator {
       .map(n -> depTopLevelModule(n))
       .forEach(rustFiles::add);
 
+    rustFiles.add(topLevelDepsModule());
+
     return rustFiles;
   }
 
@@ -107,6 +109,21 @@ public class MergedServicesGenerator {
     return new RustFile(
       Path.of("src", "deps", rustModule + ".rs"),
       TokenTree.of(RustLibraryShimGenerator.TOP_LEVEL_MOD_DECLS)
+    );
+  }
+
+  // TODO: overlap with library version
+  private RustFile topLevelDepsModule() {
+    final TokenTree content =
+        RustUtils.declarePubModules(
+          streamServicesToGenerateFor(model)
+            .filter(s -> !isMainService(s))
+            .map(s -> s.getId().getNamespace())
+            .map(RustUtils::rustModuleForSmithyNamespace)
+        );
+    return new RustFile(
+      Path.of("src", "deps.rs"),
+      content
     );
   }
 }
