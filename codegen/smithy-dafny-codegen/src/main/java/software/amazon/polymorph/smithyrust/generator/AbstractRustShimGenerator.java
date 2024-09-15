@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -957,7 +959,10 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String getDafnyModuleName(final String namespace) {
-    return namespace.replace(".", "::").toLowerCase(Locale.ROOT);
+    String dafnyExternName = NamespaceHelper.standardize(
+      namespace
+    );
+    return dafnyExternName.replace(".", "::").toLowerCase(Locale.ROOT);
   }
 
   protected String getDafnyInternalModuleName(final String namespace) {
