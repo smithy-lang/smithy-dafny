@@ -37,6 +37,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ReadonlyTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 /**
@@ -1597,6 +1598,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       serviceVariables(),
       operationVariables(serviceShape, operationShape)
     );
+
+    variables.put("selfParameter",
+      operationShape.hasTrait(ReadonlyTrait.class) ? "&self" : "&mut self");
 
     StructureShape inputShape = operationIndex
       .getInputShape(operationShape)
