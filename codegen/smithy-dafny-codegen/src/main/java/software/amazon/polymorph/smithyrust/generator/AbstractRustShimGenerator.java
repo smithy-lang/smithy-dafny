@@ -43,6 +43,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 public abstract class AbstractRustShimGenerator {
 
@@ -135,6 +136,10 @@ public abstract class AbstractRustShimGenerator {
     );
   }
 
+  protected boolean shouldGenerateTraitForResource(ResourceShape resourceShape) {
+    return ModelUtils.isInServiceNamespace(resourceShape, service);
+  }
+
   protected final Stream<
     StructureShape
   > streamStructuresToGenerateStructsFor() {
@@ -153,6 +158,7 @@ public abstract class AbstractRustShimGenerator {
       .map(s -> s.expectTrait(ReferenceTrait.class))
       .filter(t -> !t.isService())
       .map(t -> model.expectShape(t.getReferentId(), ResourceShape.class))
+      .filter(this::shouldGenerateTraitForResource)
       .sorted();
   }
 
@@ -1158,7 +1164,7 @@ public abstract class AbstractRustShimGenerator {
     final StructureShape outputShape = operationIndex
       .getOutputShape(operationShape)
       .get();
-    if (outputShape.hasTrait(PositionalTrait.class)) {
+    if (outputShape.hasTrait(PositionalTrait.class) || outputShape.hasTrait(UnitTypeTrait.class)) {
       variables.put("operationOutputType", rustTypeForShape(outputShape));
     } else {
       variables.put(
@@ -1437,6 +1443,10 @@ public abstract class AbstractRustShimGenerator {
       model
     );
     final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
+
+    if (shape.hasTrait(UnitTypeTrait.class)) {
+      return "()";
+    }
 
     return switch (shape.getType()) {
       case BOOLEAN -> "::std::primitive::bool";

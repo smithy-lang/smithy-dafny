@@ -22,7 +22,7 @@ impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for $rustResourceName:LW
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::dafny_runtime::Object<
-      dyn crate::r#$dafnyTypesModuleName:L::I$dafnyResourceName:L,
+      dyn crate::r#$dafnyTypesModuleName:L::$dafnyResourceName:L,
     >,
 ) -> $rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:LRef {
     let wrap = $dafnyResourceName:LDafnyWrapper {
@@ -40,4 +40,13 @@ pub struct $dafnyResourceName:LDafnyWrapper {
   >,
 }
 
-$resourceOperations:L
+impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
+  for $rustResourceName:LWrapper
+{
+  $resourceWrapperOperations:L
+}
+
+impl crate::types::$snakeCaseResourceName:L::$rustResourceName:L for $dafnyResourceName:LDafnyWrapper 
+{
+  $resourceDafnyWrapperOperations:L
+}

@@ -37,6 +37,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 /**
  * Generates all Rust modules needed to wrap a Dafny library as a Rust library.
@@ -127,6 +128,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
     result.addAll(
       streamResourcesToGenerateTraitsFor()
+        .filter(this::shouldGenerateTraitForResource)
         .map(this::resourceConversionModule)
         .toList()
     );
@@ -767,6 +769,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           fromDafny(outputShape, "inner_result.value()", false, false)
             .toString()
         );
+      } else if (outputShape.hasTrait(UnitTypeTrait.class)) {
+        variables.put("outputFromDafny", "()");
       } else {
         variables.put(
           "outputFromDafny",
@@ -1196,7 +1200,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
 
     variables.put(
-      "resourceOperations",
+      "resourceWrapperOperations",
       resourceShape
         .getAllOperations()
         .stream()
@@ -1211,7 +1215,29 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           );
           return IOUtils.evalTemplate(
             getClass(),
-            "runtimes/rust/conversions/resource_operation.rs",
+            "runtimes/rust/conversions/resource_wrapper_operation.rs",
+            operationVariables
+          );
+        })
+        .collect(Collectors.joining("\n\n"))
+    );
+    variables.put(
+      "resourceDafnyWrapperOperations",
+      resourceShape
+        .getAllOperations()
+        .stream()
+        .map(id -> {
+          final OperationShape operationShape = model.expectShape(
+            id,
+            OperationShape.class
+          );
+          final Map<String, String> operationVariables = MapUtils.merge(
+            variables,
+            operationVariables(resourceShape, operationShape)
+          );
+          return IOUtils.evalTemplate(
+            getClass(),
+            "runtimes/rust/conversions/resource_dafny_wrapper_operation.rs",
             operationVariables
           );
         })
@@ -1250,13 +1276,15 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
     final boolean hasInputStructure =
       inputStructure.isPresent() &&
-      !inputStructure.get().hasTrait(PositionalTrait.class);
+      !inputStructure.get().hasTrait(PositionalTrait.class) &&
+      !inputStructure.get().hasTrait(UnitTypeTrait.class);
     Optional<StructureShape> outputStructure = operationIndex.getOutputShape(
       operationShape
     );
     final boolean hasOutputStructure =
       outputStructure.isPresent() &&
-      !outputStructure.get().hasTrait(PositionalTrait.class);
+      !outputStructure.get().hasTrait(PositionalTrait.class) &&
+      !outputStructure.get().hasTrait(UnitTypeTrait.class);
 
     final Set<String> childModules = new HashSet<>();
     if (hasInputStructure) {

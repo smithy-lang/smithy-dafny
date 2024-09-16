@@ -199,12 +199,16 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   protected RustFile conversionsClientModule() {
-    // Just defining an empty file for now - we will need
-    // these functions for AWS SDK clients as well but they will
-    // be quite different from the local service versions.
+    TokenTree clientConversionFunctions = TokenTree.of(
+      evalTemplate(
+        getClass(),
+        "runtimes/rust/conversions/client_awssdk.rs",
+        serviceVariables()
+      )
+    );
     return new RustFile(
       rootPathForShape(service).resolve("conversions").resolve("client.rs"),
-      TokenTree.of("")
+      clientConversionFunctions
     );
   }
 
