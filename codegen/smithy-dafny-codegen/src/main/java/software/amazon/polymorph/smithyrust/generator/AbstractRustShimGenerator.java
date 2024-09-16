@@ -1155,7 +1155,7 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationDafnyInputType",
         evalTemplate(
-          "$rustRootModuleName:L::r#$dafnyTypesModuleName:L::$structureName:L",
+          "crate::$dafnyTypesModuleName:L::$structureName:L",
           inputShapeVariables
         )
       );
@@ -1166,6 +1166,7 @@ public abstract class AbstractRustShimGenerator {
       .get();
     if (outputShape.hasTrait(PositionalTrait.class) || outputShape.hasTrait(UnitTypeTrait.class)) {
       variables.put("operationOutputType", rustTypeForShape(outputShape));
+      variables.put("operationDafnyOutputType", dafnyTypeForShape(outputShape));
     } else {
       variables.put(
         "operationOutputType",
@@ -1180,7 +1181,7 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationDafnyOutputType",
         evalTemplate(
-          "$rustRootModuleName:L::r#$dafnyTypesModuleName:L::$structureName:L",
+          "crate::r#$dafnyTypesModuleName:L::$structureName:L",
           outputShapeVariables
         )
       );
@@ -1513,6 +1514,10 @@ public abstract class AbstractRustShimGenerator {
       model
     );
     final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
+
+    if (shape.hasTrait(UnitTypeTrait.class)) {
+      return "()";
+    }
 
     return switch (shape.getType()) {
       case BOOLEAN -> "::std::primitive::bool";

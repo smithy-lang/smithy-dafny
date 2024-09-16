@@ -1209,15 +1209,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             id,
             OperationShape.class
           );
-          final Map<String, String> operationVariables = MapUtils.merge(
-            variables,
-            operationVariables(resourceShape, operationShape)
-          );
-          return IOUtils.evalTemplate(
-            getClass(),
-            "runtimes/rust/conversions/resource_wrapper_operation.rs",
-            operationVariables
-          );
+          return resourceOperationWrapperImpl(resourceShape, operationShape);
         })
         .collect(Collectors.joining("\n\n"))
     );
@@ -1235,11 +1227,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             variables,
             operationVariables(resourceShape, operationShape)
           );
-          return IOUtils.evalTemplate(
-            getClass(),
-            "runtimes/rust/conversions/resource_dafny_wrapper_operation.rs",
-            operationVariables
-          );
+          return resourceOperationDafnyWrapperImpl(resourceShape, operationShape);
         })
         .collect(Collectors.joining("\n\n"))
     );
@@ -1253,6 +1241,124 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .resolve("conversions")
       .resolve("%s.rs".formatted(toSnakeCase(resourceName(resourceShape))));
     return new RustFile(path, TokenTree.of(content));
+  }
+
+  private String resourceOperationWrapperImpl(final ResourceShape resourceShape, final OperationShape operationShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      resourceVariables(resourceShape),
+      operationVariables(resourceShape, operationShape)
+    );
+
+    StructureShape inputShape = operationIndex
+      .getInputShape(operationShape)
+      .get();
+    if (inputShape.hasTrait(PositionalTrait.class)) {
+      // Need to fetch the single member and then convert,
+      // since on the Rust side there is still an input structure
+      // but not on the Dafny side.
+      final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
+      final String rustValue =
+        "input." + onlyMember.getMemberName() + "()";
+      variables.put(
+        "inputFromDafny",
+        fromDafny(inputShape, rustValue, false, false).toString()
+      );
+    } else {
+      variables.put(
+        "inputFromDafny",
+        evalTemplate(
+          "$rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input)",
+          variables
+        )
+      );
+    }
+
+    StructureShape outputShape = operationIndex
+      .getOutputShape(operationShape)
+      .get();
+    if (outputShape.hasTrait(PositionalTrait.class)) {
+      variables.put(
+        "outputToDafny",
+        toDafny(outputShape, "inner_result", false, false)
+          .toString()
+      );
+    } else if (outputShape.hasTrait(UnitTypeTrait.class)) {
+      variables.put("outputToDafny", "()");
+    } else {
+      variables.put(
+        "outputToDafny",
+        evalTemplate(
+          "$rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::to_dafny(inner_result.value().clone())",
+          variables
+        )
+      );
+    }
+
+    return IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/conversions/resource_wrapper_operation.rs",
+      variables
+    );
+  }
+
+  private String resourceOperationDafnyWrapperImpl(final ResourceShape resourceShape, final OperationShape operationShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      resourceVariables(resourceShape),
+      operationVariables(resourceShape, operationShape)
+    );
+
+    StructureShape inputShape = operationIndex
+      .getInputShape(operationShape)
+      .get();
+    if (inputShape.hasTrait(PositionalTrait.class)) {
+      // Need to fetch the single member and then convert,
+      // since on the Rust side there is still an input structure
+      // but not on the Dafny side.
+      final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
+      final String rustValue =
+        "input." + toSnakeCase(onlyMember.getMemberName());
+      variables.put(
+        "inputToDafny",
+        toDafny(inputShape, rustValue, true, false).toString()
+      );
+    } else {
+      variables.put(
+        "inputToDafny",
+        evalTemplate(
+          "$rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::to_dafny(input)",
+          variables
+        )
+      );
+    }
+
+    StructureShape outputShape = operationIndex
+      .getOutputShape(operationShape)
+      .get();
+    if (outputShape.hasTrait(PositionalTrait.class)) {
+      variables.put(
+        "outputFromDafny",
+        fromDafny(outputShape, "inner_result.value()", false, false)
+          .toString()
+      );
+    } else if (outputShape.hasTrait(UnitTypeTrait.class)) {
+      variables.put("outputFromDafny", "()");
+    } else {
+      variables.put(
+        "outputFromDafny",
+        evalTemplate(
+          "$rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::from_dafny(inner_result.value().clone())",
+          variables
+        )
+      );
+    }
+
+    return IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/conversions/resource_dafny_wrapper_operation.rs",
+      variables
+    );
   }
 
   @Override
