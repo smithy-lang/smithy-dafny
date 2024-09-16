@@ -13,13 +13,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.utils.OperationBindingIndex;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
@@ -72,6 +73,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .map(this::standardStructureModule)
         .toList()
     );
+    result.add(typesErrorModule());
     result.addAll(
       ModelUtils
         .streamEnumShapes(model, service.getId().getNamespace())
@@ -95,11 +97,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     // errors
     result.add(errorModule());
     result.add(sealedUnhandledErrorModule());
-    result.addAll(
-      allErrorShapes()
-        .map(errorShape -> errorConversionModule(service, errorShape))
-        .collect(Collectors.toSet())
-    );
 
     // operations
     result.add(operationModule());
@@ -201,6 +198,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private Set<RustFile> allOperationClientBuilders() {
     return allOperationShapes()
+      .filter(this::shouldGenerateOperation)
       .map(this::operationClientBuilder)
       .collect(Collectors.toSet());
   }
@@ -388,6 +386,32 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(path, TokenTree.of(content));
   }
 
+  private RustFile typesErrorModule() {
+    final Map<String, String> variables = serviceVariables();
+    final String modeledErrorVariants = allErrorShapes()
+      .map(errorShape ->
+        IOUtils.evalTemplate(
+          """
+          $rustErrorName:L {
+              message: ::std::string::String,
+          },
+          """,
+          MapUtils.merge(variables, errorVariables(errorShape))
+        )
+      )
+      .collect(Collectors.joining("\n\n"));
+    variables.put("modeledErrorVariants", modeledErrorVariants);
+
+    final String content = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/types/error.rs",
+      variables
+    );
+
+    final Path path = Path.of("src", "types", "error.rs");
+    return new RustFile(path, TokenTree.of(content));
+  }
+
   private RustFile enumTypeModule(final EnumShape enumShape) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
@@ -563,6 +587,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       pub mod $snakeCaseOperationName:L;
       """;
     final String content = allOperationShapes()
+      .filter(this::shouldGenerateOperation)
       .map(this::operationVariables)
       .map(opVariables -> IOUtils.evalTemplate(opTemplate, opVariables))
       .collect(Collectors.joining("\n\n"));
@@ -571,6 +596,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private Set<RustFile> allOperationImplementationModules() {
     return allOperationShapes()
+      .filter(this::shouldGenerateOperation)
       .map(this::operationImplementationModules)
       .flatMap(Collection::stream)
       .collect(Collectors.toSet());
@@ -596,11 +622,56 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private RustFile operationOuterModule(final OperationShape operationShape) {
-    Map<String, String> variables = operationVariables(operationShape);
+    Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      operationVariables(operationShape)
+    );
     final Shape bindingShape = operationBindingIndex
       .getBindingShape(operationShape)
       .get();
     if (bindingShape.isServiceShape()) {
+      StructureShape inputShape = operationIndex
+        .getInputShape(operationShape)
+        .get();
+      if (inputShape.hasTrait(PositionalTrait.class)) {
+        // Need to fetch the single member and then convert,
+        // since on the Rust side there is still an input structure
+        // but not on the Dafny side.
+        final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
+        final String rustValue =
+          "input." + toSnakeCase(onlyMember.getMemberName());
+        variables.put(
+          "inputToDafny",
+          toDafny(inputShape, rustValue, true, false).toString()
+        );
+      } else {
+        variables.put(
+          "inputToDafny",
+          evalTemplate(
+            "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::to_dafny(input)",
+            variables
+          )
+        );
+      }
+
+      StructureShape outputShape = operationIndex
+        .getOutputShape(operationShape)
+        .get();
+      if (outputShape.hasTrait(PositionalTrait.class)) {
+        variables.put(
+          "outputFromDafny",
+          fromDafny(outputShape, "inner_result.value()", false, false)
+            .toString()
+        );
+      } else {
+        variables.put(
+          "outputFromDafny",
+          evalTemplate(
+            "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::from_dafny(inner_result.value().clone())",
+            variables
+          )
+        );
+      }
       variables.put(
         "operationSendBody",
         IOUtils.evalTemplate(
@@ -785,7 +856,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .map(this::operationFluentBuilderFieldAccessors)
       .collect(Collectors.joining("\n"));
 
-    final Map<String, String> variables = operationVariables(operationShape);
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      operationVariables(operationShape)
+    );
     variables.put("accessors", accessors);
 
     final String content = IOUtils.evalTemplate(
@@ -845,13 +919,52 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  @SuppressWarnings("unused")
-  private RustFile errorConversionModule(
-    final ServiceShape service,
-    final Shape errorStructure
-  ) {
-    throw new UnsupportedOperationException(
-      "Error conversion is not yet implemented for library services"
+  protected RustFile conversionsErrorModule() {
+    final Map<String, String> variables = serviceVariables();
+
+    final String toDafnyArms = allErrorShapes()
+      .map(errorShape ->
+        IOUtils.evalTemplate(
+          """
+          $qualifiedRustErrorVariant:L { message } =>
+              crate::r#$dafnyTypesModuleName:L::Error::$errorName:L {
+                  message: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&message),
+              },
+          """,
+          MapUtils.merge(variables, errorVariables(errorShape))
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("toDafnyArms", toDafnyArms);
+
+    final String fromDafnyArms = allErrorShapes()
+      .map(errorShape ->
+        IOUtils.evalTemplate(
+          """
+          crate::r#$dafnyTypesModuleName:L::Error::$errorName:L { message } =>
+              $qualifiedRustErrorVariant:L {
+                  message: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&message),
+              },
+          """,
+          MapUtils.merge(variables, errorVariables(errorShape))
+        )
+      )
+      .collect(Collectors.joining("\n"));
+    variables.put("fromDafnyArms", fromDafnyArms);
+
+    final String libraryContent = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/conversions/error_library.rs",
+      variables
+    );
+    final String commonContent = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/conversions/error_common.rs",
+      variables
+    );
+    return new RustFile(
+      Path.of("src", "conversions", "error.rs"),
+      TokenTree.of(commonContent, libraryContent)
     );
   }
 
@@ -1061,24 +1174,52 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String operationModuleName = toSnakeCase(
       operationName(operationShape)
     );
-    final String outerContent = IOUtils.evalTemplate(
-      getClass(),
-      "runtimes/rust/conversions/operation.rs",
-      variables
+
+    Optional<StructureShape> inputStructure = operationIndex.getInputShape(
+      operationShape
     );
+    final boolean hasInputStructure =
+      inputStructure.isPresent() &&
+      !inputStructure.get().hasTrait(PositionalTrait.class);
+    Optional<StructureShape> outputStructure = operationIndex.getOutputShape(
+      operationShape
+    );
+    final boolean hasOutputStructure =
+      outputStructure.isPresent() &&
+      !outputStructure.get().hasTrait(PositionalTrait.class);
+
+    final Set<String> childModules = new HashSet<>();
+    if (hasInputStructure) {
+      childModules.add(
+        "_" + variables.get("snakeCaseSyntheticOperationInputName")
+      );
+    }
+    if (hasOutputStructure) {
+      childModules.add(
+        "_" + variables.get("snakeCaseSyntheticOperationOutputName")
+      );
+    }
     final RustFile outerModule = new RustFile(
       Path.of("src", "conversions", operationModuleName + ".rs"),
-      TokenTree.of(outerContent)
+      declarePubModules(childModules.stream())
     );
 
-    final RustFile requestModule = operationRequestConversionModule(
-      operationShape
-    );
-    final RustFile responseModule = operationResponseConversionModule(
-      operationShape
-    );
+    Set<RustFile> result = new HashSet<>(Set.of(outerModule));
 
-    return Set.of(outerModule, requestModule, responseModule);
+    if (hasInputStructure) {
+      final RustFile requestModule = operationRequestConversionModule(
+        operationShape
+      );
+      result.add(requestModule);
+    }
+    if (hasOutputStructure) {
+      final RustFile responseModule = operationResponseConversionModule(
+        operationShape
+      );
+      result.add(responseModule);
+    }
+
+    return result;
   }
 
   @Override
@@ -1176,7 +1317,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       fluentMemberSettersForStructure(structureShape).toString()
     );
 
-    // unwrap() is safe as long as the builder is infallible
     return TokenTree.of(
       evalTemplate(
         """
@@ -1232,6 +1372,61 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       serviceVariables(),
       operationVariables(operationShape)
     );
+
+    StructureShape inputShape = operationIndex
+      .getInputShape(operationShape)
+      .get();
+    if (inputShape.hasTrait(PositionalTrait.class)) {
+      // Need to wrap the single member after converting,
+      // since on the Rust side there is still an input structure
+      // but not on the Dafny side.
+      final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
+      variables.put("memberName", toSnakeCase(onlyMember.getMemberName()));
+      variables.put(
+        "dafnyValue",
+        fromDafny(inputShape, "input", true, false).toString()
+      );
+      variables.put(
+        "inputFromDafny",
+        evalTemplate(
+          """
+          crate::operation::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::$syntheticOperationInputName:L {
+            $memberName:L: $dafnyValue:L
+          }
+          """,
+          variables
+        )
+      );
+    } else {
+      variables.put(
+        "inputFromDafny",
+        evalTemplate(
+          "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::from_dafny(input.clone())",
+          variables
+        )
+      );
+    }
+    variables.put("operationInputDafnyType", dafnyTypeForShape(inputShape));
+
+    StructureShape outputShape = operationIndex
+      .getOutputShape(operationShape)
+      .get();
+    if (outputShape.hasTrait(PositionalTrait.class)) {
+      variables.put(
+        "outputToDafny",
+        toDafny(outputShape, "inner_result", false, false).toString()
+      );
+    } else {
+      variables.put(
+        "outputToDafny",
+        evalTemplate(
+          "crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationOutputName:L::to_dafny(inner_result)",
+          variables
+        )
+      );
+    }
+    variables.put("operationOutputDafnyType", dafnyTypeForShape(outputShape));
+
     return IOUtils.evalTemplate(
       getClass(),
       "runtimes/rust/wrapped/client_operation_impl.part.rs",
@@ -1262,6 +1457,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put("sdkId", sdkId);
     variables.put("configName", configName);
     variables.put("snakeCaseConfigName", toSnakeCase(configName));
+    variables.put(
+      "qualifiedRustServiceErrorType",
+      qualifiedRustServiceErrorType()
+    );
 
     return variables;
   }
@@ -1298,140 +1497,32 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return variables;
   }
 
-  protected String unionName(final UnionShape unionShape) {
-    return unionShape.getId().getName(service);
+  protected String qualifiedRustServiceErrorType() {
+    return "%s::error::Error".formatted(getRustTypesModuleName());
   }
 
-  protected String rustUnionName(final UnionShape unionShape) {
-    return toPascalCase(unionName(unionShape));
+  protected String errorName(final StructureShape errorShape) {
+    return errorShape.getId().getName(service);
   }
 
-  protected String qualifiedRustUnionName(final UnionShape unionShape) {
-    return "%s::%s".formatted(
-        getRustTypesModuleName(),
-        rustUnionName(unionShape)
-      );
+  protected String rustErrorName(final StructureShape errorShape) {
+    return toPascalCase(errorName(errorShape));
   }
 
-  /**
-   * Generates values for variables commonly used in union-specific templates.
-   */
-  protected HashMap<String, String> unionVariables(
-    final UnionShape unionShape
+  protected HashMap<String, String> errorVariables(
+    final StructureShape errorShape
   ) {
     final HashMap<String, String> variables = new HashMap<>();
-    final String unionName = unionName(unionShape);
-    variables.put("unionName", unionName);
-    variables.put("snakeCaseUnionName", toSnakeCase(unionName));
-    variables.put("dafnyUnionName", unionName);
-    variables.put("rustUnionName", rustUnionName(unionShape));
-    variables.put("qualifiedRustUnionName", qualifiedRustUnionName(unionShape));
+    final String errorName = errorName(errorShape);
+    final String rustErrorName = rustErrorName(errorShape);
+    variables.put("errorName", errorName);
+    variables.put("snakeCaseErrorName", toSnakeCase(errorName));
+    variables.put("rustErrorName", rustErrorName);
+    variables.put(
+      "qualifiedRustErrorVariant",
+      "%s::%s".formatted(qualifiedRustServiceErrorType(), rustErrorName)
+    );
     return variables;
-  }
-
-  protected String unionMemberName(final MemberShape memberShape) {
-    return memberShape.getMemberName();
-  }
-
-  protected String rustUnionMemberName(final MemberShape memberShape) {
-    return toPascalCase(unionMemberName(memberShape));
-  }
-
-  protected String dafnyUnionMemberName(final MemberShape memberShape) {
-    return unionMemberName(memberShape);
-  }
-
-  /**
-   * Generates values for variables commonly used in union-member-specific templates.
-   */
-  protected HashMap<String, String> unionMemberVariables(
-    final MemberShape memberShape
-  ) {
-    final String memberName = unionMemberName(memberShape);
-    final Shape targetShape = model.expectShape(memberShape.getTarget());
-
-    final HashMap<String, String> variables = new HashMap<>();
-    variables.put("unionMemberName", memberName);
-    variables.put("snakeCaseUnionMemberName", toSnakeCase(memberName));
-    variables.put("dafnyUnionMemberName", dafnyUnionMemberName(memberShape));
-    variables.put("rustUnionMemberName", rustUnionMemberName(memberShape));
-    variables.put("unionMemberType", rustTypeForShape(targetShape));
-    return variables;
-  }
-
-  private String rustTypeForShape(final Shape shape) {
-    return switch (shape.getType()) {
-      case BOOLEAN -> "::std::primitive::bool";
-      // integral
-      case BYTE -> "::std::primitive::i8";
-      case SHORT -> "::std::primitive::i16";
-      case INTEGER -> "::std::primitive::i32";
-      case LONG -> "::std::primitive::i64";
-      // floats
-      case FLOAT -> "::std::primitive::f32";
-      case DOUBLE -> "::std::primitive::f64";
-      // special numerics
-      case BIG_INTEGER -> "::num::bigint::BigInt";
-      case BIG_DECIMAL -> "::num::rational::BigRational";
-      // special collections
-      case BLOB -> "::aws_smithy_types::Blob";
-      case STRING -> {
-        //noinspection deprecation
-        if (shape.hasTrait(EnumTrait.class)) {
-          yield qualifiedRustEnumType(
-            ModelUtils.stringToEnumShape(shape.asStringShape().orElseThrow())
-          );
-        }
-        yield "::std::string::String";
-      }
-      case ENUM -> qualifiedRustEnumType(shape.asEnumShape().orElseThrow());
-      // other simple shapes
-      case TIMESTAMP -> "::aws_smithy_types::DateTime";
-      // aggregates
-      case STRUCTURE -> {
-        final StructureShape structureShape = (StructureShape) shape;
-        if (shouldGenerateStructForStructure(structureShape)) {
-          yield qualifiedRustStructureType(structureShape);
-        }
-        if (structureShape.hasTrait(ReferenceTrait.class)) {
-          yield qualifiedRustReferenceType(structureShape);
-        }
-        throw new UnsupportedOperationException(
-          "Unsupported type for structure: " + shape.getId()
-        );
-      }
-      case LIST -> {
-        final ListShape listShape = (ListShape) shape;
-        final String memberType = rustTypeForShape(
-          model.expectShape(listShape.getMember().getTarget())
-        );
-        yield "::std::vec::Vec<%s>".formatted(memberType);
-      }
-      case MAP -> {
-        final MapShape mapShape = (MapShape) shape;
-        final String keyType = rustTypeForShape(
-          model.expectShape(mapShape.getKey().getTarget())
-        );
-        final String valueType = rustTypeForShape(
-          model.expectShape(mapShape.getValue().getTarget())
-        );
-        yield "::std::collections::HashMap<%s, %s>".formatted(
-            keyType,
-            valueType
-          );
-      }
-      case UNION -> {
-        if (ModelUtils.isInServiceNamespace(shape.getId(), service)) {
-          yield qualifiedRustUnionName((UnionShape) shape);
-        }
-        throw new UnsupportedOperationException(
-          "Unsupported type for union: " + shape.getId()
-        );
-      }
-      default -> throw new UnsupportedOperationException(
-        "Unsupported shape type: " + shape.getType()
-      );
-    };
   }
 
   protected boolean isRustFieldRequired(
@@ -1451,34 +1542,38 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     boolean isDafnyOption
   ) {
     // First handle the indirection of @reference to service or resource shapes
-    final Shape shape = originalShape
-      .getTrait(ReferenceTrait.class)
-      .map(referenceTrait -> model.expectShape(referenceTrait.getReferentId()))
-      .orElse(originalShape);
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
+      originalShape,
+      model
+    );
+    final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
 
     return switch (shape.getType()) {
       case STRING, ENUM -> {
         if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
           var enumShapeName = toSnakeCase(shape.toShapeId().getName());
+          String prefix = topLevelNameForShape(shape);
           if (isDafnyOption) {
             yield TokenTree.of(
               """
               ::std::rc::Rc::new(match &%s {
-                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                   None => crate::_Wrappers_Compile::Option::None { }
               })
-              """.formatted(rustValue, enumShapeName)
+              """.formatted(rustValue, prefix, enumShapeName)
             );
           } else if (isRustOption) {
             yield TokenTree.of(
-              "crate::conversions::%s::to_dafny(%s.clone().unwrap())".formatted(
+              "%s::conversions::%s::to_dafny(%s.clone().unwrap())".formatted(
+                  prefix,
                   enumShapeName,
                   rustValue
                 )
             );
           } else {
             yield TokenTree.of(
-              "crate::conversions::%s::to_dafny(%s.clone())".formatted(
+              "%s::conversions::%s::to_dafny(%s.clone())".formatted(
+                  prefix,
                   enumShapeName,
                   rustValue
                 )
@@ -1523,14 +1618,26 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case BOOLEAN -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
+                  rustValue
+                )
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(Some(%s))".formatted(
+                  rustValue
+                )
+            );
+          }
         } else {
-          yield TokenTree.of("%s.clone()".formatted(rustValue));
+          if (isRustOption) {
+            yield TokenTree.of("%s.clone().unwrap()".formatted(rustValue));
+          } else {
+            yield TokenTree.of("%s.clone()".formatted(rustValue));
+          }
         }
       }
       case INTEGER -> {
@@ -1549,7 +1656,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             );
           }
         } else {
-          yield TokenTree.of("%s.clone()".formatted(rustValue));
+          if (isRustOption) {
+            yield TokenTree.of("%s.clone().unwrap()".formatted(rustValue));
+          } else {
+            yield TokenTree.of("%s.clone()".formatted(rustValue));
+          }
         }
       }
       case LONG -> {
@@ -1707,28 +1818,29 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       }
       case STRUCTURE, UNION -> {
         var structureShapeName = toSnakeCase(shape.getId().getName());
+        String prefix = topLevelNameForShape(shape);
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(&%s.clone().unwrap())
-              """.formatted(structureShapeName, rustValue)
+              %s::conversions::%s::to_dafny(%s.clone().unwrap())
+              """.formatted(prefix, structureShapeName, rustValue)
             );
           } else {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(%s.clone())
-              """.formatted(structureShapeName, rustValue)
+              %s::conversions::%s::to_dafny(%s.clone())
+              """.formatted(prefix, structureShapeName, rustValue)
             );
           }
         } else {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
-            """.formatted(rustValue, structureShapeName)
+            """.formatted(rustValue, prefix, structureShapeName)
           );
         }
       }
@@ -1736,33 +1848,34 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         String resourceShapeName = toSnakeCase(
           resourceName(shape.asResourceShape().get())
         );
+        String prefix = topLevelNameForShape(shape);
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(%s.clone().unwrap())
-              """.formatted(resourceShapeName, rustValue)
+              %s::conversions::%s::to_dafny(%s.clone().unwrap())
+              """.formatted(prefix, resourceShapeName, rustValue)
             );
           } else {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(%s.clone())
-              """.formatted(resourceShapeName, rustValue)
+              %s::conversions::%s::to_dafny(%s.clone())
+              """.formatted(prefix, resourceShapeName, rustValue)
             );
           }
         } else {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
-            """.formatted(rustValue, resourceShapeName)
+            """.formatted(rustValue, prefix, resourceShapeName)
           );
         }
       }
       case SERVICE -> {
-        String prefix = topLevelScopeForService(shape.asServiceShape().get());
+        String prefix = topLevelNameForShape(shape);
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(

@@ -7,6 +7,8 @@ $resourceModules:L
 
 $structureModules:L
 
+pub mod error;
+
 $enumModules:L
 
 $unionModules:L

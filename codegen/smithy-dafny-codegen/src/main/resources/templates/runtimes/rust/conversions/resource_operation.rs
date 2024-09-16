@@ -2,7 +2,7 @@
 impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
   for $rustResourceName:LWrapper
 {
-  fn r#_GetResourceData_k(
+  fn r#_$operationName:L_k(
       &mut self,
       input: &::std::rc::Rc<
       crate::r#$dafnyTypesModuleName:L::$pascalCaseOperationInputName:L,
@@ -28,7 +28,7 @@ impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
               ),
           },
           Err(x) => crate::r#_Wrappers_Compile::Result::Failure {
-              error: crate::conversions::$snakeCaseOperationName:L::to_dafny_error(x),
+              error: crate::conversions::error::to_dafny(x),
           },
       };
       ::std::rc::Rc::new(result)
@@ -36,12 +36,12 @@ impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
 }
 
 impl crate::types::$snakeCaseResourceName:L::$rustResourceName:L for $dafnyResourceName:LDafnyWrapper {
-  fn get_resource_data(
+  fn $snakeCaseOperationName:L(
       &mut self,
       input: crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L,
   ) -> Result<
       crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L,
-      crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L,
+      $qualifiedRustServiceErrorType:L,
   > {
       let inner_input =
           crate::conversions::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::to_dafny(input);
@@ -56,7 +56,7 @@ impl crate::types::$snakeCaseResourceName:L::$rustResourceName:L for $dafnyResou
               ),
           )
       } else {
-          Err(crate::conversions::$snakeCaseOperationName:L::from_dafny_error(
+          Err(crate::conversions::error::from_dafny(
               inner_result.error().clone(),
           ))
       }
