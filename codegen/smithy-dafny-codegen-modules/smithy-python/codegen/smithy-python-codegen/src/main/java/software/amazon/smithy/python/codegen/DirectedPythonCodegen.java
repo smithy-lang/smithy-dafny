@@ -350,6 +350,13 @@ public class DirectedPythonCodegen implements DirectedCodegen<GenerationContext,
         }
         LOGGER.info("Running code formatter on generated code");
         CodegenUtils.runCommand("python3 -m black . --exclude \"\"", fileManifest.getBaseDir());
+        try {
+            CodegenUtils.runCommand("python3 -m docformatter", fileManifest.getBaseDir());
+        } catch (CodegenException e) {
+            LOGGER.warning("Unable to find the python package docformatter. Skipping formatting.");
+            return;
+        }
+        CodegenUtils.runCommand("python3 -m docformatter --recursive .", fileManifest.getBaseDir());
     }
 
     private void runMypy(FileManifest fileManifest) {
