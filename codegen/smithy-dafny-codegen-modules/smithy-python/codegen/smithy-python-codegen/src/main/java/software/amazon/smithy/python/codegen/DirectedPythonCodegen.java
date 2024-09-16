@@ -338,24 +338,28 @@ public class DirectedPythonCodegen implements DirectedCodegen<GenerationContext,
             CodegenUtils.runCommand("python3 " + file, fileManifest.getBaseDir());
         }
         formatCode(fileManifest);
+        formatDocstrings(fileManifest);
         runMypy(fileManifest);
     }
 
     private void formatCode(FileManifest fileManifest) {
         try {
             CodegenUtils.runCommand("python3 -m black -h", fileManifest.getBaseDir());
-            LOGGER.info("Running code formatter on generated code");
-            CodegenUtils.runCommand("python3 -m black . --exclude \"\"", fileManifest.getBaseDir());
         } catch (CodegenException e) {
             LOGGER.warning("Unable to find the python package black. Skipping formatting.");
         }
-        try {
+        LOGGER.info("Running code formatter on generated code");
+        CodegenUtils.runCommand("python3 -m black . --exclude \"\"", fileManifest.getBaseDir());
+    }
+
+    private void formatDocstrings(FileManifest fileManifest) {
+      try {
           CodegenUtils.runCommand("python3 -m docformatter -h", fileManifest.getBaseDir());
-          LOGGER.info("Running docstring formatter on generated code");
-          CodegenUtils.runCommand("python3 -m docformatter --recursive .", fileManifest.getBaseDir());
-        } catch (CodegenException e) {
-            LOGGER.warning("Unable to find the python package docformatter. Skipping formatting.");
-        }
+      } catch (CodegenException e) {
+          LOGGER.warning("Unable to find the python package docformatter. Skipping formatting.");
+      }
+      LOGGER.info("Running docformatter on generated code");
+      CodegenUtils.runCommand("python3 -m docformatter --recursive .", fileManifest.getBaseDir());
     }
 
     private void runMypy(FileManifest fileManifest) {
