@@ -105,7 +105,8 @@ public abstract class AbstractRustShimGenerator {
     final var operationErrors = model
       .getOperationShapes()
       .stream()
-      .flatMap(operationShape -> operationShape.getErrors().stream());
+      .flatMap(operationShape -> operationShape.getErrors().stream())
+      .filter(o -> ModelUtils.isInServiceNamespace(o, service));
     return Stream
       .concat(commonErrors, operationErrors)
       .distinct()
@@ -126,7 +127,7 @@ public abstract class AbstractRustShimGenerator {
     StructureShape structureShape
   ) {
     return (
-      !isInputOrOutputStructure(structureShape) &&
+//      !isInputOrOutputStructure(structureShape) &&
       !structureShape.hasTrait(ErrorTrait.class) &&
       !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
       !structureShape.hasTrait(ReferenceTrait.class) &&
@@ -1217,8 +1218,11 @@ public abstract class AbstractRustShimGenerator {
   protected String qualifiedRustStructureType(
     final StructureShape structureShape
   ) {
+    if (structureShape.getId().getName().equals("AlgorithmSuiteInfo")) {
+      int bp = 42;
+    }
     return "%s::%s".formatted(
-        getRustTypesModuleName(),
+        mergedGenerator.generatorForShape(structureShape).getRustTypesModuleName(),
         rustStructureName(structureShape)
       );
   }
@@ -1319,8 +1323,8 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String qualifiedRustEnumType(final EnumShape enumShape) {
-    return "%s::types::%s".formatted(
-        topLevelNameForShape(enumShape),
+    return "%s::%s".formatted(
+        mergedGenerator.generatorForShape(enumShape).getRustTypesModuleName(),
         rustEnumName(enumShape)
       );
   }
@@ -1462,10 +1466,6 @@ public abstract class AbstractRustShimGenerator {
       // other simple shapes
       case TIMESTAMP -> "::aws_smithy_types::DateTime";
       // aggregates
-      case STRUCTURE -> {
-        final StructureShape structureShape = (StructureShape) shape;
-        yield qualifiedRustStructureType(structureShape);
-      }
       case LIST -> {
         final ListShape listShape = (ListShape) shape;
         final String memberType = rustTypeForShape(
@@ -1486,6 +1486,7 @@ public abstract class AbstractRustShimGenerator {
             valueType
           );
       }
+      case STRUCTURE -> qualifiedRustStructureType((StructureShape) shape);
       case UNION -> qualifiedRustUnionName((UnionShape) shape);
       case RESOURCE -> qualifiedRustResourceType((ResourceShape) shape);
       case SERVICE -> qualifiedRustServiceType((ServiceShape) shape);

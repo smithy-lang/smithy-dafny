@@ -212,9 +212,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Map<String, String> variables = serviceVariables();
     variables.put(
       "operationModules",
-      streamAllBoundOperationShapes()
-        .map(boundOperationShape ->
-          "mod %s;".formatted(toSnakeCase(operationName(boundOperationShape.operationShape())))
+      service.getOperations()
+        .stream()
+        .map(id -> model.expectShape(id, OperationShape.class))
+        .map(operationShape ->
+          "mod %s;".formatted(toSnakeCase(operationName(operationShape)))
         )
         .collect(Collectors.joining("\n\n"))
     );
@@ -369,9 +371,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         IOUtils.evalTemplate(
           """
           mod _$snakeCaseStructureName:L;
-          pub use crate::types::_$snakeCaseStructureName:L::$rustStructureName:L;
+          pub use $rustTypesModuleName:L::_$snakeCaseStructureName:L::$rustStructureName:L;
           """,
-          structureVariables(structureShape)
+          MapUtils.merge(variables, structureVariables(structureShape))
         )
       )
       .collect(Collectors.joining("\n"));
@@ -384,9 +386,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         IOUtils.evalTemplate(
           """
           mod _$snakeCaseEnumName:L;
-          pub use crate::types::_$snakeCaseEnumName:L::$rustEnumName:L;
+          pub use $rustTypesModuleName:L::_$snakeCaseEnumName:L::$rustEnumName:L;
           """,
-          enumVariables(enumShape)
+            MapUtils.merge(variables, enumVariables(enumShape))
         )
       )
       .collect(Collectors.joining("\n"));
@@ -401,9 +403,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         IOUtils.evalTemplate(
           """
           mod _$snakeCaseUnionName:L;
-          pub use crate::types::_$snakeCaseUnionName:L::$rustUnionName:L;
+          pub use $rustTypesModuleName:L::_$snakeCaseUnionName:L::$rustUnionName:L;
           """,
-          unionVariables(unionShape)
+            MapUtils.merge(variables, unionVariables(unionShape))
         )
       )
       .collect(Collectors.joining("\n"));
@@ -1586,6 +1588,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   private HashMap<String, String> structureMemberVariables(
     final MemberShape memberShape
   ) {
+
     final HashMap<String, String> variables = new HashMap<>();
     final String memberName = memberShape.getMemberName();
     variables.put("memberName", memberName);

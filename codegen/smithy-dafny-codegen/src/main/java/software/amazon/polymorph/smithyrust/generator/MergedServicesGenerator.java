@@ -6,6 +6,7 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -27,6 +28,11 @@ public class MergedServicesGenerator {
     this.model = model;
     this.namespaces = namespaces;
     this.mainService = mainService;
+
+    // Prepopulate generators
+    for (String namespace : namespaces) {
+      generatorForNamespace(model, namespace, namespaces);
+    }
   }
 
   public boolean isMainService(ServiceShape serviceShape) {
@@ -116,5 +122,9 @@ public class MergedServicesGenerator {
       Path.of("src", "deps.rs"),
       content
     );
+  }
+
+  public AbstractRustShimGenerator generatorForShape(final Shape shape) {
+    return generatorsByNamespace.get(shape.getId().getNamespace());
   }
 }
