@@ -1688,15 +1688,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   protected HashMap<String, String> serviceVariables() {
     final HashMap<String, String> variables = super.serviceVariables();
 
-    final LocalServiceTrait localServiceTrait = localServiceTrait(service);
-    final String sdkId = localServiceTrait.getSdkId();
-
     final StructureShape configShape = ModelUtils.getConfigShape(
       model,
       service
     );
     final String configName = configShape.getId().getName(service);
-    variables.put("sdkId", sdkId);
     variables.put("configName", configName);
     variables.put("snakeCaseConfigName", toSnakeCase(configName));
     variables.put(
@@ -1705,6 +1701,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
 
     return variables;
+  }
+
+  protected String getSdkId() {
+    final LocalServiceTrait localServiceTrait = localServiceTrait(service);
+    return localServiceTrait.getSdkId();
   }
 
   @Override
@@ -1781,7 +1782,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put("rustErrorName", rustErrorName);
     variables.put(
       "rustDependentRootModuleName",
-      getRustRootModuleName(dependentServiceShape.getId().getNamespace())
+      mergedGenerator.generatorForShape(dependentServiceShape).getRustRootModuleName(dependentServiceShape.getId().getNamespace())
     );
     variables.put(
       "qualifiedRustErrorVariant",

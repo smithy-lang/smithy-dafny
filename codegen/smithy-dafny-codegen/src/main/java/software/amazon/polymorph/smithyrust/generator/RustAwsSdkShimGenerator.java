@@ -84,7 +84,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         use $rustRootModuleName:L::conversions;
 
         pub struct Client {
-            inner: $sdkCrate:L::Client
+            pub inner: $sdkCrate:L::Client
         }
 
         /// A runtime for executing operations on the asynchronous client in a blocking manner.
@@ -584,7 +584,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     return "%s::types".formatted(getSdkCrate());
   }
 
-  private String getSdkId() {
+  @Override
+  protected String getSdkId() {
     return service.expectTrait(ServiceTrait.class).getSdkId();
   }
 
@@ -595,10 +596,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   @Override
   protected HashMap<String, String> serviceVariables() {
     final HashMap<String, String> variables = super.serviceVariables();
-    final String sdkId = getSdkId();
-    variables.put("sdkId", sdkId);
     variables.put("sdkCrate", getSdkCrate());
-    variables.put("clientName", "%sClient".formatted(sdkId));
+    variables.put("clientName", "%sClient".formatted(getSdkId()));
     return variables;
   }
 

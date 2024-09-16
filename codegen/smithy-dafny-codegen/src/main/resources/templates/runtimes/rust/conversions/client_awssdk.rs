@@ -6,7 +6,7 @@
 pub fn to_dafny(
     value: &$rustClientType:L,
 ) ->
-  ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient>
+  ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$sdkId:LClient>
 {
     value.dafny_client.clone()
 }
@@ -14,8 +14,8 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::dafny_runtime::Object<
-      dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient
+      dyn crate::r#$dafnyTypesModuleName:L::I$sdkId:LClient
     >,
 ) -> $rustClientType:L {
-  $rustClientType:L { dafny_client: dafny_value }
+  $rustClientType:L { inner: dafny_value }
 }

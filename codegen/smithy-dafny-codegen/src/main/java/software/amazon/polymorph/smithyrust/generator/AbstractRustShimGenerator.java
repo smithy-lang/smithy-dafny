@@ -1025,6 +1025,7 @@ public abstract class AbstractRustShimGenerator {
   protected HashMap<String, String> serviceVariables() {
     final String namespace = service.getId().getNamespace();
     final HashMap<String, String> variables = new HashMap<>();
+    variables.put("sdkId", getSdkId());
     variables.put("serviceName", service.getId().getName(service));
     variables.put("rustClientType", qualifiedRustServiceType(service));
     variables.put("dafnyModuleName", getDafnyModuleName(namespace));
@@ -1587,7 +1588,7 @@ public abstract class AbstractRustShimGenerator {
         yield "::dafny_runtime::Object<dyn crate::r#" +
         getDafnyTypesModuleName(shape.getId().getNamespace()) +
         "::I" +
-        service.getId().getName(service) +
+        mergedGenerator.generatorForShape(service).getSdkId() +
         "Client>";
       }
       default -> throw new UnsupportedOperationException(
@@ -1597,4 +1598,6 @@ public abstract class AbstractRustShimGenerator {
   }
 
   public abstract RustFile depTopLevelModule();
+
+  protected abstract String getSdkId();
 }
