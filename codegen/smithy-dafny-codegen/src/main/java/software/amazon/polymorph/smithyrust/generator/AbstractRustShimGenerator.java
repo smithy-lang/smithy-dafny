@@ -128,7 +128,6 @@ public abstract class AbstractRustShimGenerator {
     StructureShape structureShape
   ) {
     return (
-      !isInputOrOutputStructure(structureShape) &&
       !structureShape.hasTrait(ErrorTrait.class) &&
       !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
       !structureShape.hasTrait(ReferenceTrait.class) &&

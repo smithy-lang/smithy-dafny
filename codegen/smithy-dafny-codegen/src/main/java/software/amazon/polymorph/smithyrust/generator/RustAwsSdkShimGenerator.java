@@ -236,6 +236,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.toSet());
   }
 
+  @Override
+  protected boolean shouldGenerateStructForStructure(StructureShape structureShape) {
+    return super.shouldGenerateStructForStructure(structureShape) &&
+      !isInputOrOutputStructure(structureShape);
+  }
+
   protected Set<RustFile> allEnumConversionModules() {
     return ModelUtils.streamEnumShapes(model, service.getId().getNamespace())
       .map(this::enumConversionModule)
