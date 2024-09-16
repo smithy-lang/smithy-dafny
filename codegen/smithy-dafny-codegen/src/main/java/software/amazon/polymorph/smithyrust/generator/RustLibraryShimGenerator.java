@@ -189,7 +189,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return (
       super.shouldGenerateStructForStructure(structureShape) &&
       // don't generate a structure for the config structures
-      !localServiceTrait(service).getConfigId().equals(structureShape.getId())
+      !localServiceTrait(service).getConfigId().equals(structureShape.getId()) &&
+      !structureShape.hasTrait(PositionalTrait.class)
     );
   }
 

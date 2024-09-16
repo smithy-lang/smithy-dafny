@@ -1225,9 +1225,6 @@ public abstract class AbstractRustShimGenerator {
   protected String qualifiedRustStructureType(
     final StructureShape structureShape
   ) {
-    if (structureShape.getId().getName().equals("AlgorithmSuiteInfo")) {
-      int bp = 42;
-    }
     return "%s::%s".formatted(
         mergedGenerator.generatorForShape(structureShape).getRustTypesModuleName(),
         rustStructureName(structureShape)
