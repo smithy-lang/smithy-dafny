@@ -311,8 +311,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final Shape targetShape = model.expectShape(member.getTarget());
     return (
       super.isRustFieldRequired(parent, member) ||
-      (operationIndex.isOutputStructure(parent) &&
-        (targetShape.isIntegerShape() || targetShape.isLongShape() || targetShape.isListShape())) ||
+//      (operationIndex.isOutputStructure(parent) &&
+//        (targetShape.isIntegerShape() || targetShape.isLongShape() || targetShape.isListShape())) ||
       (!operationIndex.isInputStructure(parent) && targetShape.isBooleanShape() && targetShape.hasTrait(DefaultTrait.class))
     );
   }
