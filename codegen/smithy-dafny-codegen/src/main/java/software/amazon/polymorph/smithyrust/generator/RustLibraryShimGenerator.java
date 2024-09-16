@@ -782,6 +782,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           )
         );
       }
+
+      variables.put("innerInput", inputShape.hasTrait(UnitTypeTrait.class) ? "" : "&inner_input");
+
       variables.put(
         "operationSendBody",
         IOUtils.evalTemplate(
@@ -1599,9 +1602,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       operationVariables(serviceShape, operationShape)
     );
 
-    variables.put("selfParameter",
-      operationShape.hasTrait(ReadonlyTrait.class) ? "&self" : "&mut self");
-
     StructureShape inputShape = operationIndex
       .getInputShape(operationShape)
       .get();
@@ -1655,6 +1655,16 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       );
     }
     variables.put("operationOutputDafnyType", dafnyTypeForShape(outputShape));
+
+    final String selfParameter = operationShape.hasTrait(ReadonlyTrait.class) ? "&self," : "&mut self,";
+    if (inputShape.hasTrait(UnitTypeTrait.class)) {
+      variables.put("operationInputParams", selfParameter);
+    } else {
+      variables.put("operationInputParams", selfParameter + "\n        input: &" + variables.get("operationInputDafnyType") + ",");
+    }
+
+
+
 
     return IOUtils.evalTemplate(
       getClass(),
@@ -1856,10 +1866,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             valueToDafny =
               """
-              match %s {
+              ::std::rc::Rc::new(match %s {
                 Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
                 None => crate::_Wrappers_Compile::Option::None {},
-              }""".formatted(rustValue, rustToDafny.formatted("s"));
+              })""".formatted(rustValue, rustToDafny.formatted("s"));
             if (!isDafnyOption) {
               valueToDafny = "(%s).Extract()".formatted(valueToDafny);
             }
@@ -1988,23 +1998,33 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       }
       case BLOB -> {
         if (isDafnyOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::oblob_to_dafny(&%s)".formatted(
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::oblob_to_dafny(&%s)".formatted(
+                  rustValue
+                )
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::oblob_to_dafny(Some(&%s))".formatted(
                 rustValue
               )
-          );
-        } else if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::oblob_to_dafny(&%s).Extract()".formatted(
-                rustValue
-              )
-          );
+            );
+          }
         } else {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::blob_to_dafny(&%s)".formatted(
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::blob_to_dafny(&%s.unwrap())".formatted(
                 rustValue
               )
-          );
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::blob_to_dafny(&%s)".formatted(
+                rustValue
+              )
+            );
+          }
         }
       }
       case LIST -> {

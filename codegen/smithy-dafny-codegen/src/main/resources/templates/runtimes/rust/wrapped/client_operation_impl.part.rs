@@ -1,6 +1,5 @@
     fn $operationName:L(
-        $selfParameter:L,
-        input: &$operationInputDafnyType:L,
+        $operationInputParams:L
     ) -> std::rc::Rc<
         crate::r#_Wrappers_Compile::Result<
             $operationOutputDafnyType:L,
