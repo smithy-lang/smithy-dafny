@@ -1,6 +1,6 @@
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: $rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:LRef,
+    value: &$rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:LRef,
 ) -> ::dafny_runtime::Object<
   dyn crate::r#$dafnyTypesModuleName:L::$dafnyResourceName:L,
 > {

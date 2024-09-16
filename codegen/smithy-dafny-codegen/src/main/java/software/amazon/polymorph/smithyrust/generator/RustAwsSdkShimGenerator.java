@@ -83,6 +83,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         use std::sync::LazyLock;
         use $rustRootModuleName:L::conversions;
 
+        #[derive(::std::clone::Clone, ::std::fmt::Debug, ::std::cmp::PartialEq)]
         pub struct Client {
             pub inner: $sdkCrate:L::Client
         }

@@ -1,10 +1,10 @@
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: $qualifiedRustStructureType:L,
+    value: &$qualifiedRustStructureType:L,
 ) -> ::std::rc::Rc<
     crate::r#$dafnyTypesModuleName:L::$structureName:L,
 > {
-    ::std::rc::Rc::new(to_dafny_plain(value))
+    ::std::rc::Rc::new(to_dafny_plain(value.clone()))
 }
 
 #[allow(dead_code)]
