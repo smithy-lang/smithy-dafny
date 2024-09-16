@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -225,7 +226,7 @@ public class ValidationGenerator {
                             validationFuncMap.put(memberShape, unionValidation.toString());
                         }
                     }
-                    else if (currentShape.isStructureShape()){
+                    else if (currentShape.isStructureShape() && !currentShape.hasTrait(ReferenceTrait.class)){
                         validationCode.append(CHECK_AND_RETURN_ERROR.formatted(dataSource.concat(".Validate()")));
                     }
     }
@@ -382,7 +383,7 @@ public class ValidationGenerator {
         if (!(memberShape.hasTrait(RequiredTrait.class) || targetShape.hasTrait(RequiredTrait.class))) {
             return requiredCheck;
         }
-        if( memberSymbol.getProperty(POINTABLE).isPresent() && (boolean) memberSymbol.getProperty(POINTABLE).get()) 
+        if( GoPointableIndex.of(model).isPointable(memberShape) ) 
             requiredCheck.append("""
                     if ( %s == nil ) {
                         return fmt.Errorf(\"%s is required but has a nil value.\")
