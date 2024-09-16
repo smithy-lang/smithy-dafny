@@ -87,6 +87,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         pub struct Client {
             pub inner: $sdkCrate:L::Client
         }
+        
+        impl ::std::cmp::PartialEq for Client {
+          fn eq(&self, other: &Self) -> bool {
+            false
+          }
+        }
 
         /// A runtime for executing operations on the asynchronous client in a blocking manner.
         /// Necessary because Dafny only generates synchronous code.

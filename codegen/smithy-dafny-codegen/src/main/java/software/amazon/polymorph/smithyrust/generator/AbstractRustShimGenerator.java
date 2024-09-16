@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -987,7 +986,7 @@ public abstract class AbstractRustShimGenerator {
           IOUtils.evalTemplate(
             """
             $qualifiedRustUnionName:L::$rustUnionMemberName:L(x) =>
-                crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
+                crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
                     $dafnyUnionMemberName:L: $innerToDafny:L,
                 },
             """,
@@ -1003,7 +1002,7 @@ public abstract class AbstractRustShimGenerator {
         .map(memberVariables ->
           IOUtils.evalTemplate(
             """
-            crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
+            crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
                 $dafnyUnionMemberName:L: x @ _,
             } => $qualifiedRustUnionName:L::$rustUnionMemberName:L($innerFromDafny:L),
             """,
@@ -1418,7 +1417,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String dafnyUnionMemberName(final MemberShape memberShape) {
-    return unionMemberName(memberShape);
+    return DafnyNameResolver.escapeName(unionMemberName(memberShape));
   }
 
   /**
