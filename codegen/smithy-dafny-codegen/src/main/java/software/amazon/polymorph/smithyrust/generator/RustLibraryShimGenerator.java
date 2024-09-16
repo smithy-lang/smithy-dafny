@@ -537,11 +537,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables
     );
 
-    final Path path = Path.of(
-      "src",
-      "types",
-      "_%s.rs".formatted(toSnakeCase(enumName(enumShape)))
-    );
+    final Path path = rootPathForShape(service)
+      .resolve("types")
+      .resolve("_%s.rs".formatted(toSnakeCase(enumName(enumShape))));
     return new RustFile(path, TokenTree.of(content));
   }
 
@@ -612,11 +610,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/types/union.rs",
       variables
     );
-    final Path path = Path.of(
-      "src",
-      "types",
-      "_%s.rs".formatted(toSnakeCase(unionName(unionShape)))
-    );
+    final Path path = rootPathForShape(service)
+      .resolve("types")
+      .resolve("_%s.rs".formatted(toSnakeCase(unionName(unionShape))));
     return new RustFile(path, TokenTree.of(content));
   }
 
@@ -665,11 +661,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/types/resource.rs",
       variables
     );
-    final Path path = Path.of(
-      "src",
-      "types",
-      "%s.rs".formatted(toSnakeCase(resourceName(resourceShape)))
-    );
+    final Path path = rootPathForShape(service)
+      .resolve("types")
+      .resolve("%s.rs".formatted(toSnakeCase(resourceName(resourceShape))));
     return new RustFile(path, TokenTree.of(content));
   }
 
@@ -847,11 +841,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/types/structure.rs",
       variables
     );
-    final Path path = Path.of(
-      "src",
-      "types",
-      "_%s.rs".formatted(toSnakeCase(structureName(structureShape)))
-    );
+    final Path path = rootPathForShape(service)
+      .resolve("types")
+      .resolve("_%s.rs".formatted(toSnakeCase(structureName(structureShape))));
     return new RustFile(path, TokenTree.of(content));
   }
 
@@ -1189,11 +1181,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables
     );
 
-    final Path path = Path.of(
-      "src",
-      "conversions",
-      "%s.rs".formatted(toSnakeCase(structureName(structureShape)))
-    );
+    final Path path = rootPathForShape(service)
+      .resolve("conversions")
+      .resolve("%s.rs".formatted(toSnakeCase(structureName(structureShape))));
     return new RustFile(path, TokenTree.of(content));
   }
 
@@ -1231,11 +1221,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "runtimes/rust/conversions/resource.rs",
       variables
     );
-    final Path path = Path.of(
-      "src",
-      "conversions",
-      "%s.rs".formatted(toSnakeCase(resourceName(resourceShape)))
-    );
+    final Path path = rootPathForShape(service)
+      .resolve("conversions")
+      .resolve("%s.rs".formatted(toSnakeCase(resourceName(resourceShape))));
     return new RustFile(path, TokenTree.of(content));
   }
 
