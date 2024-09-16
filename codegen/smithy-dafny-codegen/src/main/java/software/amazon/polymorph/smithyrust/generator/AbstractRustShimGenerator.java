@@ -641,13 +641,14 @@ public abstract class AbstractRustShimGenerator {
         Shape memberShape = model.expectShape(
           listShape.getMember().getTarget()
         );
+        String dafnyElementType = dafnyTypeForShape(memberShape);
         if (!isDafnyOption) {
           TokenTree result = TokenTree.of(
             """
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(%s,
-                |e| %s,
+                |e: &%s| %s,
             )
-            """.formatted(dafnyValue, fromDafny(memberShape, "e", false, false))
+            """.formatted(dafnyValue, dafnyElementType, fromDafny(memberShape, "e", false, false))
           );
           if (isRustOption) {
             result =
@@ -661,12 +662,12 @@ public abstract class AbstractRustShimGenerator {
                 crate::r#_Wrappers_Compile::Option::Some { value } =>
                     Some(
                         ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                            |e| %s,
+                            |e: &%s| %s,
                         )
                     ),
                 _ => None
             }
-            """.formatted(dafnyValue, fromDafny(memberShape, "e", false, false))
+            """.formatted(dafnyValue, dafnyElementType, fromDafny(memberShape, "e", false, false))
           );
         }
       }
@@ -678,12 +679,14 @@ public abstract class AbstractRustShimGenerator {
           TokenTree result = TokenTree.of(
             """
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&%s,
-                |k| %s,
-                |v| %s,
+                |k: &%s| %s,
+                |v: &%s| %s,
             )
             """.formatted(
                 dafnyValue,
+                dafnyTypeForShape(keyShape),
                 fromDafny(keyShape, "k", false, false),
+                dafnyTypeForShape(valueShape),
                 fromDafny(valueShape, "v", false, false)
               )
           );
@@ -699,15 +702,17 @@ public abstract class AbstractRustShimGenerator {
                 crate::r#_Wrappers_Compile::Option::Some { value } =>
                     Some(
                         ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
-                            |k| %s,
-                            |v| %s,
+                            |k: &%s| %s,
+                            |v: &%s| %s,
                         )
                     ),
                 _ => None
             }
             """.formatted(
                 dafnyValue,
+                dafnyTypeForShape(keyShape),
                 fromDafny(keyShape, "k", false, false),
+                dafnyTypeForShape(valueShape),
                 fromDafny(valueShape, "v", false, false)
               )
           );
@@ -1534,9 +1539,13 @@ public abstract class AbstractRustShimGenerator {
       case STRING -> {
         //noinspection deprecation
         if (shape.hasTrait(EnumTrait.class)) {
-          yield dafnyTypeForShape(
-            ModelUtils.stringToEnumShape(shape.asStringShape().orElseThrow())
-          );
+          EnumShape enumShape = ModelUtils.stringToEnumShape(shape.asStringShape().orElseThrow());
+          yield getDafnyTypesModuleName(shape.getId().getNamespace()) +
+            "::" +
+            enumName(enumShape);
+        }
+        if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+          yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<u8>";
         }
         yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>";
       }

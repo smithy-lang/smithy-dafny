@@ -695,24 +695,24 @@ public class CodegenEngine {
     // Note this has no effect if we're being run from the Smithy build plugin,
     // since outputDir will be something like `build/smithyprojections/...`
     // and therefore not have any existing content.
-    Path outputSrcDir = outputDir.resolve("src");
-    Path implementationFromDafnyPath = outputSrcDir.resolve(
-      "implementation_from_dafny.rs"
-    );
-    Path tmpPath = null;
-    try {
-      if (Files.exists(implementationFromDafnyPath)) {
-        tmpPath = outputDir.resolve("implementation_from_dafny.rs");
-        Files.move(implementationFromDafnyPath, tmpPath);
-      }
-      software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
-      outputSrcDir.toFile().mkdirs();
-      if (tmpPath != null) {
-        Files.move(tmpPath, implementationFromDafnyPath);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+//    Path outputSrcDir = outputDir.resolve("src");
+//    Path implementationFromDafnyPath = outputSrcDir.resolve(
+//      "implementation_from_dafny.rs"
+//    );
+//    Path tmpPath = null;
+//    try {
+//      if (Files.exists(implementationFromDafnyPath)) {
+//        tmpPath = outputDir.resolve("implementation_from_dafny.rs");
+//        Files.move(implementationFromDafnyPath, tmpPath);
+//      }
+//      software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
+//      outputSrcDir.toFile().mkdirs();
+//      if (tmpPath != null) {
+//        Files.move(tmpPath, implementationFromDafnyPath);
+//      }
+//    } catch (IOException e) {
+//      throw new RuntimeException(e);
+//    }
 
     // TODO: Can't get makefile working yet
     final var namespacesToGenerate = model.getServiceShapes().stream()
