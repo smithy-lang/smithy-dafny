@@ -9,13 +9,18 @@ namespace simple.aggregate
 service SimpleAggregate {
   version: "2021-11-01",
   resources: [],
-  operations: [ GetAggregate ],
+  operations: [ GetAggregate, GetAggregateKnownValueTest ],
   errors: [],
 }
 
 structure SimpleAggregateConfig {}
 
 operation GetAggregate {
+  input: GetAggregateInput,
+  output: GetAggregateOutput,
+}
+
+operation GetAggregateKnownValueTest {
   input: GetAggregateInput,
   output: GetAggregateOutput,
 }
@@ -31,11 +36,7 @@ structure GetAggregateOutput {
 union RecursiveUnion {
   IntegerValue: Integer,
   StringValue: String,
-  ListValue: ListWithRecursion
-}
-
-list ListWithRecursion {
-  member: StructuredDataMap
+  DataMap: StructuredDataMap
 }
 
 map StructuredDataMap {
