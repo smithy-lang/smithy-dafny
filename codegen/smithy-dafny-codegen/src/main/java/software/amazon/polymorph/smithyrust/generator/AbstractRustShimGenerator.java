@@ -1147,14 +1147,14 @@ public abstract class AbstractRustShimGenerator {
       );
       variables.put(
         "operationDafnyInputType",
-        rustTypeForShape(resolvedInputShape)
+        dafnyTypeForShape(resolvedInputShape)
       );
     } else {
       Map<String, String> inputShapeVariables = structureVariables(inputShape);
       variables.put(
         "operationDafnyInputType",
         evalTemplate(
-          "crate::$dafnyTypesModuleName:L::$structureName:L",
+          "&::std::rc::Rc<crate::$dafnyTypesModuleName:L::$structureName:L>",
           inputShapeVariables
         )
       );
@@ -1180,7 +1180,7 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationDafnyOutputType",
         evalTemplate(
-          "crate::r#$dafnyTypesModuleName:L::$structureName:L",
+          "::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>",
           outputShapeVariables
         )
       );

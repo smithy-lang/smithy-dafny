@@ -1,8 +1,6 @@
 fn r#_$operationName:L_k(
     &mut self,
-    input: &::std::rc::Rc<
-    $operationDafnyInputType:L,
-    >,
+    input: $operationDafnyInputType:L,
 ) -> ::std::rc::Rc<
     crate::r#_Wrappers_Compile::Result<
         $operationDafnyOutputType:L,
