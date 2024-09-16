@@ -123,21 +123,18 @@ public class DafnyLocalServiceGenerator implements Runnable {
                                                                              : "*%s.%s,".formatted(SmithyNameResolver.smithyTypesNamespace(outputShape), outputShape.toShapeId().getName());
             String validationCheck = "";
             if(!inputType.equals("")) {
-                // TODO: Uncomment these
                 validationCheck = """
-                    // err := params.Validate()
-                    // if err != nil {
-                    //     opaqueErr := %s.OpaqueError{
-                    //         ErrObject: err,
-                    //     }
+                    err := params.Validate()
+                    if err != nil {
+                        opaqueErr := %s.OpaqueError{
+                            ErrObject: err,
+                        }
                 """.formatted(SmithyNameResolver.smithyTypesNamespace(inputShape));
-                // TODO: Uncomment these
                 if(outputType.equals("")) {
-                    validationCheck += "// return opaqueErr }";
+                    validationCheck += "return opaqueErr }";
                 }
-                // TODO: Uncomment these
                 else{
-                    validationCheck += "// return nil, opaqueErr }";
+                    validationCheck += "return nil, opaqueErr }";
                 }
             }
             String baseClientCall;
