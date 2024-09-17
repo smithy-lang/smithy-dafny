@@ -1645,6 +1645,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         "outputToDafny",
         toDafny(outputShape, "inner_result", false, false).toString()
       );
+    } else if (outputShape.hasTrait(UnitTypeTrait.class)) {
+      variables.put(
+        "outputToDafny",
+        "()"
+      );
     } else {
       variables.put(
         "outputToDafny",
@@ -1662,9 +1667,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     } else {
       variables.put("operationInputParams", selfParameter + "\n        input: &" + variables.get("operationInputDafnyType") + ",");
     }
-
-
-
 
     return IOUtils.evalTemplate(
       getClass(),
@@ -1687,15 +1689,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private LocalServiceTrait localServiceTrait(final ServiceShape serviceShape) {
     return serviceShape.expectTrait(LocalServiceTrait.class);
-  }
-
-  protected ServiceShape serviceForShape(final Model model, final Shape shape) {
-    if (shape.isServiceShape()) {
-      return (ServiceShape) shape;
-    } else {
-      final String namespace = shape.getId().getNamespace();
-      return ModelUtils.serviceFromNamespace(model, namespace);
-    }
   }
 
   @Override
@@ -1746,39 +1739,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     variables.put(
       "fieldType",
       rustTypeForShape(model.expectShape(memberShape.getTarget()))
-    );
-    return variables;
-  }
-
-  protected String qualifiedRustServiceErrorType() {
-    return "%s::error::Error".formatted(
-        getRustTypesModuleName()
-      );
-  }
-
-  protected String errorName(final StructureShape errorShape) {
-    return errorShape.getId().getName(serviceForShape(model, errorShape));
-  }
-
-  protected String rustErrorName(final StructureShape errorShape) {
-    return toPascalCase(errorName(errorShape));
-  }
-
-  protected HashMap<String, String> errorVariables(
-    final StructureShape errorShape
-  ) {
-    final HashMap<String, String> variables = new HashMap<>();
-    final String errorName = errorName(errorShape);
-    final String rustErrorName = rustErrorName(errorShape);
-    variables.put("errorName", errorName);
-    variables.put("snakeCaseErrorName", toSnakeCase(errorName));
-    variables.put("rustErrorName", rustErrorName);
-    variables.put(
-      "qualifiedRustErrorVariant",
-      "%s::%s".formatted(
-          qualifiedRustServiceErrorType(),
-          rustErrorName
-        )
     );
     return variables;
   }

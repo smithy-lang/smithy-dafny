@@ -1438,6 +1438,40 @@ public abstract class AbstractRustShimGenerator {
     return variables;
   }
 
+
+  protected String qualifiedRustServiceErrorType() {
+    return "%s::error::Error".formatted(
+      getRustTypesModuleName()
+    );
+  }
+
+  protected String errorName(final StructureShape errorShape) {
+    return errorShape.getId().getName(serviceForShape(model, errorShape));
+  }
+
+  protected String rustErrorName(final StructureShape errorShape) {
+    return toPascalCase(errorName(errorShape));
+  }
+
+  protected HashMap<String, String> errorVariables(
+    final StructureShape errorShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String errorName = errorName(errorShape);
+    final String rustErrorName = rustErrorName(errorShape);
+    variables.put("errorName", errorName);
+    variables.put("snakeCaseErrorName", toSnakeCase(errorName));
+    variables.put("rustErrorName", rustErrorName);
+    variables.put(
+      "qualifiedRustErrorVariant",
+      "%s::%s".formatted(
+        qualifiedRustServiceErrorType(),
+        rustErrorName
+      )
+    );
+    return variables;
+  }
+
   protected String rustTypeForShape(final Shape originalShape) {
     // First handle indirection like @reference
     final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
@@ -1539,18 +1573,20 @@ public abstract class AbstractRustShimGenerator {
         //noinspection deprecation
         if (shape.hasTrait(EnumTrait.class)) {
           EnumShape enumShape = ModelUtils.stringToEnumShape(shape.asStringShape().orElseThrow());
-          yield getDafnyTypesModuleName(shape.getId().getNamespace()) +
+          yield "::std::rc::Rc<crate::" + getDafnyTypesModuleName(shape.getId().getNamespace()) +
             "::" +
-            enumName(enumShape);
+            enumName(enumShape) +
+            ">";
         }
         if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
           yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<u8>";
         }
         yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>";
       }
-      case ENUM -> getDafnyTypesModuleName(shape.getId().getNamespace()) +
+      case ENUM -> "::std::rc::Rc<crate::" + getDafnyTypesModuleName(shape.getId().getNamespace()) +
       "::" +
-      enumName((EnumShape) shape);
+      enumName((EnumShape) shape) +
+      ">";
       // other simple shapes
       case TIMESTAMP -> "::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>";
       // aggregates
@@ -1608,4 +1644,13 @@ public abstract class AbstractRustShimGenerator {
   public abstract RustFile depTopLevelModule();
 
   protected abstract String getSdkId();
+
+  protected ServiceShape serviceForShape(final Model model, final Shape shape) {
+    if (shape.isServiceShape()) {
+      return (ServiceShape) shape;
+    } else {
+      final String namespace = shape.getId().getNamespace();
+      return ModelUtils.serviceFromNamespace(model, namespace);
+    }
+  }
 }
