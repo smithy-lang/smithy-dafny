@@ -9,6 +9,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.SimpleShape;
+import software.amazon.smithy.utils.CaseUtils;
 
 public class SmithyNameResolver {
 
@@ -38,6 +39,13 @@ public class SmithyNameResolver {
   }
 
   public static String smithyTypesNamespace(final Shape shape) {
+    if (shape.getId().getName().equals("TrentService") || shape.getId().getName().equals("DynamoDB_20120810"))  {
+      return CaseUtils.toPascalCase(shape
+      .toShapeId()
+      .getNamespace()
+      .replace(DOT, " "))
+      .concat("Types");
+    }
     return shape
       .toShapeId()
       .getNamespace()
