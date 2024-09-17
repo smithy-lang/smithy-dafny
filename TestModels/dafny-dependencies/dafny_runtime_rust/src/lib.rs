@@ -87,7 +87,7 @@ pub mod dafny_runtime_conversions {
         pub fn boxed_struct_to_dafny_class<T>(t: Box<T>) -> DafnyClass<T> {
             struct_to_dafny_class(*t)
         }
-        pub unsafe fn rc_struct_to_dafny_class<T>(t: ::std::rc::Rc<T>) -> DafnyClass<T> {
+        pub unsafe fn rc_struct_to_dafny_class<T: ?Sized>(t: ::std::rc::Rc<T>) -> DafnyClass<T> {
             crate::Object::from_rc(t)
         }
         // Conversions to and from Dafny arrays. They all take ownership
