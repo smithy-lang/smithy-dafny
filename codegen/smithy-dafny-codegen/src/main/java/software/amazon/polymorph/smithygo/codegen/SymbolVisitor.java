@@ -270,9 +270,13 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
       settings.getService(),
       ServiceShape.class
     );
-    return StringUtils.capitalize(
-      removeLeadingInvalidIdentCharacters(shape.getId().getName(serviceShape))
-    );
+    return switch (shape.getId().getName(serviceShape)) {
+      case "TrentService" -> "KMSClient";
+      case "DynamoDB_20120810" -> "DynamoDBClient";
+      default -> StringUtils.capitalize(
+        removeLeadingInvalidIdentCharacters(shape.getId().getName(serviceShape))
+      );
+    };
   }
 
   private String getDefaultMemberName(MemberShape shape) {
@@ -573,21 +577,8 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     if (shape.hasTrait(ReferenceTrait.class)) {
       var referredShape = model.expectShape(
         shape.expectTrait(ReferenceTrait.class).getReferentId()
-      );
-      var isService = shape.expectTrait(ReferenceTrait.class).isService();
-      if (isService) {
-        builder.putProperty(
-          "Referred",
-          symbolBuilderFor(
-            referredShape,
-            "Client",
-            SmithyNameResolver.shapeNamespace(referredShape)
-          )
-            .putProperty(SymbolUtils.POINTABLE, true)
-            .build()
         );
-      } else {
-        builder.putProperty(
+      builder.putProperty(
           "Referred",
           symbolBuilderFor(
             referredShape,
@@ -596,7 +587,29 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             .putProperty(SymbolUtils.POINTABLE, false)
             .build()
         );
-      }
+      // var isService = shape.expectTrait(ReferenceTrait.class).isService();
+      // if (isService) {
+      //   builder.putProperty(
+      //     "Referred",
+      //     symbolBuilderFor(
+      //       referredShape,
+      //       "Client",
+      //       SmithyNameResolver.shapeNamespace(referredShape)
+      //     )
+      //       .putProperty(SymbolUtils.POINTABLE, true)
+      //       .build()
+      //   );
+      // } else {
+      //   builder.putProperty(
+      //     "Referred",
+      //     symbolBuilderFor(
+      //       referredShape,
+      //       "I".concat(getDefaultShapeName(referredShape))
+      //     )
+      //       .putProperty(SymbolUtils.POINTABLE, false)
+      //       .build()
+      //   );
+      // }
     }
 
     return builder.build();
