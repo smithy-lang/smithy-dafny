@@ -419,6 +419,13 @@ public class CodegenCli {
           .hasArgs()
           .valueSeparator(',')
           .build()
+      )
+      .addOption(
+            Option
+              .builder()
+              .longOpt("local-service-test")
+              .desc("<optional> generate Dafny that tests a local service")
+              .build()
       );
   }
 
