@@ -65,4 +65,6 @@ GO_DEPENDENCY_MODULE_NAMES := \
 GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService"
 
 TRANSLATION_RECORD_GO := \
-    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	aws-sdks/kms/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	aws-sdks/ddb/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
