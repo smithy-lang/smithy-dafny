@@ -1043,19 +1043,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  public RustFile depTopLevelModule() {
-    final String rustModule = RustUtils.rustModuleForSmithyNamespace(
-      service.getId().getNamespace()
-    );
-    final TokenTree content = TokenTree.of(
+  public TokenTree topLevelModuleDeclarations() {
+    return TokenTree.of(
     """
     pub mod client;
     pub mod conversions;
     pub mod types;
     """);
-    return new RustFile(
-      Path.of("src", "deps", rustModule + ".rs"),
-      content
-    );
   }
 }

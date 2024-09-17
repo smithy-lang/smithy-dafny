@@ -45,12 +45,16 @@ import software.amazon.smithy.model.traits.UnitTypeTrait;
  */
 public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
+  private final boolean generateWrappedClient;
+
   public RustLibraryShimGenerator(
     final MergedServicesGenerator mergedGenerator,
     final Model model,
-    final ServiceShape service
+    final ServiceShape service,
+    final boolean generateWrappedClient
   ) {
     super(mergedGenerator, model, service);
+    this.generateWrappedClient = generateWrappedClient;
   }
 
   @Override
@@ -135,8 +139,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
 
     // wrapped client
-    result.add(wrappedModule());
-    result.add(wrappedClientModule());
+    if (generateWrappedClient) {
+      result.add(wrappedModule());
+      result.add(wrappedClientModule());
+    }
 
     // deps module
     result.add(depsModule());
@@ -159,6 +165,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     pub mod operation;
     pub mod conversions;
     pub mod deps;
+    """;
+
+  public static final String TOP_LEVEL_WRAPPED_CLIENT_DECL =
+    """
     #[cfg(feature = "wrapped-client")]
     pub mod wrapped;
     """;
@@ -1622,13 +1632,16 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         "inputFromDafny",
         evalTemplate(
           """
-          $rustRootModuleName:L::operation::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::$syntheticOperationInputName:L {
-            $memberName:L: $dafnyValue:L
-          }
-          """,
+            $rustRootModuleName:L::operation::$snakeCaseOperationName:L::_$snakeCaseSyntheticOperationInputName:L::$syntheticOperationInputName:L {
+              $memberName:L: $dafnyValue:L
+            }
+            """,
           variables
         )
       );
+    } else if (inputShape.hasTrait(UnitTypeTrait.class)) {
+      variables.put(
+        "inputFromDafny", "()");
     } else {
       variables.put(
         "inputFromDafny",
@@ -2181,13 +2194,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  public RustFile depTopLevelModule() {
-    final String rustModule = RustUtils.rustModuleForSmithyNamespace(
-      service.getId().getNamespace()
-    );
-    return new RustFile(
-      Path.of("src", "deps", rustModule + ".rs"),
-      TokenTree.of(RustLibraryShimGenerator.TOP_LEVEL_MOD_DECLS)
-    );
+  public TokenTree topLevelModuleDeclarations() {
+    final TokenTree common = TokenTree.of(TOP_LEVEL_MOD_DECLS);
+    return generateWrappedClient
+      ? TokenTree.of(common, TokenTree.of(TOP_LEVEL_WRAPPED_CLIENT_DECL)).lineSeparated()
+      : common;
   }
 }

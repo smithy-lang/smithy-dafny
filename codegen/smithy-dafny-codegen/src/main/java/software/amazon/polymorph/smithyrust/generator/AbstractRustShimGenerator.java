@@ -1651,7 +1651,18 @@ public abstract class AbstractRustShimGenerator {
     };
   }
 
-  public abstract RustFile depTopLevelModule();
+  public abstract TokenTree topLevelModuleDeclarations();
+
+  public RustFile depTopLevelModule() {
+    final String rustModule = RustUtils.rustModuleForSmithyNamespace(
+      service.getId().getNamespace()
+    );
+    return new RustFile(
+      Path.of("src", "deps", rustModule + ".rs"),
+      topLevelModuleDeclarations()
+    );
+
+  }
 
   protected abstract String getSdkId();
 

@@ -21,13 +21,15 @@ public class MergedServicesGenerator {
   private final Model model;
   private final ServiceShape mainService;
   private final Set<String> namespaces;
+  private final boolean generateWrappedClient;
 
   protected final Map<String, AbstractRustShimGenerator> generatorsByNamespace = new HashMap<>();
 
-  public MergedServicesGenerator(Model model, ServiceShape mainService, Set<String> namespaces) {
+  public MergedServicesGenerator(Model model, ServiceShape mainService, Set<String> namespaces, boolean generateWrappedClient) {
     this.model = model;
     this.namespaces = namespaces;
     this.mainService = mainService;
+    this.generateWrappedClient = generateWrappedClient;
 
     // Prepopulate generators
     for (String namespace : namespaces) {
@@ -88,7 +90,8 @@ public class MergedServicesGenerator {
       return new RustLibraryShimGenerator(
         this,
         model,
-        serviceShape
+        serviceShape,
+        generateWrappedClient
       );
     }
   }

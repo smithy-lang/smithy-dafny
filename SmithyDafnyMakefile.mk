@@ -600,6 +600,7 @@ _patch_after_transpile_rust:
 	--namespace $($(namespace_var)) \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS) \
+	$(if $(TRANSPILE_TESTS_IN_RUST), --local-service-test, ) \
 	";
 
 build_rust:

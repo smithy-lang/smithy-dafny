@@ -695,6 +695,9 @@ public class CodegenEngine {
     // Note this has no effect if we're being run from the Smithy build plugin,
     // since outputDir will be something like `build/smithyprojections/...`
     // and therefore not have any existing content.
+    //
+    // TODO: Not doing this for now since our current approach to externs
+    // requires putting them directly under src.
 //    Path outputSrcDir = outputDir.resolve("src");
 //    Path implementationFromDafnyPath = outputSrcDir.resolve(
 //      "implementation_from_dafny.rs"
@@ -719,7 +722,7 @@ public class CodegenEngine {
       .map(s -> s.getId().getNamespace())
       .collect(Collectors.toSet());
 
-    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespacesToGenerate);
+    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespacesToGenerate, localServiceTest);
     generator.generateAllNamespaces(outputDir);
 
     // TODO: These should be part of the StandardLibrary instead,
