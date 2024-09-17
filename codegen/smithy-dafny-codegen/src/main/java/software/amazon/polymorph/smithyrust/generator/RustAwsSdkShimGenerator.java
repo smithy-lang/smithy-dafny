@@ -126,6 +126,21 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       .lineSeparated();
 
     var postamble = TokenTree.of(
+      """
+      }
+      """
+    );
+
+    return new RustFile(
+      rootPathForShape(service).resolve("client.rs"),
+      TokenTree.of(preamble, operations, postamble)
+    );
+  }
+
+  // TODO: Should only be emitted with --generate client-constructors
+  private TokenTree clientConstructor() {
+    final Map<String, String> variables = serviceVariables();
+    return TokenTree.of(
       evalTemplate(
         """
         }
@@ -147,13 +162,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         }
         """,
         variables
-      )
-    );
-
-    return new RustFile(
-      rootPathForShape(service).resolve("client.rs"),
-      TokenTree.of(preamble, operations, postamble)
-    );
+      ));
   }
 
   private TokenTree operationClientFunction(
