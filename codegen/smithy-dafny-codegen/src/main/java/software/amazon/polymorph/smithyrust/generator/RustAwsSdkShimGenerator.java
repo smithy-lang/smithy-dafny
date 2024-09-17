@@ -234,7 +234,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       .map(errorShape ->
         IOUtils.evalTemplate(
           """
-          $qualifiedRustServiceErrorType:L::$errorName:L { error } =>
+          $qualifiedRustServiceErrorType:L::$rustErrorName:L { error } =>
               $rustRootModuleName:L::conversions::error::$snakeCaseErrorName:L::to_dafny(error),
           """,
           MapUtils.merge(errorVariables(errorShape), variables)
@@ -248,8 +248,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         IOUtils.evalTemplate(
           """
           crate::r#$dafnyTypesModuleName:L::Error::$errorName:L { $errorMessageMemberName:L, .. } =>
-            $qualifiedRustServiceErrorType:L::$errorName:L {
-              error: $sdkCrate:L::types::error::$errorName:L::builder()
+            $qualifiedRustServiceErrorType:L::$rustErrorName:L {
+              error: $sdkCrate:L::types::error::$rustErrorName:L::builder()
                 .set_message(crate::standard_library_conversions::ostring_from_dafny($errorMessageMemberName:L.clone()))
                 .build()
             },
