@@ -244,6 +244,8 @@ public class DafnyToLocalServiceShapeVisitor
       return "bytes(%1$s.Elements).decode('utf-8')".formatted(dataSource);
     }
     // Convert Dafny Seq of UTF-16 characters to native Python string
+    // TODO: This is a long conversion that is used often in generated code, since this is written for *all* strings.
+    // This should be refactored into the conversionwriter package.
     return "b''.join(ord(c).to_bytes(2, 'big') for c in %1$s).decode('utf-16-be')".formatted(
         dataSource
       );
