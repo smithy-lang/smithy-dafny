@@ -1528,8 +1528,8 @@ public abstract class AbstractRustShimGenerator {
       case INTEGER -> "::std::primitive::i32";
       case LONG -> "::std::primitive::i64";
       // floats
-      case FLOAT -> "::std::primitive::f32";
-      case DOUBLE -> "::std::primitive::f64";
+      case FLOAT -> "::dafny_runtime::Sequence<u8>";
+      case DOUBLE -> "::dafny_runtime::Sequence<u8>";
       // special numerics
       case BIG_INTEGER -> "::num::bigint::BigInt";
       case BIG_DECIMAL -> "::num::rational::BigRational";
