@@ -1230,6 +1230,9 @@ public class DafnyLocalServiceTypeConversionProtocol
                 var depService = context
                   .model()
                   .expectShape(dep, ServiceShape.class);
+                if (!depService.hasTrait(LocalServiceTrait.class)) {
+                  continue;
+                }
                 w.write(
                   """
                   if err.Is_$L() {
