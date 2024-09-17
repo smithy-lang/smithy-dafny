@@ -875,9 +875,9 @@ public class CodegenEngine {
   }
 
   private void patchRustAfterTranspiling() {
-    final String extraDeclarations = awsSdkStyle
-      ? extraDeclarationsForSDK()
-      : extraDeclarationsForLocalService();
+    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespaces, localServiceTest);
+
+    final String extraDeclarations = generator.generatorForShape(serviceShape).topLevelModuleDeclarations().toString();
     final Path implementationFromDafnyPath = libraryRoot
       .resolve("runtimes")
       .resolve("rust")
