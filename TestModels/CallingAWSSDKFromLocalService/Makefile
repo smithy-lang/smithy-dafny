@@ -58,6 +58,10 @@ WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleCallingAWSSDKFromL
 
 # Go
 
+GO_DEPENDENCY_MODULE_NAMES := \
+	--dependency-library-name=com.amazonaws.dynamodb=github.com/aws/aws-sdk-go-v2/service/dynamodb \
+	--dependency-library-name=com.amazonaws.kms=github.com/aws/aws-sdk-go-v2/service/kms
+
 GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService"
 
 TRANSLATION_RECORD_GO := \
