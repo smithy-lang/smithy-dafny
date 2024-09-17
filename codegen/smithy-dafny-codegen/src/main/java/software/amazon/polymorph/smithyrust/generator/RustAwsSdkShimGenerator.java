@@ -228,16 +228,16 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
     );
 
+    variables.put("qualifiedRustServiceErrorType", topLevelNameForShape(service) + "::types::error::Error");
+
     final String toDafnyArms = allErrorShapes()
       .map(errorShape ->
         IOUtils.evalTemplate(
           """
-          $qualifiedRustErrorVariant:L { $sdkErrorMessageDafnyName:L } =>
-              crate::r#$dafnyTypesModuleName:L::Error::$errorName:L {
-                  message: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&message),
-              },
+          $qualifiedRustServiceErrorType:L::$errorName:L { error } =>
+              $rustRootModuleName:L::conversions::error::$snakeCaseErrorName:L::to_dafny(error),
           """,
-          MapUtils.merge(variables, errorVariables(errorShape))
+          MapUtils.merge(errorVariables(errorShape), variables)
         )
       )
       .collect(Collectors.joining("\n"));
@@ -247,12 +247,14 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       .map(errorShape ->
         IOUtils.evalTemplate(
           """
-          crate::r#$dafnyTypesModuleName:L::Error::$errorName:L { message } =>
-              $qualifiedRustErrorVariant:L {
-                  message: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&message),
-              },
+          crate::r#$dafnyTypesModuleName:L::Error::$errorName:L { $errorMessageMemberName:L, .. } =>
+            $qualifiedRustServiceErrorType:L::$errorName:L {
+              error: $sdkCrate:L::types::error::$errorName:L::builder()
+                .set_message(crate::standard_library_conversions::ostring_from_dafny($errorMessageMemberName:L.clone()))
+                .build()
+            },
           """,
-          MapUtils.merge(variables, errorVariables(errorShape))
+          MapUtils.merge(errorVariables(errorShape), variables)
         )
       )
       .collect(Collectors.joining("\n"));
@@ -270,7 +272,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     ));
     return new RustFile(
       rootPathForShape(service).resolve("conversions").resolve("error.rs"),
-      TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions)
+      TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions, sdkContent)
     );
   }
 
@@ -283,7 +285,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   @Override
   protected boolean shouldGenerateStructForStructure(StructureShape structureShape) {
     return super.shouldGenerateStructForStructure(structureShape) &&
-      !isInputOrOutputStructure(structureShape);
+      !isInputOrOutputStructure(structureShape) &&
+      // TODO: Filter to shapes in the service closure (this one's an example of an orphan)
+      !structureShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KinesisStreamingDestinationInput")) &&
+      !structureShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"));
   }
 
   protected Set<RustFile> allEnumConversionModules() {
@@ -593,7 +598,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
     final String content = IOUtils.evalTemplate(
       getClass(),
-      "runtimes/rust/types/error.rs",
+      "runtimes/rust/types/error_awssdk.rs",
       variables
     );
 

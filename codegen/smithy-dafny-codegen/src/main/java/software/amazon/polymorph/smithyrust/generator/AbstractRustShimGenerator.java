@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.MoreCollectors;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -1469,6 +1470,15 @@ public abstract class AbstractRustShimGenerator {
         rustErrorName
       )
     );
+    variables.put("qualifiedRustServiceErrorType", qualifiedRustServiceErrorType());
+
+    // This is where smithy-dafny's assumption about error shapes shows up
+    var messageMember = errorShape.members()
+      .stream()
+      .filter(m -> m.getMemberName().equalsIgnoreCase("message"))
+      .collect(MoreCollectors.onlyElement());
+    variables.put("errorMessageMemberName", messageMember.getMemberName());
+
     return variables;
   }
 

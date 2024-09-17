@@ -752,6 +752,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           "inputToDafny",
           toDafny(inputShape, rustValue, true, false).toString()
         );
+      } else if (inputShape.hasTrait(UnitTypeTrait.class)) {
+        variables.put(
+          "inputToDafny", "()");
       } else {
         variables.put(
           "inputToDafny",
