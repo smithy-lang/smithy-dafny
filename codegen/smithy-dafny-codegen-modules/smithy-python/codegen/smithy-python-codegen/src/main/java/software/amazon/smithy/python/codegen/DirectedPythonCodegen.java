@@ -361,7 +361,7 @@ public class DirectedPythonCodegen implements DirectedCodegen<GenerationContext,
             return;
         }
         LOGGER.info("Running docformatter on generated code");
-        CodegenUtils.runCommand("python3 -m docformatter --recursive .", fileManifest.getBaseDir());
+        CodegenUtils.runCommand("python3 -m docformatter --recursive --in-place .", fileManifest.getBaseDir());
     }
 
     private void runMypy(FileManifest fileManifest) {
