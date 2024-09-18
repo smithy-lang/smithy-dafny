@@ -145,14 +145,18 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
             //TODO: Is it ever possible for structure to be nil?
+            final boolean assertionRequired = memberShape.isOptional() && targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class);
             final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
                                                                        ".Dtor_%s()".formatted(memberName),
                                                                        memberShape.isOptional() ? ".UnwrapOr(nil)" : "",
-                                                                       memberShape.isOptional() && targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class) ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
-                builder.append("%1$s: %2$s%3$s,".formatted(
+                                                                       assertionRequired ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
+                builder.append(
+                    """
+                       %1$s: %2$s%3$s,     
+                    """.formatted(
                         StringUtils.capitalize(memberName),
                         (targetShape.isStructureShape() && memberShape.isOptional()) && !targetShape.hasTrait(ReferenceTrait.class) ? "&" : "",
-                        ShapeVisitorHelper.toNativeContainerShapeHelper(memberShape, context, derivedDataSource, false, writer, isConfigShape, memberShape.isOptional())
+                        ShapeVisitorHelper.toNativeContainerShapeHelper(memberShape, context, derivedDataSource, assertionRequired, writer, isConfigShape, memberShape.isOptional())
                 ));
         }
 
