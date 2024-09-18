@@ -196,10 +196,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           >
         > {
           let native_result =\s
-            dafny_tokio_runtime.block_on($rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone(), self.inner.clone()).send());
+            dafny_tokio_runtime.block_on($rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone()).send());
           crate::standard_library_conversions::result_to_dafny(&native_result,\s
-            conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_response::to_dafny,
-            conversions::$snakeCaseOperationName:L::to_dafny_error)
+            $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_response::to_dafny,
+            $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::to_dafny_error)
         }
         """,
         variables
@@ -415,11 +415,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         pub fn from_dafny(
             dafny_value: ::std::rc::Rc<
                 crate::r#$dafnyTypesModuleName:L::$operationInputName:L,
-            >,
-            client: $sdkCrate:L::Client,
-        ) -> $sdkCrate:L::operation::$snakeCaseOperationName:L::builders::$operationName:LFluentBuilder {
-            client.$snakeCaseOperationName:L()
+            >
+        ) -> $sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationInputStruct:L {
+            $sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationInputStruct:L::builder()
                   $fluentMemberSetters:L
+                  .build()
+                  .unwrap()
         }
         """,
         variables
@@ -487,47 +488,75 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final Shape bindingShape,
     final OperationShape operationShape
   ) {
-    // No need for Dafny-to-Rust conversion
-    return TokenTree.empty();
-  }
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      operationVariables(bindingShape, operationShape)
+    );
+    StructureShape outputShape = model.expectShape(
+      operationShape.getOutputShape(),
+      StructureShape.class
+    );
+    variables.put(
+      "fluentMemberSetters",
+      fluentMemberSettersForStructure(outputShape).toString()
+    );
 
-  @Override
-  protected Set<RustFile> boundOperationConversionModules(
-    final BoundOperationShape boundOperationShape
-  ) {
-    // bindingShape should always be a service
-    final Shape bindingShape = boundOperationShape.bindingShape();
-    final OperationShape operationShape = boundOperationShape.operationShape();
-
-    var operationModuleName = toSnakeCase(operationName(operationShape));
-    var operationModuleContent = RustUtils.declarePubModules(
-      Stream.of(
-        "_" + toSnakeCase(operationName(operationShape) + "Request"),
-        "_" + toSnakeCase(operationName(operationShape) + "Response")
+    return TokenTree.of(
+      evalTemplate(
+        """
+        #[allow(dead_code)]
+        pub fn from_dafny(
+            dafny_value: ::std::rc::Rc<
+                crate::r#$dafnyTypesModuleName:L::$operationOutputName:L,
+            >
+        ) -> $sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationOutputStruct:L {
+            $sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationOutputStruct:L::builder()
+                  $fluentMemberSetters:L
+                  .build()
+        }
+        """,
+        variables
       )
     );
-
-    var errorToDafnyFunction = operationErrorToDafnyFunction(
-      bindingShape,
-      operationShape
-    );
-
-    RustFile outerModule = new RustFile(
-      rootPathForShape(service).resolve("conversions").resolve(operationModuleName + ".rs"),
-      TokenTree.of(operationModuleContent, errorToDafnyFunction)
-    );
-
-    RustFile requestModule = operationRequestConversionModule(
-      bindingShape,
-      operationShape
-    );
-    RustFile responseModule = operationResponseConversionModule(
-      bindingShape,
-      operationShape
-    );
-
-    return Set.of(outerModule, requestModule, responseModule);
   }
+
+//  @Override
+//  protected Set<RustFile> boundOperationConversionModules(
+//    final BoundOperationShape boundOperationShape
+//  ) {
+//    // bindingShape should always be a service
+//    final Shape bindingShape = boundOperationShape.bindingShape();
+//    final OperationShape operationShape = boundOperationShape.operationShape();
+//
+//    var operationModuleName = toSnakeCase(operationName(operationShape));
+//    var operationModuleContent = RustUtils.declarePubModules(
+//      Stream.of(
+//        "_" + toSnakeCase(operationName(operationShape) + "Request"),
+//        "_" + toSnakeCase(operationName(operationShape) + "Response")
+//      )
+//    );
+//
+//    var errorToDafnyFunction = operationErrorToDafnyFunction(
+//      bindingShape,
+//      operationShape
+//    );
+//
+//    RustFile outerModule = new RustFile(
+//      rootPathForShape(service).resolve("conversions").resolve(operationModuleName + ".rs"),
+//      TokenTree.of(operationModuleContent, errorToDafnyFunction)
+//    );
+//
+//    RustFile requestModule = operationRequestConversionModule(
+//      bindingShape,
+//      operationShape
+//    );
+//    RustFile responseModule = operationResponseConversionModule(
+//      bindingShape,
+//      operationShape
+//    );
+//
+//    return Set.of(outerModule, requestModule, responseModule);
+//  }
 
   protected TokenTree operationErrorToDafnyFunction(
     final Shape bindingShape,

@@ -1,20 +1,5 @@
 package software.amazon.polymorph.smithyrust.generator;
 
-import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
-import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
-import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
-
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.google.common.collect.MoreCollectors;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
@@ -44,6 +29,23 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
+import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
 public abstract class AbstractRustShimGenerator {
 
@@ -927,9 +929,73 @@ public abstract class AbstractRustShimGenerator {
       .collect(Collectors.toSet());
   }
 
-  protected abstract Set<RustFile> boundOperationConversionModules(
-    final BoundOperationShape operationShape
-  );
+  protected Set<RustFile> boundOperationConversionModules(
+    final BoundOperationShape boundOperationShape
+  ) {
+    final Shape bindingShape = boundOperationShape.bindingShape();
+    final OperationShape operationShape = boundOperationShape.operationShape();
+
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      operationVariables(bindingShape, operationShape)
+    );
+
+    final String operationModuleName = toSnakeCase(
+      operationName(operationShape)
+    );
+
+    Optional<StructureShape> inputStructure = operationIndex.getInputShape(
+      operationShape
+    );
+    final boolean hasInputStructure =
+      inputStructure.isPresent() &&
+        !inputStructure.get().hasTrait(PositionalTrait.class) &&
+        !inputStructure.get().hasTrait(UnitTypeTrait.class);
+    Optional<StructureShape> outputStructure = operationIndex.getOutputShape(
+      operationShape
+    );
+    final boolean hasOutputStructure =
+      outputStructure.isPresent() &&
+        !outputStructure.get().hasTrait(PositionalTrait.class) &&
+        !outputStructure.get().hasTrait(UnitTypeTrait.class);
+
+    final Set<String> childModules = new HashSet<>();
+    if (hasInputStructure) {
+      childModules.add(
+        "_" + variables.get("snakeCaseSyntheticOperationInputName")
+      );
+    }
+    if (hasOutputStructure) {
+      childModules.add(
+        "_" + variables.get("snakeCaseSyntheticOperationOutputName")
+      );
+    }
+    final RustFile outerModule = new RustFile(
+      rootPathForShape(bindingShape)
+        .resolve("conversions")
+        .resolve(operationModuleName + ".rs"),
+      RustUtils.declarePubModules(childModules.stream())
+    );
+
+    Set<RustFile> result = new HashSet<>(Set.of(outerModule));
+
+    if (hasInputStructure) {
+      final RustFile requestModule = operationRequestConversionModule(
+        bindingShape,
+        operationShape
+      );
+      result.add(requestModule);
+    }
+    if (hasOutputStructure) {
+      final RustFile responseModule = operationResponseConversionModule(
+        bindingShape,
+        operationShape
+      );
+      result.add(responseModule);
+    }
+
+    return result;
+  }
 
   protected RustFile enumConversionModule(final EnumShape enumShape) {
     Path path = rootPathForShape(service)
@@ -1131,8 +1197,8 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationTargetType",
         evalTemplate(
-          "crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
-          resourceVariables
+          "$rustRootModuleName:L::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
+          MapUtils.merge(variables, resourceVariables)
         )
       );
     }
