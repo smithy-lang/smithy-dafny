@@ -974,7 +974,10 @@ public abstract class AbstractRustShimGenerator {
       rootPathForShape(bindingShape)
         .resolve("conversions")
         .resolve(operationModuleName + ".rs"),
-      RustUtils.declarePubModules(childModules.stream())
+      TokenTree.of(
+        operationErrorConversionFunctions(boundOperationShape),
+        RustUtils.declarePubModules(childModules.stream())
+      ).lineSeparated()
     );
 
     Set<RustFile> result = new HashSet<>(Set.of(outerModule));
@@ -995,6 +998,11 @@ public abstract class AbstractRustShimGenerator {
     }
 
     return result;
+  }
+
+  protected TokenTree operationErrorConversionFunctions(final BoundOperationShape boundOperationShape) {
+    // By default none necessary, but SDKs need them
+    return TokenTree.empty();
   }
 
   protected RustFile enumConversionModule(final EnumShape enumShape) {

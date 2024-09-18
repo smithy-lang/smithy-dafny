@@ -520,6 +520,11 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
+  @Override
+  protected TokenTree operationErrorConversionFunctions(final BoundOperationShape boundOperationShape) {
+    return operationErrorToDafnyFunction(boundOperationShape.bindingShape(), boundOperationShape.operationShape());
+  }
+
 //  @Override
 //  protected Set<RustFile> boundOperationConversionModules(
 //    final BoundOperationShape boundOperationShape
