@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithyrust.generator;
 
+import com.google.common.collect.MoreCollectors;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.BoundOperationShape;
 import software.amazon.polymorph.utils.IOUtils;
@@ -1050,5 +1051,25 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     pub mod conversions;
     pub mod types;
     """);
+  }
+
+  protected String qualifiedRustStructureType(
+    final StructureShape structureShape
+  ) {
+    if (operationIndex.isInputStructure(structureShape)) {
+      final OperationShape operationShape = operationIndex.getInputBindings(structureShape).stream().collect(MoreCollectors.onlyElement());
+      return getSdkCrate() + "::operation::%s::%s".formatted(
+        toSnakeCase(operationShape.getId().getName()),
+        sdkOperationInputStruct(operationShape)
+      );
+    }
+    if (operationIndex.isOutputStructure(structureShape)) {
+      final OperationShape operationShape = operationIndex.getOutputBindings(structureShape).stream().collect(MoreCollectors.onlyElement());
+      return getSdkCrate() + "::operation::%s::%s".formatted(
+        toSnakeCase(operationShape.getId().getName()),
+        sdkOperationOutputStruct(operationShape)
+      );
+    }
+    return super.qualifiedRustStructureType(structureShape);
   }
 }

@@ -1750,11 +1750,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     final HashMap<String, String> variables = new HashMap<>();
     final String memberName = memberShape.getMemberName();
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
     variables.put("memberName", memberName);
     variables.put("fieldName", toSnakeCase(memberName));
     variables.put(
       "fieldType",
-      rustTypeForShape(model.expectShape(memberShape.getTarget()))
+      mergedGeneratorRustTypeForShape(targetShape)
     );
     return variables;
   }

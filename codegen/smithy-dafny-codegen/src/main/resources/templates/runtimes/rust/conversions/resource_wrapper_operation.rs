@@ -15,7 +15,7 @@ fn r#_$operationName:L_k(
             value: $outputToDafny:L,
         },
         Err(x) => crate::r#_Wrappers_Compile::Result::Failure {
-            error: crate::conversions::error::to_dafny(x),
+            error: $rustRootModuleName:L::conversions::error::to_dafny(x),
         },
     };
     ::std::rc::Rc::new(result)

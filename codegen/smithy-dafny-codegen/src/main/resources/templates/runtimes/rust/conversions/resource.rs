@@ -46,7 +46,7 @@ impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
   $resourceWrapperOperations:L
 }
 
-impl crate::types::$snakeCaseResourceName:L::$rustResourceName:L for $dafnyResourceName:LDafnyWrapper 
+impl $rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:L for $dafnyResourceName:LDafnyWrapper 
 {
   $resourceDafnyWrapperOperations:L
 }

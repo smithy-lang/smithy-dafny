@@ -1475,6 +1475,11 @@ public abstract class AbstractRustShimGenerator {
     return variables;
   }
 
+  protected String mergedGeneratorRustTypeForShape(final Shape shape) {
+    AbstractRustShimGenerator forShape = mergedGenerator.generatorForShape(shape);
+    return forShape != null ? forShape.rustTypeForShape(shape) : rustTypeForShape(shape);
+  }
+
   protected String rustTypeForShape(final Shape originalShape) {
     // First handle indirection like @reference
     final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
