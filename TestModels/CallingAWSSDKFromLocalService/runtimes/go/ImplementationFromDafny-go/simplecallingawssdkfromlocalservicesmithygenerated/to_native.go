@@ -6,6 +6,8 @@ import (
 	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingawssdkfromlocalserviceTypes"
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/simplecallingawssdkfromlocalservicesmithygeneratedtypes"
+	comamazonawskmssmithygenerated "github.com/smithy-lang/smithy-dafny/kms/comamazonawskmssmithygenerated"
+	"fmt"
 )
 
 func CallKMSEncryptInput_FromDafny(dafnyInput SimpleCallingawssdkfromlocalserviceTypes.CallKMSEncryptInput) simplecallingawssdkfromlocalservicesmithygeneratedtypes.CallKMSEncryptInput {
@@ -100,12 +102,6 @@ func OpaqueError_Output_FromDafny(dafnyOutput SimpleCallingawssdkfromlocalservic
 	}
 }
 
-func ComAmazonawsKms_FromDafny(dafnyOutput SimpleCallingawssdkfromlocalserviceTypes.Error) simplecallingawssdkfromlocalservicesmithygeneratedtypes.OpaqueError {
-	return simplecallingawssdkfromlocalservicesmithygeneratedtypes.OpaqueError{
-		ErrObject: dafnyOutput.Dtor_ComAmazonawsKms(),
-	}
-}
-
 func Error_FromDafny(err SimpleCallingawssdkfromlocalserviceTypes.Error) error {
 	// Service Errors
 	if err.Is_SimpleCallingAWSSDKFromLocalServiceException() {
@@ -114,7 +110,7 @@ func Error_FromDafny(err SimpleCallingawssdkfromlocalserviceTypes.Error) error {
 
 	//DependentErrors
 	if err.Is_ComAmazonawsKms() {
-		return ComAmazonawsKms_FromDafny(err)
+		return comamazonawskmssmithygenerated.Error_FromDafny(err.Dtor_ComAmazonawsKms())
 	}
 	//Unmodelled Errors
 	if err.Is_CollectionOfErrors() {
