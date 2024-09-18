@@ -1072,4 +1072,26 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     }
     return super.qualifiedRustStructureType(structureShape);
   }
+
+  protected String getRustConversionsModuleNameForShape(final Shape shape) {
+    final String namespace = shape.getId().getNamespace();
+    if (shape.isStructureShape()) {
+      if (operationIndex.isInputStructure(shape)) {
+        final OperationShape operationShape = operationIndex.getInputBindings(shape).stream().collect(MoreCollectors.onlyElement());
+        return getRustRootModuleName(namespace) + "::conversions::%s::_%s".formatted(
+          toSnakeCase(operationName(operationShape)),
+          toSnakeCase(syntheticOperationInputName(operationShape))
+        );
+      }
+      if (operationIndex.isOutputStructure(shape)) {
+        final OperationShape operationShape = operationIndex.getOutputBindings(shape).stream().collect(MoreCollectors.onlyElement());
+        return getRustRootModuleName(namespace) + "::conversions::%s::_%s".formatted(
+          toSnakeCase(operationName(operationShape)),
+          toSnakeCase(syntheticOperationOutputName(operationShape))
+        );
+      }
+    }
+
+    return super.getRustConversionsModuleNameForShape(shape);
+  }
 }

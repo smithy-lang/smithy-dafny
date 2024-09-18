@@ -2096,30 +2096,29 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
-        var structureShapeName = toSnakeCase(shape.getId().getName());
-        String prefix = topLevelNameForShape(shape);
+        var conversionsModule = mergedGenerator.generatorForShape(shape).getRustConversionsModuleNameForShape(shape);
         if (!isDafnyOption) {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              %s::conversions::%s::to_dafny(&%s.clone().unwrap())
-              """.formatted(prefix, structureShapeName, rustValue)
+              %s::to_dafny(&%s.clone().unwrap())
+              """.formatted(conversionsModule, rustValue)
             );
           } else {
             yield TokenTree.of(
               """
-              %s::conversions::%s::to_dafny(&%s.clone())
-              """.formatted(prefix, structureShapeName, rustValue)
+              %s::to_dafny(&%s.clone())
+              """.formatted(conversionsModule, rustValue)
             );
           }
         } else {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(&x.clone()) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::to_dafny(&x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
-            """.formatted(rustValue, prefix, structureShapeName)
+            """.formatted(rustValue, conversionsModule)
           );
         }
       }

@@ -712,23 +712,22 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case STRUCTURE, UNION -> {
-        var structureShapeName = toSnakeCase(shape.getId().getName());
-        String prefix = topLevelNameForShape(shape);
+        var conversionsModule = mergedGenerator.generatorForShape(shape).getRustConversionsModuleNameForShape(shape);
         if (isDafnyOption) {
           yield TokenTree.of(
             """
             match (*%s).as_ref() {
                 crate::r#_Wrappers_Compile::Option::Some { value } =>
-                    Some(%s::conversions::%s::from_dafny(value.clone())),
+                    Some(%s::from_dafny(value.clone())),
                 _ => None,
             }
-            """.formatted(dafnyValue, prefix, structureShapeName)
+            """.formatted(dafnyValue, conversionsModule)
           );
         } else {
           TokenTree result = TokenTree.of(
             """
-            %s::conversions::%s::from_dafny(%s.clone())
-            """.formatted(prefix, structureShapeName, dafnyValue)
+            %s::from_dafny(%s.clone())
+            """.formatted(conversionsModule, dafnyValue)
           );
           if (isRustOption) {
             result =
@@ -1067,6 +1066,14 @@ public abstract class AbstractRustShimGenerator {
 
   protected String getRustConversionsModuleName(final String namespace) {
     return getRustRootModuleName(namespace) + "::conversions";
+  }
+
+  protected String getRustConversionsModuleNameForShape(final Shape shape) {
+    final String namespace = shape.getId().getNamespace();
+    return switch (shape.getType()) {
+      case STRUCTURE, UNION, ENUM -> getRustConversionsModuleName(namespace) + "::" + toSnakeCase(shape.getId().getName());
+      default -> "crate::standard_library_conversions";
+    };
   }
 
   /**
