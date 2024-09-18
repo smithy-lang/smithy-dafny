@@ -361,7 +361,13 @@ public class DirectedPythonCodegen implements DirectedCodegen<GenerationContext,
             return;
         }
         LOGGER.info("Running docformatter on generated code");
-        CodegenUtils.runCommand("python3 -m docformatter --recursive --in-place .", fileManifest.getBaseDir());
+        // docformatter exit codes:
+        // 0: docformatter did not make changes
+        // 1: docformatter made changes
+        // 2: Invalid docformatter usage (incorrect arguments, etc.)
+        // If docformatter returns exit codes 0 or 1, then exit 0 to CodegenUtils. Otherwise, exit 1.
+        CodegenUtils.runCommand(
+        "python3 -m docformatter --recursive --in-place .; [ $? -eq 0 ] || [ $? -eq 1 ] || exit 1", fileManifest.getBaseDir());
     }
 
     private void runMypy(FileManifest fileManifest) {
