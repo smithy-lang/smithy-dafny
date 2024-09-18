@@ -874,10 +874,24 @@ public class CodegenEngine {
     }
   }
 
+  private static final TokenTree EXTRA_SINGLE_CRATE_DECLARATIONS = TokenTree.of(
+    """
+    mod standard_library_conversions;
+    mod standard_library_externs;
+    """
+  );
+
   private void patchRustAfterTranspiling() {
     final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespaces, localServiceTest);
 
-    final String extraDeclarations = generator.generatorForShape(serviceShape).topLevelModuleDeclarations().toString();
+    final TokenTree extraRootServiceDeclarations = generator.generatorForShape(serviceShape).topLevelModuleDeclarations();
+    String extraDeclarations = TokenTree.of(extraRootServiceDeclarations, EXTRA_SINGLE_CRATE_DECLARATIONS).lineSeparated().toString();
+    if (!awsSdkStyle) {
+      extraDeclarations = extraDeclarations
+        + System.lineSeparator()
+        + extraTopLevelDeclarationsForLocalService(serviceShape)
+        + System.lineSeparator();
+    }
     final Path implementationFromDafnyPath = libraryRoot
       .resolve("runtimes")
       .resolve("rust")
@@ -899,15 +913,7 @@ public class CodegenEngine {
     }
   }
 
-  private String extraDeclarationsForSDK() {
-    return """
-    mod client;
-    mod conversions;
-    mod standard_library_conversions;
-    """;
-  }
-
-  private String extraDeclarationsForLocalService() {
+  private String extraTopLevelDeclarationsForLocalService(ServiceShape serviceShape) {
     final String configStructName = serviceShape
       .expectTrait(LocalServiceTrait.class)
       .getConfigId()
@@ -916,17 +922,8 @@ public class CodegenEngine {
 
     return IOUtils.evalTemplate(
       """
-      // (extra-declarations)
-
-      $sharedTopLevelDecls:L
-
-      /// Copied from StandardLibrary
-      mod standard_library_conversions;
-      mod standard_library_externs;
-
       pub use client::Client;
       pub use types::$configSnakeCase:L::$configStructName:L;
-
       """,
       Map.of(
         "configSnakeCase",
