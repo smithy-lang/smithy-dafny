@@ -134,14 +134,13 @@ public class ValidationGenerator {
                     // Broke list and map into two different if else because for _, item := range %s looked good for list
                     // And for key, value := range %s looked good for map
                     if (currentShape.isListShape()) {
-                        MemberShape m = currentShape.getAllMembers().values().stream().findFirst().orElse(null);
                         String funcName = funcNameGenerator(memberShape, "validate");
                         String funcInput = dataSource.startsWith("input") ? "" : dataSource;
                         if (!funcInput.equals("")) {
                             ListShape listShapeCast = (ListShape) currentShape;
                             MemberShape listMember = listShapeCast.getMember();
-                            String inputType = "[]".concat((symbolProvider.toSymbol(listMember)).getName());
-
+                            String inputType = SmithyNameResolver.getSmithyType(currentShape, symbolProvider.toSymbol(listMember), model, symbolProvider);
+                            inputType = inputType.replace(SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."), "");
                             validationFuncInputTypeMap.put(memberShape, inputType);
                             dataSource = "Value";
                         }
