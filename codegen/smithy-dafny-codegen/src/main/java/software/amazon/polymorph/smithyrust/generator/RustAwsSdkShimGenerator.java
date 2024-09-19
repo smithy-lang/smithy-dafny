@@ -88,6 +88,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             false
           }
         }
+        
+        impl ::std::convert::Into<Client> for $sdkCrate:L::Client {
+            fn into(self) -> Client {
+                Client { inner: self }
+            }
+        }
 
         /// A runtime for executing operations on the asynchronous client in a blocking manner.
         /// Necessary because Dafny only generates synchronous code.
