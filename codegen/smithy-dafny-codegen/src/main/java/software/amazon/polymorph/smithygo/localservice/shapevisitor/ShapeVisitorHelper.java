@@ -30,14 +30,24 @@ public class ShapeVisitorHelper {
             .concat(suffix);
     }
     
-    public static String toNativeContainerShapeHelper (final MemberShape memberShape, final GenerationContext context, String dataSource, final Boolean assertionRequired, final GoWriter writer, final boolean isConfigShape, final boolean isOptional) {
+    public static String toNativeContainerShapeHelper (final MemberShape memberShape, final GenerationContext context, final String dataSource, final Boolean assertionRequired, final GoWriter writer, final boolean isConfigShape, final boolean isOptional) {
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
         String maybeAssertion = "";
         if (assertionRequired) {
             maybeAssertion = ".("
-                .concat(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape)))
-                .concat(")");
+            .concat(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape)))
+            .concat(")");
         }
+        // Resource shape already goes into a function
+        if (targetShape.hasTrait(ReferenceTrait.class)) {
+            ReferenceTrait referenceTrait = targetShape.expectTrait(ReferenceTrait.class);
+            Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+            if (resourceOrService.isResourceShape()) {
+                return targetShape.accept(
+                    new DafnyToSmithyShapeVisitor(context, dataSource.concat(maybeAssertion), writer, isConfigShape, isOptional)
+                );
+            }
+        }        
         String nextVisitorFunction;
         String funcDataSource = "input";
         if (!DafnyToSmithyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
