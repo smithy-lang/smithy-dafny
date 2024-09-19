@@ -115,7 +115,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     public String blobShape(BlobShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         return """
-                func () []byte {
+                return func () []byte {
                 var b []byte
                 if %s == nil {
                     return nil
@@ -138,8 +138,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         }
         final var builder = new StringBuilder();
         writer.addImportFromModule(SmithyNameResolver.getGoModuleNameForSmithyNamespace(shape.toShapeId().getNamespace()), DafnyNameResolver.dafnyTypesNamespace(shape));
-
-        builder.append("return %1$s{".formatted(SmithyNameResolver.smithyTypesNamespace(shape).concat(".").concat(shape.getId().getName())));
+        String maybeAddress = (this.isOptional) ? "&" : "";
+        builder.append("return %1$s%2$s{".formatted(maybeAddress, SmithyNameResolver.smithyTypesNamespace(shape).concat(".").concat(shape.getId().getName())));
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
             final var memberName = memberShapeEntry.getKey();
             final var memberShape = memberShapeEntry.getValue();
@@ -152,10 +152,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                                                                        assertionRequired ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
                 builder.append(
                     """
-                       %1$s: %2$s%3$s,     
+                       %1$s: %2$s,     
                     """.formatted(
                         StringUtils.capitalize(memberName),
-                        (targetShape.isStructureShape() && memberShape.isOptional()) && !targetShape.hasTrait(ReferenceTrait.class) ? "&" : "",
                         ShapeVisitorHelper.toNativeContainerShapeHelper(memberShape, context, derivedDataSource, assertionRequired, writer, isConfigShape, memberShape.isOptional())
                 ));
         }
@@ -217,10 +216,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 		m[%s] = %s
 	}
 	return m
-                               """.formatted(type, type, dataSource, dataSource, keyTargetShape.accept(
-                new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
-        ),
-        ShapeVisitorHelper.toNativeContainerShapeHelper(valueMemberShape, context, valueDataSource, true, writer, isConfigShape, false)
+                               """.formatted(type, type, dataSource, dataSource, 
+                               ShapeVisitorHelper.toNativeContainerShapeHelper(keyMemberShape, context, "(*val.(dafny.Tuple).IndexInt(0))", false, writer, isConfigShape, false),
+        //                        keyTargetShape.accept(
+        //         new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
+        // ),
+        ShapeVisitorHelper.toNativeContainerShapeHelper(valueMemberShape, context, valueDataSource, false, writer, isConfigShape, false)
         ));
         return builder.toString();
     }
@@ -230,7 +231,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         if (this.isOptional) {
             return """
-                    func() *bool {
+                    return func() *bool {
                         var b bool
                         if %s == nil {
                             return nil
@@ -248,7 +249,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         if (shape.hasTrait(EnumTrait.class)) {
             return """
-    func () *%s.%s {
+    return func () *%s.%s {
     var u %s.%s
                 if %s == nil {
                     return nil
@@ -284,7 +285,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         }
         if ((boolean)isOptional) {
             return """
-                func() (*string) {
+                return func() (*string) {
                     var s string
                 if %s == nil {
                     return nil
@@ -301,7 +302,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         }
         else {
             return """
-                func() (string) {
+                return func() (string) {
                     var s string
                     for i := dafny.Iterate(%s) ; ; {
                         val, ok := i()
@@ -321,7 +322,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
         if ((boolean)isOptional) {
             return ("""
-                    func() *int32 {
+                    return func() *int32 {
                         var b int32
                         if %s == nil {
                             return nil
@@ -331,7 +332,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                     }()""".formatted(dataSource, dataSource));
         }else {
             return """
-                func() int32 {
+                return func() int32 {
                     var b = %s.(int32)
                     return b
                 }()
@@ -343,7 +344,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     public String longShape(LongShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         return ("""
-                func() *int64 {
+                return func() *int64 {
                     var b int64
                     if %s == nil {
                         return nil
@@ -358,7 +359,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         writer.addUseImports(SmithyGoDependency.MATH);
         return """
-                func () *float64 {
+                return func () *float64 {
                     var b []byte
                 if %s == nil {
                     return nil
