@@ -28,6 +28,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+
 public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerator {
     public static String TO_DAFNY = "to_dafny.go";
     public static String TO_NATIVE = "to_native.go";
@@ -163,26 +165,17 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
 
         writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
             for (MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+                
                 final Shape visitingShape = context.model().expectShape(visitingMemberShape.getTarget());
-                if (alreadyVisited.contains(visitingShape.toShapeId()) || alreadyVisited.contains(visitingMemberShape.getId())) {
+                if (alreadyVisited.contains(visitingMemberShape.getId())) {
                     continue;
                 }
                 alreadyVisited.add(visitingMemberShape.toShapeId());
                 String inputType;
                 String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(visitingMemberShape)? "Wrappers.Option": DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
-                if (visitingShape.isMapShape()) {
-                    MemberShape valueMemberShape = ((MapShape) visitingShape).getValue();
-                    Shape valueShape = model.expectShape(valueMemberShape.getTarget());
-                    inputType = "map[string]".concat(SmithyNameResolver.getSmithyType(valueShape, context.symbolProvider().toSymbol(valueShape)));
-                }
-                else if (visitingShape.isListShape()) {
-                    MemberShape memberShape = ((ListShape) visitingShape).getMember();
-                    Shape memberShapeTarget = model.expectShape(memberShape.getTarget());
-                    inputType = "[]".concat(SmithyNameResolver.getSmithyType(memberShapeTarget, context.symbolProvider().toSymbol(memberShapeTarget)));
-                }
-                else {
-                    inputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
-                }                
+                inputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape), model, context.symbolProvider());                
+                if (context.symbolProvider().toSymbol(visitingMemberShape).getProperty(POINTABLE, Boolean.class).orElse(false) == true)
+                    inputType = "*".concat(inputType);
                 writer.write("""
                             func $L(input $L)($L) {
                                 return $L
@@ -325,24 +318,14 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
         delegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_NATIVE), SmithyNameResolver.shapeNamespace(serviceShape), writer -> {
             for (MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
                 final Shape visitingShape = context.model().expectShape(visitingMemberShape.getTarget());
-                if (alreadyVisited.contains(visitingShape.toShapeId()) || alreadyVisited.contains(visitingMemberShape.getId())) {
+                if (alreadyVisited.contains(visitingMemberShape.getId())) {
                     continue;
                 }
                 alreadyVisited.add(visitingMemberShape.toShapeId());
                 String outputType;
-                if (visitingShape.isMapShape()) { 
-                    MapShape mapShapeCast = (MapShape) visitingShape;
-                    MemberShape valueMemberShape = mapShapeCast.getValue();
-                    final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
-                    outputType = "map[string]".concat(SmithyNameResolver.getSmithyType(valueTargetShape, context.symbolProvider().toSymbol(valueTargetShape)));
-                } else if (visitingShape.isListShape()) {
-                    ListShape listShapeCast = (ListShape) visitingShape;
-                    MemberShape memberShape = listShapeCast.getMember();
-                    outputType = "[]".concat(SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(memberShape)));
-                } else {
-                    outputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
-                }
-                
+                outputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape), context.model(), context.symbolProvider());                
+                if (context.symbolProvider().toSymbol(visitingMemberShape).getProperty(POINTABLE, Boolean.class).orElse(false) == true)
+                    outputType = "*".concat(outputType);
                 writer.write("""
                             func $L(input interface{})($L) {
                                 $L           
