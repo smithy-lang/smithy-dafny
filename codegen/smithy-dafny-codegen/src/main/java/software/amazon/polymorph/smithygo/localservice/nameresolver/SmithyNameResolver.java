@@ -83,6 +83,9 @@ public class SmithyNameResolver {
         if(symbol.getNamespace().contains("smithy.") || symbol.getNamespace().equals("smithyapitypes") || symbol.getName().contains("string")) {
             return symbol.getName();
         }
+        if (shape.isResourceShape()) {
+            return SmithyNameResolver.smithyTypesNamespace(shape).concat(DOT).concat("I").concat(symbol.getName());
+        }
         return SmithyNameResolver.smithyTypesNamespace(shape).concat(DOT).concat(symbol.getName());
     }
 
