@@ -3,9 +3,13 @@
 package simplecallingawssdkfromlocalservicesmithygenerated
 
 import (
+	"fmt"
+	"errors"
+	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingawssdkfromlocalserviceTypes"
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/simplecallingawssdkfromlocalservicesmithygeneratedtypes"
+	"github.com/smithy-lang/smithy-dafny/kms/comamazonawskmssmithygenerated"
 )
 
 func CallKMSEncryptInput_ToDafny(nativeInput simplecallingawssdkfromlocalservicesmithygeneratedtypes.CallKMSEncryptInput) SimpleCallingawssdkfromlocalserviceTypes.CallKMSEncryptInput {
@@ -64,6 +68,12 @@ func OpaqueError_Input_ToDafny(nativeInput simplecallingawssdkfromlocalservicesm
 }
 
 func Error_ToDafny(err error) SimpleCallingawssdkfromlocalserviceTypes.Error {
+	var err2 *types.NotFoundException
+	switch {
+		case errors.As(err, &err2):
+			fmt.Println(SimpleCallingawssdkfromlocalserviceTypes.Companion_Error_.Create_ComAmazonawsKms_(comamazonawskmssmithygenerated.Error_ToDafny(err)))
+			return SimpleCallingawssdkfromlocalserviceTypes.Companion_Error_.Create_ComAmazonawsKms_(comamazonawskmssmithygenerated.Error_ToDafny(err))
+	}
 	switch err.(type) {
 	// Service Errors
 	case simplecallingawssdkfromlocalservicesmithygeneratedtypes.SimpleCallingAWSSDKFromLocalServiceException:

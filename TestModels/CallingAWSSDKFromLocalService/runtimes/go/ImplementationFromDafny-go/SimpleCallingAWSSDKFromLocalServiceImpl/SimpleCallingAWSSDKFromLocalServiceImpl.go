@@ -4,12 +4,8 @@
 package SimpleCallingAWSSDKFromLocalServiceImpl
 
 import (
-	"os"
-
-	Com "github.com/smithy-lang/smithy-dafny/kms/Com"
-	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
-	Com_Amazonaws "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws"
-	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
+	"fmt"
+	os "os"
 
 	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
@@ -18,6 +14,8 @@ import (
 	StandardLibrary_UInt "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary_UInt"
 	Wrappers "github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 	SimpleCallingawssdkfromlocalserviceTypes "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingawssdkfromlocalserviceTypes"
+	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
+	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
 )
 
 var _ = os.Args
@@ -30,8 +28,6 @@ var _ ComAmazonawsKmsTypes.Dummy__
 var _ StandardLibraryInterop.Dummy__
 var _ SimpleCallingawssdkfromlocalserviceTypes.Dummy__
 var _ Com_Amazonaws_Kms.Dummy__
-var _ Com_Amazonaws.Dummy__
-var _ Com.Dummy__
 
 type Dummy__ struct{}
 
@@ -72,20 +68,23 @@ var _ _dafny.TraitOffspring = &Default__{}
 func (_static *CompanionStruct_Default___) CallKMSEncrypt(config Config, input SimpleCallingawssdkfromlocalserviceTypes.CallKMSEncryptInput) Wrappers.Result {
 	var output Wrappers.Result = Wrappers.Companion_Result_.Default(SimpleCallingawssdkfromlocalserviceTypes.Companion_CallKMSEncryptOutput_.Default())
 	_ = output
-	var _1_encryptInput ComAmazonawsKmsTypes.EncryptRequest
-	_ = _1_encryptInput
-	_1_encryptInput = ComAmazonawsKmsTypes.Companion_EncryptRequest_.Create_EncryptRequest_((input).Dtor_keyId(), (input).Dtor_plaintext(), Wrappers.Companion_Option_.Create_None_(), Wrappers.Companion_Option_.Create_None_(), Wrappers.Companion_Option_.Create_None_(), Wrappers.Companion_Option_.Create_None_())
-	var _2_retEncryptResponse Wrappers.Result
-	_ = _2_retEncryptResponse
+	var _0_encryptInput ComAmazonawsKmsTypes.EncryptRequest
+	_ = _0_encryptInput
+	_0_encryptInput = ComAmazonawsKmsTypes.Companion_EncryptRequest_.Create_EncryptRequest_((input).Dtor_keyId(), (input).Dtor_plaintext(), Wrappers.Companion_Option_.Create_None_(), Wrappers.Companion_Option_.Create_None_(), Wrappers.Companion_Option_.Create_None_(), Wrappers.Companion_Option_.Create_None_())
+	var _1_retEncryptResponse Wrappers.Result
+	_ = _1_retEncryptResponse
 	var _out0 Wrappers.Result
 	_ = _out0
-	_out0 = ((input).Dtor_kmsClient()).Encrypt(_1_encryptInput)
-	_2_retEncryptResponse = _out0
-	if (_2_retEncryptResponse).Is_Success() {
+	_out0 = ((input).Dtor_kmsClient()).Encrypt(_0_encryptInput)
+	_1_retEncryptResponse = _out0
+	fmt.Println("Impl:")
+	fmt.Println(_out0)
+	if (_1_retEncryptResponse).Is_Success() {
 		output = Wrappers.Companion_Result_.Create_Success_(SimpleCallingawssdkfromlocalserviceTypes.Companion_CallKMSEncryptOutput_.Create_CallKMSEncryptOutput_(_dafny.SeqOfString("retEncryptResponse.value.KeyId")))
 		return output
 	} else {
-		output = Wrappers.Companion_Result_.Create_Failure_(SimpleCallingawssdkfromlocalserviceTypes.Companion_Error_.Create_ComAmazonawsKms_((_2_retEncryptResponse).Dtor_error().(ComAmazonawsKmsTypes.Error)))
+		_dafny.Print((_1_retEncryptResponse))
+		output = Wrappers.Companion_Result_.Create_Failure_(SimpleCallingawssdkfromlocalserviceTypes.Companion_Error_.Create_ComAmazonawsKms_((_1_retEncryptResponse).Dtor_error().(ComAmazonawsKmsTypes.Error)))
 		return output
 	}
 	return output

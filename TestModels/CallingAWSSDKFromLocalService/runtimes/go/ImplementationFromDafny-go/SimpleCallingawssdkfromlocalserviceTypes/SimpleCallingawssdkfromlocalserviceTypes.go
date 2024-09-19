@@ -4,10 +4,7 @@
 package SimpleCallingawssdkfromlocalserviceTypes
 
 import (
-	"fmt"
 	os "os"
-
-	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
 
 	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
@@ -15,6 +12,7 @@ import (
 	StandardLibraryInterop "github.com/dafny-lang/DafnyStandardLibGo/StandardLibraryInterop"
 	StandardLibrary_UInt "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary_UInt"
 	Wrappers "github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
+	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
 )
 
 var _ = os.Args
@@ -524,7 +522,6 @@ type Error struct {
 }
 
 func (_this Error) Get_() Data_Error_ {
-	// fmt.Println(_this.Data_Error_)
 	return _this.Data_Error_
 }
 
@@ -620,7 +617,6 @@ func (_this Error) Dtor_list() _dafny.Sequence {
 }
 
 func (_this Error) Dtor_obj() interface{} {
-	fmt.Println(_this.Get_())
 	return _this.Get_().(Error_Opaque).Obj
 }
 

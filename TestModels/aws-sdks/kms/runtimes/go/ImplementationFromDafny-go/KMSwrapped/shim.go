@@ -4,6 +4,7 @@ package KMSwrapped
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
@@ -182,6 +183,8 @@ func (shim *Shim) EnableKeyRotation(input ComAmazonawsKmsTypes.EnableKeyRotation
 func (shim *Shim) Encrypt(input ComAmazonawsKmsTypes.EncryptRequest) Wrappers.Result {
 	var native_request = comamazonawskmssmithygenerated.EncryptInput_FromDafny(input)
 	var native_response, native_error = shim.Client.Encrypt(context.Background(), &native_request)
+	fmt.Println("In shim encrypt:");
+	fmt.Println(native_error)
 	if native_error != nil {
 		return Wrappers.Companion_Result_.Create_Failure_(comamazonawskmssmithygenerated.Error_ToDafny(native_error))
 	}

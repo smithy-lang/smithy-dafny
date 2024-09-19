@@ -11,17 +11,14 @@ PROJECT_SERVICES := \
 	SimpleCallingAWSSDKFromLocalService
 
 PROJECT_DEPENDENCIES := \
-	aws-sdks/ddb \
 	aws-sdks/kms 
 
 PROJECT_INDEX := \
-	aws-sdks/ddb/src/Index.dfy \
 	aws-sdks/kms/src/Index.dfy
 
 SERVICE_NAMESPACE_SimpleCallingAWSSDKFromLocalService=simple.callingawssdkfromlocalservice
 
 SERVICE_DEPS_SimpleCallingAWSSDKFromLocalService := \
-	aws-sdks/ddb \
 	aws-sdks/kms
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
@@ -66,5 +63,4 @@ GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFrom
 
 TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
-	aws-sdks/kms/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
-	aws-sdks/ddb/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	aws-sdks/kms/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr 

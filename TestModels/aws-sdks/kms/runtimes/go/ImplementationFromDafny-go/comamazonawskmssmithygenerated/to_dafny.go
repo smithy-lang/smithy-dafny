@@ -3,6 +3,10 @@
 package comamazonawskmssmithygenerated
 
 import (
+	"reflect"
+	"fmt"
+		"errors"
+	"github.com/aws/smithy-go"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
@@ -5378,6 +5382,14 @@ func OpaqueError_Input_ToDafny(nativeInput error) ComAmazonawsKmsTypes.Error {
 }
 
 func Error_ToDafny(err error) ComAmazonawsKmsTypes.Error {
+	fmt.Println("Error_ToDafny")
+	fmt.Println(reflect.TypeOf(err.(*smithy.OperationError).Err))
+	fmt.Println(err.(*smithy.OperationError).Err)
+	var err2 *types.NotFoundException
+	switch {
+		case errors.As(err, &err2):
+			return NotFoundException_ToDafny(*err2)
+	}
 	switch err.(type) {
 	// Service Errors
 	case *types.CloudHsmClusterNotRelatedException:

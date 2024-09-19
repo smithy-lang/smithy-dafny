@@ -25,7 +25,6 @@ func (_static *CompanionStruct_Default___) WrappedSimpleCallingAWSSDKFromLocalSe
 }
 
 func (shim *Shim) CallKMSEncrypt(input SimpleCallingawssdkfromlocalserviceTypes.CallKMSEncryptInput) Wrappers.Result {
-
 	var native_request = simplecallingawssdkfromlocalservicesmithygenerated.CallKMSEncryptInput_FromDafny(input)
 	var native_response, native_error = shim.client.CallKMSEncrypt(context.Background(), native_request)
 	if native_error != nil {

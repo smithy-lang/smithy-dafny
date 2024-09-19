@@ -2,10 +2,6 @@
 package the_program
 
 import (
-	Com "Com"
-	ComAmazonawsKmsTypes "ComAmazonawsKmsTypes"
-	Com_Amazonaws "Com_Amazonaws"
-	Com_Amazonaws_Kms "Com_Amazonaws_Kms"
 	os "os"
 
 	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
@@ -17,6 +13,8 @@ import (
 	SimpleCallingAWSSDKFromLocalService "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingAWSSDKFromLocalService"
 	SimpleCallingAWSSDKFromLocalServiceImpl "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingAWSSDKFromLocalServiceImpl"
 	SimpleCallingawssdkfromlocalserviceTypes "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingawssdkfromlocalserviceTypes"
+	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
+	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
 )
 
 var _ = os.Args
@@ -29,7 +27,5 @@ var _ ComAmazonawsKmsTypes.Dummy__
 var _ StandardLibraryInterop.Dummy__
 var _ SimpleCallingawssdkfromlocalserviceTypes.Dummy__
 var _ Com_Amazonaws_Kms.Dummy__
-var _ Com_Amazonaws.Dummy__
-var _ Com.Dummy__
 var _ SimpleCallingAWSSDKFromLocalServiceImpl.Dummy__
 var _ SimpleCallingAWSSDKFromLocalService.Dummy__

@@ -6,11 +6,6 @@ package SimpleCallingAWSSDKFromLocalService
 import (
 	os "os"
 
-	Com "github.com/smithy-lang/smithy-dafny/kms/Com"
-	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
-	Com_Amazonaws "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws"
-	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
-
 	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	StandardLibrary "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
@@ -19,6 +14,8 @@ import (
 	Wrappers "github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 	SimpleCallingAWSSDKFromLocalServiceImpl "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingAWSSDKFromLocalServiceImpl"
 	SimpleCallingawssdkfromlocalserviceTypes "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingawssdkfromlocalserviceTypes"
+	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
+	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
 )
 
 var _ = os.Args
@@ -31,8 +28,6 @@ var _ ComAmazonawsKmsTypes.Dummy__
 var _ StandardLibraryInterop.Dummy__
 var _ SimpleCallingawssdkfromlocalserviceTypes.Dummy__
 var _ Com_Amazonaws_Kms.Dummy__
-var _ Com_Amazonaws.Dummy__
-var _ Com.Dummy__
 var _ SimpleCallingAWSSDKFromLocalServiceImpl.Dummy__
 
 type Dummy__ struct{}
@@ -77,13 +72,13 @@ func (_static *CompanionStruct_Default___) DefaultSimpleCallingAWSSDKFromLocalSe
 func (_static *CompanionStruct_Default___) SimpleCallingAWSSDKFromLocalService(config SimpleCallingawssdkfromlocalserviceTypes.SimpleCallingAWSSDKFromLocalServiceConfig) Wrappers.Result {
 	var res Wrappers.Result = Wrappers.Result{}
 	_ = res
-	var _3_client *SimpleCallingAWSSDKFromLocalServiceClient
-	_ = _3_client
+	var _0_client *SimpleCallingAWSSDKFromLocalServiceClient
+	_ = _0_client
 	var _nw0 *SimpleCallingAWSSDKFromLocalServiceClient = New_SimpleCallingAWSSDKFromLocalServiceClient_()
 	_ = _nw0
 	_nw0.Ctor__(SimpleCallingAWSSDKFromLocalServiceImpl.Companion_Config_.Create_Config_())
-	_3_client = _nw0
-	res = Wrappers.Companion_Result_.Create_Success_(_3_client)
+	_0_client = _nw0
+	res = Wrappers.Companion_Result_.Create_Success_(_0_client)
 	return res
 	return res
 }
@@ -156,11 +151,10 @@ func (_this *SimpleCallingAWSSDKFromLocalServiceClient) CallKMSEncrypt(input Sim
 	{
 		var output Wrappers.Result = Wrappers.Companion_Result_.Default(SimpleCallingawssdkfromlocalserviceTypes.Companion_CallKMSEncryptOutput_.Default())
 		_ = output
-		var _out1 Wrappers.Result
-		_ = _out1
-		_out1 = SimpleCallingAWSSDKFromLocalServiceImpl.Companion_Default___.CallKMSEncrypt((_this).Config(), input)
-		// fmt.Println("CallKMSEncrypt: ", _out1)
-		output = _out1
+		var _out0 Wrappers.Result
+		_ = _out0
+		_out0 = SimpleCallingAWSSDKFromLocalServiceImpl.Companion_Default___.CallKMSEncrypt((_this).Config(), input)
+		output = _out0
 		return output
 	}
 }

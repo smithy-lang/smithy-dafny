@@ -65,13 +65,14 @@ func OpaqueError_Input_ToDafny(nativeInput simplecallingawssdkfromlocalservicesm
 }
 
 func Error_ToDafny(err error) SimpleCallingawssdkfromlocalserviceTypes.Error {
+	
 	switch err.(type) {
 	// Service Errors
 	case simplecallingawssdkfromlocalservicesmithygeneratedtypes.SimpleCallingAWSSDKFromLocalServiceException:
 		return SimpleCallingAWSSDKFromLocalServiceException_ToDafny(err.(simplecallingawssdkfromlocalservicesmithygeneratedtypes.SimpleCallingAWSSDKFromLocalServiceException))
 
 	//DependentErrors
-	case comamazonawskmssmithygeneratedtypes.TrentServiceBaseException:
+	case ComAmazonawsKmsTypes.TrentServiceBaseException:
 		return SimpleCallingawssdkfromlocalserviceTypes.Companion_Error_.Create_TrentService_(comamazonawskmssmithygenerated.Error_ToDafny(err))
 
 	//Unmodelled Errors

@@ -4,11 +4,6 @@ package main
 import (
 	os "os"
 
-	Com "github.com/smithy-lang/smithy-dafny/kms/Com"
-	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
-	Com_Amazonaws "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws"
-	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
-
 	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	StandardLibrary "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
@@ -21,6 +16,8 @@ import (
 	SimpleCallingAWSSDKFromLocalServiceImplTest "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test/SimpleCallingAWSSDKFromLocalServiceImplTest"
 	WrappedSimpleCallingAWSSDKFromLocalServiceService "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test/WrappedSimpleCallingAWSSDKFromLocalServiceService"
 	WrappedSimpleCallingAWSSDKFromLocalServiceTest "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test/WrappedSimpleCallingAWSSDKFromLocalServiceTest"
+	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
+	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
 )
 
 var _ = os.Args
@@ -32,8 +29,6 @@ var _ StandardLibrary.Dummy__
 var _ ComAmazonawsKmsTypes.Dummy__
 var _ SimpleCallingawssdkfromlocalserviceTypes.Dummy__
 var _ Com_Amazonaws_Kms.Dummy__
-var _ Com_Amazonaws.Dummy__
-var _ Com.Dummy__
 var _ SimpleCallingAWSSDKFromLocalServiceImpl.Dummy__
 var _ SimpleCallingAWSSDKFromLocalService.Dummy__
 var _ StandardLibraryInterop.Dummy__
@@ -76,19 +71,19 @@ func (_this *Default__) ParentTraits_() []*_dafny.TraitID {
 var _ _dafny.TraitOffspring = &Default__{}
 
 func (_static *CompanionStruct_Default___) Test____Main____(__noArgsParameter _dafny.Sequence) {
-	var _13_success bool
-	_ = _13_success
-	_13_success = true
+	var _0_success bool
+	_ = _0_success
+	_0_success = true
 	_dafny.Print((_dafny.SeqOfString("SimpleCallingAWSSDKFromLocalServiceImplTest.CallKMSEncrypt: ")).SetString())
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
-				var _14_haltMessage = _dafny.SeqOfString(r.(string))
+				var _1_haltMessage = _dafny.SeqOfString(r.(string))
 				{
 					_dafny.Print((_dafny.SeqOfString("FAILED\n	")).SetString())
-					_dafny.Print((_14_haltMessage).SetString())
+					_dafny.Print((_1_haltMessage).SetString())
 					_dafny.Print((_dafny.SeqOfString("\n")).SetString())
-					_13_success = false
+					_0_success = false
 				}
 			}
 		}()
@@ -103,12 +98,12 @@ func (_static *CompanionStruct_Default___) Test____Main____(__noArgsParameter _d
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
-				var _15_haltMessage = _dafny.SeqOfString(r.(string))
+				var _2_haltMessage = _dafny.SeqOfString(r.(string))
 				{
 					_dafny.Print((_dafny.SeqOfString("FAILED\n	")).SetString())
-					_dafny.Print((_15_haltMessage).SetString())
+					_dafny.Print((_2_haltMessage).SetString())
 					_dafny.Print((_dafny.SeqOfString("\n")).SetString())
-					_13_success = false
+					_0_success = false
 				}
 			}
 		}()
@@ -119,7 +114,7 @@ func (_static *CompanionStruct_Default___) Test____Main____(__noArgsParameter _d
 			}
 		}
 	}()
-	if !(_13_success) {
+	if !(_0_success) {
 		panic("<stdin>(1,0): " + (_dafny.SeqOfString("Test failures occurred: see above.\n")).String())
 	}
 }

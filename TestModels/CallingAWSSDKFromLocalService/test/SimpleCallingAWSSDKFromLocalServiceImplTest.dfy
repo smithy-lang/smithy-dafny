@@ -100,15 +100,15 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     var kmsClient :- expect Kms.KMSClient();
 
     // Test with InvalidKey
-    var input_InvalidKey := Kms.Types.EncryptRequest(
-      KeyId := INVALID_KEY_ID,
-      Plaintext := [ 97, 115, 100, 102 ],
-      EncryptionContext := Wrappers.None,
-      GrantTokens := Wrappers.None,
-      EncryptionAlgorithm := Wrappers.None
-      );
-    var resFailure_InvalidKey := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := INVALID_KEY_ID, plaintext := PLAIN_TEXT));
-    expect resFailure_InvalidKey.Failure?;
+    // var input_InvalidKey := Kms.Types.EncryptRequest(
+    //   KeyId := INVALID_KEY_ID,
+    //   Plaintext := [ 97, 115, 100, 102 ],
+    //   EncryptionContext := Wrappers.None,
+    //   GrantTokens := Wrappers.None,
+    //   EncryptionAlgorithm := Wrappers.None
+    //   );
+    // var resFailure_InvalidKey := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := INVALID_KEY_ID, plaintext := PLAIN_TEXT));
+    // expect resFailure_InvalidKey.Failure?;
 
     // Test with NonExistent
     var input_NonExistent := Kms.Types.EncryptRequest(

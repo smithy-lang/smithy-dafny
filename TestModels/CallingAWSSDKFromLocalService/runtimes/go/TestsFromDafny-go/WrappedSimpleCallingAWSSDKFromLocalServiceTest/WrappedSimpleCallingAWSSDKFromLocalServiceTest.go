@@ -6,11 +6,6 @@ package WrappedSimpleCallingAWSSDKFromLocalServiceTest
 import (
 	os "os"
 
-	Com "github.com/smithy-lang/smithy-dafny/kms/Com"
-	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
-	Com_Amazonaws "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws"
-	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
-
 	_System "github.com/dafny-lang/DafnyRuntimeGo/System_"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	StandardLibrary "github.com/dafny-lang/DafnyStandardLibGo/StandardLibrary"
@@ -22,6 +17,8 @@ import (
 	SimpleCallingawssdkfromlocalserviceTypes "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingawssdkfromlocalserviceTypes"
 	SimpleCallingAWSSDKFromLocalServiceImplTest "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test/SimpleCallingAWSSDKFromLocalServiceImplTest"
 	WrappedSimpleCallingAWSSDKFromLocalServiceService "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test/WrappedSimpleCallingAWSSDKFromLocalServiceService"
+	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
+	Com_Amazonaws_Kms "github.com/smithy-lang/smithy-dafny/kms/Com_Amazonaws_Kms"
 )
 
 var _ = os.Args
@@ -33,8 +30,6 @@ var _ StandardLibrary.Dummy__
 var _ ComAmazonawsKmsTypes.Dummy__
 var _ SimpleCallingawssdkfromlocalserviceTypes.Dummy__
 var _ Com_Amazonaws_Kms.Dummy__
-var _ Com_Amazonaws.Dummy__
-var _ Com.Dummy__
 var _ SimpleCallingAWSSDKFromLocalServiceImpl.Dummy__
 var _ SimpleCallingAWSSDKFromLocalService.Dummy__
 var _ StandardLibraryInterop.Dummy__
@@ -78,22 +73,20 @@ func (_this *Default__) ParentTraits_() []*_dafny.TraitID {
 var _ _dafny.TraitOffspring = &Default__{}
 
 func (_static *CompanionStruct_Default___) TestCallKMSEncrypt() {
-	var _11_client SimpleCallingawssdkfromlocalserviceTypes.ISimpleCallingAWSSDKFromLocalServiceClient
-	_ = _11_client
-	var _12_valueOrError0 Wrappers.Result = Wrappers.Result{}
-	_ = _12_valueOrError0
-	var _out6 Wrappers.Result
-	_ = _out6
-	_out6 = WrappedSimpleCallingAWSSDKFromLocalServiceService.Companion_Default___.WrappedSimpleCallingAWSSDKFromLocalService(WrappedSimpleCallingAWSSDKFromLocalServiceService.Companion_Default___.WrappedDefaultSimpleCallingAWSSDKFromLocalServiceConfig())
-	_12_valueOrError0 = _out6
-	if !(!((_12_valueOrError0).IsFailure())) {
-		panic("test/WrappedSimpleCallingAWSSDKFromLocalServiceTest.dfy(18,18): " + (_12_valueOrError0).String())
+	var _0_valueOrError0 Wrappers.Result = Wrappers.Result{}
+	_ = _0_valueOrError0
+	var _out0 Wrappers.Result
+	_ = _out0
+	_out0 = WrappedSimpleCallingAWSSDKFromLocalServiceService.Companion_Default___.WrappedSimpleCallingAWSSDKFromLocalService(WrappedSimpleCallingAWSSDKFromLocalServiceService.Companion_Default___.WrappedDefaultSimpleCallingAWSSDKFromLocalServiceConfig())
+	_0_valueOrError0 = _out0
+	if !(!((_0_valueOrError0).IsFailure())) {
+		panic("test/WrappedSimpleCallingAWSSDKFromLocalServiceTest.dfy(18,18): " + (_0_valueOrError0).String())
 	}
-
-	_11_client = SimpleCallingawssdkfromlocalserviceTypes.Companion_ISimpleCallingAWSSDKFromLocalServiceClient_.CastTo_((_12_valueOrError0).Extract())
-	SimpleCallingAWSSDKFromLocalServiceImplTest.Companion_Default___.TestCallKMSEncrypt__Success(_11_client)
-
-	SimpleCallingAWSSDKFromLocalServiceImplTest.Companion_Default___.TestCallKMSEncrypt__Failure(_11_client)
+	var _1_client SimpleCallingawssdkfromlocalserviceTypes.ISimpleCallingAWSSDKFromLocalServiceClient
+	_ = _1_client
+	_1_client = SimpleCallingawssdkfromlocalserviceTypes.Companion_ISimpleCallingAWSSDKFromLocalServiceClient_.CastTo_((_0_valueOrError0).Extract())
+	SimpleCallingAWSSDKFromLocalServiceImplTest.Companion_Default___.TestCallKMSEncrypt__Success(_1_client)
+	SimpleCallingAWSSDKFromLocalServiceImplTest.Companion_Default___.TestCallKMSEncrypt__Failure(_1_client)
 }
 
 // End of class Default__

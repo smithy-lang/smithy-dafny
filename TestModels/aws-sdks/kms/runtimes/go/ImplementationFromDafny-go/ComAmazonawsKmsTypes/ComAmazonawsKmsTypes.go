@@ -16515,9 +16515,9 @@ func (_this type_TrustAnchorCertificateType_) String() string {
 	return "ComAmazonawsKmsTypes.TrustAnchorCertificateType"
 }
 func (_this *CompanionStruct_TrustAnchorCertificateType_) Is_(__source _dafny.Sequence) bool {
-	var _27_x _dafny.Sequence = (__source)
-	_ = _27_x
-	return Companion_Default___.IsValid__TrustAnchorCertificateType(_27_x)
+	var _0_x _dafny.Sequence = (__source)
+	_ = _0_x
+	return Companion_Default___.IsValid__TrustAnchorCertificateType(_0_x)
 }
 
 // Definition of datatype UntagResourceRequest
@@ -17946,9 +17946,9 @@ func (_this type_XksKeyIdType_) String() string {
 	return "ComAmazonawsKmsTypes.XksKeyIdType"
 }
 func (_this *CompanionStruct_XksKeyIdType_) Is_(__source _dafny.Sequence) bool {
-	var _28_x _dafny.Sequence = (__source)
-	_ = _28_x
-	return Companion_Default___.IsValid__XksKeyIdType(_28_x)
+	var _1_x _dafny.Sequence = (__source)
+	_ = _1_x
+	return Companion_Default___.IsValid__XksKeyIdType(_1_x)
 }
 
 // Definition of class XksProxyAuthenticationAccessKeyIdType
@@ -17987,9 +17987,9 @@ func (_this type_XksProxyAuthenticationAccessKeyIdType_) String() string {
 	return "ComAmazonawsKmsTypes.XksProxyAuthenticationAccessKeyIdType"
 }
 func (_this *CompanionStruct_XksProxyAuthenticationAccessKeyIdType_) Is_(__source _dafny.Sequence) bool {
-	var _29_x _dafny.Sequence = (__source)
-	_ = _29_x
-	return Companion_Default___.IsValid__XksProxyAuthenticationAccessKeyIdType(_29_x)
+	var _2_x _dafny.Sequence = (__source)
+	_ = _2_x
+	return Companion_Default___.IsValid__XksProxyAuthenticationAccessKeyIdType(_2_x)
 }
 
 // Definition of datatype XksProxyAuthenticationCredentialType
@@ -18131,9 +18131,9 @@ func (_this type_XksProxyAuthenticationRawSecretAccessKeyType_) String() string 
 	return "ComAmazonawsKmsTypes.XksProxyAuthenticationRawSecretAccessKeyType"
 }
 func (_this *CompanionStruct_XksProxyAuthenticationRawSecretAccessKeyType_) Is_(__source _dafny.Sequence) bool {
-	var _30_x _dafny.Sequence = (__source)
-	_ = _30_x
-	return Companion_Default___.IsValid__XksProxyAuthenticationRawSecretAccessKeyType(_30_x)
+	var _3_x _dafny.Sequence = (__source)
+	_ = _3_x
+	return Companion_Default___.IsValid__XksProxyAuthenticationRawSecretAccessKeyType(_3_x)
 }
 
 // Definition of datatype XksProxyConfigurationType
@@ -18419,9 +18419,9 @@ func (_this type_XksProxyUriEndpointType_) String() string {
 	return "ComAmazonawsKmsTypes.XksProxyUriEndpointType"
 }
 func (_this *CompanionStruct_XksProxyUriEndpointType_) Is_(__source _dafny.Sequence) bool {
-	var _31_x _dafny.Sequence = (__source)
-	_ = _31_x
-	return Companion_Default___.IsValid__XksProxyUriEndpointType(_31_x)
+	var _4_x _dafny.Sequence = (__source)
+	_ = _4_x
+	return Companion_Default___.IsValid__XksProxyUriEndpointType(_4_x)
 }
 
 // Definition of class XksProxyUriPathType
@@ -18460,9 +18460,9 @@ func (_this type_XksProxyUriPathType_) String() string {
 	return "ComAmazonawsKmsTypes.XksProxyUriPathType"
 }
 func (_this *CompanionStruct_XksProxyUriPathType_) Is_(__source _dafny.Sequence) bool {
-	var _32_x _dafny.Sequence = (__source)
-	_ = _32_x
-	return Companion_Default___.IsValid__XksProxyUriPathType(_32_x)
+	var _5_x _dafny.Sequence = (__source)
+	_ = _5_x
+	return Companion_Default___.IsValid__XksProxyUriPathType(_5_x)
 }
 
 // Definition of class XksProxyVpcEndpointServiceNameType
@@ -18501,9 +18501,9 @@ func (_this type_XksProxyVpcEndpointServiceNameType_) String() string {
 	return "ComAmazonawsKmsTypes.XksProxyVpcEndpointServiceNameType"
 }
 func (_this *CompanionStruct_XksProxyVpcEndpointServiceNameType_) Is_(__source _dafny.Sequence) bool {
-	var _33_x _dafny.Sequence = (__source)
-	_ = _33_x
-	return Companion_Default___.IsValid__XksProxyVpcEndpointServiceNameType(_33_x)
+	var _6_x _dafny.Sequence = (__source)
+	_ = _6_x
+	return Companion_Default___.IsValid__XksProxyVpcEndpointServiceNameType(_6_x)
 }
 
 // Definition of datatype Error
@@ -19892,7 +19892,7 @@ func (_this type_OpaqueError_) String() string {
 	return "ComAmazonawsKmsTypes.OpaqueError"
 }
 func (_this *CompanionStruct_OpaqueError_) Is_(__source Error) bool {
-	var _34_e Error = (__source)
-	_ = _34_e
-	return (_34_e).Is_Opaque()
+	var _7_e Error = (__source)
+	_ = _7_e
+	return (_7_e).Is_Opaque()
 }

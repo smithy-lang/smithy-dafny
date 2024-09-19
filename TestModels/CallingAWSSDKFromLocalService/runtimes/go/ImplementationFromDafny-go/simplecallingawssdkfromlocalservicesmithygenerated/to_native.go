@@ -110,6 +110,8 @@ func Error_FromDafny(err SimpleCallingawssdkfromlocalserviceTypes.Error) error {
 
 	//DependentErrors
 	if err.Is_ComAmazonawsKms() {
+		fmt.Println("Yo")
+		fmt.Println(comamazonawskmssmithygenerated.Error_FromDafny(err.Dtor_ComAmazonawsKms()))
 		return comamazonawskmssmithygenerated.Error_FromDafny(err.Dtor_ComAmazonawsKms())
 	}
 	//Unmodelled Errors

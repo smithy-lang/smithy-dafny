@@ -6,7 +6,6 @@ import (
 	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingawssdkfromlocalserviceTypes"
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/simplecallingawssdkfromlocalservicesmithygeneratedtypes"
-	"github.com/smithy-lang/smithy-dafny/kms/comamazonawskmssmithygenerated"
 )
 
 func CallKMSEncryptInput_FromDafny(dafnyInput SimpleCallingawssdkfromlocalserviceTypes.CallKMSEncryptInput) simplecallingawssdkfromlocalservicesmithygeneratedtypes.CallKMSEncryptInput {
