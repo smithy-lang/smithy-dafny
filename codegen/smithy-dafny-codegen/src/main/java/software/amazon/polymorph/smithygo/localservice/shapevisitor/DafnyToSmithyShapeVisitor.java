@@ -94,13 +94,14 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 return "%1$s{%2$s}".formatted(namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()), dataSource);
             }
             return """
-                    func () *%s {
+                    return func () *%s {
                         if %s == nil {
                             return nil;
                         }
                         return &%s{%s.(*%s)}
-                    }()
-            }""".formatted(namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()), dataSource, namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()),
+                    }()""".formatted(
+                        namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()), 
+                        dataSource, namespace.concat(context.symbolProvider().toSymbol(serviceShape).getName()),
                                      dataSource, DafnyNameResolver.getDafnyClient(serviceShape, serviceShape.toShapeId().getName()));
         }
     }
