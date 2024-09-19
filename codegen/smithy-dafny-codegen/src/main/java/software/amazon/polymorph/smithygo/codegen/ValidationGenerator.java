@@ -138,8 +138,7 @@ public class ValidationGenerator {
                         String funcInput = dataSource.startsWith("input") ? "" : dataSource;
                         if (!funcInput.equals("")) {
                             ListShape listShapeCast = (ListShape) currentShape;
-                            MemberShape listMember = listShapeCast.getMember();
-                            String inputType = SmithyNameResolver.getSmithyType(currentShape, symbolProvider.toSymbol(listMember), model, symbolProvider);
+                            String inputType = SmithyNameResolver.getSmithyType(currentShape, symbolProvider.toSymbol(listShapeCast), model, symbolProvider);
                             inputType = inputType.replace(SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."), "");
                             validationFuncInputTypeMap.put(memberShape, inputType);
                             dataSource = "Value";
@@ -166,9 +165,7 @@ public class ValidationGenerator {
                         if (!funcInput.equals("")) {
                             MapShape mapShapeCast = (MapShape) currentShape;
                             MemberShape valueMemberShape = mapShapeCast.getValue();
-                            final Shape valueTargetShape = model.expectShape(valueMemberShape.getTarget());
-                            String inputType = "map[string]".concat((symbolProvider.toSymbol(valueTargetShape)).getName());
-
+                            String inputType = SmithyNameResolver.getSmithyType(mapShapeCast, symbolProvider.toSymbol(mapShapeCast), model, symbolProvider);
                             validationFuncInputTypeMap.put(memberShape, inputType);
                             dataSource = "Value";
                         }
