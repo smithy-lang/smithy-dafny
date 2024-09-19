@@ -156,7 +156,11 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
               ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
               >
             > {
-            let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+            let shared_config = tokio::task::block_in_place(|| {
+              dafny_tokio_runtime.block_on(async {
+                aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()).await
+              })
+            });
             let inner = $sdkCrate:L::Client::new(&shared_config);
             let client = Client { inner };
             let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
@@ -206,10 +210,14 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           >
         > {
           let inner_input = $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone());
-          let native_result = dafny_tokio_runtime.block_on(
-            self.inner.$snakeCaseOperationName:L()
-              $fluentSetters:L
-              .send());
+          let native_result = tokio::task::block_in_place(|| {
+            dafny_tokio_runtime.block_on(async {
+              self.inner.$snakeCaseOperationName:L()
+                $fluentSetters:L
+                .send()
+                .await
+              })
+            });
           crate::standard_library_conversions::result_to_dafny(&native_result,\s
             $outputToDafnyMapper:L,
             $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::to_dafny_error)
