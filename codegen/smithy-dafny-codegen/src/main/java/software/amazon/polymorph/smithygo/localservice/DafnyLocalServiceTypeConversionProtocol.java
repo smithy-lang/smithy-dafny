@@ -173,8 +173,8 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                 alreadyVisited.add(visitingMemberShape.toShapeId());
                 String inputType;
                 String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(visitingMemberShape)? "Wrappers.Option": DafnyNameResolver.getDafnyType(visitingShape, context.symbolProvider().toSymbol(visitingShape));
-                inputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape), model, context.symbolProvider());                
-                if (context.symbolProvider().toSymbol(visitingMemberShape).getProperty(POINTABLE, Boolean.class).orElse(false) == true)
+                inputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape), model, context.symbolProvider());     
+                if (context.symbolProvider().toSymbol(visitingMemberShape).getProperty(POINTABLE, Boolean.class).orElse(false))
                     inputType = "*".concat(inputType);
                 writer.write("""
                             func $L(input $L)($L) {
@@ -333,7 +333,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                                 ShapeVisitorHelper.funcNameGenerator(visitingMemberShape, "FromDafny"),
                                 outputType,
                                 DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
-                            );
+                );
             }
         });
     }
