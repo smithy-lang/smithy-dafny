@@ -20,6 +20,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 import java.nio.file.Path;
@@ -419,6 +420,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       "fluentMemberSetters",
       fluentMemberSettersForStructure(inputShape).toString()
     );
+    variables.put("unwrapIfNecessary", ".unwrap()");
 
     return TokenTree.of(
       evalTemplate(
@@ -432,7 +434,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             $sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationInputStruct:L::builder()
                   $fluentMemberSetters:L
                   .build()
-                  .unwrap()
+                  $unwrapIfNecessary:L
         }
         """,
         variables
@@ -512,6 +514,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       "fluentMemberSetters",
       fluentMemberSettersForStructure(outputShape).toString()
     );
+    variables.put("unwrapIfNecessary",
+      // TODO: Can't figure out why this one is fallible but not other similar output structures
+      outputShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#DescribeEndpointsResponse")) ? ".unwrap()" : "");
 
     return TokenTree.of(
       evalTemplate(
@@ -525,6 +530,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             $sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationOutputStruct:L::builder()
                   $fluentMemberSetters:L
                   .build()
+                  $unwrapIfNecessary:L
+                  
         }
         """,
         variables
