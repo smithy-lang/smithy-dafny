@@ -1672,25 +1672,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return operationName(operationShape) + "Output";
   }
 
-  /**
-   * Generates values for variables commonly used in structure-member-specific templates.
-   */
-  private HashMap<String, String> structureMemberVariables(
-    final MemberShape memberShape
-  ) {
-
-    final HashMap<String, String> variables = new HashMap<>();
-    final String memberName = memberShape.getMemberName();
-    final Shape targetShape = model.expectShape(memberShape.getTarget());
-    variables.put("memberName", memberName);
-    variables.put("fieldName", toSnakeCase(memberName));
-    variables.put(
-      "fieldType",
-      mergedGeneratorRustTypeForShape(targetShape)
-    );
-    return variables;
-  }
-
   private Map<String, String> dependentServiceErrorVariables(
     final ServiceShape serviceShape,
     final ServiceShape dependentServiceShape

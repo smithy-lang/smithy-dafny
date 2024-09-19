@@ -1462,7 +1462,7 @@ public abstract class AbstractRustShimGenerator {
 
   protected String qualifiedRustUnionName(final UnionShape unionShape) {
     return "%s::%s".formatted(
-        getRustTypesModuleName(),
+        mergedGenerator.generatorForShape(unionShape).getRustTypesModuleName(),
         rustUnionName(unionShape)
       );
   }
@@ -1512,6 +1512,27 @@ public abstract class AbstractRustShimGenerator {
     variables.put("unionMemberType", rustTypeForShape(targetShape));
     return variables;
   }
+
+  /**
+   * Generates values for variables commonly used in structure-member-specific templates.
+   */
+  protected HashMap<String, String> structureMemberVariables(
+    final MemberShape memberShape
+  ) {
+
+    final HashMap<String, String> variables = new HashMap<>();
+    final String memberName = memberShape.getMemberName();
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
+    variables.put("memberName", memberName);
+    variables.put("fieldName", toSnakeCase(memberName));
+    variables.put(
+      "fieldType",
+      mergedGeneratorRustTypeForShape(targetShape)
+    );
+    return variables;
+  }
+
+
 
 
   protected String qualifiedRustServiceErrorType() {

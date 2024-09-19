@@ -20,6 +20,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -175,16 +176,24 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       operationVariables(bindingShape, operationShape)
     );
 
-    final ShapeId outputShapeId = operationShape.getOutputShape();
-    final String outputType = outputShapeId.equals(
-        ShapeId.from("smithy.api#Unit")
-      )
+    final StructureShape inputShape = operationIndex.getInputShape(operationShape).get();
+    final StructureShape outputShape = operationIndex.getOutputShape(operationShape).get();
+    final String outputType = outputShape.hasTrait(UnitTypeTrait.class)
       ? "()"
       : evalTemplate(
         "std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$operationOutputName:L>",
         variables
       );
     variables.put("outputType", outputType);
+
+    variables.put("fluentSetters", inputShape.members()
+      .stream()
+      .map(member -> evalTemplate(".set_$fieldName:L(inner_input.$fieldName:L)", structureMemberVariables(member)))
+      .collect(Collectors.joining("\n")));
+
+    variables.put("outputToDafnyMapper", outputShape.hasTrait(UnitTypeTrait.class)
+        ? "|x| ()"
+        : evalTemplate("$rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_response::to_dafny", variables));
 
     return TokenTree.of(
       evalTemplate(
@@ -195,10 +204,13 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
           >
         > {
-          let native_result =\s
-            dafny_tokio_runtime.block_on($rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone()).send());
+          let inner_input = $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone());
+          let native_result = dafny_tokio_runtime.block_on(
+            self.inner.$snakeCaseOperationName:L()
+              $fluentSetters:L
+              .send());
           crate::standard_library_conversions::result_to_dafny(&native_result,\s
-            $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_response::to_dafny,
+            $outputToDafnyMapper:L,
             $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::to_dafny_error)
         }
         """,
