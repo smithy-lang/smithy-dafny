@@ -29,6 +29,8 @@ import software.amazon.smithy.utils.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;
@@ -145,8 +147,14 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
             //TODO: Is it ever possible for structure to be nil?
+            String maybeAssertion = "";
+            if (dataSource.equals("input"))
+                maybeAssertion = ".("
+                    .concat(DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)))
+                    .concat(")");
             final boolean assertionRequired = memberShape.isOptional() && targetShape.isStructureShape() && !targetShape.hasTrait(ReferenceTrait.class);
-            final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
+            final var derivedDataSource = "%1$s%2$s%3$s%4$s%5$s".formatted(dataSource,
+                                                                        maybeAssertion,
                                                                        ".Dtor_%s()".formatted(memberName),
                                                                        memberShape.isOptional() ? ".UnwrapOr(nil)" : "",
                                                                        assertionRequired ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(memberShape))) : "");
@@ -401,7 +409,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final String rawUnionDataSource = "(" + dataSource + ".(" + DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape)) + "))";
             // unwrap union type, assert it then convert it to its member type with Dtor_ (example: Dtor_BlobValue()). unionDataSource is not a wrapper object until now.
             String unionDataSource = rawUnionDataSource + ".Dtor_" + memberName.replace(shape.getId().getName() + "Member", "") + "()";
-            final Boolean isMemberShapePointable = (GoPointableIndex.of(context.model()).isPointable(targetShape) && GoPointableIndex.of(context.model()).isDereferencable(targetShape)) && !targetShape.isStructureShape();
+            final Boolean isMemberShapePointable = (GoPointableIndex.of(context.model()).isPointable(member)) && !targetShape.isStructureShape();
             final String pointerForPointableShape = isMemberShapePointable ? "*" : "";
             final String isMemberCheck = """
                         if ((%s).%s()) {""".formatted(
