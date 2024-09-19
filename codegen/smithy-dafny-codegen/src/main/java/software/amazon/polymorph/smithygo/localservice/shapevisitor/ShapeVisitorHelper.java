@@ -39,27 +39,18 @@ public class ShapeVisitorHelper {
                 .concat(")");
         }
         String nextVisitorFunction;
-        // if (!targetShape.hasTrait(ReferenceTrait.class) && (targetShape.isStructureShape() || targetShape.isUnionShape() || targetShape.isListShape() || targetShape.isMapShape())) {
-            String funcDataSource = "input";
-            if (!DafnyToSmithyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-                DafnyToSmithyShapeVisitor.visitorFuncMap.put(memberShape, "");
-                DafnyToSmithyShapeVisitor.visitorFuncMap.put(
-                    memberShape, 
-                    targetShape.accept(
-                        new DafnyToSmithyShapeVisitor(context, funcDataSource.concat(maybeAssertion), writer, isConfigShape, isOptional)
-                    )
-                );
-            }
-            String funcName = funcNameGenerator(memberShape, "FromDafny");
-            nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
-        // }
-        // else {
-        //     if (dataSource.startsWith("input"))
-        //         dataSource = "input";
-        //     nextVisitorFunction = targetShape.accept(
-        //         new DafnyToSmithyShapeVisitor(context, dataSource, writer, isConfigShape, isOptional)
-        //     );
-        // }
+        String funcDataSource = "input";
+        if (!DafnyToSmithyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
+            DafnyToSmithyShapeVisitor.visitorFuncMap.put(memberShape, "");
+            DafnyToSmithyShapeVisitor.visitorFuncMap.put(
+                memberShape, 
+                targetShape.accept(
+                    new DafnyToSmithyShapeVisitor(context, funcDataSource.concat(maybeAssertion), writer, isConfigShape, isOptional)
+                )
+            );
+        }
+        String funcName = funcNameGenerator(memberShape, "FromDafny");
+        nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
         return nextVisitorFunction;
     }
 
