@@ -637,6 +637,14 @@ transpile_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_pre_transpile, )
 transpile_python: | transpile_dependencies_python transpile_implementation_python transpile_test_python
 transpile_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_post_transpile, )
 
+# This target should ONLY be used if you KNOW .dtr files are present.
+# This file will NOT transpile source code or source code dependencies,
+# so it will not re-generaate .dtr files.
+# The intended use case is to generate tests in release scripts without re-transpiling source code.
+transpile_only_test_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_pre_transpile, )
+transpile_only_test_python: transpile_test_python
+transpile_only_test_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_post_transpile, )
+
 transpile_implementation_python: DAFNY_OPTIONS=--allow-warnings --include-test-runner
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
