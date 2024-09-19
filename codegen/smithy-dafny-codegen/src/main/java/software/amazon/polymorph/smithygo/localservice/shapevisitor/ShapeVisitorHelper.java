@@ -30,7 +30,7 @@ public class ShapeVisitorHelper {
             .concat(suffix);
     }
     
-    public static String toNativeContainerShapeHelper (final MemberShape memberShape, final GenerationContext context, final String dataSource, final Boolean assertionRequired, final GoWriter writer, final boolean isConfigShape, final boolean isOptional) {
+    public static String toNativeContainerShapeHelper (final MemberShape memberShape, final GenerationContext context, String dataSource, final Boolean assertionRequired, final GoWriter writer, final boolean isConfigShape, final boolean isOptional) {
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
         String maybeAssertion = "";
         if (assertionRequired) {
@@ -39,7 +39,7 @@ public class ShapeVisitorHelper {
                 .concat(")");
         }
         String nextVisitorFunction;
-        if (!targetShape.hasTrait(ReferenceTrait.class) && (targetShape.isStructureShape() || targetShape.isUnionShape() || targetShape.isListShape() || targetShape.isMapShape())) {
+        // if (!targetShape.hasTrait(ReferenceTrait.class) && (targetShape.isStructureShape() || targetShape.isUnionShape() || targetShape.isListShape() || targetShape.isMapShape())) {
             String funcDataSource = "input";
             if (!DafnyToSmithyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
                 DafnyToSmithyShapeVisitor.visitorFuncMap.put(memberShape, "");
@@ -52,11 +52,14 @@ public class ShapeVisitorHelper {
             }
             String funcName = funcNameGenerator(memberShape, "FromDafny");
             nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
-        } else {
-            nextVisitorFunction = targetShape.accept(
-                new DafnyToSmithyShapeVisitor(context, dataSource.concat(maybeAssertion), writer, isConfigShape, isOptional)
-            );
-        }
+        // }
+        // else {
+        //     if (dataSource.startsWith("input"))
+        //         dataSource = "input";
+        //     nextVisitorFunction = targetShape.accept(
+        //         new DafnyToSmithyShapeVisitor(context, dataSource, writer, isConfigShape, isOptional)
+        //     );
+        // }
         return nextVisitorFunction;
     }
 
