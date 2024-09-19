@@ -81,8 +81,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             return nil;
                         }
                         return %s
-                    }()
-                }""".formatted(SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), dataSource,
+                    }()""".formatted(SmithyNameResolver.smithyTypesNamespace(resourceShape), resourceShape.getId().getName(), dataSource,
                                      "%s_FromDafny(%s.(%s.I%s))".formatted(namespace.concat(resourceShape.toShapeId().getName()), dataSource,
                                                                          DafnyNameResolver.dafnyTypesNamespace(resourceShape), resourceShape.getId().getName()));
         } else {
