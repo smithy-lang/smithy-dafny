@@ -248,7 +248,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                         return &b
                     }()""".formatted(dataSource, dataSource, context.symbolProvider().toSymbol(shape).getName());
         } else {
-            return "%s.(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape).getName());
+            return "return %s.(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape).getName());
         }
     }
 
