@@ -332,7 +332,7 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                         outputType = namespace.concat(context.symbolProvider().toSymbol(resourceOrService).getName());
                     }
                 }           
-                if (context.symbolProvider().toSymbol(visitingMemberShape).getProperty(POINTABLE, Boolean.class).orElse(false) == true)
+                if (context.symbolProvider().toSymbol(visitingMemberShape).getProperty(POINTABLE, Boolean.class).orElse(false))
                     outputType = "*".concat(outputType);
                 writer.write("""
                             func $L(input interface{})($L) {
