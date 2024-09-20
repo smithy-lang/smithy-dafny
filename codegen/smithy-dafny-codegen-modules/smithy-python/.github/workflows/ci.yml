@@ -1,0 +1,101 @@
+name: CI
+
+on:
+    push:
+        branches: develop
+    pull_request:
+        branches: develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: Set up Python for Pants - 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Set up Python for CI - ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run tests
+        run: |
+          ./pants --no-dynamic-ui test --use-coverage ::
+      - name: Upload coverage
+        if: matrix.python-version == 3.11
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./dist/coverage/python/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+
+  test-codegen:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+    name: Codegen Java 17 / Python ${{ matrix.python-version }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download Coretto 17 JDK
+        run: |
+          download_url="https://corretto.aws/downloads/latest/amazon-corretto-17-x64-linux-jdk.tar.gz"
+          wget -O $RUNNER_TEMP/java_package.tar.gz $download_url
+
+      - name: Set up Coretto 17 JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'jdkfile'
+          jdkFile: ${{ runner.temp }}/java_package.tar.gz
+          java-version: 17
+          architecture: x64
+
+      - name: clean and build without python
+        run: cd codegen && ./gradlew clean build -Plog-tests
+
+      - name: Set up Python for Pants - 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Set Up Python for CI - ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install smithy-python
+        run: |
+          ./pants --no-dynamic-ui package ::
+          python${{ matrix.python-version }} -m pip install dist/*.whl
+
+      - name: clean and build without formatting/linting installed
+        run: cd codegen && ./gradlew clean build -Plog-tests
+
+      - name: Install black
+        run: |
+          python${{ matrix.python-version }} -m pip install --upgrade black
+
+      - name: clean and build without linting installed
+        run: cd codegen && ./gradlew clean build -Plog-tests
+
+      - name: Install mypy and other libraries necessary for typing
+        run: |
+          python${{ matrix.python-version }} -m pip install --upgrade mypy pytest pytest-asyncio
+
+      - name: clean and build with all optional tools installed
+        run: cd codegen && ./gradlew clean build -Plog-tests

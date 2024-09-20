@@ -3,33 +3,33 @@
 pub fn to_dafny(
     value: crate::types::StringStructure,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
+    crate::r#simple::aggregate::internaldafny::types::StringStructure,
 > {
-    ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure::StringStructure {
-  value: dafny_standard_library::conversion::ostring_to_dafny(&value.value),
+    ::std::rc::Rc::new(crate::r#simple::aggregate::internaldafny::types::StringStructure::StringStructure {
+  value: crate::standard_library_conversions::ostring_to_dafny(&value.value),
 })
 }
 
 pub fn to_dafny_plain(
     value: crate::types::StringStructure,
-) -> crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure {
-    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure::StringStructure {
-  value: dafny_standard_library::conversion::ostring_to_dafny(&value.value),
+) -> crate::r#simple::aggregate::internaldafny::types::StringStructure {
+    crate::r#simple::aggregate::internaldafny::types::StringStructure::StringStructure {
+  value: crate::standard_library_conversions::ostring_to_dafny(&value.value),
 }
 }
 
 pub fn option_to_dafny(
     value: Option<crate::types::StringStructure>,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_Wrappers_Compile::Option<
+    crate::_Wrappers_Compile::Option<
         ::std::rc::Rc<
-            crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
+            crate::r#simple::aggregate::internaldafny::types::StringStructure,
         >,
     >,
 > {
     let inner = match value {
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
-        Some(x) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
+        None => crate::_Wrappers_Compile::Option::None {},
+        Some(x) => crate::_Wrappers_Compile::Option::Some {
             value: ::std::rc::Rc::new(to_dafny_plain(x)),
         },
     };
@@ -39,7 +39,7 @@ pub fn option_to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
+        crate::r#simple::aggregate::internaldafny::types::StringStructure,
     >,
 ) -> crate::types::StringStructure {
     plain_from_dafny(&*dafny_value)
@@ -47,26 +47,26 @@ pub fn from_dafny(
 
 #[allow(dead_code)]
 pub fn plain_from_dafny(
-    dafny_value : &crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
+    dafny_value : &crate::r#simple::aggregate::internaldafny::types::StringStructure,
 ) -> crate::types::StringStructure {
     match dafny_value {
-    crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure::StringStructure {
+    crate::r#simple::aggregate::internaldafny::types::StringStructure::StringStructure {
       value,
     } =>
     crate::types::StringStructure {
-      value: dafny_standard_library::conversion::ostring_from_dafny(value.clone()),
+      value: crate::standard_library_conversions::ostring_from_dafny(value.clone()),
     }
 }
 }
 
 #[allow(dead_code)]
 pub fn option_from_dafny(
-    dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::_Wrappers_Compile::Option<::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_daggregate_dinternaldafny_dtypes::StringStructure,
+    dafny_value: ::std::rc::Rc<crate::_Wrappers_Compile::Option<::std::rc::Rc<
+        crate::r#simple::aggregate::internaldafny::types::StringStructure,
     >>>,
 ) -> Option<crate::types::StringStructure> {
     match &*dafny_value {
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value } => {
+        crate::_Wrappers_Compile::Option::Some { value } => {
             Some(plain_from_dafny(value))
         }
         _ => None,

@@ -5,21 +5,21 @@ use std::any::Any;
 #[allow(dead_code)]
 pub fn to_dafny_error(
     value: crate::operation::get_refinement::GetRefinementError,
-) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error> {
+) -> ::std::rc::Rc<crate::r#simple::refinement::internaldafny::types::Error> {
     match value {
     crate::operation::get_refinement::GetRefinementError::Unhandled(unhandled) =>
-      ::std::rc::Rc::new(crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
+      ::std::rc::Rc::new(crate::r#simple::refinement::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
   }
 }
 
 #[allow(dead_code)]
 pub fn from_dafny_error(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error,
+        crate::r#simple::refinement::internaldafny::types::Error,
     >,
 ) -> crate::operation::get_refinement::GetRefinementError {
     // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-    if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_drefinement_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
+    if matches!(&dafny_value.as_ref(), crate::r#simple::refinement::internaldafny::types::Error::CollectionOfErrors { .. }) {
     let error_message = "TODO: can't get message yet";
     crate::operation::get_refinement::GetRefinementError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
   } else {

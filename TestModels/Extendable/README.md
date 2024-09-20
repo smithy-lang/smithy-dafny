@@ -34,7 +34,7 @@ However, providing both tests let's us:
 
 (2.) has great merit,
 as we will have to implement `localServiceWrapper` in
-every langauge `smithy-dafny` supports.
+every language `smithy-dafny` supports.
 
 We need evidence that an implementation of `localServiceWrapper` is
 correct.

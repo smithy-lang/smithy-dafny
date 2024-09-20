@@ -3,11 +3,13 @@
 using Wrappers_Compile;
 using Simple.Multiplemodels.Primaryproject;
 using Simple.Multiplemodels.Primaryproject.Wrapped;
-using TypeConversion = Simple.Multiplemodels.Primaryproject.TypeConversion ;
+using TypeConversion = Simple.Multiplemodels.Primaryproject.TypeConversion;
 namespace simple.multiplemodels.primaryproject.internaldafny.wrapped
 {
-    public partial class __default {
-        public static _IResult<types.IPrimaryProjectClient, types._IError> WrappedPrimaryProject(types._IPrimaryProjectConfig config) {
+    public partial class __default
+    {
+        public static _IResult<types.IPrimaryProjectClient, types._IError> WrappedPrimaryProject(types._IPrimaryProjectConfig config)
+        {
             var wrappedConfig = TypeConversion.FromDafny_N6_simple__N14_multiplemodels__N14_primaryproject__S20_PrimaryProjectConfig(config);
             var impl = new PrimaryProject(wrappedConfig);
             var wrappedClient = new PrimaryProjectShim(impl);

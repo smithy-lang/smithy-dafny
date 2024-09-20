@@ -1,7 +1,5 @@
 package software.amazon.polymorph.smithygo.localservice;
-
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -435,8 +433,8 @@ public class DafnyLocalServiceTypeConversionProtocol
 
                 writer.write(
                   """
-                   func $L(dafnyInput $L)($L) {
-                       ${C|}
+                  func $L(dafnyInput $L)($L) {
+                      ${C|}
                   }""",
                   inputFromDafnyMethodName,
                   DafnyNameResolver.getDafnyType(input, inputSymbol),
@@ -490,8 +488,8 @@ public class DafnyLocalServiceTypeConversionProtocol
 
                 writer.write(
                   """
-                   func $L(dafnyOutput $L)($L) {
-                       ${C|}
+                  func $L(dafnyOutput $L)($L) {
+                      ${C|}
                   }""",
                   outputFromDafnyMethodName,
                   DafnyNameResolver.getDafnyType(output, outputSymbol),
@@ -509,6 +507,7 @@ public class DafnyLocalServiceTypeConversionProtocol
           }
         }
       });
+
     var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
     for (var refResource : refResources) {
       final var resource = refResource
@@ -563,8 +562,8 @@ public class DafnyLocalServiceTypeConversionProtocol
 
                     writer.write(
                       """
-                       func $L(dafnyInput $L)($L) {
-                           ${C|}
+                      func $L(dafnyInput $L)($L) {
+                          ${C|}
                       }""",
                       inputFromDafnyMethodName,
                       DafnyNameResolver.getDafnyType(input, inputSymbol),
@@ -620,8 +619,8 @@ public class DafnyLocalServiceTypeConversionProtocol
 
                     writer.write(
                       """
-                       func $L(dafnyOutput $L)($L) {
-                           ${C|}
+                      func $L(dafnyOutput $L)($L) {
+                          ${C|}
                       }""",
                       outputFromDafnyMethodName,
                       DafnyNameResolver.getDafnyType(output, outputSymbol),
@@ -688,7 +687,6 @@ public class DafnyLocalServiceTypeConversionProtocol
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       generateConfigDeserializer(context);
     }
-
     delegator.useFileWriter(
       "%s/%s".formatted(
           SmithyNameResolver.shapeNamespace(serviceShape),
@@ -841,7 +839,7 @@ public class DafnyLocalServiceTypeConversionProtocol
 
         writer.write(
           """
-          $L
+          return $L
           """,
           input
         );
@@ -870,7 +868,7 @@ public class DafnyLocalServiceTypeConversionProtocol
 
         writer.write(
           """
-          $L
+          return $L
           """,
           output
         );
@@ -1142,8 +1140,8 @@ public class DafnyLocalServiceTypeConversionProtocol
         writer -> {
           writer.write(
             """
-             func $L(dafnyOutput $L)($L) {
-                 ${C|}
+            func $L(dafnyOutput $L)($L) {
+                ${C|}
             }""",
             getOutputFromDafnyMethodName,
             DafnyNameResolver.getDafnyType(
@@ -1165,7 +1163,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               );
               writer.write(
                 """
-                $L
+                return $L
                 """,
                 output
               );
@@ -1209,8 +1207,8 @@ public class DafnyLocalServiceTypeConversionProtocol
             writer -> {
               writer.write(
                 """
-                 func $L(dafnyOutput $L)($L) {
-                     ${C|}
+                func $L(dafnyOutput $L)($L) {
+                    ${C|}
                 }""",
                 getOutputFromDafnyMethodName,
                 DafnyNameResolver.getDafnyBaseErrorType(errorShape),
@@ -1229,7 +1227,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                   );
                   writer.write(
                     """
-                    $L
+                    return $L
                     """,
                     output
                   );

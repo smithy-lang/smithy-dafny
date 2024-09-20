@@ -1,13 +1,13 @@
 [prefix]
-"**/*.smithy" = """
+"**/[!smithy-dafny-codegen-modules]/**/*.smithy" = """
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 """
-"**/*.java" = """
+"**/[!smithy-dafny-codegen-modules]/**/*.java" = """
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 """
-"**/[!/obj/]*.cs" = """
+"**/[!smithy-dafny-codegen-modules]/**/[!/obj/]*.cs" = """
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 """
@@ -16,15 +16,15 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 """
-"**/*.kts" = """
+"**/[!smithy-dafny-codegen-modules]/**/*.kts" = """
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 """
-"**/*.mk" = """
+"**/[!smithy-dafny-codegen-modules]/**/*.mk" = """
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 """
-"**/Makefile" = """
+"**/[!smithy-dafny-codegen-modules]/**/Makefile" = """
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 """

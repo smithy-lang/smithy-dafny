@@ -1,0 +1,8 @@
+#
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+software.amazon.polymorph.smithypython.localservice.DafnyPythonLocalServiceIntegration
+software.amazon.polymorph.smithypython.wrappedlocalservice.DafnyPythonWrappedLocalServiceIntegration
+software.amazon.polymorph.smithypython.awssdk.DafnyPythonAwsSdkIntegration

@@ -3,11 +3,11 @@
 include "../src/Index.dfy"
 
 module SimpleMultiplemodelsDependencyprojectImplTest {
-    import SimpleMultiplemodelsDependencyprojectService
+    import DependencyProject
     import opened SimpleMultiplemodelsDependencyprojectTypes
     import opened Wrappers
     method{:test} TestDependencyProject(){
-        var client :- expect SimpleMultiplemodelsDependencyprojectService.DependencyProject();
+        var client :- expect DependencyProject.DependencyProject();
         TestDependencyProjectClient(client);
     }
 

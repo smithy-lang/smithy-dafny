@@ -65,6 +65,20 @@ public class ModelUtils {
     return structureShape.getAllMembers().values().stream();
   }
 
+  /**
+   * @return a stream of members of the given structure shape, sorted by name
+   */
+  public static Stream<MemberShape> streamStructureMembersSorted(
+    final StructureShape structureShape
+  ) {
+    return structureShape
+      .getAllMembers()
+      .entrySet()
+      .stream()
+      .sorted()
+      .map(Map.Entry::getValue);
+  }
+
   public static Stream<MemberShape> streamUnionMembers(
     final UnionShape unionShape
   ) {
@@ -93,6 +107,36 @@ public class ModelUtils {
       .stream()
       .filter(structureShape ->
         structureShape.getId().getNamespace().equals(namespace)
+      );
+  }
+
+  /**
+   * Returns a stream of enum shapes in the given namespace.
+   * These include both Smithy v2 enums,
+   * and Smithy v1 @enum strings converted to {@link EnumShape}s.
+   */
+  public static Stream<EnumShape> streamEnumShapes(
+    final Model model,
+    final String namespace
+  ) {
+    @SuppressWarnings("deprecation")
+    final Stream<EnumShape> v1Enums = model
+      .getStringShapesWithTrait(EnumTrait.class)
+      .stream()
+      .map(ModelUtils::stringToEnumShape);
+    final Stream<EnumShape> v2Enums = model.getEnumShapes().stream();
+    return Stream
+      .concat(v1Enums, v2Enums)
+      .filter(shape -> shape.getId().getNamespace().equals(namespace));
+  }
+
+  public static EnumShape stringToEnumShape(final StringShape stringShape) {
+    return EnumShape
+      .fromStringShape(stringShape)
+      .orElseThrow(() ->
+        new UnsupportedOperationException(
+          "Could not convert %s to an enum".formatted(stringShape.getId())
+        )
       );
   }
 
@@ -589,6 +633,73 @@ public class ModelUtils {
           return shape;
         }
       );
+  }
+
+  /**
+   * Return a builder for the provided shape.
+   * @param shape
+   * @return
+   */
+  public static AbstractShapeBuilder<?, ?> getBuilderForShape(Shape shape) {
+    // This is painful, but there is nothing like `shape.getUnderlyingShapeType`...
+    // instead, check every possible shape for its builder...
+    AbstractShapeBuilder<?, ?> builder;
+    if (shape.isBlobShape()) {
+      builder = shape.asBlobShape().get().toBuilder();
+    } else if (shape.isBooleanShape()) {
+      builder = shape.asBooleanShape().get().toBuilder();
+    } else if (shape.isDocumentShape()) {
+      builder = shape.asDocumentShape().get().toBuilder();
+    } else if (shape.isStringShape()) {
+      builder = shape.asStringShape().get().toBuilder();
+    } else if (shape.isTimestampShape()) {
+      builder = shape.asTimestampShape().get().toBuilder();
+    } else if (shape.isByteShape()) {
+      builder = shape.asByteShape().get().toBuilder();
+    } else if (shape.isIntegerShape()) {
+      builder = shape.asIntegerShape().get().toBuilder();
+    } else if (shape.isFloatShape()) {
+      builder = shape.asFloatShape().get().toBuilder();
+    } else if (shape.isBigIntegerShape()) {
+      builder = shape.asBigIntegerShape().get().toBuilder();
+    } else if (shape.isShortShape()) {
+      builder = shape.asShortShape().get().toBuilder();
+    } else if (shape.isLongShape()) {
+      builder = shape.asLongShape().get().toBuilder();
+    } else if (shape.isDoubleShape()) {
+      builder = shape.asDoubleShape().get().toBuilder();
+    } else if (shape.isBigDecimalShape()) {
+      builder = shape.asBigDecimalShape().get().toBuilder();
+    } else if (shape.isListShape()) {
+      builder = shape.asListShape().get().toBuilder();
+    } else if (shape.isSetShape()) {
+      builder = shape.asSetShape().get().toBuilder();
+    } else if (shape.isMapShape()) {
+      builder = shape.asMapShape().get().toBuilder();
+    } else if (shape.isStructureShape()) {
+      builder = shape.asStructureShape().get().toBuilder();
+    } else if (shape.isUnionShape()) {
+      builder = shape.asUnionShape().get().toBuilder();
+    } else if (shape.isServiceShape()) {
+      builder = shape.asServiceShape().get().toBuilder();
+    } else if (shape.isOperationShape()) {
+      builder = shape.asOperationShape().get().toBuilder();
+    } else if (shape.isResourceShape()) {
+      builder = shape.asResourceShape().get().toBuilder();
+    } else if (shape.isMemberShape()) {
+      builder = shape.asMemberShape().get().toBuilder();
+    } else if (shape.isEnumShape()) {
+      builder = shape.asEnumShape().get().toBuilder();
+    } else if (shape.isIntEnumShape()) {
+      builder = shape.asIntEnumShape().get().toBuilder();
+    } else {
+      // Unfortunately, there is no "default" shape...
+      // The above should cover all shapes; if not, new shapes need to be added above.
+      throw new IllegalArgumentException(
+        "Unable to process @javadoc trait on unsupported shape type: " + shape
+      );
+    }
+    return builder;
   }
 
   public static Optional<String> getDocumentationOrJavadoc(Shape shape) {

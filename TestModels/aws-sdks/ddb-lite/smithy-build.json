@@ -6,7 +6,7 @@
         {
           "name": "excludeShapesBySelector",
           "args": {
-            "selector": "operation :not([id|name = BatchGetItem, GetItem, PutItem, UpdateItem, TransactionWriteItem, Query, Scan])"
+            "selector": "operation :not([id|name = BatchGetItem, GetItem, PutItem, UpdateItem, TransactWriteItems, DeleteItem, Query, Scan, CreateTable, DescribeTable, BatchExecuteStatement, BatchWriteItem, ExecuteStatement, ExecuteTransaction, TransactGetItems])"
           }
         },
         {
@@ -21,7 +21,7 @@
       "edition": "2023",
       "service": "com.amazonaws.dynamodb#DynamoDB_20120810",
       "dafnyVersion": "${DAFNY_VERSION}",
-      "targetLanguages": ["java", "dotnet"],
+      "targetLanguages": ["java", "dotnet", "rust"],
       "includeDafnyFile": "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
     }
   }

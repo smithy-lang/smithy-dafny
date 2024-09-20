@@ -3,13 +3,13 @@
 pub fn to_dafny(
     value: crate::operation::get_constructor::GetConstructorInput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::GetConstructorInput,
+    crate::simple::constructor::internaldafny::types::GetConstructorInput,
 >{
     let dafny_value = match value.value {
-            Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-            None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+            Some(s) => crate::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
+            None => crate::_Wrappers_Compile::Option::None {},
         };
-    ::std::rc::Rc::new(crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::GetConstructorInput::GetConstructorInput {
+    ::std::rc::Rc::new(crate::simple::constructor::internaldafny::types::GetConstructorInput::GetConstructorInput {
             value: ::std::rc::Rc::new(dafny_value)
         })
 }
@@ -17,12 +17,12 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::GetConstructorInput,
+        crate::simple::constructor::internaldafny::types::GetConstructorInput,
     >,
 ) -> crate::operation::get_constructor::GetConstructorInput {
     let value = if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -31,7 +31,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.value().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

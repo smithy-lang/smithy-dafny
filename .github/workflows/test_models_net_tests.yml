@@ -52,6 +52,8 @@ jobs:
           role-session-name: NetTests
 
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.7.0
@@ -75,6 +77,9 @@ jobs:
         with:
           distribution: "corretto"
           java-version: "17"
+
+      - name: Install Smithy-Dafny codegen dependencies
+        uses: ./.github/actions/install_smithy_dafny_codegen_dependencies
 
       - name: Install smithy-dafny-codegen locally
         uses: gradle/gradle-build-action@v2

@@ -3,11 +3,13 @@
 using Wrappers_Compile;
 using Simple.Types.Boolean;
 using Simple.Types.Boolean.Wrapped;
-using TypeConversion = Simple.Types.Boolean.TypeConversion ;
+using TypeConversion = Simple.Types.Boolean.TypeConversion;
 namespace simple.types.boolean.internaldafny.wrapped
 {
-    public partial class __default {
-        public static _IResult<types.ISimpleTypesBooleanClient, types._IError> WrappedSimpleBoolean(types._ISimpleBooleanConfig config) {
+    public partial class __default
+    {
+        public static _IResult<types.ISimpleTypesBooleanClient, types._IError> WrappedSimpleBoolean(types._ISimpleBooleanConfig config)
+        {
             var wrappedConfig = TypeConversion.FromDafny_N6_simple__N5_types__N7_boolean__S19_SimpleBooleanConfig(config);
             var impl = new SimpleBoolean(wrappedConfig);
             var wrappedClient = new SimpleTypesBooleanShim(impl);

@@ -3,7 +3,7 @@
 pub fn to_dafny(
     value: crate::operation::get_constructor::GetConstructorOutput,
 ) -> ::std::rc::Rc<
-    crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::GetConstructorOutput,
+    crate::simple::constructor::internaldafny::types::GetConstructorOutput,
 >{
     let crate::operation::get_constructor::GetConstructorOutput {
         internal_config_string,
@@ -15,38 +15,38 @@ pub fn to_dafny(
     } = value;
 
     let internal_config_string = match internal_config_string {
-        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        Some(s) => crate::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
+        None => crate::_Wrappers_Compile::Option::None {},
     };
 
     let blob_value = match blob_value {
-        Some(v) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some {
-            value: ::dafny_runtime::Sequence::from_array(&v),
+        Some(v) => crate::_Wrappers_Compile::Option::Some {
+            value: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&v, |x| *x),
         },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        None => crate::_Wrappers_Compile::Option::None {},
     };
 
     let boolean_value = match boolean_value {
-        Some(value) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        Some(value) => crate::_Wrappers_Compile::Option::Some { value },
+        None => crate::_Wrappers_Compile::Option::None {},
     };
 
     let string_value = match string_value {
-        Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        Some(s) => crate::_Wrappers_Compile::Option::Some { value: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&s) },
+        None => crate::_Wrappers_Compile::Option::None {},
     };
 
     let integer_value = match integer_value {
-        Some(value) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        Some(value) => crate::_Wrappers_Compile::Option::Some { value },
+        None => crate::_Wrappers_Compile::Option::None {},
     };
 
     let long_value = match long_value {
-        Some(value) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value },
-        None => crate::implementation_from_dafny::_Wrappers_Compile::Option::None {},
+        Some(value) => crate::_Wrappers_Compile::Option::Some { value },
+        None => crate::_Wrappers_Compile::Option::None {},
     };
 
-    ::std::rc::Rc::new(crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::GetConstructorOutput::GetConstructorOutput {
+    ::std::rc::Rc::new(crate::simple::constructor::internaldafny::types::GetConstructorOutput::GetConstructorOutput {
         internalConfigString: ::std::rc::Rc::new(internal_config_string),
         blobValue: ::std::rc::Rc::new(blob_value),
         booleanValue: ::std::rc::Rc::new(boolean_value),
@@ -59,12 +59,12 @@ pub fn to_dafny(
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
-        crate::implementation_from_dafny::_simple_dconstructor_dinternaldafny_dtypes::GetConstructorOutput,
+        crate::simple::constructor::internaldafny::types::GetConstructorOutput,
     >,
 ) -> crate::operation::get_constructor::GetConstructorOutput {
     let internal_config_string = if matches!(
         dafny_value.internalConfigString().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -73,7 +73,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.internalConfigString().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {
@@ -82,7 +82,7 @@ pub fn from_dafny(
 
     let blob_value = if matches!(
         dafny_value.blobValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(
@@ -92,7 +92,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.blobValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {
@@ -101,12 +101,12 @@ pub fn from_dafny(
 
     let boolean_value = if matches!(
         dafny_value.booleanValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(dafny_value.booleanValue().Extract())
     } else if matches!(
         dafny_value.booleanValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {
@@ -115,7 +115,7 @@ pub fn from_dafny(
 
     let string_value = if matches!(
         dafny_value.stringValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(
             dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(
@@ -124,7 +124,7 @@ pub fn from_dafny(
         )
     } else if matches!(
         dafny_value.stringValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {
@@ -133,12 +133,12 @@ pub fn from_dafny(
 
     let integer_value = if matches!(
         dafny_value.integerValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(dafny_value.integerValue().Extract())
     } else if matches!(
         dafny_value.integerValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {
@@ -147,12 +147,12 @@ pub fn from_dafny(
 
     let long_value = if matches!(
         dafny_value.longValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }
+        crate::_Wrappers_Compile::Option::Some { .. }
     ) {
         Some(dafny_value.longValue().Extract())
     } else if matches!(
         dafny_value.longValue().as_ref(),
-        crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }
+        crate::_Wrappers_Compile::Option::None { .. }
     ) {
         None
     } else {

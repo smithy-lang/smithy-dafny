@@ -3,6 +3,7 @@
 include "../src/WrappedCodegenPatchesImpl.dfy"
 include "CodegenPatchesImplTest.dfy"
 
+//TODO: This will not compile in Go because https://t.corp.amazon.com/P153280434
 module WrappedCodegenPatchesTest {
     import WrappedSimpleCodegenPatchesService
     import CodegenPatchesImplTest

@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
+import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
@@ -171,11 +172,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 writer,
                 isConfigShape,
                 memberShape.isOptional(),
-                context
-                  .symbolProvider()
-                  .toSymbol(memberShape)
-                  .getProperty(POINTABLE, Boolean.class)
-                  .orElse(false)
+                AwsSdkGoPointableIndex
+                  .of(context.model())
+                  .isPointable(memberShape)
               )
             ),
             fieldSeparator

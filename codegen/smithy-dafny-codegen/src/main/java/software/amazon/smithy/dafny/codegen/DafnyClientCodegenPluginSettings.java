@@ -102,6 +102,8 @@ class DafnyClientCodegenPluginSettings {
           case "DOTNET", "CSHARP", "CS" -> Stream.of(
             CodegenEngine.TargetLanguage.DOTNET
           );
+          case "PYTHON" -> Stream.of(CodegenEngine.TargetLanguage.PYTHON);
+          case "RUST" -> Stream.of(CodegenEngine.TargetLanguage.RUST);
           case "DAFNY" -> {
             LOGGER.error(
               "Dafny code is always generated, and shouldn't be specified explicitly"

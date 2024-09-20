@@ -3,6 +3,8 @@
 
 CORES=2
 
+RUST_BENERATED=1
+
 include ../SharedMakefile.mk
 
 PROJECT_SERVICES := \
@@ -17,11 +19,23 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # Projects using replaceable modules must explicitly define these values.
 NET_SRC_INDEX=src/replaces/net
 NET_TEST_INDEX=test/replaces/net
+PYTHON_SRC_INDEX=src/replaces/python
+PYTHON_TEST_INDEX=test/replaces/python
+RUST_SRC_INDEX=src/replaces/rust
+RUST_TEST_INDEX=test/replaces/rust
 
-GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/LanguageSpecificLogic"
+RUST_OTHER_FILES=runtimes/rust/src/externs.rs
 
-PROJECT_DTR := \
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/LanguageSpecificLogic"
+
+TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # This project has no dependencies 
-# DEPENDENT-MODELS:= 
+# DEPENDENT-MODELS:=
 
+# Python
+
+PYTHON_MODULE_NAME=language_specific_logic
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr

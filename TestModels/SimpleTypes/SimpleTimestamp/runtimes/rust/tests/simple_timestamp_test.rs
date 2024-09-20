@@ -28,7 +28,7 @@ async fn test_get_timestamp() {
     .unwrap();
     let result = client().get_timestamp().value(ts).send().await.unwrap();
     let value = result.value().unwrap();
-    assert_eq!(value, &ts);
+    assert_eq!(value, ts);
 }
 
 pub fn client() -> Client {

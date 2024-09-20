@@ -6,6 +6,12 @@ but it generates code using the older CLI instead of the newer Smithy build plug
 This project will eventually be removed entirely as the CLI is deprecated.
 For more details, please see `TestModels/aws-sdks/sqs/README.md`.
 
+NOTE: The `sqs.json` in this project was copied almost unmodified from https://github.com/aws/aws-sdk-js-v3/blob/main/codegen/sdk-codegen/aws-models/sqs.json on March 6, 2023.
+The only edit is to remove the @smithy.rules#endpointRuleSet from the service,
+because it happens to be invalid and newer versions of Smithy catch this and crash.
+We can't yet update the SQS model because newer versions use Smithy 2.0 enum shapes,
+which we don't yet support for .NET.
+
 ## Build
 
 ### .NET

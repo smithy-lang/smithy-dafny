@@ -15,7 +15,10 @@ module SimpleStringImpl refines AbstractSimpleTypesSmithyStringOperations  {
     predicate GetStringKnownValueEnsuresPublicly(input: GetStringInput, output: Result<GetStringOutput, Error>) {
         true
     }
-    predicate GetStringUTF8EnsuresPublicly(input: GetStringInput, output: Result<GetStringOutput, Error>) {
+    predicate GetStringUTF8EnsuresPublicly(input: GetStringUTF8Input, output: Result<GetStringUTF8Output, Error>) {
+        true
+    }
+    predicate GetStringUTF8KnownValueEnsuresPublicly(input: GetStringUTF8Input, output: Result<GetStringUTF8Output, Error>) {
         true
     }
     method GetString ( config: InternalConfig,  input: GetStringInput )
@@ -30,10 +33,18 @@ module SimpleStringImpl refines AbstractSimpleTypesSmithyStringOperations  {
         var res := GetStringOutput(value := input.value);
         return Success(res);
     }
-    method GetStringUTF8 ( config: InternalConfig,  input: GetStringInput )
-    returns (output: Result<GetStringOutput, Error>) {
+    method GetStringUTF8 ( config: InternalConfig,  input: GetStringUTF8Input )
+    returns (output: Result<GetStringUTF8Output, Error>) {
         expect input.value.Some?;
-        var res := GetStringOutput(value := input.value);
+        var res := GetStringUTF8Output(value := input.value);
+        return Success(res);
+    }
+    method GetStringUTF8KnownValue ( config: InternalConfig,  input: GetStringUTF8Input )
+    returns (output: Result<GetStringUTF8Output, Error>) {
+        expect input.value.Some?;
+        var expected := [0x48, 0x65, 0x6C, 0x6C, 0x6F];  // Hello in UTF8
+        expect input.value.value == expected; // This is done so as to assert that polymorph layer is doing one way conversion right as well.
+        var res := GetStringUTF8Output(value := input.value);
         return Success(res);
     }
 }

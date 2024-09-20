@@ -3,6 +3,10 @@ package software.amazon.polymorph.smithygo.localservice.nameresolver;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 
+import java.util.Map;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,6 +19,7 @@ import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.SimpleShape;
 
 public class SmithyNameResolver {
 
@@ -51,7 +56,7 @@ public class SmithyNameResolver {
   }
 
   public static String shapeNamespace(final Shape shape) {
-    return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase();
+    return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase().concat("smithygenerated");
   }
 
   public static String smithyTypesNamespace(final Shape shape) {
@@ -60,7 +65,7 @@ public class SmithyNameResolver {
       .getNamespace()
       .replace(DOT, BLANK)
       .toLowerCase()
-      .concat("types");
+      .concat("smithygeneratedtypes");
   }
 
   public static String getGoModuleNameForSdkNamespace(
