@@ -12,6 +12,8 @@ include ../../SharedMakefile.mk
 PROJECT_SERVICES := \
 	ComAmazonawsDynamodb \
 
+MAIN_SERVICE_FOR_RUST := ComAmazonawsDynamodb
+
 SERVICE_NAMESPACE_ComAmazonawsDynamodb=com.amazonaws.dynamodb
 
 SERVICE_DEPS_ComAmazonawsDynamodb :=
