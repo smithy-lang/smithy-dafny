@@ -1227,7 +1227,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                   );
                   writer.write(
                     """
-                    return $L
+                    $L
                     """,
                     output
                   );
