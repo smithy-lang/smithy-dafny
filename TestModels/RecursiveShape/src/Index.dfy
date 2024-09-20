@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleRecursiveShapeImpl.dfy"
 
-module {:extern "simplerecursiveshapeinternaldafny"} SimpleRecursiveShape refines AbstractSimpleRecursiveShapeService {
+module {:extern "simple.recursiveshape.internaldafny"} SimpleRecursiveShape refines AbstractSimpleRecursiveShapeService {
   import Operations = SimpleRecursiveShapeImpl
 
   function method DefaultSimpleRecursiveShapeConfig(): SimpleRecursiveShapeConfig {
