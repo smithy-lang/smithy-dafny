@@ -351,7 +351,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String longShape(LongShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-        return ("""
+        if ((boolean)isOptional) {
+            return ("""
                 return func() *int64 {
                     var b int64
                     if %s == nil {
@@ -360,13 +361,24 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                     b = %s.(int64)
                     return &b
                 }()""").formatted(dataSource, dataSource);
+        }
+        else {
+            return """
+                return func() int64 {
+                    var b = %s.(int64)
+                    return b
+                }()
+                    """.formatted(dataSource);
+        }
+        
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
         writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
         writer.addUseImports(SmithyGoDependency.MATH);
-        return """
+        if ((boolean)isOptional) {
+            return """
                 return func () *float64 {
                     var b []byte
                 if %s == nil {
@@ -381,6 +393,21 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     	                }
                     }
                 }()""".formatted(dataSource, dataSource);
+        }
+        else {
+            return """
+                return func () float64 {
+                    var b []byte
+                    for i := dafny.Iterate(%s) ; ; {
+                        val, ok := i()
+                	    if !ok {
+    		                return []float64{math.Float64frombits(binary.LittleEndian.Uint64(b))}[0]
+    	                } else {
+    		                b = append(b, val.(byte))
+    	                }
+                    }
+                }()""".formatted(dataSource);
+        }
     }
 
     @Override
