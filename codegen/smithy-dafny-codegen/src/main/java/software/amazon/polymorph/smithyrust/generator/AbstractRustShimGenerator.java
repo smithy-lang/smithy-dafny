@@ -1299,7 +1299,7 @@ public abstract class AbstractRustShimGenerator {
       case BIG_INTEGER -> "::num::bigint::BigInt";
       case BIG_DECIMAL -> "::num::rational::BigRational";
       // special collections
-      case BLOB -> "::aws_smithy_types::Blob";
+      case BLOB -> "::std::vec::Vec<u8>";
       case STRING -> {
         //noinspection deprecation
         if (shape.hasTrait(EnumTrait.class)) {
