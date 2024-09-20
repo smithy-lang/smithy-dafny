@@ -839,7 +839,7 @@ public class DafnyLocalServiceTypeConversionProtocol
 
         writer.write(
           """
-          return $L
+          $L
           """,
           input
         );
@@ -868,7 +868,7 @@ public class DafnyLocalServiceTypeConversionProtocol
 
         writer.write(
           """
-          return $L
+          $L
           """,
           output
         );
@@ -1163,7 +1163,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               );
               writer.write(
                 """
-                return $L
+                $L
                 """,
                 output
               );

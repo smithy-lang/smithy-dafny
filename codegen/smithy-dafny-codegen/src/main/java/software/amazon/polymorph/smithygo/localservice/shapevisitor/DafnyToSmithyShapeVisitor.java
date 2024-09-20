@@ -2,10 +2,6 @@ package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-
 import java.util.HashMap;
 import java.util.Map;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
@@ -269,14 +265,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     return builder.append("}").toString();
   }
-    return builder.append("}").toString();
-  }
 
-  // TODO: smithy-dafny-conversion library
-  @Override
-  public String listShape(ListShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-    StringBuilder builder = new StringBuilder();
   // TODO: smithy-dafny-conversion library
   @Override
   public String listShape(ListShape shape) {
@@ -324,10 +313,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     return builder.append("return fieldValue").toString();
   }
 
-  @Override
-  public String mapShape(MapShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-    StringBuilder builder = new StringBuilder();
   @Override
   public String mapShape(MapShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
@@ -511,9 +496,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String integerShape(IntegerShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-  @Override
-  public String integerShape(IntegerShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
 
     if ((boolean) isOptional) {
       return (
@@ -690,10 +672,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     """.formatted(functionInit, eachMemberInUnion);
   }
 
-  @Override
-  public String timestampShape(TimestampShape shape) {
-    return "nil";
-  }
   @Override
   public String timestampShape(TimestampShape shape) {
     return "nil";
