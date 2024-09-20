@@ -322,8 +322,12 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                     continue;
                 }
                 alreadyVisited.add(visitingMemberShape.toShapeId());
-                String outputType;
-                outputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape), context.model(), context.symbolProvider());                
+                String outputType = SmithyNameResolver.getSmithyType(visitingShape, context.symbolProvider().toSymbol(visitingShape), context.model(), context.symbolProvider());     
+                if (visitingShape.hasTrait(ReferenceTrait.class)) {
+                    ReferenceTrait referenceTrait = visitingShape.expectTrait(ReferenceTrait.class);
+                    Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+                    outputType = SmithyNameResolver.getSmithyType(resourceOrService, context.symbolProvider().toSymbol(resourceOrService));
+                }           
                 if (context.symbolProvider().toSymbol(visitingMemberShape).getProperty(POINTABLE, Boolean.class).orElse(false) == true)
                     outputType = "*".concat(outputType);
                 writer.write("""
@@ -569,11 +573,11 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                          getOutputFromDafnyMethodName, DafnyNameResolver.getDafnyType(configShape, context.symbolProvider().toSymbol(configShape)), SmithyNameResolver.getSmithyType(configShape, context.symbolProvider().toSymbol(configShape)),
                          writer.consumer(w -> {
                              String output = configShape.accept(new DafnyToSmithyShapeVisitor(
-                                     context,
-                                     "dafnyOutput",
-                                     writer,
-                                     true
-                             ));
+                                 context,
+                                 "dafnyOutput",
+                                 writer,
+                                 true
+                                 ));
                              writer.write("""
                                                   $L
                                                   """, output);
