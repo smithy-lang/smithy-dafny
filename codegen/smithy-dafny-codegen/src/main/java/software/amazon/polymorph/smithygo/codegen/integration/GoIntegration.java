@@ -8,5 +8,5 @@ import software.amazon.polymorph.smithygo.codegen.GoSettings;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.smithy.codegen.core.SmithyIntegration;
 
-public interface GoIntegration extends SmithyIntegration<GoSettings, GoWriter, GenerationContext> {
-}
+public interface GoIntegration
+  extends SmithyIntegration<GoSettings, GoWriter, GenerationContext> {}
