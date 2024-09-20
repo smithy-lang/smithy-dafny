@@ -67,26 +67,24 @@ public class ShapeVisitorHelper {
     public static String toDafnyContainerShapeHelper (final MemberShape memberShape, final GenerationContext context, final String dataSource, final GoWriter writer, final boolean isConfigShape, final boolean isOptional, final boolean isPointerType) {
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
         String nextVisitorFunction;
-        if (!targetShape.hasTrait(ReferenceTrait.class) && (targetShape.isStructureShape() || targetShape.isUnionShape() || targetShape.isMapShape() || targetShape.isListShape())) {
-            String funcDataSource = "input";
-            if (!SmithyToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-                toDafnyOptionalityMap.put(memberShape, isOptional);
-                SmithyToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
-                SmithyToDafnyShapeVisitor.visitorFuncMap.put(
-                    memberShape, 
-                    targetShape.accept(
-                        new SmithyToDafnyShapeVisitor(context, funcDataSource, writer, isConfigShape, isOptional, isPointerType)
-                    )
-                );
-            }
-            String funcName = (memberShape.getId().toString().replaceAll("[.$#]","_")).concat("_ToDafny(");
-            nextVisitorFunction = funcName.concat(dataSource).concat(")");
-        }
-        else {
-            nextVisitorFunction = targetShape.accept(
+        if (targetShape.hasTrait(ReferenceTrait.class)) {
+            return targetShape.accept(
                 new SmithyToDafnyShapeVisitor(context, dataSource, writer, isConfigShape, isOptional, isPointerType)
             );
         }
+        String funcDataSource = "input";
+        if (!SmithyToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
+            toDafnyOptionalityMap.put(memberShape, isOptional);
+            SmithyToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
+            SmithyToDafnyShapeVisitor.visitorFuncMap.put(
+                memberShape, 
+                targetShape.accept(
+                    new SmithyToDafnyShapeVisitor(context, funcDataSource, writer, isConfigShape, isOptional, isPointerType)
+                )
+            );
+        }
+        String funcName = (memberShape.getId().toString().replaceAll("[.$#]","_")).concat("_ToDafny(");
+        nextVisitorFunction = funcName.concat(dataSource).concat(")");
         return nextVisitorFunction;
     }
 }
