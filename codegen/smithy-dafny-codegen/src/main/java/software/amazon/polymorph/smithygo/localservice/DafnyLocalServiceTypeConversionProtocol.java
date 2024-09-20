@@ -327,6 +327,10 @@ public class DafnyLocalServiceTypeConversionProtocol implements ProtocolGenerato
                     ReferenceTrait referenceTrait = visitingShape.expectTrait(ReferenceTrait.class);
                     Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
                     outputType = SmithyNameResolver.getSmithyType(resourceOrService, context.symbolProvider().toSymbol(resourceOrService));
+                    if (resourceOrService.isServiceShape()) {
+                        String namespace = SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
+                        outputType = namespace.concat(context.symbolProvider().toSymbol(resourceOrService).getName());
+                    }
                 }           
                 if (context.symbolProvider().toSymbol(visitingMemberShape).getProperty(POINTABLE, Boolean.class).orElse(false) == true)
                     outputType = "*".concat(outputType);
