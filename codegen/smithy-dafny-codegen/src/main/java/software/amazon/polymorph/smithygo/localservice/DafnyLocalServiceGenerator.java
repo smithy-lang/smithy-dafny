@@ -307,7 +307,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
 
   void generateShim() {
     final var namespace =
-      "Wrapped%sService".formatted(DafnyNameResolver.dafnyNamespace(service.expectTrait(LocalServiceTrait.class)));
+    "Wrapped%sService".formatted(service.getId().getName());
 
     writerDelegator.useFileWriter(
       "%s/shim.go".formatted(namespace),
