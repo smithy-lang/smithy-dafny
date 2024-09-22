@@ -394,7 +394,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
     String nilWrapIfRequired = "nil";
     String someWrapIfRequired = "%s%s";
-    String returnType = "interface {}";
+    String returnType = "bool";
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s%s)";
@@ -538,7 +538,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
     String nilWrapIfRequired = "nil";
     String someWrapIfRequired = "%s%s";
-    String returnType = "interface {}";
+    String returnType = "int32";
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s%s)";
@@ -567,7 +567,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   public String longShape(LongShape shape) {
     String nilWrapIfRequired = "nil";
     String someWrapIfRequired = "%s%s";
-    String returnType = "interface {}";
+    String returnType = "int64";
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s%s)";
@@ -602,7 +602,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     String nilWrapIfRequired = "nil";
     String someWrapIfRequired = "%s";
-    String returnType = "interface {}";
+    String returnType = "float64";
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
