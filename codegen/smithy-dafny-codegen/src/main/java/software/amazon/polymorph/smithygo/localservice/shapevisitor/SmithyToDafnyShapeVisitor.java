@@ -294,7 +294,6 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     builder.append(
       """
       func () %s {
-          if %s == nil { return %s }
       	   fieldValue := dafny.NewMapBuilder()
       	   for key, val := range %s {
       		    fieldValue.Add(%s, %s)
@@ -303,20 +302,15 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       }()""".formatted(
           returnType,
           dataSource,
-          nilWrapIfRequired,
-          dataSource,
-          keyTargetShape.accept(
-            new SmithyToDafnyShapeVisitor(
-              context,
-              "key",
-              writer,
-              isConfigShape,
-              false,
-              false
-            )
+          ShapeVisitorHelper.toDafnyContainerShapeHelper(
+            keyMemberShape,
+            context,
+            "key",
+            writer,
+            isConfigShape,
+            false,
+            false
           ),
-          // valueTargetShape.accept(
-          //         new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)),
           ShapeVisitorHelper.toDafnyContainerShapeHelper(
             valueMemberShape,
             context,
