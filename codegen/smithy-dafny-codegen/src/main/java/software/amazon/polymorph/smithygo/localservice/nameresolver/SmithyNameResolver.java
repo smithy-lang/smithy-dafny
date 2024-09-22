@@ -155,7 +155,8 @@ public class SmithyNameResolver {
   ) {
     if (
       symbol.getNamespace().contains("smithy.") ||
-      symbol.getName().contains("string")
+      symbol.getNamespace().equals("smithyapitypes") ||
+      knownSmithyType.contains(symbol.getName())
     ) {
       return symbol.getName();
     }
