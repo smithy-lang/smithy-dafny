@@ -9,18 +9,13 @@ namespace simple.recursiveShape
 service SimpleRecursiveShape {
   version: "2021-11-01",
   resources: [],
-  operations: [ GetRecursiveShape, GetRecursiveShapeKnownValueTest ],
+  operations: [ GetRecursiveShape ],
   errors: [],
 }
 
 structure SimpleRecursiveShapeConfig {}
 
 operation GetRecursiveShape {
-  input: GetRecursiveShapeInput,
-  output: GetRecursiveShapeOutput,
-}
-
-operation GetRecursiveShapeKnownValueTest {
   input: GetRecursiveShapeInput,
   output: GetRecursiveShapeOutput,
 }
@@ -36,7 +31,11 @@ structure GetRecursiveShapeOutput {
 union RecursiveUnion {
   IntegerValue: Integer,
   StringValue: String,
-  DataMap: StructuredDataMap
+  ListValue: ListWithRecursion
+}
+
+list ListWithRecursion {
+  member: StructuredDataMap
 }
 
 map StructuredDataMap {
