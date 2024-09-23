@@ -291,7 +291,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       	}
       	fieldValue = append(fieldValue, %s)}
       	""".formatted(
-          SmithyNameResolver.getSmithyType(shape, symbol, context.model(), context.symbolProvider()),
+          SmithyNameResolver.getSmithyType(
+            shape,
+            symbol,
+            context.model(),
+            context.symbolProvider()
+          ),
           dataSource,
           dataSource,
           ShapeVisitorHelper.toNativeShapeVisitorWriter(

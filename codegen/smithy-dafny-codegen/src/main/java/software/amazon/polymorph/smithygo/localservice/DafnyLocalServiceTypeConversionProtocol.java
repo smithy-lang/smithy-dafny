@@ -1,5 +1,7 @@
 package software.amazon.polymorph.smithygo.localservice;
+
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -1139,14 +1141,16 @@ public class DafnyLocalServiceTypeConversionProtocol
         SmithyNameResolver.shapeNamespace(configShape),
         writer -> {
           writer.addImportFromModule(
-                  SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                    configShape.toShapeId().getNamespace()
-                  ),
-                  SmithyNameResolver.smithyTypesNamespace(configShape)
-                );
-          System.out.println(SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-            configShape.toShapeId().getNamespace()
-          ));
+            SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+              configShape.toShapeId().getNamespace()
+            ),
+            SmithyNameResolver.smithyTypesNamespace(configShape)
+          );
+          System.out.println(
+            SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+              configShape.toShapeId().getNamespace()
+            )
+          );
           writer.write(
             """
             func $L(dafnyOutput $L)($L) {

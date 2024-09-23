@@ -1,14 +1,13 @@
 package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
-import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
-
-import java.util.Map;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -56,7 +55,12 @@ public class SmithyNameResolver {
   }
 
   public static String shapeNamespace(final Shape shape) {
-    return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase().concat("smithygenerated");
+    return shape
+      .toShapeId()
+      .getNamespace()
+      .replace(DOT, BLANK)
+      .toLowerCase()
+      .concat("smithygenerated");
   }
 
   public static String smithyTypesNamespace(final Shape shape) {

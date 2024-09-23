@@ -252,8 +252,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 .toSymbol(memberShape)
                 .getProperty(POINTABLE, Boolean.class)
                 .orElse(false)
-            )// targetShape.accept(
-            //         new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
+            )//         new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName), // targetShape.accept(
             //                                       writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
             //         ))
             ,

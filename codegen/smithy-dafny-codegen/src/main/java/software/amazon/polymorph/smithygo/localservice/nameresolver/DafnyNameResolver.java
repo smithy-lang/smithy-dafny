@@ -1,8 +1,8 @@
 package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
-import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DAFNY_TYPES;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -17,20 +17,29 @@ public class DafnyNameResolver {
 
   public static String dafnyTypesNamespace(final Shape shape) {
     // Delegate to the smithy-dafny-dafny logic. Ideally, this should be independent, but it is not today.
-    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName(shape.toShapeId().getNamespace());
+    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyTypesModuleName(
+      shape.toShapeId().getNamespace()
+    );
   }
 
   public static String dafnyNamespace(final Shape shape) {
-    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(shape.toShapeId().getNamespace());
+    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(
+      shape.toShapeId().getNamespace()
+    );
   }
 
   public static String dafnyNamespace(final ServiceTrait serviceTrait) {
-    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(serviceTrait.getSdkId());
+    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(
+      serviceTrait.getSdkId()
+    );
   }
 
-
-  public static String dafnyNamespace(final LocalServiceTrait localServiceTrait) {
-    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(localServiceTrait.getSdkId());
+  public static String dafnyNamespace(
+    final LocalServiceTrait localServiceTrait
+  ) {
+    return software.amazon.polymorph.smithydafny.DafnyNameResolver.dafnyBaseModuleName(
+      localServiceTrait.getSdkId()
+    );
   }
 
   /**
@@ -145,10 +154,7 @@ public class DafnyNameResolver {
   }
 
   public static String getDafnyClient(final Shape shape, final String sdkId) {
-    return sdkId
-      .concat(DOT)
-      .concat(sdkId)
-      .concat("Client");
+    return sdkId.concat(DOT).concat(sdkId).concat("Client");
   }
 
   public static String getDafnyInterfaceClient(final Shape shape) {
@@ -176,10 +182,7 @@ public class DafnyNameResolver {
     final Shape shape,
     final String sdkId
   ) {
-    return sdkId
-      .concat(".Companion_Default___")
-      .concat(DOT)
-      .concat(sdkId);
+    return sdkId.concat(".Companion_Default___").concat(DOT).concat(sdkId);
   }
 
   public static String getDafnyDependentErrorType(
