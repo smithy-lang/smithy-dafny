@@ -240,7 +240,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       final var memberShape = memberShapeEntry.getValue();
       builder.append(
         "%1$s%2$s".formatted(
-            ShapeVisitorHelper.toDafnyContainerShapeHelper(
+            ShapeVisitorHelper.toDafnyShapeVisitorWriter(
               memberShape,
               context,
               dataSource + "." + StringUtils.capitalize(memberName),
@@ -302,7 +302,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       }()""".formatted(
           returnType,
           dataSource,
-          ShapeVisitorHelper.toDafnyContainerShapeHelper(
+          ShapeVisitorHelper.toDafnyShapeVisitorWriter(
             keyMemberShape,
             context,
             "key",
@@ -311,7 +311,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             false,
             false
           ),
-          ShapeVisitorHelper.toDafnyContainerShapeHelper(
+          ShapeVisitorHelper.toDafnyShapeVisitorWriter(
             valueMemberShape,
             context,
             "val",
@@ -366,7 +366,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           // targetShape.accept(
           //         new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape, false, false)
           // ),
-          ShapeVisitorHelper.toDafnyContainerShapeHelper(
+          ShapeVisitorHelper.toDafnyShapeVisitorWriter(
             memberShape,
             context,
             "val",
@@ -669,7 +669,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             //             context,dataSource + ".(*" + SmithyNameResolver.smithyTypesNamespace(shape) + "." + context.symbolProvider().toMemberName(member) + ").Value", writer, isConfigShape, true, false
             //         )
             //     ),
-            ShapeVisitorHelper.toDafnyContainerShapeHelper(
+            ShapeVisitorHelper.toDafnyShapeVisitorWriter(
               member,
               context,
               dataSource +

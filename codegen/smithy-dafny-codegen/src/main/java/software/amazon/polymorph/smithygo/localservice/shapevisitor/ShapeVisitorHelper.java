@@ -1,11 +1,8 @@
 package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-
 import java.util.HashMap;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
-import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -35,7 +32,7 @@ public class ShapeVisitorHelper {
       .concat(suffix);
   }
 
-  public static String toNativeContainerShapeHelper(
+  public static String toNativeShapeVisitorWriter(
     final MemberShape memberShape,
     final GenerationContext context,
     final String dataSource,
@@ -100,7 +97,7 @@ public class ShapeVisitorHelper {
     return nextVisitorFunction;
   }
 
-  public static String toDafnyContainerShapeHelper(
+  public static String toDafnyShapeVisitorWriter(
     final MemberShape memberShape,
     final GenerationContext context,
     final String dataSource,

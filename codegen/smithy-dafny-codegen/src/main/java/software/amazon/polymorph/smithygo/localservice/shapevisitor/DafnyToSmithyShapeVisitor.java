@@ -250,7 +250,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
            %1$s: %2$s,
         """.formatted(
             StringUtils.capitalize(memberName),
-            ShapeVisitorHelper.toNativeContainerShapeHelper(
+            ShapeVisitorHelper.toNativeShapeVisitorWriter(
               memberShape,
               context,
               derivedDataSource,
@@ -294,7 +294,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           SmithyNameResolver.getSmithyType(shape, symbol, context.model(), context.symbolProvider()),
           dataSource,
           dataSource,
-          ShapeVisitorHelper.toNativeContainerShapeHelper(
+          ShapeVisitorHelper.toNativeShapeVisitorWriter(
             memberShape,
             context,
             "val",
@@ -346,7 +346,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           type,
           dataSource,
           dataSource,
-          ShapeVisitorHelper.toNativeContainerShapeHelper(
+          ShapeVisitorHelper.toNativeShapeVisitorWriter(
             keyMemberShape,
             context,
             "(*val.(dafny.Tuple).IndexInt(0))",
@@ -358,7 +358,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           //                        keyTargetShape.accept(
           //         new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
           // ),
-          ShapeVisitorHelper.toNativeContainerShapeHelper(
+          ShapeVisitorHelper.toNativeShapeVisitorWriter(
             valueMemberShape,
             context,
             valueDataSource,
@@ -647,7 +647,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             SmithyNameResolver.smithyTypesNamespace(shape),
             memberName,
             pointerForPointableShape,
-            ShapeVisitorHelper.toNativeContainerShapeHelper(
+            ShapeVisitorHelper.toNativeShapeVisitorWriter(
               member,
               context,
               unionDataSource,
