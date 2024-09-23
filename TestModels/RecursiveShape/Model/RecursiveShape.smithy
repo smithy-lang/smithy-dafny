@@ -35,14 +35,14 @@ union RecursiveUnion {
 }
 
 list ListWithRecursion {
-  member: StructuredDataMap
+  member: MapWithRecursion
 }
 
-map StructuredDataMap {
+map MapWithRecursion {
     key: String,
-    value: StructuredData
+    value: StructureWithRecursion
 }
 
-structure StructuredData {
+structure StructureWithRecursion {
     content: RecursiveUnion
 }
