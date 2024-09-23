@@ -360,9 +360,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             isConfigShape,
             false
           ),
-          //                        keyTargetShape.accept(
-          //         new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
-          // ),
           ShapeVisitorHelper.toNativeShapeVisitorWriter(
             valueMemberShape,
             context,
@@ -661,8 +658,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
               isConfigShape,
               isMemberShapePointable
             )
-            // targetShape.accept(
-            //         new DafnyToSmithyShapeVisitor(context, unionDataSource, writer, isConfigShape, isMemberShapePointable)
           )
       );
     }
