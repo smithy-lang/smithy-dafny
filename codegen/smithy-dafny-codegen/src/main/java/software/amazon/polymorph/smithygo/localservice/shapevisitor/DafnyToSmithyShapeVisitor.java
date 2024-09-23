@@ -276,9 +276,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
-    var typeName = targetShape.isStructureShape()
-      ? context.symbolProvider().toSymbol(memberShape)
-      : context.symbolProvider().toSymbol(memberShape);
+    var symbol = context.symbolProvider().toSymbol(shape);
     Boolean assertionRequired = targetShape.isStructureShape();
     builder.append(
       """
@@ -293,7 +291,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       	}
       	fieldValue = append(fieldValue, %s)}
       	""".formatted(
-          SmithyNameResolver.getSmithyType(shape, typeName, context.model(), context.symbolProvider()),
+          SmithyNameResolver.getSmithyType(shape, symbol, context.model(), context.symbolProvider()),
           dataSource,
           dataSource,
           ShapeVisitorHelper.toNativeContainerShapeHelper(
