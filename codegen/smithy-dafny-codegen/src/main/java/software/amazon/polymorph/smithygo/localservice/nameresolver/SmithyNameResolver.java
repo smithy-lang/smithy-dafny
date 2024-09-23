@@ -4,8 +4,19 @@ import static software.amazon.polymorph.smithygo.localservice.nameresolver.Const
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 
 import java.util.Map;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.SimpleShape;
@@ -13,6 +24,17 @@ import software.amazon.smithy.model.shapes.SimpleShape;
 public class SmithyNameResolver {
 
   private static Map<String, String> smithyNamespaceToGoModuleNameMap;
+  // Known native type of simple shapes
+  private static HashSet<String> knownSmithyType = new HashSet<>(
+    Arrays.asList(
+      "int32", //integer shape
+      "string", // string shape
+      "[]byte", // blob shape
+      "int64", // long shape
+      "float64", // double shape
+      "bool" //boolean shape
+    )
+  );
 
   public static void setSmithyNamespaceToGoModuleNameMap(
     Map<String, String> smithyNamespaceToGoModuleNameMap
@@ -62,12 +84,63 @@ public class SmithyNameResolver {
     return serviceTrait.getSdkId().toLowerCase();
   }
 
+  public static String getSmithyType(
+    final Shape shape,
+    final Symbol symbol,
+    Model model,
+    SymbolProvider symbolProvider
+  ) {
+    if (
+      symbol.getNamespace().contains("smithy.") ||
+      symbol.getNamespace().equals("smithyapitypes") ||
+      knownSmithyType.contains(symbol.getName())
+    ) {
+      return symbol.getName();
+    }
+    if (shape.isMapShape()) {
+      MemberShape valueMemberShape = ((MapShape) shape).getValue();
+      Shape valueShape = model.expectShape(valueMemberShape.getTarget());
+      return "map[string]".concat(
+          SmithyNameResolver.getSmithyType(
+            valueShape,
+            symbolProvider.toSymbol(valueShape),
+            model,
+            symbolProvider
+          )
+        );
+    }
+    if (shape.isListShape()) {
+      MemberShape memberShape = ((ListShape) shape).getMember();
+      Shape memberShapeTarget = model.expectShape(memberShape.getTarget());
+      return "[]".concat(
+          SmithyNameResolver.getSmithyType(
+            memberShapeTarget,
+            symbolProvider.toSymbol(memberShapeTarget),
+            model,
+            symbolProvider
+          )
+        );
+    }
+    return SmithyNameResolver
+      .smithyTypesNamespace(shape)
+      .concat(DOT)
+      .concat(symbol.getName());
+  }
+
   public static String getSmithyType(final Shape shape, final Symbol symbol) {
     if (
       symbol.getNamespace().contains("smithy.") ||
-      symbol.getName().contains("string")
+      symbol.getNamespace().equals("smithyapitypes") ||
+      knownSmithyType.contains(symbol.getName())
     ) {
       return symbol.getName();
+    }
+    if (shape.isResourceShape()) {
+      return SmithyNameResolver
+        .smithyTypesNamespace(shape)
+        .concat(DOT)
+        .concat("I")
+        .concat(symbol.getName());
     }
     return SmithyNameResolver
       .smithyTypesNamespace(shape)
@@ -82,8 +155,8 @@ public class SmithyNameResolver {
   ) {
     if (
       symbol.getNamespace().contains("smithy.") ||
-      symbol.getName().equals("string") ||
-      symbol.getName().equals("float64")
+      symbol.getNamespace().equals("smithyapitypes") ||
+      knownSmithyType.contains(symbol.getName())
     ) {
       return symbol.getName();
     }
