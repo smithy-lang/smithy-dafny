@@ -6,16 +6,16 @@ include "./SimpleLocalServiceTest.dfy"
 
 module WrappedTest {
   import opened SimpleLocalServiceTest
-  import WrappedSimpleLocalService
+  import WrappedSimpleLocalServiceService
   import opened Types = SimpleLocalServiceTypes
   import opened Wrappers
 
   method TestWrappedClient(config: Types.SimpleLocalServiceConfig)
   {
-    var client :- expect WrappedSimpleLocalService.WrappedSimpleLocalService(config);
+    var client :- expect WrappedSimpleLocalServiceService.WrappedSimpleLocalService(config);
   }
 
   method {:test} WrappedTest() {
-    TestWrappedClient(WrappedSimpleLocalService.WrappedDefaultSimpleLocalServiceConfig());
+    TestWrappedClient(WrappedSimpleLocalServiceService.WrappedDefaultSimpleLocalServiceConfig());
   }
 }

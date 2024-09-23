@@ -35,7 +35,7 @@ INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleLocalService refines AbstractSimp
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedIndex.dfy
 WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.localservice.internaldafny.wrapped\"} WrappedSimpleLocalServiceService refines WrappedAbstractSimpleLocalServiceService"
-WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleLocalService refines WrappedAbstractSimpleLocalServiceService"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleLocalServiceService refines WrappedAbstractSimpleLocalServiceService"
 
 TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr

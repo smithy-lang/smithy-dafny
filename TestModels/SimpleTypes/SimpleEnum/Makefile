@@ -45,5 +45,5 @@ INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithyenum.interna
 INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleEnum refines AbstractSimpleTypesSmithyEnumService {"
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleEnumImpl.dfy
-WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithyenum.internaldafny.wrapped\"} WrappedSimpleTypesEnumService refines WrappedAbstractSimpleTypesSmithyEnumService {"
-WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesEnumService refines WrappedAbstractSimpleTypesSmithyEnumService {"
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithyenum.internaldafny.wrapped\"} WrappedSimpleTypesSmithyEnumService refines WrappedAbstractSimpleTypesSmithyEnumService {"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesSmithyEnumService refines WrappedAbstractSimpleTypesSmithyEnumService {"
