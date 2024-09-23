@@ -1146,11 +1146,6 @@ public class DafnyLocalServiceTypeConversionProtocol
             ),
             SmithyNameResolver.smithyTypesNamespace(configShape)
           );
-          System.out.println(
-            SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-              configShape.toShapeId().getNamespace()
-            )
-          );
           writer.write(
             """
             func $L(dafnyOutput $L)($L) {
