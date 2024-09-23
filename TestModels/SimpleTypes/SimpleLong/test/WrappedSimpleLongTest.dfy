@@ -4,11 +4,11 @@ include "../src/WrappedSimpleLongImpl.dfy"
 include "SimpleLongImplTest.dfy"
 
 module WrappedSimpleTypesLongTest {
-    import WrappedSimpleTypesLongService
+    import WrappedSimpleTypesSmithyLongService
     import SimpleLongImplTest
     import opened Wrappers
     method{:test} GetLong() {
-        var client :- expect WrappedSimpleTypesLongService.WrappedSimpleLong();
+        var client :- expect WrappedSimpleTypesSmithyLongService.WrappedSimpleLong();
         SimpleLongImplTest.TestGetLong(client);
         SimpleLongImplTest.TestGetLongEdgeCases(client);
         SimpleLongImplTest.TestGetLongKnownValueTest(client);
