@@ -4,9 +4,7 @@ package simplecallingawssdkfromlocalservicesmithygenerated
 
 import (
 	"context"
-	// "fmt"
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingAWSSDKFromLocalService"
-
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/SimpleCallingawssdkfromlocalserviceTypes"
 	"github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/simplecallingawssdkfromlocalservicesmithygeneratedtypes"
 )
@@ -36,7 +34,7 @@ func (client *Client) CallKMSEncrypt(ctx context.Context, params simplecallingaw
 	}
 	var dafny_request SimpleCallingawssdkfromlocalserviceTypes.CallKMSEncryptInput = CallKMSEncryptInput_ToDafny(params)
 	var dafny_response = client.DafnyClient.CallKMSEncrypt(dafny_request)
-	// fmt.Println(dafny_response)
+
 	if dafny_response.Is_Failure() {
 		err := dafny_response.Dtor_error().(SimpleCallingawssdkfromlocalserviceTypes.Error)
 		return nil, Error_FromDafny(err)
