@@ -19,30 +19,16 @@ module SimpleRecursiveShapeImplTest {
     var myDataMap: StructuredDataMap := map[];
     // myDataMap := myDataMap["key1" := StructuredData(content := Some(42))];
     myDataMap := myDataMap["key2" := StructuredData(content := Some(IntegerValue(42)))];
-    var recursiveUnion := DataMap(myDataMap);
+    var myList: ListWithRecursion := [myDataMap];
+    var recursiveUnion := ListValue(myList);
 
     var ret :- expect client.GetRecursiveShape(GetRecursiveShapeInput(
                                                  recursiveUnion := Some(recursiveUnion)
                                                ));
     expect ret.recursiveUnion.Some?;
-    expect ret.recursiveUnion.value.DataMap?;
-    expect ret.recursiveUnion.value.DataMap == myDataMap;
+    expect ret.recursiveUnion.value.ListValue?;
+    expect ret.recursiveUnion.value.ListValue == myList;
 
     print ret;
-  }
-
-  method TestGetRecursiveShapeKnownValue(client: ISimpleRecursiveShapeClient)
-    requires client.ValidState()
-    modifies client.Modifies
-    ensures client.ValidState()
-  {
-    var myDataMap: StructuredDataMap := map[];
-    // myDataMap := myDataMap["key1" := StructuredData(content := Some(42))];
-    myDataMap := myDataMap["key2" := StructuredData(content := Some(IntegerValue(42)))];
-    var recursiveUnion := DataMap(myDataMap);
-    var ret :- expect client.GetRecursiveShape(GetRecursiveShapeInput(recursiveUnion := Some(recursiveUnion)));
-    expect ret.recursiveUnion.Some?;
-    expect ret.recursiveUnion.value.DataMap?;
-    expect ret.recursiveUnion.value.DataMap == myDataMap;
   }
 }

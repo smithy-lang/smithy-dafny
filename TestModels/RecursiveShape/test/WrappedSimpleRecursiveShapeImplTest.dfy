@@ -10,6 +10,5 @@ module WrappedSimpleTypesStringTest {
   method{:test} GetRecursiveShape() {
     var client :- expect WrappedSimpleRecursiveShapeService.WrappedSimpleRecursiveShape();
     SimpleRecursiveShapeImplTest.TestGetRecursiveShape(client);
-    SimpleRecursiveShapeImplTest.TestGetRecursiveShapeKnownValue(client);
   }
 }

@@ -12,19 +12,8 @@ module SimpleRecursiveShapeImpl refines AbstractSimpleRecursiveShapeOperations {
   predicate GetRecursiveShapeEnsuresPublicly(input: GetRecursiveShapeInput, output: Result<GetRecursiveShapeOutput, Error>) {
     true
   }
-  predicate GetRecursiveShapeKnownValueTestEnsuresPublicly(input: GetRecursiveShapeInput, output: Result<GetRecursiveShapeOutput, Error>) {
-    true
-  }
   method GetRecursiveShape(config: InternalConfig, input: GetRecursiveShapeInput )
     returns (output: Result<GetRecursiveShapeOutput, Error>) {
-    var res := GetRecursiveShapeOutput(recursiveUnion := input.recursiveUnion);
-    return Success(res);
-  }
-
-  // This method is only used for known-value testing. See "Known Value Tests" inside TestModels' README file.
-  method GetRecursiveShapeKnownValueTest(config: InternalConfig, input: GetRecursiveShapeInput )
-    returns (output: Result<GetRecursiveShapeOutput, Error>) {
-    ValidateInput(input);
     var res := GetRecursiveShapeOutput(recursiveUnion := input.recursiveUnion);
     return Success(res);
   }
