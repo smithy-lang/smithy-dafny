@@ -6,7 +6,7 @@ include "./SimpleDoubleTest.dfy"
 
 module WrappedTest {
   import opened SimpleDoubleTest
-  import opened WrappedSimpleTypesDouble
+  import opened WrappedSimpleTypesSmithyDoubleService
   import opened Types = SimpleTypesSmithyDoubleTypes
   import opened Wrappers
 

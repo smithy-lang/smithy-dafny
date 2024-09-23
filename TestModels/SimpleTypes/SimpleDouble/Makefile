@@ -50,5 +50,5 @@ INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithydouble.inter
 INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleDouble refines AbstractSimpleTypesSmithyDoubleService {"
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedIndex.dfy
-WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithydouble.internaldafny.wrapped\"} WrappedSimpleTypesDouble refines WrappedAbstractSimpleTypesSmithyDoubleService"
-WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesDouble refines WrappedAbstractSimpleTypesSmithyDoubleService"
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.types.smithydouble.internaldafny.wrapped\"} WrappedSimpleTypesSmithyDoubleService refines WrappedAbstractSimpleTypesSmithyDoubleService"
+WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleTypesSmithyDoubleService refines WrappedAbstractSimpleTypesSmithyDoubleService"
