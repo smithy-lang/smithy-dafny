@@ -11,8 +11,8 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   // For call to DDB
   const TABLE_NAME_SUCCESS_CASE := "TestTable"
   const NONEXISTENT_TABLE_NAME := "NONEXISTENT_Table"
-  
-  // For call to KMS 
+
+  // For call to KMS
   const KEY_ID_SUCCESS_CASE := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7f"
   const INVALID_KEY_ID := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-invalidkeyid"
   const NONEXISTENT_KEY_ID := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7g"
@@ -21,11 +21,11 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
 
   import opened SimpleCallingawssdkfromlocalserviceTypes
   import opened Wrappers
-  // method{:test} CallDDBGetItem(){
-  //   var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
-  //   TestCallDDBGetItem_Success(client);
-  //   TestCallDDBGetItem_Failure(client);
-  // }
+    // method{:test} CallDDBGetItem(){
+    //   var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
+    //   TestCallDDBGetItem_Success(client);
+    //   TestCallDDBGetItem_Failure(client);
+    // }
 
   // method TestCallDDBGetItem_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
   //     requires client.ValidState()
@@ -83,13 +83,14 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   }
 
   method TestCallKMSEncrypt_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-      requires client.ValidState()
-      modifies client.Modifies
-      ensures client.ValidState()
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
   {
     var kmsClient :- expect Kms.KMSClient();
     var resSuccess := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := KEY_ID_SUCCESS_CASE, plaintext := PLAIN_TEXT));
     expect resSuccess.Success?;
+    expect resSuccess.value.encryptOutput == KEY_ID_SUCCESS_CASE;
   }
 
   method TestCallKMSEncrypt_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
@@ -99,17 +100,6 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   {
     var kmsClient :- expect Kms.KMSClient();
 
-    // Test with InvalidKey
-    // var input_InvalidKey := Kms.Types.EncryptRequest(
-    //   KeyId := INVALID_KEY_ID,
-    //   Plaintext := [ 97, 115, 100, 102 ],
-    //   EncryptionContext := Wrappers.None,
-    //   GrantTokens := Wrappers.None,
-    //   EncryptionAlgorithm := Wrappers.None
-    //   );
-    // var resFailure_InvalidKey := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := INVALID_KEY_ID, plaintext := PLAIN_TEXT));
-    // expect resFailure_InvalidKey.Failure?;
-
     // Test with NonExistent
     var input_NonExistent := Kms.Types.EncryptRequest(
       KeyId := NONEXISTENT_KEY_ID,
@@ -117,7 +107,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
       EncryptionContext := Wrappers.None,
       GrantTokens := Wrappers.None,
       EncryptionAlgorithm := Wrappers.None
-      );
+    );
     var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := NONEXISTENT_KEY_ID, plaintext := PLAIN_TEXT));
     expect resFailure_NonExistent.Failure?;
   }

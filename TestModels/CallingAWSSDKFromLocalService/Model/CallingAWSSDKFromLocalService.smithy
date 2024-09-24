@@ -66,7 +66,7 @@ structure CallKMSEncryptInput {
 
 structure CallKMSEncryptOutput {
   @required
-  encryptOutput: String,
+  encryptOutput: com.amazonaws.kms#KeyIdType,
 }
 
 @error("client")
