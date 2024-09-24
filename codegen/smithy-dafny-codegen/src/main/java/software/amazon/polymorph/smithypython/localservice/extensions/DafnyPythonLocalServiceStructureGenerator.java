@@ -5,6 +5,8 @@ import static software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkN
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import java.util.Set;
+
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -238,6 +240,14 @@ public class DafnyPythonLocalServiceStructureGenerator
           symbolProvider.toSymbol(referentShape).getNamespace()
         );
       }
+    } else if (AwsSdkNameResolver.isAwsSdkShape(memberShape)) {
+      // boto3 does not have types for AWS SDK-modelled objects,
+      // so AWS SDK shapes cannot have type hints.
+      String formatString = "$L";
+      writer.write(
+        formatString,
+        memberName
+      );
     } else {
       super.writePropertyForMember(isError, memberShape);
     }
@@ -313,6 +323,14 @@ public class DafnyPythonLocalServiceStructureGenerator
       writer.addStdlibImport(
         symbolProvider.toSymbol(referentShape).getNamespace()
       );
+    } else if (AwsSdkNameResolver.isAwsSdkShape(memberShape)) {
+      // boto3 does not have types for AWS SDK-modelled objects,
+      // so AWS SDK shapes cannot have type hints.
+      String formatString = "$L,";
+      writer.write(
+        formatString,
+        memberName
+      );
     } else {
       super.writeInitMethodParameterForRequiredMember(isError, memberShape);
     }
@@ -332,12 +350,12 @@ public class DafnyPythonLocalServiceStructureGenerator
     MemberShape memberShape
   ) {
     Shape target = model.expectShape(memberShape.getTarget());
+    String memberName = symbolProvider.toMemberName(memberShape);
 
     if (target.hasTrait(ReferenceTrait.class)) {
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
-      String memberName = symbolProvider.toMemberName(memberShape);
 
       writer.addStdlibImport("typing", "Optional");
       // Use forward reference for reference traits to avoid circular import
@@ -351,6 +369,14 @@ public class DafnyPythonLocalServiceStructureGenerator
       );
       writer.addStdlibImport(
         symbolProvider.toSymbol(referentShape).getNamespace()
+      );
+    } else if (AwsSdkNameResolver.isAwsSdkShape(memberShape)) {
+      // boto3 does not have types for AWS SDK-modelled objects,
+      // so AWS SDK shapes cannot have type hints.
+      String formatString = "$L,";
+      writer.write(
+        formatString,
+        memberName
       );
     } else {
       super.writeInitMethodParameterForOptionalMember(isError, memberShape);
