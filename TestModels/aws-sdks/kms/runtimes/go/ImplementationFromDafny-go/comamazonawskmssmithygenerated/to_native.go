@@ -4,12 +4,13 @@ package comamazonawskmssmithygenerated
 
 import (
 	"fmt"
-	// "reflect"
+
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	"github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
-	// "errors"
+	"errors"
+	"github.com/aws/smithy-go"
 )
 
 func CancelKeyDeletionInput_FromDafny(dafnyInput ComAmazonawsKmsTypes.CancelKeyDeletionRequest) kms.CancelKeyDeletionInput {
@@ -7919,21 +7920,23 @@ func IncorrectKeyMaterialException_FromDafny(dafnyOutput ComAmazonawsKmsTypes.Er
 
 func NotFoundException_FromDafny(dafnyOutput ComAmazonawsKmsTypes.Error) types.NotFoundException {
 	return func() types.NotFoundException {
-
+		
 		return types.NotFoundException{
 			Message: func() *string {
-				var s string
-				if dafnyOutput.Dtor_message().UnwrapOr(nil) == nil {
-					return nil
-				}
-				for i := dafny.Iterate(dafnyOutput.Dtor_message().UnwrapOr(nil)); ; {
-					val, ok := i()
-					if !ok {
-						return &[]string{s}[0]
-					} else {
-						s = s + string(val.(dafny.Char))
-					}
-				}
+				s := "Some string"
+				return &s
+				// var s string
+				// if dafnyOutput.Dtor_message().UnwrapOr(nil) == nil {
+				// 	return nil
+				// }
+				// for i := dafny.Iterate(dafnyOutput.Dtor_message().UnwrapOr(nil)); ; {
+				// 	val, ok := i()
+				// 	if !ok {
+				// 		return &[]string{s}[0]
+				// 	} else {
+				// 		s = s + string(val.(dafny.Char))
+				// 	}
+				// }
 			}()}
 	}()
 
@@ -8208,25 +8211,18 @@ func OpaqueError_Output_FromDafny(dafnyOutput ComAmazonawsKmsTypes.Error) error 
 }
 
 func Error_FromDafny(err ComAmazonawsKmsTypes.Error) error {
-	fmt.Println("abc:")
-	fmt.Println(err)
-
-	// var err2 *types.NotFoundException
-	// e := NotFoundException_FromDafny(err)
-	// return &e
-	// switch {
-	// 	case errors.As(err, &err2):
-	// 		return NotFoundException_ToDafny(*err2)
-	// }
-	// var err2 *types.NotFoundException
-	// fmt.Println("Test NotFoundException_FromDafny")
-	// e := NotFoundException_FromDafny(err)
-	// fmt.Println(e)
-	// switch {
-	// case errors.As(&err, &err2):
-	// 	fmt.Println("Error is of type Error2:", err2)
-	// }
-
+	var err2 *types.NotFoundException
+	defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("Recovered in f", r)
+        }
+    }()
+	switch {
+		case errors.As(err.Dtor_obj().(*smithy.OperationError), &err2):
+			e := NotFoundException_FromDafny(err)
+			return &e
+	}
+	fmt.Println("\n\n\na")
 	// Service Errors
 	if err.Is_CloudHsmClusterNotRelatedException() {
 		e := CloudHsmClusterNotRelatedException_FromDafny(err)
@@ -8405,7 +8401,6 @@ func Error_FromDafny(err ComAmazonawsKmsTypes.Error) error {
 
 	if err.Is_NotFoundException() {
 		e := NotFoundException_FromDafny(err)
-		fmt.Println("Inside Not found")
 		return &e
 	}
 
@@ -8468,5 +8463,6 @@ func Error_FromDafny(err ComAmazonawsKmsTypes.Error) error {
 		e := XksKeyNotFoundException_FromDafny(err)
 		return &e
 	}
+
 	return OpaqueError_Output_FromDafny(err)
 }
