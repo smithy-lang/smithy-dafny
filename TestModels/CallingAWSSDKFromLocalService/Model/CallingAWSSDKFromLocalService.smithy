@@ -3,12 +3,12 @@
 namespace simple.callingawssdkfromlocalservice
 
 use aws.polymorph#reference
-// use com.amazonaws.dynamodb#DynamoDB_20120810
+use com.amazonaws.dynamodb#DynamoDB_20120810
 use com.amazonaws.kms#TrentService
 
 
-// @reference(service: DynamoDB_20120810)
-// structure DdbClientReference {}
+@reference(service: DynamoDB_20120810)
+structure DdbClientReference {}
 
 @reference(service: TrentService)
 structure KmsClientReference {}
@@ -17,7 +17,7 @@ structure KmsClientReference {}
   sdkId: "SimpleCallingAWSSDKFromLocalService",
   config: SimpleCallingAWSSDKFromLocalServiceConfig,
   dependencies: [
-    // DynamoDB_20120810,
+    DynamoDB_20120810,
     TrentService
   ]
 )
@@ -26,29 +26,29 @@ service SimpleCallingAWSSDKFromLocalService {
   version: "2021-11-01",
   resources: [],
   operations: [ 
-                // CallDDBGetItem,
+                CallDDBGetItem,
                 CallKMSEncrypt],
   errors: [ SimpleCallingAWSSDKFromLocalServiceException ],
 }
 
 structure SimpleCallingAWSSDKFromLocalServiceConfig {}
 
-// operation CallDDBGetItem {
-//   input: CallDDBGetItemInput,
-//   output: CallDDBGetItemOutput,
-// }
+operation CallDDBGetItem {
+  input: CallDDBGetItemInput,
+  output: CallDDBGetItemOutput,
+}
 
-// structure CallDDBGetItemInput {
-//   @required
-//   ddbClient: DdbClientReference,
-//   @required
-//   itemInput: com.amazonaws.dynamodb#GetItemInput
-// }
+structure CallDDBGetItemInput {
+  @required
+  ddbClient: DdbClientReference,
+  @required
+  tableArn: com.amazonaws.dynamodb#TableArn
+}
 
-// structure CallDDBGetItemOutput {
-//   @required
-//   itemOutput: com.amazonaws.dynamodb#GetItemOutput
-// }
+structure CallDDBGetItemOutput {
+  @required
+  itemOutput: com.amazonaws.dynamodb#Integer,
+}
 
 operation CallKMSEncrypt {
   input: CallKMSEncryptInput,

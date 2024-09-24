@@ -4,12 +4,13 @@ include "../src/Index.dfy"
 include "../src/WrappedSimpleCallingAWSSDKFromLocalServiceImpl.dfy"
 
 module SimpleCallingAWSSDKFromLocalServiceImplTest {
-  // import DDB = Com.Amazonaws.Dynamodb
+  import DDB = Com.Amazonaws.Dynamodb
   import Com.Amazonaws.Kms
   import SimpleCallingAWSSDKFromLocalService
 
   // For call to DDB
-  const TABLE_NAME_SUCCESS_CASE := "TestTable"
+  const TABLE_ARN_SUCCESS_CASE := "arn:aws:dynamodb:us-west-2:370957321024:table/TestTable"
+  const TABLE_ARN_FAILURE_CASE := "arn:aws:dynamodb:us-west-2:370957321024:table/TestTableFailure"
   const NONEXISTENT_TABLE_NAME := "NONEXISTENT_Table"
 
   // For call to KMS
@@ -21,60 +22,34 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
 
   import opened SimpleCallingawssdkfromlocalserviceTypes
   import opened Wrappers
-    // method{:test} CallDDBGetItem(){
-    //   var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
-    //   TestCallDDBGetItem_Success(client);
-    //   TestCallDDBGetItem_Failure(client);
-    // }
+  method{:test} CallDDBGetItem(){
+    var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
+    TestCallDDBScan_Success(client);
+    TestCallDDBScan_Failure(client);
+  }
 
-  // method TestCallDDBGetItem_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-  //     requires client.ValidState()
-  //     modifies client.Modifies
-  //     ensures client.ValidState()
-  // {
-  //   var ddbClient :- expect DDB.DynamoDBClient();
-  //   var Key2Get: DDB.Types.Key := map[
-  //         "branch-key-id" := DDB.Types.AttributeValue.S("aws-kms-h"),
-  //         "version" := DDB.Types.AttributeValue.S("1")
-  //       ];
+  method TestCallDDBScan_Success(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+  {
+    var ddbClient :- expect DDB.DynamoDBClient();
+    var resSuccess := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, tableArn := TABLE_ARN_SUCCESS_CASE));
 
-  //   var input := DDB.Types.GetItemInput(
-  //           TableName := TABLE_NAME_SUCCESS_CASE,
-  //           Key := Key2Get,
-  //           AttributesToGet := DDB.Wrappers.None,
-  //           ConsistentRead := DDB.Wrappers.None,
-  //           ReturnConsumedCapacity := DDB.Wrappers.None,
-  //           ProjectionExpression := DDB.Wrappers.None,
-  //           ExpressionAttributeNames := DDB.Wrappers.None
-  //   );
+    expect resSuccess.Success?;
+    expect resSuccess.value.itemOutput == 1;
+  }
 
-  //   var resSuccess := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
-  //   expect resSuccess.Success?;
-  // }
+  method TestCallDDBScan_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var ddbClient :- expect DDB.DynamoDBClient();
+    var resFailure := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, tableArn := TABLE_ARN_FAILURE_CASE));
 
-  // method TestCallDDBGetItem_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
-  //   requires client.ValidState()
-  //   modifies client.Modifies
-  //   ensures client.ValidState()
-  // {
-  //   var ddbClient :- expect DDB.DynamoDBClient();
-  //   var Key2Get: DDB.Types.Key := map[
-  //         "branch-key-id" := DDB.Types.AttributeValue.S("aws-kms-h"),
-  //         "version" := DDB.Types.AttributeValue.S("1")
-  //       ];
-  //   var input := DDB.Types.GetItemInput(
-  //           TableName := NONEXISTENT_TABLE_NAME,
-  //           Key := Key2Get,
-  //           AttributesToGet := DDB.Wrappers.None,
-  //           ConsistentRead := DDB.Wrappers.None,
-  //           ReturnConsumedCapacity := DDB.Wrappers.None,
-  //           ProjectionExpression := DDB.Wrappers.None,
-  //           ExpressionAttributeNames := DDB.Wrappers.None
-  //   );
-  //   var resFailure := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, itemInput := input));
-
-  //   expect resFailure.Failure?;
-  // }
+    expect resFailure.Failure?;
+  }
 
   method{:test} CallKMSEncrypt(){
     var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();

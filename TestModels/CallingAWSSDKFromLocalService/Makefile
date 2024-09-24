@@ -11,15 +11,18 @@ PROJECT_SERVICES := \
 	SimpleCallingAWSSDKFromLocalService
 
 PROJECT_DEPENDENCIES := \
-	aws-sdks/kms 
+	aws-sdks/kms \
+	aws-sdks/ddb 
 
 PROJECT_INDEX := \
-	aws-sdks/kms/src/Index.dfy
+	aws-sdks/kms/src/Index.dfy \
+	aws-sdks/ddb/src/Index.dfy
 
 SERVICE_NAMESPACE_SimpleCallingAWSSDKFromLocalService=simple.callingawssdkfromlocalservice
 
 SERVICE_DEPS_SimpleCallingAWSSDKFromLocalService := \
-	aws-sdks/kms
+	aws-sdks/kms \
+	aws-sdks/ddb 
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
@@ -56,11 +59,12 @@ WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleCallingAWSSDKFromL
 # Go
 
 GO_DEPENDENCY_MODULE_NAMES := \
-	--dependency-library-name=com.amazonaws.dynamodb=github.com/aws/aws-sdk-go-v2/service/dynamodb \
-	--dependency-library-name=com.amazonaws.kms=github.com/aws/aws-sdk-go-v2/service/kms
+	--dependency-library-name=com.amazonaws.dynamodb=github.com/smithy-lang/smithy-dafny/ddb \
+	--dependency-library-name=com.amazonaws.kms=github.com/smithy-lang/smithy-dafny/kms
 
 GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService"
 
 TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
-	aws-sdks/kms/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr 
+	aws-sdks/kms/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	aws-sdks/ddb/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr 

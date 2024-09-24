@@ -6,29 +6,33 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
   // import ComAmazonawsDynamodbTypes
   import ComAmazonawsKmsTypes
   import KMS = Com.Amazonaws.Kms
+  import DDB = Com.Amazonaws.Dynamodb
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)
   {true}
   function ModifiesInternalConfig(config: InternalConfig) : set<object>
   {{}}
-  // predicate CallDDBGetItemEnsuresPublicly(input: CallDDBGetItemInput, output: Result<CallDDBGetItemOutput, Error>) {
-  //   true
-  // }
+  predicate CallDDBGetItemEnsuresPublicly(input: CallDDBGetItemInput, output: Result<CallDDBGetItemOutput, Error>) {
+    true
+  }
 
   predicate CallKMSEncryptEnsuresPublicly(input: CallKMSEncryptInput, output: Result<CallKMSEncryptOutput, Error>) {
     true
   }
 
-  // method CallDDBGetItem ( config: InternalConfig,  input: CallDDBGetItemInput )
-  //   returns (output: Result<CallDDBGetItemOutput, Error>) {
-  //   var retGetItem := input.ddbClient.GetItem(input.itemInput);
-  //   if retGetItem.Success? {
-  //     return Success(CallDDBGetItemOutput(itemOutput := retGetItem.value));
-  //   } else {
-  //     return Failure(ComAmazonawsDynamodb(retGetItem.error));
-  //   }
-  // }
+  method CallDDBGetItem ( config: InternalConfig,  input: CallDDBGetItemInput )
+    returns (output: Result<CallDDBGetItemOutput, Error>) {
+    var getItemInput := DDB.Types.ScanInput(
+      TableName := input.tableArn
+    );
+    var retGetItem := input.ddbClient.Scan(getItemInput);
+    if retGetItem.Success? {
+      return Success(CallDDBGetItemOutput(itemOutput := retGetItem.value.Count.UnwrapOr(-1)));
+    } else {
+      return Failure(ComAmazonawsDynamodb(retGetItem.error));
+    }
+  }
   method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
     returns (output: Result<CallKMSEncryptOutput, Error>) {
     var encryptInput := KMS.Types.EncryptRequest(
