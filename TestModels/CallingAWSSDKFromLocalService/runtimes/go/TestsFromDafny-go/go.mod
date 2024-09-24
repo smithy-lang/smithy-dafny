@@ -5,6 +5,7 @@ go 1.23.0
 require github.com/dafny-lang/DafnyStandardLibGo v0.0.0
 
 require (
+	github.com/aws/smithy-go v1.20.4
 	github.com/dafny-lang/DafnyRuntimeGo v0.0.0
 	github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService v0.0.0
 	github.com/smithy-lang/smithy-dafny/kms v0.0.0
@@ -24,7 +25,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.22.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.30.7 // indirect
-	github.com/aws/smithy-go v1.20.4 // indirect
 )
 
 replace github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService v0.0.0 => ../ImplementationFromDafny-go
