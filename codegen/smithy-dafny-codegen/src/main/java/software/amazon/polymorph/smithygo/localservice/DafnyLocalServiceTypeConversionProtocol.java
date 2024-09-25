@@ -1,7 +1,9 @@
 package software.amazon.polymorph.smithygo.localservice;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Set;
 import software.amazon.polymorph.smithygo.codegen.ApplicationProtocol;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
@@ -969,15 +971,38 @@ public class DafnyLocalServiceTypeConversionProtocol
                   .getDependencies()
                 : new LinkedList<ShapeId>();
               if (dependencies != null) {
-                Boolean wroteDepShape = false;
-                for (var dep : dependencies) {                 
-                  var depShape = context.model().expectShape(dep);
-                  if (dep.getName().equals("TrentService") || dep.getName().equals("DynamoDB_20120810")) {
-                    // Generate Error Serialization only once
-                    if (wroteDepShape) {
-                      continue;
-                    }
-                    String depName = SmithyNameResolver.shapeNamespaceDafnyTranspiled(depShape);
+                if (dependencies.size() != 0) {
+                  Optional<ShapeId> kmsShapeId = dependencies.stream()
+                    .filter(shapeId -> "TrentService".equals(shapeId.getName()))
+                    .findFirst();
+                  Optional<ShapeId> ddbShapeId = dependencies.stream()
+                      .filter(shapeId -> "DynamoDB_20120810".equals(shapeId.getName()))
+                      .findFirst();
+                  if (kmsShapeId.isPresent() && ddbShapeId.isPresent()) {
+                    var kmsShape = context.model().expectShape(kmsShapeId.get());
+                    var ddbShape = context.model().expectShape(ddbShapeId.get());
+                    String kmsShapeNamespace = SmithyNameResolver.shapeNamespace(kmsShape);
+                    String ddbShapeNamespace = SmithyNameResolver.shapeNamespace(ddbShape);
+                    w.write("""
+                        case smithy.APIError:
+		                      kmsError := $L.Error_ToDafny(err)
+                          // There is no generic way to know if the error is a kms or a ddb error. So, we check for Opaque error.
+                          if(kmsError.Is_Opaque()) {
+                            ddbError := $L.Error_ToDafny(err)
+                            return $L.Create_$L_(ddbError)
+                          } else {
+                            return $L.Create_$L_(e)
+                          }
+                        """, 
+                          kmsShapeNamespace,
+                          ddbShapeNamespace,
+                          DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
+                          SmithyNameResolver.shapeNamespaceDafnyTranspiled(ddbShape),
+                          DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
+                          SmithyNameResolver.shapeNamespaceDafnyTranspiled(kmsShape)
+                        );
+                  } else if (kmsShapeId.isPresent() || ddbShapeId.isPresent()) {
+                    var depShape = context.model().expectShape(kmsShapeId.isPresent() ? kmsShapeId.get() : ddbShapeId.get());
                     w.write(
                       """
                       case smithy.APIError:
@@ -986,9 +1011,14 @@ public class DafnyLocalServiceTypeConversionProtocol
                       """,
                       SmithyNameResolver.shapeNamespace(depShape),
                       DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-                      depName
+                      SmithyNameResolver.shapeNamespaceDafnyTranspiled(depShape)
                     );
-                    wroteDepShape = true;
+                  }
+                }
+                for (var dep : dependencies) {     
+                  var depShape = context.model().expectShape(dep);
+                  if (dep.getName().equals("TrentService") || dep.getName().equals("DynamoDB_20120810")) {
+                    continue;
                   }
                   else {
                     w.write(

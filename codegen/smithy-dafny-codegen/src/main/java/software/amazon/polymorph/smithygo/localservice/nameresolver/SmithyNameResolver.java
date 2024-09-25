@@ -38,6 +38,10 @@ public class SmithyNameResolver {
     return shape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase().concat("smithygenerated");
   }
 
+  public static String shapeNamespaceDafnyTranspiled(final Shape shape) {
+    return CaseUtils.toPascalCase(shape.toShapeId().getNamespace().replace(DOT, " "));
+  }
+
   public static String smithyTypesNamespace(final Shape shape) {
     if (shape.getId().getName().equals("TrentService") || shape.getId().getName().equals("DynamoDB_20120810"))  {
       return CaseUtils.toPascalCase(shape
