@@ -21,6 +21,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+import software.amazon.smithy.utils.CaseUtils;
 
 public class DafnyLocalServiceTypeConversionProtocol
   implements ProtocolGenerator {
@@ -968,9 +969,29 @@ public class DafnyLocalServiceTypeConversionProtocol
                   .getDependencies()
                 : new LinkedList<ShapeId>();
               if (dependencies != null) {
-                for (var dep : dependencies) {
+                Boolean wroteDepShape = false;
+                for (var dep : dependencies) {                 
                   var depShape = context.model().expectShape(dep);
-                  w.write(
+                  if (dep.getName().equals("TrentService") || dep.getName().equals("DynamoDB_20120810")) {
+                    // Generate Error Serialization only once
+                    if (wroteDepShape) {
+                      continue;
+                    }
+                    String depName = SmithyNameResolver.shapeNamespaceDafnyTranspiled(depShape);
+                    w.write(
+                      """
+                      case smithy.APIError:
+                        e := $L.Error_ToDafny(err)
+                        return $L.Create_$L_(e)
+                      """,
+                      SmithyNameResolver.shapeNamespace(depShape),
+                      DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
+                      depName
+                    );
+                    wroteDepShape = true;
+                  }
+                  else {
+                    w.write(
                     """
                     case $L.$LBaseException:
                         return $L.Create_$L_($L.Error_ToDafny(err))
@@ -981,6 +1002,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                     dep.getName(),
                     SmithyNameResolver.shapeNamespace(depShape)
                   );
+                  }
                 }
               }
             }),
@@ -1230,8 +1252,12 @@ public class DafnyLocalServiceTypeConversionProtocol
                 var depService = context
                   .model()
                   .expectShape(dep, ServiceShape.class);
-                if (!depService.hasTrait(LocalServiceTrait.class)) {
-                  continue;
+                String shapeNamespace;
+                if (depService.hasTrait(LocalServiceTrait.class)) {
+                  shapeNamespace = depService.expectTrait(LocalServiceTrait.class).getSdkId();
+                }
+                else {
+                  shapeNamespace = SmithyNameResolver.shapeNamespaceDafnyTranspiled(depService);
                 }
                 w.write(
                   """
@@ -1239,9 +1265,9 @@ public class DafnyLocalServiceTypeConversionProtocol
                       return $L.Error_FromDafny(err.Dtor_$L())
                   }
                   """,
-                  depService.expectTrait(LocalServiceTrait.class).getSdkId(),
+                  shapeNamespace,
                   SmithyNameResolver.shapeNamespace(depService),
-                  depService.expectTrait(LocalServiceTrait.class).getSdkId()
+                  shapeNamespace
                 );
               }
             })
