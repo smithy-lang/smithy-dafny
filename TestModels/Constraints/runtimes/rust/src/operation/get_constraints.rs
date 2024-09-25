@@ -18,19 +18,19 @@ impl GetConstraints {
         crate::operation::get_constraints::GetConstraintsOutput,
         crate::types::error::Error,
     > {
-        if matches!(input.my_string, Some(ref x) if !(1..=10).contains(&x.len())) {
+        if matches!(input.my_string, Some(ref x) if !(1..=10).contains(&x.chars().map(::std::primitive::char::len_utf16).fold(0usize, ::std::ops::Add::add))) {
     return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
         "my_string",
         "my_string failed to satisfy constraint: Member must have length between 1 and 10, inclusive",
     )).map_err(crate::types::error::Error::wrap_validation_err);
 }
-if matches!(input.non_empty_string, Some(ref x) if !(1..).contains(&x.len())) {
+if matches!(input.non_empty_string, Some(ref x) if !(1..).contains(&x.chars().map(::std::primitive::char::len_utf16).fold(0usize, ::std::ops::Add::add))) {
     return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
         "non_empty_string",
         "non_empty_string failed to satisfy constraint: Member must have length greater than or equal to 1",
     )).map_err(crate::types::error::Error::wrap_validation_err);
 }
-if matches!(input.string_less_than_or_equal_to_ten, Some(ref x) if !(..=10).contains(&x.len())) {
+if matches!(input.string_less_than_or_equal_to_ten, Some(ref x) if !(..=10).contains(&x.chars().map(::std::primitive::char::len_utf16).fold(0usize, ::std::ops::Add::add))) {
     return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
         "string_less_than_or_equal_to_ten",
         "string_less_than_or_equal_to_ten failed to satisfy constraint: Member must have length less than or equal to 10",

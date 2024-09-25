@@ -785,8 +785,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           case STRING -> targetShape.hasTrait(DafnyUtf8BytesTrait.class)
             // scalar values
             ? "x.chars().count()"
-            // bytes
-            : "x.len()";
+            // The Smithy spec says that this should count scalar values,
+            // but for consistency with the existing Java and .NET implementations,
+            // we instead count UTF-16 code points.
+            // See <https://github.com/smithy-lang/smithy-dafny/issues/610>.
+            : "x.chars().map(::std::primitive::char::len_utf16).fold(0usize, ::std::ops::Add::add)";
           default -> "x.len()";
         };
       final var variables = MapUtils.merge(
