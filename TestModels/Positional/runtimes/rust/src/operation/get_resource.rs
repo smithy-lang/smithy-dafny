@@ -10,6 +10,7 @@ impl GetResource {
     pub fn new() -> Self {
         Self
     }
+
     pub(crate) async fn send(
         client: &crate::client::Client,
         input: crate::operation::get_resource::GetResourceInput,
@@ -17,6 +18,12 @@ impl GetResource {
         crate::operation::get_resource::GetResourceOutput,
         crate::types::error::Error,
     > {
+        if input.name.is_none() {
+    return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::missing_field(
+        "name",
+        "name was not specified but it is required when building GetResourceInput",
+    )).map_err(crate::types::error::Error::wrap_validation_err);
+}
                 let inner_input = crate::conversions::get_resource::_get_resource_input::to_dafny(input);
         let inner_result =
             ::dafny_runtime::md!(client.dafny_client.clone()).GetResource(&inner_input);
