@@ -19264,17 +19264,6 @@ func (CompanionStruct_Error_) Default() Error {
 }
 
 func (_this Error) Dtor_message() Wrappers.Option {
-	// var err2 *types.NotFoundException
-	// switch {
-	// case errors.As(_this.Dtor_obj().(*smithy.OperationError), &err2):
-	// 	// Get the data from _this
-	// 	data := _this.Get_()
-
-	// 	// Print the message before the switch case
-	// 	if errorData, ok := data.(interface{ GetMessage() string }); ok {
-	// 		fmt.Println(errorData.GetMessage())
-	// 	}
-	// }
 	switch data := _this.Get_().(type) {
 	case Error_AlreadyExistsException:
 		return data.Message
