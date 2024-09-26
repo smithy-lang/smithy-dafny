@@ -31,6 +31,12 @@ module WrappedSimpleConstraintsTest {
     TestGetConstraintWithGreaterThanOne(client);
     TestGetConstraintWithUtf8Bytes(client);
     TestGetConstraintWithListOfUtf8Bytes(client);
+
+    var allowBadUtf8BytesFromDafny := true;
+    if (allowBadUtf8BytesFromDafny) {
+      TestGetConstraintWithBadUtf8Bytes(client);
+      TestGetConstraintWithListOfBadUtf8Bytes(client);
+    }
   }
 
   method TestGetConstraintWithValidInputs(client: ISimpleConstraintsClient)
@@ -486,11 +492,6 @@ module WrappedSimpleConstraintsTest {
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
 
-    // good length, bad bytes
-    input := input.(MyUtf8Bytes := Some(ForceUtf8Bytes([255,255,255])));
-    ret := client.GetConstraints(input := input);
-    expect ret.Failure?;
-
     var one : seq<uint8> := [0xf0, 0xa8, 0x89, 0x9f];
     var two : seq<uint8> := [0xc2, 0xa3];
     input := input.(MyUtf8Bytes := Some(ForceUtf8Bytes(one)));
@@ -527,13 +528,25 @@ module WrappedSimpleConstraintsTest {
     // expect ret.Failure?;
   }
 
+  // @length(min: 1, max: 10)
+  method TestGetConstraintWithBadUtf8Bytes(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    // good length, bad bytes
+    var input := GetValidInput();
+    input := input.(MyUtf8Bytes := Some(ForceUtf8Bytes([255,255,255])));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Failure?;
+  }
+
   // @length(min: 1, max: 2)
   method TestGetConstraintWithListOfUtf8Bytes(client: ISimpleConstraintsClient)
     requires client.ValidState()
     modifies client.Modifies
     ensures client.ValidState()
   {
-    var bad := ForceUtf8Bytes([255,255,255]);
     var good := ForceUtf8Bytes([1,2,3]);
 
     var input := GetValidInput();
@@ -552,9 +565,20 @@ module WrappedSimpleConstraintsTest {
     input := input.(MyListOfUtf8Bytes := Some(ForceListOfUtf8Bytes([good, good, good])));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
+  }
 
+  // @length(min: 1, max: 2)
+  method TestGetConstraintWithListOfBadUtf8Bytes(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var bad := ForceUtf8Bytes([255,255,255]);
+    var good := ForceUtf8Bytes([1,2,3]);
+
+    var input := GetValidInput();
     input := input.(MyListOfUtf8Bytes := Some(ForceListOfUtf8Bytes([bad])));
-    ret := client.GetConstraints(input := input);
+    var ret := client.GetConstraints(input := input);
     expect ret.Failure?;
 
     input := input.(MyListOfUtf8Bytes := Some(ForceListOfUtf8Bytes([bad, good])));
