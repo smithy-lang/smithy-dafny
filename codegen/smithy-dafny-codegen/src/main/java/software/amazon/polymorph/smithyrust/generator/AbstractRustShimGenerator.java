@@ -464,7 +464,10 @@ public abstract class AbstractRustShimGenerator {
               valueToRust = "(%s).unwrap()".formatted(valueToRust);
             }
           } else {
-            valueToRust = dafnyToRust.formatted(dafnyValue + ".as_ref()");
+            valueToRust =
+              dafnyToRust.formatted(
+                "::std::borrow::Borrow::borrow(%s)".formatted(dafnyValue)
+              );
             if (isRustOption) {
               valueToRust = "Some(%s)".formatted(valueToRust);
             }
