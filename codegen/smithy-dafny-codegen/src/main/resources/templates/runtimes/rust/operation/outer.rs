@@ -7,6 +7,7 @@ impl $pascalCaseOperationName:L {
     pub fn new() -> Self {
         Self
     }
+
     pub(crate) async fn send(
         $operationTargetName:L: &$operationTargetType:L,
         input: $operationInputType:L,
@@ -14,6 +15,7 @@ impl $pascalCaseOperationName:L {
         $operationOutputType:L,
         $qualifiedRustServiceErrorType:L,
     > {
+        $inputValidations:L
         $operationSendBody:L
     }
 }

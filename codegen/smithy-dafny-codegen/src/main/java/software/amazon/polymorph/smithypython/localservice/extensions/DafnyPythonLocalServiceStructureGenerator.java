@@ -374,13 +374,6 @@ public class DafnyPythonLocalServiceStructureGenerator
       () -> {
         writer.writeDocs(() -> {
           writer.write("Creates a $L from a dictionary.\n", shapeName);
-          writer.write(
-            writer.formatDocs(
-              """
-              The dictionary is expected to use the modeled shape names rather \
-              than the parameter names as keys to be mostly compatible with boto3."""
-            )
-          );
         });
 
         if (shape.members().isEmpty() && !isError) {
@@ -522,13 +515,6 @@ public class DafnyPythonLocalServiceStructureGenerator
           writer.write(
             "Converts the $L to a dictionary.\n",
             symbolProvider.toSymbol(shape).getName()
-          );
-          writer.write(
-            writer.formatDocs(
-              """
-              The dictionary uses the modeled shape names rather than the parameter names \
-              as keys to be mostly compatible with boto3."""
-            )
           );
         });
 

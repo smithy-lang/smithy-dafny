@@ -4,6 +4,7 @@ import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,10 @@ import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.BoundOperationShape;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.utils.ConstrainTraitUtils;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -39,6 +44,8 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ReadonlyTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 
 /**
  * Generates all Rust modules needed to wrap a Dafny library as a Rust library.
@@ -732,7 +739,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       StructureShape.class
     );
     return Set.of(
-      operationOuterModule(bindingShape, operationShape),
+      operationOuterModule(bindingShape, operationShape, inputShape),
       operationStructureModule(bindingShape, operationShape, inputShape),
       operationStructureModule(bindingShape, operationShape, outputShape),
       operationBuildersModule(bindingShape, operationShape)
@@ -741,16 +748,20 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile operationOuterModule(
     final Shape bindingShape,
-    final OperationShape operationShape
+    final OperationShape operationShape,
+    final StructureShape inputShape
   ) {
-    Map<String, String> variables = MapUtils.merge(
+    final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
       operationVariables(bindingShape, operationShape)
     );
+    variables.put(
+      "inputValidations",
+      new InputValidationGenerator(bindingShape, operationShape)
+        .generateValidations(model, inputShape)
+        .collect(Collectors.joining("\n"))
+    );
     if (bindingShape.isServiceShape()) {
-      StructureShape inputShape = operationIndex
-        .getInputShape(operationShape)
-        .get();
       if (inputShape.hasTrait(PositionalTrait.class)) {
         // Need to fetch the single member and then convert,
         // since on the Rust side there is still an input structure
@@ -813,7 +824,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           "$snakeCaseResourceName:L.inner.borrow_mut().$snakeCaseOperationName:L(input)",
           MapUtils.merge(
             variables,
-            resourceVariables(bindingShape.asResourceShape().get())
+            resourceVariables(bindingShape.asResourceShape().orElseThrow())
           )
         )
       );
@@ -829,6 +840,138 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Path path = operationsModuleFilePath(bindingShape)
       .resolve(snakeCaseOpName + ".rs");
     return new RustFile(path, TokenTree.of(content));
+  }
+
+  class InputValidationGenerator
+    extends ConstrainTraitUtils.ValidationGenerator<String> {
+
+    private final Map<String, String> commonVariables;
+
+    InputValidationGenerator(final Shape bindingShape, final OperationShape operationShape) {
+      this.commonVariables =
+        MapUtils.merge(serviceVariables(), operationVariables(bindingShape, operationShape));
+    }
+
+    @Override
+    protected String validateRequired(final MemberShape memberShape) {
+      return IOUtils.evalTemplate(
+        """
+        if input.$fieldName:L.is_none() {
+            return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::missing_field(
+                "$fieldName:L",
+                "$fieldName:L was not specified but it is required when building $pascalCaseOperationInputName:L",
+            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
+        }
+        """,
+        MapUtils.merge(commonVariables, structureMemberVariables(memberShape))
+      );
+    }
+
+    @Override
+    protected String validateRange(
+      final MemberShape memberShape,
+      final RangeTrait rangeTrait
+    ) {
+      final var variables = MapUtils.merge(
+        commonVariables,
+        structureMemberVariables(memberShape)
+      );
+      final var targetShape = model.expectShape(memberShape.getTarget());
+      final var min = rangeTrait
+        .getMin()
+        .map(bound -> asLiteral(bound, targetShape));
+      final var max = rangeTrait
+        .getMax()
+        .map(bound -> asLiteral(bound, targetShape));
+      final var conditionTemplate =
+        "!(%s..%s).contains(&x)".formatted(
+            min.orElse(""),
+            max.map(val -> "=" + val).orElse("")
+          );
+      final var rangeDescription = describeMinMax(min, max);
+      return IOUtils.evalTemplate(
+        """
+        if matches!(input.$fieldName:L, Some(x) if %s) {
+            return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
+                "$fieldName:L",
+                "$fieldName:L failed to satisfy constraint: Member must be %s",
+            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
+        }
+        """.formatted(conditionTemplate, rangeDescription),
+        variables
+      );
+    }
+
+    @Override
+    protected String validateLength(
+      final MemberShape memberShape,
+      final LengthTrait lengthTrait
+    ) {
+      final var targetShape = model.expectShape(memberShape.getTarget());
+      final var len =
+        switch (targetShape.getType()) {
+          case BLOB -> "x.as_ref().len()";
+          case STRING -> targetShape.hasTrait(DafnyUtf8BytesTrait.class)
+            // scalar values
+            ? "x.chars().count()"
+            // The Smithy spec says that this should count scalar values,
+            // but for consistency with the existing Java and .NET implementations,
+            // we instead count UTF-16 code points.
+            // See <https://github.com/smithy-lang/smithy-dafny/issues/610>.
+            : "x.chars().map(::std::primitive::char::len_utf16).fold(0usize, ::std::ops::Add::add)";
+          default -> "x.len()";
+        };
+      final var variables = MapUtils.merge(
+        commonVariables,
+        structureMemberVariables(memberShape)
+      );
+      final var min = lengthTrait.getMin().map(Object::toString);
+      final var max = lengthTrait.getMax().map(Object::toString);
+      final var conditionTemplate =
+        "!(%s..%s).contains(&%s)".formatted(
+            min.orElse(""),
+            max.map(val -> "=" + val).orElse(""),
+            len
+          );
+      final var rangeDescription = describeMinMax(min, max);
+      return IOUtils.evalTemplate(
+        """
+        if matches!(input.$fieldName:L, Some(ref x) if %s) {
+            return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
+                "$fieldName:L",
+                "$fieldName:L failed to satisfy constraint: Member must have length %s",
+            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
+        }
+        """.formatted(conditionTemplate, rangeDescription),
+        variables
+      );
+    }
+
+    private String asLiteral(final BigDecimal value, final Shape targetShape) {
+      return ConstrainTraitUtils.RangeTraitUtils.asShapeType(
+        targetShape,
+        value
+      );
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private String describeMinMax(
+      final Optional<String> min,
+      final Optional<String> max
+    ) {
+      if (min.isPresent() && max.isPresent()) {
+        return "between %s and %s, inclusive".formatted(min.get(), max.get());
+      } else if (min.isPresent()) {
+        return "greater than or equal to %s".formatted(min.get());
+      } else {
+        if (max.isEmpty()) {
+          throw new IllegalArgumentException(
+            "At least one of max and min must be non-null"
+          );
+        }
+        return "less than or equal to %s".formatted(max.get());
+      }
+    }
   }
 
   private RustFile operationStructureModule(
@@ -1649,6 +1792,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String configName = configShape.getId().getName(service);
     variables.put("configName", configName);
     variables.put("snakeCaseConfigName", toSnakeCase(configName));
+    variables.put("rustErrorModuleName", rustErrorModuleName());
     variables.put(
       "qualifiedRustServiceErrorType",
       qualifiedRustServiceErrorType()
@@ -1687,6 +1831,38 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "rustDependentRootModuleName",
       mergedGenerator.generatorForShape(dependentServiceShape).getRustRootModuleName(dependentServiceShape.getId().getNamespace())
     );
+    variables.put(
+      "qualifiedRustErrorVariant",
+      "%s::%s".formatted(qualifiedRustServiceErrorType(), rustErrorName)
+    );
+    return variables;
+  }
+
+  protected String rustErrorModuleName() {
+    return "%s::error".formatted(getRustTypesModuleName());
+  }
+
+  protected String qualifiedRustServiceErrorType() {
+    return "%s::Error".formatted(rustErrorModuleName());
+  }
+
+  protected String errorName(final StructureShape errorShape) {
+    return errorShape.getId().getName(service);
+  }
+
+  protected String rustErrorName(final StructureShape errorShape) {
+    return toPascalCase(errorName(errorShape));
+  }
+
+  protected HashMap<String, String> errorVariables(
+    final StructureShape errorShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String errorName = errorName(errorShape);
+    final String rustErrorName = rustErrorName(errorShape);
+    variables.put("errorName", errorName);
+    variables.put("snakeCaseErrorName", toSnakeCase(errorName));
+    variables.put("rustErrorName", rustErrorName);
     variables.put(
       "qualifiedRustErrorVariant",
       "%s::%s".formatted(qualifiedRustServiceErrorType(), rustErrorName)
@@ -1751,21 +1927,17 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         } else if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
           final String rustToDafny =
             "dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.as_bytes().to_vec(), |b| *b)";
-          String valueToDafny;
-          if (isRustOption) {
-            valueToDafny =
-              """
-              ::std::rc::Rc::new(match %s {
-                Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
-                None => crate::_Wrappers_Compile::Option::None {},
-              })""".formatted(rustValue, rustToDafny.formatted("s"));
-            if (!isDafnyOption) {
-              valueToDafny = "(%s).Extract()".formatted(valueToDafny);
-            }
-          } else {
-            valueToDafny = rustToDafny.formatted(rustValue);
+          if (!isRustOption) {
+            yield TokenTree.of(rustToDafny.formatted(rustValue));
           }
-          yield TokenTree.of("%s".formatted(valueToDafny));
+          final String coercion = isDafnyOption ? "into()" : "Extract()";
+          yield TokenTree.of(
+            """
+            (match %s {
+              Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
+              None => crate::_Wrappers_Compile::Option::None {},
+            }).%s""".formatted(rustValue, rustToDafny.formatted("s"), coercion)
+          );
         } else {
           if (isRustOption) {
             var result = TokenTree.of(
