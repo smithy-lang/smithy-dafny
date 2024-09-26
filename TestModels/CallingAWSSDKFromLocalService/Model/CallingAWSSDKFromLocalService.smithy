@@ -26,26 +26,26 @@ service SimpleCallingAWSSDKFromLocalService {
   version: "2021-11-01",
   resources: [],
   operations: [ 
-                CallDDBGetItem,
+                CallDDBScan,
                 CallKMSEncrypt],
   errors: [ SimpleCallingAWSSDKFromLocalServiceException ],
 }
 
 structure SimpleCallingAWSSDKFromLocalServiceConfig {}
 
-operation CallDDBGetItem {
-  input: CallDDBGetItemInput,
-  output: CallDDBGetItemOutput,
+operation CallDDBScan {
+  input: CallDDBScanInput,
+  output: CallDDBScanOutput,
 }
 
-structure CallDDBGetItemInput {
+structure CallDDBScanInput {
   @required
   ddbClient: DdbClientReference,
   @required
   tableArn: com.amazonaws.dynamodb#TableArn
 }
 
-structure CallDDBGetItemOutput {
+structure CallDDBScanOutput {
   @required
   itemOutput: com.amazonaws.dynamodb#Integer,
 }

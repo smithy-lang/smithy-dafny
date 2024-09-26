@@ -22,7 +22,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
 
   import opened SimpleCallingawssdkfromlocalserviceTypes
   import opened Wrappers
-  method{:test} CallDDBGetItem(){
+  method{:test} CallDDBScan(){
     var client :- expect SimpleCallingAWSSDKFromLocalService.SimpleCallingAWSSDKFromLocalService();
     TestCallDDBScan_Success(client);
     TestCallDDBScan_Failure(client);
@@ -34,7 +34,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
       ensures client.ValidState()
   {
     var ddbClient :- expect DDB.DynamoDBClient();
-    var resSuccess := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, tableArn := TABLE_ARN_SUCCESS_CASE));
+    var resSuccess := client.CallDDBScan(SimpleCallingAWSSDKFromLocalService.Types.CallDDBScanInput(ddbClient := ddbClient, tableArn := TABLE_ARN_SUCCESS_CASE));
 
     expect resSuccess.Success?;
     expect resSuccess.value.itemOutput == 1;
@@ -46,7 +46,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     ensures client.ValidState()
   {
     var ddbClient :- expect DDB.DynamoDBClient();
-    var resFailure := client.CallDDBGetItem(SimpleCallingAWSSDKFromLocalService.Types.CallDDBGetItemInput(ddbClient := ddbClient, tableArn := TABLE_ARN_FAILURE_CASE));
+    var resFailure := client.CallDDBScan(SimpleCallingAWSSDKFromLocalService.Types.CallDDBScanInput(ddbClient := ddbClient, tableArn := TABLE_ARN_FAILURE_CASE));
 
     expect resFailure.Failure?;
   }

@@ -13,7 +13,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
   {true}
   function ModifiesInternalConfig(config: InternalConfig) : set<object>
   {{}}
-  predicate CallDDBGetItemEnsuresPublicly(input: CallDDBGetItemInput, output: Result<CallDDBGetItemOutput, Error>) {
+  predicate CallDDBScanEnsuresPublicly(input: CallDDBScanInput, output: Result<CallDDBScanOutput, Error>) {
     true
   }
 
@@ -21,16 +21,16 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
     true
   }
 
-  method CallDDBGetItem ( config: InternalConfig,  input: CallDDBGetItemInput )
-    returns (output: Result<CallDDBGetItemOutput, Error>) {
-    var getItemInput := DDB.Types.ScanInput(
+  method CallDDBScan ( config: InternalConfig,  input: CallDDBScanInput )
+    returns (output: Result<CallDDBScanOutput, Error>) {
+    var ScanInput := DDB.Types.ScanInput(
       TableName := input.tableArn
     );
-    var retGetItem := input.ddbClient.Scan(getItemInput);
-    if retGetItem.Success? {
-      return Success(CallDDBGetItemOutput(itemOutput := retGetItem.value.Count.UnwrapOr(-1)));
+    var retScan := input.ddbClient.Scan(ScanInput);
+    if retScan.Success? {
+      return Success(CallDDBScanOutput(itemOutput := retScan.value.Count.UnwrapOr(-1)));
     } else {
-      return Failure(ComAmazonawsDynamodb(retGetItem.error));
+      return Failure(ComAmazonawsDynamodb(retScan.error));
     }
   }
   method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
