@@ -10,6 +10,7 @@ impl GetName {
     pub fn new() -> Self {
         Self
     }
+
     pub(crate) async fn send(
         simple_resource: &crate::types::simple_resource::SimpleResourceRef,
         input: crate::operation::get_name::GetNameInput,
@@ -17,6 +18,7 @@ impl GetName {
         crate::operation::get_name::GetNameOutput,
         crate::types::error::Error,
     > {
+
         simple_resource.inner.borrow_mut().get_name(input)
     }
 }
