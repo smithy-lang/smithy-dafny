@@ -2219,7 +2219,7 @@ public class DafnyApiCodegen {
               modifiesClause =
                 modifiesClause.append(
                   TokenTree.of(
-                    ", t%1$s <- %2$s".formatted(
+                    ", t%1$s <- %2$s | true\n".formatted(
                         intermediateTempVariableCounter,
                         accessPathToCurrentShape
                       )
@@ -2231,7 +2231,7 @@ public class DafnyApiCodegen {
               modifiesClause =
                 modifiesClause.append(
                   TokenTree.of(
-                    ", t%1$s <- %2$s.Values".formatted(
+                    ", t%1$s <- %2$s.Values | true\n".formatted(
                         intermediateTempVariableCounter,
                         accessPathToCurrentShape
                       )
