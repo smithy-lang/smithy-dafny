@@ -58,7 +58,6 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
   {
     var ddbClient :- expect DDB.DynamoDBClient();
     var resFailure := client.CallDDBScan(SimpleCallingAWSSDKFromLocalService.Types.CallDDBScanInput(ddbClient := ddbClient, tableArn := TABLE_ARN_FAILURE_CASE));
-    print(resFailure);
     expect resFailure.Failure?;
   }
 }
