@@ -9,8 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	"github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
-	"errors"
-	"github.com/aws/smithy-go"
 )
 
 func CancelKeyDeletionInput_FromDafny(dafnyInput ComAmazonawsKmsTypes.CancelKeyDeletionRequest) kms.CancelKeyDeletionInput {
@@ -7920,7 +7918,7 @@ func IncorrectKeyMaterialException_FromDafny(dafnyOutput ComAmazonawsKmsTypes.Er
 
 func NotFoundException_FromDafny(dafnyOutput ComAmazonawsKmsTypes.Error) types.NotFoundException {
 	return func() types.NotFoundException {
-		
+
 		return types.NotFoundException{
 			Message: func() *string {
 				s := "Some string"
@@ -8211,17 +8209,6 @@ func OpaqueError_Output_FromDafny(dafnyOutput ComAmazonawsKmsTypes.Error) error 
 }
 
 func Error_FromDafny(err ComAmazonawsKmsTypes.Error) error {
-	var err2 *types.NotFoundException
-	defer func() {
-        if r := recover(); r != nil {
-            fmt.Println("Recovered in f", r)
-        }
-    }()
-	switch {
-		case errors.As(err.Dtor_obj().(*smithy.OperationError), &err2):
-			e := NotFoundException_FromDafny(err)
-			return &e
-	}
 	// Service Errors
 	if err.Is_CloudHsmClusterNotRelatedException() {
 		e := CloudHsmClusterNotRelatedException_FromDafny(err)

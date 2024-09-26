@@ -8,6 +8,8 @@ import (
 	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
 	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 	"github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
+	"errors"
+	"fmt"
 )
 
 func CancelKeyDeletionInput_ToDafny(nativeInput kms.CancelKeyDeletionInput) ComAmazonawsKmsTypes.CancelKeyDeletionRequest {
@@ -5378,6 +5380,18 @@ func OpaqueError_Input_ToDafny(nativeInput error) ComAmazonawsKmsTypes.Error {
 }
 
 func Error_ToDafny(err error) ComAmazonawsKmsTypes.Error {
+	var err2 *types.NotFoundException
+	defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("Recovered in f", r)
+        }
+    }()
+	switch {
+		case errors.As(err, &err2):
+			e := NotFoundException_ToDafny(*err2)
+			fmt.Println(e)
+			return e
+	}
 	switch err.(type) {
 	// Service Errors
 	case *types.CloudHsmClusterNotRelatedException:
