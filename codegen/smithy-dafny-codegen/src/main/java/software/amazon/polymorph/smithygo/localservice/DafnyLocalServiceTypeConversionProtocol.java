@@ -930,7 +930,8 @@ public class DafnyLocalServiceTypeConversionProtocol
                 default:
                     error, ok := err.($L.OpaqueError)
                     if !ok {
-                        panic("Error is not an OpaqueError")
+                      // We expect to get error string for opaque error from SDK error
+                      error = $L.OpaqueError{ErrObject: err}  
                     }
                     return OpaqueError_Input_ToDafny(error)
                 }
@@ -1036,6 +1037,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                 }
               }
             }),
+            SmithyNameResolver.smithyTypesNamespace(serviceShape),
             SmithyNameResolver.smithyTypesNamespace(serviceShape),
             SmithyNameResolver.smithyTypesNamespace(serviceShape),
             SmithyNameResolver.smithyTypesNamespace(serviceShape)
