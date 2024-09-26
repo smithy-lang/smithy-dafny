@@ -991,7 +991,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                             ddbError := $L.Error_ToDafny(err)
                             return $L.Create_$L_(ddbError)
                           } else {
-                            return $L.Create_$L_(e)
+                            return $L.Create_$L_(kmsError)
                           }
                         """, 
                           kmsShapeNamespace,
