@@ -876,7 +876,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           } else {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(%s)
+              crate::conversions::%s::to_dafny(&%s)
               """.formatted(structureShapeName, rustValue)
             );
           }
@@ -884,7 +884,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
             """.formatted(rustValue, structureShapeName)

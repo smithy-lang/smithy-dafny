@@ -1890,13 +1890,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              %s::conversions::%s::to_dafny(%s.clone().unwrap())
+              %s::conversions::%s::to_dafny(&%s.clone().unwrap())
               """.formatted(prefix, structureShapeName, rustValue)
             );
           } else {
             yield TokenTree.of(
               """
-              %s::conversions::%s::to_dafny(%s.clone())
+              %s::conversions::%s::to_dafny(&%s.clone())
               """.formatted(prefix, structureShapeName, rustValue)
             );
           }
@@ -1904,7 +1904,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(&x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
             """.formatted(rustValue, prefix, structureShapeName)
