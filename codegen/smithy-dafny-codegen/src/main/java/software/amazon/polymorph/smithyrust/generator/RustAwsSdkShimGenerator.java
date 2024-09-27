@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.rust.codegen.core.smithy.traits.RustBoxTrait;
@@ -280,16 +281,21 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     // and may not be complete!
     final Shape targetShape = model.expectShape(member.getTarget());
     return (
-      super.isRustFieldRequired(parent, member) ||
-      (operationIndex.isOutputStructure(parent) &&
-        (targetShape.isIntegerShape() ||
-          targetShape.isLongShape() ||
-          targetShape.isListShape())) ||
-      (!operationIndex.isInputStructure(parent) &&
-        targetShape.isBooleanShape() &&
-        targetShape.hasTrait(DefaultTrait.class))
+      super.isRustFieldRequired(parent, member)
+        || (operationIndex.isOutputStructure(parent) &&
+        ((!targetShape.hasTrait(BoxTrait.class) && (targetShape.isIntegerShape() || targetShape.isLongShape()))
+          || targetShape.isListShape()))
+        || (!operationIndex.isInputStructure(parent) && targetShape.isBooleanShape() && targetShape.hasTrait(DefaultTrait.class))
+        // TODO: I'm giving up on figuring out these ones for now
+        || SPECIAL_CASE_REQUIRED_MEMBERS.contains(member.getId())
     );
   }
+
+  private final static Set<ShapeId> SPECIAL_CASE_REQUIRED_MEMBERS = Set.of(
+    ShapeId.from("com.amazonaws.dynamodb#ImportTableDescription$ErrorCount"),
+    ShapeId.from("com.amazonaws.dynamodb#ImportTableDescription$ProcessedItemCount"),
+    ShapeId.from("com.amazonaws.dynamodb#ImportTableDescription$ImportedItemCount")
+  );
 
   @Override
   protected boolean isStructureBuilderFallible(
