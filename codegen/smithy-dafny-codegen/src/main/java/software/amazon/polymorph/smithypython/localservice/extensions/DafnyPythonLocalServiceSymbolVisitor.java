@@ -18,6 +18,7 @@ import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
+import software.amazon.smithy.model.traits.SparseTrait;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
@@ -301,6 +302,40 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
         )
       )
       .build();
+  }
+
+  @Override
+  public Symbol mapShape(MapShape shape) {
+    String filename = "models";
+
+
+//      .definitionFile(
+//        getSymbolDefinitionFilePathForNamespaceAndFilename(
+//          shape.getId().getNamespace(),
+//          filename
+//        )
+//      )
+//      .putProperty("fromDict", createFromDictFunctionSymbol(shape))
+//      .putProperty("unknown", unknownSymbol)
+//      .build();
+
+    Symbol reference = toSymbol(shape.getValue());
+    // see: https://smithy.io/2.0/spec/type-refinement-traits.html#smithy-api-sparse-trait
+    String type = String.format(shape.hasTrait(SparseTrait.class) ? "%s | None" : "%s", reference.getName());
+    var builder = createSymbolBuilder(
+      shape,
+      "dict[str, " + type + "]",
+      getSymbolNamespacePathForNamespaceAndFilename(
+        shape.getId().getNamespace(),
+        filename
+      )
+    );
+
+    if (needsDictHelpers(shape)) {
+      builder.putProperty("asDict", createAsDictFunctionSymbol(shape))
+        .putProperty("fromDict", createFromDictFunctionSymbol(shape));
+    }
+    return builder.build();
   }
 
   /**

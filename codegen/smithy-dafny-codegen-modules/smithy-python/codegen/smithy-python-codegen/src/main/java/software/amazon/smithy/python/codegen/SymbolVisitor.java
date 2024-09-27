@@ -205,12 +205,12 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return builder.build();
     }
 
-    private boolean needsDictHelpers(MapShape shape) {
+    protected boolean needsDictHelpers(MapShape shape) {
         Shape target = model.expectShape(shape.getValue().getTarget());
         return targetRequiresDictHelpers(target);
     }
 
-    private boolean needsDictHelpers(CollectionShape shape) {
+    protected boolean needsDictHelpers(CollectionShape shape) {
         Shape target = model.expectShape(shape.getMember().getTarget());
         return targetRequiresDictHelpers(target);
     }

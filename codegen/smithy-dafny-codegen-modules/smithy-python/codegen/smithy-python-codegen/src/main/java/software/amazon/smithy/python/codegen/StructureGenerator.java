@@ -284,7 +284,7 @@ public class StructureGenerator implements Runnable {
                 .collect(Collectors.toList());
     }
 
-    private String getTargetFormat(MemberShape member) {
+    protected String getTargetFormat(MemberShape member) {
         Shape target = model.expectShape(member.getTarget());
         // Recursive shapes may be referenced before they're defined even with
         // a topological sort. So forward references need to be used when

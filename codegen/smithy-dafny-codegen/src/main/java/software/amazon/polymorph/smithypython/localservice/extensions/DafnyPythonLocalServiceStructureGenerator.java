@@ -5,6 +5,8 @@ import static software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkN
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import java.util.Set;
+
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -666,5 +668,14 @@ public class DafnyPythonLocalServiceStructureGenerator
       memberName,
       getDefaultValue(writer, member)
     );
+  }
+
+  @Override
+  protected String getTargetFormat(MemberShape member) {
+    return "ABC";
+//    if (AwsSdkNameResolver.isAwsSdkShape(member)) {
+//      return "$L";
+//    }
+//    return super.getTargetFormat(member);
   }
 }
