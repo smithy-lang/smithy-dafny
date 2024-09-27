@@ -450,6 +450,8 @@ _polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
 
 ########################## .NET targets
 
+net: polymorph_dafny transpile_net polymorph_net test_net
+
 transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
 transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
@@ -498,6 +500,8 @@ format_net-check:
 	dotnet format runtimes/net/*.csproj --verify-no-changes
 
 ########################## Java targets
+
+java: polymorph_dafny transpile_java polymorph_java build_java test_java
 
 build_java: transpile_java mvn_local_deploy_dependencies
 	$(GRADLEW) -p runtimes/java build
@@ -552,6 +556,8 @@ test_java:
 	$(GRADLEW) -p runtimes/java test --info
 
 ########################## Rust targets
+
+rust: polymorph_dafny transpile_rust polymorph_rust test_rust
 
 # The Dafny Rust code generator only supports a single crate for everything,
 # so (among other consequences) we compile src and test code together.
@@ -631,6 +637,8 @@ _clean:
 clean: _clean
 
 ########################## Python targets
+
+net: polymorph_dafny transpile_python polymorph_python test_python
 
 # Python MUST transpile dependencies first to generate .dtr files
 transpile_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_pre_transpile, )
