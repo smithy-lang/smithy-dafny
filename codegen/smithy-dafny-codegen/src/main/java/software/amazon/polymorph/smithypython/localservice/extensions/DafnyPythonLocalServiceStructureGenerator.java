@@ -672,10 +672,9 @@ public class DafnyPythonLocalServiceStructureGenerator
 
   @Override
   protected String getTargetFormat(MemberShape member) {
-    return "ABC";
-//    if (AwsSdkNameResolver.isAwsSdkShape(member)) {
-//      return "$L";
-//    }
-//    return super.getTargetFormat(member);
+    if (AwsSdkNameResolver.isAwsSdkShape(member)) {
+      return "'$L'";
+    }
+    return super.getTargetFormat(member);
   }
 }
