@@ -282,8 +282,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     return (
       super.isRustFieldRequired(parent, member) ||
       (operationIndex.isOutputStructure(parent) &&
-        (targetShape.isIntegerShape() || targetShape.isLongShape() || targetShape.isListShape())) ||
-      (!operationIndex.isInputStructure(parent) && targetShape.isBooleanShape() && targetShape.hasTrait(DefaultTrait.class))
+        (targetShape.isIntegerShape() ||
+          targetShape.isLongShape() ||
+          targetShape.isListShape())) ||
+      (!operationIndex.isInputStructure(parent) &&
+        targetShape.isBooleanShape() &&
+        targetShape.hasTrait(DefaultTrait.class))
     );
   }
 
@@ -485,7 +489,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
     String errorName = toPascalCase(errorShape.getId().getName());
     variables.put("errorName", errorName);
-    variables.put("snakeCaseErrorName", toSnakeCase(errorShape.getId().getName()));
+    variables.put(
+      "snakeCaseErrorName",
+      toSnakeCase(errorShape.getId().getName())
+    );
 
     return TokenTree.of(
       evalTemplate(
@@ -670,14 +677,14 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             yield TokenTree.of(
               "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
-                rustValue
-              )
+                  rustValue
+                )
             );
           } else {
             yield TokenTree.of(
               "crate::standard_library_conversions::obool_to_dafny(&Some(%s))".formatted(
-                rustValue
-              )
+                  rustValue
+                )
             );
           }
         } else {
@@ -719,21 +726,21 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             yield TokenTree.of(
               "crate::standard_library_conversions::odouble_to_dafny(&%s)".formatted(
-                rustValue
-              )
+                  rustValue
+                )
             );
           } else {
             yield TokenTree.of(
               "crate::standard_library_conversions::double_to_dafny(&Some(%s))".formatted(
-                rustValue
-              )
+                  rustValue
+                )
             );
           }
         } else {
           yield TokenTree.of(
             "crate::standard_library_conversions::double_to_dafny(%s.clone())".formatted(
-              rustValue
-            )
+                rustValue
+              )
           );
         }
       }
