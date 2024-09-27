@@ -45,7 +45,7 @@ aws_sdk_dynamodb::types::AttributeValue::M(x) =>
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::M {
         M: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&x.clone(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
-    |v| crate::conversions::attribute_value::to_dafny(v)
+    |v| crate::conversions::attribute_value::to_dafny(&v)
 ,
 )
 ,
@@ -53,7 +53,7 @@ aws_sdk_dynamodb::types::AttributeValue::M(x) =>
 aws_sdk_dynamodb::types::AttributeValue::L(x) =>
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue::L {
         L: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&x,
-    |e| crate::conversions::attribute_value::to_dafny(e)
+    |e| crate::conversions::attribute_value::to_dafny(&e)
 ,
 )
 ,
