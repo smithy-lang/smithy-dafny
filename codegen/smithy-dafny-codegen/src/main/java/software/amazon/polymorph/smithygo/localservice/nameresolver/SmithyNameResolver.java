@@ -125,6 +125,11 @@ public class SmithyNameResolver {
           )
         );
     }
+    if (shape.isTimestampShape()) {
+      return "time"
+        .concat(DOT)
+        .concat(symbol.getName());
+    }
     return SmithyNameResolver
       .smithyTypesNamespace(shape)
       .concat(DOT)
