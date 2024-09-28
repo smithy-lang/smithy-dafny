@@ -15,13 +15,20 @@ import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.awssdk.shapevisitor.ShapeVisitorHelper;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 public class DafnyAwsSdkClientTypeConversionProtocol
   implements ProtocolGenerator {
@@ -349,6 +356,80 @@ public class DafnyAwsSdkClientTypeConversionProtocol
       });
 
     generateErrorDeserializer(context);
+
+    delegator.useFileWriter(
+      "%s/%s".formatted(
+          SmithyNameResolver.shapeNamespace(serviceShape),
+          TO_NATIVE
+        ),
+      SmithyNameResolver.shapeNamespace(serviceShape),
+      writer -> {
+        ServiceTrait serviceTrait = context
+            .model()
+            .expectShape(context.settings().getService(context.model()).toShapeId())
+            .getTrait(ServiceTrait.class)
+            .get();
+        for (MemberShape visitingMemberShape : DafnyToAwsSdkShapeVisitor.visitorFuncMap.keySet()) {
+          final Shape visitingShape = context
+            .model()
+            .expectShape(visitingMemberShape.getTarget());
+          if (alreadyVisited.contains(visitingMemberShape.getId())) {
+            continue;
+          }
+          alreadyVisited.add(visitingMemberShape.toShapeId());
+          String outputType;
+          if (
+            visitingShape.hasTrait(EnumTrait.class)
+            || visitingShape.isStructureShape()
+            || visitingShape.isUnionShape()
+          ) outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
+          else if (visitingShape.isListShape()) {
+            final MemberShape memberShape = visitingShape.asListShape().get().getMember();
+            final Shape targetShape = context
+              .model()
+              .expectShape(memberShape.getTarget());
+            outputType = "[]".concat(GoCodegenUtils.getType(
+              context.symbolProvider().toSymbol(targetShape),
+              serviceTrait
+              ));
+          }
+          else if (visitingShape.isMapShape()) {
+            MemberShape valueMemberShape = visitingShape.asMapShape().get().getValue();
+            Shape valueTargetShape = context
+              .model()
+              .expectShape(valueMemberShape.getTarget());
+            outputType = "map[string]".concat(GoCodegenUtils.getType(
+              context.symbolProvider().toSymbol(valueTargetShape),
+              serviceTrait
+              ));
+          }
+          else {
+            outputType = SmithyNameResolver.getSmithyType(
+              visitingShape,
+              context.symbolProvider().toSymbol(visitingShape),
+              context.model(),
+              context.symbolProvider()
+            );
+          }
+          if (
+            ShapeVisitorHelper.toNativeOutputPointerMap.get(visitingMemberShape)
+          ) outputType = "*".concat(outputType);
+          writer.write(
+            """
+            func $L(input $L)($L) {
+                return $L
+            }""",
+            ShapeVisitorHelper.funcNameGenerator(
+              visitingMemberShape,
+              "FromDafny"
+            ),
+            "interface {}",
+            outputType,
+            DafnyToAwsSdkShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+          );
+        }
+      }
+    );
   }
 
   private void generateRequestSerializer(
