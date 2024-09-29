@@ -94,6 +94,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String blobShape(BlobShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     return """
     func () []byte {
     var b []byte
@@ -108,7 +109,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             b = append(b, val.(byte))
         }
     }
-    }()""".formatted(dataSource, dataSource);
+    }()""".formatted(nonAssertDataSource, dataSource);
   }
 
   @Override
@@ -192,16 +193,6 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
               shapeName.contains(memberName) ||
               awsSdkGoPointableIndex.isPointable(targetShape)
             )
-            // targetShape.accept(
-            //   new DafnyToAwsSdkShapeVisitor(
-            //     context,
-            //     derivedDataSource,
-            //     writer,
-            //     memberShape.isOptional(),
-            //     shapeName.contains(memberName) ||
-            //     awsSdkGoPointableIndex.isPointable(targetShape)
-            //   )
-            // )
           )
       );
     }
@@ -254,24 +245,6 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
               false,
               awsSdkGoPointableIndex.isPointable(memberShape)
             )
-          // targetShape.accept(
-          //   new DafnyToAwsSdkShapeVisitor(
-          //     context,
-          //     "val%s".formatted(
-          //         memberShape.isOptional()
-          //           ? ".(%s)".formatted(
-          //               DafnyNameResolver.getDafnyType(
-          //                 targetShape,
-          //                 context.symbolProvider().toSymbol(targetShape)
-          //               )
-          //             )
-          //           : ""
-          //       ),
-          //     writer,
-          //     false,
-          //     awsSdkGoPointableIndex.isPointable(memberShape)
-          //   )
-          // )
         )
     );
 
@@ -335,15 +308,6 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
               keyMemberShape.isOptional(),
               awsSdkGoPointableIndex.isPointable(keyMemberShape)
             ),
-          // keyTargetShape.accept(
-          //   new DafnyToAwsSdkShapeVisitor(
-          //     context,
-          //     "(*val.(dafny.Tuple).IndexInt(0))",
-          //     writer,
-          //     keyMemberShape.isOptional(),
-          //     awsSdkGoPointableIndex.isPointable(keyMemberShape)
-          //   )
-          // ),
           ShapeVisitorHelper.toNativeShapeVisitorWriter(
             valueMemberShape,
             context,
@@ -353,24 +317,6 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             false,
             awsSdkGoPointableIndex.isPointable(valueMemberShape)
           )
-          // valueTargetShape.accept(
-          //   new DafnyToAwsSdkShapeVisitor(
-          //     context,
-          //     "(*val.(dafny.Tuple).IndexInt(1))%s".formatted(
-          //         valueMemberShape.isOptional()
-          //           ? ".(%s)".formatted(
-          //               DafnyNameResolver.getDafnyType(
-          //                 valueTargetShape,
-          //                 context.symbolProvider().toSymbol(valueTargetShape)
-          //               )
-          //             )
-          //           : ""
-          //       ),
-          //     writer,
-          //     false,
-          //     awsSdkGoPointableIndex.isPointable(valueMemberShape)
-          //   )
-          // )
         )
     );
     return builder.toString();
@@ -490,11 +436,12 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       ? "uint8"
       : "dafny.Char";
     var nilCheck = "";
+    String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     if (this.isOptional) {
       if (this.isPointable) {
-        nilCheck = "if %s == nil { return nil }".formatted(dataSource);
+        nilCheck = "if %s == nil { return nil }".formatted(nonAssertDataSource);
       } else {
-        nilCheck = "if %s == nil { return s }".formatted(dataSource);
+        nilCheck = "if %s == nil { return s }".formatted(nonAssertDataSource);
       }
     }
     return """

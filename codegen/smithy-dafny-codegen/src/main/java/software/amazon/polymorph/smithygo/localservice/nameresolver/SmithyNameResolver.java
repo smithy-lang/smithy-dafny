@@ -169,6 +169,9 @@ public class SmithyNameResolver {
     ) {
       return symbol.getName();
     }
+    if (symbol.getFullName().equals("time.Time")) {
+      return(symbol.getFullName());
+    }
     return SmithyNameResolver
       .smithyTypesNamespaceAws(serviceTrait, subtype)
       .concat(DOT)

@@ -59,7 +59,8 @@ public class DafnyNameResolver {
         return symbol.getName();
       case MAP:
         return "dafny.Map";
-      case DOUBLE, STRING, BLOB, LIST:
+      // TODO: Figure out the dafny type for TIMESTAMP
+      case DOUBLE, STRING, BLOB, LIST, TIMESTAMP:
         return "dafny.Sequence";
       // default catches a case where users may author their own classes that implement and extend resource (ExtendableTrait)
       // ENUM, STRUCTURE, UNION can be removed but for posterity it looks great to see all the shapes being covered.

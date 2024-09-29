@@ -205,6 +205,60 @@ public class DafnyAwsSdkClientTypeConversionProtocol
         }
       });
     generateErrorSerializer(context);
+    writerDelegator.useFileWriter(
+      "%s/%s".formatted(
+          SmithyNameResolver.shapeNamespace(serviceShape),
+          TO_DAFNY
+        ),
+      SmithyNameResolver.shapeNamespace(serviceShape),
+      writer -> {
+        for (MemberShape visitingMemberShape : AwsSdkToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+          final Shape visitingShape = context
+            .model()
+            .expectShape(visitingMemberShape.getTarget());
+          if (alreadyVisited.contains(visitingMemberShape.getId())) {
+            continue;
+          }
+          alreadyVisited.add(visitingMemberShape.toShapeId());
+          String inputType;
+          ShapeVisitorHelper.toDafnyOptionalityMap.get(
+              visitingMemberShape
+            );
+          String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
+              visitingMemberShape
+            )
+            ? "Wrappers.Option"
+            : DafnyNameResolver.getDafnyType(
+              visitingShape,
+              context.symbolProvider().toSymbol(visitingShape)
+            );
+          inputType =
+          GoCodegenUtils.getType(
+            context.symbolProvider().toSymbol(visitingShape),
+            serviceShape.expectTrait(ServiceTrait.class)
+            );
+          if (
+            AwsSdkGoPointableIndex
+                .of(context.model())
+                .isPointable(visitingMemberShape)
+          ) inputType = "*".concat(inputType);
+          writer.write(
+            """
+            func $L(input $L)($L) {
+                return $L
+            }
+            """,
+            ShapeVisitorHelper.funcNameGenerator(
+              visitingMemberShape,
+              "ToDafny"
+            ),
+            inputType,
+            outputType,
+            AwsSdkToDafnyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+          );
+        }
+      }
+    );
   }
 
   @Override

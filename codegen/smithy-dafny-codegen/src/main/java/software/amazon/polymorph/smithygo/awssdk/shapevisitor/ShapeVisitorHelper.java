@@ -1,12 +1,10 @@
 package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -104,7 +102,7 @@ public class ShapeVisitorHelper {
     String nextVisitorFunction;
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       return targetShape.accept(
-        new SmithyToDafnyShapeVisitor(
+        new AwsSdkToDafnyShapeVisitor(
           context,
           dataSource,
           writer,
@@ -115,13 +113,16 @@ public class ShapeVisitorHelper {
       );
     }
     String funcDataSource = "input";
-    if (!SmithyToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-      toDafnyOptionalityMap.put(memberShape, isOptional);
-      SmithyToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
-      SmithyToDafnyShapeVisitor.visitorFuncMap.put(
+    if (!AwsSdkToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
+      if (targetShape.isUnionShape())
+        toDafnyOptionalityMap.put(memberShape, true);
+      else
+        toDafnyOptionalityMap.put(memberShape, isOptional);
+      AwsSdkToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
+      AwsSdkToDafnyShapeVisitor.visitorFuncMap.put(
         memberShape,
         targetShape.accept(
-          new SmithyToDafnyShapeVisitor(
+          new AwsSdkToDafnyShapeVisitor(
             context,
             funcDataSource,
             writer,
