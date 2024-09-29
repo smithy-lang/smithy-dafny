@@ -6,7 +6,7 @@ include "./SimpleLocalServiceTest.dfy"
 
 module WrappedTest {
   import opened SimpleLocalServiceTest
-  import WrappedSimpleLocalServiceService
+  import WrappedSimpleLocalService
   import opened Types = SimpleLocalServiceTypes
   import opened Wrappers
 
