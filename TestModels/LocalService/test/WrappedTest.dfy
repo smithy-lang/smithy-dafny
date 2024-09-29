@@ -12,10 +12,10 @@ module WrappedTest {
 
   method TestWrappedClient(config: Types.SimpleLocalServiceConfig)
   {
-    var client :- expect WrappedSimpleLocalServiceService.WrappedSimpleLocalService(config);
+    var client :- expect WrappedSimpleLocalService.WrappedSimpleLocalService(config);
   }
 
   method {:test} WrappedTest() {
-    TestWrappedClient(WrappedSimpleLocalServiceService.WrappedDefaultSimpleLocalServiceConfig());
+    TestWrappedClient(WrappedSimpleLocalService.WrappedDefaultSimpleLocalServiceConfig());
   }
 }

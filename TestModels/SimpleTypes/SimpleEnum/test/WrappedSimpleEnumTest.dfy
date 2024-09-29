@@ -4,11 +4,11 @@ include "../src/WrappedSimpleEnumImpl.dfy"
 include "SimpleEnumImplTest.dfy"
 
 module WrappedSimpleTypesEnumTest {
-    import WrappedSimpleTypesSmithyEnumService
+    import WrappedSimpleTypesEnumService
     import SimpleEnumImplTest
     import opened Wrappers
     method{:test} GetEnum() {
-        var client :- expect WrappedSimpleTypesSmithyEnumService.WrappedSimpleEnum();
+        var client :- expect WrappedSimpleTypesEnumService.WrappedSimpleEnum();
         SimpleEnumImplTest.TestGetEnum(client);
         SimpleEnumImplTest.TestGetEnumFirstKnownValueTest(client);
         SimpleEnumImplTest.TestGetEnumSecondKnownValueTest(client);

@@ -17,8 +17,4 @@ module SimpleRecursiveShapeImpl refines AbstractSimpleRecursiveShapeOperations {
     var res := GetRecursiveShapeOutput(recursiveUnion := input.recursiveUnion);
     return Success(res);
   }
-
-  method ValidateInput(input: GetRecursiveShapeInput) {
-
-  }
 }

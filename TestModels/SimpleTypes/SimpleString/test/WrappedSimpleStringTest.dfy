@@ -4,11 +4,11 @@ include "../src/WrappedSimpleStringImpl.dfy"
 include "SimpleStringImplTest.dfy"
 
 module WrappedSimpleTypesStringTest {
-    import WrappedSimpleTypesSmithyStringService
+    import WrappedSimpleTypesStringService
     import SimpleStringImplTest
     import opened Wrappers
     method{:test} GetString() {
-        var client :- expect WrappedSimpleTypesSmithyStringService.WrappedSimpleString();
+        var client :- expect WrappedSimpleTypesStringService.WrappedSimpleString();
         SimpleStringImplTest.TestGetString(client);
         SimpleStringImplTest.TestGetStringKnownValue(client);
         SimpleStringImplTest. TestGetStringUTF8(client);
