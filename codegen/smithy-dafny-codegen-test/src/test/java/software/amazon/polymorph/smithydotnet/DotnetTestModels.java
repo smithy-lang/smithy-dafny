@@ -26,7 +26,7 @@ class DotnetTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
     DISABLED_TESTS.add("SimpleTypes/SimpleShort");
-
+    // TODO: Remove RecursiveShape from disabled test
     DISABLED_TESTS.add("RecursiveShape");
   }
 
