@@ -36,6 +36,7 @@ import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.SetUtils;
 
 /**
@@ -131,10 +132,15 @@ public final class StructureGenerator implements Runnable {
             memberSymbol.getProperty("Referred", Symbol.class).get();
           var refShape = targetShape.expectTrait(ReferenceTrait.class);
           if (refShape.isService()) {
-            namespace =
-              SmithyNameResolver.shapeNamespace(
-                model.expectShape(refShape.getReferentId())
-              );
+            if (shape.getId().getName().equals("TrentService"))
+              namespace = CaseUtils.toPascalCase(shape.toShapeId().getNamespace().replace(".", " ")).concat("Types");
+            else if (shape.getId().getName().equals("DynamoDB_20120810"))
+              namespace = CaseUtils.toPascalCase(shape.toShapeId().getNamespace().replace(".", " ")).concat("Types");
+            else
+              namespace =
+                SmithyNameResolver.shapeNamespace(
+                  model.expectShape(refShape.getReferentId())
+                );
           }
           if (
             !member
