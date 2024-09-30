@@ -27,7 +27,5 @@ module SimpleRecursiveShapeImplTest {
     expect ret.recursiveUnion.Some?;
     expect ret.recursiveUnion.value.ListValue?;
     expect ret.recursiveUnion.value.ListValue == myList;
-
-    print ret;
   }
 }
