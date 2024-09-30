@@ -587,29 +587,6 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             .putProperty(SymbolUtils.POINTABLE, false)
             .build()
         );
-      // var isService = shape.expectTrait(ReferenceTrait.class).isService();
-      // if (isService) {
-      //   builder.putProperty(
-      //     "Referred",
-      //     symbolBuilderFor(
-      //       referredShape,
-      //       "Client",
-      //       SmithyNameResolver.shapeNamespace(referredShape)
-      //     )
-      //       .putProperty(SymbolUtils.POINTABLE, true)
-      //       .build()
-      //   );
-      // } else {
-      //   builder.putProperty(
-      //     "Referred",
-      //     symbolBuilderFor(
-      //       referredShape,
-      //       "I".concat(getDefaultShapeName(referredShape))
-      //     )
-      //       .putProperty(SymbolUtils.POINTABLE, false)
-      //       .build()
-      //   );
-      // }
     }
 
     return builder.build();
