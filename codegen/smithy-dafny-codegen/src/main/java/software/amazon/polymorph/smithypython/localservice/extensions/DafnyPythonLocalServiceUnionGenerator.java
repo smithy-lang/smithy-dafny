@@ -113,9 +113,6 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
       String memberType = symbolProvider.toSymbol(referentShape).getNamespace() +
         "." +
         symbolProvider.toSymbol(referentShape).getName();
-      writer.addStdlibImport(
-        symbolProvider.toSymbol(referentShape).getNamespace()
-      );
 
       String formatString = format("def __init__(self, value: '%s'):", memberType);
       writer.openBlock(formatString,
