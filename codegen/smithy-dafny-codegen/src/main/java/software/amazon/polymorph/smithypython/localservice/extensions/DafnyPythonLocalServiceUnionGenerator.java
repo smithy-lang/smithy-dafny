@@ -68,7 +68,6 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
     String formatString = format("def __init__(self, value: %s):", memberType);
     writer.openBlock(formatString,
       "",
-      targetSymbol,
       () -> {
         writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
         writer.write("self.value = value");
