@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.IOUtils;
@@ -47,9 +46,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   private final Set<CodegenEngine.GenerationAspect> generationAspects;
 
-  public RustAwsSdkShimGenerator(Model model, ServiceShape service, Set<CodegenEngine.GenerationAspect> generationAspects) {
+  public RustAwsSdkShimGenerator(
+    Model model,
+    ServiceShape service,
+    Set<CodegenEngine.GenerationAspect> generationAspects
+  ) {
     super(model, service);
-
     this.generationAspects = generationAspects;
   }
 
@@ -82,16 +84,22 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile clientModule() {
     final Map<String, String> variables = serviceVariables();
-    variables.put("operations", TokenTree
-      .of(
-        service
-          .getOperations()
-          .stream()
-          .map(id ->
-            operationClientFunction(model.expectShape(id, OperationShape.class))
-          )
-      )
-      .lineSeparated().toString());
+    variables.put(
+      "operations",
+      TokenTree
+        .of(
+          service
+            .getOperations()
+            .stream()
+            .map(id ->
+              operationClientFunction(
+                model.expectShape(id, OperationShape.class)
+              )
+            )
+        )
+        .lineSeparated()
+        .toString()
+    );
 
     var preamble = TokenTree.of(
       evalTemplate(
@@ -130,29 +138,34 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
 
     final TokenTree postamble;
-    if (generationAspects.contains(CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS)) {
-      postamble = TokenTree.of(
-        evalTemplate(
-          """
-          #[allow(non_snake_case)]
-          impl crate::r#$dafnyInternalModuleName:L::_default {
-            pub fn $clientName:L() -> ::std::rc::Rc<
-              crate::r#_Wrappers_Compile::Result<
-                ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
-                ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
-                >
-              > {
-              let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
-              let inner = $sdkCrate:L::Client::new(&shared_config);
-              let client = Client { inner };
-              let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
-              std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+    if (
+      generationAspects.contains(
+        CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS
+      )
+    ) {
+      postamble =
+        TokenTree.of(
+          evalTemplate(
+            """
+            #[allow(non_snake_case)]
+            impl crate::r#$dafnyInternalModuleName:L::_default {
+              pub fn $clientName:L() -> ::std::rc::Rc<
+                crate::r#_Wrappers_Compile::Result<
+                  ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
+                  ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
+                  >
+                > {
+                let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+                let inner = $sdkCrate:L::Client::new(&shared_config);
+                let client = Client { inner };
+                let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
+                std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+              }
             }
-          }
-          """,
-          variables
-        )
-      );
+            """,
+            variables
+          )
+        );
     } else {
       postamble = TokenTree.empty();
     }
@@ -238,12 +251,28 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
-  protected boolean shouldGenerateStructForStructure(StructureShape structureShape) {
-    return super.shouldGenerateStructForStructure(structureShape) &&
+  protected boolean shouldGenerateStructForStructure(
+    StructureShape structureShape
+  ) {
+    return (
+      super.shouldGenerateStructForStructure(structureShape) &&
       !isInputOrOutputStructure(structureShape) &&
       // TODO: Filter to shapes in the service closure (this one's an example of an orphan)
-      !structureShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KinesisStreamingDestinationInput")) &&
-      !structureShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"));
+      !structureShape
+        .getId()
+        .equals(
+          ShapeId.from(
+            "com.amazonaws.dynamodb#KinesisStreamingDestinationInput"
+          )
+        ) &&
+      !structureShape
+        .getId()
+        .equals(
+          ShapeId.from(
+            "com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"
+          )
+        )
+    );
   }
 
   protected Set<RustFile> allUnionConversionModules() {
@@ -300,20 +329,27 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     // and may not be complete!
     final Shape targetShape = model.expectShape(member.getTarget());
     return (
-      super.isRustFieldRequired(parent, member)
-        || (operationIndex.isOutputStructure(parent) &&
-        ((!targetShape.hasTrait(BoxTrait.class) && (targetShape.isIntegerShape() || targetShape.isLongShape()))
-          || targetShape.isListShape()))
-        || (!operationIndex.isInputStructure(parent) && targetShape.isBooleanShape() && targetShape.hasTrait(DefaultTrait.class))
-        // TODO: I'm giving up on figuring out these ones for now
-        || SPECIAL_CASE_REQUIRED_MEMBERS.contains(member.getId())
+      super.isRustFieldRequired(parent, member) ||
+      (operationIndex.isOutputStructure(parent) &&
+        ((!targetShape.hasTrait(BoxTrait.class) &&
+            (targetShape.isIntegerShape() || targetShape.isLongShape())) ||
+          targetShape.isListShape())) ||
+      (!operationIndex.isInputStructure(parent) &&
+        targetShape.isBooleanShape() &&
+        targetShape.hasTrait(DefaultTrait.class)) ||
+      // TODO: I'm giving up on figuring out these ones for now
+      SPECIAL_CASE_REQUIRED_MEMBERS.contains(member.getId())
     );
   }
 
-  private final static Set<ShapeId> SPECIAL_CASE_REQUIRED_MEMBERS = Set.of(
+  private static final Set<ShapeId> SPECIAL_CASE_REQUIRED_MEMBERS = Set.of(
     ShapeId.from("com.amazonaws.dynamodb#ImportTableDescription$ErrorCount"),
-    ShapeId.from("com.amazonaws.dynamodb#ImportTableDescription$ProcessedItemCount"),
-    ShapeId.from("com.amazonaws.dynamodb#ImportTableDescription$ImportedItemCount")
+    ShapeId.from(
+      "com.amazonaws.dynamodb#ImportTableDescription$ProcessedItemCount"
+    ),
+    ShapeId.from(
+      "com.amazonaws.dynamodb#ImportTableDescription$ImportedItemCount"
+    )
   );
 
   @Override
@@ -740,14 +776,14 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             yield TokenTree.of(
               "crate::standard_library_conversions::olong_to_dafny(&%s)".formatted(
-                rustValue
-              )
+                  rustValue
+                )
             );
           } else {
             yield TokenTree.of(
               "crate::standard_library_conversions::olong_to_dafny(&Some(%s))".formatted(
-                rustValue
-              )
+                  rustValue
+                )
             );
           }
         } else {
