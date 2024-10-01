@@ -241,7 +241,9 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             AwsSdkGoPointableIndex
                 .of(context.model())
                 .isPointable(visitingMemberShape)
-          ) inputType = "*".concat(inputType);
+          ) {
+            inputType = "*".concat(inputType);
+          }
           writer.write(
             """
             func $L(input $L)($L) {
@@ -436,8 +438,9 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             visitingShape.hasTrait(EnumTrait.class)
             || visitingShape.isStructureShape()
             || visitingShape.isUnionShape()
-          ) outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
-          else if (visitingShape.isListShape()) {
+          ) { 
+            outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
+          } else if (visitingShape.isListShape()) {
             final MemberShape memberShape = visitingShape.asListShape().get().getMember();
             final Shape targetShape = context
               .model()
@@ -467,7 +470,9 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           }
           if (
             ShapeVisitorHelper.toNativeOutputPointerMap.get(visitingMemberShape)
-          ) outputType = "*".concat(outputType);
+          ) {
+            outputType = "*".concat(outputType);
+          }
           writer.write(
             """
             func $L(input $L)($L) {

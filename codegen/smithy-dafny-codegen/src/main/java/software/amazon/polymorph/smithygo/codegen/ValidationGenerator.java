@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithygo.codegen;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
-import java.lang.reflect.Member;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Optional;
@@ -96,8 +95,8 @@ public class ValidationGenerator {
     writeFuncValidations(symbol);
   }
 
-  public void writeFuncValidations(Symbol symbol) {
-    for (MemberShape key : validationFuncMap.keySet()) {
+  public void writeFuncValidations(final Symbol symbol) {
+    for (final MemberShape key : validationFuncMap.keySet()) {
       String inputType = "";
       if (validationFuncInputTypeMap.containsKey(key)) {
         inputType = "Value ".concat(validationFuncInputTypeMap.get(key));
@@ -126,7 +125,7 @@ public class ValidationGenerator {
     final Shape containerShape,
     final boolean isInputStructure,
     final String dataSource,
-    StringBuilder validationCode
+    final StringBuilder validationCode
   ) {
     containerShape
       .getAllMembers()
@@ -138,8 +137,11 @@ public class ValidationGenerator {
         String memberName;
         if (
           containerShape.isListShape() || containerShape.isMapShape()
-        ) memberName = dataSource; else memberName =
-          dataSource + "." + symbolProvider.toMemberName(member);
+        ) {
+          memberName = dataSource;
+        } else {
+          memberName = dataSource + "." + symbolProvider.toMemberName(member);
+        }
         renderValidatorForEachShape(
           model.expectShape(member.getTarget()),
           member,
@@ -156,7 +158,7 @@ public class ValidationGenerator {
     final MemberShape memberShape,
     final boolean isInputStructure,
     String dataSource,
-    StringBuilder validationCode
+    final StringBuilder validationCode
   ) {
     Symbol symbol = symbolProvider.toSymbol(currentShape);
     if (isInputStructure) {
@@ -196,10 +198,10 @@ public class ValidationGenerator {
     // Broke list and map into two different if else because for _, item := range %s looked good for list
     // And for key, value := range %s looked good for map
     if (currentShape.isListShape()) {
-      String funcName = funcNameGenerator(memberShape, "validate");
-      String funcInput = dataSource.startsWith("input") ? "" : dataSource;
+      final String funcName = funcNameGenerator(memberShape, "validate");
+      final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
       if (!funcInput.equals("")) {
-        ListShape listShapeCast = (ListShape) currentShape;
+        final ListShape listShapeCast = (ListShape) currentShape;
         String inputType = SmithyNameResolver.getSmithyType(
           currentShape,
           symbolProvider.toSymbol(listShapeCast),
@@ -239,10 +241,10 @@ public class ValidationGenerator {
         validationFuncMap.put(memberShape, listValidation.toString());
       }
     } else if (currentShape.isMapShape()) {
-      String funcName = funcNameGenerator(memberShape, "validate");
-      String funcInput = dataSource.startsWith("input") ? "" : dataSource;
+      final String funcName = funcNameGenerator(memberShape, "validate");
+      final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
       if (!funcInput.equals("")) {
-        MapShape mapShapeCast = (MapShape) currentShape;
+        final MapShape mapShapeCast = (MapShape) currentShape;
         String inputType = SmithyNameResolver.getSmithyType(
           mapShapeCast,
           symbolProvider.toSymbol(mapShapeCast),
@@ -283,8 +285,8 @@ public class ValidationGenerator {
         validationFuncMap.put(memberShape, mapValidation.toString());
       }
     } else if (currentShape.isUnionShape()) {
-      String funcName = funcNameGenerator(memberShape, "validate");
-      String funcInput = dataSource.startsWith("input") ? "" : dataSource;
+      final String funcName = funcNameGenerator(memberShape, "validate");
+      final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
       if (!funcInput.equals("")) {
         String inputType = (symbolProvider.toSymbol(currentShape)).getName();
 
@@ -346,7 +348,7 @@ public class ValidationGenerator {
     final String dataSource,
     final String pointableString
   ) {
-    Shape targetShape = model.expectShape(memberShape.getTarget());
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
     Shape currentShape;
     StringBuilder rangeCheck = new StringBuilder();
     if (memberShape.hasTrait(RangeTrait.class)) {
@@ -415,8 +417,8 @@ public class ValidationGenerator {
     final String dataSource,
     final String pointableString
   ) {
-    Shape targetShape = model.expectShape(memberShape.getTarget());
-    Shape currentShape;
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
+    final Shape currentShape;
     StringBuilder lengthCheck = new StringBuilder();
     if (memberShape.hasTrait(LengthTrait.class)) {
       currentShape = memberShape;
@@ -520,7 +522,7 @@ public class ValidationGenerator {
     final MemberShape memberShape,
     final String dataSource
   ) {
-    Shape targetShape = model.expectShape(memberShape.getTarget());
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
     StringBuilder requiredCheck = new StringBuilder();
     if (
       !(memberShape.hasTrait(RequiredTrait.class) ||
@@ -545,7 +547,7 @@ public class ValidationGenerator {
     final String dataSource,
     final String pointableString
   ) {
-    Shape targetShape = model.expectShape(memberShape.getTarget());
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
     StringBuilder UTFCheck = new StringBuilder();
     if (
       !(memberShape.hasTrait(DafnyUtf8BytesTrait.class) ||
