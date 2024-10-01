@@ -70,7 +70,7 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
 
           writer.write(
               """
-                            if (len(this_d) != 1):
+                            if (len(d) != 1):
                                 raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
                             """);
           if (target.isStructureShape()) {
