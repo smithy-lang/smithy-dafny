@@ -221,9 +221,6 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
           String inputType;
-          ShapeVisitorHelper.toDafnyOptionalityMap.get(
-              visitingMemberShape
-            );
           String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
               visitingMemberShape
             )
