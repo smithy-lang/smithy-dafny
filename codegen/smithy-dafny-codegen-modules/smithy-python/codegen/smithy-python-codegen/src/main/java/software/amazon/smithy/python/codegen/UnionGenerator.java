@@ -68,6 +68,10 @@ public class UnionGenerator implements Runnable {
         });
     }
 
+    protected void writeClassLevelImports(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
+      // Stub method that can be overridden by other codegens.
+    }
+
     @Override
     public void run() {
         var parentName = symbolProvider.toSymbol(shape).getName();
@@ -86,6 +90,8 @@ public class UnionGenerator implements Runnable {
                 member.getMemberTrait(model, DocumentationTrait.class).ifPresent(trait -> {
                     writer.writeDocs(trait.getValue());
                 });
+
+                writeClassLevelImports(member, memberSymbol, target, targetSymbol);
 
                 writeInitMethodForMember(member, memberSymbol, target, targetSymbol);
 
