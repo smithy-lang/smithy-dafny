@@ -24,7 +24,7 @@ TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 
 # Constants for languages that drop extern names (Python, Go)
-
+# TODO: Before merging decide if we need this variables
 TYPES_FILE_PATH=Model/SimpleRecursiveShapeTypes.dfy
 TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.recursiveshape.internaldafny.types\" } SimpleRecursiveShapeTypes"
 TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleRecursiveShapeTypes"
