@@ -4,7 +4,7 @@
 CORES=2
 
 #TODO: Think about extern processing in new test models
-ENABLE_EXTERN_PROCESSING=0
+ENABLE_EXTERN_PROCESSING=1
 RUST_BENERATED=1
 
 include ../SharedMakefile.mk
