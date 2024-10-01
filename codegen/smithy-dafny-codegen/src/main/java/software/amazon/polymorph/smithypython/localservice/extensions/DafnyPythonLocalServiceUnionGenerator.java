@@ -47,27 +47,35 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
 
   @Override
   protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
-    String memberType;
-
+    // Override Smithy-Python to handle shapes with ReferenceTraits
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       Shape referentShape = model.expectShape(
         targetShape.expectTrait(ReferenceTrait.class).getReferentId()
       );
 
       // Use forward reference for reference traits to avoid circular import
-      memberType = symbolProvider.toSymbol(referentShape).getNamespace() +
+      String memberType = symbolProvider.toSymbol(referentShape).getNamespace() +
         "." +
         symbolProvider.toSymbol(referentShape).getName();
       writer.addStdlibImport(
         symbolProvider.toSymbol(referentShape).getNamespace()
       );
+
+      String formatString = format("def __init__(self, value: %s):", memberType);
+      writer.openBlock(formatString,
+        "",
+        () -> {
+          writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
+          writer.write("self.value = value");
+        });
     } else {
-      memberType = getTargetFormat(member);
+      super.writeInitMethodForMember(member, memberSymbol, targetShape, targetSymbol);
     }
 
     String formatString = format("def __init__(self, value: %s):", memberType);
     writer.openBlock(formatString,
       "",
+      targetSymbol,
       () -> {
         writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
         writer.write("self.value = value");
