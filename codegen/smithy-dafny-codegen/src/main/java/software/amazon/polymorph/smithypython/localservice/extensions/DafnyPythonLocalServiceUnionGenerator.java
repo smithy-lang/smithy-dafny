@@ -83,7 +83,7 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
             : "$T";
           if (target.isStructureShape()) {
             writer.write(
-                "return $T($T.from_dict(d[$S]))",
+                format("return $T(%s.from_dict(d[$S]))", targetSymbolFormat),
                 memberSymbol,
                 targetSymbol,
                 member.getMemberName());
