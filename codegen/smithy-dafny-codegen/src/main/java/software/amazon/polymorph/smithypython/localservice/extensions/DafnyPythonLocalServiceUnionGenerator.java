@@ -4,6 +4,8 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import java.util.Set;
 import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -11,6 +13,8 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.UnionGenerator;
+
+import static java.lang.String.format;
 
 /**
  * Extend Smithy-Python's UnionGenerator to write Constraint traits.
@@ -39,5 +43,35 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
       member,
       "value"
     );
+  }
+
+  @Override
+  protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
+    String memberType;
+
+    if (targetShape.hasTrait(ReferenceTrait.class)) {
+      Shape referentShape = model.expectShape(
+        targetShape.expectTrait(ReferenceTrait.class).getReferentId()
+      );
+
+      // Use forward reference for reference traits to avoid circular import
+      memberType = symbolProvider.toSymbol(referentShape).getNamespace() +
+        "." +
+        symbolProvider.toSymbol(referentShape).getName();
+      writer.addStdlibImport(
+        symbolProvider.toSymbol(referentShape).getNamespace()
+      );
+    } else {
+      memberType = getTargetFormat(member);
+    }
+
+    String formatString = format("def __init__(self, value: %s):", memberType);
+    writer.openBlock(formatString,
+      "",
+      targetSymbol,
+      () -> {
+        writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
+        writer.write("self.value = value");
+      });
   }
 }

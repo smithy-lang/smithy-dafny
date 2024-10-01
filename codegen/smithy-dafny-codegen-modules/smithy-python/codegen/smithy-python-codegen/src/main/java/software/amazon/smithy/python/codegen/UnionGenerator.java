@@ -34,7 +34,7 @@ import static java.lang.String.format;
 public class UnionGenerator implements Runnable {
 
     protected final Model model;
-    private final SymbolProvider symbolProvider;
+    protected final SymbolProvider symbolProvider;
     protected final PythonWriter writer;
     private final UnionShape shape;
     private final Set<Shape> recursiveShapes;
@@ -173,7 +173,7 @@ public class UnionGenerator implements Runnable {
         writeGlobalFromDict();
     }
 
-    private String getTargetFormat(MemberShape member) {
+    protected String getTargetFormat(MemberShape member) {
         Shape target = model.expectShape(member.getTarget());
         // Recursive shapes may be referenced before they're defined even with
         // a topological sort. So forward references need to be used when
