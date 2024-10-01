@@ -237,6 +237,15 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.toSet());
   }
 
+  @Override
+  protected boolean shouldGenerateStructForStructure(StructureShape structureShape) {
+    return super.shouldGenerateStructForStructure(structureShape) &&
+      !isInputOrOutputStructure(structureShape) &&
+      // TODO: Filter to shapes in the service closure (this one's an example of an orphan)
+      !structureShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KinesisStreamingDestinationInput")) &&
+      !structureShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"));
+  }
+
   protected Set<RustFile> allUnionConversionModules() {
     return model
       .getUnionShapes()
@@ -727,12 +736,20 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case LONG -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::olong_to_dafny(&%s)".formatted(
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::olong_to_dafny(&%s)".formatted(
                 rustValue
               )
-          );
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::olong_to_dafny(&Some(%s))".formatted(
+                rustValue
+              )
+            );
+          }
         } else {
           yield TokenTree.of(rustValue);
         }
