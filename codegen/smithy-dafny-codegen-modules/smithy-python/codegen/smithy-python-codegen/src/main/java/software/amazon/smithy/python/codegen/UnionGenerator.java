@@ -72,9 +72,9 @@ public class UnionGenerator implements Runnable {
       writer.write("@staticmethod");
       writer.openBlock("def from_dict(d: Dict[str, Any]) -> $S:", "", memberSymbol.getName(), () -> {
         writer.write("""
-                            if (len(d) != 1):
-                                raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
-                            """);
+          if (len(d) != 1):
+              raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
+          """);
         if (target.isStructureShape()) {
           writer.write("return $T($T.from_dict(d[$S]))", memberSymbol, targetSymbol,
             member.getMemberName());
