@@ -79,7 +79,7 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
           // it has been imported within the context of the function.
           // Else, write as Smithy-Python default: $T.
           String targetSymbolFormat = target.hasTrait(ReferenceTrait.class)
-            ? "$L"
+            ? "$S"
             : "$T";
           if (target.isStructureShape()) {
             writer.write(
