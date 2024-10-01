@@ -120,6 +120,8 @@ public class UnionGenerator implements Runnable {
                     }
                 });
 
+                writeFromDictMethod(member, memberSymbol, target, targetSymbol);
+
                 writer.write("""
                     def __repr__(self) -> str:
                         return f"$L(value=repr(self.value))"
