@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
@@ -43,8 +45,12 @@ import software.amazon.smithy.rust.codegen.core.smithy.traits.RustBoxTrait;
 // putContext method, instead of trying to work purely functionality with map literals.
 public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
-  public RustAwsSdkShimGenerator(Model model, ServiceShape service) {
+  private final Set<CodegenEngine.GenerationAspect> generationAspects;
+
+  public RustAwsSdkShimGenerator(Model model, ServiceShape service, Set<CodegenEngine.GenerationAspect> generationAspects) {
     super(model, service);
+
+    this.generationAspects = generationAspects;
   }
 
   @Override
@@ -76,14 +82,25 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile clientModule() {
     final Map<String, String> variables = serviceVariables();
+    variables.put("operations", TokenTree
+      .of(
+        service
+          .getOperations()
+          .stream()
+          .map(id ->
+            operationClientFunction(model.expectShape(id, OperationShape.class))
+          )
+      )
+      .lineSeparated().toString());
+
     var preamble = TokenTree.of(
       evalTemplate(
         """
         use std::sync::LazyLock;
         use crate::conversions;
 
-        struct Client {
-            inner: $sdkCrate:L::Client
+        pub struct Client {
+            pub inner: $sdkCrate:L::Client
         }
 
         /// A runtime for executing operations on the asynchronous client in a blocking manner.
@@ -105,7 +122,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
         impl crate::r#$dafnyTypesModuleName:L::I$clientName:L
           for Client {
-
+          $operations:L
+        }
         """,
         variables
       )
@@ -122,30 +140,33 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       )
       .lineSeparated();
 
-    var postamble = TokenTree.of(
-      evalTemplate(
-        """
-        }
-
-        #[allow(non_snake_case)]
-        impl crate::r#$dafnyInternalModuleName:L::_default {
-          pub fn $clientName:L() -> ::std::rc::Rc<
-            crate::r#_Wrappers_Compile::Result<
-              ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
-              ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
-              >
-            > {
-            let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
-            let inner = $sdkCrate:L::Client::new(&shared_config);
-            let client = Client { inner };
-            let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
-            std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+    final TokenTree postamble;
+    if (generationAspects.contains(CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS)) {
+      postamble = TokenTree.of(
+        evalTemplate(
+          """
+          #[allow(non_snake_case)]
+          impl crate::r#$dafnyInternalModuleName:L::_default {
+            pub fn $clientName:L() -> ::std::rc::Rc<
+              crate::r#_Wrappers_Compile::Result<
+                ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
+                ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
+                >
+              > {
+              let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+              let inner = $sdkCrate:L::Client::new(&shared_config);
+              let client = Client { inner };
+              let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
+              std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+            }
           }
-        }
-        """,
-        variables
-      )
-    );
+          """,
+          variables
+        )
+      );
+    } else {
+      postamble = TokenTree.empty();
+    }
 
     return new RustFile(
       Path.of("src", "client.rs"),
