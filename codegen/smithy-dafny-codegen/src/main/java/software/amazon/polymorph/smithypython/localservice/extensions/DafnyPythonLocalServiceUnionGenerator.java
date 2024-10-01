@@ -52,6 +52,7 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
    * @param target
    * @param targetSymbol
    */
+  @Override
   protected void writeFromDictMethod(MemberShape member, Symbol memberSymbol, Shape target, Symbol targetSymbol) {
     writer.write("@staticmethod");
     writer.openBlock(
@@ -69,7 +70,7 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
 
           writer.write(
               """
-                            if (len(d) != 1):
+                            if (len(this_d) != 1):
                                 raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
                             """);
           if (target.isStructureShape()) {
