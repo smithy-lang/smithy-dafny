@@ -52,7 +52,8 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
       Shape referentShape =
           model.expectShape(targetShape.expectTrait(ReferenceTrait.class).getReferentId());
 
-      writer.addStdlibImport(
+      writer.write(
+        "from $L import $L",
         symbolProvider.toSymbol(referentShape).getNamespace(),
         symbolProvider.toSymbol(referentShape).getName()
       );
