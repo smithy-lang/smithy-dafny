@@ -30,8 +30,6 @@ class PythonTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/kms-lite");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
-    // TODO: Remove RecursiveShape from disabled test
-    DISABLED_TESTS.add("RecursiveShape");
   }
 
   @ParameterizedTest

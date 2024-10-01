@@ -12,7 +12,7 @@ import (
 )
 
 func (_static *CompanionStruct_Default___) DynamoDBClient() Wrappers.Result {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile("default"))
 	if err != nil {
 		panic(err)
 	}
