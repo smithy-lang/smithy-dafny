@@ -68,8 +68,24 @@ public class UnionGenerator implements Runnable {
         });
     }
 
-    protected void writeClassLevelImports(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
-      // Stub method that can be overridden by other codegens.
+    protected void writeFromDictMethod(MemberShape member, Symbol memberSymbol, Shape target, Symbol targetSymbol) {
+      writer.write("@staticmethod");
+      writer.openBlock("def from_dict(d: Dict[str, Any]) -> $S:", "", memberSymbol.getName(), () -> {
+        writer.write("""
+                            if (len(d) != 1):
+                                raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
+                            """);
+        if (target.isStructureShape()) {
+          writer.write("return $T($T.from_dict(d[$S]))", memberSymbol, targetSymbol,
+            member.getMemberName());
+        } else if (targetSymbol.getProperty("fromDict").isPresent()) {
+          var targetFromDictSymbol = targetSymbol.expectProperty("fromDict", Symbol.class);
+          writer.write("return $T($T(d[$S]))",
+            memberSymbol, targetFromDictSymbol, member.getMemberName());
+        } else {
+          writer.write("return $T(d[$S])", memberSymbol, member.getMemberName());
+        }
+      });
     }
 
     @Override
@@ -91,8 +107,6 @@ public class UnionGenerator implements Runnable {
                     writer.writeDocs(trait.getValue());
                 });
 
-                writeClassLevelImports(member, memberSymbol, target, targetSymbol);
-
                 writeInitMethodForMember(member, memberSymbol, target, targetSymbol);
 
                 writer.openBlock("def as_dict(self) -> Dict[str, Any]:", "", () -> {
@@ -103,24 +117,6 @@ public class UnionGenerator implements Runnable {
                         writer.write("return {$S: $T(self.value)}", member.getMemberName(), targetAsDictSymbol);
                     } else {
                         writer.write("return {$S: self.value}", member.getMemberName());
-                    }
-                });
-
-                writer.write("@staticmethod");
-                writer.openBlock("def from_dict(d: Dict[str, Any]) -> $S:", "", memberSymbol.getName(), () -> {
-                    writer.write("""
-                            if (len(d) != 1):
-                                raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
-                            """);
-                    if (target.isStructureShape()) {
-                        writer.write("return $T($T.from_dict(d[$S]))", memberSymbol, targetSymbol,
-                                member.getMemberName());
-                    } else if (targetSymbol.getProperty("fromDict").isPresent()) {
-                        var targetFromDictSymbol = targetSymbol.expectProperty("fromDict", Symbol.class);
-                        writer.write("return $T($T(d[$S]))",
-                            memberSymbol, targetFromDictSymbol, member.getMemberName());
-                    } else {
-                        writer.write("return $T(d[$S])", memberSymbol, member.getMemberName());
                     }
                 });
 

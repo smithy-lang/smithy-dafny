@@ -45,48 +45,74 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
     );
   }
 
-  @Override
-  protected void writeClassLevelImports(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
-    // Override Smithy-Python to handle shapes with ReferenceTraits
-    if (targetShape.hasTrait(ReferenceTrait.class)) {
-      Shape referentShape =
-          model.expectShape(targetShape.expectTrait(ReferenceTrait.class).getReferentId());
+  /**
+   * Override Smithy-Python writeFromDictMethod to handle members with {@code ReferenceTrait.class}.
+   * @param member
+   * @param memberSymbol
+   * @param target
+   * @param targetSymbol
+   */
+  protected void writeFromDictMethod(MemberShape member, Symbol memberSymbol, Shape target, Symbol targetSymbol) {
+    writer.write("@staticmethod");
+    writer.openBlock(
+        "def from_dict(d: Dict[str, Any]) -> $S:",
+        "",
+        memberSymbol.getName(),
+        () -> {
 
-      writer.writeComment("Import reference class at class level to avoid circular dependency");
-      writer.write(
-        "from $L import $L",
-        symbolProvider.toSymbol(referentShape).getNamespace(),
-        symbolProvider.toSymbol(referentShape).getName()
-      );
-    }
-    super.writeClassLevelImports(member, memberSymbol, targetShape, targetSymbol);
+          // Block below is changed from Smithy-Python.
+          // Import any modules required for reference shapes to convert from_dict.
+          // Import within function to avoid circular imports from top-level imports
+          if (target.hasTrait(ReferenceTrait.class)) {
+            writer.write("from $L import $L", targetSymbol.getNamespace(), targetSymbol.getName());
+          }
+
+          writer.write(
+              """
+                            if (len(d) != 1):
+                                raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
+                            """);
+          if (target.isStructureShape()) {
+            writer.write(
+                "return $T($T.from_dict(d[$S]))",
+                memberSymbol,
+                targetSymbol,
+                member.getMemberName());
+          } else if (targetSymbol.getProperty("fromDict").isPresent()) {
+            var targetFromDictSymbol = targetSymbol.expectProperty("fromDict", Symbol.class);
+            writer.write(
+                "return $T($T(d[$S]))", memberSymbol, targetFromDictSymbol, member.getMemberName());
+          } else {
+            writer.write("return $T(d[$S])", memberSymbol, member.getMemberName());
+          }
+        });
   }
 
-//  @Override
-//  protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
-//    // Override Smithy-Python to handle shapes with ReferenceTraits
-//    if (targetShape.hasTrait(ReferenceTrait.class)) {
-//      Shape referentShape = model.expectShape(
-//        targetShape.expectTrait(ReferenceTrait.class).getReferentId()
-//      );
-//
-//      // Use forward reference for reference traits to avoid circular import
-//      String memberType = symbolProvider.toSymbol(referentShape).getNamespace() +
-//        "." +
-//        symbolProvider.toSymbol(referentShape).getName();
-//      writer.addStdlibImport(
-//        symbolProvider.toSymbol(referentShape).getNamespace()
-//      );
-//
-//      String formatString = format("def __init__(self, value: '%s'):", memberType);
-//      writer.openBlock(formatString,
-//        "",
-//        () -> {
-//          writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
-//          writer.write("self.value = value");
-//        });
-//    } else {
-//      super.writeInitMethodForMember(member, memberSymbol, targetShape, targetSymbol);
-//    }
-//  }
+  @Override
+  protected void writeInitMethodForMember(MemberShape member, Symbol memberSymbol, Shape targetShape, Symbol targetSymbol) {
+    // Override Smithy-Python to handle shapes with ReferenceTraits
+    if (targetShape.hasTrait(ReferenceTrait.class)) {
+      Shape referentShape = model.expectShape(
+        targetShape.expectTrait(ReferenceTrait.class).getReferentId()
+      );
+
+      // Use forward reference for reference traits to avoid circular import
+      String memberType = symbolProvider.toSymbol(referentShape).getNamespace() +
+        "." +
+        symbolProvider.toSymbol(referentShape).getName();
+      writer.addStdlibImport(
+        symbolProvider.toSymbol(referentShape).getNamespace()
+      );
+
+      String formatString = format("def __init__(self, value: '%s'):", memberType);
+      writer.openBlock(formatString,
+        "",
+        () -> {
+          writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
+          writer.write("self.value = value");
+        });
+    } else {
+      super.writeInitMethodForMember(member, memberSymbol, targetShape, targetSymbol);
+    }
+  }
 }
