@@ -73,6 +73,14 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
                             if (len(d) != 1):
                                 raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
                             """);
+
+          // Block below is changed from Smithy-Python.
+          // If shape has ReferenceTrait, write it as literal;
+          // it has been imported within the context of the function.
+          // Else, write as Smithy-Python default: $T.
+          String targetSymbolFormat = target.hasTrait(ReferenceTrait.class)
+            ? "$L"
+            : "$T";
           if (target.isStructureShape()) {
             writer.write(
                 "return $T($T.from_dict(d[$S]))",
