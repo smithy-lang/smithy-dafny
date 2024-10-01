@@ -1,6 +1,6 @@
 # RecursiveShape
 
-This project implements the smithy [SimpleTypes](https://smithy.io/2.0/spec/simple-types.html) into an recursive shaped structure along with the associated operations in `dafny`. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
+This project implements the smithy [SimpleTypes](https://smithy.io/2.0/spec/simple-types.html) into a recursive shaped structure along with the associated operations in `dafny`. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
 
 ## Build
 
