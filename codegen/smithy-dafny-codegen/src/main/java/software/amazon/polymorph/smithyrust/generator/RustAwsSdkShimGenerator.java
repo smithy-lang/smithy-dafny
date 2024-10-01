@@ -129,17 +129,6 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       )
     );
 
-    var operations = TokenTree
-      .of(
-        service
-          .getOperations()
-          .stream()
-          .map(id ->
-            operationClientFunction(model.expectShape(id, OperationShape.class))
-          )
-      )
-      .lineSeparated();
-
     final TokenTree postamble;
     if (generationAspects.contains(CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS)) {
       postamble = TokenTree.of(
@@ -170,7 +159,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
     return new RustFile(
       Path.of("src", "client.rs"),
-      TokenTree.of(preamble, operations, postamble)
+      TokenTree.of(preamble, postamble)
     );
   }
 
