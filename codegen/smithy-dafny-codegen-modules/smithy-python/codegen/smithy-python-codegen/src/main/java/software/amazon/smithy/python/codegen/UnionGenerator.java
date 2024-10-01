@@ -177,7 +177,7 @@ public class UnionGenerator implements Runnable {
         writeGlobalFromDict();
     }
 
-    protected String getTargetFormat(MemberShape member) {
+    private String getTargetFormat(MemberShape member) {
         Shape target = model.expectShape(member.getTarget());
         // Recursive shapes may be referenced before they're defined even with
         // a topological sort. So forward references need to be used when
