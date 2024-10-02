@@ -1261,7 +1261,7 @@ public class DafnyLocalServiceTypeConversionProtocol
       );
   }
 
-  // Generates rest of the not to dafny visited shapes into a function
+  // Generates rest of the not visited shapes into a function
   private void generateSerializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
     var writerDelegator = context.writerDelegator();
     final var model = context.model();
@@ -1320,7 +1320,7 @@ public class DafnyLocalServiceTypeConversionProtocol
     );
   }
 
-  // Generates rest of the not to dafny visited shapes into a function
+  // Generates rest of the not visited shapes into a function
   private void generateDeserializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
     var delegator = context.writerDelegator();
     final var model = context.model();
