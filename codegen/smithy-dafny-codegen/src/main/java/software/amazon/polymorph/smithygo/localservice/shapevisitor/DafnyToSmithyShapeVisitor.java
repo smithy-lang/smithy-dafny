@@ -10,6 +10,7 @@ import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -291,12 +292,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       	}
       	fieldValue = append(fieldValue, %s)}
       	""".formatted(
-          SmithyNameResolver.getSmithyType(
-            shape,
-            symbol,
-            context.model(),
-            context.symbolProvider()
-          ),
+          GoCodegenUtils.getType(symbol, shape),
           dataSource,
           dataSource,
           ShapeVisitorHelper.toNativeShapeVisitorWriter(

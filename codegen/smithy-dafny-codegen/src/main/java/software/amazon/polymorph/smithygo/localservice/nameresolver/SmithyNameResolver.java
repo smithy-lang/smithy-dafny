@@ -84,55 +84,6 @@ public class SmithyNameResolver {
     return serviceTrait.getSdkId().toLowerCase();
   }
 
-  public static String getSmithyType(
-    final Shape shape,
-    final Symbol symbol,
-    Model model,
-    SymbolProvider symbolProvider
-  ) {
-    if (
-      symbol.getNamespace().contains("smithy.") ||
-      symbol.getNamespace().equals("smithyapitypes") ||
-      knownSmithyType.contains(symbol.getName())
-    ) {
-      return symbol.getName();
-    }
-    if (shape.isMapShape()) {
-      MemberShape valueMemberShape = ((MapShape) shape).getValue();
-      Shape valueShape = model.expectShape(valueMemberShape.getTarget());
-      return "map[string]".concat(
-          SmithyNameResolver.getSmithyType(
-            valueShape,
-            symbolProvider.toSymbol(valueShape),
-            model,
-            symbolProvider
-          )
-        );
-    }
-    if (shape.isListShape()) {
-      MemberShape memberShape = ((ListShape) shape).getMember();
-      Shape memberShapeTarget = model.expectShape(memberShape.getTarget());
-      return "[]".concat(
-          SmithyNameResolver.getSmithyType(
-            memberShapeTarget,
-            symbolProvider.toSymbol(memberShapeTarget),
-            model,
-            symbolProvider
-          )
-        );
-    }
-    // TODO: Figure out the type of timestamp
-    if (shape.isTimestampShape()) {
-      return "time"
-        .concat(DOT)
-        .concat(symbol.getName());
-    }
-    return SmithyNameResolver
-      .smithyTypesNamespace(shape)
-      .concat(DOT)
-      .concat(symbol.getName());
-  }
-
   public static String getSmithyType(final Shape shape, final Symbol symbol) {
     if (
       symbol.getNamespace().contains("smithy.") ||
@@ -146,6 +97,12 @@ public class SmithyNameResolver {
         .smithyTypesNamespace(shape)
         .concat(DOT)
         .concat("I")
+        .concat(symbol.getName());
+    }
+    // TODO: Figure out the type of timestamp
+    if (shape.isTimestampShape()) {
+      return "time"
+        .concat(DOT)
         .concat(symbol.getName());
     }
     return SmithyNameResolver
