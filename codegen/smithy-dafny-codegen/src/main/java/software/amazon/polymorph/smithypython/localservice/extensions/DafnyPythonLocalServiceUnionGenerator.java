@@ -124,7 +124,8 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
   }
 
   /**
-   * Override Smithy-Python writeFromDictMethod to handle members with {@code ReferenceTrait.class}.
+   * If a Union member has {@code ReferenceTrait.class}, handle it here.
+   * Otherwise, defer to Smithy-Python writeInitMethodForMember.
    * @param member
    * @param memberSymbol
    * @param targetShape
