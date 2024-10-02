@@ -17,8 +17,6 @@ import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafn
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -28,6 +26,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 
 public class DafnyLocalServiceTypeConversionProtocol
   implements ProtocolGenerator {
@@ -354,13 +353,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               visitingShape,
               context.symbolProvider().toSymbol(visitingShape)
             );
-          inputType =
-            SmithyNameResolver.getSmithyType(
-              visitingShape,
-              context.symbolProvider().toSymbol(visitingShape),
-              model,
-              context.symbolProvider()
-            );
+          inputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
           if (
             context
               .symbolProvider()
@@ -704,12 +697,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          String outputType = SmithyNameResolver.getSmithyType(
-            visitingShape,
-            context.symbolProvider().toSymbol(visitingShape),
-            context.model(),
-            context.symbolProvider()
-          );
+          String outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
           if (visitingShape.hasTrait(ReferenceTrait.class)) {
             ReferenceTrait referenceTrait = visitingShape.expectTrait(
               ReferenceTrait.class
@@ -717,11 +705,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             Shape resourceOrService = context
               .model()
               .expectShape(referenceTrait.getReferentId());
-            outputType =
-              SmithyNameResolver.getSmithyType(
-                resourceOrService,
-                context.symbolProvider().toSymbol(resourceOrService)
-              );
+            outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
             if (resourceOrService.isServiceShape()) {
               String namespace = SmithyNameResolver
                 .shapeNamespace(resourceOrService)
