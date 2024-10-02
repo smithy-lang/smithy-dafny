@@ -154,6 +154,13 @@ public class SmithyNameResolver {
       .concat(symbol.getName());
   }
 
+  public static String getSmithyType(final Shape shape) {
+    return SmithyNameResolver
+      .smithyTypesNamespace(shape)
+      .concat(DOT)
+      .concat(shape.toShapeId().getName());
+  }
+
   public static String getSmithyTypeAws(
     final ServiceTrait serviceTrait,
     final Symbol symbol,
@@ -174,13 +181,6 @@ public class SmithyNameResolver {
       .smithyTypesNamespaceAws(serviceTrait, subtype)
       .concat(DOT)
       .concat(symbol.getName());
-  }
-
-  public static String getSmithyType(final Shape shape) {
-    return SmithyNameResolver
-      .smithyTypesNamespace(shape)
-      .concat(DOT)
-      .concat(shape.toShapeId().getName());
   }
 
   public static String getToDafnyMethodName(
