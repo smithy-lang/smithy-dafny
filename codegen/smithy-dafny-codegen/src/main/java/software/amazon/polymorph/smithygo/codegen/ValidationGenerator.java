@@ -99,13 +99,6 @@ public class ValidationGenerator {
         funcNameGenerator(key, "validate"),
         inputType
       );
-      writer.write(
-        """
-            var err error = nil
-            // to avoid declared and not used error
-            _ = err
-        """
-      );
       writer.write(validationFuncMap.get(key));
       writer.write("return nil");
       writer.closeBlock("}");
