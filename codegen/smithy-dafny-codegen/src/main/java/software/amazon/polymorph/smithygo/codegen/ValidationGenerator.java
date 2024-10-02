@@ -75,13 +75,6 @@ public class ValidationGenerator {
     Symbol symbol = symbolProvider.toSymbol(shape);
     writer.openBlock("func (input $L) Validate() (error) {", symbol.getName());
     writer.write(
-      """
-      var err error = nil
-      // to avoid declared and not used error
-      _ = err
-      """
-    );
-    writer.write(
       renderValidatorHelper(
         shape,
         isInputStructure,
