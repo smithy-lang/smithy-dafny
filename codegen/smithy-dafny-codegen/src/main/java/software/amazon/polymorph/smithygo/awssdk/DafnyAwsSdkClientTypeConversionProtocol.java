@@ -439,24 +439,11 @@ public class DafnyAwsSdkClientTypeConversionProtocol
               }
               break;
             case LIST:
-              final MemberShape memberShape = visitingShape.asListShape().get().getMember();
-              final Shape targetShape = context
-                .model()
-                .expectShape(memberShape.getTarget());
-              outputType = "[]".concat(GoCodegenUtils.getType(
-                context.symbolProvider().toSymbol(targetShape),
-                serviceTrait
-                ));
-              break;
             case MAP:
-              MemberShape valueMemberShape = visitingShape.asMapShape().get().getValue();
-              Shape valueTargetShape = context
-                .model()
-                .expectShape(valueMemberShape.getTarget());
-              outputType = "map[string]".concat(GoCodegenUtils.getType(
-                context.symbolProvider().toSymbol(valueTargetShape),
+              outputType = GoCodegenUtils.getType(
+                context.symbolProvider().toSymbol(visitingShape),
                 serviceTrait
-                ));
+                );
               break;
           }
           if (
