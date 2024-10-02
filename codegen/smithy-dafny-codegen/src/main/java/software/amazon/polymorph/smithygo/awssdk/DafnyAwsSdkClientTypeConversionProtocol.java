@@ -430,40 +430,39 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          String outputType;
-          if (
-            visitingShape.hasTrait(EnumTrait.class)
-            || visitingShape.isStructureShape()
-            || visitingShape.isUnionShape()
-          ) { 
-            outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
-          } else if (visitingShape.isListShape()) {
-            final MemberShape memberShape = visitingShape.asListShape().get().getMember();
-            final Shape targetShape = context
-              .model()
-              .expectShape(memberShape.getTarget());
-            outputType = "[]".concat(GoCodegenUtils.getType(
-              context.symbolProvider().toSymbol(targetShape),
-              serviceTrait
-              ));
-          }
-          else if (visitingShape.isMapShape()) {
-            MemberShape valueMemberShape = visitingShape.asMapShape().get().getValue();
-            Shape valueTargetShape = context
-              .model()
-              .expectShape(valueMemberShape.getTarget());
-            outputType = "map[string]".concat(GoCodegenUtils.getType(
-              context.symbolProvider().toSymbol(valueTargetShape),
-              serviceTrait
-              ));
-          }
-          else {
-            outputType = SmithyNameResolver.getSmithyType(
-              visitingShape,
-              context.symbolProvider().toSymbol(visitingShape),
-              context.model(),
-              context.symbolProvider()
-            );
+          String outputType = SmithyNameResolver.getSmithyType(
+            visitingShape,
+            context.symbolProvider().toSymbol(visitingShape),
+            context.model(),
+            context.symbolProvider()
+          );
+          switch (visitingShape.getType()) {
+            case STRUCTURE:
+            case UNION:
+              if (visitingShape.hasTrait(EnumTrait.class)) {
+                outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
+              }
+              break;
+            case LIST:
+              final MemberShape memberShape = visitingShape.asListShape().get().getMember();
+              final Shape targetShape = context
+                .model()
+                .expectShape(memberShape.getTarget());
+              outputType = "[]".concat(GoCodegenUtils.getType(
+                context.symbolProvider().toSymbol(targetShape),
+                serviceTrait
+                ));
+              break;
+            case MAP:
+              MemberShape valueMemberShape = visitingShape.asMapShape().get().getValue();
+              Shape valueTargetShape = context
+                .model()
+                .expectShape(valueMemberShape.getTarget());
+              outputType = "map[string]".concat(GoCodegenUtils.getType(
+                context.symbolProvider().toSymbol(valueTargetShape),
+                serviceTrait
+                ));
+              break;
           }
           if (
             ShapeVisitorHelper.toNativeOutputPointerMap.get(visitingMemberShape)
