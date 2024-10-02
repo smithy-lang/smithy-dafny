@@ -5,6 +5,11 @@ CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
 
+TRANSPILE_TESTS_IN_RUST=1
+
+RUST_OTHER_FILES := \
+	runtimes/rust/src/kms.rs
+
 include ../../SharedMakefile.mk
 
 NAMESPACE=com.amazonaws.kms
