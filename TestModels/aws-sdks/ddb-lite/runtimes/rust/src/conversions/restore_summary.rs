@@ -10,7 +10,7 @@ pub fn to_dafny(
         SourceBackupArn: crate::standard_library_conversions::ostring_to_dafny(&value.source_backup_arn),
  SourceTableArn: crate::standard_library_conversions::ostring_to_dafny(&value.source_table_arn),
  RestoreDateTime: crate::standard_library_conversions::timestamp_to_dafny(&value.restore_date_time),
- RestoreInProgress: value.restore_in_progress,
+ RestoreInProgress: value.restore_in_progress.clone(),
     }
   )
 } #[allow(dead_code)]

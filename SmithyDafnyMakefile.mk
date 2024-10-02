@@ -503,6 +503,8 @@ _mv_polymorph_go:
     done
 ########################## .NET targets
 
+net: polymorph_dafny transpile_net polymorph_net test_net
+
 transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
 transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_post_transpile, )
@@ -551,6 +553,8 @@ format_net-check:
 	dotnet format runtimes/net/*.csproj --verify-no-changes
 
 ########################## Java targets
+
+java: polymorph_dafny transpile_java polymorph_java build_java test_java
 
 build_java: transpile_java mvn_local_deploy_dependencies
 	$(GRADLEW) -p runtimes/java build
@@ -606,6 +610,8 @@ test_java:
 
 ########################## Rust targets
 
+rust: polymorph_dafny transpile_rust polymorph_rust test_rust
+
 # The Dafny Rust code generator only supports a single crate for everything,
 # so (among other consequences) we compile src and test code together.
 transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
@@ -636,7 +642,7 @@ _mv_implementation_rust:
 # Pre-process the Dafny-generated Rust code to remove them.
 	sed -i -e 's/[[:space:]]*$$//' runtimes/rust/src/implementation_from_dafny.rs 
 
-	rustfmt runtimes/rust/src/implementation_from_dafny.rs
+	rustfmt --edition 2021 runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 
 patch_after_transpile_rust:
@@ -713,6 +719,8 @@ test_go:
 	cd runtimes/go/TestsFromDafny-go && go run TestsFromDafny.go
 
 ########################## Python targets
+
+net: polymorph_dafny transpile_python polymorph_python test_python
 
 # Python MUST transpile dependencies first to generate .dtr files
 transpile_python: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_pre_transpile, )

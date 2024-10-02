@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -542,18 +543,23 @@ public abstract class AbstractRustShimGenerator {
         }
       }
       case DOUBLE -> {
-        if (isRustOption) {
+        if (isDafnyOption) {
           yield TokenTree.of(
             "crate::standard_library_conversions::odouble_from_dafny(%s.clone())".formatted(
                 dafnyValue
               )
           );
         } else {
-          yield TokenTree.of(
+          TokenTree result = TokenTree.of(
             "crate::standard_library_conversions::double_from_dafny(&%s.clone())".formatted(
                 dafnyValue
               )
           );
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
         }
       }
       case TIMESTAMP -> {
@@ -912,6 +918,80 @@ public abstract class AbstractRustShimGenerator {
     );
   }
 
+  protected RustFile unionConversionModule(final UnionShape unionShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      unionVariables(unionShape)
+    );
+
+    final List<Map<String, String>> perMemberVariables = unionShape
+      .members()
+      .stream()
+      .map(memberShape -> {
+        final Map<String, String> memberVariables = MapUtils.merge(
+          variables,
+          unionMemberVariables(memberShape)
+        );
+        final Shape targetShape = model.expectShape(memberShape.getTarget());
+        memberVariables.put(
+          "innerToDafny",
+          toDafny(targetShape, "x", false, false).toString()
+        );
+        memberVariables.put(
+          "innerFromDafny",
+          fromDafny(targetShape, "x", false, false).toString()
+        );
+        return memberVariables;
+      })
+      .toList();
+
+    variables.put(
+      "toDafnyVariants",
+      perMemberVariables
+        .stream()
+        .map(memberVariables ->
+          IOUtils.evalTemplate(
+            """
+            $qualifiedRustUnionName:L::$rustUnionMemberName:L(x) =>
+                crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
+                    $dafnyUnionMemberName:L: $innerToDafny:L,
+                },
+            """,
+            memberVariables
+          )
+        )
+        .collect(Collectors.joining("\n"))
+    );
+    variables.put(
+      "fromDafnyVariants",
+      perMemberVariables
+        .stream()
+        .map(memberVariables ->
+          IOUtils.evalTemplate(
+            """
+            crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
+                $dafnyUnionMemberName:L: x @ _,
+            } => $qualifiedRustUnionName:L::$rustUnionMemberName:L($innerFromDafny:L),
+            """,
+            memberVariables
+          )
+        )
+        .collect(Collectors.joining("\n"))
+    );
+
+    final String content = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/conversions/union.rs",
+      variables
+    );
+    final Path path = Path.of(
+      "src",
+      "conversions",
+      "%s.rs".formatted(toSnakeCase(unionName(unionShape)))
+    );
+    return new RustFile(path, TokenTree.of(content));
+  }
+
   /**
    * Generates values for variables commonly used in service-specific templates.
    */
@@ -1088,8 +1168,8 @@ public abstract class AbstractRustShimGenerator {
   protected String qualifiedRustStructureType(
     final StructureShape structureShape
   ) {
-    return "%s::types::%s".formatted(
-        topLevelNameForShape(structureShape),
+    return "%s::%s".formatted(
+        getRustTypesModuleName(),
         rustStructureName(structureShape)
       );
   }
@@ -1228,8 +1308,8 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String qualifiedRustUnionName(final UnionShape unionShape) {
-    return "%s::types::%s".formatted(
-        topLevelNameForShape(unionShape),
+    return "%s::%s".formatted(
+        getRustTypesModuleName(),
         rustUnionName(unionShape)
       );
   }
