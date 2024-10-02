@@ -559,16 +559,24 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       context.symbolProvider().toSymbol(shape)
     );
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    String returnType = DafnyNameResolver.getDafnyType(
+        shape,
+        context.symbolProvider().toSymbol(shape)
+      );
+    String someWrapIfRequired = "%s(%s)";
+    if (this.isOptional) {
+      returnType = "Wrappers.Option";
+      someWrapIfRequired =
+        "Wrappers.Companion_Option_.Create_Some_(%s(%s))";
+    }
     final String functionInit =
       """
-      func() Wrappers.Option {
-          switch %s.(type) {""".formatted(dataSource);
+      func() %s {
+          switch %s.(type) {""".formatted(returnType, dataSource);
     StringBuilder eachMemberInUnion = new StringBuilder();
     for (var member : shape.getAllMembers().values()) {
       final String memberName = context.symbolProvider().toMemberName(member);
       final Shape targetShape = context.model().expectShape(member.getTarget());
-      final String someWrapIfRequired =
-        "Wrappers.Companion_Option_.Create_Some_(%s(%s))";
       final String baseType = DafnyNameResolver.getDafnyType(
         targetShape,
         context.symbolProvider().toSymbol(targetShape)

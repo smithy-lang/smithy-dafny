@@ -111,12 +111,7 @@ public class ShapeVisitorHelper {
     }
     String funcDataSource = "input";
     if (!AwsSdkToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-      if (targetShape.isUnionShape()) {
-        toDafnyOptionalityMap.put(memberShape, true);
-      }
-      else {
-        toDafnyOptionalityMap.put(memberShape, isOptional);
-      }
+      toDafnyOptionalityMap.put(memberShape, isOptional);
       AwsSdkToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
       AwsSdkToDafnyShapeVisitor.visitorFuncMap.put(
         memberShape,
