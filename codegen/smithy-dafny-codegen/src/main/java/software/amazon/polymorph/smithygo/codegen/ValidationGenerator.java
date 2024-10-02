@@ -36,9 +36,8 @@ public class ValidationGenerator {
   private static final String UNION_DATASOURCE = "unionType.Value";
   private static final String CHECK_AND_RETURN_ERROR =
     """
-    err = %s
-    if err != nil {
-        return err
+    if %s != nil {
+        return %s
     }
     """;
   private static HashMap<MemberShape, String> validationFuncMap =
@@ -219,9 +218,10 @@ public class ValidationGenerator {
           validationFuncInputTypeMap.put(memberShape, inputType);
           dataSource = "Value";
         }
+        String funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
         validationCode.append(
           CHECK_AND_RETURN_ERROR.formatted(
-            "input.".concat(funcName).concat("(%s)".formatted(funcInput))
+            funcCall, funcCall
           )
         );
         validationFuncMap.put(memberShape, null);
@@ -263,9 +263,10 @@ public class ValidationGenerator {
           validationFuncInputTypeMap.put(memberShape, inputType);
           dataSource = "Value";
         }
+        String funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
         validationCode.append(
           CHECK_AND_RETURN_ERROR.formatted(
-            "input.".concat(funcName).concat("(%s)".formatted(funcInput))
+            funcCall, funcCall
           )
         );
         validationFuncMap.put(memberShape, null);
@@ -292,9 +293,10 @@ public class ValidationGenerator {
         validationFuncInputTypeMap.put(memberShape, inputType);
         dataSource = "Value";
       }
+      String funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
       validationCode.append(
         CHECK_AND_RETURN_ERROR.formatted(
-          "input.".concat(funcName).concat("(%s)".formatted(funcInput))
+          funcCall, funcCall
         )
       );
       if (!validationFuncMap.containsKey(memberShape)) {
@@ -334,8 +336,9 @@ public class ValidationGenerator {
       currentShape.isStructureShape() &&
       !currentShape.hasTrait(ReferenceTrait.class)
     ) {
+      String funcCall = dataSource.concat(".Validate()");
       validationCode.append(
-        CHECK_AND_RETURN_ERROR.formatted(dataSource.concat(".Validate()"))
+        CHECK_AND_RETURN_ERROR.formatted(funcCall, funcCall)
       );
     }
   }
