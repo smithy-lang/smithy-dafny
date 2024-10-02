@@ -1,13 +1,10 @@
 package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
-import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
-import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Map;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -18,7 +15,6 @@ import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.SimpleShape;
 
 public class SmithyNameResolver {
 
@@ -125,6 +121,7 @@ public class SmithyNameResolver {
           )
         );
     }
+    // TODO: Figure out the type of timestamp
     if (shape.isTimestampShape()) {
       return "time"
         .concat(DOT)
@@ -169,6 +166,7 @@ public class SmithyNameResolver {
     ) {
       return symbol.getName();
     }
+    // TODO: Figure types of Timestamp shape after completing timestamps
     if (symbol.getFullName().equals("time.Time")) {
       return(symbol.getFullName());
     }
