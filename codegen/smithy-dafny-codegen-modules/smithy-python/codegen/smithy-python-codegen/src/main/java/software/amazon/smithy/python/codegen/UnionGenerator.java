@@ -34,7 +34,7 @@ import static java.lang.String.format;
 public class UnionGenerator implements Runnable {
 
     protected final Model model;
-    private final SymbolProvider symbolProvider;
+    protected final SymbolProvider symbolProvider;
     protected final PythonWriter writer;
     private final UnionShape shape;
     private final Set<Shape> recursiveShapes;
@@ -66,6 +66,26 @@ public class UnionGenerator implements Runnable {
                 writeInitMethodConstraintsChecksForMember(member, memberSymbol.getName());
                 writer.write("self.value = value");
         });
+    }
+
+    protected void writeFromDictMethod(MemberShape member, Symbol memberSymbol, Shape target, Symbol targetSymbol) {
+      writer.write("@staticmethod");
+      writer.openBlock("def from_dict(d: Dict[str, Any]) -> $S:", "", memberSymbol.getName(), () -> {
+        writer.write("""
+          if (len(d) != 1):
+              raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
+          """);
+        if (target.isStructureShape()) {
+          writer.write("return $T($T.from_dict(d[$S]))", memberSymbol, targetSymbol,
+            member.getMemberName());
+        } else if (targetSymbol.getProperty("fromDict").isPresent()) {
+          var targetFromDictSymbol = targetSymbol.expectProperty("fromDict", Symbol.class);
+          writer.write("return $T($T(d[$S]))",
+            memberSymbol, targetFromDictSymbol, member.getMemberName());
+        } else {
+          writer.write("return $T(d[$S])", memberSymbol, member.getMemberName());
+        }
+      });
     }
 
     @Override
@@ -100,23 +120,7 @@ public class UnionGenerator implements Runnable {
                     }
                 });
 
-                writer.write("@staticmethod");
-                writer.openBlock("def from_dict(d: Dict[str, Any]) -> $S:", "", memberSymbol.getName(), () -> {
-                    writer.write("""
-                            if (len(d) != 1):
-                                raise TypeError(f"Unions may have exactly 1 value, but found {len(d)}")
-                            """);
-                    if (target.isStructureShape()) {
-                        writer.write("return $T($T.from_dict(d[$S]))", memberSymbol, targetSymbol,
-                                member.getMemberName());
-                    } else if (targetSymbol.getProperty("fromDict").isPresent()) {
-                        var targetFromDictSymbol = targetSymbol.expectProperty("fromDict", Symbol.class);
-                        writer.write("return $T($T(d[$S]))",
-                            memberSymbol, targetFromDictSymbol, member.getMemberName());
-                    } else {
-                        writer.write("return $T(d[$S])", memberSymbol, member.getMemberName());
-                    }
-                });
+                writeFromDictMethod(member, memberSymbol, target, targetSymbol);
 
                 writer.write("""
                     def __repr__(self) -> str:
