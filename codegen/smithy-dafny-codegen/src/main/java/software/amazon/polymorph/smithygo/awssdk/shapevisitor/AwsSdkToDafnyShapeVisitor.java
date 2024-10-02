@@ -172,7 +172,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             ShapeVisitorHelper.toDafnyShapeVisitorWriter(
               memberShape,
               context,
-              dataSource + "." + StringUtils.capitalize(memberName),
+              dataSource.concat(".").concat(StringUtils.capitalize(memberName)),
               writer,
               isConfigShape,
               memberShape.isOptional(),
