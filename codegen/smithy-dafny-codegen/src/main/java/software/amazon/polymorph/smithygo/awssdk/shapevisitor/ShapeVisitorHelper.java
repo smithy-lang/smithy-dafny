@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -12,11 +13,11 @@ import software.amazon.smithy.model.traits.EnumTrait;
 
 public class ShapeVisitorHelper {
 
-  public static final HashMap<MemberShape, Boolean> toDafnyOptionalityMap =
+  public static final Map<MemberShape, Boolean> toDafnyOptionalityMap =
     new HashMap<>();
-  public static final HashMap<MemberShape, Boolean> toNativeOutputPointerMap =
+  public static final Map<MemberShape, Boolean> toNativeOutputPointerMap =
     new HashMap<>();
-  public static final HashMap<MemberShape, String> toNativeNextFuncInput =
+  public static final Map<MemberShape, String> toNativeNextFuncInput =
     new HashMap<>();
 
   /**

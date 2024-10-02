@@ -1,6 +1,8 @@
 package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
 import java.util.HashMap;
+import java.util.Map;
+
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
@@ -10,7 +12,7 @@ import software.amazon.smithy.model.shapes.Shape;
 
 public class ShapeVisitorHelper {
 
-  public static final HashMap<MemberShape, Boolean> toDafnyOptionalityMap =
+  public static final Map<MemberShape, Boolean> toDafnyOptionalityMap =
     new HashMap<>();
 
   /**
