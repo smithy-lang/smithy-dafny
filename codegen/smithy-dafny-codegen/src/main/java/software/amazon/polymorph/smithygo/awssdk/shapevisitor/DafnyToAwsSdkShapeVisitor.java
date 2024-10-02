@@ -94,7 +94,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String blobShape(BlobShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-    String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+    String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     return """
     func () []byte {
     var b []byte
@@ -109,7 +109,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             b = append(b, val.(byte))
         }
     }
-    }()""".formatted(nonAssertDataSource, dataSource);
+    }()""".formatted(unAssertDataSource, dataSource);
   }
 
   @Override
@@ -128,8 +128,8 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     var nilcheck = "";
     if (this.isOptional) {
       if (this.isPointable) {
-        String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
-        nilcheck = "if %s == nil { return nil }".formatted(nonAssertDataSource);
+        String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+        nilcheck = "if %s == nil { return nil }".formatted(unAssertDataSource);
       } else {
         nilcheck = "";
       }
@@ -214,7 +214,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       context.symbolProvider().toSymbol(targetShape),
       serviceTrait
     );
-    String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+    String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     builder.append(
       """
       func() []%s{
@@ -233,7 +233,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             ? """
             if %s == nil {
                 return nil
-            }""".formatted(nonAssertDataSource)
+            }""".formatted(unAssertDataSource)
             : "",
           dataSource,
           ShapeVisitorHelper.toNativeShapeVisitorWriter(
@@ -271,14 +271,14 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     );
 
     var nilCheck = "";
-    String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+    String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     if (this.isOptional) {
       nilCheck =
         """
         if %s == nil {
             return nil
         }
-        """.formatted(nonAssertDataSource);
+        """.formatted(unAssertDataSource);
     }
     builder.append(
       """
@@ -298,7 +298,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
           typeName,
           typeName,
           nilCheck,
-          nonAssertDataSource,
+          unAssertDataSource,
           ShapeVisitorHelper.toNativeShapeVisitorWriter(
               keyMemberShape,
               context,
@@ -326,12 +326,12 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   public String booleanShape(BooleanShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
     var nilCheck = "";
-    String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+    String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     if (this.isOptional) {
       if (this.isPointable) {
-        nilCheck = "if %s == nil { return nil }".formatted(nonAssertDataSource);
+        nilCheck = "if %s == nil { return nil }".formatted(unAssertDataSource);
       } else {
-        nilCheck = "if %s == nil { return b }".formatted(nonAssertDataSource);
+        nilCheck = "if %s == nil { return b }".formatted(unAssertDataSource);
       }
     }
     return """
@@ -343,7 +343,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     }()""".formatted(
         this.isPointable ? "*" : "",
         nilCheck,
-        nonAssertDataSource,
+        unAssertDataSource,
         this.isPointable ? "&" : ""
       );
   }
@@ -353,7 +353,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
     if (shape.hasTrait(EnumTrait.class)) {
       if (this.isOptional) {
-        String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+        String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
         return """
            func () %s.%s {
            var u %s.%s
@@ -378,7 +378,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             context.symbolProvider().toSymbol(shape).getName(),
             SmithyNameResolver.smithyTypesNamespaceAws(serviceTrait, true),
             context.symbolProvider().toSymbol(shape).getName(),
-            nonAssertDataSource,
+            unAssertDataSource,
             dataSource,
             DafnyNameResolver.getDafnyType(
               shape,
@@ -436,12 +436,12 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       ? "uint8"
       : "dafny.Char";
     var nilCheck = "";
-    String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+    String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     if (this.isOptional) {
       if (this.isPointable) {
-        nilCheck = "if %s == nil { return nil }".formatted(nonAssertDataSource);
+        nilCheck = "if %s == nil { return nil }".formatted(unAssertDataSource);
       } else {
-        nilCheck = "if %s == nil { return s }".formatted(nonAssertDataSource);
+        nilCheck = "if %s == nil { return s }".formatted(unAssertDataSource);
       }
     }
     return """
@@ -469,7 +469,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   public String integerShape(IntegerShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
     if (AwsSdkGoPointableIndex.of(context.model()).isPointable(shape)) {
-      String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+      String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
       return """
       func() *int32 {
           var i int32
@@ -478,7 +478,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
           }
           i = %s
           return &i
-      }()""".formatted(nonAssertDataSource, dataSource);
+      }()""".formatted(unAssertDataSource, dataSource);
     } else {
       return "%s".formatted(
           dataSource
@@ -490,12 +490,12 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   public String longShape(LongShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
     var nilCheck = "";
-    String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+    String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     if (this.isOptional) {
       if (this.isPointable) {
-        nilCheck = "if %s == nil { return nil }".formatted(nonAssertDataSource);
+        nilCheck = "if %s == nil { return nil }".formatted(unAssertDataSource);
       } else {
-        nilCheck = "if %s == nil { return i}".formatted(nonAssertDataSource);
+        nilCheck = "if %s == nil { return i}".formatted(unAssertDataSource);
       }
     }
     return """
@@ -507,7 +507,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     }()""".formatted(
         this.isPointable ? "*" : "",
         nilCheck,
-        nonAssertDataSource,
+        unAssertDataSource,
         this.isPointable ? "&" : ""
       );
   }
@@ -519,12 +519,12 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addUseImports(SmithyGoDependency.stdlib("encoding/binary"));
     var nilCheck = "";
     if (this.isOptional) {
-      String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+      String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
       if (this.isPointable) {
-        nilCheck = "if %s == nil { return nil }".formatted(nonAssertDataSource);
+        nilCheck = "if %s == nil { return nil }".formatted(unAssertDataSource);
       } else {
         nilCheck =
-          "if %s == nil { var f float64; return f}".formatted(nonAssertDataSource);
+          "if %s == nil { var f float64; return f}".formatted(unAssertDataSource);
       }
     }
     return """
@@ -552,11 +552,11 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
     var nilCheck = "";
     if (this.isOptional) {
-      String nonAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+      String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
       if (this.isPointable) {
-          nilCheck = "if %s == nil { return nil }".formatted(nonAssertDataSource);
+          nilCheck = "if %s == nil { return nil }".formatted(unAssertDataSource);
       } else {
-          nilCheck = "if %s == nil { return union}".formatted(nonAssertDataSource);
+          nilCheck = "if %s == nil { return union}".formatted(unAssertDataSource);
       }
     }
     final String functionInit = """
