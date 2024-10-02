@@ -430,12 +430,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          String outputType = SmithyNameResolver.getSmithyType(
-            visitingShape,
-            context.symbolProvider().toSymbol(visitingShape),
-            context.model(),
-            context.symbolProvider()
-          );
+          String outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);;
           switch (visitingShape.getType()) {
             case STRUCTURE:
             case UNION:
