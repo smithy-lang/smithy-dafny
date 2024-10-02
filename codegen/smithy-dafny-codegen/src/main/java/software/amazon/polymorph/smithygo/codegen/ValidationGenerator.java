@@ -4,6 +4,7 @@ import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.ListResourceBundle;
 import java.util.Optional;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
@@ -21,6 +22,7 @@ import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 
 // Renders constraint validation
 public class ValidationGenerator {
@@ -183,18 +185,15 @@ public class ValidationGenerator {
     // Broke list and map into two different if else because for _, item := range %s looked good for list
     // And for key, value := range %s looked good for map
     if (currentShape.isListShape()) {
+      MemberShape itemMember = ((ListShape) currentShape).getAllMembers().values().iterator().next();
+      StringBuilder itemValidation = new StringBuilder();
+      renderValidatorForEachShape(model.expectShape(itemMember.getTarget()), itemMember, false, LIST_ITEM, itemValidation);
       // If the validation function is not created and the list shape does have some constraints
-      if (!validationFuncMap.containsKey(memberShape) && renderValidatorHelper(currentShape, false, LIST_ITEM, new StringBuilder()).length() != 0) {
+      if (!validationFuncMap.containsKey(memberShape) && itemValidation.length() != 0) {
         final String funcName = funcNameGenerator(memberShape, "validate");
         final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
         if (!funcInput.equals("")) {
-          final ListShape listShapeCast = (ListShape) currentShape;
-          String inputType = SmithyNameResolver.getSmithyType(
-            currentShape,
-            symbolProvider.toSymbol(listShapeCast),
-            model,
-            symbolProvider
-          );
+          String inputType = GoCodegenUtils.getType(symbolProvider.toSymbol(currentShape), currentShape);
           // remove the package name because this code is generated inside smithyTypesNamespace itself
           inputType =
             inputType.replace(
@@ -217,7 +216,7 @@ public class ValidationGenerator {
           for _, %s := range %s {
           """.formatted(LIST_ITEM, dataSource)
         );
-        renderValidatorHelper(currentShape, false, LIST_ITEM, listValidation);
+        listValidation.append(itemValidation);
         listValidation.append(
           """
           }
@@ -226,18 +225,21 @@ public class ValidationGenerator {
         validationFuncMap.put(memberShape, listValidation.toString());
       }
     } else if (currentShape.isMapShape()) {
-      // If the validation function is not created and the map shape does have some constraints
-      if (!validationFuncMap.containsKey(memberShape) && renderValidatorHelper(currentShape, false, MAP_VALUE, new StringBuilder()).length() != 0) {
+      MemberShape keyMember = ((MapShape) currentShape).getKey();
+      MemberShape valueMember = ((MapShape) currentShape).getValue();
+      StringBuilder keyValidation = new StringBuilder();
+      StringBuilder valueValidation = new StringBuilder();
+      renderValidatorForEachShape(model.expectShape(keyMember.getTarget()), keyMember, false, MAP_KEY, keyValidation);
+      renderValidatorForEachShape(model.expectShape(valueMember.getTarget()), valueMember, false, MAP_VALUE, valueValidation);
+      // Put map key or value to _ if no constraints in key or value
+      String maybeMapKey = keyValidation.length() == 0 ? "_" : MAP_KEY;
+      String maybeMapValue = valueValidation.length() == 0 ? "_" : MAP_VALUE;
+      // If the validation function is not created and the map shape does have some constraints in its key and value
+      if (!validationFuncMap.containsKey(memberShape) && (keyValidation.length() != 0 || valueValidation.length() != 0)) {
         final String funcName = funcNameGenerator(memberShape, "validate");
         final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
         if (!funcInput.equals("")) {
-          final MapShape mapShapeCast = (MapShape) currentShape;
-          String inputType = SmithyNameResolver.getSmithyType(
-            mapShapeCast,
-            symbolProvider.toSymbol(mapShapeCast),
-            model,
-            symbolProvider
-          );
+          String inputType = GoCodegenUtils.getType(symbolProvider.toSymbol(currentShape), currentShape);
           // remove the package name because this code is generated inside smithyTypesNamespace itself
           inputType =
             inputType.replace(
@@ -258,9 +260,10 @@ public class ValidationGenerator {
         mapValidation.append(
           """
           for %s, %s := range %s {
-          """.formatted(MAP_KEY, MAP_VALUE, dataSource)
+          """.formatted(maybeMapKey, maybeMapValue, dataSource)
         );
-        renderValidatorHelper(currentShape, false, MAP_VALUE, mapValidation);
+        mapValidation.append(keyValidation);
+        mapValidation.append(valueValidation);
         mapValidation.append(
           """
               }
