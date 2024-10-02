@@ -198,31 +198,31 @@ public class ValidationGenerator {
     // Broke list and map into two different if else because for _, item := range %s looked good for list
     // And for key, value := range %s looked good for map
     if (currentShape.isListShape()) {
-      final String funcName = funcNameGenerator(memberShape, "validate");
-      final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
-      if (!funcInput.equals("")) {
-        final ListShape listShapeCast = (ListShape) currentShape;
-        String inputType = SmithyNameResolver.getSmithyType(
-          currentShape,
-          symbolProvider.toSymbol(listShapeCast),
-          model,
-          symbolProvider
-        );
-        // remove the package name because this code is generated inside smithyTypesNamespace itself
-        inputType =
-          inputType.replace(
-            SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."),
-            ""
+      if (!validationFuncMap.containsKey(memberShape) && renderValidatorHelper(currentShape, false, LIST_ITEM, new StringBuilder()).length() != 0) {
+        final String funcName = funcNameGenerator(memberShape, "validate");
+        final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
+        if (!funcInput.equals("")) {
+          final ListShape listShapeCast = (ListShape) currentShape;
+          String inputType = SmithyNameResolver.getSmithyType(
+            currentShape,
+            symbolProvider.toSymbol(listShapeCast),
+            model,
+            symbolProvider
           );
-        validationFuncInputTypeMap.put(memberShape, inputType);
-        dataSource = "Value";
-      }
-      validationCode.append(
-        CHECK_AND_RETURN_ERROR.formatted(
-          "input.".concat(funcName).concat("(%s)".formatted(funcInput))
-        )
-      );
-      if (!validationFuncMap.containsKey(memberShape)) {
+          // remove the package name because this code is generated inside smithyTypesNamespace itself
+          inputType =
+            inputType.replace(
+              SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."),
+              ""
+            );
+          validationFuncInputTypeMap.put(memberShape, inputType);
+          dataSource = "Value";
+        }
+        validationCode.append(
+          CHECK_AND_RETURN_ERROR.formatted(
+            "input.".concat(funcName).concat("(%s)".formatted(funcInput))
+          )
+        );
         validationFuncMap.put(memberShape, null);
         StringBuilder listValidation = new StringBuilder();
         listValidation.append(
@@ -241,39 +241,36 @@ public class ValidationGenerator {
         validationFuncMap.put(memberShape, listValidation.toString());
       }
     } else if (currentShape.isMapShape()) {
-      final String funcName = funcNameGenerator(memberShape, "validate");
-      final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
-      if (!funcInput.equals("")) {
-        final MapShape mapShapeCast = (MapShape) currentShape;
-        String inputType = SmithyNameResolver.getSmithyType(
-          mapShapeCast,
-          symbolProvider.toSymbol(mapShapeCast),
-          model,
-          symbolProvider
-        );
-        // remove the package name because this code is generated inside smithyTypesNamespace itself
-        inputType =
-          inputType.replace(
-            SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."),
-            ""
+      if (!validationFuncMap.containsKey(memberShape) && renderValidatorHelper(currentShape, false, MAP_VALUE, new StringBuilder()).length() != 0) {
+        final String funcName = funcNameGenerator(memberShape, "validate");
+        final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
+        if (!funcInput.equals("")) {
+          final MapShape mapShapeCast = (MapShape) currentShape;
+          String inputType = SmithyNameResolver.getSmithyType(
+            mapShapeCast,
+            symbolProvider.toSymbol(mapShapeCast),
+            model,
+            symbolProvider
           );
-        validationFuncInputTypeMap.put(memberShape, inputType);
-        dataSource = "Value";
-      }
-      validationCode.append(
-        CHECK_AND_RETURN_ERROR.formatted(
-          "input.".concat(funcName).concat("(%s)".formatted(funcInput))
-        )
-      );
-      if (!validationFuncMap.containsKey(memberShape)) {
+          // remove the package name because this code is generated inside smithyTypesNamespace itself
+          inputType =
+            inputType.replace(
+              SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."),
+              ""
+            );
+          validationFuncInputTypeMap.put(memberShape, inputType);
+          dataSource = "Value";
+        }
+        validationCode.append(
+          CHECK_AND_RETURN_ERROR.formatted(
+            "input.".concat(funcName).concat("(%s)".formatted(funcInput))
+          )
+        );
         validationFuncMap.put(memberShape, null);
         StringBuilder mapValidation = new StringBuilder();
         mapValidation.append(
           """
           for %s, %s := range %s {
-              // To avoid declared and not used error for shapes which does not need validation check
-              _ = key
-              _ = value
           """.formatted(MAP_KEY, MAP_VALUE, dataSource)
         );
         renderValidatorHelper(currentShape, false, MAP_VALUE, mapValidation);
@@ -325,9 +322,7 @@ public class ValidationGenerator {
           """
           // Default case should not be reached.
           default:
-              // To avoid used and not used error when nothing to validate
-              _ = unionType
-              panic("Unhandled union type")
+              panic(fmt.Sprintf("Unhandled union type: %T ", unionType))
           }
               """
         );
