@@ -459,7 +459,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             s = s + string(byteSlice)
         """.formatted(underlyingType);
     }
-    if ((boolean) isOptional) {
+    if (isOptional) {
       return """
        return func() (*string) {
            var s string
@@ -495,7 +495,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String integerShape(IntegerShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
 
-    if ((boolean) isOptional) {
+    if (isOptional) {
       return (
         """
         return func() *int32 {
@@ -520,7 +520,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String longShape(LongShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-    if ((boolean) isOptional) {
+    if (isOptional) {
       return (
         """
         return func() *int64 {
@@ -546,7 +546,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String doubleShape(DoubleShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
     writer.addUseImports(SmithyGoDependency.MATH);
-    if ((boolean) isOptional) {
+    if (isOptional) {
       return """
       return func () *float64 {
           var b []byte
@@ -582,7 +582,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String unionShape(UnionShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
     String nilCheck = "";
-    if ((boolean) isOptional) {
+    if (isOptional) {
       nilCheck =
         """
         if %s == nil {
