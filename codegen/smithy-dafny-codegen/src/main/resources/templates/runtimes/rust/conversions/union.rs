@@ -1,12 +1,12 @@
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: $qualifiedRustUnionName:L,
+    value: &$qualifiedRustUnionName:L,
 ) -> ::std::rc::Rc<
     crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L,
 > {
     ::std::rc::Rc::new(match value {
         $toDafnyVariants:L
-        $qualifiedRustUnionName:L::Unknown => unreachable!(),
+        _ => panic!("Unknown union variant: {:?}", value),
     })
 }
 

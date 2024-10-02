@@ -1186,80 +1186,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(path, TokenTree.of(content));
   }
 
-  private RustFile unionConversionModule(final UnionShape unionShape) {
-    final Map<String, String> variables = MapUtils.merge(
-      serviceVariables(),
-      unionVariables(unionShape)
-    );
-
-    final List<Map<String, String>> perMemberVariables = unionShape
-      .members()
-      .stream()
-      .map(memberShape -> {
-        final Map<String, String> memberVariables = MapUtils.merge(
-          variables,
-          unionMemberVariables(memberShape)
-        );
-        final Shape targetShape = model.expectShape(memberShape.getTarget());
-        memberVariables.put(
-          "innerToDafny",
-          toDafny(targetShape, "x", false, false).toString()
-        );
-        memberVariables.put(
-          "innerFromDafny",
-          fromDafny(targetShape, "x", false, false).toString()
-        );
-        return memberVariables;
-      })
-      .toList();
-
-    variables.put(
-      "toDafnyVariants",
-      perMemberVariables
-        .stream()
-        .map(memberVariables ->
-          IOUtils.evalTemplate(
-            """
-            $qualifiedRustUnionName:L::$rustUnionMemberName:L(x) =>
-                crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
-                    $dafnyUnionMemberName:L: $innerToDafny:L,
-                },
-            """,
-            memberVariables
-          )
-        )
-        .collect(Collectors.joining("\n"))
-    );
-    variables.put(
-      "fromDafnyVariants",
-      perMemberVariables
-        .stream()
-        .map(memberVariables ->
-          IOUtils.evalTemplate(
-            """
-            crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
-                $dafnyUnionMemberName:L: x @ _,
-            } => $qualifiedRustUnionName:L::$rustUnionMemberName:L($innerFromDafny:L),
-            """,
-            memberVariables
-          )
-        )
-        .collect(Collectors.joining("\n"))
-    );
-
-    final String content = IOUtils.evalTemplate(
-      getClass(),
-      "runtimes/rust/conversions/union.rs",
-      variables
-    );
-    final Path path = Path.of(
-      "src",
-      "conversions",
-      "%s.rs".formatted(toSnakeCase(unionName(unionShape)))
-    );
-    return new RustFile(path, TokenTree.of(content));
-  }
-
   private RustFile resourceConversionModule(final ResourceShape resourceShape) {
     final Map<String, String> variables = MapUtils.merge(
       serviceVariables(),
@@ -1964,13 +1890,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           if (isRustOption) {
             yield TokenTree.of(
               """
-              %s::conversions::%s::to_dafny(%s.clone().unwrap())
+              %s::conversions::%s::to_dafny(&%s.clone().unwrap())
               """.formatted(prefix, structureShapeName, rustValue)
             );
           } else {
             yield TokenTree.of(
               """
-              %s::conversions::%s::to_dafny(%s.clone())
+              %s::conversions::%s::to_dafny(&%s.clone())
               """.formatted(prefix, structureShapeName, rustValue)
             );
           }
@@ -1978,7 +1904,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(&x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
             """.formatted(rustValue, prefix, structureShapeName)

@@ -7,12 +7,15 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -26,7 +29,11 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.BoxTrait;
+import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.rust.codegen.core.smithy.traits.RustBoxTrait;
 
 /**
  * Generates all Rust modules needed to wrap
@@ -37,8 +44,15 @@ import software.amazon.smithy.model.traits.EnumTrait;
 // putContext method, instead of trying to work purely functionality with map literals.
 public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
-  public RustAwsSdkShimGenerator(Model model, ServiceShape service) {
+  private final Set<CodegenEngine.GenerationAspect> generationAspects;
+
+  public RustAwsSdkShimGenerator(
+    Model model,
+    ServiceShape service,
+    Set<CodegenEngine.GenerationAspect> generationAspects
+  ) {
     super(model, service);
+    this.generationAspects = generationAspects;
   }
 
   @Override
@@ -61,23 +75,40 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     result.add(conversionsModule());
     result.addAll(allOperationConversionModules());
     result.addAll(allStructureConversionModules());
+    result.addAll(allUnionConversionModules());
     result.add(conversionsErrorModule());
     result.add(conversionsClientModule());
-    // TODO union conversion modules
 
     return result;
   }
 
   private RustFile clientModule() {
     final Map<String, String> variables = serviceVariables();
+    variables.put(
+      "operations",
+      TokenTree
+        .of(
+          service
+            .getOperations()
+            .stream()
+            .map(id ->
+              operationClientFunction(
+                model.expectShape(id, OperationShape.class)
+              )
+            )
+        )
+        .lineSeparated()
+        .toString()
+    );
+
     var preamble = TokenTree.of(
       evalTemplate(
         """
         use std::sync::LazyLock;
         use crate::conversions;
 
-        struct Client {
-            inner: $sdkCrate:L::Client
+        pub struct Client {
+            pub inner: $sdkCrate:L::Client
         }
 
         /// A runtime for executing operations on the asynchronous client in a blocking manner.
@@ -99,51 +130,49 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
         impl crate::r#$dafnyTypesModuleName:L::I$clientName:L
           for Client {
-
+          $operations:L
+        }
         """,
         variables
       )
     );
 
-    var operations = TokenTree
-      .of(
-        service
-          .getOperations()
-          .stream()
-          .map(id ->
-            operationClientFunction(model.expectShape(id, OperationShape.class))
+    final TokenTree postamble;
+    if (
+      generationAspects.contains(
+        CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS
+      )
+    ) {
+      postamble =
+        TokenTree.of(
+          evalTemplate(
+            """
+            #[allow(non_snake_case)]
+            impl crate::r#$dafnyInternalModuleName:L::_default {
+              pub fn $clientName:L() -> ::std::rc::Rc<
+                crate::r#_Wrappers_Compile::Result<
+                  ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
+                  ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
+                  >
+                > {
+                let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+                let inner = $sdkCrate:L::Client::new(&shared_config);
+                let client = Client { inner };
+                let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
+                std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+              }
+            }
+            """,
+            variables
           )
-      )
-      .lineSeparated();
-
-    var postamble = TokenTree.of(
-      evalTemplate(
-        """
-        }
-
-        #[allow(non_snake_case)]
-        impl crate::r#$dafnyInternalModuleName:L::_default {
-          pub fn $clientName:L() -> ::std::rc::Rc<
-            crate::r#_Wrappers_Compile::Result<
-              ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
-              ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
-              >
-            > {
-            let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
-            let inner = $sdkCrate:L::Client::new(&shared_config);
-            let client = Client { inner };
-            let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
-            std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
-          }
-        }
-        """,
-        variables
-      )
-    );
+        );
+    } else {
+      postamble = TokenTree.empty();
+    }
 
     return new RustFile(
       Path.of("src", "client.rs"),
-      TokenTree.of(preamble, operations, postamble)
+      TokenTree.of(preamble, postamble)
     );
   }
 
@@ -222,6 +251,40 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
   }
 
   @Override
+  protected boolean shouldGenerateStructForStructure(
+    StructureShape structureShape
+  ) {
+    return (
+      super.shouldGenerateStructForStructure(structureShape) &&
+      !isInputOrOutputStructure(structureShape) &&
+      // TODO: Filter to shapes in the service closure (this one's an example of an orphan)
+      !structureShape
+        .getId()
+        .equals(
+          ShapeId.from(
+            "com.amazonaws.dynamodb#KinesisStreamingDestinationInput"
+          )
+        ) &&
+      !structureShape
+        .getId()
+        .equals(
+          ShapeId.from(
+            "com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"
+          )
+        )
+    );
+  }
+
+  protected Set<RustFile> allUnionConversionModules() {
+    return model
+      .getUnionShapes()
+      .stream()
+      .filter(this::shouldGenerateEnumForUnion)
+      .map(this::unionConversionModule)
+      .collect(Collectors.toSet());
+  }
+
+  @Override
   protected TokenTree operationRequestToDafnyFunction(
     final OperationShape operationShape
   ) {
@@ -267,9 +330,27 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final Shape targetShape = model.expectShape(member.getTarget());
     return (
       super.isRustFieldRequired(parent, member) ||
-      (operationIndex.isOutputStructure(parent) && targetShape.isIntegerShape())
+      (operationIndex.isOutputStructure(parent) &&
+        ((!targetShape.hasTrait(BoxTrait.class) &&
+            (targetShape.isIntegerShape() || targetShape.isLongShape())) ||
+          targetShape.isListShape())) ||
+      (!operationIndex.isInputStructure(parent) &&
+        targetShape.isBooleanShape() &&
+        targetShape.hasTrait(DefaultTrait.class)) ||
+      // TODO: I'm giving up on figuring out these ones for now
+      SPECIAL_CASE_REQUIRED_MEMBERS.contains(member.getId())
     );
   }
+
+  private static final Set<ShapeId> SPECIAL_CASE_REQUIRED_MEMBERS = Set.of(
+    ShapeId.from("com.amazonaws.dynamodb#ImportTableDescription$ErrorCount"),
+    ShapeId.from(
+      "com.amazonaws.dynamodb#ImportTableDescription$ProcessedItemCount"
+    ),
+    ShapeId.from(
+      "com.amazonaws.dynamodb#ImportTableDescription$ImportedItemCount"
+    )
+  );
 
   @Override
   protected boolean isStructureBuilderFallible(
@@ -469,7 +550,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     );
     String errorName = toPascalCase(errorShape.getId().getName());
     variables.put("errorName", errorName);
-    variables.put("snakeCaseErrorName", toSnakeCase(errorName));
+    variables.put(
+      "snakeCaseErrorName",
+      toSnakeCase(errorShape.getId().getName())
+    );
 
     return TokenTree.of(
       evalTemplate(
@@ -650,14 +734,22 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case BOOLEAN -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
+                  rustValue
+                )
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::obool_to_dafny(&Some(%s))".formatted(
+                  rustValue
+                )
+            );
+          }
         } else {
-          yield TokenTree.of(rustValue);
+          yield TokenTree.of("%s.clone()".formatted(rustValue));
         }
       }
       case INTEGER -> {
@@ -680,26 +772,42 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         }
       }
       case LONG -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::olong_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::olong_to_dafny(&%s)".formatted(
+                  rustValue
+                )
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::olong_to_dafny(&Some(%s))".formatted(
+                  rustValue
+                )
+            );
+          }
         } else {
           yield TokenTree.of(rustValue);
         }
       }
       case DOUBLE -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::odouble_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
+        if (isDafnyOption) {
+          if (isRustOption) {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::odouble_to_dafny(&%s)".formatted(
+                  rustValue
+                )
+            );
+          } else {
+            yield TokenTree.of(
+              "crate::standard_library_conversions::double_to_dafny(&Some(%s))".formatted(
+                  rustValue
+                )
+            );
+          }
         } else {
           yield TokenTree.of(
-            "crate::standard_library_conversions::double_to_dafny(*%s)".formatted(
+            "crate::standard_library_conversions::double_to_dafny(%s.clone())".formatted(
                 rustValue
               )
           );
@@ -844,7 +952,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           } else {
             yield TokenTree.of(
               """
-              crate::conversions::%s::to_dafny(%s)
+              crate::conversions::%s::to_dafny(&%s)
               """.formatted(structureShapeName, rustValue)
             );
           }
@@ -852,7 +960,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           yield TokenTree.of(
             """
             ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x) },
+                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
             """.formatted(rustValue, structureShapeName)
