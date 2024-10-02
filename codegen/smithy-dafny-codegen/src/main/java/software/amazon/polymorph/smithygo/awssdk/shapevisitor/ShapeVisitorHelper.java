@@ -51,7 +51,7 @@ public class ShapeVisitorHelper {
       .model()
       .expectShape(memberShape.getTarget());
     String maybeAssertion = "";
-    if (assertionRequired) {
+    if (assertionRequired && !targetShape.hasTrait(EnumTrait.class)) {
       maybeAssertion =
         ".(".concat(
             DafnyNameResolver.getDafnyType(
@@ -60,9 +60,6 @@ public class ShapeVisitorHelper {
             )
           )
           .concat(")");
-      if (targetShape.hasTrait(EnumTrait.class)) {
-        maybeAssertion = "";
-      }
     }
     String nextVisitorFunction;
     String funcDataSource = "input";
