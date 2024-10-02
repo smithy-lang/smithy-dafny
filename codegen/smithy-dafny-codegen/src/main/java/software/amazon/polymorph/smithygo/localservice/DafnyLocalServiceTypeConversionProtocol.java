@@ -328,56 +328,7 @@ public class DafnyLocalServiceTypeConversionProtocol
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       generateConfigSerializer(context);
     }
-
-    writerDelegator.useFileWriter(
-      "%s/%s".formatted(
-          SmithyNameResolver.shapeNamespace(serviceShape),
-          TO_DAFNY
-        ),
-      SmithyNameResolver.shapeNamespace(serviceShape),
-      writer -> {
-        for (MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
-          final Shape visitingShape = context
-            .model()
-            .expectShape(visitingMemberShape.getTarget());
-          if (alreadyVisited.contains(visitingMemberShape.getId())) {
-            continue;
-          }
-          alreadyVisited.add(visitingMemberShape.toShapeId());
-          String inputType;
-          String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
-              visitingMemberShape
-            )
-            ? "Wrappers.Option"
-            : DafnyNameResolver.getDafnyType(
-              visitingShape,
-              context.symbolProvider().toSymbol(visitingShape)
-            );
-          inputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
-          if (
-            context
-              .symbolProvider()
-              .toSymbol(visitingMemberShape)
-              .getProperty(POINTABLE, Boolean.class)
-              .orElse(false)
-          ) inputType = "*".concat(inputType);
-          writer.write(
-            """
-            func $L(input $L)($L) {
-                return $L
-            }
-            """,
-            ShapeVisitorHelper.funcNameGenerator(
-              visitingMemberShape,
-              "ToDafny"
-            ),
-            inputType,
-            outputType,
-            SmithyToDafnyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
-          );
-        }
-      }
-    );
+    generateSerializerFunctions(context, alreadyVisited);
   }
 
   @Override
@@ -682,62 +633,7 @@ public class DafnyLocalServiceTypeConversionProtocol
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       generateConfigDeserializer(context);
     }
-    delegator.useFileWriter(
-      "%s/%s".formatted(
-          SmithyNameResolver.shapeNamespace(serviceShape),
-          TO_NATIVE
-        ),
-      SmithyNameResolver.shapeNamespace(serviceShape),
-      writer -> {
-        for (MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
-          final Shape visitingShape = context
-            .model()
-            .expectShape(visitingMemberShape.getTarget());
-          if (alreadyVisited.contains(visitingMemberShape.getId())) {
-            continue;
-          }
-          alreadyVisited.add(visitingMemberShape.toShapeId());
-          String outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
-          if (visitingShape.hasTrait(ReferenceTrait.class)) {
-            ReferenceTrait referenceTrait = visitingShape.expectTrait(
-              ReferenceTrait.class
-            );
-            Shape resourceOrService = context
-              .model()
-              .expectShape(referenceTrait.getReferentId());
-            outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
-            if (resourceOrService.isServiceShape()) {
-              String namespace = SmithyNameResolver
-                .shapeNamespace(resourceOrService)
-                .concat(".");
-              outputType =
-                namespace.concat(
-                  context.symbolProvider().toSymbol(resourceOrService).getName()
-                );
-            }
-          }
-          if (
-            context
-              .symbolProvider()
-              .toSymbol(visitingMemberShape)
-              .getProperty(POINTABLE, Boolean.class)
-              .orElse(false)
-          ) outputType = "*".concat(outputType);
-          writer.write(
-            """
-            func $L(input interface{})($L) {
-                $L
-            }""",
-            ShapeVisitorHelper.funcNameGenerator(
-              visitingMemberShape,
-              "FromDafny"
-            ),
-            outputType,
-            DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
-          );
-        }
-      }
-    );
+    generateDeserializerFunctions(context, alreadyVisited);
   }
 
   private void generateRequestSerializer(
@@ -1363,5 +1259,130 @@ public class DafnyLocalServiceTypeConversionProtocol
           );
         }
       );
+  }
+
+  // Generates rest of the not to dafny visited shapes into a function
+  private void generateSerializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
+    var writerDelegator = context.writerDelegator();
+    final var model = context.model();
+    final var serviceShape = model.expectShape(
+      context.settings().getService(),
+      ServiceShape.class
+    );
+    writerDelegator.useFileWriter(
+      "%s/%s".formatted(
+          SmithyNameResolver.shapeNamespace(serviceShape),
+          TO_DAFNY
+        ),
+      SmithyNameResolver.shapeNamespace(serviceShape),
+      writer -> {
+        for (MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+          final Shape visitingShape = context
+            .model()
+            .expectShape(visitingMemberShape.getTarget());
+          if (alreadyVisited.contains(visitingMemberShape.getId())) {
+            continue;
+          }
+          alreadyVisited.add(visitingMemberShape.toShapeId());
+          String inputType;
+          String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
+              visitingMemberShape
+            )
+            ? "Wrappers.Option"
+            : DafnyNameResolver.getDafnyType(
+              visitingShape,
+              context.symbolProvider().toSymbol(visitingShape)
+            );
+          inputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
+          if (
+            context
+              .symbolProvider()
+              .toSymbol(visitingMemberShape)
+              .getProperty(POINTABLE, Boolean.class)
+              .orElse(false)
+          ) inputType = "*".concat(inputType);
+          writer.write(
+            """
+            func $L(input $L)($L) {
+                return $L
+            }
+            """,
+            ShapeVisitorHelper.funcNameGenerator(
+              visitingMemberShape,
+              "ToDafny"
+            ),
+            inputType,
+            outputType,
+            SmithyToDafnyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+          );
+        }
+      }
+    );
+  }
+
+  // Generates rest of the not to dafny visited shapes into a function
+  private void generateDeserializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
+    var delegator = context.writerDelegator();
+    final var model = context.model();
+    final var serviceShape = model.expectShape(
+      context.settings().getService(),
+      ServiceShape.class
+    );
+    delegator.useFileWriter(
+      "%s/%s".formatted(
+          SmithyNameResolver.shapeNamespace(serviceShape),
+          TO_NATIVE
+        ),
+      SmithyNameResolver.shapeNamespace(serviceShape),
+      writer -> {
+        for (MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
+          final Shape visitingShape = context
+            .model()
+            .expectShape(visitingMemberShape.getTarget());
+          if (alreadyVisited.contains(visitingMemberShape.getId())) {
+            continue;
+          }
+          alreadyVisited.add(visitingMemberShape.toShapeId());
+          String outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
+          if (visitingShape.hasTrait(ReferenceTrait.class)) {
+            ReferenceTrait referenceTrait = visitingShape.expectTrait(
+              ReferenceTrait.class
+            );
+            Shape resourceOrService = context
+              .model()
+              .expectShape(referenceTrait.getReferentId());
+            outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
+            if (resourceOrService.isServiceShape()) {
+              String namespace = SmithyNameResolver
+                .shapeNamespace(resourceOrService)
+                .concat(".");
+              outputType =
+                namespace.concat(
+                  context.symbolProvider().toSymbol(resourceOrService).getName()
+                );
+            }
+          }
+          if (
+            context
+              .symbolProvider()
+              .toSymbol(visitingMemberShape)
+              .getProperty(POINTABLE, Boolean.class)
+              .orElse(false)
+          ) outputType = "*".concat(outputType);
+          writer.write(
+            """
+            func $L(input interface{})($L) {
+                $L
+            }""",
+            ShapeVisitorHelper.funcNameGenerator(
+              visitingMemberShape,
+              "FromDafny"
+            ),
+            outputType,
+            DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+          );
+        }
+      }
+    );
   }
 }
