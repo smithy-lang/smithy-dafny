@@ -666,6 +666,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String timestampShape(TimestampShape shape) {
+    // TODO: Figure out timestamp types when working on timestampShape 
+    writer.addImport("time");
     return "nil";
   }
 }
