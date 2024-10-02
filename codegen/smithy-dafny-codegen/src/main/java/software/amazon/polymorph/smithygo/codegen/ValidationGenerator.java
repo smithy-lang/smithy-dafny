@@ -514,7 +514,7 @@ public class ValidationGenerator {
         """
       );
     }
-    return (lengthCheck);
+    return lengthCheck;
   }
 
   private StringBuilder addRequiredCheck(
@@ -539,7 +539,7 @@ public class ValidationGenerator {
       }
       """.formatted(dataSource, dataSource)
     );
-    return (requiredCheck);
+    return requiredCheck;
   }
 
   private StringBuilder addUTFCheck(
@@ -576,6 +576,6 @@ public class ValidationGenerator {
         """
       );
     }
-    return (UTFCheck);
+    return UTFCheck;
   }
 }
