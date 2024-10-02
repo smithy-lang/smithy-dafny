@@ -198,6 +198,7 @@ public class ValidationGenerator {
     // Broke list and map into two different if else because for _, item := range %s looked good for list
     // And for key, value := range %s looked good for map
     if (currentShape.isListShape()) {
+      // If the validation function is not created and the list shape does have some constraints
       if (!validationFuncMap.containsKey(memberShape) && renderValidatorHelper(currentShape, false, LIST_ITEM, new StringBuilder()).length() != 0) {
         final String funcName = funcNameGenerator(memberShape, "validate");
         final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
@@ -241,6 +242,7 @@ public class ValidationGenerator {
         validationFuncMap.put(memberShape, listValidation.toString());
       }
     } else if (currentShape.isMapShape()) {
+      // If the validation function is not created and the map shape does have some constraints
       if (!validationFuncMap.containsKey(memberShape) && renderValidatorHelper(currentShape, false, MAP_VALUE, new StringBuilder()).length() != 0) {
         final String funcName = funcNameGenerator(memberShape, "validate");
         final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
