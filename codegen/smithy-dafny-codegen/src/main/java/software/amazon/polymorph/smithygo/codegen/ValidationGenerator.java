@@ -409,7 +409,7 @@ public class ValidationGenerator {
         """
       );
     }
-    return (rangeCheck);
+    return rangeCheck;
   }
 
   private StringBuilder addLengthCheck(
