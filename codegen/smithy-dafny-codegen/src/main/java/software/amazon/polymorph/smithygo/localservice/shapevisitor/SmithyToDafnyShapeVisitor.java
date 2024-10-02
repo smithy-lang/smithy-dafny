@@ -3,6 +3,8 @@ package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 import java.util.HashMap;
+import java.util.Map;
+
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
@@ -40,7 +42,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   private final boolean isOptional;
   protected boolean isPointerType;
-  public static final HashMap<MemberShape, String> visitorFuncMap =
+  public static final Map<MemberShape, String> visitorFuncMap =
     new HashMap<>();
 
   public void setPointerType() {
