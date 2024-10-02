@@ -212,13 +212,6 @@ public class ValidationGenerator {
         );
         validationFuncMap.put(memberShape, null);
         StringBuilder listValidation = new StringBuilder();
-        listValidation.append(
-          """
-          for _, %s := range %s {
-              // To avoid declared and not used error for shapes which does not need validation check
-              _ = item
-          """.formatted(LIST_ITEM, dataSource)
-        );
         renderValidatorHelper(currentShape, false, LIST_ITEM, listValidation);
         listValidation.append(
           """
