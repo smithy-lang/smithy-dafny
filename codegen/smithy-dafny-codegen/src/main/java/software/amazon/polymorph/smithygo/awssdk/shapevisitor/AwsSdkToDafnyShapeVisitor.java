@@ -1,5 +1,7 @@
 package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -571,6 +573,12 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         targetShape,
         context.symbolProvider().toSymbol(targetShape)
       );
+      String dataSourceInput = dataSource
+                        .concat(".(*")
+                        .concat(SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true))
+                        .concat(DOT)
+                        .concat(context.symbolProvider().toMemberName(member))
+                        .concat(").Value");
       eachMemberInUnion.append(
         """
         case *%s.%s:
@@ -587,12 +595,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             ShapeVisitorHelper.toDafnyShapeVisitorWriter(
               member,
               context,
-              dataSource +
-              ".(*" +
-              SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true) +
-              "." +
-              context.symbolProvider().toMemberName(member) +
-              ").Value",
+              dataSourceInput,
               writer,
               isConfigShape,
               true,
