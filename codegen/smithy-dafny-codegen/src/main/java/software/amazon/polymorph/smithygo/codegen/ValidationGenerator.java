@@ -212,7 +212,17 @@ public class ValidationGenerator {
         );
         validationFuncMap.put(memberShape, null);
         StringBuilder listValidation = new StringBuilder();
+        listValidation.append(
+          """
+          for _, %s := range %s {
+          """.formatted(LIST_ITEM, dataSource)
+        );
         renderValidatorHelper(currentShape, false, LIST_ITEM, listValidation);
+        listValidation.append(
+          """
+          }
+          """
+        );
         validationFuncMap.put(memberShape, listValidation.toString());
       }
     } else if (currentShape.isMapShape()) {
