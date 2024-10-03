@@ -13,6 +13,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameRes
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -1280,6 +1281,9 @@ public class DafnyLocalServiceTypeConversionProtocol
               if (dependencies == null) {
                 return;
               }
+              var sdkId = serviceShape.hasTrait(LocalServiceTrait.class)
+                ? serviceShape.expectTrait(LocalServiceTrait.class).getSdkId()
+                : serviceShape.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
               for (var dep : dependencies) {
                 var depService = context
                   .model()
