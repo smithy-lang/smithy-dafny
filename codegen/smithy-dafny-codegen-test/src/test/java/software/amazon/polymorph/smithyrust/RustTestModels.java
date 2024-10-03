@@ -21,28 +21,23 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("Constraints");
     DISABLED_TESTS.add("Dependencies");
     DISABLED_TESTS.add("Documentation");
-    DISABLED_TESTS.add("Errors");
     DISABLED_TESTS.add("Extendable");
     DISABLED_TESTS.add("Extern");
-    DISABLED_TESTS.add("LocalService");
     DISABLED_TESTS.add("MultipleModels");
-    DISABLED_TESTS.add("Positional");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
     DISABLED_TESTS.add("SimpleTypes/SimpleShort");
-    DISABLED_TESTS.add("aws-sdks/ddb");
     DISABLED_TESTS.add("aws-sdks/glue");
     DISABLED_TESTS.add("aws-sdks/lakeformation");
-    DISABLED_TESTS.add("aws-sdks/kms");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
   }
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForDotnet(String relativeTestModelPath) {
+  void testModelsForRust(String relativeTestModelPath) {
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

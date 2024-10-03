@@ -3,7 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: &aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretInput
+    value: &aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretInput,
 ) -> ::std::rc::Rc<
     crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DeriveSharedSecretRequest,
 >{

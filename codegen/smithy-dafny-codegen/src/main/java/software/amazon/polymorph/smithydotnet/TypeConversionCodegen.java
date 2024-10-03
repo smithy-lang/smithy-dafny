@@ -114,12 +114,23 @@ public class TypeConversionCodegen {
           Stream.of(typeConverter.fromDafny, typeConverter.toDafny)
         )
       )
+      .prepend(conversionConstants())
       .lineSeparated()
       .braced();
     final TokenTree conversionClass = conversionClassBody
       .prepend(TokenTree.of("public static class", TYPE_CONVERSION_CLASS_NAME))
       .namespaced(Token.of(getTypeConversionNamespace()));
     return Map.of(TYPE_CONVERSION_CLASS_PATH, conversionClass.prepend(prelude));
+  }
+
+  private static TokenTree conversionConstants() {
+    return TokenTree.of(
+      """
+      private const string ISO8601DateFormat = "yyyy-MM-dd\\\\THH:mm:ss.fff\\\\Z";
+
+      private const string ISO8601DateFormatNoMS = "yyyy-MM-dd\\\\THH:mm:ss\\\\Z";
+      """
+    );
   }
 
   /**
@@ -383,15 +394,13 @@ public class TypeConversionCodegen {
   ) {
     final TokenTree fromDafnyBody = Token.of(
       """
-      System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("");
       string timestampString = new string(value.Elements);
-      return System.DateTime.ParseExact(timestampString, "s", culture);
+      return System.DateTime.ParseExact(timestampString, new[] {ISO8601DateFormat, ISO8601DateFormatNoMS}, System.Globalization.CultureInfo.InvariantCulture);
       """
     );
     final TokenTree toDafnyBody = Token.of(
       """
-      System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("");
-      string timestampString = value.ToString("s", culture);
+      string timestampString = value.ToString(ISO8601DateFormat, System.Globalization.CultureInfo.InvariantCulture);
       return Dafny.Sequence<char>.FromString(timestampString);
       """
     );

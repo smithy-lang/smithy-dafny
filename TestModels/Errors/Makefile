@@ -5,6 +5,8 @@ CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
 
+TRANSPILE_TESTS_IN_RUST=1
+
 include ../SharedMakefile.mk
 
 PROJECT_SERVICES := \
@@ -23,6 +25,13 @@ clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+
+# Python
+
+PYTHON_MODULE_NAME=simple_errors
+
+TRANSLATION_RECORD_PYTHON := \
+	--translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

@@ -3,6 +3,7 @@
 
 CORES=2
 
+TRANSPILE_TESTS_IN_RUST=1
 ENABLE_EXTERN_PROCESSING=1
 
 include ../SharedMakefile.mk
@@ -47,3 +48,10 @@ clean:
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+
+# Python
+
+PYTHON_MODULE_NAME=simple_localservice
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr

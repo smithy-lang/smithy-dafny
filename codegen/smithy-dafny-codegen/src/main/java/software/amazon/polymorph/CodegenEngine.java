@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,14 +48,21 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
+import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
+import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
+import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
+import software.amazon.polymorph.smithyrust.generator.RustLibraryShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.aws.traits.ServiceTrait;
+import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.Pair;
@@ -89,6 +95,8 @@ public class CodegenEngine {
   // To be initialized in constructor
   private final Model model;
   private final ServiceShape serviceShape;
+  private final Map<String, String> dependencyLibraryNames;
+  private final Optional<String> libraryName;
 
   /**
    * This should only be called by {@link Builder#build()},
@@ -111,7 +119,9 @@ public class CodegenEngine {
     final Set<GenerationAspect> generationAspects,
     final Path libraryRoot,
     final Optional<Path> patchFilesDir,
-    final boolean updatePatchFiles
+    final boolean updatePatchFiles,
+    final Map<String, String> dependencyLibraryNames,
+    final Optional<String> libraryName
   ) {
     // To be provided to constructor
     this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
@@ -129,6 +139,8 @@ public class CodegenEngine {
     this.libraryRoot = libraryRoot;
     this.patchFilesDir = patchFilesDir;
     this.updatePatchFiles = updatePatchFiles;
+    this.dependencyLibraryNames = dependencyLibraryNames;
+    this.libraryName = libraryName;
 
     this.model =
       this.awsSdkStyle
@@ -175,6 +187,7 @@ public class CodegenEngine {
         case JAVA -> generateJava(outputDir, testOutputDir);
         case DOTNET -> generateDotnet(outputDir);
         case RUST -> generateRust(outputDir);
+        case PYTHON -> generatePython();
         default -> throw new UnsupportedOperationException(
           "Cannot generate code for target language %s".formatted(lang.name())
         );
@@ -230,15 +243,7 @@ public class CodegenEngine {
 
     dafnyOtherGeneratedAspects(outputDir);
 
-    LOGGER.info("Formatting Dafny code in {}", outputDir);
-    runCommand(
-      outputDir,
-      "dafny",
-      "format",
-      "--function-syntax:3",
-      "--unicode-char:false",
-      "."
-    );
+    formatDafnyCode(outputDir);
 
     handlePatching(TargetLanguage.DAFNY, outputDir);
   }
@@ -299,16 +304,29 @@ public class CodegenEngine {
     // Perhaps we can make a `smithy init` template for that instead?
 
     if (!generationAspects.isEmpty()) {
-      Path srcDir = outputDir.resolve("../src");
-      LOGGER.info("Formatting Dafny code in {}", srcDir);
-      runCommand(
-        srcDir,
-        "dafny",
-        "format",
-        "--function-syntax:3",
-        "--unicode-char:false",
-        "."
-      );
+      formatDafnyCode(outputDir.resolve("../src"));
+    }
+  }
+
+  /**
+   * Formats the Dafny code in the given path using {@code dafny format},
+   * but does not throw an exception if the command fails.
+   * <p>
+   * This enables generating interdependent Dafny files
+   * across multiple smithy-dafny-codegen invocations.
+   */
+  private void formatDafnyCode(final Path path) {
+    LOGGER.info("Formatting Dafny code in {}", path);
+    final CommandResult formatResult = runCommand(
+      path,
+      "dafny",
+      "format",
+      "--function-syntax:3",
+      "--unicode-char:false",
+      "."
+    );
+    if (formatResult.exitCode != 0) {
+      LOGGER.warn("Formatting failed:\n{}", formatResult.output);
     }
   }
 
@@ -344,7 +362,7 @@ public class CodegenEngine {
     javaOtherGeneratedAspects();
 
     LOGGER.info("Formatting Java code in {}", outputDir);
-    runCommand(
+    runCommandOrThrow(
       outputDir,
       "npm",
       "i",
@@ -352,7 +370,7 @@ public class CodegenEngine {
       "prettier@3",
       "prettier-plugin-java@2.5"
     );
-    runCommand(
+    runCommandOrThrow(
       outputDir,
       "npx",
       "prettier@3",
@@ -528,7 +546,7 @@ public class CodegenEngine {
           .filter(path -> path.toFile().getName().endsWith(".csproj"))
           .map(Path::toString)
       );
-      runCommand(dotnetRoot, args.toArray(String[]::new));
+      runCommandOrThrow(dotnetRoot, args.toArray(String[]::new));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -660,52 +678,32 @@ public class CodegenEngine {
       "Rust code generation is incomplete and may not function correctly!"
     );
 
-    // Clear out all contents of src first to make sure if we didn't intend to generate it,
-    // it doesn't show up as generated code. This ensures patching has the right baseline.
-    // It would be great to do this for all languages,
-    // but we're not currently precise enough and do multiple passes
-    // to generate code for things like wrapped services.
-    //
-    // Be sure to NOT delete src/implementation_from_dafny.rs though,
-    // by temporarily moving it out of src/
-    //
-    // Note this has no effect if we're being run from the Smithy build plugin,
-    // since outputDir will be something like `build/smithyprojections/...`
-    // and therefore not have any existing content.
-    Path outputSrcDir = outputDir.resolve("src");
-    Path implementationFromDafnyPath = outputSrcDir.resolve(
-      "implementation_from_dafny.rs"
-    );
-    Path tmpPath = null;
-    try {
-      if (Files.exists(implementationFromDafnyPath)) {
-        tmpPath = outputDir.resolve("implementation_from_dafny.rs");
-        Files.move(implementationFromDafnyPath, tmpPath);
-      }
-      software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
-      outputSrcDir.toFile().mkdirs();
-      if (tmpPath != null) {
-        Files.move(tmpPath, implementationFromDafnyPath);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
     if (awsSdkStyle) {
       RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(
+        model,
+        serviceShape,
+        generationAspects
+      );
+      generator.generate(outputDir);
+    } else {
+      RustLibraryShimGenerator generator = new RustLibraryShimGenerator(
         model,
         serviceShape
       );
       generator.generate(outputDir);
-
-      // TODO: This should be part of the StandardLibrary instead,
-      // but since the Dafny Rust code generator doesn't yet support multiple crates,
-      // we have to inline it instead.
-      writeTemplatedFile(
-        "runtimes/rust/src/standard_library_conversions.rs",
-        Map.of()
-      );
     }
+
+    // TODO: These should be part of the StandardLibrary instead,
+    // but since the Dafny Rust code generator doesn't yet support multiple crates,
+    // we have to inline it instead.
+    writeTemplatedFile(
+      "runtimes/rust/src/standard_library_conversions.rs",
+      Map.of()
+    );
+    writeTemplatedFile(
+      "runtimes/rust/src/standard_library_externs.rs",
+      Map.of()
+    );
 
     handlePatching(TargetLanguage.RUST, outputDir);
   }
@@ -743,13 +741,14 @@ public class CodegenEngine {
         );
         Path outputDirRelative = libraryRoot.relativize(outputDir);
         // Need to ignore the exit code because diff will return 1 if there is a diff
-        String patchContent = runCommandIgnoringExitCode(
+        String patchContent = runCommand(
           libraryRoot,
           "git",
           "diff",
           "-R",
           outputDirRelative.toString()
-        );
+        )
+          .output;
         if (!patchContent.isBlank()) {
           IOUtils.writeToFile(patchContent, patchFile.toFile());
         }
@@ -765,13 +764,72 @@ public class CodegenEngine {
           if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
             Path patchFile = patchFilePair.getValue();
             LOGGER.info("Applying patch file {}", patchFile);
-            runCommand(libraryRoot, "git", "apply", "-v", patchFile.toString());
+            runCommandOrThrow(
+              libraryRoot,
+              "git",
+              "apply",
+              "-v",
+              patchFile.toString()
+            );
             return;
           }
         }
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  private void generatePython() {
+    if (libraryName.isEmpty()) {
+      throw new IllegalArgumentException(
+        "Python codegen requires a module name"
+      );
+    }
+
+    ObjectNode.Builder pythonSettingsBuilder = ObjectNode
+      .builder()
+      .withMember("service", serviceShape.getId().toString())
+      .withMember("module", libraryName.get())
+      // Smithy-Python requires some string to be present here, but this is unused.
+      // Any references to this version are deleted as part of code generation.
+      .withMember("moduleVersion", "0.0.1");
+
+    final PluginContext pluginContext = PluginContext
+      .builder()
+      .model(model)
+      .fileManifest(
+        FileManifest.create(targetLangOutputDirs.get(TargetLanguage.PYTHON))
+      )
+      .settings(pythonSettingsBuilder.build())
+      .build();
+
+    final Map<String, String> smithyNamespaceToPythonModuleNameMap =
+      new HashMap<>();
+    smithyNamespaceToPythonModuleNameMap.put(
+      serviceShape.getId().getNamespace(),
+      libraryName.get()
+    );
+    smithyNamespaceToPythonModuleNameMap.putAll(dependencyLibraryNames);
+
+    if (this.awsSdkStyle) {
+      DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin =
+        new DafnyPythonAwsSdkClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
+      dafnyPythonAwsSdkClientCodegenPlugin.execute(pluginContext);
+    } else if (this.localServiceTest) {
+      DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin =
+        new DafnyPythonWrappedLocalServiceClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
+      pythonClientCodegenPlugin.execute(pluginContext);
+    } else {
+      DafnyPythonLocalServiceClientCodegenPlugin pythonClientCodegenPlugin =
+        new DafnyPythonLocalServiceClientCodegenPlugin(
+          smithyNamespaceToPythonModuleNameMap
+        );
+      pythonClientCodegenPlugin.execute(pluginContext);
     }
   }
 
@@ -826,6 +884,8 @@ public class CodegenEngine {
 
     return IOUtils.evalTemplate(
       """
+      // (extra-declarations)
+
       pub mod client;
       pub mod types;
 
@@ -836,7 +896,10 @@ public class CodegenEngine {
       pub mod operation;
 
       mod conversions;
+
+      /// Copied from StandardLibrary
       mod standard_library_conversions;
+      mod standard_library_externs;
 
       #[cfg(feature = "wrapped-client")]
       pub mod wrapped;
@@ -854,26 +917,34 @@ public class CodegenEngine {
     );
   }
 
-  private String runCommand(Path workingDir, String... args) {
-    List<String> argsList = List.of(args);
-    StringBuilder output = new StringBuilder();
-    int exitCode = IoUtils.runCommand(
+  private record CommandResult(int exitCode, String output) {}
+
+  /**
+   * Runs the given command and throws an exception if the exit code is nonzero.
+   */
+  private String runCommandOrThrow(Path workingDir, String... args) {
+    final CommandResult result = runCommand(workingDir, args);
+    if (result.exitCode != 0) {
+      throw new RuntimeException(
+        "Command failed: " + List.of(args) + "\n" + result.output
+      );
+    }
+    return result.output;
+  }
+
+  /**
+   * Runs the given command.
+   */
+  private CommandResult runCommand(Path workingDir, String... args) {
+    final List<String> argsList = List.of(args);
+    final StringBuilder output = new StringBuilder();
+    final int exitCode = IoUtils.runCommand(
       argsList,
       workingDir,
       output,
       Collections.emptyMap()
     );
-    if (exitCode != 0) {
-      throw new RuntimeException("Command failed: " + argsList + "\n" + output);
-    }
-    return output.toString();
-  }
-
-  private String runCommandIgnoringExitCode(Path workingDir, String... args) {
-    List<String> argsList = List.of(args);
-    StringBuilder output = new StringBuilder();
-    IoUtils.runCommand(argsList, workingDir, output, Collections.emptyMap());
-    return output.toString();
+    return new CommandResult(exitCode, output.toString());
   }
 
   private Path standardLibraryPath() {
@@ -932,6 +1003,8 @@ public class CodegenEngine {
     private Path libraryRoot;
     private Path patchFilesDir;
     private boolean updatePatchFiles = false;
+    private Map<String, String> dependencyLibraryNames;
+    private String libraryName;
 
     public Builder() {}
 
@@ -956,6 +1029,24 @@ public class CodegenEngine {
      */
     public Builder withNamespace(final String namespace) {
       this.namespace = namespace;
+      return this;
+    }
+
+    /**
+     * Sets the directories in which to search for dependent model file(s).
+     */
+    public Builder withDependencyLibraryNames(
+      final Map<String, String> dependencyLibraryNames
+    ) {
+      this.dependencyLibraryNames = dependencyLibraryNames;
+      return this;
+    }
+
+    /**
+     * Sets the Python module name for any generated Python code.
+     */
+    public Builder withLibraryName(final String libraryName) {
+      this.libraryName = libraryName;
       return this;
     }
 
@@ -1098,6 +1189,11 @@ public class CodegenEngine {
         throw new IllegalStateException("No namespace provided");
       }
 
+      final Map<String, String> dependencyLibraryNames =
+        this.dependencyLibraryNames == null
+          ? new HashMap<>()
+          : this.dependencyLibraryNames;
+
       final Map<TargetLanguage, Path> targetLangOutputDirsRaw =
         Objects.requireNonNull(this.targetLangOutputDirs);
       targetLangOutputDirsRaw.replaceAll((_lang, path) ->
@@ -1142,6 +1238,10 @@ public class CodegenEngine {
         );
       }
 
+      final Optional<String> libraryName = Optional.ofNullable(
+        this.libraryName
+      );
+
       final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
 
       final Optional<Path> patchFilesDir = Optional
@@ -1169,7 +1269,9 @@ public class CodegenEngine {
         this.generationAspects,
         libraryRoot,
         patchFilesDir,
-        updatePatchFiles
+        updatePatchFiles,
+        dependencyLibraryNames,
+        libraryName
       );
     }
   }
@@ -1179,6 +1281,7 @@ public class CodegenEngine {
     JAVA,
     DOTNET,
     RUST,
+    PYTHON,
   }
 
   public enum GenerationAspect {

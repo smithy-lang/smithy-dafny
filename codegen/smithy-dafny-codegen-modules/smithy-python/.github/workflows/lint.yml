@@ -1,0 +1,24 @@
+name: Lint code
+
+on:
+    push:
+        branches: develop
+    pull_request:
+        branches: develop
+
+jobs:
+  lint:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python for Pants - 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+    - name: Set up Python for linting - 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - name: Run pre-commit
+      uses: pre-commit/action@v3.0.0

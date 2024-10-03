@@ -3660,23 +3660,6 @@
         }
       }
     },
-    "com.amazonaws.kms#ListKeysRequest": {
-      "type": "structure",
-      "members": {
-        "Limit": {
-          "target": "com.amazonaws.kms#LimitType",
-          "traits": {
-            "smithy.api#documentation": "<p>Use this parameter to specify the maximum number of items to return. When this\n    value is present, KMS does not return more than the specified number of items, but it might\n    return fewer.</p>\n         <p>This value is optional. If you include a value, it must be between\n    1 and 1000, inclusive. If you do not include a value, it defaults to 100.</p>"
-          }
-        },
-        "Marker": {
-          "target": "com.amazonaws.kms#MarkerType",
-          "traits": {
-            "smithy.api#documentation": "<p>Use this parameter in a subsequent request after you receive a response with\n    truncated results. Set it to the value of <code>NextMarker</code> from the truncated response\n    you just received.</p>"
-          }
-        }
-      }
-    },
     "com.amazonaws.kms#ListResourceTags": {
       "type": "operation",
       "input": {
@@ -3746,30 +3729,6 @@
           "target": "com.amazonaws.kms#BooleanType",
           "traits": {
             "smithy.api#documentation": "<p>A flag that indicates whether there are more items in the list. When this\n    value is true, the list in this response is truncated. To get more items, pass the value of\n    the <code>NextMarker</code> element in thisresponse to the <code>Marker</code> parameter in a\n    subsequent request.</p>"
-          }
-        }
-      }
-    },
-    "com.amazonaws.kms#ListRetirableGrantsRequest": {
-      "type": "structure",
-      "members": {
-        "Limit": {
-          "target": "com.amazonaws.kms#LimitType",
-          "traits": {
-            "smithy.api#documentation": "<p>Use this parameter to specify the maximum number of items to return. When this\n    value is present, KMS does not return more than the specified number of items, but it might\n    return fewer.</p>\n         <p>This value is optional. If you include a value, it must be between 1\n    and 100, inclusive. If you do not include a value, it defaults to 50.</p>"
-          }
-        },
-        "Marker": {
-          "target": "com.amazonaws.kms#MarkerType",
-          "traits": {
-            "smithy.api#documentation": "<p>Use this parameter in a subsequent request after you receive a response with\n    truncated results. Set it to the value of <code>NextMarker</code> from the truncated response\n    you just received.</p>"
-          }
-        },
-        "RetiringPrincipal": {
-          "target": "com.amazonaws.kms#PrincipalIdType",
-          "traits": {
-            "smithy.api#documentation": "<p>The retiring principal for which to list grants. Enter a principal in your\n      Amazon Web Services account.</p>\n         <p>To specify the retiring principal, use the <a href=\"https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html\">Amazon Resource Name (ARN)</a> of an\n      Amazon Web Services principal. Valid Amazon Web Services principals include Amazon Web Services accounts (root), IAM users, federated\n      users, and assumed role users. For examples of the ARN syntax for specifying a principal, see\n        <a href=\"https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#arn-syntax-iam\">Amazon Web Services Identity and Access Management (IAM)</a> in the Example ARNs section of the\n        <i>Amazon Web Services General Reference</i>.</p>",
-            "smithy.api#required": {}
           }
         }
       }

@@ -3,10 +3,17 @@
 package software.amazon.polymorph.utils;
 
 import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.stream.Stream;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.model.traits.Trait;
+import software.amazon.smithy.utils.Pair;
 
 // TODO: Support idRef, pattern, uniqueItems
 public class ConstrainTraitUtils {
@@ -27,6 +34,72 @@ public class ConstrainTraitUtils {
     return (
       hasRequiredTrait(shape) || hasRangeTrait(shape) || hasLengthTrait(shape)
     );
+  }
+
+  /**
+   * Utility class to generate validation expressions for all members of a structure.
+   *
+   * @param <V> type of validation expressions, typically {@link String} or {@link TokenTree}
+   */
+  public abstract static class ValidationGenerator<V> {
+
+    protected abstract V validateRequired(MemberShape memberShape);
+
+    protected abstract V validateRange(
+      MemberShape memberShape,
+      RangeTrait rangeTrait
+    );
+
+    protected abstract V validateLength(
+      MemberShape memberShape,
+      LengthTrait lengthTrait
+    );
+
+    /**
+     * Returns a stream of constraint traits that Polymorph-generated code should enforce
+     * on any code path that invokes a service or resource operation,
+     * from either the given shape or the targeted shape (if the given shape is a member shape).
+     */
+    private Stream<? extends Trait> enforcedConstraints(
+      final Model model,
+      final Shape shape
+    ) {
+      return Stream
+        .of(
+          shape.getMemberTrait(model, RequiredTrait.class),
+          shape.getMemberTrait(model, RangeTrait.class),
+          shape.getMemberTrait(model, LengthTrait.class)
+        )
+        .flatMap(Optional::stream);
+    }
+
+    public Stream<V> generateValidations(
+      final Model model,
+      final StructureShape structureShape
+    ) {
+      return structureShape
+        .getAllMembers()
+        .values()
+        .stream()
+        .flatMap(memberShape ->
+          enforcedConstraints(model, memberShape)
+            .map(trait -> Pair.of(memberShape, trait))
+        )
+        .map(memberTrait -> {
+          final MemberShape memberShape = memberTrait.left;
+          final Trait trait = memberTrait.right;
+          if (trait instanceof RequiredTrait) {
+            return validateRequired(memberShape);
+          } else if (trait instanceof RangeTrait rangeTrait) {
+            return validateRange(memberShape, rangeTrait);
+          } else if (trait instanceof LengthTrait lengthTrait) {
+            return validateLength(memberShape, lengthTrait);
+          }
+          throw new UnsupportedOperationException(
+            "Unsupported constraint trait %s on shape %s".formatted(trait)
+          );
+        });
+    }
   }
 
   public static class RangeTraitUtils {
@@ -50,7 +123,7 @@ public class ConstrainTraitUtils {
     }
 
     // TODO: Only INTEGER has been tested
-    private static String asShapeType(Shape shape, BigDecimal value) {
+    public static String asShapeType(Shape shape, BigDecimal value) {
       return switch (shape.getType()) {
         case BYTE -> "%d".formatted(value.byteValue());
         case SHORT -> "%d".formatted(value.shortValue());

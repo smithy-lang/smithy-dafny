@@ -1,0 +1,71 @@
+[GLOBAL]
+pants_version = "2.14.0"
+
+backend_packages = [
+    "pants.backend.python",
+    "pants.backend.python.lint.black",
+    "pants.backend.python.lint.isort",
+    "pants.backend.python.lint.flake8",
+    "pants.backend.python.typecheck.mypy",
+    "pants.backend.experimental.python.lint.pyupgrade",
+    "pants.backend.python.lint.docformatter",
+]
+
+[source]
+root_patterns = [
+    "python-packages/*"
+]
+
+[python]
+interpreter_constraints = [">=3.11"]
+
+[black]
+version = "black==22.10.0"
+args = ["-t py311"]
+lockfile = "lockfiles/black"
+interpreter_constraints = [">=3.11"]
+
+[pytest]
+version = "pytest<7.3"
+extra_requirements = [
+    "pytest-asyncio<0.21.0",
+    "pytest-cov<3.1",
+    "freezegun<1.3.0"
+]
+lockfile = "lockfiles/pytest"
+
+[coverage-py]
+interpreter_constraints = [">=3.11"]
+report = [
+    "xml",
+    "html"
+]
+
+[mypy]
+version = "mypy==1.0.0"
+lockfile = "lockfiles/mypy"
+interpreter_constraints = [">=3.11"]
+extra_type_stubs = [
+    "types-freezegun<1.2.0",
+]
+
+[flake8]
+version = "flake8<6.1"
+lockfile = "lockfiles/flake8"
+args = "--extend-ignore=W503"
+
+[pyupgrade]
+args = ["--py311-plus"]
+interpreter_constraints = [">=3.11"]
+
+[docformatter]
+version = "docformatter==1.5.1"
+args = ["--wrap-summaries 88", "--wrap-descriptions 88"]
+lockfile = "lockfiles/docformatter"
+interpreter_constraints = [">=3.11"]
+
+[poetry]
+interpreter_constraints = [">=3.11"]
+
+[anonymous-telemetry]
+enabled = false

@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "simple-types-smithystring"
+version = "0.1.0"
+description = ""
+authors = ["AWS <aws-arg-dafny@amazon.com>"]
+packages = [
+    { include = "simple_types_smithystring", from = "src" }
+]
+# Include all of the following .gitignored files in package distributions,
+# even though it is not included in version control
+include = ["**/smithygenerated/**/*.py", "**/internaldafny/generated/*.py"]
+
+[tool.poetry.dependencies]
+python = "^3.11.0"
+# TODO: Depend on PyPi once Smithy-Python publishes their Python package there
+smithy-python = { path = "../../../../../codegen/smithy-dafny-codegen-modules/smithy-python/python-packages/smithy-python", develop = false}
+smithy-dafny-standard-library = {path = "../../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
+DafnyRuntimePython = "^4.7.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

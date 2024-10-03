@@ -7,7 +7,7 @@ pub fn to_dafny(
     value: aws_sdk_kms::types::KeyAgreementAlgorithmSpec,
 ) -> ::std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec>{
     ::std::rc::Rc::new(match value {
- aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec::ECDH {},
+        aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh => crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec::ECDH {},
         _ => panic!("Unknown enum variant: {}", value),
     })
 }
@@ -16,6 +16,6 @@ pub fn from_dafny(
     dafny_value: &crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec,
 ) -> aws_sdk_kms::types::KeyAgreementAlgorithmSpec {
     match dafny_value {
- crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec::ECDH {} => aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh,
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec::ECDH {} => aws_sdk_kms::types::KeyAgreementAlgorithmSpec::Ecdh,
     }
 }

@@ -5,6 +5,11 @@ CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
 
+TRANSPILE_TESTS_IN_RUST=1
+
+RUST_OTHER_FILES := \
+	runtimes/rust/src/ddb.rs
+
 include ../../SharedMakefile.mk
 
 PROJECT_SERVICES := \
@@ -27,6 +32,7 @@ _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
 _polymorph_wrapped_java: ;
+_polymorph_wrapped_python: ;
 
 format_net:
 	pushd runtimes/net && dotnet format && popd
@@ -35,6 +41,13 @@ clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
+
+# Python
+
+PYTHON_MODULE_NAME=com_amazonaws_dynamodb
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

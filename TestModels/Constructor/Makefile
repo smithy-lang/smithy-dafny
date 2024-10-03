@@ -4,7 +4,8 @@
 CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
-RUST_BENERATED=1
+
+TRANSPILE_TESTS_IN_RUST=1
 
 include ../SharedMakefile.mk
 
@@ -19,8 +20,15 @@ SERVICE_DEPS_SimpleConstructor :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-# This project has no dependencies 
-# DEPENDENT-MODELS:= 
+# This project has no dependencies
+# DEPENDENT-MODELS:=
+
+# Python
+
+PYTHON_MODULE_NAME=simple_constructor
+
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

@@ -1,0 +1,41 @@
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
+
+# Maven
+target/
+**/dependency-reduced-pom.xml
+
+# Gradle
+/.gradle
+build/
+*/out/
+*/*/out/
+
+# Python
+__pycache__
+*.swp
+.mypy_cache
+.coverage
+coverage.xml
+htmlcov
+*.egg-info
+dist
+
+# Pants workspace files
+/.pants.d/
+/dist/
+/.pids
+/.pants.workdir.file_lock*
