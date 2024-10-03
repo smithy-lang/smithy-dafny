@@ -683,46 +683,12 @@ public class CodegenEngine {
       "Rust code generation is incomplete and may not function correctly!"
     );
 
-    // Clear out all contents of src first to make sure if we didn't intend to generate it,
-    // it doesn't show up as generated code. This ensures patching has the right baseline.
-    // It would be great to do this for all languages,
-    // but we're not currently precise enough and do multiple passes
-    // to generate code for things like wrapped services.
-    //
-    // Be sure to NOT delete src/implementation_from_dafny.rs though,
-    // by temporarily moving it out of src/
-    //
-    // Note this has no effect if we're being run from the Smithy build plugin,
-    // since outputDir will be something like `build/smithyprojections/...`
-    // and therefore not have any existing content.
-    //
-    // TODO: Not doing this for now since our current approach to externs
-    // requires putting them directly under src.
-//    Path outputSrcDir = outputDir.resolve("src");
-//    Path implementationFromDafnyPath = outputSrcDir.resolve(
-//      "implementation_from_dafny.rs"
-//    );
-//    Path tmpPath = null;
-//    try {
-//      if (Files.exists(implementationFromDafnyPath)) {
-//        tmpPath = outputDir.resolve("implementation_from_dafny.rs");
-//        Files.move(implementationFromDafnyPath, tmpPath);
-//      }
-//      software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
-//      outputSrcDir.toFile().mkdirs();
-//      if (tmpPath != null) {
-//        Files.move(tmpPath, implementationFromDafnyPath);
-//      }
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    }
-
     // TODO: Can't get makefile working yet
     final var namespacesToGenerate = model.getServiceShapes().stream()
       .map(s -> s.getId().getNamespace())
       .collect(Collectors.toSet());
 
-    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespacesToGenerate, localServiceTest);
+    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespacesToGenerate, localServiceTest, generationAspects);
     generator.generateAllNamespaces(outputDir);
 
     // TODO: These should be part of the StandardLibrary instead,
@@ -882,7 +848,7 @@ public class CodegenEngine {
   );
 
   private void patchRustAfterTranspiling() {
-    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespaces, localServiceTest);
+    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespaces, localServiceTest, generationAspects);
 
     final TokenTree extraRootServiceDeclarations = generator.generatorForShape(serviceShape).topLevelModuleDeclarations();
     String extraDeclarations = TokenTree.of(extraRootServiceDeclarations, EXTRA_SINGLE_CRATE_DECLARATIONS).lineSeparated().toString();

@@ -1,32 +1,14 @@
 package software.amazon.polymorph.smithyrust.generator;
 
-import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
-import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
-import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
-
-import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.BoundOperationShape;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.utils.OperationBindingIndex;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
@@ -42,10 +24,25 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.ReadonlyTrait;
-import software.amazon.smithy.model.traits.UnitTypeTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
+import software.amazon.smithy.model.traits.ReadonlyTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
+
+import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
+import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
 /**
  * Generates all Rust modules needed to wrap a Dafny library as a Rust library.

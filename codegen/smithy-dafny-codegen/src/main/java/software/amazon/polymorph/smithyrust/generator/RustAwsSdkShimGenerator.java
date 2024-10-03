@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyrust.generator;
 
 import com.google.common.collect.MoreCollectors;
+import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.BoundOperationShape;
 import software.amazon.polymorph.utils.IOUtils;
@@ -20,7 +21,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 import java.nio.file.Path;
@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
@@ -42,8 +41,16 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
  */
 public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
-  public RustAwsSdkShimGenerator(MergedServicesGenerator mergedGenerator, Model model, ServiceShape service) {
+  private final Set<CodegenEngine.GenerationAspect> generationAspects;
+
+  public RustAwsSdkShimGenerator(
+    MergedServicesGenerator mergedGenerator,
+    Model model,
+    ServiceShape service,
+    Set<CodegenEngine.GenerationAspect> generationAspects
+  ) {
     super(mergedGenerator, model, service);
+    this.generationAspects = generationAspects;
   }
 
   @Override
@@ -72,6 +79,24 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   private RustFile clientModule() {
     final Map<String, String> variables = serviceVariables();
+    variables.put(
+      "operations",
+      TokenTree
+        .of(
+          service
+            .getOperations()
+            .stream()
+            .map(id ->
+              operationClientFunction(
+                service,
+                model.expectShape(id, OperationShape.class)
+              )
+            )
+        )
+        .lineSeparated()
+        .toString()
+    );
+
     var preamble = TokenTree.of(
       evalTemplate(
         """
@@ -114,68 +139,50 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
         impl crate::r#$dafnyTypesModuleName:L::I$clientName:L
           for Client {
-
+          $operations:L
+        }
         """,
         variables
       )
     );
 
-    var operations = TokenTree
-      .of(
-        service
-          .getOperations()
-          .stream()
-          .map(id ->
-            operationClientFunction(
-              service,
-              model.expectShape(id, OperationShape.class)
-            )
-          )
+    final TokenTree postamble;
+    if (
+      generationAspects.contains(
+        CodegenEngine.GenerationAspect.CLIENT_CONSTRUCTORS
       )
-      .lineSeparated();
-
-    var postamble = TokenTree.of(
-      """
-      }
-      """
-    );
+    ) {
+      postamble =
+        TokenTree.of(
+          evalTemplate(
+            """
+            #[allow(non_snake_case)]
+            impl crate::r#$dafnyInternalModuleName:L::_default {
+              pub fn $clientName:L() -> ::std::rc::Rc<
+                crate::r#_Wrappers_Compile::Result<
+                  ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
+                  ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
+                  >
+                > {
+                let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+                let inner = $sdkCrate:L::Client::new(&shared_config);
+                let client = Client { inner };
+                let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
+                std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+              }
+            }
+            """,
+            variables
+          )
+        );
+    } else {
+      postamble = TokenTree.empty();
+    }
 
     return new RustFile(
-      rootPathForShape(service).resolve("client.rs"),
-      TokenTree.of(preamble, operations, postamble)
+      Path.of("src", "client.rs"),
+      TokenTree.of(preamble, postamble)
     );
-  }
-
-  // TODO: Should only be emitted with --generate client-constructors
-  private TokenTree clientConstructor() {
-    final Map<String, String> variables = serviceVariables();
-    return TokenTree.of(
-      evalTemplate(
-        """
-        }
-
-        #[allow(non_snake_case)]
-        impl crate::r#$dafnyInternalModuleName:L::_default {
-          pub fn $clientName:L() -> ::std::rc::Rc<
-            crate::r#_Wrappers_Compile::Result<
-              ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
-              ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
-              >
-            > {
-            let shared_config = tokio::task::block_in_place(|| {
-              dafny_tokio_runtime.block_on(async {
-                aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()).await
-              })
-            });
-            let inner = $sdkCrate:L::Client::new(&shared_config);
-            let client = Client { inner };
-            let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
-            std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
-          }
-        }
-        """,
-        variables
-      ));
   }
 
   private TokenTree operationClientFunction(

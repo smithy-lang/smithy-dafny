@@ -4,8 +4,8 @@
 use std::sync::LazyLock;
 use crate::conversions;
 
-struct Client {
-    inner: aws_sdk_kms::Client
+pub struct Client {
+    pub inner: aws_sdk_kms::Client
 }
 
 /// A runtime for executing operations on the asynchronous client in a blocking manner.
@@ -27,7 +27,7 @@ impl dafny_runtime::UpcastObject<dyn crate::r#software::amazon::cryptography::se
 
 impl crate::r#software::amazon::cryptography::services::kms::internaldafny::types::IKMSClient
   for Client {
- fn Decrypt(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptRequest>)
+  fn Decrypt(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptResponse>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
@@ -122,9 +122,8 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::update_primary_region::_update_primary_region_response::to_dafny,
     conversions::update_primary_region::to_dafny_error)
-} }
-
-#[allow(non_snake_case)]
+}
+} #[allow(non_snake_case)]
 impl crate::r#software::amazon::cryptography::services::kms::internaldafny::_default {
   pub fn KMSClient() -> ::std::rc::Rc<
     crate::r#_Wrappers_Compile::Result<

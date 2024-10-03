@@ -7,6 +7,9 @@ ENABLE_EXTERN_PROCESSING=1
 
 TRANSPILE_TESTS_IN_RUST=1
 
+RUST_OTHER_FILES := \
+	runtimes/rust/src/ddb.rs
+
 include ../../SharedMakefile.mk
 
 PROJECT_SERVICES := \

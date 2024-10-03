@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithyrust.generator;
 
+import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -22,14 +23,16 @@ public class MergedServicesGenerator {
   private final ServiceShape mainService;
   private final Set<String> namespaces;
   private final boolean generateWrappedClient;
+  private final Set<CodegenEngine.GenerationAspect> generationAspects;
 
   protected final Map<String, AbstractRustShimGenerator> generatorsByNamespace = new HashMap<>();
 
-  public MergedServicesGenerator(Model model, ServiceShape mainService, Set<String> namespaces, boolean generateWrappedClient) {
+  public MergedServicesGenerator(Model model, ServiceShape mainService, Set<String> namespaces, boolean generateWrappedClient, Set<CodegenEngine.GenerationAspect> generationAspects) {
     this.model = model;
     this.namespaces = namespaces;
     this.mainService = mainService;
     this.generateWrappedClient = generateWrappedClient;
+    this.generationAspects = generationAspects;
 
     // Prepopulate generators
     for (String namespace : namespaces) {
@@ -84,7 +87,8 @@ public class MergedServicesGenerator {
       return new RustAwsSdkShimGenerator(
         this,
         model,
-        serviceShape
+        serviceShape,
+        generationAspects
       );
     } else {
       return new RustLibraryShimGenerator(

@@ -4,8 +4,8 @@
 use std::sync::LazyLock;
 use crate::conversions;
 
-struct Client {
-    inner: aws_sdk_dynamodb::Client
+pub struct Client {
+    pub inner: aws_sdk_dynamodb::Client
 }
 
 /// A runtime for executing operations on the asynchronous client in a blocking manner.
@@ -27,7 +27,7 @@ impl dafny_runtime::UpcastObject<dyn crate::r#software::amazon::cryptography::se
 
 impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient
   for Client {
- fn BatchExecuteStatement(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchExecuteStatementInput>)
+  fn BatchExecuteStatement(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchExecuteStatementInput>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchExecuteStatementOutput>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
@@ -206,9 +206,8 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
   crate::standard_library_conversions::result_to_dafny(&native_result,
     conversions::update_item::_update_item_response::to_dafny,
     conversions::update_item::to_dafny_error)
-} }
-
-#[allow(non_snake_case)]
+}
+} #[allow(non_snake_case)]
 impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::_default {
   pub fn DynamoDBClient() -> ::std::rc::Rc<
     crate::r#_Wrappers_Compile::Result<
