@@ -526,10 +526,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             match value {
               $sdkCrate:L::error::SdkError::ServiceError(service_error) => match service_error.err() {
                 $errorCases:L
-                e => crate::conversions::error::to_opaque_error(e.to_string()),
+                e => crate::conversions::error::to_opaque_error(format!("{:?}", e)),
               },
               _ => {
-                crate::conversions::error::to_opaque_error(value.to_string())
+                crate::conversions::error::to_opaque_error(format!("{:?}", value))
               }
            }
         }

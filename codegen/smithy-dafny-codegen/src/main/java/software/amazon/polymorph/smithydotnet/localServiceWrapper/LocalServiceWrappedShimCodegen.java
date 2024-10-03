@@ -325,7 +325,7 @@ public class LocalServiceWrappedShimCodegen {
     final TokenTree unknownErrorCase = Token.of(
       """
       default:
-          return new %s(error, Dafny.Sequence<char>.FromString(error.GetType().Name + \": \" + error.ToString()));
+          return new %s(error, Dafny.Sequence<char>.FromString(error.ToString()));
       """.formatted(dafnyUnknownErrorType)
     );
 
