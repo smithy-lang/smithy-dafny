@@ -15,13 +15,20 @@ import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.awssdk.shapevisitor.ShapeVisitorHelper;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 public class DafnyAwsSdkClientTypeConversionProtocol
   implements ProtocolGenerator {
@@ -198,6 +205,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
         }
       });
     generateErrorSerializer(context);
+    generateSerializerFunctions(context, alreadyVisited);
   }
 
   @Override
@@ -349,6 +357,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
       });
 
     generateErrorDeserializer(context);
+    generateDeserializerFunctions(context, alreadyVisited);
   }
 
   private void generateRequestSerializer(
@@ -759,5 +768,135 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           );
         }
       );
+  }
+
+  // Generates rest of the not visited shapes into a function
+  private void generateSerializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
+    var writerDelegator = context.writerDelegator();
+    final var model = context.model();
+    final var serviceShape = model.expectShape(
+      context.settings().getService(),
+      ServiceShape.class
+    );
+    writerDelegator.useFileWriter(
+      "%s/%s".formatted(
+          SmithyNameResolver.shapeNamespace(serviceShape),
+          TO_DAFNY
+        ),
+      SmithyNameResolver.shapeNamespace(serviceShape),
+      writer -> {
+        for (final MemberShape visitingMemberShape : AwsSdkToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+          final Shape visitingShape = context
+            .model()
+            .expectShape(visitingMemberShape.getTarget());
+          if (alreadyVisited.contains(visitingMemberShape.getId())) {
+            continue;
+          }
+          alreadyVisited.add(visitingMemberShape.toShapeId());
+          String inputType;
+          String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
+              visitingMemberShape
+            )
+            ? "Wrappers.Option"
+            : DafnyNameResolver.getDafnyType(
+              visitingShape,
+              context.symbolProvider().toSymbol(visitingShape)
+            );
+          inputType =
+          GoCodegenUtils.getType(
+            context.symbolProvider().toSymbol(visitingShape),
+            serviceShape.expectTrait(ServiceTrait.class)
+            );
+          if (
+            AwsSdkGoPointableIndex
+                .of(context.model())
+                .isPointable(visitingMemberShape)
+          ) {
+            inputType = "*".concat(inputType);
+          }
+          writer.write(
+            """
+            func $L(input $L)($L) {
+                return $L
+            }
+            """,
+            ShapeVisitorHelper.funcNameGenerator(
+              visitingMemberShape,
+              "ToDafny"
+            ),
+            inputType,
+            outputType,
+            AwsSdkToDafnyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+          );
+        }
+      }
+    );
+  }
+
+  // Generates rest of the not visited shapes into a function
+  private void generateDeserializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
+    var delegator = context.writerDelegator();
+    final var model = context.model();
+    final var serviceShape = model.expectShape(
+      context.settings().getService(),
+      ServiceShape.class
+    );
+    delegator.useFileWriter(
+      "%s/%s".formatted(
+          SmithyNameResolver.shapeNamespace(serviceShape),
+          TO_NATIVE
+        ),
+      SmithyNameResolver.shapeNamespace(serviceShape),
+      writer -> {
+        ServiceTrait serviceTrait = context
+            .model()
+            .expectShape(context.settings().getService(context.model()).toShapeId())
+            .getTrait(ServiceTrait.class)
+            .get();
+        for (MemberShape visitingMemberShape : DafnyToAwsSdkShapeVisitor.visitorFuncMap.keySet()) {
+          final Shape visitingShape = context
+            .model()
+            .expectShape(visitingMemberShape.getTarget());
+          if (alreadyVisited.contains(visitingMemberShape.getId())) {
+            continue;
+          }
+          alreadyVisited.add(visitingMemberShape.toShapeId());
+          String outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);;
+          switch (visitingShape.getType()) {
+            case STRUCTURE:
+            case UNION:
+              if (visitingShape.hasTrait(EnumTrait.class)) {
+                outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
+              }
+              break;
+            case LIST:
+            case MAP:
+              outputType = GoCodegenUtils.getType(
+                context.symbolProvider().toSymbol(visitingShape),
+                serviceTrait
+                );
+              break;
+          }
+          if (
+            ShapeVisitorHelper.toNativeOutputPointerMap.get(visitingMemberShape)
+          ) {
+            outputType = "*".concat(outputType);
+          }
+          writer.write(
+            """
+            func $L(input $L)($L) {
+                return $L
+            }""",
+            ShapeVisitorHelper.funcNameGenerator(
+              visitingMemberShape,
+              "FromDafny"
+            ),
+            "interface {}",
+            outputType,
+            DafnyToAwsSdkShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+          );
+        }
+      }
+    );
   }
 }

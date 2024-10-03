@@ -32,6 +32,26 @@ public class GoCodegenUtils {
     throw new RuntimeException("Failed to determine shape type");
   }
 
+  public static String getType(final Symbol symbol, final Shape shape) {
+    // symbol.getProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class).isEmpty()
+    if (
+      symbol.getProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class).isEmpty()
+      ) {
+        return SmithyNameResolver.getSmithyType(shape, symbol);
+      }
+    var type = getType(
+      symbol.expectProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class),
+      shape
+    );
+    if (symbol.getProperty(SymbolUtils.GO_MAP).isPresent()) {
+      type = "map[string]" + type;
+    }
+    if (symbol.getProperty(SymbolUtils.GO_SLICE).isPresent()) {
+      type = "[]" + type;
+    }
+    return type;
+  }
+
   public static Symbol getRootSymbol(Symbol symbol) {
     if (
       symbol.getProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class).isEmpty()
