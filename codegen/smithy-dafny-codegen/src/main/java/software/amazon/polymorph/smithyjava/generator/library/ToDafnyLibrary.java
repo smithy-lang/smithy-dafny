@@ -177,7 +177,11 @@ public class ToDafnyLibrary extends ToDafny {
         .endControlFlow()
     );
     return method
-      .addStatement("return $T.create_Opaque($L, dafny.DafnySequence.asString(\"\"))", dafnyError, VAR_INPUT)
+      .addStatement(
+        "return $T.create_Opaque($L, dafny.DafnySequence.asString(\"\"))",
+        dafnyError,
+        VAR_INPUT
+      )
       .build();
   }
 
@@ -191,7 +195,12 @@ public class ToDafnyLibrary extends ToDafny {
       .returns(dafnyError)
       .addModifiers(PUBLIC_STATIC)
       .addParameter(opaqueError, VAR_INPUT)
-      .addStatement("return $T.create_Opaque($L.obj(), dafny.DafnySequence.asString($L.alt_text()))", dafnyError, VAR_INPUT, VAR_INPUT)
+      .addStatement(
+        "return $T.create_Opaque($L.obj(), dafny.DafnySequence.asString($L.alt_text()))",
+        dafnyError,
+        VAR_INPUT,
+        VAR_INPUT
+      )
       .build();
   }
 

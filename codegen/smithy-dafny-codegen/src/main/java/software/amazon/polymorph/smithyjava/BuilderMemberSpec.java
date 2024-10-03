@@ -63,7 +63,6 @@ public class BuilderMemberSpec {
       "alt_text",
       "A best effort text representation of obj."
     )
-
   );
   public static final List<BuilderMemberSpec> COLLECTION_ARGS = List.of(
     _MESSAGE,

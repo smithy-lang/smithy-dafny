@@ -705,7 +705,7 @@ public class ToDafnyAwsV2 extends ToDafny {
         "nativeValue"
       )
       .addStatement(
-        "return $T.create_Opaque(nativeValue)",
+        "return $T.create_Opaque(nativeValue, dafny.DafnySequence.asString(nativeValue.getClass().getSimpleName() + \": \" + nativeValue.getMessage()))",
         subject.dafnyNameResolver.abstractClassForError()
       )
       .build();
@@ -731,7 +731,7 @@ public class ToDafnyAwsV2 extends ToDafny {
         "Which would allow Dafny developers to treat the two differently."
       )
       .addStatement(
-        "return $T.create_Opaque(nativeValue)",
+        "return $T.create_Opaque(nativeValue, dafny.DafnySequence.asString(nativeValue.getClass().getSimpleName() + \": \" + nativeValue.getMessage()))",
         subject.dafnyNameResolver.abstractClassForError()
       )
       .build();
