@@ -186,7 +186,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     final TokenTree unknownErrorCase = Token.of(
       """
       default:
-          return new %s(value);
+          return new %s(value, Dafny.Sequence<char>.FromString(value.GetType().Name + \": \" + value.ToString()));
       """.formatted(dafnyUnknownErrorType)
     );
     final TokenTree cases = TokenTree

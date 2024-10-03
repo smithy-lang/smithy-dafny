@@ -1718,20 +1718,20 @@ public class TypeConversionCodegen {
         "case %1$s exception:".formatted(
             DotNetNameResolver.baseClassForUnknownError()
           ),
-        "return new %1$s(exception);".formatted(
+        "return new %1$s(exception, Dafny.Sequence<char>.FromString(exception.GetType().Name + \": \" + exception.ToString()));".formatted(
             DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(
               serviceShape
             )
           ),
         "case %1$s exception:".formatted(C_SHARP_SYSTEM_EXCEPTION),
-        "return new %1$s(exception);".formatted(
+        "return new %1$s(exception, Dafny.Sequence<char>.FromString(exception.GetType().Name + \": \" + exception.ToString()));".formatted(
             DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(
               serviceShape
             )
           ),
         "default:",
         "// The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)",
-        "return new %1$s(value);".formatted(
+        "return new %1$s(value, Dafny.Sequence<char>.FromString(value.GetType().Name + \": \" + value.ToString()));".formatted(
             DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(
               serviceShape
             )
