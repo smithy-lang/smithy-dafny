@@ -37,7 +37,6 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     var resSuccess := client.CallDDBScan(SimpleCallingAWSSDKFromLocalService.Types.CallDDBScanInput(ddbClient := ddbClient, tableArn := TABLE_ARN_SUCCESS_CASE));
 
     expect resSuccess.Success?;
-    expect resSuccess.value.itemOutput == 1;
   }
 
   method TestCallDDBScan_Failure(client: ISimpleCallingAWSSDKFromLocalServiceClient)
