@@ -983,6 +983,22 @@ public class DafnyLocalServiceTypeConversionProtocol
                   if (kmsShapeId.isPresent() && ddbShapeId.isPresent()) {
                     var kmsShape = context.model().expectShape(kmsShapeId.get());
                     var ddbShape = context.model().expectShape(ddbShapeId.get());
+                    writer.addImportFromModule(
+                      SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+                        ddbShape.getId().getNamespace()
+                      ),
+                      SmithyNameResolver.shapeNamespace(
+                        ddbShape
+                      )
+                    );
+                    writer.addImportFromModule(
+                      SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+                        kmsShape.getId().getNamespace()
+                      ),
+                      SmithyNameResolver.shapeNamespace(
+                        kmsShape
+                      )
+                    );
                     String kmsShapeNamespace = SmithyNameResolver.shapeNamespace(kmsShape);
                     String ddbShapeNamespace = SmithyNameResolver.shapeNamespace(ddbShape);
                     w.write("""
@@ -1005,6 +1021,14 @@ public class DafnyLocalServiceTypeConversionProtocol
                         );
                   } else if (kmsShapeId.isPresent() || ddbShapeId.isPresent()) {
                     var depShape = context.model().expectShape(kmsShapeId.isPresent() ? kmsShapeId.get() : ddbShapeId.get());
+                    writer.addImportFromModule(
+                      SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+                        depShape.getId().getNamespace()
+                      ),
+                      SmithyNameResolver.shapeNamespace(
+                        depShape
+                      )
+                    );
                     w.write(
                       """
                       case smithy.APIError:
