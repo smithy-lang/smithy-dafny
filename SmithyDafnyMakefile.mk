@@ -525,6 +525,7 @@ transpile_test_java: _transpile_test_all _mv_test_java
 # To avoid `java/implementation-java` the code is generated and then moved.
 _mv_implementation_java:
 	rm -rf runtimes/java/src/main/dafny-generated
+	mkdir -p runtimes/java/src/main
 	mv runtimes/java/ImplementationFromDafny-java runtimes/java/src/main/dafny-generated
 _mv_test_java:
 	rm -rf runtimes/java/src/test/dafny-generated
