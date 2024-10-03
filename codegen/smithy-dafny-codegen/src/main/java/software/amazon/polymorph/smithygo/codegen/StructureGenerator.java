@@ -132,10 +132,12 @@ public final class StructureGenerator implements Runnable {
             memberSymbol.getProperty("Referred", Symbol.class).get();
           var refShape = targetShape.expectTrait(ReferenceTrait.class);
           if (refShape.isService()) {
-            if (shape.getId().getName().equals("TrentService"))
-              namespace = CaseUtils.toPascalCase(shape.toShapeId().getNamespace().replace(".", " ")).concat("Types");
-            else if (shape.getId().getName().equals("DynamoDB_20120810"))
-              namespace = CaseUtils.toPascalCase(shape.toShapeId().getNamespace().replace(".", " ")).concat("Types");
+            if (refShape.getReferentId().getName().equals("TrentService")){
+              namespace = CaseUtils.toPascalCase(refShape.getReferentId().getNamespace().replace(".", " ")).concat("Types");
+            }
+            else if (refShape.getReferentId().getName().equals("DynamoDB_20120810")){
+              namespace = CaseUtils.toPascalCase(refShape.getReferentId().getNamespace().replace(".", " ")).concat("Types");
+            }
             else
               namespace =
                 SmithyNameResolver.shapeNamespace(
