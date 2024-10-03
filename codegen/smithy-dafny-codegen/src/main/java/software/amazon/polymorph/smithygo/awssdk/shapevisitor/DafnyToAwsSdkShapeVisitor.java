@@ -552,7 +552,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addImportFromModule("github.com/dafny-lang/DafnyStandardLibGo", "Wrappers");
     var nilCheck = "";
     if (this.isOptional) {
-      String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+      final String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
       if (this.isPointable) {
           nilCheck = "if %s == nil { return nil }".formatted(unAssertDataSource);
       } else {
@@ -568,8 +568,8 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(shape), true),
             nilCheck
     );
-    StringBuilder eachMemberInUnion = new StringBuilder();
-    for (var member : shape.getAllMembers().values()) {
+    final StringBuilder eachMemberInUnion = new StringBuilder();
+    for (final var member : shape.getAllMembers().values()) {
         final Shape targetShape = context.model().expectShape(member.getTarget());
         final String memberName = context.symbolProvider().toMemberName(member);
         // unwrap union type, assert it then convert it to its member type with Dtor_ (example: Dtor_BlobValue()). unionDataSource is not a wrapper object until now.

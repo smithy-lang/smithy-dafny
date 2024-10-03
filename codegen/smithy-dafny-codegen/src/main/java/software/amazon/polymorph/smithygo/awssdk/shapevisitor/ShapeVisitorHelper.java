@@ -128,7 +128,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcName =
+    final String funcName =
       (memberShape.getId().toString().replaceAll("[.$#]", "_")).concat(
           "_ToDafny("
         );

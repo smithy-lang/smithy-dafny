@@ -1322,7 +1322,7 @@ public class DafnyLocalServiceTypeConversionProtocol
 
   // Generates rest of the not visited shapes into a function
   private void generateDeserializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
-    var delegator = context.writerDelegator();
+    final var delegator = context.writerDelegator();
     final var model = context.model();
     final var serviceShape = model.expectShape(
       context.settings().getService(),
@@ -1335,7 +1335,7 @@ public class DafnyLocalServiceTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        for (MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
+        for (final MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
           final Shape visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
@@ -1345,15 +1345,15 @@ public class DafnyLocalServiceTypeConversionProtocol
           alreadyVisited.add(visitingMemberShape.toShapeId());
           String outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
           if (visitingShape.hasTrait(ReferenceTrait.class)) {
-            ReferenceTrait referenceTrait = visitingShape.expectTrait(
+            final ReferenceTrait referenceTrait = visitingShape.expectTrait(
               ReferenceTrait.class
             );
-            Shape resourceOrService = context
+            final Shape resourceOrService = context
               .model()
               .expectShape(referenceTrait.getReferentId());
             outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
             if (resourceOrService.isServiceShape()) {
-              String namespace = SmithyNameResolver
+              final String namespace = SmithyNameResolver
                 .shapeNamespace(resourceOrService)
                 .concat(".");
               outputType =

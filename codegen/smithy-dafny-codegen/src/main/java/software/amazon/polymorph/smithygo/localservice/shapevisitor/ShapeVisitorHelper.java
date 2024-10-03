@@ -59,10 +59,10 @@ public class ShapeVisitorHelper {
     }
     // Resource shape already goes into a function
     if (targetShape.hasTrait(ReferenceTrait.class)) {
-      ReferenceTrait referenceTrait = targetShape.expectTrait(
+      final ReferenceTrait referenceTrait = targetShape.expectTrait(
         ReferenceTrait.class
       );
-      Shape resourceOrService = context
+      final Shape resourceOrService = context
         .model()
         .expectShape(referenceTrait.getReferentId());
       if (resourceOrService.isResourceShape()) {
@@ -77,8 +77,8 @@ public class ShapeVisitorHelper {
         );
       }
     }
-    String nextVisitorFunction;
-    String funcDataSource = "input";
+    final String nextVisitorFunction;
+    final String funcDataSource = "input";
     if (!DafnyToSmithyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
       DafnyToSmithyShapeVisitor.visitorFuncMap.put(memberShape, "");
       DafnyToSmithyShapeVisitor.visitorFuncMap.put(
@@ -94,7 +94,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcName = funcNameGenerator(memberShape, "FromDafny");
+    final String funcName = funcNameGenerator(memberShape, "FromDafny");
     nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
     return nextVisitorFunction;
   }
@@ -111,7 +111,7 @@ public class ShapeVisitorHelper {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
-    String nextVisitorFunction;
+    final String nextVisitorFunction;
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       return targetShape.accept(
         new SmithyToDafnyShapeVisitor(
@@ -124,7 +124,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcDataSource = "input";
+    final String funcDataSource = "input";
     if (!SmithyToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
       toDafnyOptionalityMap.put(memberShape, isOptional);
       SmithyToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
@@ -142,7 +142,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcName =
+    final String funcName =
       (memberShape.getId().toString().replaceAll("[.$#]", "_")).concat(
           "_ToDafny("
         );

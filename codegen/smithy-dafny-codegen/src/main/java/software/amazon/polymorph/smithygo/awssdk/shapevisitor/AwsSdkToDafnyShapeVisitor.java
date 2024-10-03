@@ -550,7 +550,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String unionShape(UnionShape shape) {
-    ServiceShape serviceShape = context
+    final ServiceShape serviceShape = context
         .model()
         .expectShape(context.settings().getService(context.model()).toShapeId())
         .asServiceShape().get();
@@ -574,7 +574,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       func() %s {
           switch %s.(type) {""".formatted(returnType, dataSource);
     StringBuilder eachMemberInUnion = new StringBuilder();
-    for (var member : shape.getAllMembers().values()) {
+    for (final var member : shape.getAllMembers().values()) {
       final String memberName = context.symbolProvider().toMemberName(member);
       final Shape targetShape = context.model().expectShape(member.getTarget());
       final String baseType = DafnyNameResolver.getDafnyType(
