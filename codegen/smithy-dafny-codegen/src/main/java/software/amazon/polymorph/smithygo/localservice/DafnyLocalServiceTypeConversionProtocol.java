@@ -1263,7 +1263,7 @@ public class DafnyLocalServiceTypeConversionProtocol
 
   // Generates rest of the not visited shapes into a function
   private void generateSerializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
-    var writerDelegator = context.writerDelegator();
+    final var writerDelegator = context.writerDelegator();
     final var model = context.model();
     final var serviceShape = model.expectShape(
       context.settings().getService(),
