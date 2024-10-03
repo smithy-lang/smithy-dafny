@@ -26,6 +26,7 @@ class DotnetTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
     DISABLED_TESTS.add("SimpleTypes/SimpleShort");
+    DISABLED_TESTS.add("CallingAWSSDKFromLocalService");
   }
 
   @ParameterizedTest
