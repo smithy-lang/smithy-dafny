@@ -638,6 +638,17 @@ clean: _clean
 
 ########################## Python targets
 
+# Install packages via `python3 -m pip`,
+# which is the syntax Smithy-Python and Smithy-Dafny Python use
+# to invoke these packages.
+# This helps ensure these packages are installed to the correct Python installation.
+setup_smithy_dafny_python:
+	python3 -m pip install docformatter black
+
+setup_python: setup_smithy_dafny_python
+setup_python:
+	python3 -m pip install poetry
+
 net: polymorph_dafny transpile_python polymorph_python test_python
 
 # Python MUST transpile dependencies first to generate .dtr files
