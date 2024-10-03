@@ -16,6 +16,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.ShapeVisitorHelper;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -1441,13 +1442,8 @@ public class DafnyLocalServiceTypeConversionProtocol
               .expectShape(referenceTrait.getReferentId());
             outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
             if (resourceOrService.isServiceShape()) {
-              String namespace = SmithyNameResolver
-                .shapeNamespace(resourceOrService)
-                .concat(".");
               outputType =
-                namespace.concat(
-                  context.symbolProvider().toSymbol(resourceOrService).getName()
-                );
+                DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) resourceOrService, resourceOrService.expectTrait(ServiceTrait.class));
             }
           }
           if (

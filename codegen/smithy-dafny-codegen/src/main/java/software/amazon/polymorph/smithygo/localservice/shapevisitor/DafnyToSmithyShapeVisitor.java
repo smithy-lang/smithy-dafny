@@ -127,8 +127,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
       }
       if (!this.isOptional) {
-        return "%1$s".formatted(
-            dataSource
+        return "%1$s(%s)".formatted(
+            dataSource, 
+            DafnyNameResolver.getDafnyClient(
+              serviceShape,
+              serviceShape.toShapeId().getName()
+            )
           );
       }
       return """
