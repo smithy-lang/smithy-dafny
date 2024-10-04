@@ -1579,7 +1579,7 @@ public class DafnyApiCodegen {
         Token.of(
           "// The Opaque error, used for native, extern, wrapped or unknown errors"
         ),
-        Token.of("| Opaque(obj: object, alt_text : string := \"\")"),
+        Token.of("| Opaque(obj: object, alt_text : string)"),
         // Helper error for use with `extern`
         Token.of("type OpaqueError = e: Error | e.Opaque? witness *")
       )
