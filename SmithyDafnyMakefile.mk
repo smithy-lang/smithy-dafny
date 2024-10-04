@@ -450,7 +450,7 @@ _polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
 
 ########################## .NET targets
 
-net: polymorph_dafny transpile_net polymorph_net test_net
+net: polymorph_dafny transpile_net polymorph_dotnet test_net
 
 transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net

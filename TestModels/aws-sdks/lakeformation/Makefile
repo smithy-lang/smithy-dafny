@@ -23,6 +23,13 @@ AWS_SDK_CMD=--aws-sdk
 
 POLYMORPH_OPTIONS=--generate project-files --generate client-constructors
 
+# Override calling the polymorph CLI to invoke the Smithy build instead
+_polymorph_dafny:
+	$(GRADLEW) polymorphDafny
+
+_polymorph_java:
+	$(GRADLEW) polymorphJava
+
 # There is no wrapped target for aws-sdk types
 _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
