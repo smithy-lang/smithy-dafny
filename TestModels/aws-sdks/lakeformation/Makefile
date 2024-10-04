@@ -18,6 +18,8 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 AWS_SDK_CMD=--aws-sdk
 
+SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/model
+
 # This project has no dependencies
 # DEPENDENT-MODELS:=
 
@@ -27,10 +29,14 @@ POLYMORPH_OPTIONS=--generate project-files --generate client-constructors
 _polymorph_dafny:
 	$(GRADLEW) polymorphDafny
 
+_polymorph_dotnet:
+	$(GRADLEW) polymorphDotnet
+
 _polymorph_java:
 	$(GRADLEW) polymorphJava
 
 # There is no wrapped target for aws-sdk types
+_polymorph: ;
 _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;

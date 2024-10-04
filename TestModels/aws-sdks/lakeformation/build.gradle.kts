@@ -42,6 +42,25 @@ tasks.register("polymorphDafny") {
     }
 }
 
+tasks.register("polymorphDotnet") {
+    dependsOn("build")
+    doLast {
+        // if needed, specify a projection to use instead
+        // default (no projection) is "source"
+        val projectionName = "operation-subset"
+        copy {
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/net"))
+            into("runtimes/net")
+        }
+        exec {
+            // need to adjust the relative import, since we're copying it away
+            // the commandLine method does not play nice with sed,
+            // so we have to execute it through bash :(
+            commandLine("bash", "-c", "sed 's|../../../../../../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj|../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj|' runtimes/net/LakeFormation.csproj > runtimes/net/tmp && mv runtimes/net/tmp runtimes/net/LakeFormation.csproj")
+        }
+    }
+}
+
 tasks.register("polymorphJava") {
     dependsOn("build")
     doLast {
