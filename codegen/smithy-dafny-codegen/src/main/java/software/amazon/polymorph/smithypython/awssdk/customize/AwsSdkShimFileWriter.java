@@ -151,7 +151,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       // and this function should only cast to Opaque errors
       writer.write(
         """
-        return $L.Error_Opaque(obj=e)
+        return $L.Error_Opaque(obj=e, alt__text=repr(e))
         """,
         DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
           serviceShape.getId(),
@@ -164,7 +164,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       writer.write(
         """
         else:
-            return $L.Error_Opaque(obj=e)
+            return $L.Error_Opaque(obj=e, alt__text=repr(e))
         """,
         DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
           serviceShape.getId(),

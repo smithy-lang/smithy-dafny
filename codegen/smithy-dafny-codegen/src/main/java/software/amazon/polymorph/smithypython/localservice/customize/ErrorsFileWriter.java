@@ -156,10 +156,12 @@ public class ErrorsFileWriter implements CustomFileWriter {
                 def __init__(
                     self,
                     *,
-                    obj
+                    obj,
+                    alt__text
                 ):
                     super().__init__("")
                     self.obj = obj
+                    self.alt__text = alt__text
 
                 def as_dict(self) -> Dict[str, Any]:
                     ""\"Converts the OpaqueError to a dictionary.
@@ -171,6 +173,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                         'message': self.message,
                         'code': self.code,
                         'obj': self.obj,
+                        'alt__text': self.alt__text,
                     }
 
                 @staticmethod
@@ -182,7 +185,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     ""\"
                     kwargs: Dict[str, Any] = {
                         'message': d['message'],
-                        'obj': d['obj']
+                        'obj': d['obj'],
+                        'alt__text': d['alt__text']
                     }
 
                     return OpaqueError(**kwargs)
@@ -192,7 +196,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     result += f'message={self.message},'
                     if self.message is not None:
                         result += f"message={repr(self.message)}"
-                    result += f'obj={self.obj}'
+                    result += f'obj={self.alt__text}'
                     result += ")"
                     return result
 
@@ -408,7 +412,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
     writer.write(
       """
       if isinstance(e, OpaqueError):
-          return $L.Error_Opaque(obj=e.obj)
+          return $L.Error_Opaque(obj=e.obj, alt__text=e.alt__text)
       """,
       DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
         serviceShape.getId(),
@@ -424,7 +428,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
     writer.write(
       """
       else:
-          return $L.Error_Opaque(obj=e)
+          return $L.Error_Opaque(obj=e, alt__text=repr(e))
       """,
       DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
         serviceShape.getId(),
