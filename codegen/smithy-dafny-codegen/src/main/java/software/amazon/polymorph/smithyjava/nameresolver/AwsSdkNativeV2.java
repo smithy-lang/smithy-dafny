@@ -152,11 +152,7 @@ public class AwsSdkNativeV2 extends Native {
     final Shape shape = model.expectShape(shapeId);
 
     if (shape.hasTrait(EnumTrait.class)) {
-      if (true || shapeRequiresTypeConversionFromStringToStructure(shapeId)) {
-        return classForEnum(shape);
-      }
-
-      return classForString();
+      return classForEnum(shape);
     }
     if (SHAPE_TYPES_LIST_SET_MAP.contains(shape.getType())) {
       return typeForListSetOrMapNoEnum(shapeId);
@@ -182,24 +178,6 @@ public class AwsSdkNativeV2 extends Native {
     }
 
     return super.typeForShape(shapeId);
-  }
-
-  /**
-   * Returns true if the provided ShapeId has type string in the Smithy model, but AWS SDK for
-   *   Java V2 effectively expects type structure.
-   * @param shapeId
-   * @return true if AWS SDK for Java V2 expects this to have been modeled as a structure in Smithy
-   */
-  protected boolean shapeRequiresTypeConversionFromStringToStructure(
-    ShapeId shapeId
-  ) {
-    return (
-      shapeId
-        .toString()
-        .contains("com.amazonaws.kms#EncryptionAlgorithmSpec") ||
-      shapeId.toString().contains("com.amazonaws.kms#SigningAlgorithmSpec") ||
-      shapeId.toString().contains("com.amazonaws.kms#GrantOperation")
-    );
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
