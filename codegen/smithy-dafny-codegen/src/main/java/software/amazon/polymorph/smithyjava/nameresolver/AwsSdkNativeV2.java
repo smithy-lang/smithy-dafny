@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import software.amazon.awssdk.codegen.internal.Utils;
 import software.amazon.awssdk.codegen.model.service.ServiceModel;
 import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
@@ -103,8 +102,7 @@ public class AwsSdkNativeV2 extends Native {
   }
 
   /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
-  private static void checkForAwsServiceConstants(String namespace) {
-  }
+  private static void checkForAwsServiceConstants(String namespace) {}
 
   /**
    * Throws IllegalArgumentException if shapeId is not in namespace
@@ -125,8 +123,10 @@ public class AwsSdkNativeV2 extends Native {
     checkForAwsServiceConstants(awsServiceSmithyNamespace);
     return ClassName.get(
       packageNameForAwsSdkV2Shape(shape),
-      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(awsServiceSmithyNamespace,
-              sdkId(shape) + "Client")
+      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
+        awsServiceSmithyNamespace,
+        sdkId(shape) + "Client"
+      )
     );
   }
 
@@ -276,24 +276,30 @@ public class AwsSdkNativeV2 extends Native {
     if (operationIndex.isInputStructure(shape)) {
       var operations = operationIndex.getInputBindings(shape);
       if (operations.size() > 1) {
-        throw new IllegalArgumentException("Structures bound to more than one operation as input are not supported: " + shape);
+        throw new IllegalArgumentException(
+          "Structures bound to more than one operation as input are not supported: " +
+          shape
+        );
       }
       var operation = operations.stream().findFirst().get();
       return ClassName.get(
-              smithyName.packageName(),
-              CodegenNamingUtils.pascalCase(operation.getId().getName()) + "Request"
+        smithyName.packageName(),
+        CodegenNamingUtils.pascalCase(operation.getId().getName()) + "Request"
       );
     }
 
     if (operationIndex.isOutputStructure(shape)) {
       var operations = operationIndex.getOutputBindings(shape);
       if (operations.size() > 1) {
-        throw new IllegalArgumentException("Structures bound to more than one operation as output are not supported: " + shape);
+        throw new IllegalArgumentException(
+          "Structures bound to more than one operation as output are not supported: " +
+          shape
+        );
       }
       var operation = operations.stream().findFirst().get();
       return ClassName.get(
-          smithyName.packageName(),
-          CodegenNamingUtils.pascalCase(operation.getId().getName()) + "Response"
+        smithyName.packageName(),
+        CodegenNamingUtils.pascalCase(operation.getId().getName()) + "Response"
       );
     }
 
@@ -368,9 +374,10 @@ public class AwsSdkNativeV2 extends Native {
   }
 
   private static String sdkId(ServiceShape serviceShape) {
-    return serviceShape.getTrait(ServiceTrait.class)
-                .map(serviceTrait -> serviceTrait.getSdkId())
-                .orElse(serviceShape.getId().getName());
+    return serviceShape
+      .getTrait(ServiceTrait.class)
+      .map(serviceTrait -> serviceTrait.getSdkId())
+      .orElse(serviceShape.getId().getName());
   }
 
   /**
@@ -386,7 +393,7 @@ public class AwsSdkNativeV2 extends Native {
       packageName,
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
         serviceShape.getId().getNamespace(),
-              sdkId(serviceShape) + "Client"
+        sdkId(serviceShape) + "Client"
       )
     );
   }

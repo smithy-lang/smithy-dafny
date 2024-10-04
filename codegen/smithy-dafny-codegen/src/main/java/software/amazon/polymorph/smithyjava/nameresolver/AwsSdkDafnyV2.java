@@ -120,7 +120,7 @@ public class AwsSdkDafnyV2 extends Dafny {
     return CodeBlock.of(
       "$L.$L()",
       variableName,
-            Utils.unCapitalize(memberShape.getMemberName())
+      Utils.unCapitalize(memberShape.getMemberName())
     );
   }
 
