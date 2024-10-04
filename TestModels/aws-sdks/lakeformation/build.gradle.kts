@@ -71,8 +71,8 @@ tasks.register("polymorphJava") {
         // because we need a fresher software.amazon.awssdk:kms version
         // than what's in the template.
         copy {
-            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/java/src"))
-            into("runtimes/java/src")
+            from(layout.buildDirectory.dir("smithyprojections/" + project.name + "/" + projectionName + "/dafny-client-codegen/runtimes/java"))
+            into("runtimes/java")
         }
     }
 }
