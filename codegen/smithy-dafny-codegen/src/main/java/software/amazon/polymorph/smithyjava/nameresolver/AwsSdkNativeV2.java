@@ -5,7 +5,6 @@ package software.amazon.polymorph.smithyjava.nameresolver;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.isAttributeValueType;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET_MAP;
-import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -33,7 +32,6 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.model.traits.TitleTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
