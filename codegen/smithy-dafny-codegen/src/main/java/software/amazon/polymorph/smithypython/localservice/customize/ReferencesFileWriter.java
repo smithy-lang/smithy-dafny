@@ -360,6 +360,21 @@ public class ReferencesFileWriter implements CustomFileWriter {
         codegenContext
       );
 
+      ServiceShape serviceShape = codegenContext
+        .model()
+        .expectShape(codegenContext.settings().getService())
+        .asServiceShape()
+        .get();
+
+      writer.addStdlibImport(
+        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+          serviceShape.getId().getNamespace(),
+          codegenContext.settings()
+        ) +
+        ".errors",
+        "_smithy_error_to_dafny_error"
+      );
+
       writer.openBlock(
         "def $L(self, dafny_input: '$L') -> '$L':",
         "",
