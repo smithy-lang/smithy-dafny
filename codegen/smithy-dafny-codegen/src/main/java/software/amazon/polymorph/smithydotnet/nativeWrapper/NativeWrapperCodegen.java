@@ -390,7 +390,7 @@ public class NativeWrapperCodegen {
   ) {
     final String catchStatement = "catch(%s e)".formatted(caughtException);
     final TokenTree caughtStatement = TokenTree.of(
-      "return %s.create_Failure(%s(e));".formatted(
+      "return %s.create_Failure(%s(e, Dafny.Sequence<char>.FromString(e.ToString())));".formatted(
           dafnyOutput,
           nameResolver.qualifiedTypeConverterForCommonError(
             serviceShape,
