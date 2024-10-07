@@ -6,6 +6,7 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import static java.lang.String.format;
 
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.logging.Logger;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
@@ -14,6 +15,7 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.codegen.core.directed.*;
+import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -456,6 +458,9 @@ public class DirectedDafnyPythonLocalServiceCodegen
 
     ShapeId configShapeId = directive.service().getTrait(LocalServiceTrait.class).get().getConfigId();
     StructureShape configShape = directive.model().expectShape(configShapeId).asStructureShape().get();
+
+    Set<Shape> knownShapes = new Walker(directive.model()).walkShapes(directive.service());
+
 
     directive
       .context()

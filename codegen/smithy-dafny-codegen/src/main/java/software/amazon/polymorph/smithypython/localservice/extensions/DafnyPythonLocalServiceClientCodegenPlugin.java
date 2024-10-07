@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.JavaDocTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.build.PluginContext;
@@ -226,23 +227,25 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
   ) {
     ServiceShape.Builder transformedServiceShapeBuilder =
       serviceShape.toBuilder();
-    Set<Shape> knownShapes = new Walker(model).walkShapes(serviceShape);
-    ModelTransformer
-      .create()
-      .mapShapes(
-        model,
-        shape -> {
-          if (!knownShapes.contains(shape)
-          && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
-          && (shape.isStructureShape() || shape.isUnionShape())
-          && !serviceShape.getOperations().contains(shape.getId())
-          ) {
-            System.out.println("not in: " + shape.getId());
-            transformedServiceShapeBuilder.addMixin(shape);
-          }
-          return shape;
-        }
-      );
+    transformedServiceShapeBuilder.addMixin(
+      model.expectShape(serviceShape.getTrait(LocalServiceTrait.class).get().getConfigId())
+    );
+//
+//    ModelTransformer
+//      .create()
+//      .mapShapes(
+//        model,
+//        shape -> {
+//          if (!knownShapes.contains(shape)
+//          && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
+//          && (shape.isStructureShape() || shape.isUnionShape())
+//          && !serviceShape.getOperations().contains(shape.getId())
+//          ) {
+//            System.out.println("not in: " + shape.getId());
+//          }
+//          return shape;
+//        }
+//      );
 
     System.out.println("size = " + TopologicalIndex.of(model).getRecursiveShapes().size());
 
