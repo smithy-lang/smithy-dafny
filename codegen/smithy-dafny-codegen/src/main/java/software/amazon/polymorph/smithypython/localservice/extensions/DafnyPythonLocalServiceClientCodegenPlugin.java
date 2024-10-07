@@ -4,6 +4,9 @@
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -222,12 +225,13 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
   ) {
     ServiceShape.Builder transformedServiceShapeBuilder =
       serviceShape.toBuilder();
+    Set<Shape> knownShapes = model.shapes().collect(Collectors.toSet())
     ModelTransformer
       .create()
       .mapShapes(
         model,
         shape -> {
-          if (!TopologicalIndex.of(model).getRecursiveShapes().contains(shape)
+          if (knownShapes.contains(shape)
           && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
           && (shape.isStructureShape() || shape.isUnionShape())
           && !serviceShape.getOperations().contains(shape.getId())) {
