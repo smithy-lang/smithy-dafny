@@ -190,7 +190,6 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
               .getReferentId();
             if (model.expectShape(referenceShapeId).isResourceShape()) {
               transformedServiceShapeBuilder.addResource(referenceShapeId);
-              transformedServiceShapeBuilder.addMember()
             }
           }
           return shape;
