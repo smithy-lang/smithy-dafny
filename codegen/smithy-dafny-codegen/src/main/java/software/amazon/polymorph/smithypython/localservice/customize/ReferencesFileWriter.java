@@ -360,32 +360,6 @@ public class ReferencesFileWriter implements CustomFileWriter {
         codegenContext
       );
 
-      ServiceShape serviceShape = codegenContext
-        .model()
-        .expectShape(codegenContext.settings().getService())
-        .asServiceShape()
-        .get();
-      List<ShapeId> serviceDependencyErrors = serviceShape.getErrors();
-      // Services don't specify a "default" error.
-      // Pick the first one off its list of errors.
-      // Crypto Tools currently only specifies one error per service, so this works perfectly, but may not
-      // extend well.
-      // This will need to be updated.
-      if (serviceDependencyErrors.size() > 1) {
-        throw new IllegalArgumentException(
-          "Only 1 service-modelled error per service supported"
-        );
-      }
-
-      writer.addStdlibImport(
-        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-          serviceShape.getId().getNamespace(),
-          codegenContext.settings()
-        ) +
-        ".errors",
-        "_smithy_error_to_dafny_error"
-      );
-
       writer.openBlock(
         "def $L(self, dafny_input: '$L') -> '$L':",
         "",
