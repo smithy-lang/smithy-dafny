@@ -225,13 +225,13 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
   ) {
     ServiceShape.Builder transformedServiceShapeBuilder =
       serviceShape.toBuilder();
-    Set<Shape> knownShapes = model.shapes().collect(Collectors.toSet())
+    Set<Shape> knownShapes = model.shapes().collect(Collectors.toSet());
     ModelTransformer
       .create()
       .mapShapes(
         model,
         shape -> {
-          if (knownShapes.contains(shape)
+          if (!knownShapes.contains(shape)
           && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
           && (shape.isStructureShape() || shape.isUnionShape())
           && !serviceShape.getOperations().contains(shape.getId())) {
