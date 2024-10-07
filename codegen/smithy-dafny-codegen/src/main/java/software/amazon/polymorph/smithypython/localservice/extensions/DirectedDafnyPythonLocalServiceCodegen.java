@@ -10,9 +10,12 @@ import java.util.logging.Logger;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.codegen.core.directed.*;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.*;
 
 /**
@@ -453,6 +456,36 @@ public class DirectedDafnyPythonLocalServiceCodegen
     var protocolGenerator = directive.context().protocolGenerator();
     if (protocolGenerator == null) {
       return;
+    }
+
+    ShapeId configShapeId = directive.service().getTrait(LocalServiceTrait.class).get().getConfigId();
+    StructureShape configShape = directive.model().expectShape(configShapeId).asStructureShape().get();
+
+    if (
+      directive
+        .shape()
+        .getId()
+        .getNamespace()
+        .equals(directive.context().settings().getService().getNamespace())
+    ) {
+      directive
+        .context()
+        .writerDelegator()
+        .useShapeWriter(
+          configShape,
+          writer -> {
+            DafnyPythonLocalServiceStructureGenerator generator =
+              new DafnyPythonLocalServiceStructureGenerator(
+                directive.model(),
+                directive.settings(),
+                directive.symbolProvider(),
+                writer,
+                configShape,
+                TopologicalIndex.of(directive.model()).getRecursiveShapes()
+              );
+            generator.run();
+          }
+        );
     }
 
     protocolGenerator.generateSharedSerializerComponents(directive.context());
