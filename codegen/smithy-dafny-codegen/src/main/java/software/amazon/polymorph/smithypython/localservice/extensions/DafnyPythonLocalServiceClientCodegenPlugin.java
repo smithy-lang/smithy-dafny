@@ -253,7 +253,18 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
 
     System.out.println("size = " + TopologicalIndex.of(model).getRecursiveShapes().size());
 
-    return model;
+    return ModelTransformer
+      .create()
+      .mapShapes(
+        model,
+        shape -> {
+          if (shape.getId().equals(serviceShape.getId())) {
+            return transformedServiceShapeBuilder.build();
+          } else {
+            return shape;
+          }
+        }
+      );
   }
 
   /**
