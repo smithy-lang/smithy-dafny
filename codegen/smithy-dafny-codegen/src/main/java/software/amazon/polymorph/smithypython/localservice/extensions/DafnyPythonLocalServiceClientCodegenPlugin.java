@@ -233,7 +233,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
     transformedServiceShapeBuilder.addMixin(
       MemberShape.builder()
         .target(configShape.getId())
-        .id(configShape.getId())
+        .id(ShapeId.from(serviceShape.getId() + "$" + configShape.getId()))
         .build()
     );
 
