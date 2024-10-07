@@ -13,10 +13,7 @@ import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.AbstractShapeBuilder;
-import software.amazon.smithy.model.shapes.EnumShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.transform.ModelTransformer;
@@ -223,6 +220,8 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
     Model model,
     ServiceShape serviceShape
   ) {
+    ServiceShape.Builder transformedServiceShapeBuilder =
+      serviceShape.toBuilder();
     ModelTransformer
       .create()
       .mapShapes(
@@ -231,6 +230,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
           if (!TopologicalIndex.of(model).getRecursiveShapes().contains(shape)
           && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())) {
             System.out.println("not in: " + shape.getId());
+            transformedServiceShapeBuilder.addMember(MemberShape.builder().target(shape.getId()).build());
           }
           return shape;
         }
