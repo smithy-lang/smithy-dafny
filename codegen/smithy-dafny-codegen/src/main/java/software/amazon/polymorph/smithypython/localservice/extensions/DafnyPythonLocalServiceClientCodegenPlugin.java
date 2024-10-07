@@ -107,7 +107,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
         serviceShape
       );
     transformedModel = transformStringEnumShapesToEnumShapes(transformedModel);
-    transformedModel = transformServiceShapeToAddOrphanedShapes(transformedModel);
+    transformedModel = transformServiceShapeToAddOrphanedShapes(transformedModel, serviceShape);
     return transformedModel;
   }
 
@@ -220,14 +220,16 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
    * @return
    */
   public static Model transformServiceShapeToAddOrphanedShapes(
-    Model model
+    Model model,
+    ServiceShape serviceShape
   ) {
     ModelTransformer
       .create()
       .mapShapes(
         model,
         shape -> {
-          if (!TopologicalIndex.of(model).getRecursiveShapes().contains(shape)) {
+          if (!TopologicalIndex.of(model).getRecursiveShapes().contains(shape)
+          && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())) {
             System.out.println("not in: " + shape.getId());
           }
           return shape;
