@@ -453,39 +453,31 @@ public class DirectedDafnyPythonLocalServiceCodegen
     new SynchronousClientGenerator(directive.context(), directive.service())
       .run();
 
-    var protocolGenerator = directive.context().protocolGenerator();
-    if (protocolGenerator == null) {
-      return;
-    }
-
     ShapeId configShapeId = directive.service().getTrait(LocalServiceTrait.class).get().getConfigId();
     StructureShape configShape = directive.model().expectShape(configShapeId).asStructureShape().get();
 
-    if (
-      directive
-        .shape()
-        .getId()
-        .getNamespace()
-        .equals(directive.context().settings().getService().getNamespace())
-    ) {
-      directive
-        .context()
-        .writerDelegator()
-        .useShapeWriter(
-          configShape,
-          writer -> {
-            DafnyPythonLocalServiceStructureGenerator generator =
-              new DafnyPythonLocalServiceStructureGenerator(
-                directive.model(),
-                directive.settings(),
-                directive.symbolProvider(),
-                writer,
-                configShape,
-                TopologicalIndex.of(directive.model()).getRecursiveShapes()
-              );
-            generator.run();
-          }
-        );
+    directive
+      .context()
+      .writerDelegator()
+      .useShapeWriter(
+        configShape,
+        writer -> {
+          DafnyPythonLocalServiceStructureGenerator generator =
+            new DafnyPythonLocalServiceStructureGenerator(
+              directive.model(),
+              directive.settings(),
+              directive.symbolProvider(),
+              writer,
+              configShape,
+              TopologicalIndex.of(directive.model()).getRecursiveShapes()
+            );
+          generator.run();
+        }
+      );
+
+    var protocolGenerator = directive.context().protocolGenerator();
+    if (protocolGenerator == null) {
+      return;
     }
 
     protocolGenerator.generateSharedSerializerComponents(directive.context());
