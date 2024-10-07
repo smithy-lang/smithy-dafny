@@ -10,6 +10,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
+import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.AbstractShapeBuilder;
@@ -106,6 +107,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
         serviceShape
       );
     transformedModel = transformStringEnumShapesToEnumShapes(transformedModel);
+    transformedModel = transformServiceShapeToAddOrphanedShapes(transformedModel);
     return transformedModel;
   }
 
@@ -188,6 +190,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
               .getReferentId();
             if (model.expectShape(referenceShapeId).isResourceShape()) {
               transformedServiceShapeBuilder.addResource(referenceShapeId);
+              transformedServiceShapeBuilder.addMember()
             }
           }
           return shape;
@@ -206,6 +209,33 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
           }
         }
       );
+  }
+
+  /**
+   * Smithy plugins require that resource shapes are attached to a ServiceShape.
+   * Smithy plugins also do not understand Polymorph's {@link ReferenceTrait} and will not
+   * discover the linked shape.
+   * This parses Polymorph's ReferenceTrait to attach any referenced resources to the {@param serviceShape}
+   * so the Smithy plugin's shape discovery can find the shape.
+   * @param model
+   * @return
+   */
+  public static Model transformServiceShapeToAddOrphanedShapes(
+    Model model
+  ) {
+    ModelTransformer
+      .create()
+      .mapShapes(
+        model,
+        shape -> {
+          if (!TopologicalIndex.of(model).getRecursiveShapes().contains(shape)) {
+            System.out.println("not in: " + shape.getId());
+          }
+          return shape;
+        }
+      );
+
+    return model;
   }
 
   /**
