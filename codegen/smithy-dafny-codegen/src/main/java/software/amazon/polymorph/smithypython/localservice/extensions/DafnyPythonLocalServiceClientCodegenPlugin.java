@@ -232,9 +232,11 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
         model,
         shape -> {
           if (!knownShapes.contains(shape)
-          && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
-          && (shape.isStructureShape() || shape.isUnionShape())
-          && !serviceShape.getOperations().contains(shape.getId())) {
+          && !TopologicalIndex.of(model).getRecursiveShapes().contains(shape)
+//          && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
+//          && (shape.isStructureShape() || shape.isUnionShape())
+//          && !serviceShape.getOperations().contains(shape.getId())
+          ) {
             System.out.println("not in: " + shape.getId());
             transformedServiceShapeBuilder.addMixin(shape);
           }
