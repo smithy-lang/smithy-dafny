@@ -16,6 +16,7 @@ import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -225,14 +226,13 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
   ) {
     ServiceShape.Builder transformedServiceShapeBuilder =
       serviceShape.toBuilder();
-    Set<Shape> knownShapes = model.shapes().collect(Collectors.toSet());
+    Set<Shape> knownShapes = new Walker(model).walkShapes(serviceShape);
     ModelTransformer
       .create()
       .mapShapes(
         model,
         shape -> {
           if (!knownShapes.contains(shape)
-          && !TopologicalIndex.of(model).getRecursiveShapes().contains(shape)
 //          && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
 //          && (shape.isStructureShape() || shape.isUnionShape())
 //          && !serviceShape.getOperations().contains(shape.getId())
