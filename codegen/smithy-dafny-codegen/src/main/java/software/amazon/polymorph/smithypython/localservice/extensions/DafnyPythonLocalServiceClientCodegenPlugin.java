@@ -228,10 +228,11 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
     ServiceShape.Builder transformedServiceShapeBuilder =
       serviceShape.toBuilder();
 
-    ShapeId configShapeId = model.expectShape(serviceShape.getTrait(LocalServiceTrait.class).get().getConfigId();
+    Shape configShape = model.expectShape(serviceShape.getTrait(LocalServiceTrait.class).get().getConfigId());
+
     transformedServiceShapeBuilder.addMixin(
       MemberShape.builder()
-        .target(configShapeId)
+        .target(configShape.getId())
         .build()
     );
 
