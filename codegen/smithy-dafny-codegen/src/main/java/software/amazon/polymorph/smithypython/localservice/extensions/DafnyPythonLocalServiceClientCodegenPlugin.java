@@ -230,7 +230,10 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
           if (!TopologicalIndex.of(model).getRecursiveShapes().contains(shape)
           && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())) {
             System.out.println("not in: " + shape.getId());
-            transformedServiceShapeBuilder.addMember(MemberShape.builder().target(shape.getId()).build());
+            transformedServiceShapeBuilder.addMember(MemberShape.builder()
+                .target(shape.getId())
+                .id(shape.getId())
+              .build());
           }
           return shape;
         }
