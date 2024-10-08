@@ -498,6 +498,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
               .getId().getNamespace()
               .equals(directive.context().settings().getService().getNamespace())
           ) {
+            System.out.println("doing " + shapeToGenerate.getId());
             directive
               .context()
               .writerDelegator()
