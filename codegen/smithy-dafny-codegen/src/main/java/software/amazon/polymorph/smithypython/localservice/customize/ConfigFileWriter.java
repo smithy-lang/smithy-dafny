@@ -33,9 +33,6 @@ public class ConfigFileWriter implements CustomFileWriter {
     ServiceShape serviceShape,
     GenerationContext codegenContext
   ) {
-
-    return;
-
     final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(
       LocalServiceTrait.class
     );
