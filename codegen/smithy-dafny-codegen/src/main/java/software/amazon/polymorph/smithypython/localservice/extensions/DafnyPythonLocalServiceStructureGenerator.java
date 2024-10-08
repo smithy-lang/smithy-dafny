@@ -73,7 +73,7 @@ public class DafnyPythonLocalServiceStructureGenerator
     var symbol = symbolProvider.toSymbol(shape);
     writer.openBlock("class $L(Config):", "", symbol.getName(), () -> {
       writeProperties(false);
-      writeLocalServiceInit(false);
+      writeLocalServiceInit();
       writeAsDict(false);
       writeFromDict(false);
       writeRepr(false);
