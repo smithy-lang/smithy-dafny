@@ -178,7 +178,7 @@ public class ToDafnyLibrary extends ToDafny {
     );
     return method
       .addStatement(
-        "return $T.create_Opaque($L, dafny.DafnySequence.asString(dafny.DafnySequence.asString(Objects.nonNull($L.getMessage()) ? $L.getMessage() : \"\")))",
+        "return $T.create_Opaque($L, dafny.DafnySequence.asString(Objects.nonNull($L.getMessage()) ? $L.getMessage() : \"\"))",
         dafnyError,
         VAR_INPUT,
         VAR_INPUT,
