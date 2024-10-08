@@ -6,6 +6,9 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import static java.lang.String.format;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -460,70 +463,129 @@ public class DirectedDafnyPythonLocalServiceCodegen
     StructureShape configShape = directive.model().expectShape(configShapeId).asStructureShape().get();
 
     Set<Shape> knownShapes = new Walker(directive.model()).walkShapes(directive.service());
+    Set<Shape> unknownShapes = directive.model().toSet();
+    unknownShapes.removeAll(knownShapes);
 
+    List<Shape> orderedShapes = new ArrayList();
 
-    directive
-      .context()
-      .writerDelegator()
-      .useShapeWriter(
-        configShape,
-        writer -> {
-          DafnyPythonLocalServiceStructureGenerator generator =
-            new DafnyPythonLocalServiceStructureGenerator(
-              directive.model(),
-              directive.settings(),
-              directive.symbolProvider(),
-              writer,
-              configShape,
-              TopologicalIndex.of(directive.model()).getRecursiveShapes()
-            );
-          generator.run();
-        }
-      );
+    TopologicalIndex topologicalIndex = TopologicalIndex.of(directive.model());
+    Iterator var7 = topologicalIndex.getOrderedShapes().iterator();
 
-    for (ShapeId shapeId : directive.service().getMixins()) {
-      Shape mixinShape = directive.model().expectShape(shapeId);
-      if (mixinShape.isStructureShape()) {
-        directive
-          .context()
-          .writerDelegator()
-          .useShapeWriter(
-            configShape,
-            writer -> {
-              DafnyPythonLocalServiceStructureGenerator generator =
-                new DafnyPythonLocalServiceStructureGenerator(
-                  directive.model(),
-                  directive.settings(),
-                  directive.symbolProvider(),
-                  writer,
-                  configShape,
-                  TopologicalIndex.of(directive.model()).getRecursiveShapes()
-                );
-              generator.run();
-            }
-          );
-      } else if (mixinShape.isUnionShape()) {
-        directive
-          .context()
-          .writerDelegator()
-          .useShapeWriter(
-            configShape,
-            writer -> {
-              DafnyPythonLocalServiceStructureGenerator generator =
-                new DafnyPythonLocalServiceStructureGenerator(
-                  directive.model(),
-                  directive.settings(),
-                  directive.symbolProvider(),
-                  writer,
-                  configShape,
-                  TopologicalIndex.of(directive.model()).getRecursiveShapes()
-                );
-              generator.run();
-            }
-          );
+    Shape shape;
+    while(var7.hasNext()) {
+      shape = (Shape)var7.next();
+      if (unknownShapes.contains(shape)) {
+        orderedShapes.add(shape);
       }
-
     }
+
+    var7 = topologicalIndex.getRecursiveShapes().iterator();
+
+    while(var7.hasNext()) {
+      shape = (Shape)var7.next();
+      if (unknownShapes.contains(shape)) {
+        orderedShapes.add(shape);
+      }
+    }
+
+    Iterator var9 = orderedShapes.iterator();
+
+    while(var9.hasNext()) {
+      Shape shapeToGenerate = (Shape)var9.next();
+      if (unknownShapes.contains(shapeToGenerate)) {
+        if (shapeToGenerate.isUnionShape()) {
+          if (
+            directive
+              .shape()
+              .getId()
+              .getNamespace()
+              .equals(directive.context().settings().getService().getNamespace())
+          ) {
+            directive
+              .context()
+              .writerDelegator()
+              .useShapeWriter(
+                directive.shape(),
+                writer -> {
+                  DafnyPythonLocalServiceUnionGenerator generator =
+                    new DafnyPythonLocalServiceUnionGenerator(
+                      directive.model(),
+                      directive.symbolProvider(),
+                      writer,
+                      shapeToGenerate.asUnionShape().get(),
+                      TopologicalIndex.of(directive.model()).getRecursiveShapes()
+                    );
+                  generator.run();
+                }
+              );
+          }
+        }
+      }
+    }
+
+//
+//    directive
+//      .context()
+//      .writerDelegator()
+//      .useShapeWriter(
+//        configShape,
+//        writer -> {
+//          DafnyPythonLocalServiceStructureGenerator generator =
+//            new DafnyPythonLocalServiceStructureGenerator(
+//              directive.model(),
+//              directive.settings(),
+//              directive.symbolProvider(),
+//              writer,
+//              configShape,
+//              TopologicalIndex.of(directive.model()).getRecursiveShapes()
+//            );
+//          generator.run();
+//        }
+//      );
+//
+//    for (ShapeId shapeId : directive.service().getMixins()) {
+//      Shape mixinShape = directive.model().expectShape(shapeId);
+//      if (mixinShape.isStructureShape()) {
+//        directive
+//          .context()
+//          .writerDelegator()
+//          .useShapeWriter(
+//            configShape,
+//            writer -> {
+//              DafnyPythonLocalServiceStructureGenerator generator =
+//                new DafnyPythonLocalServiceStructureGenerator(
+//                  directive.model(),
+//                  directive.settings(),
+//                  directive.symbolProvider(),
+//                  writer,
+//                  configShape,
+//                  TopologicalIndex.of(directive.model()).getRecursiveShapes()
+//                );
+//              generator.run();
+//            }
+//          );
+//      } else if (mixinShape.isUnionShape()) {
+//        directive
+//          .context()
+//          .writerDelegator()
+//          .useShapeWriter(
+//            configShape,
+//            writer -> {
+//              DafnyPythonLocalServiceStructureGenerator generator =
+//                new DafnyPythonLocalServiceStructureGenerator(
+//                  directive.model(),
+//                  directive.settings(),
+//                  directive.symbolProvider(),
+//                  writer,
+//                  configShape,
+//                  TopologicalIndex.of(directive.model()).getRecursiveShapes()
+//                );
+//              generator.run();
+//            }
+//          );
+//      }
+//
+//    }
 
     var protocolGenerator = directive.context().protocolGenerator();
     if (protocolGenerator == null) {
