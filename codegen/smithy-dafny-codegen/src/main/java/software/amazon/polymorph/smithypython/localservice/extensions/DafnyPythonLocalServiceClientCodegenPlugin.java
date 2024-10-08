@@ -225,17 +225,17 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
     Model model,
     ServiceShape serviceShape
   ) {
-    ServiceShape.Builder transformedServiceShapeBuilder =
-      serviceShape.toBuilder();
-
-    Shape configShape = model.expectShape(serviceShape.getTrait(LocalServiceTrait.class).get().getConfigId());
-
-    transformedServiceShapeBuilder.addMixin(
-      MemberShape.builder()
-        .target(configShape.getId())
-        .id(ShapeId.from(serviceShape.getId() + "$" + configShape.getId().getName()))
-        .build()
-    );
+//    ServiceShape.Builder transformedServiceShapeBuilder =
+//      serviceShape.toBuilder();
+//
+//    Shape configShape = model.expectShape(serviceShape.getTrait(LocalServiceTrait.class).get().getConfigId());
+//
+//    transformedServiceShapeBuilder.addMixin(
+//      MemberShape.builder()
+//        .target(configShape.getId())
+//        .id(ShapeId.from(serviceShape.getId() + "$" + configShape.getId().getName()))
+//        .build()
+//    );
 
 //    ModelTransformer
 //      .create()
@@ -252,21 +252,21 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
 //          return shape;
 //        }
 //      );
-
-    System.out.println("size = " + TopologicalIndex.of(model).getRecursiveShapes().size());
-
-    return ModelTransformer
-      .create()
-      .mapShapes(
-        model,
-        shape -> {
-          if (shape.getId().equals(serviceShape.getId())) {
-            return transformedServiceShapeBuilder.build();
-          } else {
-            return shape;
-          }
-        }
-      );
+//
+//    System.out.println("size = " + TopologicalIndex.of(model).getRecursiveShapes().size());
+//
+//    return ModelTransformer
+//      .create()
+//      .mapShapes(
+//        model,
+//        shape -> {
+//          if (shape.getId().equals(serviceShape.getId())) {
+//            return transformedServiceShapeBuilder.build();
+//          } else {
+//            return shape;
+//          }
+//        }
+//      );
   }
 
   /**
