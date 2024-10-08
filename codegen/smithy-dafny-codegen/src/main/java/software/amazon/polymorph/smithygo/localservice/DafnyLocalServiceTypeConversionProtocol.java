@@ -1443,7 +1443,10 @@ public class DafnyLocalServiceTypeConversionProtocol
             outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
             if (resourceOrService.isServiceShape()) {
               outputType =
-                DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) resourceOrService, resourceOrService.expectTrait(ServiceTrait.class));
+              DafnyNameResolver.getDafnyClient(
+                serviceShape,
+                serviceShape.toShapeId().getName()
+              );
             }
           }
           if (

@@ -138,7 +138,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         );
         return "return %1$s.(%2$s)".formatted(
             dataSource, 
-            DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) serviceShape, serviceShape.expectTrait(ServiceTrait.class))
+            DafnyNameResolver.getDafnyClient(
+              serviceShape,
+              serviceShape.toShapeId().getName()
+            )
           );
       }
       return """
