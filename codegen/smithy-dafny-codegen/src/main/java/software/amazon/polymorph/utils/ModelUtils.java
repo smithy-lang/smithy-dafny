@@ -735,12 +735,14 @@ public class ModelUtils {
     TopologicalIndex topologicalIndex = TopologicalIndex.of(model);
 
     for (Shape shape : topologicalIndex.getOrderedShapes()) {
-      if (orphanedShapes.contains(shape)) {
+      if (orphanedShapes.contains(shape)
+      && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())) {
         orderedShapes.add(shape);
       }
     }
     for (Shape shape : topologicalIndex.getRecursiveShapes()) {
-      if (orphanedShapes.contains(shape)) {
+      if (orphanedShapes.contains(shape)
+        && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())) {
         orderedShapes.add(shape);
       }
     }
