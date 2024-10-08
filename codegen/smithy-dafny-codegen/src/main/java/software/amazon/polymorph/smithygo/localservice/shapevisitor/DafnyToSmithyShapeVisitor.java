@@ -136,12 +136,19 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
               DafnyNameResolver
                 .dafnyTypesNamespace(serviceShape)
         );
+        String sdkId = serviceShape.toShapeId().getName();
+        String returnType;
+        if (sdkId.equals("DynamoDB_20120810") || sdkId.equals("TrentService")) {
+          returnType = DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) serviceShape, serviceShape.expectTrait(ServiceTrait.class));
+        } else {
+          returnType = DafnyNameResolver.getDafnyClient(
+            serviceShape,
+            serviceShape.toShapeId().getName()
+          );
+        }
         return "return %1$s.(%2$s)".formatted(
             dataSource, 
-            DafnyNameResolver.getDafnyClient(
-              serviceShape,
-              serviceShape.toShapeId().getName()
-            )
+            returnType
           );
       }
       return """
