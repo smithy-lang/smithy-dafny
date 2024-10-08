@@ -12,7 +12,7 @@ plugins {
 description = "Convert Native Java Types to Dafny Runtime Types and vice versa"
 group = "software.amazon.smithy.dafny"
 var artifactId = "conversion"
-version = "0.1"
+version = "0.1.1"
 
 var moduleName = "%s.%s".format(group, artifactId)
 var displayName = "Smithy :: Dafny :: Conversion"
