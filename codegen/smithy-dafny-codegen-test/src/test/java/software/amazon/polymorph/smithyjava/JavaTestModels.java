@@ -18,6 +18,7 @@ class JavaTestModels extends TestModelTest {
   static {
     DISABLED_TESTS.add("Aggregate");
     DISABLED_TESTS.add("AggregateReferences");
+    DISABLED_TESTS.add("CallingAWSSDKFromLocalService");
     DISABLED_TESTS.add("Constructor");
     DISABLED_TESTS.add("Dependencies");
     DISABLED_TESTS.add("Extern");

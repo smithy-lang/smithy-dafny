@@ -22,7 +22,7 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 
-GO_MODULE_NAME="github.com/Smithy-dafny/TestModels/Extern"
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Extern"
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
