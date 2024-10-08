@@ -506,7 +506,9 @@ public class DirectedDafnyPythonLocalServiceCodegen
         );
       } else {
         // Add more as needed...
-        throw new ClassCastException("Unsupported class for orphaned shape " + shapeToGenerate);
+        throw new ClassCastException(
+          "Unsupported class for orphaned shape " + shapeToGenerate
+        );
       }
     }
   }

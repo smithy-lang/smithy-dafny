@@ -44,7 +44,7 @@ public final class DafnyPythonWrappedLocalServiceClientCodegenPlugin
   }
 
   /**
-   * Perform all transformations on the model before running localService codegen.
+   * Perform all transformations on the model before running wrapped localService codegen.
    * @param model
    * @param serviceShape
    * @return
