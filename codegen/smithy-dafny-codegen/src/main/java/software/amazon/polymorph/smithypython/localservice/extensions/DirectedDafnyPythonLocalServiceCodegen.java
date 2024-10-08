@@ -6,11 +6,10 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import static java.lang.String.format;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
@@ -463,7 +462,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
     StructureShape configShape = directive.model().expectShape(configShapeId).asStructureShape().get();
 
     Set<Shape> knownShapes = new Walker(directive.model()).walkShapes(directive.service());
-    Set<Shape> unknownShapes = directive.model().toSet();
+    Set<Shape> unknownShapes = directive.model().shapes().collect(Collectors.toSet());
     unknownShapes.removeAll(knownShapes);
 
     List<Shape> orderedShapes = new ArrayList();
