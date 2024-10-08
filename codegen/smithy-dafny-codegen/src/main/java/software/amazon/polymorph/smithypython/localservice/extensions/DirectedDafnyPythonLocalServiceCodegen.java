@@ -503,7 +503,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
               .context()
               .writerDelegator()
               .useShapeWriter(
-                directive.shape(),
+                shapeToGenerate,
                 writer -> {
                   DafnyPythonLocalServiceUnionGenerator generator =
                     new DafnyPythonLocalServiceUnionGenerator(
