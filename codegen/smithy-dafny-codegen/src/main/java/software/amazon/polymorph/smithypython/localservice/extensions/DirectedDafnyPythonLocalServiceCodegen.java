@@ -469,9 +469,9 @@ public class DirectedDafnyPythonLocalServiceCodegen
    * @param directive
    */
   protected void generateOrphanedShapesForService(
-    GenerateServiceDirective<GenerationContext, PythonSettings> directive
-  ) {
-    // Copy-paste Smithy-Core's shape discovery mechanism to get a set of "known" shapes to Smithy-Core
+      GenerateServiceDirective<GenerationContext, PythonSettings> directive) {
+    // Copy-paste Smithy-Core's shape discovery mechanism to get a set of "known" shapes to
+    // Smithy-Core
     Set<Shape> knownShapes = new Walker(directive.model()).walkShapes(directive.service());
     Set<Shape> unknownShapes = directive.model().shapes().collect(Collectors.toSet());
     unknownShapes.removeAll(knownShapes);
@@ -508,6 +508,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
         writeEnumShape(shapeToGenerate.asEnumShape().get(), directive.context());
       } else if (shapeToGenerate.isUnionShape()) {
         writeUnionShape(shapeToGenerate.asUnionShape().get(), directive.context());
+      }
     }
   }
 
