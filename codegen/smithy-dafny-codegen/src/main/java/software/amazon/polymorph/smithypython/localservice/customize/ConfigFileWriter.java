@@ -34,104 +34,66 @@ public class ConfigFileWriter implements CustomFileWriter {
     GenerationContext codegenContext
   ) {
 
-//
-//    final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(
-//      LocalServiceTrait.class
-//    );
-//    final StructureShape configShape = codegenContext
-//      .model()
-//      .expectShape(localServiceTrait.getConfigId(), StructureShape.class);
-//
-//    String moduleName =
-//      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-//        codegenContext.settings().getService().getNamespace()
-//      );
-//    codegenContext
-//      .writerDelegator()
-//      .useFileWriter(
-//        moduleName + "/config.py",
-//        "",
-//        writer -> {
-//          DafnyNameResolver.importDafnyTypeForShape(
-//            writer,
-//            configShape.getId(),
-//            codegenContext
-//          );
-//
-//          writer.write(
-//            """
-//            class $L(Config):
-//                ""\"
-//                Smithy-modelled localService Config shape for this localService.
-//                ""\"
-//                ${C|}
-//
-//                def __init__(
-//                    self,
-//                    ${C|}
-//                ):
-//                    ${C|}
-//                    super().__init__()
-//                    ${C|}
-//
-//            def dafny_config_to_smithy_config(dafny_config) -> $L:
-//                ""\"
-//                Converts the provided Dafny shape for this localService's config
-//                into the corresponding Smithy-modelled shape.
-//                ""\"
-//                ${C|}
-//
-//            def smithy_config_to_dafny_config(smithy_config) -> $L:
-//                ""\"
-//                Converts the provided Smithy-modelled shape for this localService's config
-//                into the corresponding Dafny shape.
-//                ""\"
-//                ${C|}
-//            """,
-//            configShape.getId().getName(),
-//            writer.consumer(w ->
-//              generateConfigClassFields(configShape, codegenContext, w)
-//            ),
-//            writer.consumer(w ->
-//              generateConfigConstructorParameters(
-//                configShape,
-//                codegenContext,
-//                w
-//              )
-//            ),
-//            writer.consumer(w ->
-//              generateConfigConstructorDocumentation(
-//                configShape,
-//                codegenContext,
-//                w
-//              )
-//            ),
-//            writer.consumer(w ->
-//              generateConfigConstructorFieldAssignments(
-//                configShape,
-//                codegenContext,
-//                w
-//              )
-//            ),
-//            configShape.getId().getName(),
-//            writer.consumer(w ->
-//              generateDafnyConfigToSmithyConfigFunctionBody(
-//                configShape,
-//                codegenContext,
-//                w
-//              )
-//            ),
-//            DafnyNameResolver.getDafnyTypeForShape(configShape.getId()),
-//            writer.consumer(w ->
-//              generateSmithyConfigToDafnyConfigFunctionBody(
-//                configShape,
-//                codegenContext,
-//                w
-//              )
-//            )
-//          );
-//        }
-//      );
+    return;
+
+    final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(
+      LocalServiceTrait.class
+    );
+    final StructureShape configShape = codegenContext
+      .model()
+      .expectShape(localServiceTrait.getConfigId(), StructureShape.class);
+
+    String moduleName =
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        codegenContext.settings().getService().getNamespace()
+      );
+    codegenContext
+      .writerDelegator()
+      .useFileWriter(
+        moduleName + "/config.py",
+        "",
+        writer -> {
+          DafnyNameResolver.importDafnyTypeForShape(
+            writer,
+            configShape.getId(),
+            codegenContext
+          );
+
+          writer.write(
+            """
+            def dafny_config_to_smithy_config(dafny_config) -> $L:
+                ""\"
+                Converts the provided Dafny shape for this localService's config
+                into the corresponding Smithy-modelled shape.
+                ""\"
+                ${C|}
+
+            def smithy_config_to_dafny_config(smithy_config) -> $L:
+                ""\"
+                Converts the provided Smithy-modelled shape for this localService's config
+                into the corresponding Dafny shape.
+                ""\"
+                ${C|}
+            """,
+            configShape.getId().getName(),
+            writer.consumer(w ->
+              generateDafnyConfigToSmithyConfigFunctionBody(
+                configShape,
+                codegenContext,
+                w
+              )
+            ),
+            DafnyNameResolver.getDafnyTypeForShape(configShape.getId()),
+            writer.consumer(w ->
+              generateSmithyConfigToDafnyConfigFunctionBody(
+                configShape,
+                codegenContext,
+                w
+              )
+            )
+          );
+        }
+      );
   }
 
   /**
