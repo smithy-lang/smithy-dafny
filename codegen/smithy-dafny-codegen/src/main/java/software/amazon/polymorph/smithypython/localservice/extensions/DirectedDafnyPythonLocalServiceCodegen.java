@@ -356,7 +356,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
       context
         .writerDelegator()
         .useShapeWriter(
-          shape,
+          enumShape,
           writer -> {
             EnumGenerator generator = new EnumGenerator(
               context.model(),
