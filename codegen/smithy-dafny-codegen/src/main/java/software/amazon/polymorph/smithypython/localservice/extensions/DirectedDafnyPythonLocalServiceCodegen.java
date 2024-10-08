@@ -548,6 +548,35 @@ public class DirectedDafnyPythonLocalServiceCodegen
           }
         }
 
+        if (shapeToGenerate.isResourceShape()) {
+          if (
+            ReferencesFileWriter.shouldGenerateResourceForShape(
+              shapeToGenerate.asResourceShape().get(),
+              directive.context()
+            )
+          ) {
+            String moduleName =
+              SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                directive.context().settings().getService().getNamespace()
+              );
+            directive
+              .context()
+              .writerDelegator()
+              .useFileWriter(
+                moduleName + "/references.py",
+                "",
+                writer -> {
+                  new ReferencesFileWriter()
+                    .generateResourceInterfaceAndImplementation(
+                      shapeToGenerate.asResourceShape().get(),
+                      directive.context(),
+                      writer
+                    );
+                }
+              );
+          }
+        }
+
 
       }
     }
