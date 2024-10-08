@@ -345,6 +345,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
         .equals(context.settings().getService().getNamespace())
     ) {
       EnumShape enumShape;
+      System.out.println("maybe enum " + shape.getId());
       if (shape.isEnumShape()) {
         enumShape = shape.asEnumShape().get();
       } else if (shape.isStringShape()) {
