@@ -7,6 +7,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -100,8 +101,9 @@ public class DafnyPythonLocalServiceStructureGenerator
     });
 
     writer.indent();
-    writer.write("super().__init__(message)");
 
+    writeClassDocs(false);
+    writer.write("super().__init__()");
 
     Stream.concat(requiredMembers.stream(), optionalMembers.stream()).forEach(member -> {
       String memberName = symbolProvider.toMemberName(member);
@@ -262,7 +264,10 @@ public class DafnyPythonLocalServiceStructureGenerator
       );
     }
 
-    if (target.hasTrait(ReferenceTrait.class)) {
+    // Reference shapes require forward reference to avoid circular import,
+    // but AWS SDKs don't
+    if (target.hasTrait(ReferenceTrait.class)
+      && !AwsSdkNameResolver.isAwsSdkShape(target)) {
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
@@ -446,12 +451,15 @@ public class DafnyPythonLocalServiceStructureGenerator
         for (MemberShape memberShape : shape.members()) {
           var target = model.expectShape(memberShape.getTarget());
           if (target.hasTrait(ReferenceTrait.class)) {
-            Symbol targetSymbol = symbolProvider.toSymbol(target);
-            writer.write(
-              "from $L import $L",
-              targetSymbol.getNamespace(),
-              targetSymbol.getName()
-            );
+            // Don't need to import boto3 BaseClient
+            if (!AwsSdkNameResolver.isAwsSdkShape(target)) {
+              Symbol targetSymbol = symbolProvider.toSymbol(target);
+              writer.write(
+                "from $L import $L",
+                targetSymbol.getNamespace(),
+                targetSymbol.getName()
+              );
+            }
           }
         }
 
