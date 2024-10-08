@@ -12,7 +12,7 @@ plugins {
 description = "Convert Native Java Types to Dafny Runtime Types and vice versa"
 group = "software.amazon.smithy.dafny"
 var artifactId = "conversion"
-version = "0.1"
+version = "0.1.1"
 
 var moduleName = "%s.%s".format(group, artifactId)
 var displayName = "Smithy :: Dafny :: Conversion"
@@ -116,6 +116,25 @@ fun maybeCodeArtifact(buildGradle: Build_gradle, repositoryHandler: RepositoryHa
                 username = "aws"
                 password = buildGradle.caPassword!!
             }
+        }
+    }
+}
+
+signing {
+    // Signing is required if building a release version and if we're going to publish it.
+    // Otherwise, signing will only occur if signatory credentials are configured.
+    setRequired({
+         gradle.getTaskGraph().hasTask("publish") 
+    })
+
+    sign(publishing.publications["mavenJava"])
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://aws.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://aws.oss.sonatype.org/content/repositories/snapshots/"))
         }
     }
 }
