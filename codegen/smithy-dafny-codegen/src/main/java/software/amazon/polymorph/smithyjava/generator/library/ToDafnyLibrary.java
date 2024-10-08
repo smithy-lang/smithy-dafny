@@ -16,7 +16,6 @@ import com.squareup.javapoet.WildcardTypeName;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
@@ -179,7 +178,7 @@ public class ToDafnyLibrary extends ToDafny {
     );
     return method
       .addStatement(
-        "return $T.create_Opaque($L, dafny.DafnySequence.asString(Objects.nonNull($L.getMessage()) ? $L.getMessage() : \"\"))",
+        "return $T.create_Opaque($L, dafny.DafnySequence.asString(java.util.Objects.nonNull($L.getMessage()) ? $L.getMessage() : \"\"))",
         dafnyError,
         VAR_INPUT,
         VAR_INPUT,
@@ -199,7 +198,7 @@ public class ToDafnyLibrary extends ToDafny {
       .addModifiers(PUBLIC_STATIC)
       .addParameter(opaqueError, VAR_INPUT)
       .addStatement(
-        "return $T.create_Opaque($L.obj(), dafny.DafnySequence.asString(Objects.nonNull($L.alt_text()) ? $L.alt_text() : \"\"))",
+        "return $T.create_Opaque($L.obj(), dafny.DafnySequence.asString(java.util.Objects.nonNull($L.alt_text()) ? $L.alt_text() : \"\"))",
         dafnyError,
         VAR_INPUT,
         VAR_INPUT,
