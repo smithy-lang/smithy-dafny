@@ -65,8 +65,7 @@ public class ToDafny {
       final int limit
     ) {
       byte[] rawArray = new byte[limit - start];
-      byteBuffer.position(start);
-      byteBuffer.get(rawArray, 0, limit);
+      byteBuffer.get(rawArray, start - byteBuffer.position(), limit);
       return ByteSequence(rawArray);
     }
 
