@@ -109,7 +109,6 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
         serviceShape
       );
     transformedModel = transformStringEnumShapesToEnumShapes(transformedModel);
-    transformedModel = transformServiceShapeToAddOrphanedShapes(transformedModel, serviceShape);
     return transformedModel;
   }
 
@@ -210,64 +209,6 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
           }
         }
       );
-  }
-
-  /**
-   * Smithy plugins require that resource shapes are attached to a ServiceShape.
-   * Smithy plugins also do not understand Polymorph's {@link ReferenceTrait} and will not
-   * discover the linked shape.
-   * This parses Polymorph's ReferenceTrait to attach any referenced resources to the {@param serviceShape}
-   * so the Smithy plugin's shape discovery can find the shape.
-   * @param model
-   * @return
-   */
-  public static Model transformServiceShapeToAddOrphanedShapes(
-    Model model,
-    ServiceShape serviceShape
-  ) {
-    return model;
-//    ServiceShape.Builder transformedServiceShapeBuilder =
-//      serviceShape.toBuilder();
-//
-//    Shape configShape = model.expectShape(serviceShape.getTrait(LocalServiceTrait.class).get().getConfigId());
-//
-//    transformedServiceShapeBuilder.addMixin(
-//      MemberShape.builder()
-//        .target(configShape.getId())
-//        .id(ShapeId.from(serviceShape.getId() + "$" + configShape.getId().getName()))
-//        .build()
-//    );
-
-//    ModelTransformer
-//      .create()
-//      .mapShapes(
-//        model,
-//        shape -> {
-//          if (!knownShapes.contains(shape)
-//          && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
-//          && (shape.isStructureShape() || shape.isUnionShape())
-//          && !serviceShape.getOperations().contains(shape.getId())
-//          ) {
-//            System.out.println("not in: " + shape.getId());
-//          }
-//          return shape;
-//        }
-//      );
-//
-//    System.out.println("size = " + TopologicalIndex.of(model).getRecursiveShapes().size());
-//
-//    return ModelTransformer
-//      .create()
-//      .mapShapes(
-//        model,
-//        shape -> {
-//          if (shape.getId().equals(serviceShape.getId())) {
-//            return transformedServiceShapeBuilder.build();
-//          } else {
-//            return shape;
-//          }
-//        }
-//      );
   }
 
   /**
