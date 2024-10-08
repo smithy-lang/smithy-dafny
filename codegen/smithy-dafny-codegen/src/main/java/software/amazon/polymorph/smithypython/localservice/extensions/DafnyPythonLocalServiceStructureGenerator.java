@@ -453,6 +453,7 @@ public class DafnyPythonLocalServiceStructureGenerator
           if (target.hasTrait(ReferenceTrait.class)) {
             // Don't need to import boto3 BaseClient
             if (!AwsSdkNameResolver.isAwsSdkShape(target)) {
+              System.out.println("boto3 target: " + target);
               Symbol targetSymbol = symbolProvider.toSymbol(target);
               writer.write(
                 "from $L import $L",
