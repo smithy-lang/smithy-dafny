@@ -66,14 +66,23 @@ public class DafnyPythonLocalServiceStructureGenerator
   }
 
   /**
-   * Renders a normal, non-error structure.
+   * Renders a LocalService's Config shape in config.py.
+   * LocalService Config shapes are special:
+   * - They extend the default Smithy-Python Config
+   * - Their __init__ methods call super.__init__() to init Smithy-Python Config.
+   * Most of this is lifted directly from Smithy-Python; the changed components are
+   * called out with comments saying "Component below is changed from Smithy-Python."
    */
   protected void renderLocalServiceConfigShape() {
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Any");
     var symbol = symbolProvider.toSymbol(shape);
+    // Component below is changed from Smithy-Python.
+    // Write special class that extends parent class.
     writer.openBlock("class $L(Config):", "", symbol.getName(), () -> {
       writeProperties(false);
+      // Component below is changed from Smithy-Python.
+      // Write special __init__ that initializes parent class.
       writeLocalServiceInit();
       writeAsDict(false);
       writeFromDict(false);
@@ -83,9 +92,12 @@ public class DafnyPythonLocalServiceStructureGenerator
     writer.write("");
   }
 
-
+  /**
+   * Writes an __init__ method for a LocalService Config shape.
+   * Most of this is lifted directly from Smithy-Python; the changed components are
+   * called out with comments saying "Component below is changed from Smithy-Python."
+   */
   protected void writeLocalServiceInit() {
-
     writer.openBlock("def __init__(", "):", () -> {
       writer.write("self,");
       if (!shape.members().isEmpty()) {
@@ -103,6 +115,8 @@ public class DafnyPythonLocalServiceStructureGenerator
     writer.indent();
 
     writeClassDocs(false);
+    // Component below is changed from Smithy-Python.
+    // Initialize parent Config.
     writer.write("super().__init__()");
 
     Stream.concat(requiredMembers.stream(), optionalMembers.stream()).forEach(member -> {

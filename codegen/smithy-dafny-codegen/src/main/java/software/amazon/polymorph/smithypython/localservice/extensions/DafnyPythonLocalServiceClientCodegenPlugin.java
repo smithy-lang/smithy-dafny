@@ -4,21 +4,18 @@
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.JavaDocTrait;
-import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
-import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.neighbor.Walker;
-import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.shapes.AbstractShapeBuilder;
+import software.amazon.smithy.model.shapes.EnumShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.transform.ModelTransformer;
