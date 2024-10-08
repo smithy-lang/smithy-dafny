@@ -605,6 +605,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                 .toSymbol(
                   awsNormalizedModel.expectShape(error.toShapeId())
                 ).getName();
+                w.addImport("errors");
                 w.write(
                   """
                     var $L *$L
