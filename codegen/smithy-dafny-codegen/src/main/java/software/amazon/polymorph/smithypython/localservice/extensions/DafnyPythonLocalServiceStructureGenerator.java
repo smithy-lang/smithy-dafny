@@ -265,7 +265,7 @@ public class DafnyPythonLocalServiceStructureGenerator
     }
 
     // Reference shapes require forward reference to avoid circular import,
-    // but AWS SDKs don't
+    // but references to AWS SDKs don't
     if (target.hasTrait(ReferenceTrait.class)
       && !AwsSdkNameResolver.isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())) {
       Shape referentShape = model.expectShape(
@@ -361,7 +361,10 @@ public class DafnyPythonLocalServiceStructureGenerator
       );
     }
 
-    if (target.hasTrait(ReferenceTrait.class)) {
+    // Reference shapes require forward reference to avoid circular import,
+    // but references to AWS SDKs don't
+    if (target.hasTrait(ReferenceTrait.class)
+      && !AwsSdkNameResolver.isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())) {
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
@@ -397,7 +400,10 @@ public class DafnyPythonLocalServiceStructureGenerator
   ) {
     Shape target = model.expectShape(memberShape.getTarget());
 
-    if (target.hasTrait(ReferenceTrait.class)) {
+    // Reference shapes require forward reference to avoid circular import,
+    // but references to AWS SDKs don't
+    if (target.hasTrait(ReferenceTrait.class)
+      && !AwsSdkNameResolver.isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())) {
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
@@ -451,15 +457,13 @@ public class DafnyPythonLocalServiceStructureGenerator
           // Import within function to avoid circular imports from top-level imports
           for (MemberShape memberShape : shape.members()) {
             var target = model.expectShape(memberShape.getTarget());
-            if (target.hasTrait(ReferenceTrait.class)) {
-              // Don't need to import boto3 BaseClient
-              if (!AwsSdkNameResolver.isAwsSdkShape(
-                  target.getTrait(ReferenceTrait.class).get().getReferentId())) {
-                System.out.println("boto3 target: " + target);
+            // Reference shapes require forward reference to avoid circular import,
+            // but references to AWS SDKs don't
+            if (target.hasTrait(ReferenceTrait.class)
+              && !AwsSdkNameResolver.isAwsSdkShape(target.getTrait(ReferenceTrait.class).get().getReferentId())) {
                 Symbol targetSymbol = symbolProvider.toSymbol(target);
                 writer.write(
                     "from $L import $L", targetSymbol.getNamespace(), targetSymbol.getName());
-              }
             }
           }
 
