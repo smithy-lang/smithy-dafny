@@ -428,7 +428,16 @@ public class ErrorsFileWriter implements CustomFileWriter {
     writer.write(
       """
       else:
-          return $L.Error_Opaque(obj=e, alt__text=repr(e))
+          return $L.Error_Opaque(obj=e, alt__text=_dafny.Seq(
+            repr(e).join(
+                [
+                    chr(int.from_bytes(pair, "big"))
+                    for pair in zip(
+                        *[iter(native_input.version.encode("utf-16-be"))] * 2
+                    )
+                ]
+            )
+        ))
       """,
       DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
         serviceShape.getId(),
