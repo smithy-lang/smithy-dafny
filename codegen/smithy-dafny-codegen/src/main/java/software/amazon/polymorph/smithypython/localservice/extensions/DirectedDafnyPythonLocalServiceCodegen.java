@@ -19,6 +19,7 @@ import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.codegen.core.directed.*;
 import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.*;
 
@@ -330,11 +331,11 @@ public class DirectedDafnyPythonLocalServiceCodegen
   public void generateEnumShape(
     GenerateEnumDirective<GenerationContext, PythonSettings> directive
   ) {
-    writeEnumShape(directive.shape().asEnumShape().get(), directive.context());
+    writeEnumShape(directive.shape(), directive.context());
   }
 
   protected void writeEnumShape(
-    EnumShape shape,
+    Shape shape,
     GenerationContext context
   ) {
     if (
@@ -343,6 +344,15 @@ public class DirectedDafnyPythonLocalServiceCodegen
         .getNamespace()
         .equals(context.settings().getService().getNamespace())
     ) {
+      EnumShape enumShape;
+      if (shape.isEnumShape()) {
+        enumShape = shape.asEnumShape().get();
+      } else if (shape.isStringShape()) {
+        enumShape = EnumShape.fromStringShape(shape.asStringShape().get()).get();
+      } else {
+        throw new IllegalArgumentException("Shape cannot be interpreted as EnumShape: " + shape.getId());
+      }
+
       context
         .writerDelegator()
         .useShapeWriter(
@@ -352,7 +362,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
               context.model(),
               context.symbolProvider(),
               writer,
-              shape
+              enumShape
             );
             generator.run();
           }
