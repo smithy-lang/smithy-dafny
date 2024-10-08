@@ -252,7 +252,7 @@ public class StructureGenerator implements Runnable {
             && (target.isDocumentShape() || target.isListShape() || target.isMapShape());
     }
 
-    private void writeClassDocs(boolean isError) {
+    protected void writeClassDocs(boolean isError) {
         if (hasDocs()) {
             writer.writeDocs(() -> {
                 shape.getTrait(DocumentationTrait.class).ifPresent(trait -> {

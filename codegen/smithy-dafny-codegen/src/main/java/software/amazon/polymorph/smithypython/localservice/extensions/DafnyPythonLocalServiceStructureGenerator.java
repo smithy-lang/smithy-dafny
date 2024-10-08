@@ -5,8 +5,11 @@ import static software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkN
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import java.util.Set;
+import java.util.stream.Stream;
+
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
@@ -16,6 +19,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.NullableIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.*;
 import software.amazon.smithy.python.codegen.PythonSettings;
@@ -45,15 +49,70 @@ public class DafnyPythonLocalServiceStructureGenerator
 
   @Override
   public void run() {
+    Set<ShapeId> localServiceConfigShapes =
+      SmithyNameResolver.getLocalServiceConfigShapes(model);
+
     if (shape.hasTrait(PositionalTrait.class)) {
       // Do not need to render shapes with positional trait, their linked shapes are rendered
       return;
-    }
-    if (!shape.hasTrait(ErrorTrait.class)) {
+    } else if (localServiceConfigShapes.contains(shape.getId())) {
+      renderLocalServiceConfigShape();
+    } else if (!shape.hasTrait(ErrorTrait.class)) {
       renderStructure();
     } else {
       renderError();
     }
+  }
+
+  /**
+   * Renders a normal, non-error structure.
+   */
+  protected void renderLocalServiceConfigShape() {
+    writer.addStdlibImport("typing", "Dict");
+    writer.addStdlibImport("typing", "Any");
+    var symbol = symbolProvider.toSymbol(shape);
+    writer.openBlock("class $L(Config):", "", symbol.getName(), () -> {
+      writeProperties(false);
+      writeLocalServiceInit(false);
+      writeAsDict(false);
+      writeFromDict(false);
+      writeRepr(false);
+      writeEq(false);
+    });
+    writer.write("");
+  }
+
+
+  protected void writeLocalServiceInit() {
+
+    writer.openBlock("def __init__(", "):", () -> {
+      writer.write("self,");
+      if (!shape.members().isEmpty()) {
+        // Adding this star to the front prevents the use of positional arguments.
+        writer.write("*,");
+      }
+      for (MemberShape member : requiredMembers) {
+        writeInitMethodParameterForRequiredMember(false, member);
+      }
+      for (MemberShape member : optionalMembers) {
+        writeInitMethodParameterForOptionalMember(false, member);
+      }
+    });
+
+    writer.indent();
+    writer.write("super().__init__(message)");
+
+
+    Stream.concat(requiredMembers.stream(), optionalMembers.stream()).forEach(member -> {
+      String memberName = symbolProvider.toMemberName(member);
+      if (isOptionalDefault(member)) {
+        writeInitMethodAssignerForOptionalMember(member, memberName);
+      } else {
+        writeInitMethodAssignerForRequiredMember(member, memberName);
+      }
+    });
+    writer.dedent();
+    writer.write("");
   }
 
   /**
