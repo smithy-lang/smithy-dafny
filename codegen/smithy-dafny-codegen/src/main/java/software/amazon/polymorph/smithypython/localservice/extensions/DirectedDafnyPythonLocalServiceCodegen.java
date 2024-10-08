@@ -7,6 +7,7 @@ import static java.lang.String.format;
 import static software.amazon.polymorph.utils.ModelUtils.getTopologicallyOrderedOrphanedShapesForService;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Logger;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
