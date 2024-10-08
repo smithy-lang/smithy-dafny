@@ -492,6 +492,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
     while(var9.hasNext()) {
       Shape shapeToGenerate = (Shape)var9.next();
       if (unknownShapes.contains(shapeToGenerate)) {
+
         if (shapeToGenerate.isUnionShape()) {
           if (
             shapeToGenerate
@@ -518,6 +519,36 @@ public class DirectedDafnyPythonLocalServiceCodegen
               );
           }
         }
+
+        if (shapeToGenerate.isStructureShape()) {
+          if (
+            shapeToGenerate
+              .getId().getNamespace()
+              .equals(directive.context().settings().getService().getNamespace())
+          ) {
+            System.out.println("doing " + shapeToGenerate.getId());
+            directive
+              .context()
+              .writerDelegator()
+              .useShapeWriter(
+                shapeToGenerate,
+                writer -> {
+                  DafnyPythonLocalServiceStructureGenerator generator =
+                    new DafnyPythonLocalServiceStructureGenerator(
+                      directive.model(),
+                      directive.settings(),
+                      directive.symbolProvider(),
+                      writer,
+                      shapeToGenerate.asStructureShape().get(),
+                      topologicalIndex.getRecursiveShapes()
+                    );
+                  generator.run();
+                }
+              );
+          }
+        }
+
+
       }
     }
 
