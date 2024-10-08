@@ -69,10 +69,6 @@ public class NativeWrapperCodegen {
       model.expectShape(resourceShapeId, ResourceShape.class);
     this.nameResolver = nameResolver;
     this.resourceShapeId = resourceShapeId;
-    System.out.println("serviceShape");
-    System.out.println(serviceShape);
-    System.out.println("resourceShape");
-    System.out.println(resourceShape);
   }
 
   /**
@@ -394,7 +390,6 @@ public class NativeWrapperCodegen {
   ) {
     final String catchStatement = "catch(%s e)".formatted(caughtException);
     final TokenTree caughtStatement = TokenTree.of(
-      //      "return %s.create_Failure(%s(e, Dafny.Sequence<char>.FromString(e.ToString())));".formatted(
       "return %s.create_Failure(%s(e));".formatted(
           dafnyOutput,
           nameResolver.qualifiedTypeConverterForCommonError(

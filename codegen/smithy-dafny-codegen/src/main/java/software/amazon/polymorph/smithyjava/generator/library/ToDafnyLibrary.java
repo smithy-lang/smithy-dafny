@@ -178,8 +178,10 @@ public class ToDafnyLibrary extends ToDafny {
     );
     return method
       .addStatement(
-        "return $T.create_Opaque($L, dafny.DafnySequence.asString(\"\"))",
+        "return $T.create_Opaque($L, dafny.DafnySequence.asString(dafny.DafnySequence.asString(Objects.nonNull($L.getMessage()) ? $L.getMessage() : \"\")))",
         dafnyError,
+        VAR_INPUT,
+        VAR_INPUT,
         VAR_INPUT
       )
       .build();
@@ -196,8 +198,9 @@ public class ToDafnyLibrary extends ToDafny {
       .addModifiers(PUBLIC_STATIC)
       .addParameter(opaqueError, VAR_INPUT)
       .addStatement(
-        "return $T.create_Opaque($L.obj(), dafny.DafnySequence.asString($L.alt_text()))",
+        "return $T.create_Opaque($L.obj(), dafny.DafnySequence.asString(Objects.nonNull($L.alt_text()) ? $L.alt_text() : \"\"))",
         dafnyError,
+        VAR_INPUT,
         VAR_INPUT,
         VAR_INPUT
       )
