@@ -225,6 +225,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin
     Model model,
     ServiceShape serviceShape
   ) {
+    return model;
 //    ServiceShape.Builder transformedServiceShapeBuilder =
 //      serviceShape.toBuilder();
 //
