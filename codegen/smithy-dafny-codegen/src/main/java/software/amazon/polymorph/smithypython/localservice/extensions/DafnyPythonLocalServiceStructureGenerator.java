@@ -6,7 +6,6 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import java.util.Set;
 import java.util.stream.Stream;
-
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
@@ -79,16 +78,21 @@ public class DafnyPythonLocalServiceStructureGenerator
     var symbol = symbolProvider.toSymbol(shape);
     // Component below is changed from Smithy-Python.
     // Write special class that extends parent class.
-    writer.openBlock("class $L(Config):", "", symbol.getName(), () -> {
-      writeProperties(false);
-      // Component below is changed from Smithy-Python.
-      // Write special __init__ that initializes parent class.
-      writeLocalServiceInit();
-      writeAsDict(false);
-      writeFromDict(false);
-      writeRepr(false);
-      writeEq(false);
-    });
+    writer.openBlock(
+      "class $L(Config):",
+      "",
+      symbol.getName(),
+      () -> {
+        writeProperties(false);
+        // Component below is changed from Smithy-Python.
+        // Write special __init__ that initializes parent class.
+        writeLocalServiceInit();
+        writeAsDict(false);
+        writeFromDict(false);
+        writeRepr(false);
+        writeEq(false);
+      }
+    );
     writer.write("");
   }
 
@@ -98,19 +102,23 @@ public class DafnyPythonLocalServiceStructureGenerator
    * called out with comments saying "Component below is changed from Smithy-Python."
    */
   protected void writeLocalServiceInit() {
-    writer.openBlock("def __init__(", "):", () -> {
-      writer.write("self,");
-      if (!shape.members().isEmpty()) {
-        // Adding this star to the front prevents the use of positional arguments.
-        writer.write("*,");
+    writer.openBlock(
+      "def __init__(",
+      "):",
+      () -> {
+        writer.write("self,");
+        if (!shape.members().isEmpty()) {
+          // Adding this star to the front prevents the use of positional arguments.
+          writer.write("*,");
+        }
+        for (MemberShape member : requiredMembers) {
+          writeInitMethodParameterForRequiredMember(false, member);
+        }
+        for (MemberShape member : optionalMembers) {
+          writeInitMethodParameterForOptionalMember(false, member);
+        }
       }
-      for (MemberShape member : requiredMembers) {
-        writeInitMethodParameterForRequiredMember(false, member);
-      }
-      for (MemberShape member : optionalMembers) {
-        writeInitMethodParameterForOptionalMember(false, member);
-      }
-    });
+    );
 
     writer.indent();
 
@@ -119,14 +127,16 @@ public class DafnyPythonLocalServiceStructureGenerator
     // Initialize parent Config.
     writer.write("super().__init__()");
 
-    Stream.concat(requiredMembers.stream(), optionalMembers.stream()).forEach(member -> {
-      String memberName = symbolProvider.toMemberName(member);
-      if (isOptionalDefault(member)) {
-        writeInitMethodAssignerForOptionalMember(member, memberName);
-      } else {
-        writeInitMethodAssignerForRequiredMember(member, memberName);
-      }
-    });
+    Stream
+      .concat(requiredMembers.stream(), optionalMembers.stream())
+      .forEach(member -> {
+        String memberName = symbolProvider.toMemberName(member);
+        if (isOptionalDefault(member)) {
+          writeInitMethodAssignerForOptionalMember(member, memberName);
+        } else {
+          writeInitMethodAssignerForRequiredMember(member, memberName);
+        }
+      });
     writer.dedent();
     writer.write("");
   }
@@ -280,8 +290,12 @@ public class DafnyPythonLocalServiceStructureGenerator
 
     // Reference shapes require forward reference to avoid circular import,
     // but references to AWS SDKs don't
-    if (target.hasTrait(ReferenceTrait.class)
-      && !AwsSdkNameResolver.isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())) {
+    if (
+      target.hasTrait(ReferenceTrait.class) &&
+      !AwsSdkNameResolver.isAwsSdkShape(
+        target.expectTrait(ReferenceTrait.class).getReferentId()
+      )
+    ) {
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
@@ -377,8 +391,12 @@ public class DafnyPythonLocalServiceStructureGenerator
 
     // Reference shapes require forward reference to avoid circular import,
     // but references to AWS SDKs don't
-    if (target.hasTrait(ReferenceTrait.class)
-      && !AwsSdkNameResolver.isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())) {
+    if (
+      target.hasTrait(ReferenceTrait.class) &&
+      !AwsSdkNameResolver.isAwsSdkShape(
+        target.expectTrait(ReferenceTrait.class).getReferentId()
+      )
+    ) {
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
@@ -416,8 +434,12 @@ public class DafnyPythonLocalServiceStructureGenerator
 
     // Reference shapes require forward reference to avoid circular import,
     // but references to AWS SDKs don't
-    if (target.hasTrait(ReferenceTrait.class)
-      && !AwsSdkNameResolver.isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())) {
+    if (
+      target.hasTrait(ReferenceTrait.class) &&
+      !AwsSdkNameResolver.isAwsSdkShape(
+        target.expectTrait(ReferenceTrait.class).getReferentId()
+      )
+    ) {
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
@@ -452,110 +474,141 @@ public class DafnyPythonLocalServiceStructureGenerator
     writer.write("@staticmethod");
     var shapeName = symbolProvider.toSymbol(shape).getName();
     writer.openBlock(
-        "def from_dict(d: Dict[str, Any]) -> $S:",
-        "",
-        shapeName,
-        () -> {
-          writer.writeDocs(
-              () -> {
-                writer.write("Creates a $L from a dictionary.\n", shapeName);
-              });
-
-          if (shape.members().isEmpty() && !isError) {
-            writer.write("return $L()", shapeName);
-            return;
-          }
-
-          // Block below is changed from Smithy-Python.
-          // Import any modules required for reference shapes to convert from_dict.
-          // Import within function to avoid circular imports from top-level imports
-          for (MemberShape memberShape : shape.members()) {
-            var target = model.expectShape(memberShape.getTarget());
-            // Reference shapes require forward reference to avoid circular import,
-            // but references to AWS SDKs don't
-            if (target.hasTrait(ReferenceTrait.class)
-              && !AwsSdkNameResolver.isAwsSdkShape(target.getTrait(ReferenceTrait.class).get().getReferentId())) {
-                Symbol targetSymbol = symbolProvider.toSymbol(target);
-                writer.write(
-                    "from $L import $L", targetSymbol.getNamespace(), targetSymbol.getName());
-            }
-          }
-
-          if (requiredMembers.isEmpty() && !isError) {
-            writer.write("kwargs: Dict[str, Any] = {}");
-          } else {
-            writer.openBlock(
-                "kwargs: Dict[str, Any] = {",
-                "}",
-                () -> {
-                  if (isError) {
-                    writer.write("'message': d['message'],");
-                  }
-                  for (MemberShape member : requiredMembers) {
-                    var memberName = symbolProvider.toMemberName(member);
-                    var target = model.expectShape(member.getTarget());
-                    Symbol targetSymbol = symbolProvider.toSymbol(target);
-                    // Block below is changed from Smithy-Python.
-                    // If passing a boto3 client, just pass the client.
-                    // Also, use snakecase member name inside the dictionary.
-                    if (target.hasTrait(ReferenceTrait.class)
-                        && target.expectTrait(ReferenceTrait.class).isService()
-                        && isAwsSdkShape(
-                            target.expectTrait(ReferenceTrait.class).getReferentId())) {
-                      writer.write("$S: d[$S],", memberName, memberName);
-                    } else if (target.isStructureShape()) {
-                      writer.write(
-                          "$S: $L.from_dict(d[$S]),",
-                          memberName,
-                          targetSymbol.getName(),
-                          memberName);
-                    } else if (targetSymbol.getProperty("fromDict").isPresent()) {
-                      var targetFromDictSymbol =
-                          targetSymbol.expectProperty("fromDict", Symbol.class);
-                      writer.write("$S: $T(d[$S]),", memberName, targetFromDictSymbol, memberName);
-                    } else {
-                      writer.write("$S: d[$S],", memberName, memberName);
-                    }
-                  }
-                });
-          }
-          writer.write("");
-
-          for (MemberShape member : optionalMembers) {
-            var memberName = symbolProvider.toMemberName(member);
-            var target = model.expectShape(member.getTarget());
-            writer.openBlock(
-                "if $S in d:",
-                "",
-                memberName,
-                () -> {
-                  var targetSymbol = symbolProvider.toSymbol(target);
-                  // Block below is changed from Smithy-Python.
-                  // If passing a boto3 client, just pass the client.
-                  // Also, use snakecase member name inside the dictionary.
-                  if (target.hasTrait(ReferenceTrait.class)
-                      && target.expectTrait(ReferenceTrait.class).isService()
-                      && isAwsSdkShape(target.expectTrait(ReferenceTrait.class).getReferentId())) {
-                    writer.write("kwargs[$S] = d[$S]", memberName, memberName);
-                  } else if (target.isStructureShape()) {
-                    writer.write(
-                        "kwargs[$S] = $L.from_dict(d[$S])",
-                        memberName,
-                        targetSymbol.getName(),
-                        memberName);
-                  } else if (targetSymbol.getProperty("fromDict").isPresent()) {
-                    var targetFromDictSymbol =
-                        targetSymbol.expectProperty("fromDict", Symbol.class);
-                    writer.write(
-                        "kwargs[$S] = $T(d[$S]),", memberName, targetFromDictSymbol, memberName);
-                  } else {
-                    writer.write("kwargs[$S] = d[$S]", memberName, memberName);
-                  }
-                });
-          }
-
-          writer.write("return $L(**kwargs)", shapeName);
+      "def from_dict(d: Dict[str, Any]) -> $S:",
+      "",
+      shapeName,
+      () -> {
+        writer.writeDocs(() -> {
+          writer.write("Creates a $L from a dictionary.\n", shapeName);
         });
+
+        if (shape.members().isEmpty() && !isError) {
+          writer.write("return $L()", shapeName);
+          return;
+        }
+
+        // Block below is changed from Smithy-Python.
+        // Import any modules required for reference shapes to convert from_dict.
+        // Import within function to avoid circular imports from top-level imports
+        for (MemberShape memberShape : shape.members()) {
+          var target = model.expectShape(memberShape.getTarget());
+          // Reference shapes require forward reference to avoid circular import,
+          // but references to AWS SDKs don't
+          if (
+            target.hasTrait(ReferenceTrait.class) &&
+            !AwsSdkNameResolver.isAwsSdkShape(
+              target.getTrait(ReferenceTrait.class).get().getReferentId()
+            )
+          ) {
+            Symbol targetSymbol = symbolProvider.toSymbol(target);
+            writer.write(
+              "from $L import $L",
+              targetSymbol.getNamespace(),
+              targetSymbol.getName()
+            );
+          }
+        }
+
+        if (requiredMembers.isEmpty() && !isError) {
+          writer.write("kwargs: Dict[str, Any] = {}");
+        } else {
+          writer.openBlock(
+            "kwargs: Dict[str, Any] = {",
+            "}",
+            () -> {
+              if (isError) {
+                writer.write("'message': d['message'],");
+              }
+              for (MemberShape member : requiredMembers) {
+                var memberName = symbolProvider.toMemberName(member);
+                var target = model.expectShape(member.getTarget());
+                Symbol targetSymbol = symbolProvider.toSymbol(target);
+                // Block below is changed from Smithy-Python.
+                // If passing a boto3 client, just pass the client.
+                // Also, use snakecase member name inside the dictionary.
+                if (
+                  target.hasTrait(ReferenceTrait.class) &&
+                  target.expectTrait(ReferenceTrait.class).isService() &&
+                  isAwsSdkShape(
+                    target.expectTrait(ReferenceTrait.class).getReferentId()
+                  )
+                ) {
+                  writer.write("$S: d[$S],", memberName, memberName);
+                } else if (target.isStructureShape()) {
+                  writer.write(
+                    "$S: $L.from_dict(d[$S]),",
+                    memberName,
+                    targetSymbol.getName(),
+                    memberName
+                  );
+                } else if (targetSymbol.getProperty("fromDict").isPresent()) {
+                  var targetFromDictSymbol = targetSymbol.expectProperty(
+                    "fromDict",
+                    Symbol.class
+                  );
+                  writer.write(
+                    "$S: $T(d[$S]),",
+                    memberName,
+                    targetFromDictSymbol,
+                    memberName
+                  );
+                } else {
+                  writer.write("$S: d[$S],", memberName, memberName);
+                }
+              }
+            }
+          );
+        }
+        writer.write("");
+
+        for (MemberShape member : optionalMembers) {
+          var memberName = symbolProvider.toMemberName(member);
+          var target = model.expectShape(member.getTarget());
+          writer.openBlock(
+            "if $S in d:",
+            "",
+            memberName,
+            () -> {
+              var targetSymbol = symbolProvider.toSymbol(target);
+              // Block below is changed from Smithy-Python.
+              // If passing a boto3 client, just pass the client.
+              // Also, use snakecase member name inside the dictionary.
+              if (
+                target.hasTrait(ReferenceTrait.class) &&
+                target.expectTrait(ReferenceTrait.class).isService() &&
+                isAwsSdkShape(
+                  target.expectTrait(ReferenceTrait.class).getReferentId()
+                )
+              ) {
+                writer.write("kwargs[$S] = d[$S]", memberName, memberName);
+              } else if (target.isStructureShape()) {
+                writer.write(
+                  "kwargs[$S] = $L.from_dict(d[$S])",
+                  memberName,
+                  targetSymbol.getName(),
+                  memberName
+                );
+              } else if (targetSymbol.getProperty("fromDict").isPresent()) {
+                var targetFromDictSymbol = targetSymbol.expectProperty(
+                  "fromDict",
+                  Symbol.class
+                );
+                writer.write(
+                  "kwargs[$S] = $T(d[$S]),",
+                  memberName,
+                  targetFromDictSymbol,
+                  memberName
+                );
+              } else {
+                writer.write("kwargs[$S] = d[$S]", memberName, memberName);
+              }
+            }
+          );
+        }
+
+        writer.write("return $L(**kwargs)", shapeName);
+      }
+    );
     writer.write("");
   }
 

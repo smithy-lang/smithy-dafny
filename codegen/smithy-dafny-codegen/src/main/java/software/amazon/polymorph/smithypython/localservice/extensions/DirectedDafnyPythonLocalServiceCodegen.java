@@ -7,19 +7,14 @@ import static java.lang.String.format;
 import static software.amazon.polymorph.utils.ModelUtils.getTopologicallyOrderedOrphanedShapesForService;
 
 import java.nio.file.Path;
-import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.codegen.core.directed.*;
-import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.*;
-import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.*;
 
@@ -213,10 +208,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
     ResourceShape shape,
     GenerationContext context
   ) {
-    if (ReferencesFileWriter.shouldGenerateResourceForShape(
-      shape,
-      context
-    )) {
+    if (ReferencesFileWriter.shouldGenerateResourceForShape(shape, context)) {
       String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
           context.settings().getService().getNamespace()
@@ -297,7 +289,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
     GenerationContext context
   ) {
     if (
-     shape
+      shape
         .getId()
         .getNamespace()
         .equals(context.settings().getService().getNamespace())
@@ -334,10 +326,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
     writeEnumShape(directive.shape(), directive.context());
   }
 
-  protected void writeEnumShape(
-    Shape shape,
-    GenerationContext context
-  ) {
+  protected void writeEnumShape(Shape shape, GenerationContext context) {
     if (
       shape
         .getId()
@@ -345,13 +334,15 @@ public class DirectedDafnyPythonLocalServiceCodegen
         .equals(context.settings().getService().getNamespace())
     ) {
       EnumShape enumShape;
-      System.out.println("maybe enum " + shape.getId());
       if (shape.isEnumShape()) {
         enumShape = shape.asEnumShape().get();
       } else if (shape.isStringShape()) {
-        enumShape = EnumShape.fromStringShape(shape.asStringShape().get()).get();
+        enumShape =
+          EnumShape.fromStringShape(shape.asStringShape().get()).get();
       } else {
-        throw new IllegalArgumentException("Shape cannot be interpreted as EnumShape: " + shape.getId());
+        throw new IllegalArgumentException(
+          "Shape cannot be interpreted as EnumShape: " + shape.getId()
+        );
       }
 
       context
@@ -383,10 +374,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
     writeUnionShape(directive.shape(), directive.context());
   }
 
-  protected void writeUnionShape(
-    UnionShape shape,
-    GenerationContext context
-  ) {
+  protected void writeUnionShape(UnionShape shape, GenerationContext context) {
     if (
       shape
         .getId()
@@ -481,26 +469,41 @@ public class DirectedDafnyPythonLocalServiceCodegen
    * @param directive
    */
   protected void generateOrphanedShapesForService(
-      GenerateServiceDirective<GenerationContext, PythonSettings> directive) {
-
+    GenerateServiceDirective<GenerationContext, PythonSettings> directive
+  ) {
     List<Shape> orderedShapes = getTopologicallyOrderedOrphanedShapesForService(
-      directive.shape(), directive.model()
+      directive.shape(),
+      directive.model()
     );
 
     for (Shape shapeToGenerate : orderedShapes) {
       if (shapeToGenerate.isResourceShape()) {
-        writeResourceShape(shapeToGenerate.asResourceShape().get(), directive.context());
+        writeResourceShape(
+          shapeToGenerate.asResourceShape().get(),
+          directive.context()
+        );
       } else if (shapeToGenerate.isStructureShape()) {
-        StructureShape structureShape = shapeToGenerate.asStructureShape().get();
+        StructureShape structureShape = shapeToGenerate
+          .asStructureShape()
+          .get();
         if (structureShape.hasTrait(ErrorTrait.class)) {
-          writeStructureShapeWithErrorTrait(structureShape, directive.context());
+          writeStructureShapeWithErrorTrait(
+            structureShape,
+            directive.context()
+          );
         } else {
           writeStructureShape(structureShape, directive.context());
         }
       } else if (shapeToGenerate.isEnumShape()) {
-        writeEnumShape(shapeToGenerate.asEnumShape().get(), directive.context());
+        writeEnumShape(
+          shapeToGenerate.asEnumShape().get(),
+          directive.context()
+        );
       } else if (shapeToGenerate.isUnionShape()) {
-        writeUnionShape(shapeToGenerate.asUnionShape().get(), directive.context());
+        writeUnionShape(
+          shapeToGenerate.asUnionShape().get(),
+          directive.context()
+        );
       }
     }
   }
