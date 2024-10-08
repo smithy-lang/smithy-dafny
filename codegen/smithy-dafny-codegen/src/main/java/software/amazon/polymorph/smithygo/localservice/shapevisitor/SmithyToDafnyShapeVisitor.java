@@ -706,6 +706,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String timestampShape(TimestampShape shape) {
+    writer.addImport("time");
     return "Wrappers.Companion_Option_.Create_None_()";
   }
 }
