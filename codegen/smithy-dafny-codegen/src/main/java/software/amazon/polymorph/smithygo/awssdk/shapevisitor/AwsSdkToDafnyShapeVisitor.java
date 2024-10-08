@@ -635,6 +635,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String timestampShape(TimestampShape shape) {
+    writer.addImport("time");
     if (this.isOptional) {
       return "Wrappers.Companion_Option_.Create_None_()";
     }
