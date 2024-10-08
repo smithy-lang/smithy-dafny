@@ -1442,11 +1442,17 @@ public class DafnyLocalServiceTypeConversionProtocol
               .expectShape(referenceTrait.getReferentId());
             outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
             if (resourceOrService.isServiceShape()) {
-              outputType =
-              DafnyNameResolver.getDafnyClient(
-                serviceShape,
-                serviceShape.toShapeId().getName()
-              );
+              String sdkId = resourceOrService.toShapeId().getName();
+              if (sdkId.equals("DynamoDB_20120810") || sdkId.equals("TrentService")) {
+                outputType = DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) resourceOrService, resourceOrService.expectTrait(ServiceTrait.class));
+              }
+              else {
+                outputType =
+                  DafnyNameResolver.getDafnyClient(
+                    resourceOrService,
+                    sdkId
+                  );
+              }
             }
           }
           if (
