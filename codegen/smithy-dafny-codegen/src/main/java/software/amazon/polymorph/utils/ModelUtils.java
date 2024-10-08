@@ -736,13 +736,15 @@ public class ModelUtils {
 
     for (Shape shape : topologicalIndex.getOrderedShapes()) {
       if (orphanedShapes.contains(shape)
-      && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())) {
+      && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
+      && !shape.isMemberShape()) {
         orderedShapes.add(shape);
       }
     }
     for (Shape shape : topologicalIndex.getRecursiveShapes()) {
       if (orphanedShapes.contains(shape)
-        && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())) {
+        && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
+        && !shape.isMemberShape()) {
         orderedShapes.add(shape);
       }
     }
