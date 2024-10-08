@@ -738,16 +738,26 @@ public class ModelUtils {
     // 1. In the same namespace as the service. (Should only generate shapes in this service.)
     // 2. Not a member shape. (Member shapes don't have their own shapes generated for them.)
     for (Shape shape : topologicalIndex.getOrderedShapes()) {
-      if (orphanedShapes.contains(shape)
-      && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
-      && !shape.isMemberShape()) {
+      if (
+        orphanedShapes.contains(shape) &&
+        shape
+          .getId()
+          .getNamespace()
+          .equals(serviceShape.getId().getNamespace()) &&
+        !shape.isMemberShape()
+      ) {
         orderedShapes.add(shape);
       }
     }
     for (Shape shape : topologicalIndex.getRecursiveShapes()) {
-      if (orphanedShapes.contains(shape)
-        && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())
-        && !shape.isMemberShape()) {
+      if (
+        orphanedShapes.contains(shape) &&
+        shape
+          .getId()
+          .getNamespace()
+          .equals(serviceShape.getId().getNamespace()) &&
+        !shape.isMemberShape()
+      ) {
         orderedShapes.add(shape);
       }
     }
