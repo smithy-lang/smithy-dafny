@@ -429,11 +429,11 @@ public class ErrorsFileWriter implements CustomFileWriter {
       """
       else:
           return $L.Error_Opaque(obj=e, alt__text=_dafny.Seq(
-            repr(e).join(
+            "".join(
                 [
                     chr(int.from_bytes(pair, "big"))
                     for pair in zip(
-                        *[iter(native_input.version.encode("utf-16-be"))] * 2
+                        *[iter(repr(e).encode("utf-16-be"))] * 2
                     )
                 ]
             )
