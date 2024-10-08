@@ -34,7 +34,6 @@ public class ConfigFileWriter implements CustomFileWriter {
     GenerationContext codegenContext
   ) {
 
-    return;
 
     final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(
       LocalServiceTrait.class
@@ -61,20 +60,6 @@ public class ConfigFileWriter implements CustomFileWriter {
 
           writer.write(
             """
-            class $L(Config):
-                ""\"
-                Smithy-modelled localService Config shape for this localService.
-                ""\"
-                ${C|}
-
-                def __init__(
-                    self,
-                    ${C|}
-                ):
-                    ${C|}
-                    super().__init__()
-                    ${C|}
-
             def dafny_config_to_smithy_config(dafny_config) -> $L:
                 ""\"
                 Converts the provided Dafny shape for this localService's config
