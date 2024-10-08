@@ -424,6 +424,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
         serviceShape.getId().getNamespace()
       )
     );
+    writer.addStdlibImport("_dafny");
     // Nothing found, we know nothing about this error. Cast as opaque
     writer.write(
       """

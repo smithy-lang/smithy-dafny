@@ -146,6 +146,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       hasOpenedIfBlock = true;
     }
 
+    writer.addStdlibImport("_dafny");
     if (hasOpenedIfBlock) {
       // If `hasOpenedIfBlock` is false, then codegen never wrote any errors,
       // and this function should only cast to Opaque errors
