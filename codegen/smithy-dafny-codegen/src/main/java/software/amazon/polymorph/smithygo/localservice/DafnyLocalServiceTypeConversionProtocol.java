@@ -1023,10 +1023,10 @@ public class DafnyLocalServiceTypeConversionProtocol
                           kmsShapeNamespace,
                           ddbShapeNamespace,
                           DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-                          SmithyNameResolver.shapeNamespaceDafnyTranspiled(ddbShape),
+                          DafnyNameResolver.dafnyNamespace(ddbShape),
                           DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-                          SmithyNameResolver.shapeNamespaceDafnyTranspiled(kmsShape)
-                        );
+                          DafnyNameResolver.dafnyNamespace(kmsShape)
+                          );
                   } else if (kmsShapeId.isPresent() || ddbShapeId.isPresent()) {
                     var depShape = context.model().expectShape(kmsShapeId.isPresent() ? kmsShapeId.get() : ddbShapeId.get());
                     writer.addImportFromModule(
@@ -1045,7 +1045,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                       """,
                       SmithyNameResolver.shapeNamespace(depShape),
                       DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-                      SmithyNameResolver.shapeNamespaceDafnyTranspiled(depShape)
+                      DafnyNameResolver.dafnyNamespace(depShape)
                     );
                   }
                 }
@@ -1331,7 +1331,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                   shapeNamespace = depService.expectTrait(LocalServiceTrait.class).getSdkId();
                 }
                 else {
-                  shapeNamespace = SmithyNameResolver.shapeNamespaceDafnyTranspiled(depService);
+                  shapeNamespace = DafnyNameResolver.dafnyNamespace(depService);
                 }
                 w.write(
                   """
