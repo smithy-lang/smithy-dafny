@@ -734,6 +734,9 @@ public class ModelUtils {
 
     TopologicalIndex topologicalIndex = TopologicalIndex.of(model);
 
+    // Get orphaned shapes under the following conditions:
+    // 1. In the same namespace as the service. (Should only generate shapes in this service.)
+    // 2. Not a member shape. (Member shapes don't have their own shapes generated for them.)
     for (Shape shape : topologicalIndex.getOrderedShapes()) {
       if (orphanedShapes.contains(shape)
       && shape.getId().getNamespace().equals(serviceShape.getId().getNamespace())

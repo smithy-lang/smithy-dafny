@@ -505,6 +505,8 @@ public class DirectedDafnyPythonLocalServiceCodegen
           shapeToGenerate.asUnionShape().get(),
           directive.context()
         );
+      } else if (shapeToGenerate.isStringShape()) {
+        // Orphaned strings are apparently not generated for .NET/Java
       } else {
         // Add more as needed...
         throw new ClassCastException(
