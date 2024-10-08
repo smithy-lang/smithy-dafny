@@ -511,7 +511,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
                       directive.symbolProvider(),
                       writer,
                       shapeToGenerate.asUnionShape().get(),
-                      TopologicalIndex.of(directive.model()).getRecursiveShapes()
+                      topologicalIndex.getRecursiveShapes()
                     );
                   generator.run();
                 }
