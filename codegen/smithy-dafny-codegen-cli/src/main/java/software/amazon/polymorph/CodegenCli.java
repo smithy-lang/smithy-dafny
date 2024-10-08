@@ -131,10 +131,18 @@ public class CodegenCli {
       .withTargetLangOutputDirs(outputDirs)
       .withTargetLangTestOutputDirs(testOutputDirs)
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
-      .withLocalServiceTest(cliArguments.localServiceTest)
       .withDafnyVersion(cliArguments.dafnyVersion)
       .withUpdatePatchFiles(cliArguments.updatePatchFiles)
       .withGenerationAspects(cliArguments.generationAspects);
+    // Rust currently generates all code for all dependencies at once,
+    // and the makefile structure makes it very difficult to avoid passing --local-service-test
+    // when we don't actually want it for --aws-sdk style projects.
+    // For now just ignoring it with a warning.
+    if (outputDirs.containsKey(TargetLanguage.RUST) && cliArguments.awsSdkStyle && cliArguments.localServiceTest) {
+      LOGGER.warn("Ignoring --local-service-test because --output-rust and --aws-sdk are also present");
+    } else {
+      engineBuilder.withLocalServiceTest(cliArguments.localServiceTest);
+    }
     cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
     cliArguments.javaAwsSdkVersion.ifPresent(
       engineBuilder::withJavaAwsSdkVersion

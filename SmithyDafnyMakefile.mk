@@ -588,7 +588,7 @@ _mv_implementation_rust:
 
 patch_after_transpile_rust:
 	export service_deps_var=SERVICE_DEPS_$(MAIN_SERVICE_FOR_RUST) ; \
-  export namespace_var=SERVICE_NAMESPACE_$(MAIN_SERVICE_FOR_RUST) ; \
+	export namespace_var=SERVICE_NAMESPACE_$(MAIN_SERVICE_FOR_RUST) ; \
 	export SERVICE=$(MAIN_SERVICE_FOR_RUST) ; \
 	$(MAKE) _patch_after_transpile_rust ; \
 
