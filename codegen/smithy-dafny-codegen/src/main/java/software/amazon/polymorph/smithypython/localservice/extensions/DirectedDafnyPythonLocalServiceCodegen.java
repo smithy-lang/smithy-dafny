@@ -494,10 +494,8 @@ public class DirectedDafnyPythonLocalServiceCodegen
       if (unknownShapes.contains(shapeToGenerate)) {
         if (shapeToGenerate.isUnionShape()) {
           if (
-            directive
-              .shape()
-              .getId()
-              .getNamespace()
+            shapeToGenerate
+              .getId().getNamespace()
               .equals(directive.context().settings().getService().getNamespace())
           ) {
             directive
