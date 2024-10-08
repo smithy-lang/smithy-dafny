@@ -119,3 +119,22 @@ fun maybeCodeArtifact(buildGradle: Build_gradle, repositoryHandler: RepositoryHa
         }
     }
 }
+
+signing {
+    // Signing is required if building a release version and if we're going to publish it.
+    // Otherwise, signing will only occur if signatory credentials are configured.
+    setRequired({
+         gradle.getTaskGraph().hasTask("publish") 
+    })
+
+    sign(publishing.publications["mavenJava"])
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://aws.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://aws.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
+}
