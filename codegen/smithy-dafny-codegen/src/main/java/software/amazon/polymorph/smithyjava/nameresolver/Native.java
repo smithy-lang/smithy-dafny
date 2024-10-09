@@ -40,7 +40,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
  * model Shapes and generated identifiers in Java
  * for the native Java code.
  */
-public class Native extends NameResolver {
+public abstract class Native extends NameResolver {
 
   protected static final Map<
     String,
@@ -373,7 +373,5 @@ public class Native extends NameResolver {
     );
   }
 
-  protected ClassName classNameForAwsSdkShape(final Shape shape) {
-    throw new UnsupportedOperationException();
-  }
+  protected abstract ClassName classNameForAwsSdkShape(final Shape shape);
 }
