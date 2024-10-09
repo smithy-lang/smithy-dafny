@@ -413,13 +413,12 @@ public class DirectedDafnyPythonLocalServiceCodegen
         .useShapeWriter(
           shape,
           writer -> {
-            MapGenerator generator =
-              new MapGenerator(
-                context.model(),
-                context.symbolProvider(),
-                writer,
-                shape
-              );
+            MapGenerator generator = new MapGenerator(
+              context.model(),
+              context.symbolProvider(),
+              writer,
+              shape
+            );
             generator.run();
           }
         );
@@ -531,13 +530,13 @@ public class DirectedDafnyPythonLocalServiceCodegen
           directive.context()
         );
       } else if (shapeToGenerate.isStringShape()) {
-        // Orphaned strings are apparently not generated for .NET/Java
+        // Classes are not generated for strings
       } else if (shapeToGenerate.isIntegerShape()) {
-        // Orphaned strings are apparently not generated for .NET/Java
+        // Classes are not generated for ints
       } else if (shapeToGenerate.isListShape()) {
-        // Orphaned strings are apparently not generated for .NET/Java
+        // Classes are not generated for lists
       } else if (shapeToGenerate.isMapShape()) {
-//        writeMapShape(shapeToGenerate.asMapShape().get(), directive.context());
+        // Classes are not generated for maps
       } else {
         // Add more as needed...
         throw new ClassCastException(
