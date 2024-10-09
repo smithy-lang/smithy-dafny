@@ -286,7 +286,6 @@ public class DirectedPythonCodegen implements DirectedCodegen<GenerationContext,
         var directories = directive.context().writerDelegator().getWriters().keySet().stream()
                 .map(Paths::get)
                 .filter(path -> !path.getParent().equals(directive.fileManifest().getBaseDir()))
-                .filter(path -> !path.getParent().equals(null))
                 .collect(Collectors.groupingBy(Path::getParent, Collectors.toSet()));
         for (var entry : directories.entrySet()) {
             var initPath = entry.getKey().resolve("__init__.py");
