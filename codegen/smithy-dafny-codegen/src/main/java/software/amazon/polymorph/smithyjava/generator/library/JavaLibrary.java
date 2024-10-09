@@ -121,14 +121,8 @@ public class JavaLibrary extends CodegenSubject {
     AwsSdkVersion awsSdkVersion
   ) {
     return switch (awsSdkVersion) {
-      case V1 -> new AwsSdkNativeV1(
-        serviceShape,
-        model
-      );
-      case V2 -> new AwsSdkNativeV2(
-        serviceShape,
-        model
-      );
+      case V1 -> new AwsSdkNativeV1(serviceShape, model);
+      case V2 -> new AwsSdkNativeV2(serviceShape, model);
     };
   }
 
