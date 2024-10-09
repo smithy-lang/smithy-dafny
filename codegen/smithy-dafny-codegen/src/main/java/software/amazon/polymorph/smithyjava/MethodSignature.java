@@ -6,7 +6,7 @@ import com.squareup.javapoet.MethodSpec;
 import software.amazon.polymorph.utils.ModelUtils;
 
 /**
- * @param method         MethodSpec.Builder that SHOULD have Parameters, Returns, & Modifiers set correctly ( note that
+ * @param method         MethodSpec.Builder that SHOULD have Parameters, Returns, and Modifiers set correctly ( note that
  *                       void or parameterless methods would not have any Returns or Parameters).
  * @param resolvedInput  A ResolvedShapeId representing the input
  * @param resolvedOutput A ResolvedShapeId representing the output
