@@ -121,23 +121,29 @@ public class DafnyPythonLocalServiceStructureGenerator
 
     // This is Smithy-Python's writeClassDocs modified for LocalService Config shapes.
     this.writer.writeDocs(() -> {
-      if (shape.hasTrait(DocumentationTrait.class)) {
-        this.shape.getTrait(DocumentationTrait.class).ifPresent((trait) -> {
-          this.writer.write(this.writer.formatDocs(trait.getValue()), new Object[0]);
-        });
-      } else {
-        // Component below is changed from Smithy-Python.
-        // Write default docstring for LocalService Config shape constructor
-        this.writer.write("Constructor for $L", symbolProvider.toSymbol(shape));
-      }
+        if (shape.hasTrait(DocumentationTrait.class)) {
+          this.shape.getTrait(DocumentationTrait.class)
+            .ifPresent(trait -> {
+              this.writer.write(
+                  this.writer.formatDocs(trait.getValue()),
+                  new Object[0]
+                );
+            });
+        } else {
+          // Component below is changed from Smithy-Python.
+          // Write default docstring for LocalService Config shape constructor
+          this.writer.write(
+              "Constructor for $L",
+              symbolProvider.toSymbol(shape)
+            );
+        }
 
-      if (!this.shape.members().isEmpty()) {
-        this.writer.write("", new Object[0]);
-        this.requiredMembers.forEach(this::writeMemberDocs);
-        this.optionalMembers.forEach(this::writeMemberDocs);
-      }
-
-    });
+        if (!this.shape.members().isEmpty()) {
+          this.writer.write("", new Object[0]);
+          this.requiredMembers.forEach(this::writeMemberDocs);
+          this.optionalMembers.forEach(this::writeMemberDocs);
+        }
+      });
     // Component below is changed from Smithy-Python.
     // Initialize parent Config.
     writer.write("super().__init__()");
