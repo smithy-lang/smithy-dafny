@@ -9,7 +9,7 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactWriteItemsInput::TransactWriteItemsInput {
         TransactItems: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.transact_items.clone().unwrap(),
-    |e| crate::conversions::transact_write_item::to_dafny(&e)
+    |e| crate::conversions::transact_write_item::to_dafny(e)
 ,
 )
 ,
@@ -30,12 +30,11 @@ pub fn to_dafny(
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactWriteItemsInput,
-    >,
-    client: aws_sdk_dynamodb::Client,
-) -> aws_sdk_dynamodb::operation::transact_write_items::builders::TransactWriteItemsFluentBuilder {
-    client.transact_write_items()
+    >
+) -> aws_sdk_dynamodb::operation::transact_write_items::TransactWriteItemsInput {
+    aws_sdk_dynamodb::operation::transact_write_items::TransactWriteItemsInput::builder()
           .set_transact_items(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(dafny_value.TransactItems(),
-    |e| crate::conversions::transact_write_item::from_dafny(e.clone())
+    |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::TransactWriteItem>| crate::conversions::transact_write_item::from_dafny(e.clone())
 ,
 )
  ))
@@ -54,4 +53,6 @@ pub fn from_dafny(
 }
 )
  .set_client_request_token(crate::standard_library_conversions::ostring_from_dafny(dafny_value.ClientRequestToken().clone()))
+          .build()
+          .unwrap()
 }

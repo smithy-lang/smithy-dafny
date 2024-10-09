@@ -11,7 +11,7 @@ pub fn to_dafny(
  Parameters: ::std::rc::Rc::new(match &value.parameters {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::attribute_value::to_dafny(&e)
+            |e| crate::conversions::attribute_value::to_dafny(e)
 ,
         )
     },
@@ -33,7 +33,7 @@ pub fn from_dafny(
     crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| crate::conversions::attribute_value::from_dafny(e.clone())
+                |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>| crate::conversions::attribute_value::from_dafny(e.clone())
 ,
             )
         ),

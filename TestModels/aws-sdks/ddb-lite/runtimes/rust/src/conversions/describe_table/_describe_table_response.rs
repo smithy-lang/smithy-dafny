@@ -9,10 +9,26 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DescribeTableOutput::DescribeTableOutput {
         Table: ::std::rc::Rc::new(match &value.table {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::table_description::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::table_description::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
     })
 }
- 
+ #[allow(dead_code)]
+pub fn from_dafny(
+    dafny_value: ::std::rc::Rc<
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::DescribeTableOutput,
+    >
+) -> aws_sdk_dynamodb::operation::describe_table::DescribeTableOutput {
+    aws_sdk_dynamodb::operation::describe_table::DescribeTableOutput::builder()
+          .set_table(match (*dafny_value.Table()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(crate::conversions::table_description::from_dafny(value.clone())),
+    _ => None,
+}
+)
+          .build()
+
+
+}

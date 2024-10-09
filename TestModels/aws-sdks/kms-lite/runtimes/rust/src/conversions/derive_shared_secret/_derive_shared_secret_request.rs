@@ -22,7 +22,7 @@ pub fn to_dafny(
 ,
  DryRun: crate::standard_library_conversions::obool_to_dafny(&value.dry_run),
  Recipient: ::std::rc::Rc::new(match &value.recipient {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::recipient_info::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
@@ -32,10 +32,9 @@ pub fn to_dafny(
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DeriveSharedSecretRequest,
-    >,
-    client: aws_sdk_kms::Client,
-) -> aws_sdk_kms::operation::derive_shared_secret::builders::DeriveSharedSecretFluentBuilder {
-    client.derive_shared_secret()
+    >
+) -> aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretInput {
+    aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretInput::builder()
           .set_key_id(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.KeyId()) ))
  .set_key_agreement_algorithm(Some( crate::conversions::key_agreement_algorithm_spec::from_dafny(dafny_value.KeyAgreementAlgorithm()) ))
  .set_public_key(Some(crate::standard_library_conversions::blob_from_dafny(dafny_value.PublicKey().clone())))
@@ -43,7 +42,7 @@ pub fn from_dafny(
     crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
+                |e: &::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(e),
             )
         ),
     _ => None
@@ -56,4 +55,6 @@ pub fn from_dafny(
     _ => None,
 }
 )
+          .build()
+          .unwrap()
 }

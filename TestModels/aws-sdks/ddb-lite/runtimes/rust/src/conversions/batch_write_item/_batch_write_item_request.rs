@@ -11,7 +11,7 @@ pub fn to_dafny(
         RequestItems: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.request_items.clone().unwrap(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
     |v| ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&v,
-    |e| crate::conversions::write_request::to_dafny(&e)
+    |e| crate::conversions::write_request::to_dafny(e)
 ,
 )
 ,
@@ -33,14 +33,13 @@ pub fn to_dafny(
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchWriteItemInput,
-    >,
-    client: aws_sdk_dynamodb::Client,
-) -> aws_sdk_dynamodb::operation::batch_write_item::builders::BatchWriteItemFluentBuilder {
-    client.batch_write_item()
+    >
+) -> aws_sdk_dynamodb::operation::batch_write_item::BatchWriteItemInput {
+    aws_sdk_dynamodb::operation::batch_write_item::BatchWriteItemInput::builder()
           .set_request_items(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&dafny_value.RequestItems(),
-    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
-    |v| ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(v,
-    |e| crate::conversions::write_request::from_dafny(e.clone())
+    |k: &::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
+    |v: &::dafny_runtime::dafny_runtime_conversions::DafnySequence<::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::WriteRequest>>| ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(v,
+    |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::WriteRequest>| crate::conversions::write_request::from_dafny(e.clone())
 ,
 )
 ,
@@ -60,4 +59,6 @@ pub fn from_dafny(
     _ => None,
 }
 )
+          .build()
+          .unwrap()
 }

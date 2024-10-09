@@ -12,7 +12,7 @@ pub fn to_dafny(
  ReadCapacityUnits: crate::standard_library_conversions::odouble_to_dafny(&value.read_capacity_units),
  WriteCapacityUnits: crate::standard_library_conversions::odouble_to_dafny(&value.write_capacity_units),
  Table: ::std::rc::Rc::new(match &value.table {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::capacity::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::capacity::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
@@ -21,7 +21,7 @@ pub fn to_dafny(
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
-            |v| crate::conversions::capacity::to_dafny(&v)
+            |v| crate::conversions::capacity::to_dafny(v)
 ,
         )
     },
@@ -33,7 +33,7 @@ pub fn to_dafny(
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
             |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
-            |v| crate::conversions::capacity::to_dafny(&v)
+            |v| crate::conversions::capacity::to_dafny(v)
 ,
         )
     },
@@ -63,8 +63,8 @@ pub fn from_dafny(
     crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
-                |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
-                |v| crate::conversions::capacity::from_dafny(v.clone())
+                |k: &::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
+                |v: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Capacity>| crate::conversions::capacity::from_dafny(v.clone())
 ,
             )
         ),
@@ -75,8 +75,8 @@ pub fn from_dafny(
     crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
-                |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
-                |v| crate::conversions::capacity::from_dafny(v.clone())
+                |k: &::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
+                |v: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Capacity>| crate::conversions::capacity::from_dafny(v.clone())
 ,
             )
         ),

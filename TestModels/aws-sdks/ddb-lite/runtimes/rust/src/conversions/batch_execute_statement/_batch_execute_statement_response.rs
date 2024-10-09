@@ -11,7 +11,7 @@ pub fn to_dafny(
         Responses: ::std::rc::Rc::new(match &value.responses {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::batch_statement_response::to_dafny(&e)
+            |e| crate::conversions::batch_statement_response::to_dafny(e)
 ,
         )
     },
@@ -21,7 +21,7 @@ pub fn to_dafny(
  ConsumedCapacity: ::std::rc::Rc::new(match &value.consumed_capacity {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::consumed_capacity::to_dafny(&e)
+            |e| crate::conversions::consumed_capacity::to_dafny(e)
 ,
         )
     },
@@ -30,4 +30,36 @@ pub fn to_dafny(
 ,
     })
 }
- 
+ #[allow(dead_code)]
+pub fn from_dafny(
+    dafny_value: ::std::rc::Rc<
+        crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchExecuteStatementOutput,
+    >
+) -> aws_sdk_dynamodb::operation::batch_execute_statement::BatchExecuteStatementOutput {
+    aws_sdk_dynamodb::operation::batch_execute_statement::BatchExecuteStatementOutput::builder()
+          .set_responses(match (*dafny_value.Responses()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchStatementResponse>| crate::conversions::batch_statement_response::from_dafny(e.clone())
+,
+            )
+        ),
+    _ => None
+}
+)
+ .set_consumed_capacity(match (*dafny_value.ConsumedCapacity()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ConsumedCapacity>| crate::conversions::consumed_capacity::from_dafny(e.clone())
+,
+            )
+        ),
+    _ => None
+}
+)
+          .build()
+
+
+}

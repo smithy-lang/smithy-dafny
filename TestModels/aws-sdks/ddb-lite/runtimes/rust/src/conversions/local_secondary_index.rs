@@ -9,7 +9,7 @@ pub fn to_dafny(
     crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::LocalSecondaryIndex::LocalSecondaryIndex {
         IndexName: dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&value.index_name),
  KeySchema: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.key_schema,
-    |e| crate::conversions::key_schema_element::to_dafny(&e)
+    |e| crate::conversions::key_schema_element::to_dafny(e)
 ,
 )
 ,
@@ -26,7 +26,7 @@ pub fn from_dafny(
     aws_sdk_dynamodb::types::LocalSecondaryIndex::builder()
           .set_index_name(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.IndexName()) ))
  .set_key_schema(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(dafny_value.KeySchema(),
-    |e| crate::conversions::key_schema_element::from_dafny(e.clone())
+    |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::KeySchemaElement>| crate::conversions::key_schema_element::from_dafny(e.clone())
 ,
 )
  ))

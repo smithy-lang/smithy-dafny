@@ -12,7 +12,7 @@ pub fn to_dafny(
  Parameters: ::std::rc::Rc::new(match &value.parameters {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::attribute_value::to_dafny(&e)
+            |e| crate::conversions::attribute_value::to_dafny(e)
 ,
         )
     },
@@ -33,16 +33,15 @@ pub fn to_dafny(
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteStatementInput,
-    >,
-    client: aws_sdk_dynamodb::Client,
-) -> aws_sdk_dynamodb::operation::execute_statement::builders::ExecuteStatementFluentBuilder {
-    client.execute_statement()
+    >
+) -> aws_sdk_dynamodb::operation::execute_statement::ExecuteStatementInput {
+    aws_sdk_dynamodb::operation::execute_statement::ExecuteStatementInput::builder()
           .set_statement(Some( dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(dafny_value.Statement()) ))
  .set_parameters(match (*dafny_value.Parameters()).as_ref() {
     crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| crate::conversions::attribute_value::from_dafny(e.clone())
+                |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::AttributeValue>| crate::conversions::attribute_value::from_dafny(e.clone())
 ,
             )
         ),
@@ -59,4 +58,6 @@ pub fn from_dafny(
 }
 )
  .set_limit(crate::standard_library_conversions::oint_from_dafny(dafny_value.Limit().clone()))
+          .build()
+          .unwrap()
 }

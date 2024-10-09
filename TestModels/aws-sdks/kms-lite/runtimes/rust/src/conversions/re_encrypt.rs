@@ -1,10 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-pub mod _re_encrypt_request;
-
- pub mod _re_encrypt_response;
- #[allow(dead_code)]
+#[allow(dead_code)]
 pub fn to_dafny_error(
     value: &::aws_smithy_runtime_api::client::result::SdkError<
         aws_sdk_kms::operation::re_encrypt::ReEncryptError,
@@ -42,3 +39,7 @@ pub fn to_dafny_error(
       }
    }
 }
+
+ pub mod _re_encrypt_request;
+
+ pub mod _re_encrypt_response;

@@ -11,7 +11,7 @@ pub fn to_dafny(
  KeySchema: ::std::rc::Rc::new(match &value.key_schema {
     Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
         ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-            |e| crate::conversions::key_schema_element::to_dafny(&e)
+            |e| crate::conversions::key_schema_element::to_dafny(e)
 ,
         )
     },
@@ -19,7 +19,7 @@ pub fn to_dafny(
 })
 ,
  Projection: ::std::rc::Rc::new(match &value.projection {
-    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::projection::to_dafny(&x) },
+    Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::projection::to_dafny(x) },
     None => crate::_Wrappers_Compile::Option::None { }
 })
 ,
@@ -40,7 +40,7 @@ pub fn from_dafny(
     crate::r#_Wrappers_Compile::Option::Some { value } =>
         Some(
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                |e| crate::conversions::key_schema_element::from_dafny(e.clone())
+                |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::KeySchemaElement>| crate::conversions::key_schema_element::from_dafny(e.clone())
 ,
             )
         ),

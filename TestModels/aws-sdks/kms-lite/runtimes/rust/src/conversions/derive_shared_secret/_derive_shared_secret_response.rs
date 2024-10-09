@@ -23,4 +23,31 @@ pub fn to_dafny(
 ,
     })
 }
- 
+ #[allow(dead_code)]
+pub fn from_dafny(
+    dafny_value: ::std::rc::Rc<
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DeriveSharedSecretResponse,
+    >
+) -> aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretOutput {
+    aws_sdk_kms::operation::derive_shared_secret::DeriveSharedSecretOutput::builder()
+          .set_key_id(crate::standard_library_conversions::ostring_from_dafny(dafny_value.KeyId().clone()))
+ .set_shared_secret(crate::standard_library_conversions::oblob_from_dafny(dafny_value.SharedSecret().clone()))
+ .set_ciphertext_for_recipient(crate::standard_library_conversions::oblob_from_dafny(dafny_value.CiphertextForRecipient().clone()))
+ .set_key_agreement_algorithm(match &**dafny_value.KeyAgreementAlgorithm() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::key_agreement_algorithm_spec::from_dafny(value)
+    ),
+    _ => None,
+}
+)
+ .set_key_origin(match &**dafny_value.KeyOrigin() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::origin_type::from_dafny(value)
+    ),
+    _ => None,
+}
+)
+          .build()
+
+
+}

@@ -54,4 +54,67 @@ pub fn to_dafny(
 ,
     })
 }
- 
+ #[allow(dead_code)]
+pub fn from_dafny(
+    dafny_value: ::std::rc::Rc<
+        crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyResponse,
+    >
+) -> aws_sdk_kms::operation::get_public_key::GetPublicKeyOutput {
+    aws_sdk_kms::operation::get_public_key::GetPublicKeyOutput::builder()
+          .set_key_id(crate::standard_library_conversions::ostring_from_dafny(dafny_value.KeyId().clone()))
+ .set_public_key(crate::standard_library_conversions::oblob_from_dafny(dafny_value.PublicKey().clone()))
+ .set_customer_master_key_spec(match &**dafny_value.CustomerMasterKeySpec() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::customer_master_key_spec::from_dafny(value)
+    ),
+    _ => None,
+}
+)
+ .set_key_spec(match &**dafny_value.KeySpec() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::key_spec::from_dafny(value)
+    ),
+    _ => None,
+}
+)
+ .set_key_usage(match &**dafny_value.KeyUsage() {
+    crate::r#_Wrappers_Compile::Option::Some { value } => Some(
+        crate::conversions::key_usage_type::from_dafny(value)
+    ),
+    _ => None,
+}
+)
+ .set_encryption_algorithms(match (*dafny_value.EncryptionAlgorithms()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::EncryptionAlgorithmSpec>| crate::conversions::encryption_algorithm_spec::from_dafny(e),
+            )
+        ),
+    _ => None
+}
+)
+ .set_signing_algorithms(match (*dafny_value.SigningAlgorithms()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::SigningAlgorithmSpec>| crate::conversions::signing_algorithm_spec::from_dafny(e),
+            )
+        ),
+    _ => None
+}
+)
+ .set_key_agreement_algorithms(match (*dafny_value.KeyAgreementAlgorithms()).as_ref() {
+    crate::r#_Wrappers_Compile::Option::Some { value } =>
+        Some(
+            ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
+                |e: &::std::rc::Rc<crate::software::amazon::cryptography::services::kms::internaldafny::types::KeyAgreementAlgorithmSpec>| crate::conversions::key_agreement_algorithm_spec::from_dafny(e),
+            )
+        ),
+    _ => None
+}
+)
+          .build()
+
+
+}

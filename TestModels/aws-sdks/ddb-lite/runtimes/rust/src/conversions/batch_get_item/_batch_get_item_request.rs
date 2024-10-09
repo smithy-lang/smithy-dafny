@@ -10,7 +10,7 @@ pub fn to_dafny(
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput::BatchGetItemInput {
         RequestItems: ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&value.request_items.clone().unwrap(),
     |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&k),
-    |v| crate::conversions::keys_and_attributes::to_dafny(&v)
+    |v| crate::conversions::keys_and_attributes::to_dafny(v)
 ,
 )
 ,
@@ -25,13 +25,12 @@ pub fn to_dafny(
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::BatchGetItemInput,
-    >,
-    client: aws_sdk_dynamodb::Client,
-) -> aws_sdk_dynamodb::operation::batch_get_item::builders::BatchGetItemFluentBuilder {
-    client.batch_get_item()
+    >
+) -> aws_sdk_dynamodb::operation::batch_get_item::BatchGetItemInput {
+    aws_sdk_dynamodb::operation::batch_get_item::BatchGetItemInput::builder()
           .set_request_items(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&dafny_value.RequestItems(),
-    |k| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
-    |v| crate::conversions::keys_and_attributes::from_dafny(v.clone())
+    |k: &::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>| dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(k),
+    |v: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::KeysAndAttributes>| crate::conversions::keys_and_attributes::from_dafny(v.clone())
 ,
 )
  ))
@@ -42,4 +41,6 @@ pub fn from_dafny(
     _ => None,
 }
 )
+          .build()
+          .unwrap()
 }

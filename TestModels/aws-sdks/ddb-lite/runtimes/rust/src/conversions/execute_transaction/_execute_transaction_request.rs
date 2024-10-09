@@ -9,7 +9,7 @@ pub fn to_dafny(
 >{
     ::std::rc::Rc::new(crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteTransactionInput::ExecuteTransactionInput {
         TransactStatements: ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&value.transact_statements.clone().unwrap(),
-    |e| crate::conversions::parameterized_statement::to_dafny(&e)
+    |e| crate::conversions::parameterized_statement::to_dafny(e)
 ,
 )
 ,
@@ -25,12 +25,11 @@ pub fn to_dafny(
 pub fn from_dafny(
     dafny_value: ::std::rc::Rc<
         crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ExecuteTransactionInput,
-    >,
-    client: aws_sdk_dynamodb::Client,
-) -> aws_sdk_dynamodb::operation::execute_transaction::builders::ExecuteTransactionFluentBuilder {
-    client.execute_transaction()
+    >
+) -> aws_sdk_dynamodb::operation::execute_transaction::ExecuteTransactionInput {
+    aws_sdk_dynamodb::operation::execute_transaction::ExecuteTransactionInput::builder()
           .set_transact_statements(Some( ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(dafny_value.TransactStatements(),
-    |e| crate::conversions::parameterized_statement::from_dafny(e.clone())
+    |e: &::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::ParameterizedStatement>| crate::conversions::parameterized_statement::from_dafny(e.clone())
 ,
 )
  ))
@@ -42,4 +41,6 @@ pub fn from_dafny(
     _ => None,
 }
 )
+          .build()
+          .unwrap()
 }
