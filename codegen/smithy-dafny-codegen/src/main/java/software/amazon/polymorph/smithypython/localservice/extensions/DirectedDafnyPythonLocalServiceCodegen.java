@@ -532,6 +532,8 @@ public class DirectedDafnyPythonLocalServiceCodegen
         );
       } else if (shapeToGenerate.isStringShape()) {
         // Orphaned strings are apparently not generated for .NET/Java
+      } else if (shapeToGenerate.isIntegerShape()) {
+        // Orphaned strings are apparently not generated for .NET/Java
       } else if (shapeToGenerate.isMapShape()) {
         writeMapShape(shapeToGenerate.asMapShape().get(), directive.context());
       } else {
