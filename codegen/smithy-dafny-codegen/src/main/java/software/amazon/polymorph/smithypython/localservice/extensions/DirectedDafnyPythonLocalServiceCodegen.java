@@ -401,30 +401,6 @@ public class DirectedDafnyPythonLocalServiceCodegen
     }
   }
 
-  protected void writeMapShape(MapShape shape, GenerationContext context) {
-    if (
-      shape
-        .getId()
-        .getNamespace()
-        .equals(context.settings().getService().getNamespace())
-    ) {
-      context
-        .writerDelegator()
-        .useShapeWriter(
-          shape,
-          writer -> {
-            MapGenerator generator = new MapGenerator(
-              context.model(),
-              context.symbolProvider(),
-              writer,
-              shape
-            );
-            generator.run();
-          }
-        );
-    }
-  }
-
   /**
    * Call `DirectedPythonCodegen.customizeAfterIntegrations`, then remove
    * `localservice_codegen_todelete.py`. The CodegenDirector will invoke this method after shape
