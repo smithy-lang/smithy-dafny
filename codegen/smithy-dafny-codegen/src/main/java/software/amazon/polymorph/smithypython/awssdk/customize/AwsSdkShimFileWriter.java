@@ -86,19 +86,19 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       );
   }
 
-  private static final String DAFNY_STRING_E = 
-  """
-        _dafny.Seq(
-            "".join(
-                [
-                    chr(int.from_bytes(pair, "big"))
-                    for pair in zip(
-                        *[iter(repr(e).encode("utf-16-be"))] * 2
-                    )
-                ]
+  private static final String DAFNY_STRING_E =
+    """
+            _dafny.Seq(
+                "".join(
+                    [
+                        chr(int.from_bytes(pair, "big"))
+                        for pair in zip(
+                            *[iter(repr(e).encode("utf-16-be"))] * 2
+                        )
+                    ]
+                )
             )
-        )
-""";
+    """;
 
   /**
    * Generate the method body for the `_sdk_error_to_dafny_error` method. This writes out a block to
