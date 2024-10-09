@@ -412,7 +412,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
     writer.write(
       """
       if isinstance(e, OpaqueError):
-          return $L.Error_Opaque(obj=e.obj, alt__text=e.alt__text)
+          return $L.Error_Opaque(obj=e.obj, alt__text=e.alt_text)
       """,
       DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
         serviceShape.getId(),
