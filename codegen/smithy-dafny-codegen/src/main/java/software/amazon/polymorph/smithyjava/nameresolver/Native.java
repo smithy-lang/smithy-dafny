@@ -374,6 +374,8 @@ public class Native extends NameResolver {
   }
 
   protected ClassName classNameForAwsSdkShape(final Shape shape) {
-    throw new UnsupportedOperationException("classNameForAwsSdkShape should only be called on AWS SDK-specific subclasses");
+    throw new UnsupportedOperationException(
+      "classNameForAwsSdkShape should only be called on AWS SDK-specific subclasses"
+    );
   }
 }
