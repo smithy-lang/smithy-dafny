@@ -157,11 +157,11 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     self,
                     *,
                     obj,
-                    alt__text
+                    alt_text
                 ):
                     super().__init__("")
                     self.obj = obj
-                    self.alt__text = alt__text
+                    self.alt_text = alt_text
 
                 def as_dict(self) -> Dict[str, Any]:
                     ""\"Converts the OpaqueError to a dictionary.
@@ -173,7 +173,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                         'message': self.message,
                         'code': self.code,
                         'obj': self.obj,
-                        'alt__text': self.alt__text,
+                        'alt_text': self.alt_text,
                     }
 
                 @staticmethod
@@ -186,7 +186,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     kwargs: Dict[str, Any] = {
                         'message': d['message'],
                         'obj': d['obj'],
-                        'alt__text': d['alt__text']
+                        'alt_text': d['alt_text']
                     }
 
                     return OpaqueError(**kwargs)
@@ -196,7 +196,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     result += f'message={self.message},'
                     if self.message is not None:
                         result += f"message={repr(self.message)}"
-                    result += f'obj={self.alt__text}'
+                    result += f'obj={self.alt_text}'
                     result += ")"
                     return result
 
