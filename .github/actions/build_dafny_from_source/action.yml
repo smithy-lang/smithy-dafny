@@ -56,8 +56,11 @@ runs:
 
     # update the copy of the Rust runtime we have inside TestModels
     # (since it's not published yet)
-    - name: Update dafny_runtime_rust
-      shell: bash
-      run: |
-        rm -rf TestModels/dafny-dependencies/dafny_runtime_rust
-        cp -r dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust
+    # TODO: Temporarily not doing this because we need a targeted fix to the runtime,
+    # but can't pick it up by moving to a newer Dafny commit because that would pull in
+    # other breaking changes.
+#    - name: Update dafny_runtime_rust
+#      shell: bash
+#      run: |
+#        rm -rf TestModels/dafny-dependencies/dafny_runtime_rust
+#        cp -r dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust
