@@ -740,10 +740,7 @@ public class ModelUtils {
     for (Shape shape : topologicalIndex.getOrderedShapes()) {
       if (
         orphanedShapes.contains(shape) &&
-        shape
-          .getId()
-          .getNamespace()
-          .equals(serviceShape.getId().getNamespace()) &&
+        ModelUtils.isInServiceNamespace(shape, serviceShape) &&
         !shape.isMemberShape()
       ) {
         orderedShapes.add(shape);
@@ -752,10 +749,7 @@ public class ModelUtils {
     for (Shape shape : topologicalIndex.getRecursiveShapes()) {
       if (
         orphanedShapes.contains(shape) &&
-        shape
-          .getId()
-          .getNamespace()
-          .equals(serviceShape.getId().getNamespace()) &&
+        ModelUtils.isInServiceNamespace(shape, serviceShape) &&
         !shape.isMemberShape()
       ) {
         orderedShapes.add(shape);

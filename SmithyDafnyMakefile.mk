@@ -259,6 +259,9 @@ transpile_dependencies_test:
 
 ########################## Code-Gen targets
 
+mvn_local_deploy_polymorph_dependencies:
+	$(MAKE) -C $(SMITHY_DAFNY_ROOT) mvn_local_deploy_polymorph_dependencies
+
 # The OUTPUT variables are created this way
 # so that it is possible to run _parts_ of polymorph.
 # Otherwise it is difficult to run/test only a Dafny change.
@@ -327,6 +330,7 @@ _polymorph_dependencies:
 # Generates all target runtime code for all namespaces in this project.
 # Not including Rust until is it more fully implemented.
 .PHONY: polymorph_code_gen
+polymorph_code_gen: mvn_local_deploy_polymorph_dependencies
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
 polymorph_code_gen: _polymorph_dependencies
 polymorph_code_gen:
@@ -352,6 +356,7 @@ check_polymorph_diff:
 
 # Generates dafny code for all namespaces in this project
 .PHONY: polymorph_dafny
+polymorph_dafny: mvn_local_deploy_polymorph_dependencies
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
 polymorph_dafny: _polymorph_dependencies
 polymorph_dafny:
@@ -370,6 +375,7 @@ _polymorph_dafny: _polymorph
 
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_dotnet
+polymorph_dotnet: mvn_local_deploy_polymorph_dependencies
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
 polymorph_dotnet: _polymorph_dependencies
 polymorph_dotnet:
@@ -388,6 +394,7 @@ _polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project
 .PHONY: polymorph_java
+polymorph_java: mvn_local_deploy_polymorph_dependencies
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 polymorph_java:
@@ -406,6 +413,7 @@ _polymorph_java: _polymorph
 
 # Generates python code for all namespaces in this project
 .PHONY: polymorph_python
+polymorph_python: mvn_local_deploy_polymorph_dependencies
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 polymorph_python: _polymorph_dependencies
 polymorph_python:
@@ -432,6 +440,7 @@ setup_prettier:
 # to also patch the results of transpile_rust,
 # so we assume that is run first!
 .PHONY: polymorph_rust
+polymorph_rust: mvn_local_deploy_polymorph_dependencies
 polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
 polymorph_rust: _polymorph_dependencies
 polymorph_rust:
