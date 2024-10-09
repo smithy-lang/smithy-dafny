@@ -5,7 +5,6 @@ package software.amazon.polymorph.smithyjava.nameresolver;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.isAttributeValueType;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET_MAP;
-import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -15,12 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import software.amazon.awssdk.codegen.internal.Utils;
 import software.amazon.awssdk.codegen.model.service.ServiceModel;
 import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
+import software.amazon.awssdk.utils.internal.CodegenNamingUtils;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -29,7 +32,6 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.model.traits.TitleTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
@@ -41,6 +43,7 @@ import software.amazon.smithy.utils.StringUtils;
 public class AwsSdkNativeV2 extends Native {
 
   private final DefaultNamingStrategy awsSDKNaming;
+  private final OperationIndex operationIndex;
 
   public AwsSdkNativeV2(final ServiceShape serviceShape, final Model model) {
     super(
@@ -50,8 +53,8 @@ public class AwsSdkNativeV2 extends Native {
       defaultModelPackageName(packageNameForAwsSdkV2Shape(serviceShape)),
       CodegenSubject.AwsSdkVersion.V2
     );
-    checkForAwsServiceConstants();
     awsSDKNaming = new DefaultNamingStrategy(new ServiceModel(), null);
+    operationIndex = new OperationIndex(model);
   }
 
   // The values of these maps are NOT in smithy models and thus must be hard-coded
@@ -89,34 +92,6 @@ public class AwsSdkNativeV2 extends Native {
       );
   }
 
-  /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
-  private void checkForAwsServiceConstants() {
-    String namespace = serviceShape.getId().getNamespace();
-    checkForAwsServiceConstants(namespace);
-  }
-
-  /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
-  private static void checkForAwsServiceConstants(String namespace) {
-    boolean knowBaseException =
-      AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
-    if (!knowBaseException) {
-      throw new IllegalArgumentException(
-        "Polymorph does not know this service's Base Exception: %s".formatted(
-            namespace
-          )
-      );
-    }
-    boolean knowClientInterface =
-      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.containsKey(namespace);
-    if (!knowClientInterface) {
-      throw new IllegalArgumentException(
-        "Polymorph does not know this service's Client Interface: %s".formatted(
-            namespace
-          )
-      );
-    }
-  }
-
   /**
    * Throws IllegalArgumentException if shapeId is not in namespace
    */
@@ -133,10 +108,12 @@ public class AwsSdkNativeV2 extends Native {
 
   public static ClassName classNameForServiceClient(ServiceShape shape) {
     String awsServiceSmithyNamespace = shape.toShapeId().getNamespace();
-    checkForAwsServiceConstants(awsServiceSmithyNamespace);
     return ClassName.get(
       packageNameForAwsSdkV2Shape(shape),
-      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.get(awsServiceSmithyNamespace)
+      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
+        awsServiceSmithyNamespace,
+        sdkId(shape) + "Client"
+      )
     );
   }
 
@@ -162,11 +139,7 @@ public class AwsSdkNativeV2 extends Native {
     final Shape shape = model.expectShape(shapeId);
 
     if (shape.hasTrait(EnumTrait.class)) {
-      if (shapeRequiresTypeConversionFromStringToStructure(shapeId)) {
-        return classForEnum(shape);
-      }
-
-      return classForString();
+      return classForEnum(shape);
     }
     if (SHAPE_TYPES_LIST_SET_MAP.contains(shape.getType())) {
       return typeForListSetOrMapNoEnum(shapeId);
@@ -192,24 +165,6 @@ public class AwsSdkNativeV2 extends Native {
     }
 
     return super.typeForShape(shapeId);
-  }
-
-  /**
-   * Returns true if the provided ShapeId has type string in the Smithy model, but AWS SDK for
-   *   Java V2 effectively expects type structure.
-   * @param shapeId
-   * @return true if AWS SDK for Java V2 expects this to have been modeled as a structure in Smithy
-   */
-  protected boolean shapeRequiresTypeConversionFromStringToStructure(
-    ShapeId shapeId
-  ) {
-    return (
-      shapeId
-        .toString()
-        .contains("com.amazonaws.kms#EncryptionAlgorithmSpec") ||
-      shapeId.toString().contains("com.amazonaws.kms#SigningAlgorithmSpec") ||
-      shapeId.toString().contains("com.amazonaws.kms#GrantOperation")
-    );
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -273,33 +228,43 @@ public class AwsSdkNativeV2 extends Native {
       return CodeBlock.of("$L", shape.getMemberName().toLowerCase());
     }
 
-    return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
+    return CodeBlock.of("$L", Utils.unCapitalize(shape.getMemberName()));
   }
 
-  public static ClassName classNameForAwsSdkShape(final Shape shape) {
+  public ClassName classNameForAwsSdkShape(final Shape shape) {
     // Assume that the shape is in the model package
     ClassName smithyName = ClassName.get(
       defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
       StringUtils.capitalize(shape.getId().getName())
     );
 
-    if (smithyName.simpleName().endsWith("Input")) {
+    if (operationIndex.isInputStructure(shape)) {
+      var operations = operationIndex.getInputBindings(shape);
+      if (operations.size() > 1) {
+        throw new IllegalArgumentException(
+          "Structures bound to more than one operation as input are not supported: " +
+          shape
+        );
+      }
+      var operation = operations.stream().findFirst().get();
       return ClassName.get(
         smithyName.packageName(),
-        smithyName
-          .simpleName()
-          .substring(0, smithyName.simpleName().lastIndexOf("Input")) +
-        "Request"
+        CodegenNamingUtils.pascalCase(operation.getId().getName()) + "Request"
       );
     }
 
-    if (smithyName.simpleName().endsWith("Output")) {
+    if (operationIndex.isOutputStructure(shape)) {
+      var operations = operationIndex.getOutputBindings(shape);
+      if (operations.size() > 1) {
+        throw new IllegalArgumentException(
+          "Structures bound to more than one operation as output are not supported: " +
+          shape
+        );
+      }
+      var operation = operations.stream().findFirst().get();
       return ClassName.get(
         smithyName.packageName(),
-        smithyName
-          .simpleName()
-          .substring(0, smithyName.simpleName().lastIndexOf("Output")) +
-        "Response"
+        CodegenNamingUtils.pascalCase(operation.getId().getName()) + "Response"
       );
     }
 
@@ -352,7 +317,7 @@ public class AwsSdkNativeV2 extends Native {
     }
     // check if this Shape is in AWS SDK for Java V2 package
     if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
-      AwsSdkNativeV2.classNameForAwsSdkShape(shape);
+      return classNameForAwsSdkShape(shape);
     }
     return super.classNameForStructure(shape);
   }
@@ -373,6 +338,13 @@ public class AwsSdkNativeV2 extends Native {
     return this.awsSDKNaming.getEnumValueName(enumValueName);
   }
 
+  private static String sdkId(ServiceShape serviceShape) {
+    return serviceShape
+      .getTrait(ServiceTrait.class)
+      .map(serviceTrait -> serviceTrait.getSdkId())
+      .orElse(serviceShape.getId().getName());
+  }
+
   /**
    * Returns the TypeName for an AWS Service's Client Interface.
    */
@@ -384,8 +356,9 @@ public class AwsSdkNativeV2 extends Native {
     checkInServiceNamespace(shape.getId());
     return ClassName.get(
       packageName,
-      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.get(
-        serviceShape.getId().getNamespace()
+      AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
+        serviceShape.getId().getNamespace(),
+        sdkId(serviceShape) + "Client"
       )
     );
   }
@@ -399,8 +372,9 @@ public class AwsSdkNativeV2 extends Native {
   public ClassName baseErrorForService() {
     return ClassName.get(
       modelPackage,
-      AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.get(
-        serviceShape.getId().getNamespace()
+      AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.getOrDefault(
+        serviceShape.getId().getNamespace(),
+        sdkId(serviceShape) + "Exception"
       )
     );
   }

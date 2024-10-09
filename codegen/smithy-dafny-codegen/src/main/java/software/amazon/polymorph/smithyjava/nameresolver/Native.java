@@ -193,10 +193,7 @@ public class Native extends NameResolver {
     // This case must be first because shape can be an @enum string, or a Smithy 2.0 enum
     if (shape.hasTrait(EnumTrait.class)) {
       if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
-        return switch (awsSdkVersion) {
-          case V2 -> AwsSdkNativeV2.classNameForAwsSdkShape(shape);
-          case V1 -> AwsSdkNativeV1.classNameForAwsSdkShape(shape);
-        };
+        return classNameForAwsSdkShape(shape);
       }
       return classForEnum(shape);
     }
@@ -264,10 +261,7 @@ public class Native extends NameResolver {
       return classNameForInterfaceOrLocalService(rShape, this.awsSdkVersion);
     }
     if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
-      return switch (awsSdkVersion) {
-        case V2 -> AwsSdkNativeV2.classNameForAwsSdkShape(shape);
-        case V1 -> AwsSdkNativeV1.classNameForAwsSdkShape(shape);
-      };
+      return classNameForAwsSdkShape(shape);
     }
     if (isInServiceNameSpace(shape.getId())) {
       return ClassName.get(modelPackage, shape.getId().getName());
@@ -376,6 +370,12 @@ public class Native extends NameResolver {
     throw new IllegalArgumentException(
       "Local Services no longer have a local error hierarchy." +
       "Use `ClassName.get(RuntimeException.class)` instead."
+    );
+  }
+
+  protected ClassName classNameForAwsSdkShape(final Shape shape) {
+    throw new UnsupportedOperationException(
+      "classNameForAwsSdkShape should only be called on AWS SDK-specific subclasses"
     );
   }
 }
