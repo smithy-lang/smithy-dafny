@@ -8,7 +8,10 @@ pub mod builders;
 
 
 
-
+mod _some_dependency_operation_input;
+pub use crate::deps::simple_multiplemodels_dependencyproject::types::_some_dependency_operation_input::SomeDependencyOperationInput;
+mod _some_dependency_operation_output;
+pub use crate::deps::simple_multiplemodels_dependencyproject::types::_some_dependency_operation_output::SomeDependencyOperationOutput;
 
 pub mod error;
 

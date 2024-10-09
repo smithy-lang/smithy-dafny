@@ -13,7 +13,7 @@ impl Client {
     #[track_caller]
     pub fn from_conf(
         conf: crate::types::primary_project_config::PrimaryProjectConfig,
-    ) -> Result<Self, BuildError> {
+    ) -> Result<Self, crate::types::error::Error> {
         let inner =
             crate::simple::multiplemodels::primaryproject::internaldafny::_default::PrimaryProject(
                 &crate::conversions::primary_project_config::_primary_project_config::to_dafny(conf),
@@ -22,12 +22,7 @@ impl Client {
             inner.as_ref(),
             crate::_Wrappers_Compile::Result::Failure { .. }
         ) {
-            // TODO: convert error - the potential types are not modeled!
-            return Err(BuildError::other(
-                ::aws_smithy_types::error::metadata::ErrorMetadata::builder()
-                    .message("Invalid client config")
-                    .build(),
-            ));
+            return Err(crate::conversions::error::from_dafny(inner.as_ref().error().clone()));
         }
         Ok(Self {
             dafny_client: ::dafny_runtime::upcast_object()(inner.Extract())

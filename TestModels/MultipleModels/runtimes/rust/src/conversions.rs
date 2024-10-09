@@ -9,4 +9,8 @@ pub mod client;
 
  pub mod some_primary_operation;
 
+ pub mod some_primary_operation_input;
+
+ pub mod some_primary_operation_output;
+
 pub mod primary_project_config;

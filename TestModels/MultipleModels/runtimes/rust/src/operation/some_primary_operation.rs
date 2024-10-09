@@ -10,6 +10,7 @@ impl SomePrimaryOperation {
     pub fn new() -> Self {
         Self
     }
+
     pub(crate) async fn send(
         client: &crate::client::Client,
         input: crate::operation::some_primary_operation::SomePrimaryOperationInput,
@@ -17,6 +18,7 @@ impl SomePrimaryOperation {
         crate::operation::some_primary_operation::SomePrimaryOperationOutput,
         crate::types::error::Error,
     > {
+
                 let inner_input = crate::conversions::some_primary_operation::_some_primary_operation_input::to_dafny(input);
         let inner_result =
             ::dafny_runtime::md!(client.dafny_client.clone()).SomePrimaryOperation(&inner_input);

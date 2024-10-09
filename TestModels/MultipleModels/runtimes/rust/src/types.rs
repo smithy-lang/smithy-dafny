@@ -8,7 +8,10 @@ pub mod builders;
 
 
 
-
+mod _some_primary_operation_input;
+pub use crate::types::_some_primary_operation_input::SomePrimaryOperationInput;
+mod _some_primary_operation_output;
+pub use crate::types::_some_primary_operation_output::SomePrimaryOperationOutput;
 
 pub mod error;
 

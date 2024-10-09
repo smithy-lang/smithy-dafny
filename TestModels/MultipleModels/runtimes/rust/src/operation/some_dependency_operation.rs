@@ -10,6 +10,7 @@ impl SomeDependencyOperation {
     pub fn new() -> Self {
         Self
     }
+
     pub(crate) async fn send(
         client: &crate::client::Client,
         input: crate::operation::some_dependency_operation::SomeDependencyOperationInput,
@@ -17,6 +18,7 @@ impl SomeDependencyOperation {
         crate::operation::some_dependency_operation::SomeDependencyOperationOutput,
         crate::types::error::Error,
     > {
+
                 let inner_input = crate::conversions::some_dependency_operation::_some_dependency_operation_input::to_dafny(input);
         let inner_result =
             ::dafny_runtime::md!(client.dafny_client.clone()).SomeDependencyOperation(&inner_input);

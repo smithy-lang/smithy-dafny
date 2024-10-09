@@ -7,4 +7,8 @@ pub mod client;
 
  pub mod some_dependency_operation;
 
+ pub mod some_dependency_operation_input;
+
+ pub mod some_dependency_operation_output;
+
 pub mod dependency_project_config;
