@@ -2,17 +2,14 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import static java.lang.String.format;
 import static software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver.isAwsSdkShape;
-import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import java.util.Set;
 import java.util.stream.Stream;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
-import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.utils.ConstrainTraitUtils;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -86,7 +83,7 @@ public class DafnyPythonLocalServiceStructureGenerator
         writeProperties(false);
         // Component below is changed from Smithy-Python.
         // Write special __init__ that initializes parent class.
-        writeLocalServiceInit();
+        writeLocalServiceConfigShapeInit();
         writeAsDict(false);
         writeFromDict(false);
         writeRepr(false);
@@ -101,7 +98,7 @@ public class DafnyPythonLocalServiceStructureGenerator
    * Most of this is lifted directly from Smithy-Python; the changed components are
    * called out with comments saying "Component below is changed from Smithy-Python."
    */
-  protected void writeLocalServiceInit() {
+  protected void writeLocalServiceConfigShapeInit() {
     writer.openBlock(
       "def __init__(",
       "):",
@@ -122,7 +119,25 @@ public class DafnyPythonLocalServiceStructureGenerator
 
     writer.indent();
 
-    writeClassDocs(false);
+    // This is Smithy-Python's writeClassDocs modified for LocalService Config shapes.
+    this.writer.writeDocs(() -> {
+      if (shape.hasTrait(DocumentationTrait.class)) {
+        this.shape.getTrait(DocumentationTrait.class).ifPresent((trait) -> {
+          this.writer.write(this.writer.formatDocs(trait.getValue()), new Object[0]);
+        });
+      } else {
+        // Component below is changed from Smithy-Python.
+        // Write default docstring for LocalService Config shape constructor
+        this.writer.write("Constructor for $L", symbolProvider.toSymbol(shape));
+      }
+
+      if (!this.shape.members().isEmpty()) {
+        this.writer.write("", new Object[0]);
+        this.requiredMembers.forEach(this::writeMemberDocs);
+        this.optionalMembers.forEach(this::writeMemberDocs);
+      }
+
+    });
     // Component below is changed from Smithy-Python.
     // Initialize parent Config.
     writer.write("super().__init__()");
