@@ -533,7 +533,7 @@ public class DirectedDafnyPythonLocalServiceCodegen
       } else if (shapeToGenerate.isStringShape()) {
         // Orphaned strings are apparently not generated for .NET/Java
       } else if (shapeToGenerate.isMapShape()) {
-        writeMapShape
+        writeMapShape(shapeToGenerate.asMapShape().get(), directive.context());
       } else {
         // Add more as needed...
         throw new ClassCastException(

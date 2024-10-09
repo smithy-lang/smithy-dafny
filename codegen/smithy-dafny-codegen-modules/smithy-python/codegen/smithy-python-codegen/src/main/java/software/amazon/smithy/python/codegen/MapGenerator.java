@@ -32,7 +32,7 @@ public class MapGenerator implements Runnable {
     private final PythonWriter writer;
     private final MapShape shape;
 
-    MapGenerator(
+    public MapGenerator(
             Model model,
             SymbolProvider symbolProvider,
             PythonWriter writer,
