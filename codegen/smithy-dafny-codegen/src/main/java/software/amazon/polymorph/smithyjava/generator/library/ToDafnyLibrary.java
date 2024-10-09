@@ -198,7 +198,7 @@ public class ToDafnyLibrary extends ToDafny {
       .addModifiers(PUBLIC_STATIC)
       .addParameter(opaqueError, VAR_INPUT)
       .addStatement(
-        "return $T.create_Opaque($L.obj(), dafny.DafnySequence.asString(java.util.Objects.nonNull($L.alt_text()) ? $L.alt_text() : \"\"))",
+        "return $T.create_Opaque($L.obj(), dafny.DafnySequence.asString(java.util.Objects.nonNull($L.altText()) ? $L.altText() : \"\"))",
         dafnyError,
         VAR_INPUT,
         VAR_INPUT,

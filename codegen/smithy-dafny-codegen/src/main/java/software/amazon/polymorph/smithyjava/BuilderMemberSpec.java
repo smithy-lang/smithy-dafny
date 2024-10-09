@@ -60,7 +60,7 @@ public class BuilderMemberSpec {
     ),
     new BuilderMemberSpec(
       TypeName.get(String.class),
-      "alt_text",
+      "altText",
       "A best effort text representation of obj."
     )
   );
