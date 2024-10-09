@@ -134,7 +134,7 @@ public class DafnyPythonLocalServiceStructureGenerator
           // Write default docstring for LocalService Config shape constructor
           this.writer.write(
               "Constructor for $L",
-              symbolProvider.toSymbol(shape)
+              symbolProvider.toSymbol(shape).getName()
             );
         }
 
