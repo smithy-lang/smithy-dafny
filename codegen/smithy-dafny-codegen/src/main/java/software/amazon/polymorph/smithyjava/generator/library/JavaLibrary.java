@@ -24,8 +24,6 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ShimV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ShimV2;
 import software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim;
 import software.amazon.polymorph.smithyjava.generator.library.shims.ServiceShim;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -120,10 +118,16 @@ public class JavaLibrary extends CodegenSubject {
     ServiceShape serviceShape,
     AwsSdkVersion awsSdkVersion
   ) {
-    return switch (awsSdkVersion) {
-      case V1 -> new AwsSdkNativeV1(serviceShape, model);
-      case V2 -> new AwsSdkNativeV2(serviceShape, model);
-    };
+    String packageName = NamespaceHelper.standardize(
+      serviceShape.getId().getNamespace()
+    );
+    return new Native(
+      packageName,
+      serviceShape,
+      model,
+      packageName + ".model",
+      awsSdkVersion
+    );
   }
 
   public static CodeBlock wrapAwsService(
