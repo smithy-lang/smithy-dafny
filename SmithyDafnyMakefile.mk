@@ -503,7 +503,7 @@ _mv_polymorph_go:
     done
 ########################## .NET targets
 
-net: polymorph_dafny transpile_net polymorph_net test_net
+net: polymorph_dafny transpile_net polymorph_dotnet test_net
 
 transpile_net: $(if $(ENABLE_EXTERN_PROCESSING), _with_extern_pre_transpile, )
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
@@ -578,6 +578,7 @@ transpile_test_java: _transpile_test_all _mv_test_java
 # To avoid `java/implementation-java` the code is generated and then moved.
 _mv_implementation_java:
 	rm -rf runtimes/java/src/main/dafny-generated
+	mkdir -p runtimes/java/src/main
 	mv runtimes/java/ImplementationFromDafny-java runtimes/java/src/main/dafny-generated
 _mv_test_java:
 	rm -rf runtimes/java/src/test/dafny-generated
