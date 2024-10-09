@@ -401,6 +401,31 @@ public class DirectedDafnyPythonLocalServiceCodegen
     }
   }
 
+  protected void writeMapShape(MapShape shape, GenerationContext context) {
+    if (
+      shape
+        .getId()
+        .getNamespace()
+        .equals(context.settings().getService().getNamespace())
+    ) {
+      context
+        .writerDelegator()
+        .useShapeWriter(
+          shape,
+          writer -> {
+            MapGenerator generator =
+              new MapGenerator(
+                context.model(),
+                context.symbolProvider(),
+                writer,
+                shape
+              );
+            generator.run();
+          }
+        );
+    }
+  }
+
   /**
    * Call `DirectedPythonCodegen.customizeAfterIntegrations`, then remove
    * `localservice_codegen_todelete.py`. The CodegenDirector will invoke this method after shape
@@ -507,6 +532,8 @@ public class DirectedDafnyPythonLocalServiceCodegen
         );
       } else if (shapeToGenerate.isStringShape()) {
         // Orphaned strings are apparently not generated for .NET/Java
+      } else if (shapeToGenerate.isMapShape()) {
+        writeMapShape
       } else {
         // Add more as needed...
         throw new ClassCastException(
