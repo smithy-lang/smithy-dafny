@@ -53,7 +53,6 @@ public class AwsSdkNativeV2 extends Native {
       defaultModelPackageName(packageNameForAwsSdkV2Shape(serviceShape)),
       CodegenSubject.AwsSdkVersion.V2
     );
-    checkForAwsServiceConstants();
     awsSDKNaming = new DefaultNamingStrategy(new ServiceModel(), null);
     operationIndex = new OperationIndex(model);
   }
@@ -93,15 +92,6 @@ public class AwsSdkNativeV2 extends Native {
       );
   }
 
-  /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
-  private void checkForAwsServiceConstants() {
-    String namespace = serviceShape.getId().getNamespace();
-    checkForAwsServiceConstants(namespace);
-  }
-
-  /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
-  private static void checkForAwsServiceConstants(String namespace) {}
-
   /**
    * Throws IllegalArgumentException if shapeId is not in namespace
    */
@@ -118,7 +108,6 @@ public class AwsSdkNativeV2 extends Native {
 
   public static ClassName classNameForServiceClient(ServiceShape shape) {
     String awsServiceSmithyNamespace = shape.toShapeId().getNamespace();
-    checkForAwsServiceConstants(awsServiceSmithyNamespace);
     return ClassName.get(
       packageNameForAwsSdkV2Shape(shape),
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
