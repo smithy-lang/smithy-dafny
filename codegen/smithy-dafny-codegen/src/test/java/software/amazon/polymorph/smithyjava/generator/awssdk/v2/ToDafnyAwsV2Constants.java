@@ -47,7 +47,7 @@ public class ToDafnyAwsV2Constants {
   protected static String GENERATE_CONVERT_LIST =
     """
     public static dafny.DafnySequence<? extends software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType> KeyUsageTypes (
-        java.util.List<java.lang.String> nativeValue
+        java.util.List<software.amazon.awssdk.services.kms.model.KeyUsageType> nativeValue
     ) {
       return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
           nativeValue,
