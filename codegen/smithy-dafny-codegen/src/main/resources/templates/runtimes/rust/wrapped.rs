@@ -7,6 +7,6 @@ impl crate::r#$dafnyInternalModuleName:L::wrapped::_default {
           ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient>,
           ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
   >>{
-      crate::wrapped::client::Client::from_conf(config)
+      $rustRootModuleName:L::wrapped::client::Client::from_conf(config)
   }
 }

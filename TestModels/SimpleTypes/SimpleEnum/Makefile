@@ -14,6 +14,8 @@ NAMESPACE=simple.types.smithyEnum
 PROJECT_SERVICES := \
 	SimpleEnum
 
+MAIN_SERVICE_FOR_RUST := SimpleEnum
+
 SERVICE_NAMESPACE_SimpleEnum=simple.types.smithyEnum
 
 SERVICE_DEPS_SimpleEnum :=

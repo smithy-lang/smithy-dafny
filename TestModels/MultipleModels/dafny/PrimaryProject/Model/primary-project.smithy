@@ -7,6 +7,7 @@ use simple.multiplemodels.dependencyproject#SomeDependencyOperation
 @aws.polymorph#localService(
   sdkId: "PrimaryProject",
   config: PrimaryProjectConfig,
+  dependencies: [ simple.multiplemodels.dependencyproject#DependencyProject ]
 ) service PrimaryProject {
   version: "2021-11-01",
   resources: [],

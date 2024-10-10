@@ -13,6 +13,8 @@ NAMESPACE=simple.localService
 PROJECT_SERVICES := \
 	SimpleLocalService
 
+MAIN_SERVICE_FOR_RUST := SimpleLocalService
+
 SERVICE_NAMESPACE_SimpleLocalService=simple.localService
 
 SERVICE_DEPS_SimpleLocalService :=

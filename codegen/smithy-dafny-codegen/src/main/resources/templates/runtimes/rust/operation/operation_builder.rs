@@ -6,7 +6,7 @@ $builderSettersDoc:L
     /// - On success, responds with [`$pascalCaseOperationOutputName:L`](crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L) with field(s):
 $outputDoc:L
     /// - On failure, responds with [`SdkError<$pascalCaseOperationErrorName:L>`](crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationErrorName:L)
-    pub fn $snakeCaseOperationName:L(&self) -> crate::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationName:LFluentBuilder {
-        crate::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationName:LFluentBuilder::new(self.clone())
+    pub fn $snakeCaseOperationName:L(&self) -> $rustRootModuleName:L::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationName:LFluentBuilder {
+        $rustRootModuleName:L::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationName:LFluentBuilder::new(self.clone())
     }
 }
