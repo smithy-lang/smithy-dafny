@@ -45,7 +45,7 @@ public class DafnyLocalServiceTypeConversionProtocol
   }
 
   @Override
-  public void generateSerializers(GenerationContext context) {
+  public void generateSerializers(final GenerationContext context) {
     final Set<ShapeId> alreadyVisited = new HashSet<>();
     final var model = context.model();
     final var serviceShape = model.expectShape(
@@ -159,12 +159,12 @@ public class DafnyLocalServiceTypeConversionProtocol
     final var refResources = context
       .model()
       .getShapesWithTrait(ReferenceTrait.class);
-    for (var refResource : refResources) {
+    for (final var refResource : refResources) {
       final var resource = refResource
         .expectTrait(ReferenceTrait.class)
         .getReferentId();
       if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
-        var resourceShape = model.expectShape(resource, ResourceShape.class);
+        final var resourceShape = model.expectShape(resource, ResourceShape.class);
         resourceShape
           .getOperations()
           .forEach(eachOperation -> {
@@ -332,7 +332,7 @@ public class DafnyLocalServiceTypeConversionProtocol
   }
 
   @Override
-  public void generateDeserializers(GenerationContext context) {
+  public void generateDeserializers(final GenerationContext context) {
     final Set<ShapeId> alreadyVisited = new HashSet<>();
     final var serviceShape = context.settings().getService(context.model());
     final var delegator = context.writerDelegator();
@@ -340,7 +340,7 @@ public class DafnyLocalServiceTypeConversionProtocol
     serviceShape
       .getOperations()
       .forEach(eachOperation -> {
-        var operation = context
+        final var operation = context
           .model()
           .expectShape(eachOperation, OperationShape.class);
 
@@ -454,14 +454,14 @@ public class DafnyLocalServiceTypeConversionProtocol
         }
       });
 
-    var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
-    for (var refResource : refResources) {
+    final var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
+    for (final var refResource : refResources) {
       final var resource = refResource
         .expectTrait(ReferenceTrait.class)
         .getReferentId();
 
       if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
-        var resourceShape = context
+        final var resourceShape = context
           .model()
           .expectShape(resource, ResourceShape.class);
         resourceShape
@@ -788,7 +788,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               context.symbolProvider().toSymbol(configShape)
             ),
             writer.consumer(w -> {
-              String output = configShape.accept(
+              final String output = configShape.accept(
                 new SmithyToDafnyShapeVisitor(
                   context,
                   "nativeInput",
@@ -970,14 +970,14 @@ public class DafnyLocalServiceTypeConversionProtocol
               }
             }),
             writer.consumer(w -> {
-              var dependencies = serviceShape.hasTrait(LocalServiceTrait.class)
+              final var dependencies = serviceShape.hasTrait(LocalServiceTrait.class)
                 ? serviceShape
                   .expectTrait(LocalServiceTrait.class)
                   .getDependencies()
                 : new LinkedList<ShapeId>();
               if (dependencies != null) {
-                for (var dep : dependencies) {
-                  var depShape = context.model().expectShape(dep);
+                for (final var dep : dependencies) {
+                  final var depShape = context.model().expectShape(dep);
                   w.write(
                     """
                     case $L.$LBaseException:
@@ -1041,7 +1041,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               context.symbolProvider().toSymbol(configShape)
             ),
             writer.consumer(w -> {
-              String output = configShape.accept(
+              final String output = configShape.accept(
                 new DafnyToSmithyShapeVisitor(
                   context,
                   "dafnyOutput",
@@ -1105,7 +1105,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                   context.symbolProvider().toSymbol(errorShape)
                 ),
                 writer.consumer(w -> {
-                  String output = errorShape.accept(
+                  final String output = errorShape.accept(
                     new DafnyToSmithyShapeVisitor(
                       context,
                       "dafnyOutput",
@@ -1215,7 +1215,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             """,
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
-              for (var error : serviceShape.getErrors()) {
+              for (final var error : serviceShape.getErrors()) {
                 w.write(
                   """
                   if err.Is_$L() {
@@ -1232,7 +1232,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               }
             }),
             writer.consumer(w -> {
-              var dependencies = serviceShape.hasTrait(LocalServiceTrait.class)
+              final var dependencies = serviceShape.hasTrait(LocalServiceTrait.class)
                 ? serviceShape
                   .expectTrait(LocalServiceTrait.class)
                   .getDependencies()
@@ -1240,8 +1240,8 @@ public class DafnyLocalServiceTypeConversionProtocol
               if (dependencies == null) {
                 return;
               }
-              for (var dep : dependencies) {
-                var depService = context
+              for (final var dep : dependencies) {
+                final var depService = context
                   .model()
                   .expectShape(dep, ServiceShape.class);
                 w.write(
@@ -1262,7 +1262,7 @@ public class DafnyLocalServiceTypeConversionProtocol
   }
 
   // Generates rest of the not visited shapes into a function
-  private void generateSerializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
+  private void generateSerializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
     final var writerDelegator = context.writerDelegator();
     final var model = context.model();
     final var serviceShape = model.expectShape(
@@ -1276,7 +1276,7 @@ public class DafnyLocalServiceTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        for (MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+        for (final MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
           final Shape visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
@@ -1285,7 +1285,7 @@ public class DafnyLocalServiceTypeConversionProtocol
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
           String inputType;
-          String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
+          final String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
               visitingMemberShape
             )
             ? "Wrappers.Option"
@@ -1321,7 +1321,7 @@ public class DafnyLocalServiceTypeConversionProtocol
   }
 
   // Generates rest of the not visited shapes into a function
-  private void generateDeserializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
+  private void generateDeserializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
     final var delegator = context.writerDelegator();
     final var model = context.model();
     final var serviceShape = model.expectShape(

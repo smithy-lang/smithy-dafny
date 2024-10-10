@@ -38,8 +38,8 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   final ServiceShape serviceShape;
 
   public DafnyAwsSdkClientTypeConversionProtocol(
-    Model model,
-    ServiceShape serviceShape
+    final Model model,
+    final ServiceShape serviceShape
   ) {
     dafnyNonNormalizedModel = model;
     awsNormalizedModel =
@@ -59,7 +59,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   }
 
   @Override
-  public void generateSerializers(GenerationContext context) {
+  public void generateSerializers(final GenerationContext context) {
     final Set<ShapeId> alreadyVisited = new HashSet<>();
     final var symbolProvider = context.symbolProvider();
     final var writerDelegator = context.writerDelegator();
@@ -209,7 +209,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   }
 
   @Override
-  public void generateDeserializers(GenerationContext context) {
+  public void generateDeserializers(final GenerationContext context) {
     final Set<ShapeId> alreadyVisited = new HashSet<>();
     final var symbolProvider = context.symbolProvider();
     final var delegator = context.writerDelegator();
@@ -603,7 +603,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             """,
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
-              for (var error : errorShapes) {
+              for (final var error : errorShapes) {
                 w.write(
                   """
                     case *$L:
@@ -689,7 +689,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                 DafnyNameResolver.getDafnyBaseErrorType(errorShape),
                 context.symbolProvider().toSymbol(errorShape).getName(),
                 writer.consumer(w -> {
-                  String output = errorShape.accept(
+                  final String output = errorShape.accept(
                     new DafnyToAwsSdkShapeVisitor(
                       context,
                       "dafnyOutput",
@@ -749,7 +749,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             """,
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
-              for (var error : awsNormalizedModel.getShapesWithTrait(
+              for (final var error : awsNormalizedModel.getShapesWithTrait(
                 ErrorTrait.class
               )) {
                 w.write(
@@ -774,7 +774,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   }
 
   // Generates rest of the not visited shapes into a function
-  private void generateSerializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
+  private void generateSerializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
     final var writerDelegator = context.writerDelegator();
     final var model = context.model();
     final var serviceShape = model.expectShape(
@@ -797,7 +797,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
           String inputType;
-          String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
+          final String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
               visitingMemberShape
             )
             ? "Wrappers.Option"
@@ -837,7 +837,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   }
 
   // Generates rest of the not visited shapes into a function
-  private void generateDeserializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
+  private void generateDeserializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
     final var delegator = context.writerDelegator();
     final var model = context.model();
     final var serviceShape = model.expectShape(
@@ -851,12 +851,12 @@ public class DafnyAwsSdkClientTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        ServiceTrait serviceTrait = context
+        final ServiceTrait serviceTrait = context
             .model()
             .expectShape(context.settings().getService(context.model()).toShapeId())
             .getTrait(ServiceTrait.class)
             .get();
-        for (MemberShape visitingMemberShape : DafnyToAwsSdkShapeVisitor.visitorFuncMap.keySet()) {
+        for (final MemberShape visitingMemberShape : DafnyToAwsSdkShapeVisitor.visitorFuncMap.keySet()) {
           final Shape visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
