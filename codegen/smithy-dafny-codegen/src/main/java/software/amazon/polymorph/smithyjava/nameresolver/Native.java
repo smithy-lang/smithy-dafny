@@ -378,8 +378,10 @@ public class Native extends NameResolver {
     // but then call this method that should only be relevant for AWS SDK wrappers.
     // It would be better to make Native abstract in the future.
     return switch (awsSdkVersion) {
-      case V1 -> new AwsSdkNativeV1(serviceShape, model).classNameForAwsSdkShape(shape);
-      case V2 -> new AwsSdkNativeV2(serviceShape, model).classNameForAwsSdkShape(shape);
+      case V1 -> new AwsSdkNativeV1(serviceShape, model)
+        .classNameForAwsSdkShape(shape);
+      case V2 -> new AwsSdkNativeV2(serviceShape, model)
+        .classNameForAwsSdkShape(shape);
     };
   }
 }
