@@ -29,9 +29,9 @@ TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.recursiveshape.internald
 TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleRecursiveShapeTypes"
 
 INDEX_FILE_PATH=src/Index.dfy
-INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.recursiveshape.internaldafny\"} SimpleRecursiveShape refines AbstractSimpleRecursiveShapeService {"
+INDEX_FILE_WITH_EXTERN_STRING="module SimpleRecursiveShape refines AbstractSimpleRecursiveShapeService {"
 INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleRecursiveShape refines AbstractSimpleRecursiveShapeService {"
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleRecursiveShapeImpl.dfy
-WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.recursiveshape.internaldafny.wrapped\"} WrappedSimpleRecursiveShapeService refines WrappedAbstractSimpleRecursiveShapeService {"
+WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module WrappedSimpleRecursiveShapeService refines WrappedAbstractSimpleRecursiveShapeService {"
 WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleRecursiveShapeService refines WrappedAbstractSimpleRecursiveShapeService {"
