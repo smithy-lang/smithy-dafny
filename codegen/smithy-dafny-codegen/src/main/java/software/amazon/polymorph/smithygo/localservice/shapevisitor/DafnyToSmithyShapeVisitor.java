@@ -520,8 +520,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       return func() int32 {
           var b = %s.(int32)
           return b
-      }()
-          """.formatted(dataSource);
+      }()""".formatted(dataSource);
     }
   }
 
