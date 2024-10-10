@@ -459,7 +459,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
             writer.write(
               """
               if error.is_Opaque:
-                  return OpaqueError(obj=error.obj)
+                  return OpaqueError(obj=error.obj, alt_text=error.alt__text)
               elif error.is_CollectionOfErrors:
                   return CollectionOfErrors(
                       message=_dafny.string_of(error.message),
@@ -496,7 +496,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
             writer.write(
               """
               else:
-                  return OpaqueError(obj=error)"""
+                  return OpaqueError(obj=error, alt_text=repr(error))"""
             );
           }
         );
