@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleRecursiveShapeTypesWrapped.dfy"
 
-module WrappedSimpleRecursiveShapeService refines WrappedAbstractSimpleRecursiveShapeService {
+module {:extern "simple.recursiveshape.internaldafny.wrapped"} WrappedSimpleRecursiveShapeService refines WrappedAbstractSimpleRecursiveShapeService {
   import WrappedService = SimpleRecursiveShape
   function method WrappedDefaultSimpleRecursiveShapeConfig(): SimpleRecursiveShapeConfig {
     SimpleRecursiveShapeConfig

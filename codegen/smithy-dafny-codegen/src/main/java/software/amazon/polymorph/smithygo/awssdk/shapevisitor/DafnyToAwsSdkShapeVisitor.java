@@ -1,9 +1,7 @@
 package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
 import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -48,7 +46,9 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   private final ServiceTrait serviceTrait;
   private final boolean isOptional;
   private final boolean isPointable;
-  public static final Map<MemberShape, String> VISITOR_FUNCTION_MAP = new HashMap<>();
+
+  //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
+  private static final Map<MemberShape, String> memberShapeConversionFuncMap = new HashMap<>();
 
   public DafnyToAwsSdkShapeVisitor(
     final GenerationContext context,
@@ -77,6 +77,18 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         .expectShape(context.settings().getService(context.model()).toShapeId())
         .getTrait(ServiceTrait.class)
         .get();
+  }
+
+  public static Set<MemberShape> getAllShapesRequiringConversionFunc() {
+    return memberShapeConversionFuncMap.keySet();
+  }
+
+  public static void putShapesWithConversionFunc(final MemberShape shape, final String conversionFunc) {
+    memberShapeConversionFuncMap.put(shape, conversionFunc);
+  }
+
+  public static String getConversionFunc(final MemberShape shape) {
+    return memberShapeConversionFuncMap.get(shape);
   }
 
   @Override
@@ -161,15 +173,17 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         .expectShape(memberShape.getTarget());
       //TODO: Is it ever possible for structure to be nil?
       String maybeAssertion = "";
-      if (dataSource.equals("input")) maybeAssertion =
-        ".(".concat(
-            DafnyNameResolver.getDafnyType(
-              shape,
-              context.symbolProvider().toSymbol(shape)
+      if (dataSource.equals("input")) {
+        maybeAssertion =
+          ".(".concat(
+              DafnyNameResolver.getDafnyType(
+                shape,
+                context.symbolProvider().toSymbol(shape)
+              )
             )
-          )
-          .concat(")");
-      final boolean assertionRequired =
+            .concat(")");
+      }
+      final var assertionRequired =
         memberShape.isOptional();
       final var derivedDataSource =
         "%1$s%2$s%3$s%4$s".formatted(
@@ -556,7 +570,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
           nilCheck = "if %s == nil { return union}".formatted(unAssertDataSource);
       }
     }
-    final String functionInit = """
+    final var functionInit = """
         func() %s {
             var union %s
             %s
@@ -565,27 +579,27 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
             SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(shape), true),
             nilCheck
     );
-    final StringBuilder eachMemberInUnion = new StringBuilder();
+    final var eachMemberInUnion = new StringBuilder();
     for (final var member : shape.getAllMembers().values()) {
-        final Shape targetShape = context.model().expectShape(member.getTarget());
-        final String memberName = context.symbolProvider().toMemberName(member);
+        final var targetShape = context.model().expectShape(member.getTarget());
+        final var memberName = context.symbolProvider().toMemberName(member);
         // unwrap union type, assert it then convert it to its member type with Dtor_ (example: Dtor_BlobValue()). unionDataSource is not a wrapper object until now.
-        String unionDataSource = dataSource + ".Dtor_" + memberName.replace(shape.getId().getName() + "Member", "") + "()";
-        final Boolean isMemberShapePointable = (awsSdkGoPointableIndex.isPointable(targetShape) && awsSdkGoPointableIndex.isDereferencable(targetShape)) && !targetShape.isStructureShape();
-        final String pointerForPointableShape = isMemberShapePointable ? "*" : "";
-        final String isMemberCheck = """
+        var unionDataSource = dataSource.concat(".Dtor_").concat(memberName.replace(shape.getId().getName().concat("Member"), "")).concat("()");
+        final var isMemberShapePointable = (awsSdkGoPointableIndex.isPointable(targetShape) && awsSdkGoPointableIndex.isDereferencable(targetShape)) && !targetShape.isStructureShape();
+        final var pointerForPointableShape = isMemberShapePointable ? "*" : "";
+        final var isMemberCheck = """
                     if ((%s).%s()) {""".formatted(
                 dataSource,
-                memberName.replace(shape.getId().getName() + "Member", "Is_")
+                memberName.replace(shape.getId().getName().concat("Member"), "Is_")
         );
-        String wrappedDataSource = "";
-        boolean requireAssertion = true;
+        var wrappedDataSource = "";
+        var requiresAssertion = true;
         if (!(targetShape.isStructureShape())) {
             // All other shape except structure needs a Wrapper object but unionDataSource is not a Wrapper object.
             wrappedDataSource = """
                 var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)""".formatted(unionDataSource);
             unionDataSource = "dataSource.UnwrapOr(nil)";
-            requireAssertion = false;
+            requiresAssertion = false;
         }
         eachMemberInUnion.append("""
                         %s
@@ -604,7 +618,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
                   member,
                   context,
                   unionDataSource,
-                  requireAssertion,
+                  requiresAssertion,
                   writer,
                   member.isOptional(),
                   isMemberShapePointable)

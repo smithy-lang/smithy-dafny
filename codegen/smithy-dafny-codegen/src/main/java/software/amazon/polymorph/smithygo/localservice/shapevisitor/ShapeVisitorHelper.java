@@ -12,8 +12,12 @@ import software.amazon.smithy.model.shapes.Shape;
 
 public class ShapeVisitorHelper {
 
-  public static final Map<MemberShape, Boolean> TO_DAFNY_OPTIONALITY_MAP =
+  private static final Map<MemberShape, Boolean> optionalShapesToDafny =
     new HashMap<>();
+
+  public static boolean isToDafnyShapeOptional(final MemberShape shape) {
+    return optionalShapesToDafny.get(shape);
+  }
 
   /**
    * Generates functions Name for To Dafny and To Native conversion.
@@ -79,9 +83,9 @@ public class ShapeVisitorHelper {
     }
     final String nextVisitorFunction;
     final String funcDataSource = "input";
-    if (!DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
-      DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
-      DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.put(
+    if (!DafnyToSmithyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+      DafnyToSmithyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
+      DafnyToSmithyShapeVisitor.putShapesWithConversionFunc(
         memberShape,
         targetShape.accept(
           new DafnyToSmithyShapeVisitor(
@@ -125,10 +129,10 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcDataSource = "input";
-    if (!SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
-      TO_DAFNY_OPTIONALITY_MAP.put(memberShape, isOptional);
-      SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
-      SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(
+    if (!SmithyToDafnyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+      optionalShapesToDafny.put(memberShape, isOptional);
+      SmithyToDafnyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
+      SmithyToDafnyShapeVisitor.putShapesWithConversionFunc(
         memberShape,
         targetShape.accept(
           new SmithyToDafnyShapeVisitor(
