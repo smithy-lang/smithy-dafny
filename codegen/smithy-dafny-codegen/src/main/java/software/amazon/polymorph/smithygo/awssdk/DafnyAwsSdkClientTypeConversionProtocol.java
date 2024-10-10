@@ -537,7 +537,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                 context.symbolProvider().toSymbol(errorShape).getName(),
                 DafnyNameResolver.getDafnyBaseErrorType(errorShape),
                 writer.consumer(w -> {
-                  String output = errorShape.accept(
+                  final String output = errorShape.accept(
                     new AwsSdkToDafnyShapeVisitor(
                       context,
                       "nativeInput",
