@@ -12,6 +12,8 @@ include ../SharedMakefile.mk
 PROJECT_SERVICES := \
 	SimpleErrors
 
+MAIN_SERVICE_FOR_RUST := SimpleErrors
+
 SERVICE_NAMESPACE_SimpleErrors=simple.errors
 
 SERVICE_DEPS_SimpleErrors :=

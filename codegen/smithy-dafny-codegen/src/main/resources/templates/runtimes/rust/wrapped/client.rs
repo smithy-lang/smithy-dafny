@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
 pub struct Client {
-    wrapped: crate::client::Client
+    wrapped: $rustRootModuleName:L::client::Client
 }
 
 /// A runtime for executing operations on the asynchronous client in a blocking manner.
@@ -29,14 +29,14 @@ impl Client {
   ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient>,
   ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
 >> {
-    let result = crate::client::Client::from_conf(
-      crate::conversions::$snakeCaseConfigName:L::_$snakeCaseConfigName:L::from_dafny(
+    let result = $rustRootModuleName:L::client::Client::from_conf(
+      $rustRootModuleName:L::conversions::$snakeCaseConfigName:L::_$snakeCaseConfigName:L::from_dafny(
           config.clone(),
       ),
     );
     match result {
       Ok(client) =>  {
-        let wrap = crate::wrapped::client::Client {
+        let wrap = $rustRootModuleName:L::wrapped::client::Client {
           wrapped: client
         };
         std::rc::Rc::new(
@@ -45,7 +45,7 @@ impl Client {
           }
         )
       },
-      Err(error) => crate::conversions::error::to_opaque_error_result(error)
+      Err(error) => $rustRootModuleName:L::conversions::error::to_opaque_error_result(error)
     }
   }
 }

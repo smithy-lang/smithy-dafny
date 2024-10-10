@@ -4,8 +4,21 @@
 use std::sync::LazyLock;
 use crate::conversions;
 
+#[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct Client {
     pub inner: aws_sdk_kms::Client
+}
+
+impl ::std::cmp::PartialEq for Client {
+  fn eq(&self, other: &Self) -> bool {
+    false
+  }
+}
+
+impl ::std::convert::Into<Client> for aws_sdk_kms::Client {
+    fn into(self) -> Client {
+        Client { inner: self }
+    }
 }
 
 /// A runtime for executing operations on the asynchronous client in a blocking manner.
@@ -33,11 +46,24 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
-  let native_result =
-    dafny_tokio_runtime.block_on(conversions::decrypt::_decrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
+  let inner_input = crate::conversions::decrypt::_decrypt_request::from_dafny(input.clone());
+  let native_result = tokio::task::block_in_place(|| {
+    dafny_tokio_runtime.block_on(async {
+      self.inner.decrypt()
+        .set_ciphertext_blob(inner_input.ciphertext_blob)
+.set_encryption_context(inner_input.encryption_context)
+.set_grant_tokens(inner_input.grant_tokens)
+.set_key_id(inner_input.key_id)
+.set_encryption_algorithm(inner_input.encryption_algorithm)
+.set_recipient(inner_input.recipient)
+.set_dry_run(inner_input.dry_run)
+        .send()
+        .await
+      })
+    });
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::decrypt::_decrypt_response::to_dafny,
-    conversions::decrypt::to_dafny_error)
+    crate::conversions::decrypt::_decrypt_response::to_dafny,
+    crate::conversions::decrypt::to_dafny_error)
 }
  fn DeriveSharedSecret(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DeriveSharedSecretRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -45,11 +71,23 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
-  let native_result =
-    dafny_tokio_runtime.block_on(conversions::derive_shared_secret::_derive_shared_secret_request::from_dafny(input.clone(), self.inner.clone()).send());
+  let inner_input = crate::conversions::derive_shared_secret::_derive_shared_secret_request::from_dafny(input.clone());
+  let native_result = tokio::task::block_in_place(|| {
+    dafny_tokio_runtime.block_on(async {
+      self.inner.derive_shared_secret()
+        .set_key_id(inner_input.key_id)
+.set_key_agreement_algorithm(inner_input.key_agreement_algorithm)
+.set_public_key(inner_input.public_key)
+.set_grant_tokens(inner_input.grant_tokens)
+.set_dry_run(inner_input.dry_run)
+.set_recipient(inner_input.recipient)
+        .send()
+        .await
+      })
+    });
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::derive_shared_secret::_derive_shared_secret_response::to_dafny,
-    conversions::derive_shared_secret::to_dafny_error)
+    crate::conversions::derive_shared_secret::_derive_shared_secret_response::to_dafny,
+    crate::conversions::derive_shared_secret::to_dafny_error)
 }
  fn Encrypt(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::EncryptRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -57,11 +95,23 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
-  let native_result =
-    dafny_tokio_runtime.block_on(conversions::encrypt::_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
+  let inner_input = crate::conversions::encrypt::_encrypt_request::from_dafny(input.clone());
+  let native_result = tokio::task::block_in_place(|| {
+    dafny_tokio_runtime.block_on(async {
+      self.inner.encrypt()
+        .set_key_id(inner_input.key_id)
+.set_plaintext(inner_input.plaintext)
+.set_encryption_context(inner_input.encryption_context)
+.set_grant_tokens(inner_input.grant_tokens)
+.set_encryption_algorithm(inner_input.encryption_algorithm)
+.set_dry_run(inner_input.dry_run)
+        .send()
+        .await
+      })
+    });
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::encrypt::_encrypt_response::to_dafny,
-    conversions::encrypt::to_dafny_error)
+    crate::conversions::encrypt::_encrypt_response::to_dafny,
+    crate::conversions::encrypt::to_dafny_error)
 }
  fn GenerateDataKey(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -69,11 +119,24 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
-  let native_result =
-    dafny_tokio_runtime.block_on(conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone(), self.inner.clone()).send());
+  let inner_input = crate::conversions::generate_data_key::_generate_data_key_request::from_dafny(input.clone());
+  let native_result = tokio::task::block_in_place(|| {
+    dafny_tokio_runtime.block_on(async {
+      self.inner.generate_data_key()
+        .set_key_id(inner_input.key_id)
+.set_encryption_context(inner_input.encryption_context)
+.set_number_of_bytes(inner_input.number_of_bytes)
+.set_key_spec(inner_input.key_spec)
+.set_grant_tokens(inner_input.grant_tokens)
+.set_recipient(inner_input.recipient)
+.set_dry_run(inner_input.dry_run)
+        .send()
+        .await
+      })
+    });
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::generate_data_key::_generate_data_key_response::to_dafny,
-    conversions::generate_data_key::to_dafny_error)
+    crate::conversions::generate_data_key::_generate_data_key_response::to_dafny,
+    crate::conversions::generate_data_key::to_dafny_error)
 }
  fn GenerateDataKeyWithoutPlaintext(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyWithoutPlaintextRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -81,11 +144,23 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
-  let native_result =
-    dafny_tokio_runtime.block_on(conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_request::from_dafny(input.clone(), self.inner.clone()).send());
+  let inner_input = crate::conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_request::from_dafny(input.clone());
+  let native_result = tokio::task::block_in_place(|| {
+    dafny_tokio_runtime.block_on(async {
+      self.inner.generate_data_key_without_plaintext()
+        .set_key_id(inner_input.key_id)
+.set_encryption_context(inner_input.encryption_context)
+.set_key_spec(inner_input.key_spec)
+.set_number_of_bytes(inner_input.number_of_bytes)
+.set_grant_tokens(inner_input.grant_tokens)
+.set_dry_run(inner_input.dry_run)
+        .send()
+        .await
+      })
+    });
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_response::to_dafny,
-    conversions::generate_data_key_without_plaintext::to_dafny_error)
+    crate::conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_response::to_dafny,
+    crate::conversions::generate_data_key_without_plaintext::to_dafny_error)
 }
  fn GetPublicKey(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -93,11 +168,19 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
-  let native_result =
-    dafny_tokio_runtime.block_on(conversions::get_public_key::_get_public_key_request::from_dafny(input.clone(), self.inner.clone()).send());
+  let inner_input = crate::conversions::get_public_key::_get_public_key_request::from_dafny(input.clone());
+  let native_result = tokio::task::block_in_place(|| {
+    dafny_tokio_runtime.block_on(async {
+      self.inner.get_public_key()
+        .set_key_id(inner_input.key_id)
+.set_grant_tokens(inner_input.grant_tokens)
+        .send()
+        .await
+      })
+    });
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::get_public_key::_get_public_key_response::to_dafny,
-    conversions::get_public_key::to_dafny_error)
+    crate::conversions::get_public_key::_get_public_key_response::to_dafny,
+    crate::conversions::get_public_key::to_dafny_error)
 }
  fn ReEncrypt(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -105,11 +188,26 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
-  let native_result =
-    dafny_tokio_runtime.block_on(conversions::re_encrypt::_re_encrypt_request::from_dafny(input.clone(), self.inner.clone()).send());
+  let inner_input = crate::conversions::re_encrypt::_re_encrypt_request::from_dafny(input.clone());
+  let native_result = tokio::task::block_in_place(|| {
+    dafny_tokio_runtime.block_on(async {
+      self.inner.re_encrypt()
+        .set_ciphertext_blob(inner_input.ciphertext_blob)
+.set_source_encryption_context(inner_input.source_encryption_context)
+.set_source_key_id(inner_input.source_key_id)
+.set_destination_key_id(inner_input.destination_key_id)
+.set_destination_encryption_context(inner_input.destination_encryption_context)
+.set_source_encryption_algorithm(inner_input.source_encryption_algorithm)
+.set_destination_encryption_algorithm(inner_input.destination_encryption_algorithm)
+.set_grant_tokens(inner_input.grant_tokens)
+.set_dry_run(inner_input.dry_run)
+        .send()
+        .await
+      })
+    });
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::re_encrypt::_re_encrypt_response::to_dafny,
-    conversions::re_encrypt::to_dafny_error)
+    crate::conversions::re_encrypt::_re_encrypt_response::to_dafny,
+    crate::conversions::re_encrypt::to_dafny_error)
 }
  fn UpdatePrimaryRegion(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::UpdatePrimaryRegionRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
@@ -117,11 +215,19 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
   >
 > {
-  let native_result =
-    dafny_tokio_runtime.block_on(conversions::update_primary_region::_update_primary_region_request::from_dafny(input.clone(), self.inner.clone()).send());
+  let inner_input = crate::conversions::update_primary_region::_update_primary_region_request::from_dafny(input.clone());
+  let native_result = tokio::task::block_in_place(|| {
+    dafny_tokio_runtime.block_on(async {
+      self.inner.update_primary_region()
+        .set_key_id(inner_input.key_id)
+.set_primary_region(inner_input.primary_region)
+        .send()
+        .await
+      })
+    });
   crate::standard_library_conversions::result_to_dafny(&native_result,
-    conversions::update_primary_region::_update_primary_region_response::to_dafny,
-    conversions::update_primary_region::to_dafny_error)
+    |x| (),
+    crate::conversions::update_primary_region::to_dafny_error)
 }
 } #[allow(non_snake_case)]
 impl crate::r#software::amazon::cryptography::services::kms::internaldafny::_default {

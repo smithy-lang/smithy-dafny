@@ -1,6 +1,5 @@
-use simple_resource::SimpleResourceRef;
+use simple_resources::types::simple_resource::SimpleResourceRef;
 use simple_resources::operation::get_resource_data::*;
-use simple_resources::types::*;
 use simple_resources::*;
 
 #[tokio::test]

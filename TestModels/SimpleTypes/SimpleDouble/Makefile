@@ -14,6 +14,8 @@ NAMESPACE=simple.types.smithyDouble
 PROJECT_SERVICES := \
 	SimpleDouble
 
+MAIN_SERVICE_FOR_RUST := SimpleDouble
+
 SERVICE_NAMESPACE_SimpleDouble=simple.types.smithyDouble
 
 SERVICE_DEPS_SimpleDouble :=

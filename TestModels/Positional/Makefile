@@ -13,6 +13,8 @@ NAMESPACE=simple.positional
 PROJECT_SERVICES := \
 	SimplePositional
 
+MAIN_SERVICE_FOR_RUST := SimplePositional
+
 SERVICE_NAMESPACE_SimplePositional=simple.positional
 
 SERVICE_DEPS_SimplePositional :=

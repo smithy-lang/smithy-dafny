@@ -13,6 +13,8 @@ NAMESPACE=simple.refinement
 PROJECT_SERVICES := \
 	SimpleRefinement
 
+MAIN_SERVICE_FOR_RUST := SimpleRefinement
+
 SERVICE_NAMESPACE_SimpleRefinement=simple.refinement
 
 SERVICE_DEPS_SimpleRefinement :=

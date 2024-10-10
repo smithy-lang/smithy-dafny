@@ -10,6 +10,8 @@ include ../SharedMakefile.mk
 PROJECT_SERVICES := \
 	LanguageSpecificLogic
 
+MAIN_SERVICE_FOR_RUST := LanguageSpecificLogic
+
 SERVICE_NAMESPACE_LanguageSpecificLogic=language.specific.logic
 
 SERVICE_DEPS_LanguageSpecificLogic :=

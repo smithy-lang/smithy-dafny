@@ -9,8 +9,8 @@ impl $rustStructureName:L {
 }
 impl $rustStructureName:L {
     /// Creates a new builder-style object to manufacture [`$rustStructureName:L`]($qualifiedRustStructureType:L).
-    pub fn builder() -> crate::types::builders::$rustStructureName:LBuilder {
-        crate::types::builders::$rustStructureName:LBuilder::default()
+    pub fn builder() -> $rustTypesModuleName:L::builders::$rustStructureName:LBuilder {
+        $rustTypesModuleName:L::builders::$rustStructureName:LBuilder::default()
     }
 }
 

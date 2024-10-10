@@ -9,8 +9,8 @@ impl $rustStructureName:L {
 }
 impl $rustStructureName:L {
     /// Creates a new builder-style object to manufacture [`$rustStructureName:L`](crate::operation::$snakeCaseOperationName:L::builders::$rustStructureName:L).
-    pub fn builder() -> crate::operation::$snakeCaseOperationName:L::builders::$rustStructureName:LBuilder {
-        crate::operation::$snakeCaseOperationName:L::builders::$rustStructureName:LBuilder::default()
+    pub fn builder() -> $rustRootModuleName:L::operation::$snakeCaseOperationName:L::builders::$rustStructureName:LBuilder {
+        $rustRootModuleName:L::operation::$snakeCaseOperationName:L::builders::$rustStructureName:LBuilder::default()
     }
 }
 
@@ -28,10 +28,10 @@ impl $rustStructureName:LBuilder {
     pub fn build(
         self,
     ) -> ::std::result::Result<
-        crate::operation::$snakeCaseOperationName:L::$rustStructureName:L,
+        $rustRootModuleName:L::operation::$snakeCaseOperationName:L::$rustStructureName:L,
         ::aws_smithy_types::error::operation::BuildError,
     > {
-        ::std::result::Result::Ok(crate::operation::$snakeCaseOperationName:L::$rustStructureName:L {
+        ::std::result::Result::Ok($rustRootModuleName:L::operation::$snakeCaseOperationName:L::$rustStructureName:L {
             $builderAssignments:L
         })
     }

@@ -14,6 +14,8 @@ NAMESPACE=simple.types.smithyLong
 PROJECT_SERVICES := \
 	SimpleLong
 
+MAIN_SERVICE_FOR_RUST := SimpleLong
+
 SERVICE_NAMESPACE_SimpleLong=simple.types.smithyLong
 
 SERVICE_DEPS_SimpleLong :=
