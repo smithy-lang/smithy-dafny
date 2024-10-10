@@ -8,7 +8,7 @@ pub fn to_opaque_error<E: std::error::Error + 'static>(value: E) ->
     )));
   ::std::rc::Rc::new(
     crate::r#language::specific::logic::internaldafny::types::Error::Opaque {
-        obj: error_obj,
+        obj: error_obj, alt_text : ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string("foo")
     },
   )
 }
