@@ -138,8 +138,14 @@ public class CodegenCli {
     // and the makefile structure makes it very difficult to avoid passing --local-service-test
     // when we don't actually want it for --aws-sdk style projects.
     // For now just ignoring it with a warning.
-    if (outputDirs.containsKey(TargetLanguage.RUST) && cliArguments.awsSdkStyle && cliArguments.localServiceTest) {
-      LOGGER.warn("Ignoring --local-service-test because --output-rust and --aws-sdk are also present");
+    if (
+      outputDirs.containsKey(TargetLanguage.RUST) &&
+      cliArguments.awsSdkStyle &&
+      cliArguments.localServiceTest
+    ) {
+      LOGGER.warn(
+        "Ignoring --local-service-test because --output-rust and --aws-sdk are also present"
+      );
     } else {
       engineBuilder.withLocalServiceTest(cliArguments.localServiceTest);
     }
@@ -429,11 +435,11 @@ public class CodegenCli {
           .build()
       )
       .addOption(
-            Option
-              .builder()
-              .longOpt("local-service-test")
-              .desc("<optional> generate Dafny that tests a local service")
-              .build()
+        Option
+          .builder()
+          .longOpt("local-service-test")
+          .desc("<optional> generate Dafny that tests a local service")
+          .build()
       );
   }
 

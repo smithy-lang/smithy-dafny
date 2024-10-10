@@ -6,5 +6,4 @@ import software.amazon.smithy.model.shapes.Shape;
 public record BoundOperationShape(
   Shape bindingShape,
   OperationShape operationShape
-  ) {
-}
+) {}

@@ -1,10 +1,9 @@
 package software.amazon.polymorph.smithyrust.generator;
 
-import software.amazon.polymorph.utils.TokenTree;
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import software.amazon.polymorph.utils.TokenTree;
 
 public class RustUtils {
 

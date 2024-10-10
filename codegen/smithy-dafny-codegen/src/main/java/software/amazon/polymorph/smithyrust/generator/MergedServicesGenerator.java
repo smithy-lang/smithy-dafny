@@ -1,5 +1,12 @@
 package software.amazon.polymorph.smithyrust.generator;
 
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -9,14 +16,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
-
 public class MergedServicesGenerator {
 
   private final Model model;
@@ -25,9 +24,16 @@ public class MergedServicesGenerator {
   private final boolean generateWrappedClient;
   private final Set<CodegenEngine.GenerationAspect> generationAspects;
 
-  protected final Map<String, AbstractRustShimGenerator> generatorsByNamespace = new HashMap<>();
+  protected final Map<String, AbstractRustShimGenerator> generatorsByNamespace =
+    new HashMap<>();
 
-  public MergedServicesGenerator(Model model, ServiceShape mainService, Set<String> namespaces, boolean generateWrappedClient, Set<CodegenEngine.GenerationAspect> generationAspects) {
+  public MergedServicesGenerator(
+    Model model,
+    ServiceShape mainService,
+    Set<String> namespaces,
+    boolean generateWrappedClient,
+    Set<CodegenEngine.GenerationAspect> generationAspects
+  ) {
     this.model = model;
     this.namespaces = namespaces;
     this.mainService = mainService;
@@ -51,7 +57,8 @@ public class MergedServicesGenerator {
   public Set<RustFile> rustFiles() {
     Set<RustFile> rustFiles = new HashSet<>();
 
-    namespaces.stream()
+    namespaces
+      .stream()
       .map(namespace -> generatorForNamespace(model, namespace, namespaces))
       .flatMap(generator -> generator.rustFiles().stream())
       .forEach(rustFiles::add);
@@ -77,12 +84,27 @@ public class MergedServicesGenerator {
     IOUtils.writeTokenTreesIntoDir(tokenTreeMap, outputDir);
   }
 
-  protected AbstractRustShimGenerator generatorForNamespace(final Model model, final String namespace, final Set<String> namespaces) {
-    return generatorsByNamespace.computeIfAbsent(namespace, n ->
-      generatorFor(model, ModelUtils.serviceFromNamespace(model, n), namespaces));
+  protected AbstractRustShimGenerator generatorForNamespace(
+    final Model model,
+    final String namespace,
+    final Set<String> namespaces
+  ) {
+    return generatorsByNamespace.computeIfAbsent(
+      namespace,
+      n ->
+        generatorFor(
+          model,
+          ModelUtils.serviceFromNamespace(model, n),
+          namespaces
+        )
+    );
   }
 
-  public AbstractRustShimGenerator generatorFor(Model model, ServiceShape serviceShape, Set<String> namespaces) {
+  public AbstractRustShimGenerator generatorFor(
+    Model model,
+    ServiceShape serviceShape,
+    Set<String> namespaces
+  ) {
     if (serviceShape.hasTrait(ServiceTrait.class)) {
       return new RustAwsSdkShimGenerator(
         this,
@@ -118,17 +140,13 @@ public class MergedServicesGenerator {
 
   // TODO: overlap with library version
   private RustFile topLevelDepsModule() {
-    final TokenTree content =
-        RustUtils.declarePubModules(
-          streamServicesToGenerateFor(model)
-            .filter(s -> !isMainService(s))
-            .map(s -> s.getId().getNamespace())
-            .map(RustUtils::rustModuleForSmithyNamespace)
-        );
-    return new RustFile(
-      Path.of("src", "deps.rs"),
-      content
+    final TokenTree content = RustUtils.declarePubModules(
+      streamServicesToGenerateFor(model)
+        .filter(s -> !isMainService(s))
+        .map(s -> s.getId().getNamespace())
+        .map(RustUtils::rustModuleForSmithyNamespace)
     );
+    return new RustFile(Path.of("src", "deps.rs"), content);
   }
 
   public AbstractRustShimGenerator generatorForShape(final Shape shape) {

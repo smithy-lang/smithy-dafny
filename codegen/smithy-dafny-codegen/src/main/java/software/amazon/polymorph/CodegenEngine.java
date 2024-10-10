@@ -154,7 +154,10 @@ public class CodegenEngine {
     // TODO: This should not be used by Rust since it supports (or really requires)
     // generating for multiple namespaces.
     this.serviceShape =
-      ModelUtils.serviceFromNamespace(this.model, this.namespaces.stream().findFirst().get());
+      ModelUtils.serviceFromNamespace(
+        this.model,
+        this.namespaces.stream().findFirst().get()
+      );
   }
 
   /**
@@ -684,11 +687,19 @@ public class CodegenEngine {
     );
 
     // TODO: Can't get makefile working yet
-    final var namespacesToGenerate = model.getServiceShapes().stream()
+    final var namespacesToGenerate = model
+      .getServiceShapes()
+      .stream()
       .map(s -> s.getId().getNamespace())
       .collect(Collectors.toSet());
 
-    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespacesToGenerate, localServiceTest, generationAspects);
+    final MergedServicesGenerator generator = new MergedServicesGenerator(
+      model,
+      serviceShape,
+      namespacesToGenerate,
+      localServiceTest,
+      generationAspects
+    );
     generator.generateAllNamespaces(outputDir);
 
     // TODO: These should be part of the StandardLibrary instead,
@@ -848,15 +859,27 @@ public class CodegenEngine {
   );
 
   private void patchRustAfterTranspiling() {
-    final MergedServicesGenerator generator = new MergedServicesGenerator(model, serviceShape, namespaces, localServiceTest, generationAspects);
+    final MergedServicesGenerator generator = new MergedServicesGenerator(
+      model,
+      serviceShape,
+      namespaces,
+      localServiceTest,
+      generationAspects
+    );
 
-    final TokenTree extraRootServiceDeclarations = generator.generatorForShape(serviceShape).topLevelModuleDeclarations();
-    String extraDeclarations = TokenTree.of(extraRootServiceDeclarations, EXTRA_SINGLE_CRATE_DECLARATIONS).lineSeparated().toString();
+    final TokenTree extraRootServiceDeclarations = generator
+      .generatorForShape(serviceShape)
+      .topLevelModuleDeclarations();
+    String extraDeclarations = TokenTree
+      .of(extraRootServiceDeclarations, EXTRA_SINGLE_CRATE_DECLARATIONS)
+      .lineSeparated()
+      .toString();
     if (!awsSdkStyle && serviceShape.hasTrait(LocalServiceTrait.class)) {
-      extraDeclarations = extraDeclarations
-        + System.lineSeparator()
-        + extraTopLevelDeclarationsForLocalService(serviceShape)
-        + System.lineSeparator();
+      extraDeclarations =
+        extraDeclarations +
+        System.lineSeparator() +
+        extraTopLevelDeclarationsForLocalService(serviceShape) +
+        System.lineSeparator();
     }
     final Path implementationFromDafnyPath = libraryRoot
       .resolve("runtimes")
@@ -879,7 +902,9 @@ public class CodegenEngine {
     }
   }
 
-  private String extraTopLevelDeclarationsForLocalService(ServiceShape serviceShape) {
+  private String extraTopLevelDeclarationsForLocalService(
+    ServiceShape serviceShape
+  ) {
     final String configStructName = serviceShape
       .expectTrait(LocalServiceTrait.class)
       .getConfigId()
@@ -1177,7 +1202,9 @@ public class CodegenEngine {
         for (final TargetLanguage targetLanguage : this.targetLangOutputDirs.keySet()) {
           if (!targetLanguage.equals(TargetLanguage.RUST)) {
             throw new IllegalStateException(
-              "generating for %s does not support multiple namespaces".formatted(targetLanguage)
+              "generating for %s does not support multiple namespaces".formatted(
+                  targetLanguage
+                )
             );
           }
         }

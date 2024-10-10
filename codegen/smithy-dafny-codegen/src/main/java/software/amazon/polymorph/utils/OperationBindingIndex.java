@@ -59,9 +59,7 @@ public class OperationBindingIndex implements KnowledgeIndex {
   }
 
   public Set<Shape> getAllBindingShapes() {
-    return SetUtils.copyOf(
-      bindingShapes
-    );
+    return SetUtils.copyOf(bindingShapes);
   }
 
   public Set<Shape> getBindingShapes(ToShapeId operation) {

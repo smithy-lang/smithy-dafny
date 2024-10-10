@@ -434,7 +434,8 @@ polymorph_rust: service_deps_var=SERVICE_DEPS_$(MAIN_SERVICE_FOR_RUST)
 polymorph_rust: namespace_var=SERVICE_NAMESPACE_$(MAIN_SERVICE_FOR_RUST)
 polymorph_rust: SERVICE=$(MAIN_SERVICE_FOR_RUST)
 polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
-polymorph_rust: _polymorph_rust
+polymorph_rust:
+	$(MAKE) _polymorph_rust
 
 # For several TestModels we've just manually written the code generation target,
 # So we just want to ensure we can transpile and pass the tests in CI.
