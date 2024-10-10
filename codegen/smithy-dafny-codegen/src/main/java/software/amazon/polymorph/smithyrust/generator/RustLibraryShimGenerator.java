@@ -1951,7 +1951,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           final String coercion = isDafnyOption ? "into()" : "Extract()";
           yield TokenTree.of(
             """
-            (match %s {
+            std::rc::Rc::new(match %s {
               Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
               None => crate::_Wrappers_Compile::Option::None {},
             }).%s""".formatted(rustValue, rustToDafny.formatted("s"), coercion)
