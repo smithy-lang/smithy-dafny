@@ -46,6 +46,9 @@ polymorph_python:
 polymorph_rust:
 	echo "Skipping polymorph_rust for StandardLibrary"
 
+patch_after_transpile_rust:
+	echo "Skipping patch_after_transpile_rust for StandardLibrary"
+
 _polymorph_dependencies: 
 	echo "Skipping _polymorph_dependencies for StandardLibrary"
 
