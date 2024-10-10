@@ -14,6 +14,8 @@ NAMESPACE=simple.types.integer
 PROJECT_SERVICES := \
 	SimpleInteger
 
+MAIN_SERVICE_FOR_RUST := SimpleInteger
+
 SERVICE_NAMESPACE_SimpleInteger=simple.types.integer
 
 SERVICE_DEPS_SimpleInteger :=

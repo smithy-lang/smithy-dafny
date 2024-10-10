@@ -14,6 +14,8 @@ NAMESPACE=simple.types.blob
 PROJECT_SERVICES := \
 	SimpleBlob
 
+MAIN_SERVICE_FOR_RUST := SimpleBlob
+
 SERVICE_NAMESPACE_SimpleBlob=simple.types.blob
 
 SERVICE_DEPS_SimpleBlob :=

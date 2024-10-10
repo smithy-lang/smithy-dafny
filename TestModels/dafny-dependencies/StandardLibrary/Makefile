@@ -34,20 +34,20 @@ polymorph_dafny :
 	--dependent-model $(PROJECT_ROOT)/$(STD_LIBRARY)/../Model \
 	";
 
-polymorph_dotnet :
+polymorph_dotnet:
 	echo "Skipping polymorph_dotnet for StandardLibrary"
 
-polymorph_java :
+polymorph_java:
 	echo "Skipping polymorph_java for StandardLibrary"
 
-polymorph_python :
+polymorph_python:
 	echo "Skipping polymorph_python for StandardLibrary"
 
-# Using this target for the side-effect of maintaining patches,
-# Since Dafny Rust code generation is incomplete and also needs to be patched.
-# That only works if you run transpile_rust first.
-polymorph_rust :
+polymorph_rust:
 	echo "Skipping polymorph_rust for StandardLibrary"
+
+patch_after_transpile_rust:
+	echo "Skipping patch_after_transpile_rust for StandardLibrary"
 
 _polymorph_dependencies: 
 	echo "Skipping _polymorph_dependencies for StandardLibrary"
@@ -70,6 +70,12 @@ transpile_python: | transpile_implementation_python transpile_test_python
 transpile_rust: | transpile_implementation_rust
 
 RUST_OTHER_FILES=runtimes/rust/src/conversion.rs runtimes/rust/src/UTF8_externs.rs
+
+# These are necessary just for the patch_after_transpile_rust target
+MAIN_SERVICE_FOR_RUST := StandardLibrary
+SERVICE_NAMESPACE_StandardLibrary=aws.polymorph
+SERVICE_DEPS_StandardLibrary :=
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # Override this target to not insert a dependency on the standard library.
 _mv_implementation_rust:

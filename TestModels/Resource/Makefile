@@ -14,6 +14,8 @@ NAMESPACE=simple.resources
 PROJECT_SERVICES := \
 	SimpleResources
 
+MAIN_SERVICE_FOR_RUST := SimpleResources
+
 SERVICE_NAMESPACE_SimpleResources=simple.resources
 
 SERVICE_DEPS_SimpleResources :=

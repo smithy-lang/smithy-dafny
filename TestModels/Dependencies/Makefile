@@ -5,10 +5,14 @@ CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
 
+TRANSPILE_TESTS_IN_RUST=1
+
 include ../SharedMakefile.mk
 
 PROJECT_SERVICES := \
 	SimpleDependencies
+
+MAIN_SERVICE_FOR_RUST := SimpleDependencies
 
 # Dependencies external to this project
 # Order is important
