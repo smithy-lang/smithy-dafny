@@ -17,8 +17,6 @@ public class ShapeVisitorHelper {
     new HashMap<>();
   public static final Map<MemberShape, Boolean> TO_NATIVE_OUTPUT_POINTER_MAP =
     new HashMap<>();
-  public static final Map<MemberShape, String> toNativeNextFuncInput =
-    new HashMap<>();
 
   /**
    * Generates functions Name for To Dafny and To Native conversion.
