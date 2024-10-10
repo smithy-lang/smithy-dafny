@@ -72,6 +72,7 @@ RUST_OTHER_FILES=runtimes/rust/src/conversion.rs runtimes/rust/src/UTF8_externs.
 MAIN_SERVICE_FOR_RUST := StandardLibrary
 SERVICE_NAMESPACE_StandardLibrary=aws.polymorph
 SERVICE_DEPS_StandardLibrary :=
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # Override this target to not insert a dependency on the standard library.
 _mv_implementation_rust:

@@ -852,7 +852,7 @@ public class CodegenEngine {
 
     final TokenTree extraRootServiceDeclarations = generator.generatorForShape(serviceShape).topLevelModuleDeclarations();
     String extraDeclarations = TokenTree.of(extraRootServiceDeclarations, EXTRA_SINGLE_CRATE_DECLARATIONS).lineSeparated().toString();
-    if (!awsSdkStyle) {
+    if (!awsSdkStyle && serviceShape.hasTrait(LocalServiceTrait.class)) {
       extraDeclarations = extraDeclarations
         + System.lineSeparator()
         + extraTopLevelDeclarationsForLocalService(serviceShape)

@@ -430,7 +430,6 @@ setup_prettier:
 # Generates rust code for all namespaces in this project
 .PHONY: polymorph_rust
 polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
-# TODO: merging all namespaces into one crate
 polymorph_rust: service_deps_var=SERVICE_DEPS_$(MAIN_SERVICE_FOR_RUST)
 polymorph_rust: namespace_var=SERVICE_NAMESPACE_$(MAIN_SERVICE_FOR_RUST)
 polymorph_rust: SERVICE=$(MAIN_SERVICE_FOR_RUST)
