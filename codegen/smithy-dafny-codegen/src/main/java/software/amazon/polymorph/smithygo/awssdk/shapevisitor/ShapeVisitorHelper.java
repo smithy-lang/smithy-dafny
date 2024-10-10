@@ -13,7 +13,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 
 public class ShapeVisitorHelper {
 
-  public static final Map<MemberShape, Boolean> toDafnyOptionalityMap =
+  public static final Map<MemberShape, Boolean> TO_DAFNY_OPTIONALITY_MAP =
     new HashMap<>();
   public static final Map<MemberShape, Boolean> toNativeOutputPointerMap =
     new HashMap<>();
@@ -112,7 +112,7 @@ public class ShapeVisitorHelper {
     }
     final String funcDataSource = "input";
     if (!AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
-      toDafnyOptionalityMap.put(memberShape, isOptional);
+      TO_DAFNY_OPTIONALITY_MAP.put(memberShape, isOptional);
       AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
       AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(
         memberShape,

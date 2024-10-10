@@ -1285,7 +1285,7 @@ public class DafnyLocalServiceTypeConversionProtocol
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
           String inputType;
-          final String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
+          final String outputType = ShapeVisitorHelper.TO_DAFNY_OPTIONALITY_MAP.get(
               visitingMemberShape
             )
             ? "Wrappers.Option"

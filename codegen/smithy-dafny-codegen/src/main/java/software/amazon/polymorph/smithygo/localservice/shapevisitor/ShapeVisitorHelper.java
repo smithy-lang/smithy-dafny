@@ -12,7 +12,7 @@ import software.amazon.smithy.model.shapes.Shape;
 
 public class ShapeVisitorHelper {
 
-  public static final Map<MemberShape, Boolean> toDafnyOptionalityMap =
+  public static final Map<MemberShape, Boolean> TO_DAFNY_OPTIONALITY_MAP =
     new HashMap<>();
 
   /**
@@ -126,7 +126,7 @@ public class ShapeVisitorHelper {
     }
     final String funcDataSource = "input";
     if (!SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
-      toDafnyOptionalityMap.put(memberShape, isOptional);
+      TO_DAFNY_OPTIONALITY_MAP.put(memberShape, isOptional);
       SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
       SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(
         memberShape,
