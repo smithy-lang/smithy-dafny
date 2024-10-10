@@ -15,7 +15,7 @@ public class ShapeVisitorHelper {
 
   public static final Map<MemberShape, Boolean> TO_DAFNY_OPTIONALITY_MAP =
     new HashMap<>();
-  public static final Map<MemberShape, Boolean> toNativeOutputPointerMap =
+  public static final Map<MemberShape, Boolean> TO_NATIVE_OUTPUT_POINTER_MAP =
     new HashMap<>();
   public static final Map<MemberShape, String> toNativeNextFuncInput =
     new HashMap<>();
@@ -78,7 +78,7 @@ public class ShapeVisitorHelper {
           )
         )
       );
-      toNativeOutputPointerMap.put(memberShape, isPointable);
+      TO_NATIVE_OUTPUT_POINTER_MAP.put(memberShape, isPointable);
     }
     final String funcName = funcNameGenerator(memberShape, "FromDafny");
     nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");

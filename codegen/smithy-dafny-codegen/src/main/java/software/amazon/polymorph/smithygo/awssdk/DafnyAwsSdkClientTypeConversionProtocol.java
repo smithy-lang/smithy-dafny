@@ -881,7 +881,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
               break;
           }
           if (
-            ShapeVisitorHelper.toNativeOutputPointerMap.get(visitingMemberShape)
+            ShapeVisitorHelper.TO_NATIVE_OUTPUT_POINTER_MAP.get(visitingMemberShape)
           ) {
             outputType = "*".concat(outputType);
           }
