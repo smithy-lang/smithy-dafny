@@ -4,8 +4,10 @@
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import static java.lang.String.format;
+import static software.amazon.polymorph.utils.ModelUtils.getTopologicallyOrderedOrphanedShapesForService;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Logger;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
@@ -13,6 +15,8 @@ import software.amazon.polymorph.smithypython.localservice.customize.ReferencesF
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.codegen.core.directed.*;
+import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.*;
 
 /**
@@ -198,18 +202,19 @@ public class DirectedDafnyPythonLocalServiceCodegen
   public void generateResource(
     GenerateResourceDirective<GenerationContext, PythonSettings> directive
   ) {
-    if (
-      ReferencesFileWriter.shouldGenerateResourceForShape(
-        directive.shape(),
-        directive.context()
-      )
-    ) {
+    writeResourceShape(directive.shape(), directive.context());
+  }
+
+  protected void writeResourceShape(
+    ResourceShape shape,
+    GenerationContext context
+  ) {
+    if (ReferencesFileWriter.shouldGenerateResourceForShape(shape, context)) {
       String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-          directive.context().settings().getService().getNamespace()
+          context.settings().getService().getNamespace()
         );
-      directive
-        .context()
+      context
         .writerDelegator()
         .useFileWriter(
           moduleName + "/references.py",
@@ -217,8 +222,8 @@ public class DirectedDafnyPythonLocalServiceCodegen
           writer -> {
             new ReferencesFileWriter()
               .generateResourceInterfaceAndImplementation(
-                directive.shape(),
-                directive.context(),
+                shape,
+                context,
                 writer
               );
           }
@@ -235,27 +240,32 @@ public class DirectedDafnyPythonLocalServiceCodegen
   public void generateStructure(
     GenerateStructureDirective<GenerationContext, PythonSettings> directive
   ) {
+    writeStructureShape(directive.shape(), directive.context());
+  }
+
+  protected void writeStructureShape(
+    StructureShape shape,
+    GenerationContext context
+  ) {
     if (
-      directive
-        .shape()
+      shape
         .getId()
         .getNamespace()
-        .equals(directive.context().settings().getService().getNamespace())
+        .equals(context.settings().getService().getNamespace())
     ) {
-      directive
-        .context()
+      context
         .writerDelegator()
         .useShapeWriter(
-          directive.shape(),
+          shape,
           writer -> {
             DafnyPythonLocalServiceStructureGenerator generator =
               new DafnyPythonLocalServiceStructureGenerator(
-                directive.model(),
-                directive.settings(),
-                directive.symbolProvider(),
+                context.model(),
+                context.settings(),
+                context.symbolProvider(),
                 writer,
-                directive.shape(),
-                TopologicalIndex.of(directive.model()).getRecursiveShapes()
+                shape,
+                TopologicalIndex.of(context.model()).getRecursiveShapes()
               );
             generator.run();
           }
@@ -272,27 +282,32 @@ public class DirectedDafnyPythonLocalServiceCodegen
   public void generateError(
     GenerateErrorDirective<GenerationContext, PythonSettings> directive
   ) {
+    writeStructureShapeWithErrorTrait(directive.shape(), directive.context());
+  }
+
+  protected void writeStructureShapeWithErrorTrait(
+    StructureShape shape,
+    GenerationContext context
+  ) {
     if (
-      directive
-        .shape()
+      shape
         .getId()
         .getNamespace()
-        .equals(directive.context().settings().getService().getNamespace())
+        .equals(context.settings().getService().getNamespace())
     ) {
-      directive
-        .context()
+      context
         .writerDelegator()
         .useShapeWriter(
-          directive.shape(),
+          shape,
           writer -> {
             DafnyPythonLocalServiceStructureGenerator generator =
               new DafnyPythonLocalServiceStructureGenerator(
-                directive.model(),
-                directive.settings(),
-                directive.symbolProvider(),
+                context.model(),
+                context.settings(),
+                context.symbolProvider(),
                 writer,
-                directive.shape(),
-                TopologicalIndex.of(directive.model()).getRecursiveShapes()
+                shape,
+                TopologicalIndex.of(context.model()).getRecursiveShapes()
               );
             generator.run();
           }
@@ -309,28 +324,38 @@ public class DirectedDafnyPythonLocalServiceCodegen
   public void generateEnumShape(
     GenerateEnumDirective<GenerationContext, PythonSettings> directive
   ) {
+    writeEnumShape(directive.shape(), directive.context());
+  }
+
+  protected void writeEnumShape(Shape shape, GenerationContext context) {
     if (
-      directive
-        .shape()
+      shape
         .getId()
         .getNamespace()
-        .equals(directive.context().settings().getService().getNamespace())
+        .equals(context.settings().getService().getNamespace())
     ) {
-      if (!directive.shape().isEnumShape()) {
-        return;
+      EnumShape enumShape;
+      if (shape.isEnumShape()) {
+        enumShape = shape.asEnumShape().get();
+      } else if (shape.isStringShape()) {
+        enumShape =
+          EnumShape.fromStringShape(shape.asStringShape().get()).get();
+      } else {
+        throw new IllegalArgumentException(
+          "Shape cannot be interpreted as EnumShape: " + shape.getId()
+        );
       }
 
-      directive
-        .context()
+      context
         .writerDelegator()
         .useShapeWriter(
-          directive.shape(),
+          enumShape,
           writer -> {
             EnumGenerator generator = new EnumGenerator(
-              directive.model(),
-              directive.symbolProvider(),
+              context.model(),
+              context.symbolProvider(),
               writer,
-              directive.shape().asEnumShape().get()
+              enumShape
             );
             generator.run();
           }
@@ -347,26 +372,28 @@ public class DirectedDafnyPythonLocalServiceCodegen
   public void generateUnion(
     GenerateUnionDirective<GenerationContext, PythonSettings> directive
   ) {
+    writeUnionShape(directive.shape(), directive.context());
+  }
+
+  protected void writeUnionShape(UnionShape shape, GenerationContext context) {
     if (
-      directive
-        .shape()
+      shape
         .getId()
         .getNamespace()
-        .equals(directive.context().settings().getService().getNamespace())
+        .equals(context.settings().getService().getNamespace())
     ) {
-      directive
-        .context()
+      context
         .writerDelegator()
         .useShapeWriter(
-          directive.shape(),
+          shape,
           writer -> {
             DafnyPythonLocalServiceUnionGenerator generator =
               new DafnyPythonLocalServiceUnionGenerator(
-                directive.model(),
-                directive.symbolProvider(),
+                context.model(),
+                context.symbolProvider(),
                 writer,
-                directive.shape(),
-                TopologicalIndex.of(directive.model()).getRecursiveShapes()
+                shape,
+                TopologicalIndex.of(context.model()).getRecursiveShapes()
               );
             generator.run();
           }
@@ -437,6 +464,65 @@ public class DirectedDafnyPythonLocalServiceCodegen
   }
 
   /**
+   * This MUST run after code generation for non-orphaned shapes.
+   * Orphaned shapes may topologically depend on non-orphaned shapes, but not vice versa.
+   *
+   * @param directive
+   */
+  protected void generateOrphanedShapesForService(
+    GenerateServiceDirective<GenerationContext, PythonSettings> directive
+  ) {
+    List<Shape> orderedShapes = getTopologicallyOrderedOrphanedShapesForService(
+      directive.shape(),
+      directive.model()
+    );
+
+    for (Shape shapeToGenerate : orderedShapes) {
+      if (shapeToGenerate.isResourceShape()) {
+        writeResourceShape(
+          shapeToGenerate.asResourceShape().get(),
+          directive.context()
+        );
+      } else if (shapeToGenerate.isStructureShape()) {
+        StructureShape structureShape = shapeToGenerate
+          .asStructureShape()
+          .get();
+        if (structureShape.hasTrait(ErrorTrait.class)) {
+          writeStructureShapeWithErrorTrait(
+            structureShape,
+            directive.context()
+          );
+        } else {
+          writeStructureShape(structureShape, directive.context());
+        }
+      } else if (shapeToGenerate.isEnumShape()) {
+        writeEnumShape(
+          shapeToGenerate.asEnumShape().get(),
+          directive.context()
+        );
+      } else if (shapeToGenerate.isUnionShape()) {
+        writeUnionShape(
+          shapeToGenerate.asUnionShape().get(),
+          directive.context()
+        );
+      } else if (shapeToGenerate.isStringShape()) {
+        // Classes are not generated for strings
+      } else if (shapeToGenerate.isIntegerShape()) {
+        // Classes are not generated for ints
+      } else if (shapeToGenerate.isListShape()) {
+        // Classes are not generated for lists
+      } else if (shapeToGenerate.isMapShape()) {
+        // Classes are not generated for maps
+      } else {
+        // Add more as needed...
+        throw new ClassCastException(
+          "Unsupported class for orphaned shape " + shapeToGenerate
+        );
+      }
+    }
+  }
+
+  /**
    * Override Smithy-Python's generateService to generate a synchronous client.
    * Smithy-Python-generated clients' methods are all async.
    * Smithy-Dafny-Python-generated clients' methods are not async.
@@ -447,6 +533,16 @@ public class DirectedDafnyPythonLocalServiceCodegen
   public void generateService(
     GenerateServiceDirective<GenerationContext, PythonSettings> directive
   ) {
+    // For Python, orphaned shape generation MUST run after
+    // Smithy-Core's `CodegenDirector.generateShapesInService` executes.
+    // Orphaned shapes may depend on shapes generated by that method,
+    // and must be generated after non-orphaned shapes.
+    // (The reverse is not true; non-orphaned shapes will never depend on orphaned shapes.)
+    // Smithy-Core currently calls `directedCodegen.generateService` (this method)
+    // immediately after calling `generateShapesInService`,
+    // so this is a correct ordering to generate orphaned shapes.
+    generateOrphanedShapesForService(directive);
+
     new SynchronousClientGenerator(directive.context(), directive.service())
       .run();
 

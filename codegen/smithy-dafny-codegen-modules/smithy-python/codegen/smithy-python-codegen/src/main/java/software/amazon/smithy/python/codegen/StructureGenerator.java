@@ -252,7 +252,7 @@ public class StructureGenerator implements Runnable {
             && (target.isDocumentShape() || target.isListShape() || target.isMapShape());
     }
 
-    private void writeClassDocs(boolean isError) {
+    protected void writeClassDocs(boolean isError) {
         if (hasDocs()) {
             writer.writeDocs(() -> {
                 shape.getTrait(DocumentationTrait.class).ifPresent(trait -> {
@@ -326,7 +326,7 @@ public class StructureGenerator implements Runnable {
         return false;
     }
 
-    private void writeMemberDocs(MemberShape member) {
+    protected void writeMemberDocs(MemberShape member) {
         member.getMemberTrait(model, DocumentationTrait.class).ifPresent(trait -> {
             String memberName = symbolProvider.toMemberName(member);
             String docs = writer.formatDocs(String.format(":param %s: %s", memberName, trait.getValue()));
