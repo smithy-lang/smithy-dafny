@@ -1096,7 +1096,7 @@ public abstract class AbstractRustShimGenerator {
         .map(memberVariables ->
           IOUtils.evalTemplate(
             """
-            crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$dafnyUnionMemberName:L {
+            crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
                 $dafnyUnionMemberName:L: x @ _,
             } => $qualifiedRustUnionName:L::$rustUnionMemberName:L($innerFromDafny:L),
             """,
