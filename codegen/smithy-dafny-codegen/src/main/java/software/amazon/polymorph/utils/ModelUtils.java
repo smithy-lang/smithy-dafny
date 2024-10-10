@@ -743,6 +743,7 @@ public class ModelUtils {
         ModelUtils.isInServiceNamespace(shape, serviceShape) &&
         !shape.isMemberShape()
       ) {
+        System.out.println("Orphaned shape: " + shape.getId());
         orderedShapes.add(shape);
       }
     }
@@ -752,10 +753,12 @@ public class ModelUtils {
         ModelUtils.isInServiceNamespace(shape, serviceShape) &&
         !shape.isMemberShape()
       ) {
+        System.out.println("Orphaned shape: " + shape.getId());
         orderedShapes.add(shape);
       }
     }
 
+    System.out.println("Orphaned shape count: " + orderedShapes);
     return orderedShapes;
   }
 }
