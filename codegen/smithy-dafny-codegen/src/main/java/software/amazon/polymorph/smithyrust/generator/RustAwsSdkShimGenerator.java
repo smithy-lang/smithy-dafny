@@ -181,7 +181,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     }
 
     return new RustFile(
-      Path.of("src", "client.rs"),
+      rootPathForShape(service).resolve("client.rs"),
       TokenTree.of(preamble, postamble)
     );
   }
