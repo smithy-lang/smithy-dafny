@@ -1276,7 +1276,7 @@ public class DafnyLocalServiceTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        for (final MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+        for (final MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.keySet()) {
           final Shape visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
@@ -1313,7 +1313,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             ),
             inputType,
             outputType,
-            SmithyToDafnyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+            SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.get(visitingMemberShape)
           );
         }
       }
@@ -1335,7 +1335,7 @@ public class DafnyLocalServiceTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        for (final MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.visitorFuncMap.keySet()) {
+        for (final MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.keySet()) {
           final Shape visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
@@ -1379,7 +1379,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               "FromDafny"
             ),
             outputType,
-            DafnyToSmithyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+            DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.get(visitingMemberShape)
           );
         }
       }

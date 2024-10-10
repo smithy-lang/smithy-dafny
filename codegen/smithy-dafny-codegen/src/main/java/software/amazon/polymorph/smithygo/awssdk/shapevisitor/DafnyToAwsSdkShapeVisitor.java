@@ -48,7 +48,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   private final ServiceTrait serviceTrait;
   private final boolean isOptional;
   private final boolean isPointable;
-  public static final Map<MemberShape, String> visitorFuncMap = new HashMap<>();
+  public static final Map<MemberShape, String> VISITOR_FUNCTION_MAP = new HashMap<>();
 
   public DafnyToAwsSdkShapeVisitor(
     final GenerationContext context,

@@ -38,7 +38,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   private final GoWriter writer;
   private final boolean isConfigShape;
   private final boolean isOptional;
-  public static final Map<MemberShape, String> visitorFuncMap = new HashMap<>();
+  public static final Map<MemberShape, String> VISITOR_FUNCTION_MAP = new HashMap<>();
 
   public DafnyToSmithyShapeVisitor(
     final GenerationContext context,

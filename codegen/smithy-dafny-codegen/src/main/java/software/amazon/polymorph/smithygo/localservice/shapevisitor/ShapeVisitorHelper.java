@@ -79,9 +79,9 @@ public class ShapeVisitorHelper {
     }
     final String nextVisitorFunction;
     final String funcDataSource = "input";
-    if (!DafnyToSmithyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-      DafnyToSmithyShapeVisitor.visitorFuncMap.put(memberShape, "");
-      DafnyToSmithyShapeVisitor.visitorFuncMap.put(
+    if (!DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
+      DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
+      DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.put(
         memberShape,
         targetShape.accept(
           new DafnyToSmithyShapeVisitor(
@@ -125,10 +125,10 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcDataSource = "input";
-    if (!SmithyToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
+    if (!SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
       toDafnyOptionalityMap.put(memberShape, isOptional);
-      SmithyToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
-      SmithyToDafnyShapeVisitor.visitorFuncMap.put(
+      SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
+      SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(
         memberShape,
         targetShape.accept(
           new SmithyToDafnyShapeVisitor(

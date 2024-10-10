@@ -42,7 +42,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   private final boolean isOptional;
   protected boolean isPointerType;
-  public static final Map<MemberShape, String> visitorFuncMap = new HashMap<>();
+  public static final Map<MemberShape, String> VISITOR_FUNCTION_MAP = new HashMap<>();
 
   public void setPointerType() {
     this.isPointerType = false;

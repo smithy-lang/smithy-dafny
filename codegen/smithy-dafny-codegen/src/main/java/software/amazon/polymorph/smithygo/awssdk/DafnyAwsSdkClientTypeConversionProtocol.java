@@ -788,7 +788,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        for (final MemberShape visitingMemberShape : AwsSdkToDafnyShapeVisitor.visitorFuncMap.keySet()) {
+        for (final MemberShape visitingMemberShape : AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.keySet()) {
           final Shape visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
@@ -829,7 +829,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             ),
             inputType,
             outputType,
-            AwsSdkToDafnyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+            AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.get(visitingMemberShape)
           );
         }
       }
@@ -856,7 +856,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             .expectShape(context.settings().getService(context.model()).toShapeId())
             .getTrait(ServiceTrait.class)
             .get();
-        for (final MemberShape visitingMemberShape : DafnyToAwsSdkShapeVisitor.visitorFuncMap.keySet()) {
+        for (final MemberShape visitingMemberShape : DafnyToAwsSdkShapeVisitor.VISITOR_FUNCTION_MAP.keySet()) {
           final Shape visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
@@ -896,7 +896,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             ),
             "interface {}",
             outputType,
-            DafnyToAwsSdkShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+            DafnyToAwsSdkShapeVisitor.VISITOR_FUNCTION_MAP.get(visitingMemberShape)
           );
         }
       }

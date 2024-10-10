@@ -64,9 +64,9 @@ public class ShapeVisitorHelper {
     }
     final String nextVisitorFunction;
     final String funcDataSource = "input";
-    if (!DafnyToAwsSdkShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-      DafnyToAwsSdkShapeVisitor.visitorFuncMap.put(memberShape, "");
-      DafnyToAwsSdkShapeVisitor.visitorFuncMap.put(
+    if (!DafnyToAwsSdkShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
+      DafnyToAwsSdkShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
+      DafnyToAwsSdkShapeVisitor.VISITOR_FUNCTION_MAP.put(
         memberShape,
         targetShape.accept(
           new DafnyToAwsSdkShapeVisitor(
@@ -111,10 +111,10 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcDataSource = "input";
-    if (!AwsSdkToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
+    if (!AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
       toDafnyOptionalityMap.put(memberShape, isOptional);
-      AwsSdkToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
-      AwsSdkToDafnyShapeVisitor.visitorFuncMap.put(
+      AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
+      AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(
         memberShape,
         targetShape.accept(
           new AwsSdkToDafnyShapeVisitor(
