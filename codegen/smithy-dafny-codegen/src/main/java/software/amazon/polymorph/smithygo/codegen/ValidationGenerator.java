@@ -530,8 +530,8 @@ public class ValidationGenerator {
       validationFuncMap.put(memberShape, mapValidation.toString());
     }
   }
+
   private void renderUnionShape(final UnionShape currentShape, final MemberShape  memberShape, final StringBuilder validationCode, String dataSource) {
-  {
     final var funcName = funcNameGenerator(memberShape, "validate");
     final var funcInput = dataSource.startsWith("input") ? "" : dataSource;
     if (!funcInput.isEmpty()) {
@@ -579,6 +579,5 @@ public class ValidationGenerator {
       );
       validationFuncMap.put(memberShape, unionValidation.toString());
     }
-  }
   }
 }
