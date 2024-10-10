@@ -4,6 +4,8 @@ import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
@@ -38,7 +40,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   private final GoWriter writer;
   private final boolean isConfigShape;
   private final boolean isOptional;
-  public static final Map<MemberShape, String> VISITOR_FUNCTION_MAP = new HashMap<>();
+  //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
+  private static final Map<MemberShape, String> memberShapeConversionFuncMap = new HashMap<>();
 
   public DafnyToSmithyShapeVisitor(
     final GenerationContext context,
@@ -61,6 +64,18 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     this.writer = writer;
     this.isConfigShape = isConfigShape;
     this.isOptional = isOptional;
+  }
+
+  public static Set<MemberShape> getAllShapesRequiringConversionFunc() {
+    return memberShapeConversionFuncMap.keySet();
+  }
+
+  public static void putShapesWithConversionFunc(final MemberShape shape, final String conversionFunc) {
+    memberShapeConversionFuncMap.put(shape, conversionFunc);
+  }
+
+  public static String getConversionFunc(final MemberShape shape) {
+    return memberShapeConversionFuncMap.get(shape);
   }
 
   protected String referenceStructureShape(final StructureShape shape) {

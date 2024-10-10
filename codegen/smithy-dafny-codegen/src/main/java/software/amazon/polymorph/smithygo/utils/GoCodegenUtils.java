@@ -33,7 +33,6 @@ public class GoCodegenUtils {
   }
 
   public static String getType(final Symbol symbol, final Shape shape) {
-    // symbol.getProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class).isEmpty()
     if (
       symbol.getProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class).isEmpty()
       ) {

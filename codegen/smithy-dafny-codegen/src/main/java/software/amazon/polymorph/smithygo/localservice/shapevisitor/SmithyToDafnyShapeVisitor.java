@@ -4,6 +4,7 @@ import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -42,12 +43,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   private final boolean isOptional;
   protected boolean isPointerType;
-  public static final Map<MemberShape, String> VISITOR_FUNCTION_MAP =
-    new HashMap<>();
-
-  public void setPointerType() {
-    this.isPointerType = false;
-  }
+  //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
+  private static final Map<MemberShape, String> memberShapeConversionFuncMap = new HashMap<>();
 
   public SmithyToDafnyShapeVisitor(
     final GenerationContext context,
@@ -64,6 +61,19 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     this.isOptional = isOptional;
     this.isPointerType = isPointerType;
   }
+
+  public static Set<MemberShape> getAllShapesRequiringConversionFunc() {
+    return memberShapeConversionFuncMap.keySet();
+  }
+
+  public static void putShapesWithConversionFunc(final MemberShape shape, final String conversionFunc) {
+    memberShapeConversionFuncMap.put(shape, conversionFunc);
+  }
+
+  public static String getConversionFunc(final MemberShape shape) {
+    return memberShapeConversionFuncMap.get(shape);
+  }
+
 
   protected String referenceStructureShape(StructureShape shape) {
     ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);

@@ -13,11 +13,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.SimpleShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
@@ -42,9 +38,9 @@ public class ValidationGenerator {
         return %s
     }
     """;
-  private static Map<MemberShape, String> validationFuncMap =
+  private static final Map<MemberShape, String> validationFuncMap =
     new HashMap<>();
-  private static Map<MemberShape, String> validationFuncInputTypeMap =
+  private static final Map<MemberShape, String> validationFuncInputTypeMap =
     new HashMap<>();
 
   public ValidationGenerator(
@@ -127,7 +123,7 @@ public class ValidationGenerator {
         ) {
           memberName = dataSource;
         } else {
-          memberName = dataSource + "." + symbolProvider.toMemberName(member);
+          memberName = dataSource.concat(".").concat(symbolProvider.toMemberName(member));
         }
         renderValidatorForEachShape(
           model.expectShape(member.getTarget()),
@@ -167,7 +163,7 @@ public class ValidationGenerator {
     ) {
       if (
         (boolean) symbol.getProperty(POINTABLE, Boolean.class).orElse(false) &&
-        memberShape.isOptional()
+          memberShape.isOptional()
       ) {
         pointableString = "*";
       }
@@ -184,149 +180,26 @@ public class ValidationGenerator {
     );
     // Broke list and map into two different if else because for _, item := range %s looked good for list
     // And for key, value := range %s looked good for map
-    if (currentShape.isListShape()) {
-      MemberShape itemMember = ((ListShape) currentShape).getAllMembers().values().iterator().next();
-      StringBuilder itemValidation = new StringBuilder();
-      renderValidatorForEachShape(model.expectShape(itemMember.getTarget()), itemMember, false, LIST_ITEM, itemValidation);
-      // If the validation function is not created and the list shape does have some constraints
-      if (!validationFuncMap.containsKey(memberShape) && itemValidation.length() != 0) {
-        final String funcName = funcNameGenerator(memberShape, "validate");
-        final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
-        if (!funcInput.equals("")) {
-          String inputType = GoCodegenUtils.getType(symbolProvider.toSymbol(currentShape), currentShape);
-          // remove the package name because this code is generated inside smithyTypesNamespace itself
-          inputType =
-            inputType.replace(
-              SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."),
-              ""
-            );
-          validationFuncInputTypeMap.put(memberShape, inputType);
-          dataSource = "Value";
-        }
-        String funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
-        validationCode.append(
-          CHECK_AND_RETURN_ERROR.formatted(
-            funcCall, funcCall
-          )
-        );
-        validationFuncMap.put(memberShape, null);
-        StringBuilder listValidation = new StringBuilder();
-        listValidation.append(
-          """
-          for _, %s := range %s {
-          """.formatted(LIST_ITEM, dataSource)
-        );
-        listValidation.append(itemValidation);
-        listValidation.append(
-          """
-          }
-          """
-        );
-        validationFuncMap.put(memberShape, listValidation.toString());
-      }
-    } else if (currentShape.isMapShape()) {
-      MemberShape keyMember = ((MapShape) currentShape).getKey();
-      MemberShape valueMember = ((MapShape) currentShape).getValue();
-      StringBuilder keyValidation = new StringBuilder();
-      StringBuilder valueValidation = new StringBuilder();
-      renderValidatorForEachShape(model.expectShape(keyMember.getTarget()), keyMember, false, MAP_KEY, keyValidation);
-      renderValidatorForEachShape(model.expectShape(valueMember.getTarget()), valueMember, false, MAP_VALUE, valueValidation);
-      // Put map key or value to _ if no constraints in key or value
-      String maybeMapKey = keyValidation.length() == 0 ? "_" : MAP_KEY;
-      String maybeMapValue = valueValidation.length() == 0 ? "_" : MAP_VALUE;
-      // If the validation function is not created and the map shape does have some constraints in its key and value
-      if (!validationFuncMap.containsKey(memberShape) && (keyValidation.length() != 0 || valueValidation.length() != 0)) {
-        final String funcName = funcNameGenerator(memberShape, "validate");
-        final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
-        if (!funcInput.equals("")) {
-          String inputType = GoCodegenUtils.getType(symbolProvider.toSymbol(currentShape), currentShape);
-          // remove the package name because this code is generated inside smithyTypesNamespace itself
-          inputType =
-            inputType.replace(
-              SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."),
-              ""
-            );
-          validationFuncInputTypeMap.put(memberShape, inputType);
-          dataSource = "Value";
-        }
-        String funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
-        validationCode.append(
-          CHECK_AND_RETURN_ERROR.formatted(
-            funcCall, funcCall
-          )
-        );
-        validationFuncMap.put(memberShape, null);
-        StringBuilder mapValidation = new StringBuilder();
-        mapValidation.append(
-          """
-          for %s, %s := range %s {
-          """.formatted(maybeMapKey, maybeMapValue, dataSource)
-        );
-        mapValidation.append(keyValidation);
-        mapValidation.append(valueValidation);
-        mapValidation.append(
-          """
-              }
-          """
-        );
-        validationFuncMap.put(memberShape, mapValidation.toString());
-      }
-    } else if (currentShape.isUnionShape()) {
-      final String funcName = funcNameGenerator(memberShape, "validate");
-      final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
-      if (!funcInput.equals("")) {
-        String inputType = (symbolProvider.toSymbol(currentShape)).getName();
-
-        validationFuncInputTypeMap.put(memberShape, inputType);
-        dataSource = "Value";
-      }
-      String funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
-      validationCode.append(
-        CHECK_AND_RETURN_ERROR.formatted(
-          funcCall, funcCall
-        )
-      );
-      if (!validationFuncMap.containsKey(memberShape)) {
-        validationFuncMap.put(memberShape, null);
-        StringBuilder unionValidation = new StringBuilder();
-        unionValidation.append(
-          """
-          switch unionType := %s.(type) {
-              """.formatted(dataSource)
-        );
-        for (var memberInUnion : currentShape.getAllMembers().values()) {
-          unionValidation.append(
-            """
-            case *%s:
-            """.formatted(symbolProvider.toMemberName(memberInUnion))
-          );
-
-          renderValidatorForEachShape(
-            model.expectShape(memberInUnion.getTarget()),
-            memberInUnion,
-            false,
-            "unionType.Value",
-            unionValidation
+    switch (currentShape.getType()) {
+      case LIST:
+        renderListShape(currentShape.asListShape().orElseThrow(), memberShape, validationCode, dataSource);
+        break;
+      case MAP:
+        renderMapShape(currentShape.asMapShape().orElseThrow(), memberShape, validationCode, dataSource);
+        break;
+      case UNION:
+        renderUnionShape(currentShape.asUnionShape().orElseThrow(), memberShape, validationCode, dataSource);
+        break;
+      case STRUCTURE:
+        if (!currentShape.hasTrait(ReferenceTrait.class)) {
+          final var funcCall = dataSource.concat(".Validate()");
+          validationCode.append(
+            CHECK_AND_RETURN_ERROR.formatted(funcCall, funcCall)
           );
         }
-        unionValidation.append(
-          """
-          // Default case should not be reached.
-          default:
-              panic(fmt.Sprintf("Unhandled union type: %T ", unionType))
-          }
-              """
-        );
-        validationFuncMap.put(memberShape, unionValidation.toString());
-      }
-    } else if (
-      currentShape.isStructureShape() &&
-      !currentShape.hasTrait(ReferenceTrait.class)
-    ) {
-      String funcCall = dataSource.concat(".Validate()");
-      validationCode.append(
-        CHECK_AND_RETURN_ERROR.formatted(funcCall, funcCall)
-      );
+        break;
+      default:
+        break;
     }
   }
 
@@ -564,5 +437,147 @@ public class ValidationGenerator {
       );
     }
     return UTFCheck;
+  }
+
+  //dataSource in non-final; Not sure if we need it as mutable.
+  private void renderListShape(final ListShape currentShape, final MemberShape  memberShape, final StringBuilder validationCode, String dataSource) {
+    final var itemMember = currentShape.getAllMembers().values().iterator().next();
+    final var itemValidation = new StringBuilder();
+    renderValidatorForEachShape(model.expectShape(itemMember.getTarget()), itemMember, false, LIST_ITEM, itemValidation);
+    // If the validation function is not created and the list shape does have some constraints
+    if (!validationFuncMap.containsKey(memberShape) && !itemValidation.isEmpty()) {
+      final String funcName = funcNameGenerator(memberShape, "validate");
+      final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
+      if (!funcInput.isEmpty()) {
+        var inputType = GoCodegenUtils.getType(symbolProvider.toSymbol(currentShape), currentShape);
+        // remove the package name because this code is generated inside smithyTypesNamespace itself
+        inputType =
+          inputType.replace(
+            SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."),
+            ""
+          );
+        validationFuncInputTypeMap.put(memberShape, inputType);
+        dataSource = "Value";
+      }
+      final var funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
+      validationCode.append(
+        CHECK_AND_RETURN_ERROR.formatted(
+          funcCall, funcCall
+        )
+      );
+      validationFuncMap.put(memberShape, null);
+      final var listValidation = new StringBuilder();
+      listValidation.append(
+        """
+        for _, %s := range %s {
+        """.formatted(LIST_ITEM, dataSource)
+      );
+      listValidation.append(itemValidation);
+      listValidation.append(
+        """
+        }
+        """
+      );
+      validationFuncMap.put(memberShape, listValidation.toString());
+    }
+  }
+
+  private void renderMapShape(final MapShape currentShape, final MemberShape  memberShape, final StringBuilder validationCode, String dataSource) {
+    final var keyMember = currentShape.getKey();
+    final var valueMember = currentShape.getValue();
+    final var keyValidation = new StringBuilder();
+    final var valueValidation = new StringBuilder();
+    renderValidatorForEachShape(model.expectShape(keyMember.getTarget()), keyMember, false, MAP_KEY, keyValidation);
+    renderValidatorForEachShape(model.expectShape(valueMember.getTarget()), valueMember, false, MAP_VALUE, valueValidation);
+    // Put map key or value to _ if no constraints in key or value
+    final var maybeMapKey = keyValidation.isEmpty() ? "_" : MAP_KEY;
+    final var maybeMapValue = valueValidation.isEmpty() ? "_" : MAP_VALUE;
+    // If the validation function is not created and the map shape does have some constraints in its key and value
+    if (!validationFuncMap.containsKey(memberShape) && (!keyValidation.isEmpty() || !valueValidation.isEmpty())) {
+      final var funcName = funcNameGenerator(memberShape, "validate");
+      final var funcInput = dataSource.startsWith("input") ? "" : dataSource;
+      if (!funcInput.isEmpty()) {
+        var inputType = GoCodegenUtils.getType(symbolProvider.toSymbol(currentShape), currentShape);
+        // remove the package name because this code is generated inside smithyTypesNamespace itself
+        inputType =
+          inputType.replace(
+            SmithyNameResolver.smithyTypesNamespace(currentShape).concat("."),
+            ""
+          );
+        validationFuncInputTypeMap.put(memberShape, inputType);
+        dataSource = "Value";
+      }
+      final var funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
+      validationCode.append(
+        CHECK_AND_RETURN_ERROR.formatted(
+          funcCall, funcCall
+        )
+      );
+      validationFuncMap.put(memberShape, null);
+      final var mapValidation = new StringBuilder();
+      mapValidation.append(
+        """
+        for %s, %s := range %s {
+        """.formatted(maybeMapKey, maybeMapValue, dataSource)
+      );
+      mapValidation.append(keyValidation);
+      mapValidation.append(valueValidation);
+      mapValidation.append(
+        """
+            }
+        """
+      );
+      validationFuncMap.put(memberShape, mapValidation.toString());
+    }
+  }
+
+  private void renderUnionShape(final UnionShape currentShape, final MemberShape  memberShape, final StringBuilder validationCode, String dataSource) {
+    final var funcName = funcNameGenerator(memberShape, "validate");
+    final var funcInput = dataSource.startsWith("input") ? "" : dataSource;
+    if (!funcInput.isEmpty()) {
+      final var inputType = (symbolProvider.toSymbol(currentShape)).getName();
+
+      validationFuncInputTypeMap.put(memberShape, inputType);
+      dataSource = "Value";
+    }
+    final var funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
+    validationCode.append(
+      CHECK_AND_RETURN_ERROR.formatted(
+        funcCall, funcCall
+      )
+    );
+    if (!validationFuncMap.containsKey(memberShape)) {
+      validationFuncMap.put(memberShape, null);
+      final var unionValidation = new StringBuilder();
+      unionValidation.append(
+        """
+        switch unionType := %s.(type) {
+            """.formatted(dataSource)
+      );
+      for (final var memberInUnion : currentShape.getAllMembers().values()) {
+        unionValidation.append(
+          """
+          case *%s:
+          """.formatted(symbolProvider.toMemberName(memberInUnion))
+        );
+
+        renderValidatorForEachShape(
+          model.expectShape(memberInUnion.getTarget()),
+          memberInUnion,
+          false,
+          "unionType.Value",
+          unionValidation
+        );
+      }
+      unionValidation.append(
+        """
+        // Default case should not be reached.
+        default:
+            panic(fmt.Sprintf("Unhandled union type: %T ", unionType))
+        }
+            """
+      );
+      validationFuncMap.put(memberShape, unionValidation.toString());
+    }
   }
 }

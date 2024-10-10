@@ -4,6 +4,7 @@ import static software.amazon.polymorph.smithygo.localservice.nameresolver.Const
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
@@ -42,11 +43,8 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   private final boolean isOptional;
   protected boolean isPointerType;
-  public static final Map<MemberShape, String> VISITOR_FUNCTION_MAP = new HashMap<>();
-
-  public void setPointerType() {
-    this.isPointerType = false;
-  }
+  //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
+  private static final Map<MemberShape, String> memberShapeConversionFuncMap = new HashMap<>();
 
   public AwsSdkToDafnyShapeVisitor(
     final GenerationContext context,
@@ -62,6 +60,18 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     this.isConfigShape = isConfigShape;
     this.isOptional = isOptional;
     this.isPointerType = isPointerType;
+  }
+
+  public static Set<MemberShape> getAllShapesRequiringConversionFunc() {
+    return memberShapeConversionFuncMap.keySet();
+  }
+
+  public static void putShapesWithConversionFunc(final MemberShape shape, final String conversionFunc) {
+    memberShapeConversionFuncMap.put(shape, conversionFunc);
+  }
+
+  public static String getConversionFunc(final MemberShape shape) {
+    return memberShapeConversionFuncMap.get(shape);
   }
 
   @Override
@@ -166,9 +176,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
       final var memberName = memberShapeEntry.getKey();
       final var memberShape = memberShapeEntry.getValue();
-      final var targetShape = context
-        .model()
-        .expectShape(memberShape.getTarget());
+
       builder.append(
         "%1$s%2$s".formatted(
             ShapeVisitorHelper.toDafnyShapeVisitorWriter(
@@ -200,11 +208,13 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
 
-    final MemberShape keyMemberShape = shape.getKey();
-    final MemberShape valueMemberShape = shape.getValue();
-    String nilWrapIfRequired = "nil";
-    String someWrapIfRequired = "%s";
-    String returnType = "dafny.Map";
+    final var keyMemberShape = shape.getKey();
+    final var valueMemberShape = shape.getValue();
+
+    var nilWrapIfRequired = "nil";
+    var someWrapIfRequired = "%s";
+    var returnType = "dafny.Map";
+
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
@@ -257,11 +267,13 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String listShape(final ListShape shape) {
     writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-    final StringBuilder builder = new StringBuilder();
-    final MemberShape memberShape = shape.getMember();
-    String nilWrapIfRequired = "nil";
-    String someWrapIfRequired = "%s";
-    String returnType = "dafny.Sequence";
+
+    final var builder = new StringBuilder();
+    final var memberShape = shape.getMember();
+
+    var nilWrapIfRequired = "nil";
+    var someWrapIfRequired = "%s";
+    var returnType = "dafny.Sequence";
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
@@ -396,9 +408,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
       }
 
-      if (shape.hasTrait(DafnyUtf8BytesTrait.class)) writer.addUseImports(
-        SmithyGoDependency.stdlib("unicode/utf8")
-      );
+      if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+        writer.addUseImports(SmithyGoDependency.stdlib("unicode/utf8"));
+      }
       final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
         ? """
             dafny.SeqOf(func () []interface{} {
@@ -537,91 +549,92 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String unionShape(final UnionShape shape) {
-    final ServiceShape serviceShape = context
-        .model()
-        .expectShape(context.settings().getService(context.model()).toShapeId())
-        .asServiceShape().get();
-    final String internalDafnyType = DafnyNameResolver.getDafnyType(
+    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+
+    final var serviceShape = context
+      .model()
+      .expectShape(context.settings().getService(context.model()).toShapeId())
+      .asServiceShape().get();
+
+    final var internalDafnyType = DafnyNameResolver.getDafnyType(
       shape,
       context.symbolProvider().toSymbol(shape)
     );
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-    String returnType = DafnyNameResolver.getDafnyType(
-        shape,
-        context.symbolProvider().toSymbol(shape)
-      );
-    String someWrapIfRequired = "%s(%s)";
+
+    var returnType = DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape));
+    var someWrapIfRequired = "%s(%s)";
     if (this.isOptional) {
       returnType = "Wrappers.Option";
       someWrapIfRequired =
         "Wrappers.Companion_Option_.Create_Some_(%s(%s))";
     }
-    final String functionInit =
+
+    final var functionInit =
       """
-      func() %s {
-          switch %s.(type) {""".formatted(returnType, dataSource);
-    final StringBuilder eachMemberInUnion = new StringBuilder();
+        func() %s {
+            switch %s.(type) {""".formatted(returnType, dataSource);
+
+    final var eachMemberInUnion = new StringBuilder();
     for (final var member : shape.getAllMembers().values()) {
-      final String memberName = context.symbolProvider().toMemberName(member);
-      final Shape targetShape = context.model().expectShape(member.getTarget());
-      final String baseType = DafnyNameResolver.getDafnyType(
-        targetShape,
-        context.symbolProvider().toSymbol(targetShape)
-      );
-      final String dataSourceInput = dataSource
-                        .concat(".(*")
-                        .concat(SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true))
-                        .concat(DOT)
-                        .concat(context.symbolProvider().toMemberName(member))
-                        .concat(").Value");
+      final var memberName = context.symbolProvider().toMemberName(member);
+      final var targetShape = context.model().expectShape(member.getTarget());
+      final var baseType = DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape));
+      final var dataSourceInput = dataSource
+        .concat(".(*")
+        .concat(SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true))
+        .concat(DOT)
+        .concat(context.symbolProvider().toMemberName(member))
+        .concat(").Value");
       eachMemberInUnion.append(
         """
-        case *%s.%s:
-            var companion = %s
-            var inputToConversion = %s
-            return %s
-            """.formatted(
-            SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true),
-            context.symbolProvider().toMemberName(member),
-            internalDafnyType.replace(
-              shape.getId().getName(),
-              "CompanionStruct_" + shape.getId().getName() + "_{}"
+          case *%s.%s:
+              var companion = %s
+              var inputToConversion = %s
+              return %s
+          """.formatted(
+          SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true),
+          context.symbolProvider().toMemberName(member),
+          internalDafnyType.replace(
+            shape.getId().getName(),
+            "CompanionStruct_".concat(shape.getId().getName()).concat("_{}")
+          ),
+          ShapeVisitorHelper.toDafnyShapeVisitorWriter(
+            member,
+            context,
+            dataSourceInput,
+            writer,
+            isConfigShape,
+            true,
+            false
+          ),
+          someWrapIfRequired.formatted(
+            DafnyNameResolver.getDafnyCreateFuncForUnionMemberShape(
+              shape,
+              memberName
             ),
-            ShapeVisitorHelper.toDafnyShapeVisitorWriter(
-              member,
-              context,
-              dataSourceInput,
-              writer,
-              isConfigShape,
-              true,
-              false
-            ),
-            someWrapIfRequired.formatted(
-              DafnyNameResolver.getDafnyCreateFuncForUnionMemberShape(
-                shape,
-                memberName
-              ),
-              "inputToConversion.UnwrapOr(nil)%s".formatted(
-                  baseType != "" ? ".(" + baseType + ")" : ""
-                )
+            "inputToConversion.UnwrapOr(nil)%s".formatted(
+              !baseType.isEmpty() ? ".(".concat(baseType).concat(")") : ""
             )
           )
+        )
       );
     }
-    final String defaultCase =
+
+    final var defaultCase =
       """
-              default:
-      panic("Unhandled union type")
-          }
-      }()""";
+                default:
+        panic("Unhandled union type")
+            }
+        }()""";
     return """
-    %s
-    %s
-    %s""".formatted(functionInit, eachMemberInUnion, defaultCase);
+      %s
+      %s
+      %s""".formatted(functionInit, eachMemberInUnion, defaultCase);
   }
 
   @Override
   public String timestampShape(final TimestampShape shape) {
+    //TODO: This is a stub implementation and not working yet.
     writer.addImport("time");
     if (this.isOptional) {
       return "Wrappers.Companion_Option_.Create_None_()";

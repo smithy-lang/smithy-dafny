@@ -1262,6 +1262,8 @@ public class DafnyLocalServiceTypeConversionProtocol
   }
 
   // Generates rest of the not visited shapes into a function
+  // TODO: We should be able to optimize it to run along with the ShapeVisitors.
+  // But since this runs outside of any production code - we are okay with this for now
   private void generateSerializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
     final var writerDelegator = context.writerDelegator();
     final var model = context.model();
@@ -1276,8 +1278,8 @@ public class DafnyLocalServiceTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        for (final MemberShape visitingMemberShape : SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.keySet()) {
-          final Shape visitingShape = context
+        for (final var visitingMemberShape : SmithyToDafnyShapeVisitor.getAllShapesRequiringConversionFunc()) {
+          final var visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
           if (alreadyVisited.contains(visitingMemberShape.getId())) {
@@ -1285,7 +1287,7 @@ public class DafnyLocalServiceTypeConversionProtocol
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
           String inputType;
-          final String outputType = ShapeVisitorHelper.TO_DAFNY_OPTIONALITY_MAP.get(
+          final var outputType = ShapeVisitorHelper.isToDafnyShapeOptional(
               visitingMemberShape
             )
             ? "Wrappers.Option"
@@ -1313,7 +1315,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             ),
             inputType,
             outputType,
-            SmithyToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.get(visitingMemberShape)
+            SmithyToDafnyShapeVisitor.getConversionFunc(visitingMemberShape)
           );
         }
       }
@@ -1321,6 +1323,8 @@ public class DafnyLocalServiceTypeConversionProtocol
   }
 
   // Generates rest of the not visited shapes into a function
+  // TODO: We should be able to optimize it to run along with the ShapeVisitors.
+  // But since this runs outside of any production code - we are okay with this for now
   private void generateDeserializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
     final var delegator = context.writerDelegator();
     final var model = context.model();
@@ -1335,25 +1339,25 @@ public class DafnyLocalServiceTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        for (final MemberShape visitingMemberShape : DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.keySet()) {
-          final Shape visitingShape = context
+        for (final var visitingMemberShape : DafnyToSmithyShapeVisitor.getAllShapesRequiringConversionFunc()) {
+          final var visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
           if (alreadyVisited.contains(visitingMemberShape.getId())) {
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          String outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
+          var outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
           if (visitingShape.hasTrait(ReferenceTrait.class)) {
-            final ReferenceTrait referenceTrait = visitingShape.expectTrait(
+            final var referenceTrait = visitingShape.expectTrait(
               ReferenceTrait.class
             );
-            final Shape resourceOrService = context
+            final var resourceOrService = context
               .model()
               .expectShape(referenceTrait.getReferentId());
             outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
             if (resourceOrService.isServiceShape()) {
-              final String namespace = SmithyNameResolver
+              final var namespace = SmithyNameResolver
                 .shapeNamespace(resourceOrService)
                 .concat(".");
               outputType =
@@ -1379,7 +1383,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               "FromDafny"
             ),
             outputType,
-            DafnyToSmithyShapeVisitor.VISITOR_FUNCTION_MAP.get(visitingMemberShape)
+            DafnyToSmithyShapeVisitor.getConversionFunc(visitingMemberShape)
           );
         }
       }

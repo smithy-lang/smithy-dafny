@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -13,10 +14,18 @@ import software.amazon.smithy.model.traits.EnumTrait;
 
 public class ShapeVisitorHelper {
 
-  public static final Map<MemberShape, Boolean> TO_DAFNY_OPTIONALITY_MAP =
+  private static final Map<MemberShape, Boolean> optionalShapesToDafny =
     new HashMap<>();
-  public static final Map<MemberShape, Boolean> TO_NATIVE_OUTPUT_POINTER_MAP =
+  private static final Map<MemberShape, Boolean> pointerShapesToNative =
     new HashMap<>();
+
+  public static boolean isToDafnyShapeOptional(final MemberShape shape) {
+    return optionalShapesToDafny.get(shape);
+  }
+
+  public static boolean isToNativeShapePointable(final MemberShape shape) {
+    return pointerShapesToNative.get(shape);
+  }
 
   /**
    * Generates functions Name for To Dafny and To Native conversion.
@@ -62,9 +71,9 @@ public class ShapeVisitorHelper {
     }
     final String nextVisitorFunction;
     final String funcDataSource = "input";
-    if (!DafnyToAwsSdkShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
-      DafnyToAwsSdkShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
-      DafnyToAwsSdkShapeVisitor.VISITOR_FUNCTION_MAP.put(
+    if (!DafnyToAwsSdkShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+      DafnyToAwsSdkShapeVisitor.putShapesWithConversionFunc(memberShape, "");
+      DafnyToAwsSdkShapeVisitor.putShapesWithConversionFunc(
         memberShape,
         targetShape.accept(
           new DafnyToAwsSdkShapeVisitor(
@@ -76,7 +85,7 @@ public class ShapeVisitorHelper {
           )
         )
       );
-      TO_NATIVE_OUTPUT_POINTER_MAP.put(memberShape, isPointable);
+      pointerShapesToNative.put(memberShape, isPointable);
     }
     final String funcName = funcNameGenerator(memberShape, "FromDafny");
     nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
@@ -109,10 +118,10 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcDataSource = "input";
-    if (!AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.containsKey(memberShape)) {
-      TO_DAFNY_OPTIONALITY_MAP.put(memberShape, isOptional);
-      AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(memberShape, "");
-      AwsSdkToDafnyShapeVisitor.VISITOR_FUNCTION_MAP.put(
+    if (!AwsSdkToDafnyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+      optionalShapesToDafny.put(memberShape, isOptional);
+      AwsSdkToDafnyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
+      AwsSdkToDafnyShapeVisitor.putShapesWithConversionFunc(
         memberShape,
         targetShape.accept(
           new AwsSdkToDafnyShapeVisitor(
