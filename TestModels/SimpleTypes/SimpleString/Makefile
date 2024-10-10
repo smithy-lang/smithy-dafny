@@ -14,6 +14,8 @@ NAMESPACE=simple.types.smithyString
 PROJECT_SERVICES := \
 	SimpleString
 
+MAIN_SERVICE_FOR_RUST := SimpleString
+
 SERVICE_NAMESPACE_SimpleString=simple.types.smithyString
 
 SERVICE_DEPS_SimpleString :=

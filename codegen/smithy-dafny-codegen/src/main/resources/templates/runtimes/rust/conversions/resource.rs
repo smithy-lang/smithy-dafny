@@ -1,6 +1,6 @@
 #[allow(dead_code)]
 pub fn to_dafny(
-    value: crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef,
+    value: &$rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:LRef,
 ) -> ::dafny_runtime::Object<
   dyn crate::r#$dafnyTypesModuleName:L::$dafnyResourceName:L,
 > {
@@ -12,7 +12,7 @@ pub fn to_dafny(
 }
 
 pub struct $rustResourceName:LWrapper {
-  obj: crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef,
+  obj: $rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:LRef,
 }
 
 impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for $rustResourceName:LWrapper {
@@ -22,13 +22,13 @@ impl ::dafny_runtime::UpcastObject<dyn ::std::any::Any> for $rustResourceName:LW
 #[allow(dead_code)]
 pub fn from_dafny(
     dafny_value: ::dafny_runtime::Object<
-      dyn crate::r#$dafnyTypesModuleName:L::ISimpleResource,
+      dyn crate::r#$dafnyTypesModuleName:L::$dafnyResourceName:L,
     >,
-) -> crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef {
+) -> $rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:LRef {
     let wrap = $dafnyResourceName:LDafnyWrapper {
         obj: dafny_value.clone(),
     };
-    crate::types::$snakeCaseResourceName:L::$rustResourceName:LRef {
+    $rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:LRef {
       inner: ::std::rc::Rc::new(::std::cell::RefCell::new(wrap))
     }
 }
@@ -40,4 +40,13 @@ pub struct $dafnyResourceName:LDafnyWrapper {
   >,
 }
 
-$resourceOperations:L
+impl crate::$dafnyTypesModuleName:L::$dafnyResourceName:L
+  for $rustResourceName:LWrapper
+{
+  $resourceWrapperOperations:L
+}
+
+impl $rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:L for $dafnyResourceName:LDafnyWrapper 
+{
+  $resourceDafnyWrapperOperations:L
+}

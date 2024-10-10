@@ -14,6 +14,8 @@ NAMESPACE=simple.union
 PROJECT_SERVICES := \
 	SimpleUnion
 
+MAIN_SERVICE_FOR_RUST := SimpleUnion
+
 SERVICE_NAMESPACE_SimpleUnion=simple.union
 
 SERVICE_DEPS_SimpleUnion :=

@@ -14,6 +14,8 @@ NAMESPACE=simple.constructor
 PROJECT_SERVICES := \
 	SimpleConstructor
 
+MAIN_SERVICE_FOR_RUST := SimpleConstructor
+
 SERVICE_NAMESPACE_SimpleConstructor=simple.constructor
 
 SERVICE_DEPS_SimpleConstructor :=
