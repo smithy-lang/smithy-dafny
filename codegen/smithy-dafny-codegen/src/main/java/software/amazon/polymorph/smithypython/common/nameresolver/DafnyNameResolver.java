@@ -295,7 +295,8 @@ public class DafnyNameResolver {
       );
     }
 
-    final String replacedEnumValue = enumValue.replace("_", "__" )
+    final String replacedEnumValue = enumValue
+      .replace("_", "__")
       .replace("-", "__")
       .replace(":", "__");
 
