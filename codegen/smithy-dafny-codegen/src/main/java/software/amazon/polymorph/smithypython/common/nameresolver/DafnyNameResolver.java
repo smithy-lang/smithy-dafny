@@ -295,10 +295,14 @@ public class DafnyNameResolver {
       );
     }
 
+    final String replacedEnumValue = enumValue.replace("_", "__" )
+      .replace("-", "__")
+      .replace(":", "__");
+
     return (
       mangleDafnyType(stringShape.getId().getName()) +
       "_" +
-      mangleDafnyType(enumValue.replace("_", "__"))
+      mangleDafnyType(replacedEnumValue)
     );
   }
 
