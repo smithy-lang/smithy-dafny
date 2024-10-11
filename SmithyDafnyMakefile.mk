@@ -259,6 +259,9 @@ transpile_dependencies_test:
 
 ########################## Code-Gen targets
 
+mvn_local_deploy_polymorph_dependencies:
+	$(MAKE) -C $(SMITHY_DAFNY_ROOT) mvn_local_deploy_polymorph_dependencies
+
 # The OUTPUT variables are created this way
 # so that it is possible to run _parts_ of polymorph.
 # Otherwise it is difficult to run/test only a Dafny change.
@@ -269,6 +272,7 @@ transpile_dependencies_test:
 #   make polymorph_code_gen CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli
 # StandardLibrary is filtered out from dependent-model patsubst list;
 #   Its model is contained in $(LIBRARY_ROOT)/model, not $(LIBRARY_ROOT)/../StandardLibrary/Model.
+_polymorph: mvn_local_deploy_polymorph_dependencies
 _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
 	./../gradlew run --args="\
@@ -288,12 +292,13 @@ _polymorph:
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	$(DEPENDENCY_MODULE_NAMES) \
-	--namespace $($(namespace_var)) \
+	$(patsubst %, --namespace %, $($(namespace_var))) \
 	$(OUTPUT_LOCAL_SERVICE_$(SERVICE)) \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS) \
 	";
 
+_polymorph_wrapped: mvn_local_deploy_polymorph_dependencies
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
@@ -428,20 +433,15 @@ setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
 
 # Generates rust code for all namespaces in this project
-# Note that we rely on the patching feature of polymorph
-# to also patch the results of transpile_rust,
-# so we assume that is run first!
 .PHONY: polymorph_rust
-polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
-polymorph_rust: _polymorph_dependencies
-polymorph_rust:
-	set -e; for service in $(PROJECT_SERVICES) ; do \
-		export service_deps_var=SERVICE_DEPS_$${service} ; \
-		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
-		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_rust ; \
-	done
 
+polymorph_rust:
+	$(MAKE) _polymorph_rust
+
+_polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
+_polymorph_rust: service_deps_var=SERVICE_DEPS_$(MAIN_SERVICE_FOR_RUST)
+_polymorph_rust: namespace_var=SERVICE_NAMESPACE_$(MAIN_SERVICE_FOR_RUST)
+_polymorph_rust: SERVICE=$(MAIN_SERVICE_FOR_RUST)
 _polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 # For several TestModels we've just manually written the code generation target,
 # So we just want to ensure we can transpile and pass the tests in CI.
@@ -562,7 +562,7 @@ rust: polymorph_dafny transpile_rust polymorph_rust test_rust
 
 # The Dafny Rust code generator only supports a single crate for everything,
 # so (among other consequences) we compile src and test code together.
-transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
+transpile_rust: | transpile_implementation_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
@@ -589,17 +589,15 @@ _mv_implementation_rust:
 # rustfmt has a recurring bug where it leaves behind trailing spaces and then complains about it.
 # Pre-process the Dafny-generated Rust code to remove them.
 	sed -i -e 's/[[:space:]]*$$//' runtimes/rust/src/implementation_from_dafny.rs 
-
+	rm -f runtimes/rust/src/implementation_from_dafny.rs-e
 	rustfmt --edition 2021 runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 
 patch_after_transpile_rust:
-	set -e; for service in $(PROJECT_SERVICES) ; do \
-		export service_deps_var=SERVICE_DEPS_$${service} ; \
-		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
-		export SERVICE=$${service} ; \
-		$(MAKE) _patch_after_transpile_rust ; \
-	done
+	export service_deps_var=SERVICE_DEPS_$(MAIN_SERVICE_FOR_RUST) ; \
+	export namespace_var=SERVICE_NAMESPACE_$(MAIN_SERVICE_FOR_RUST) ; \
+	export SERVICE=$(MAIN_SERVICE_FOR_RUST) ; \
+	$(MAKE) _patch_after_transpile_rust ; \
 
 _patch_after_transpile_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 _patch_after_transpile_rust:
@@ -615,6 +613,7 @@ _patch_after_transpile_rust:
 	--namespace $($(namespace_var)) \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS) \
+	$(if $(TRANSPILE_TESTS_IN_RUST), --local-service-test, ) \
 	";
 
 build_rust:
@@ -726,12 +725,28 @@ local_transpile_impl_net_single: TARGET=cs
 local_transpile_impl_net_single: OUT=runtimes/net/ImplementationFromDafny
 local_transpile_impl_net_single: local_transpile_impl_single
 
+local_transpile_impl_rust_single: TARGET=rs
+local_transpile_impl_rust_single: OUT=implementation_from_dafny
+local_transpile_impl_rust_single: SRC_INDEX=$(RUST_SRC_INDEX)
+local_transpile_impl_rust_single: TEST_INDEX=$(RUST_TEST_INDEX)
+local_transpile_impl_rust_single: DAFNY_OPTIONS=--emit-uncompilable-code --allow-warnings --compile-suffix
+local_transpile_impl_rust_single: TRANSPILE_DEPENDENCIES=
+local_transpile_impl_rust_single: STD_LIBRARY=
+local_transpile_impl_rust_single: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+local_transpile_impl_rust_single: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
+local_transpile_impl_rust_single: DAFNY_OTHER_FILES=$(RUST_OTHER_FILES)
+local_transpile_impl_rust_single: deps_var=SERVICE_DEPS_$(SERVICE)
+local_transpile_impl_rust_single: service_deps_var=SERVICE_DEPS_$(SERVICE)
+local_transpile_impl_rust_single: namespace_var=SERVICE_NAMESPACE_$(SERVICE)
+local_transpile_impl_rust_single: $(if $(TRANSPILE_TESTS_IN_RUST), transpile_test, transpile_implementation) _mv_implementation_rust _patch_after_transpile_rust
+
+
 local_transpile_impl_single: deps_var=SERVICE_DEPS_$(SERVICE)
 local_transpile_impl_single: TRANSPILE_TARGETS=./dafny/$(SERVICE)/src/$(FILE)
 local_transpile_impl_single: TRANSPILE_DEPENDENCIES= \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $($(deps_var))) \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX)) \
-		-library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $($(deps_var))) \
+		$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX)) \
+		--library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 local_transpile_impl_single: transpile_implementation
 
 # Targets to transpile single local service for convenience.

@@ -86,6 +86,20 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       );
   }
 
+  private static final String DAFNY_STRING_E =
+    """
+            _dafny.Seq(
+                "".join(
+                    [
+                        chr(int.from_bytes(pair, "big"))
+                        for pair in zip(
+                            *[iter(repr(e).encode("utf-16-be"))] * 2
+                        )
+                    ]
+                )
+            )
+    """;
+
   /**
    * Generate the method body for the `_sdk_error_to_dafny_error` method. This writes out a block to
    * convert a boto3 ClientError modelled in JSON into a Dafny-modelled error
@@ -146,17 +160,19 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       hasOpenedIfBlock = true;
     }
 
+    writer.addStdlibImport("_dafny");
     if (hasOpenedIfBlock) {
       // If `hasOpenedIfBlock` is false, then codegen never wrote any errors,
       // and this function should only cast to Opaque errors
       writer.write(
         """
-        return $L.Error_Opaque(obj=e)
+        return $L.Error_Opaque(obj=e, alt__text=$L)
         """,
         DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
           serviceShape.getId(),
           codegenContext
-        )
+        ),
+        DAFNY_STRING_E
       );
     } else {
       // If `hasOpenedIfBlock` is true, then codegen wrote at least one error,
@@ -164,12 +180,13 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       writer.write(
         """
         else:
-            return $L.Error_Opaque(obj=e)
+          return $L.Error_Opaque(obj=e, alt__text=$L)
         """,
         DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(
           serviceShape.getId(),
           codegenContext
-        )
+        ),
+        DAFNY_STRING_E
       );
     }
   }

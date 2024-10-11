@@ -17,8 +17,10 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.MutableLocalStateTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
+import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -711,5 +713,83 @@ public class ModelUtils {
       .getTrait(DocumentationTrait.class)
       .map(StringTrait::getValue)
       .or(() -> shape.getTrait(JavaDocTrait.class).map(StringTrait::getValue));
+  }
+
+  public static List<Shape> getTopologicallyOrderedOrphanedShapesForService(
+    ServiceShape serviceShape,
+    Model model
+  ) {
+    // Copy-paste Smithy-Core's shape discovery mechanism:
+    // Walk the model starting from the serviceShape.
+    // This generates shapes that are "known" to Smithy-Core's `generateShapesInService`.
+    Set<Shape> nonOrphanedShapes = new Walker(model).walkShapes(serviceShape);
+
+    // orphanedShapes = (all shapes in model) - (non-orphaned shapes)
+    Set<Shape> orphanedShapes = model.shapes().collect(Collectors.toSet());
+    orphanedShapes.removeAll(nonOrphanedShapes);
+
+    // Copy-paste Smithy-Core's shape ordering mechanism for topological ordering
+    // (Python needs topological ordering to write shapes in order; other languages might not matter)
+    List<Shape> orderedShapes = new ArrayList();
+
+    TopologicalIndex topologicalIndex = TopologicalIndex.of(model);
+
+    // Get orphaned shapes under the following conditions:
+    // 1. In the same namespace as the service. (Should only generate shapes in this service.)
+    // 2. Not a member shape. (Member shapes don't have their own shapes generated for them.)
+    for (Shape shape : topologicalIndex.getOrderedShapes()) {
+      if (
+        orphanedShapes.contains(shape) &&
+        ModelUtils.isInServiceNamespace(shape, serviceShape) &&
+        !shape.isMemberShape()
+      ) {
+        orderedShapes.add(shape);
+      }
+    }
+    for (Shape shape : topologicalIndex.getRecursiveShapes()) {
+      if (
+        orphanedShapes.contains(shape) &&
+        ModelUtils.isInServiceNamespace(shape, serviceShape) &&
+        !shape.isMemberShape()
+      ) {
+        orderedShapes.add(shape);
+      }
+    }
+
+    return orderedShapes;
+  }
+
+  public static Stream<ServiceShape> streamLocalServiceDependencies(
+    final Model model,
+    final ServiceShape serviceShape
+  ) {
+    final Optional<LocalServiceTrait> localServiceTrait = serviceShape.getTrait(
+      LocalServiceTrait.class
+    );
+    if (!localServiceTrait.isPresent()) {
+      return Stream.empty();
+    }
+
+    final Set<ShapeId> dependentIds = localServiceTrait.get().getDependencies();
+    if (dependentIds == null) {
+      return Stream.empty();
+    }
+
+    return dependentIds
+      .stream()
+      .map(id -> model.expectShape(id, ServiceShape.class));
+  }
+
+  public static StructureShape getConfigShape(
+    final Model model,
+    final ServiceShape serviceShape
+  ) {
+    final Optional<LocalServiceTrait> localServiceTrait = serviceShape.getTrait(
+      LocalServiceTrait.class
+    );
+    return model.expectShape(
+      localServiceTrait.get().getConfigId(),
+      StructureShape.class
+    );
   }
 }

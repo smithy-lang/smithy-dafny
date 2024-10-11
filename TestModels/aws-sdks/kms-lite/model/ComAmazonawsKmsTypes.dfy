@@ -439,7 +439,7 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
 
 
       // The Opaque error, used for native, extern, wrapped or unknown errors
-    | Opaque(obj: object)
+    | Opaque(obj: object, alt_text : string)
   type OpaqueError = e: Error | e.Opaque? witness *
 }
 abstract module AbstractComAmazonawsKmsService {

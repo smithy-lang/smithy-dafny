@@ -1,6 +1,6 @@
-pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationOutputName:L::$pascalCaseOperationOutputName:LBuilder;
+pub use $rustRootModuleName:L::operation::$snakeCaseOperationName:L::_$snakeCaseOperationOutputName:L::$pascalCaseOperationOutputName:LBuilder;
 
-pub use crate::operation::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::$pascalCaseOperationInputName:LBuilder;
+pub use $rustRootModuleName:L::operation::$snakeCaseOperationName:L::_$snakeCaseOperationInputName:L::$pascalCaseOperationInputName:LBuilder;
 
 impl $pascalCaseOperationInputName:LBuilder {
     /// Sends a request with this input using the given client.
@@ -21,7 +21,7 @@ impl $pascalCaseOperationInputName:LBuilder {
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct $pascalCaseOperationName:LFluentBuilder {
     $operationTargetName:L: $operationTargetType:L,
-    pub(crate) inner: crate::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationInputName:LBuilder,
+    pub(crate) inner: $rustRootModuleName:L::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationInputName:LBuilder,
 }
 impl $pascalCaseOperationName:LFluentBuilder {
     /// Creates a new `$pascalCaseOperationName:L`.
@@ -32,7 +32,7 @@ impl $pascalCaseOperationName:LFluentBuilder {
         }
     }
     /// Access the $pascalCaseOperationName:L as a reference.
-    pub fn as_input(&self) -> &crate::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationInputName:LBuilder {
+    pub fn as_input(&self) -> &$rustRootModuleName:L::operation::$snakeCaseOperationName:L::builders::$pascalCaseOperationInputName:LBuilder {
         &self.inner
     }
     /// Sends the request and returns the response.
@@ -50,9 +50,10 @@ impl $pascalCaseOperationName:LFluentBuilder {
             // and smithy-rs seems to not generate a ValidationError case unless there is.
             // Vanilla smithy-rs uses SdkError::construction_failure, but we aren't using SdkError.
             .map_err(|mut e| $qualifiedRustServiceErrorType:L::Opaque {
-                obj: ::dafny_runtime::Object::from_ref(&mut e as &mut dyn ::std::any::Any)
+                obj: ::dafny_runtime::Object::from_ref(&mut e as &mut dyn ::std::any::Any),
+		alt_text : format!("{:?}", e)
             })?;
-        crate::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.$operationTargetName:L, input).await
+        $rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.$operationTargetName:L, input).await
     }
 
     $accessors:L

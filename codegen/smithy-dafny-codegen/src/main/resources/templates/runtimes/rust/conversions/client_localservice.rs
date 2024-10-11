@@ -4,7 +4,7 @@
 #[allow(dead_code)]
 
 pub fn to_dafny(
-    value: &crate::client::Client,
+    value: &$rustClientType:L,
 ) ->
   ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient>
 {
@@ -16,6 +16,6 @@ pub fn from_dafny(
     dafny_value: ::dafny_runtime::Object<
       dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient
     >,
-) -> crate::client::Client {
-  crate::client::Client { dafny_client: dafny_value }
+) -> $rustClientType:L {
+  $rustClientType:L { dafny_client: dafny_value }
 }

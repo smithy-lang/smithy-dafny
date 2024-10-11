@@ -12,6 +12,8 @@ NAMESPACE=com.amazonaws.kms
 PROJECT_SERVICES := \
 	ComAmazonawsKms
 
+MAIN_SERVICE_FOR_RUST := ComAmazonawsKms
+
 SERVICE_NAMESPACE_ComAmazonawsKms=com.amazonaws.kms
 
 SERVICE_DEPS_ComAmazonawsKms :=

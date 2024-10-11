@@ -374,8 +374,14 @@ public class Native extends NameResolver {
   }
 
   protected ClassName classNameForAwsSdkShape(final Shape shape) {
-    throw new UnsupportedOperationException(
-      "classNameForAwsSdkShape should only be called on AWS SDK-specific subclasses"
-    );
+    // This is inefficient, but we currently instantiate Native for local services
+    // but then call this method that should only be relevant for AWS SDK wrappers.
+    // It would be better to make Native abstract in the future.
+    return switch (awsSdkVersion) {
+      case V1 -> new AwsSdkNativeV1(serviceShape, model)
+        .classNameForAwsSdkShape(shape);
+      case V2 -> new AwsSdkNativeV2(serviceShape, model)
+        .classNameForAwsSdkShape(shape);
+    };
   }
 }

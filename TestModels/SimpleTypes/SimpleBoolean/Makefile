@@ -14,6 +14,8 @@ NAMESPACE=simple.types.boolean
 PROJECT_SERVICES := \
 	SimpleBoolean
 
+MAIN_SERVICE_FOR_RUST := SimpleBoolean
+
 SERVICE_NAMESPACE_SimpleBoolean=simple.types.boolean
 
 SERVICE_DEPS_SimpleBoolean :=

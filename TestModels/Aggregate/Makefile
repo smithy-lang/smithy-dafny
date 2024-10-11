@@ -12,6 +12,8 @@ include ../SharedMakefile.mk
 PROJECT_SERVICES := \
 	SimpleAggregate
 
+MAIN_SERVICE_FOR_RUST := SimpleAggregate
+
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 

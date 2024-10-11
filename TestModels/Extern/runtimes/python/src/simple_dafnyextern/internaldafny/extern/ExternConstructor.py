@@ -21,6 +21,6 @@ class ExternConstructorClass:
       try:
         return Wrappers.Result_Success(ExternConstructorClass(input))
       except Exception as e:
-        return Wrappers.Result_Failure(SimpleDafnyExternTypes.Error_Opaque(e))
+        return Wrappers.Result_Failure(SimpleDafnyExternTypes.Error_Opaque(e, repr(e)))
 
 simple_dafnyextern.internaldafny.generated.ExternConstructor.ExternConstructorClass = ExternConstructorClass
