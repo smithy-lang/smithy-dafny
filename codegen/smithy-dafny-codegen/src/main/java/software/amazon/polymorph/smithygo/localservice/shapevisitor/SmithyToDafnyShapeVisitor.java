@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -144,7 +145,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String blobShape(BlobShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     String nilWrapIfRequired = "nil";
     String someWrapIfRequired = "%s";
     String returnType = "dafny.Sequence";
@@ -270,7 +271,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   public String mapShape(MapShape shape) {
     StringBuilder builder = new StringBuilder();
 
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
 
     MemberShape keyMemberShape = shape.getKey();
     final Shape keyTargetShape = context
@@ -332,7 +333,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String listShape(ListShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
 
     StringBuilder builder = new StringBuilder();
 
@@ -385,7 +386,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String booleanShape(BooleanShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     String nilWrapIfRequired = "nil";
     String someWrapIfRequired = "%s%s";
     String returnType = "interface {}";
@@ -415,7 +416,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String stringShape(StringShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (shape.hasTrait(EnumTrait.class)) {
       String nilWrapIfRequired = "nil";
       String someWrapIfRequired = "%s";
@@ -529,7 +530,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String integerShape(IntegerShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     String nilWrapIfRequired = "nil";
     String someWrapIfRequired = "%s%s";
     String returnType = "interface {}";
@@ -575,7 +576,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
     }
 
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
 
     return """
     func () %s {
@@ -590,7 +591,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String doubleShape(DoubleShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     writer.addUseImports(SmithyGoDependency.stdlib("encoding/binary"));
     writer.addUseImports(SmithyGoDependency.MATH);
 
@@ -636,7 +637,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       shape,
       context.symbolProvider().toSymbol(shape)
     );
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     final String functionInit =
       """
       func() Wrappers.Option {
