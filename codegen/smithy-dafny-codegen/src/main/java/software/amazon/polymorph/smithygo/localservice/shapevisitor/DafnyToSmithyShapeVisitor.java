@@ -214,10 +214,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       ),
       DafnyNameResolver.dafnyTypesNamespace(shape)
     );
-    final String maybeAddress = (this.isOptional) ? "&" : "";
+    final String referenceType = (this.isOptional) ? "&" : "";
     builder.append(
       "return %1$s%2$s{".formatted(
-          maybeAddress,
+          referenceType,
           SmithyNameResolver
             .smithyTypesNamespace(shape)
             .concat(".")
