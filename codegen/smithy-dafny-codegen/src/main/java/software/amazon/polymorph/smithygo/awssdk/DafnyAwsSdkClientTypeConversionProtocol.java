@@ -825,11 +825,6 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   // But since this runs outside of any production code - we are okay with this for now
   private void generateDeserializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
     final var delegator = context.writerDelegator();
-    final var model = context.model();
-    final var serviceShape = model.expectShape(
-      context.settings().getService(),
-      ServiceShape.class
-    );
     delegator.useFileWriter(
       "%s/%s".formatted(
           SmithyNameResolver.shapeNamespace(serviceShape),
@@ -850,7 +845,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          var outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);;
+          var outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
           switch (visitingShape.getType()) {
             case STRUCTURE:
             case UNION:

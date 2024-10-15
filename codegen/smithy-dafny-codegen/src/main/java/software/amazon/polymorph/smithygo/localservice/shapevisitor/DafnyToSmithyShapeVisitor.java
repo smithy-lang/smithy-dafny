@@ -1,7 +1,5 @@
 package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -234,7 +232,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         .expectShape(memberShape.getTarget());
       //TODO: Is it ever possible for structure to be nil?
       String maybeAssertion = "";
-      if (dataSource.equals("input")) maybeAssertion =
+      if (dataSource.equals("input")) {
+        maybeAssertion =
         ".(".concat(
             DafnyNameResolver.getDafnyType(
               shape,
@@ -242,6 +241,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             )
           )
           .concat(")");
+      }
       final boolean assertionRequired =
         memberShape.isOptional() &&
         targetShape.isStructureShape() &&
@@ -456,7 +456,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       ? "uint8"
       : "dafny.Char";
     var strConv = "s = s + string(val.(%s))".formatted(underlyingType);
-    if (underlyingType == "uint8") {
+    if (underlyingType.equals("uint8")) {
       strConv =
         """
             // UTF bytes should be always converted from bytes to string in go
@@ -618,25 +618,21 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       String unionDataSource =
         rawUnionDataSource +
         ".Dtor_" +
-        memberName.replace(shape.getId().getName() + "Member", "") +
+        memberName.replace(shape.getId().getName().concat("Member"), "") +
         "()";
-      final Boolean isMemberShapePointable =
+      final boolean isMemberShapePointable =
         (GoPointableIndex.of(context.model()).isPointable(member)) &&
         !targetShape.isStructureShape();
       final String pointerForPointableShape = isMemberShapePointable ? "*" : "";
-      final String isMemberCheck =
-        """
-        if ((%s).%s()) {""".formatted(
+      final String isMemberCheck = "if ((%s).%s()) {".formatted(
             rawUnionDataSource,
-            memberName.replace(shape.getId().getName() + "Member", "Is_")
+            memberName.replace(shape.getId().getName().concat("Member"), "Is_")
           );
       String wrappedDataSource = "";
       boolean requireAssertion = true;
       if (!(targetShape.isStructureShape())) {
         // All other shape except structure needs a Wrapper object but unionDataSource is not a Wrapper object.
-        wrappedDataSource =
-          """
-          var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)""".formatted(
+        wrappedDataSource ="var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)".formatted(
               unionDataSource
             );
         unionDataSource = "dataSource.UnwrapOr(nil)";

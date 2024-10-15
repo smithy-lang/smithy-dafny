@@ -443,11 +443,11 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       }
     }
 
-    var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
+    final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
       ? "uint8"
       : "dafny.Char";
     var nilCheck = "";
-    String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
+    final String unAssertDataSource = dataSource.startsWith("input.(") ? "input" : dataSource;
     if (this.isOptional) {
       if (this.isPointable) {
         nilCheck = "if %s == nil { return nil }".formatted(unAssertDataSource);

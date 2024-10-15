@@ -50,7 +50,7 @@ public class ShapeVisitorHelper {
     final MemberShape memberShape,
     final GenerationContext context,
     final String dataSource,
-    final Boolean assertionRequired,
+    final boolean assertionRequired,
     final GoWriter writer,
     final boolean isOptional,
     final boolean isPointable

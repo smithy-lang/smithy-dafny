@@ -18,11 +18,9 @@ import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
@@ -32,8 +30,8 @@ import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 public class DafnyLocalServiceTypeConversionProtocol
   implements ProtocolGenerator {
 
-  public static String TO_DAFNY = "to_dafny.go";
-  public static String TO_NATIVE = "to_native.go";
+  public static final String TO_DAFNY = "to_dafny.go";
+  public static final String TO_NATIVE = "to_native.go";
 
   @Override
   public ShapeId getProtocol() {
@@ -853,7 +851,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                 ),
                 DafnyNameResolver.getDafnyBaseErrorType(errorShape),
                 writer.consumer(w -> {
-                  String output = errorShape.accept(
+                  final String output = errorShape.accept(
                     new SmithyToDafnyShapeVisitor(
                       context,
                       "nativeInput",
@@ -1241,11 +1239,11 @@ public class DafnyLocalServiceTypeConversionProtocol
               if (dependencies == null) {
                 return;
               }
-              var sdkId = serviceShape.hasTrait(LocalServiceTrait.class)
+              final var sdkId = serviceShape.hasTrait(LocalServiceTrait.class)
                 ? serviceShape.expectTrait(LocalServiceTrait.class).getSdkId()
                 : serviceShape.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
               for (var dep : dependencies) {
-                var depService = context
+                final var depService = context
                   .model()
                   .expectShape(dep, ServiceShape.class);
                 w.write(
@@ -1306,7 +1304,9 @@ public class DafnyLocalServiceTypeConversionProtocol
               .toSymbol(visitingMemberShape)
               .getProperty(POINTABLE, Boolean.class)
               .orElse(false)
-          ) inputType = "*".concat(inputType);
+          ) {
+            inputType = "*".concat(inputType);
+          }
           writer.write(
             """
             func $L(input $L)($L) {
