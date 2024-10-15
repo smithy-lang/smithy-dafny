@@ -16,8 +16,7 @@ module SimpleRecursiveShapeImplTest {
     modifies client.Modifies
     ensures client.ValidState()
   {
-    var myDataMap: MapWithRecursion := map[];
-    myDataMap := myDataMap["key2" := StructureWithRecursion(content := Some(IntegerValue(42)))];
+    var myDataMap: MapWithRecursion := map["key2" := StructureWithRecursion(content := Some(IntegerValue(42)))];
     var myList: ListWithRecursion := [myDataMap];
     var recursiveUnion := ListValue(myList);
 
