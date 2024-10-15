@@ -1055,14 +1055,16 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return variables;
   }
 
-  private String structureField(final StructureShape parent, final MemberShape memberShape) {
-    final String template = isRustFieldRequired(parent, memberShape) ?
-      """
+  private String structureField(
+    final StructureShape parent,
+    final MemberShape memberShape
+  ) {
+    final String template = isRustFieldRequired(parent, memberShape)
+      ? """
       #[allow(missing_docs)] // documentation missing in model
       pub $fieldName:L: $fieldType:L,
       """
-    :
-      """
+      : """
       #[allow(missing_docs)] // documentation missing in model
       pub $fieldName:L: ::std::option::Option<$fieldType:L>,
       """;
@@ -1072,17 +1074,19 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private String structureGetter(final StructureShape parent, final MemberShape memberShape) {
+  private String structureGetter(
+    final StructureShape parent,
+    final MemberShape memberShape
+  ) {
     final Map<String, String> variables = structureMemberVariables(memberShape);
-    final String template = isRustFieldRequired(parent, memberShape) ?
-      """
+    final String template = isRustFieldRequired(parent, memberShape)
+      ? """
       #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(&self) -> &$fieldType:L {
           &self.$fieldName:L
       }
       """
-      :
-      """
+      : """
       #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(&self) -> &::std::option::Option<$fieldType:L> {
           &self.$fieldName:L
@@ -1091,7 +1095,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return IOUtils.evalTemplate(template, variables);
   }
 
-  private String structureBuilderField(final StructureShape parent, final MemberShape memberShape) {
+  private String structureBuilderField(
+    final StructureShape parent,
+    final MemberShape memberShape
+  ) {
     if (isRustFieldRequired(parent, memberShape)) {
       return IOUtils.evalTemplate(
         "pub(crate) $fieldName:L: $fieldType:L,",
@@ -1105,9 +1112,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     }
   }
 
-  private String structureBuilderAccessors(final StructureShape parent, final MemberShape memberShape) {
-    final String template = isRustFieldRequired(parent, memberShape) ?
-      """
+  private String structureBuilderAccessors(
+    final StructureShape parent,
+    final MemberShape memberShape
+  ) {
+    final String template = isRustFieldRequired(parent, memberShape)
+      ? """
       #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
           self.$fieldName:L = input.into();
@@ -1123,8 +1133,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           &self.$fieldName:L
       }
       """
-      :
-      """
+      : """
       #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
           self.$fieldName:L = ::std::option::Option::Some(input.into());
@@ -1953,12 +1962,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
     final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
 
-      // System.err.println("Library toDafny : ");
-      // System.err.println(shape.getId().getName());
-      // System.err.println(shape.getId().getNamespace());
-      // System.err.println(rustValue);
-      // System.err.println(isRustOption);
-      // System.err.println(isDafnyOption);
+    // System.err.println("Library toDafny : ");
+    // System.err.println(shape.getId().getName());
+    // System.err.println(shape.getId().getNamespace());
+    // System.err.println(rustValue);
+    // System.err.println(isRustOption);
+    // System.err.println(isDafnyOption);
 
     return switch (shape.getType()) {
       case STRING, ENUM -> {

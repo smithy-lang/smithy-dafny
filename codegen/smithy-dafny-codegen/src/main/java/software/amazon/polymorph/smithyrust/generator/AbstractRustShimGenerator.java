@@ -438,7 +438,9 @@ public abstract class AbstractRustShimGenerator {
       // System.err.println(isRequired);
       // System.err.println(rustRequired);
     } else {
-      System.err.println("*******************************************************************************");
+      System.err.println(
+        "*******************************************************************************"
+      );
     }
 
     // isRustOption is always true here because we're using .set_foo(...) fluent builder methods
