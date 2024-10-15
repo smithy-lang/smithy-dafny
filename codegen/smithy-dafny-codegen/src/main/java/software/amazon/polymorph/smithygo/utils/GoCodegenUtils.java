@@ -13,13 +13,13 @@ import software.amazon.smithy.model.shapes.Shape;
 
 public class GoCodegenUtils {
 
-  public static String getType(Symbol symbol, ServiceTrait serviceTrait) {
+  public static String getType(final Symbol symbol, final ServiceTrait serviceTrait) {
     if (
       symbol.getProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class).isEmpty()
     ) {
       return SmithyNameResolver.getSmithyTypeAws(serviceTrait, symbol, true);
     }
-    var type = getType(
+    final var type = getType(
       symbol.expectProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class),
       serviceTrait
     );
@@ -51,7 +51,7 @@ public class GoCodegenUtils {
     return type;
   }
 
-  public static Symbol getRootSymbol(Symbol symbol) {
+  public static Symbol getRootSymbol(final Symbol symbol) {
     if (
       symbol.getProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class).isEmpty()
     ) {
@@ -62,12 +62,12 @@ public class GoCodegenUtils {
     );
   }
 
-  public static boolean isOperationStruct(Model model, Shape shape) {
-    NeighborProvider provider = NeighborProviderIndex
+  public static boolean isOperationStruct(final Model model, final Shape shape) {
+    final NeighborProvider provider = NeighborProviderIndex
       .of(model)
       .getReverseProvider();
     for (Relationship relationship : provider.getNeighbors(shape)) {
-      RelationshipType relationshipType = relationship.getRelationshipType();
+      final RelationshipType relationshipType = relationship.getRelationshipType();
       if (
         relationshipType == RelationshipType.INPUT ||
         relationshipType == RelationshipType.OUTPUT
