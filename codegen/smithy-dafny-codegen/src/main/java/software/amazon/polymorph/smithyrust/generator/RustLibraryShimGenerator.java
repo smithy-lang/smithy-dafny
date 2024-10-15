@@ -1027,19 +1027,19 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .toList();
     final String fields = members
       .stream()
-      .map(this::structureField)
+      .map(member -> structureField(structureShape, member))
       .collect(Collectors.joining("\n"));
     final String getters = members
       .stream()
-      .map(this::structureGetter)
+      .map(member -> structureGetter(structureShape, member))
       .collect(Collectors.joining("\n"));
     final String builderFields = members
       .stream()
-      .map(this::structureBuilderField)
+      .map(member -> structureBuilderField(structureShape, member))
       .collect(Collectors.joining("\n"));
     final String builderAccessors = members
       .stream()
-      .map(this::structureBuilderAccessors)
+      .map(member -> structureBuilderAccessors(structureShape, member))
       .collect(Collectors.joining("\n"));
     final String builderAssignments = members
       .stream()
@@ -1055,8 +1055,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return variables;
   }
 
-  private String structureField(final MemberShape memberShape) {
-    final String template =
+  private String structureField(final StructureShape parent, final MemberShape memberShape) {
+    final String template = isRustFieldRequired(parent, memberShape) ?
+      """
+      #[allow(missing_docs)] // documentation missing in model
+      pub $fieldName:L: $fieldType:L,
+      """
+    :
       """
       #[allow(missing_docs)] // documentation missing in model
       pub $fieldName:L: ::std::option::Option<$fieldType:L>,
@@ -1067,9 +1072,16 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
-  private String structureGetter(final MemberShape memberShape) {
+  private String structureGetter(final StructureShape parent, final MemberShape memberShape) {
     final Map<String, String> variables = structureMemberVariables(memberShape);
-    final String template =
+    final String template = isRustFieldRequired(parent, memberShape) ?
+      """
+      #[allow(missing_docs)] // documentation missing in model
+      pub fn $fieldName:L(&self) -> &$fieldType:L {
+          &self.$fieldName:L
+      }
+      """
+      :
       """
       #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(&self) -> &::std::option::Option<$fieldType:L> {
@@ -1079,15 +1091,39 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return IOUtils.evalTemplate(template, variables);
   }
 
-  private String structureBuilderField(final MemberShape memberShape) {
-    return IOUtils.evalTemplate(
-      "pub(crate) $fieldName:L: ::std::option::Option<$fieldType:L>,",
-      structureMemberVariables(memberShape)
-    );
+  private String structureBuilderField(final StructureShape parent, final MemberShape memberShape) {
+    if (isRustFieldRequired(parent, memberShape)) {
+      return IOUtils.evalTemplate(
+        "pub(crate) $fieldName:L: $fieldType:L,",
+        structureMemberVariables(memberShape)
+      );
+    } else {
+      return IOUtils.evalTemplate(
+        "pub(crate) $fieldName:L: ::std::option::Option<$fieldType:L>,",
+        structureMemberVariables(memberShape)
+      );
+    }
   }
 
-  private String structureBuilderAccessors(final MemberShape memberShape) {
-    final String template =
+  private String structureBuilderAccessors(final StructureShape parent, final MemberShape memberShape) {
+    final String template = isRustFieldRequired(parent, memberShape) ?
+      """
+      #[allow(missing_docs)] // documentation missing in model
+      pub fn $fieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
+          self.$fieldName:L = input.into();
+          self
+      }
+      #[allow(missing_docs)] // documentation missing in model
+      pub fn set_$fieldName:L(mut self, input: $fieldType:L) -> Self {
+          self.$fieldName:L = input;
+          self
+      }
+      #[allow(missing_docs)] // documentation missing in model
+      pub fn get_$fieldName:L(&self) -> &$fieldType:L {
+          &self.$fieldName:L
+      }
+      """
+      :
       """
       #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
@@ -1894,7 +1930,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   ) {
     // We're currently always wrapping all structure members with Option<...>,
     // but this may change with https://github.com/smithy-lang/smithy-dafny/issues/533.
-    return false;
+    return (
+      hasRequiredTrait(member) &&
+      // !operationIndex.isOutputStructure(parent) &&
+      !operationIndex.isInputStructure(parent) &&
+      !parent.getId().getNamespace().startsWith("com.amazonaws")
+      // !targetShape.isStructureShape()
+    );
   }
 
   @Override
@@ -1910,6 +1952,13 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       model
     );
     final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
+
+      // System.err.println("Library toDafny : ");
+      // System.err.println(shape.getId().getName());
+      // System.err.println(shape.getId().getNamespace());
+      // System.err.println(rustValue);
+      // System.err.println(isRustOption);
+      // System.err.println(isDafnyOption);
 
     return switch (shape.getType()) {
       case STRING, ENUM -> {
