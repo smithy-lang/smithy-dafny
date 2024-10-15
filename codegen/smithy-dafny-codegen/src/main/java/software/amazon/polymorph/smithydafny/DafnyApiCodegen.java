@@ -794,35 +794,32 @@ public class DafnyApiCodegen {
       .dropEmpty()
       .lineSeparated()
       .append(mutableState
-        ? TokenTree.of(
-            TokenTree.of("""
-            
-            // Need to update all these words
-            //
-            
-            
-            // Not only will you need to ensure
-            // that all your mutable elements are contained in %s,
-            // you MUST also ensure
-            // that your invariant does not rely on %s.
-            // This means your invariant will begin to look like:
-            // && %1$s in %2$s
-            // && this in %2$s                      // so we can read property
-            // && property in %2$s                  // so we can read properties of property
-            // && property != %1$s as object        // property really is not %1$s!
-            // && (forall m <- property.Modifies    // everything in property.Modifies
-            //    :: m in %2$s - %1$s)              // is in %2$s and really is not %1$s!
-            """.formatted(
-                nameResolver.callHistoryFieldName(),
-                nameResolver.mutableStateFunctionName()
-              )
-            ),
-        TokenTree.of("""
-                ghost var InternalModifies: set<object>
-                predicate InternalValidState()
-                  reads this`InternalModifies, InternalModifies
-                  ensures InternalValidState() ==> History !in InternalModifies
-          """)
+          ? TokenTree.of(
+          TokenTree.of("""            
+              // Dynamic mutable state MUST be internal to the resource.
+              // All your dynamic elements are copied in %1$s.
+              // This means your invariant will begin to look like:
+              // && %3$s !in %1$s
+              // && this in %1$s                      // so we can read property
+              // && property in %1$s                  // so we can read properties of property
+              // It is up to you to maintain control of your dynamically mutable elements             
+              """.formatted(
+            nameResolver.dynamicMutableStateFunctionName(),
+            nameResolver.dynamicValidStateInvariantName(),
+            nameResolver.callHistoryFieldName()
+            )
+          ),
+          TokenTree.of("""
+                    ghost var %1$s: set<object>
+                    predicate %2$s()
+                      reads this`%1$s, %1$s
+                      ensures %2$s() ==> %3$s !in %1$s
+              """.formatted(
+              nameResolver.dynamicMutableStateFunctionName(),
+              nameResolver.dynamicValidStateInvariantName(),
+              nameResolver.callHistoryFieldName()
+            )
+          )
         )
         : TokenTree.empty()
       )
@@ -941,7 +938,11 @@ public class DafnyApiCodegen {
             mutableState
               ? TokenTree.of(
               """
-                // There needs to be a bit of comments here
+                // This axiom is intended to create a seperated class.
+                // The idea is that the memory inside the resource is controlled locally
+                // and that no external code gets to mutate this state.
+                // Dafny can not currently model this idea as a language feature.
+                // So this axiom is approximating it.               
                 """,
                 "assume {:axiom} %s < %s && %s();"
                   .formatted(
