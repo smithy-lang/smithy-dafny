@@ -393,7 +393,7 @@ public abstract class AbstractRustShimGenerator {
               ".set_" +
               toSnakeCase(m.getMemberName()) +
               "(" +
-              fromDafnyForMember(m) +
+              fromDafnyForMember(shape, m) +
               ")"
             )
           )
@@ -421,16 +421,35 @@ public abstract class AbstractRustShimGenerator {
       .lineSeparated();
   }
 
-  private TokenTree fromDafnyForMember(MemberShape member) {
+  private TokenTree fromDafnyForMember(Shape parent, MemberShape member) {
     Shape targetShape = model.expectShape(member.getTarget());
     boolean isRequired = member.hasTrait(RequiredTrait.class);
+
+    boolean rustRequired = isRequired;
+    if (parent instanceof StructureShape) {
+      rustRequired = isRustFieldRequired((StructureShape) parent, member);
+      // System.err.println("The Member Shape : ");
+      // System.err.println(parent == member);
+      // System.err.println(member.getId().getName());
+      // System.err.println(member.getId().getNamespace());
+      // System.err.println("The Parent Shape : ");
+      // System.err.println(parent.getId().getName());
+      // System.err.println(parent.getId().getNamespace());
+      // System.err.println(isRequired);
+      // System.err.println(rustRequired);
+    } else {
+      System.err.println(
+        "*******************************************************************************"
+      );
+    }
+
     // isRustOption is always true here because we're using .set_foo(...) fluent builder methods
     // on the Rust side as opposed to just .foo(...), and those all take options
     // even for required members.
     return fromDafny(
       targetShape,
       "dafny_value." + member.getMemberName() + "()",
-      true,
+      !rustRequired,
       !isRequired
     );
   }
@@ -843,11 +862,13 @@ public abstract class AbstractRustShimGenerator {
     // These rules were mostly reverse-engineered from inspection of Rust SDKs,
     // and may not be complete!
     final Shape targetShape = model.expectShape(member.getTarget());
+
     return (
       hasRequiredTrait(member) &&
-      !operationIndex.isOutputStructure(parent) &&
+      // !operationIndex.isOutputStructure(parent) &&
       !operationIndex.isInputStructure(parent) &&
-      !targetShape.isStructureShape()
+      !parent.getId().getNamespace().startsWith("com.amazonaws")
+      // !targetShape.isStructureShape()
     );
   }
 
