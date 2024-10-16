@@ -163,6 +163,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           ),
           dataSource,
           DafnyNameResolver.getDafnyClient(
+            serviceShape,
             serviceShape.toShapeId().getName()
           )
         );
