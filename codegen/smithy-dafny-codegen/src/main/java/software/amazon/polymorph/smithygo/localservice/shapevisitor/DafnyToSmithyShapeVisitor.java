@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
@@ -184,7 +187,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String blobShape(final BlobShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     return """
     return func () []byte {
     var b []byte
@@ -285,9 +288,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   // TODO: smithy-dafny-conversion library
   @Override
   public String listShape(final ListShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     final StringBuilder builder = new StringBuilder();
-
     final MemberShape memberShape = shape.getMember();
     final Shape targetShape = context
       .model()
@@ -327,9 +329,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String mapShape(final MapShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     final StringBuilder builder = new StringBuilder();
-
     final MemberShape keyMemberShape = shape.getKey();
     final MemberShape valueMemberShape = shape.getValue();
     final Shape valueTargetShape = context
@@ -384,7 +385,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String booleanShape(final BooleanShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (this.isOptional) {
       return """
       return func() *bool {
@@ -409,7 +410,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String stringShape(final StringShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (shape.hasTrait(EnumTrait.class)) {
       return """
          return func () *%s.%s {
@@ -501,8 +502,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String integerShape(final IntegerShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (isOptional) {
       return (
         """
@@ -526,7 +526,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String longShape(final LongShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (isOptional) {
       return (
         """
@@ -551,7 +551,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String doubleShape(final DoubleShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     writer.addUseImports(SmithyGoDependency.MATH);
     if (isOptional) {
       return """
@@ -587,7 +587,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String unionShape(final UnionShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     String nilCheck = "";
     if (isOptional) {
       nilCheck =

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+
 import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -88,7 +91,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String blobShape(final BlobShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     String nilWrapIfRequired = "nil";
     String someWrapIfRequired = "%s";
     String returnType = "dafny.Sequence";
@@ -206,7 +209,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   public String mapShape(final MapShape shape) {
     final StringBuilder builder = new StringBuilder();
 
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
 
     final var keyMemberShape = shape.getKey();
     final var valueMemberShape = shape.getValue();
@@ -266,8 +269,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String listShape(final ListShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     final var builder = new StringBuilder();
     final var memberShape = shape.getMember();
 
@@ -314,7 +316,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String booleanShape(final BooleanShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     String nilWrapIfRequired = "false";
     String someWrapIfRequired = "%s%s";
     String returnType = "bool";
@@ -344,7 +346,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String stringShape(final StringShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (shape.hasTrait(EnumTrait.class)) {
       String someWrapIfRequired = "%s";
       String returnType = DafnyNameResolver.getDafnyType(
@@ -446,7 +448,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String integerShape(final IntegerShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     String nilWrapIfRequired = "0";
     String someWrapIfRequired = "%s%s";
     String returnType = "int";
@@ -492,7 +494,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
     }
 
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
 
     return """
     func () %s {
@@ -507,7 +509,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String doubleShape(final DoubleShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     writer.addUseImports(SmithyGoDependency.stdlib("encoding/binary"));
     writer.addUseImports(SmithyGoDependency.MATH);
 
