@@ -120,7 +120,6 @@ public class DafnyLocalServiceGenerator implements Runnable {
     writer.addUseImports(SmithyGoDependency.CONTEXT);
 
     final var dafnyClient = DafnyNameResolver.getDafnyClient(
-      service,
       serviceTrait.getSdkId()
     );
     writer.write(
@@ -616,7 +615,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
                   .expectShape(resource, ResourceShape.class)
                   .getOperations()
                   .forEach(operation -> {
-                    var operationShape = model.expectShape(
+                    final var operationShape = model.expectShape(
                       operation,
                       OperationShape.class
                     );
