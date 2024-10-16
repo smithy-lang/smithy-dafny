@@ -30,8 +30,8 @@ public class ValidationGenerator {
 
   private static final String LIST_ITEM = "item";
   private static final String MAP_KEY = "key";
-  private static final String MAP_VALUE = "value";
   private static final String UNION_DATASOURCE = "unionType.Value";
+  private static final String MAP_VALUE = "value";
   private static final String CHECK_AND_RETURN_ERROR =
     """
     if %s != nil {
@@ -540,7 +540,6 @@ public class ValidationGenerator {
     var dataSourceForUnion = dataSource;
     if (!funcInput.isEmpty()) {
       final var inputType = (symbolProvider.toSymbol(currentShape)).getName();
-
       validationFuncInputTypeMap.put(memberShape, inputType);
       dataSourceForUnion = "Value";
     }
@@ -569,7 +568,7 @@ public class ValidationGenerator {
           model.expectShape(memberInUnion.getTarget()),
           memberInUnion,
           false,
-          "unionType.Value",
+          UNION_DATASOURCE,
           unionValidation
         );
       }

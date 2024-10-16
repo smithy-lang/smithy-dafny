@@ -120,7 +120,6 @@ public class DafnyLocalServiceGenerator implements Runnable {
     writer.addUseImports(SmithyGoDependency.CONTEXT);
 
     final var dafnyClient = DafnyNameResolver.getDafnyClient(
-      service,
       serviceTrait.getSdkId()
     );
     writer.write(
