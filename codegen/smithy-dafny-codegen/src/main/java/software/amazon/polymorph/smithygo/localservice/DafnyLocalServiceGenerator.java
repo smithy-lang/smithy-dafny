@@ -16,6 +16,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -121,7 +122,6 @@ public class DafnyLocalServiceGenerator implements Runnable {
     writer.addUseImports(SmithyGoDependency.CONTEXT);
 
     final var dafnyClient = DafnyNameResolver.getDafnyClient(
-      service,
       serviceTrait.getSdkId()
     );
     writer.write(
@@ -309,7 +309,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
 
   void generateShim() {
     final var namespace =
-      "Wrapped%sService".formatted(DafnyNameResolver.dafnyNamespace(service.expectTrait(LocalServiceTrait.class)));
+      "Wrapped%sService".formatted(DafnyNameResolver.dafnyNamespace(service));
 
     writerDelegator.useFileWriter(
       "%s/shim.go".formatted(namespace),

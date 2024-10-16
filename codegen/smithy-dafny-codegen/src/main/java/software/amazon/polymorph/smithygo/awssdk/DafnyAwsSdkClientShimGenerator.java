@@ -44,7 +44,11 @@ public class DafnyAwsSdkClientShimGenerator implements Runnable {
 
   void generateShim() {
     final var namespace =
-      "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(service.expectTrait(ServiceTrait.class)));
+      "%swrapped".formatted(
+          DafnyNameResolver.dafnyNamespace(
+            service.expectTrait(ServiceTrait.class)
+          )
+        );
 
     writerDelegator.useFileWriter(
       "%s/shim.go".formatted(namespace),

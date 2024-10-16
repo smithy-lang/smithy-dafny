@@ -186,7 +186,10 @@ public class GoPointableIndex implements KnowledgeIndex {
       return false;
     }
 
-    if (KNOWN_POINTER_TYPE.contains(targetShape.getType())) {
+    if (
+      KNOWN_POINTER_TYPE.contains(targetShape.getType()) &&
+      !model.expectShape(member.getContainer()).isUnionShape()
+    ) {
       return true;
     }
 
