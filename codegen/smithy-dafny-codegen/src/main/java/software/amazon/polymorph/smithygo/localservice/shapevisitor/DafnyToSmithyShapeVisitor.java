@@ -31,6 +31,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.utils.StringUtils;
 
+// TODO: Remove anonymous function in each of the shape visitor and test if it will work
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   private final GenerationContext context;
