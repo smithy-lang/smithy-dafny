@@ -1,7 +1,7 @@
-diff --git a/ComAmazonawsKms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java b/ComAmazonawsKms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
+diff --git a/TestModels/aws-sdks/kms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java b/TestModels/aws-sdks/kms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
 index 5e894e4e..9d02d333 100644
---- a/ComAmazonawsKms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
-+++ b/ComAmazonawsKms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
+--- a/TestModels/aws-sdks/kms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
++++ b/TestModels/aws-sdks/kms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
 @@ -264,62 +264,47 @@ public class ToDafny {
      aliasName =
        Objects.nonNull(nativeValue.aliasName())
@@ -4532,10 +4532,10 @@ index 5e894e4e..9d02d333 100644
          {
            return SigningAlgorithmSpec.create_SM2DSA();
          }
-diff --git a/ComAmazonawsKms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToNative.java b/ComAmazonawsKms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToNative.java
+diff --git a/TestModels/aws-sdks/kms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToNative.java b/TestModels/aws-sdks/kms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToNative.java
 index e8eddd3c..399865e7 100644
---- a/ComAmazonawsKms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToNative.java
-+++ b/ComAmazonawsKms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToNative.java
+--- a/TestModels/aws-sdks/kms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToNative.java
++++ b/TestModels/aws-sdks/kms/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToNative.java
 @@ -4542,6 +4542,196 @@ public class ToNative {
      return builder.build();
    }

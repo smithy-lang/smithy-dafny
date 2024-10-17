@@ -1,7 +1,7 @@
-diff --git a/ComAmazonawsKms/runtimes/net/Generated/TypeConversion.cs b/ComAmazonawsKms/runtimes/net/Generated/TypeConversion.cs
+diff --git a/TestModels/aws-sdks/kms/runtimes/net/Generated/TypeConversion.cs b/TestModels/aws-sdks/kms/runtimes/net/Generated/TypeConversion.cs
 index f479e07b..46aff0c7 100644
---- a/ComAmazonawsKms/runtimes/net/Generated/TypeConversion.cs
-+++ b/ComAmazonawsKms/runtimes/net/Generated/TypeConversion.cs
+--- a/TestModels/aws-sdks/kms/runtimes/net/Generated/TypeConversion.cs
++++ b/TestModels/aws-sdks/kms/runtimes/net/Generated/TypeConversion.cs
 @@ -5510,7 +5510,7 @@ namespace Com.Amazonaws.Kms
          public static System.DateTime FromDafny_N3_com__N9_amazonaws__N3_kms__S8_DateType(Dafny.ISequence<char> value)
          {
