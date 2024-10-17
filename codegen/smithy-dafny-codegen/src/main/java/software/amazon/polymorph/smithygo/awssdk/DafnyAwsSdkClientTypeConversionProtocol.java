@@ -845,22 +845,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          var outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
-          switch (visitingShape.getType()) {
-            case STRUCTURE:
-            case UNION:
-              if (visitingShape.hasTrait(EnumTrait.class)) {
-                outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
-              }
-              break;
-            case LIST:
-            case MAP:
-              outputType = GoCodegenUtils.getType(
-                context.symbolProvider().toSymbol(visitingShape),
-                serviceTrait
-                );
-              break;
-          }
+          var outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), serviceTrait);
           if (
             ShapeVisitorHelper.isToNativeShapePointable(visitingMemberShape)
           ) {
