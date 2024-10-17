@@ -52,7 +52,6 @@ public class ShapeVisitorHelper {
           )
           .concat(")");
     }
-    final String nextVisitorFunction;
     final String funcDataSource = "input";
     if (!DafnyToAwsSdkShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
       DafnyToAwsSdkShapeVisitor.putShapesWithConversionFunc(memberShape, "");
@@ -71,7 +70,7 @@ public class ShapeVisitorHelper {
       pointerShapesToNative.put(memberShape, isPointable);
     }
     final String funcName = funcNameGenerator(memberShape, "FromDafny");
-    nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
+    final String nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
     return nextVisitorFunction;
   }
 
@@ -87,7 +86,6 @@ public class ShapeVisitorHelper {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
-      final String nextVisitorFunction;
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       return targetShape.accept(
         new AwsSdkToDafnyShapeVisitor(
@@ -119,7 +117,7 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcName = funcNameGenerator(memberShape, "ToDafny");
-    nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
+    final String nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
     return nextVisitorFunction;
   }
 }
