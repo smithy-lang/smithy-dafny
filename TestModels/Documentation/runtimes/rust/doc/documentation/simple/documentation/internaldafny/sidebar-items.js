@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["allocate_object"],"macro":["UpcastObjectFn","update_field_uninit_object"],"mod":["types"],"struct":["MaybePlacebo","Object","Rc","SimpleDocumentationClient","_default"],"trait":["Any","UpcastObject"]};

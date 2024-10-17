@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Sequence"],"fn":["allocate_object"],"macro":["UpcastObjectFn"],"struct":["DafnyCharUTF16","Object","Rc","WrappersInterop"],"trait":["Any","UpcastObject"]};

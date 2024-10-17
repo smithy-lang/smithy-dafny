@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"derive":["Default"],"enum":["Sequence"],"fn":["__init_ValidUTF8Bytes","integer_range"],"macro":["int","seq"],"struct":["DafnyCharUTF16","DafnyInt","Rc","_default"],"trait":["Default"],"type":["ValidUTF8Bytes","nat"]};
