@@ -29,25 +29,6 @@ public class ShapeVisitorHelper {
     return pointerShapesToNative.get(shape);
   }
 
-  /**
-   * Generates functions Name for To Dafny and To Native conversion.
-   *
-   * @param memberShape       MemberShape to generate function name for.
-   * @param suffix            Suffix to add to the function. As of this writing, we only put FromDafny or ToNative suffix.
-   * @return the function Name
-   */
-  // public static String funcNameGenerator(
-  //   final MemberShape memberShape,
-  //   final String suffix
-  // ) {
-  //   return memberShape
-  //     .getId()
-  //     .toString()
-  //     .replaceAll("[.$#]", "_")
-  //     .concat("_")
-  //     .concat(suffix);
-  // }
-
   public static String toNativeShapeVisitorWriter(
     final MemberShape memberShape,
     final GenerationContext context,
