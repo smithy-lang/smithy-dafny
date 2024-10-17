@@ -1,6 +1,6 @@
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-$rustStructureComment:L
+$rustUnionComment:L
 pub enum $rustUnionName:L {
     $variants:L
     /// The `Unknown` variant represents cases where new union variant was received. Consider upgrading the SDK to the latest available version.
