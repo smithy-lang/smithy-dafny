@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["_set_widget_name_input"]};

@@ -1,4 +1,5 @@
 #[derive(Debug, PartialEq, Copy, Clone)]
+$rustEnumComment:L
 pub enum $rustEnumName:L {
     $variants:L
 }

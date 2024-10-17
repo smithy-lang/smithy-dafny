@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["_get_thing_input","_get_thing_output"]};

@@ -1,6 +1,6 @@
-#[allow(missing_docs)] // documentation missing in model
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
+$rustStructureComment:L
 pub struct $rustStructureName:L {
     $fields:L
 }

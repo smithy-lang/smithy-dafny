@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Tuple0","Tuple1","Tuple10","Tuple11","Tuple12","Tuple13","Tuple14","Tuple15","Tuple16","Tuple17","Tuple18","Tuple19","Tuple2","Tuple20","Tuple3","Tuple4","Tuple5","Tuple6","Tuple7","Tuple8","Tuple9"],"type":["nat"]};
