@@ -1487,13 +1487,23 @@ public class DafnyApiCodegen {
                 ),
                 isOutput
                   ? TokenTree.of(
-                    Token.of("&& fresh(%1$s.%2$s)".formatted(varName, s.getMemberName())),
+                    Token.of(
+                      "&& fresh(%1$s.%2$s)".formatted(
+                          varName,
+                          s.getMemberName()
+                        )
+                    ),
                     Token
                       .of("&& fresh")
                       .append(
                         TokenTree
                           .of(
-                            Token.of("%1$s.%2$s.Modifies".formatted(varName, s.getMemberName())),
+                            Token.of(
+                              "%1$s.%2$s.Modifies".formatted(
+                                  varName,
+                                  s.getMemberName()
+                                )
+                            ),
                             removeInputs
                           )
                           .parenthesized()
