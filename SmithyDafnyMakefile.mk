@@ -259,6 +259,9 @@ transpile_dependencies_test:
 
 ########################## Code-Gen targets
 
+mvn_local_deploy_polymorph_dependencies:
+	$(MAKE) -C $(SMITHY_DAFNY_ROOT) mvn_local_deploy_polymorph_dependencies
+
 # The OUTPUT variables are created this way
 # so that it is possible to run _parts_ of polymorph.
 # Otherwise it is difficult to run/test only a Dafny change.
@@ -269,6 +272,7 @@ transpile_dependencies_test:
 #   make polymorph_code_gen CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli
 # StandardLibrary is filtered out from dependent-model patsubst list;
 #   Its model is contained in $(LIBRARY_ROOT)/model, not $(LIBRARY_ROOT)/../StandardLibrary/Model.
+_polymorph: mvn_local_deploy_polymorph_dependencies
 _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
 	./../gradlew run --args="\
@@ -294,6 +298,7 @@ _polymorph:
 	$(POLYMORPH_OPTIONS) \
 	";
 
+_polymorph_wrapped: mvn_local_deploy_polymorph_dependencies
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \

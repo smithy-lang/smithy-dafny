@@ -181,7 +181,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     }
 
     return new RustFile(
-      Path.of("src", "client.rs"),
+      rootPathForShape(service).resolve("client.rs"),
       TokenTree.of(preamble, postamble)
     );
   }
@@ -667,10 +667,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             match value {
               $sdkCrate:L::error::SdkError::ServiceError(service_error) => match service_error.err() {
                 $errorCases:L
-                e => $rustRootModuleName:L::conversions::error::to_opaque_error(e.to_string()),
+                e => $rustRootModuleName:L::conversions::error::to_opaque_error(format!("{:?}", e)),
               },
               _ => {
-                $rustRootModuleName:L::conversions::error::to_opaque_error(value.to_string())
+                $rustRootModuleName:L::conversions::error::to_opaque_error(format!("{:?}", value))
               }
            }
         }
