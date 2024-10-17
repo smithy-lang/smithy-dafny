@@ -3,7 +3,7 @@ package software.amazon.polymorph.smithygo.utils;
 import software.amazon.smithy.model.shapes.MemberShape;
 
 public class Constants {
-    public static final String DAFNY_RUNTIME_GO_LIBRARY_MODULE = "github.com/dafny-lang/DafnyRuntimeGo/v4";
+    public static final String DAFNY_RUNTIME_GO_LIBRARY_MODULE = "github.com/dafny-lang/DafnyRuntimeGo";
 
     // TODO: Is it possible to make this function name shorter and in camelCase?
     /**
