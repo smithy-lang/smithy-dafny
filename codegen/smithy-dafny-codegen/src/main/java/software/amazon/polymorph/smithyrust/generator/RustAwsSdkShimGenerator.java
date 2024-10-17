@@ -236,7 +236,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     return TokenTree.of(
       evalTemplate(
         """
-        fn $operationName:L(&mut self, input: &std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$operationInputName:L>)
+        fn $operationName:L(&self, input: &std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$operationInputName:L>)
           -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
             $outputType:L,
             std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>

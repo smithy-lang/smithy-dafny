@@ -27,15 +27,11 @@ jobs:
     uses: ./.github/workflows/test_models_net_tests.yml
     with:
       dafny: "nightly-latest"
-  # This workflow is normally pinned to a specific commit from the feat-rust feature branch.
-  # In the spirit of nightly, here we test against the tip of feat-rust
-  # (built from source instead of downloaded from nuget as a prerelease)
-  # to catch pending regressions.
   dafny-nightly-rust:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
-      dafny: "feat-rust"
+      dafny: "nightly-latest"
   dafny-nightly-python:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_python_tests.yml

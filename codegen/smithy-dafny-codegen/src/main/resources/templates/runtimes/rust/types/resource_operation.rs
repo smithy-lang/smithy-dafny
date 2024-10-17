@@ -1,5 +1,5 @@
   fn $snakeCaseOperationName:L(
-    &mut self,
+    &self,
     input: $operationInputType:L,
   ) -> Result<
     $operationOutputType:L,
