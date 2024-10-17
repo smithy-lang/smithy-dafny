@@ -1130,6 +1130,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("serviceName", service.getId().getName(service));
     variables.put("rustClientType", qualifiedRustServiceType(service));
     variables.put("dafnyModuleName", getDafnyModuleName(namespace));
+    variables.put("rustStructureComment", docFromShape(service));
     variables.put(
       "dafnyInternalModuleName",
       getDafnyInternalModuleName(namespace)
