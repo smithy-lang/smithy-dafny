@@ -850,6 +850,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           ) {
             outputType = "*".concat(outputType);
           }
+          // TODO: we should able to change output type to specific shape from interface {}
           writer.write(
             """
             func $L(input $L)($L) {
