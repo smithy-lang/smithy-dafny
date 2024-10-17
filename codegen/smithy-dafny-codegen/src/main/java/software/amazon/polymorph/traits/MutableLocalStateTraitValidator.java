@@ -23,7 +23,7 @@ public class MutableLocalStateTraitValidator extends AbstractValidator {
         danger(
           shape,
           """
-          aws.polymorph#mutableLocalState can allow callers to introduce soundness issues.
+          aws.polymorph#mutableLocalState may allow callers to introduce soundness issues.
 
           At this time to support dynamic mutable state smithy-dafny creates a seperated class by using an {:axiom}.
           The idea for these seperated classes is that the resource has access to an internal modifies set.
@@ -37,10 +37,10 @@ public class MutableLocalStateTraitValidator extends AbstractValidator {
           However, a clever caller could cast this trait into its concrete class.
           Such a caller now has access to observe the internal state of the resource.
 
-          Dafny will allow such a caller to prove that this state is unchanged.
+          Dafny may allow such a caller to prove that this state is unchanged.
           Because the called operations do not contain these elements inside their `modifies` clause.
           But these elements would indeed be modified.
-          Thus Dafny could prove false.
+          Thus Dafny might prove false.
 
           ```dafny
 
@@ -55,9 +55,7 @@ public class MutableLocalStateTraitValidator extends AbstractValidator {
           var output2 :- expect concreteResource.ChangeState();
 
           // State will have changed, because we called for a state change.
-          // however, Dafny can prove that state MUST NOT have changed,
-          // because concreteResource.ChangeState modifies == concreteResource.Modifies
-          // and `this !in concreteResource.Modifies`
+          // however, Dafny may be able prove that state MUST NOT have changed.
           assert state == concreteResource.state;
           expect state != concreteResource.state;
           ```

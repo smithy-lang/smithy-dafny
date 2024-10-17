@@ -787,10 +787,17 @@ public class DafnyApiCodegen {
             nameResolver.validStateInvariantName()
           ),
         "predicate %s()".formatted(nameResolver.validStateInvariantName()),
-        "ensures %s() ==> %s in %s".formatted(
+        "ensures %s() ==> %s in %s %s".formatted(
             nameResolver.validStateInvariantName(),
             nameResolver.callHistoryFieldName(),
-            nameResolver.mutableStateFunctionName()
+            nameResolver.mutableStateFunctionName(),
+            // This makes it harder to prove false with the axiom.
+            // See MutableLocalStateTraitValidator
+            // By saying that the containing resource can be modified
+            // it is very difficult to create a contradiction.
+            mutableState
+              ? "&& this in " + nameResolver.mutableStateFunctionName()
+              : ""
           )
       )
       .dropEmpty()
@@ -1640,39 +1647,8 @@ public class DafnyApiCodegen {
           .lineSeparated()
           .toString()
       );
-      //      return TokenTree.of(
-      //        TokenTree
-      //          .of(
-      //            Token.of("(match %s ".formatted(varName)),
-      //            Token.of(memberShape
-      //              .asUnionShape()
-      //              .get()
-      //              .members()
-      //              .stream()
-      //              .filter(this::OnlyReferenceStructures)
-      //              .map(s -> Token
-      //                .of(
-      //                  "case %s(o) => o.Modifies"
-      //                    .formatted(s.getMemberName())
-      //                ))),
-      //            TokenTree.of(
-      //              memberShape
-      //                .asUnionShape()
-      //                .get()
-      //                .members()
-      //                .stream()
-      //                .allMatch(this::OnlyReferenceStructures)
-      //                ? ")"
-      //                : "case _ => {})")
-      //          )
-      //          .flatten()
-      //          .dropEmpty()
-      //          .lineSeparated()
-      //          .toString()
-      //      );
     } else if (isUnion && !member.isRequired()) {
       // Optional union item
-      // Required union item
       // This is very annoying
       // the way that the decreases clause work
       // it needs to delimit this list of values
@@ -1692,38 +1668,6 @@ public class DafnyApiCodegen {
           .lineSeparated()
           .toString()
       );
-      //      return TokenTree.of(
-      //        TokenTree
-      //          .of(
-      //            Token.of("(if %1$s.Some? then \n match %1$s.value ".formatted(varName)),
-      //            Token.of(memberShape
-      //              .asUnionShape()
-      //              .get()
-      //              .members()
-      //              .stream()
-      //              .filter(this::OnlyReferenceStructures)
-      //              .map(s -> Token
-      //                .of(
-      //                  "case %s(o) => o.Modifies"
-      //                    .formatted(s.getMemberName())
-      //                ))),
-      //            TokenTree.of(
-      //              memberShape
-      //                .asUnionShape()
-      //                .get()
-      //                .members()
-      //                .stream()
-      //                .allMatch(this::OnlyReferenceStructures)
-      //                ? ""
-      //                : "case _ => {}"),
-      //            Token.of("else {})")
-      //          )
-      //          .flatten()
-      //          .dropEmpty()
-      //          .lineSeparated()
-      //          .toString()
-      //      );
-
     } else {
       throw new IllegalStateException("Unsupported shape type");
     }
@@ -1738,6 +1682,7 @@ public class DafnyApiCodegen {
         union
           .members()
           .stream()
+          // Only reference structures can hold state
           .filter(this::OnlyReferenceStructures)
           .map(s ->
             TokenTree
