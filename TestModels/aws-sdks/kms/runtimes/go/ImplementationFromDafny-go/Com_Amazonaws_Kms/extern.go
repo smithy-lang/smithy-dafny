@@ -12,7 +12,7 @@ import (
 )
 
 func (_static *CompanionStruct_Default___) KMSClient() Wrappers.Result {
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile("default"))
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		panic(err)
 	}
