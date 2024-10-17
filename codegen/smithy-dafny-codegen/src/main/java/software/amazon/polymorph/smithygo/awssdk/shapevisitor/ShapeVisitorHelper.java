@@ -70,8 +70,7 @@ public class ShapeVisitorHelper {
       pointerShapesToNative.put(memberShape, isPointable);
     }
     final String funcName = funcNameGenerator(memberShape, "FromDafny");
-    final String nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
-    return nextVisitorFunction;
+    return(funcName.concat("(").concat(dataSource).concat(")"));
   }
 
   public static String toDafnyShapeVisitorWriter(
@@ -117,7 +116,6 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcName = funcNameGenerator(memberShape, "ToDafny");
-    final String nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
-    return nextVisitorFunction;
+    return(funcName.concat("(").concat(dataSource).concat(")"));
   }
 }
