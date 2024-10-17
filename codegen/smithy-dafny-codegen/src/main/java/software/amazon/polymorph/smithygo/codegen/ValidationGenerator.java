@@ -89,7 +89,7 @@ public class ValidationGenerator {
     for (final MemberShape key : validationFuncMap.keySet()) {
       String inputType = "";
       if (validationFuncInputTypeMap.containsKey(key)) {
-        inputType = "Value ".concat(validationFuncInputTypeMap.get(key));
+        inputType = "Value %s".formatted(validationFuncInputTypeMap.get(key));
       }
       writer.openBlock(
         "func (input $L) $L($L) (error) {",

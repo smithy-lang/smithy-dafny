@@ -35,6 +35,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 // TODO: Remove anonymous function in each of the shape visitor and test if it will work
+// TODO: if check with %s to figure out if it's a pointer or not and remove duplicate code when shape is optional vs non optional
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   private final GenerationContext context;

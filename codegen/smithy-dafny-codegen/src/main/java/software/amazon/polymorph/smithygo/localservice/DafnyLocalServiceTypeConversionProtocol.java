@@ -1377,6 +1377,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               .getProperty(POINTABLE, Boolean.class)
               .orElse(false)
           ) outputType = "*".concat(outputType);
+          // TODO: we should be able to change input type to specific shape from interface {}
           writer.write(
             """
             func $L(input interface{})($L) {
