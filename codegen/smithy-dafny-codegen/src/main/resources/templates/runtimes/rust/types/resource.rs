@@ -1,4 +1,5 @@
 
+$rustResourceComment:L
 pub trait $rustResourceName:L {
   $resourceOperations:L
 }
