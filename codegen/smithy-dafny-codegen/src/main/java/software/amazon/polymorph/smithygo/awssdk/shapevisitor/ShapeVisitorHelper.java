@@ -12,6 +12,8 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.polymorph.smithygo.utils.Constants.funcNameGenerator;
+
 public class ShapeVisitorHelper {
 
   private static final Map<MemberShape, Boolean> optionalShapesToDafny =
@@ -34,17 +36,17 @@ public class ShapeVisitorHelper {
    * @param suffix            Suffix to add to the function. As of this writing, we only put FromDafny or ToNative suffix.
    * @return the function Name
    */
-  public static String funcNameGenerator(
-    final MemberShape memberShape,
-    final String suffix
-  ) {
-    return memberShape
-      .getId()
-      .toString()
-      .replaceAll("[.$#]", "_")
-      .concat("_")
-      .concat(suffix);
-  }
+  // public static String funcNameGenerator(
+  //   final MemberShape memberShape,
+  //   final String suffix
+  // ) {
+  //   return memberShape
+  //     .getId()
+  //     .toString()
+  //     .replaceAll("[.$#]", "_")
+  //     .concat("_")
+  //     .concat(suffix);
+  // }
 
   public static String toNativeShapeVisitorWriter(
     final MemberShape memberShape,
@@ -135,11 +137,8 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    final String funcName =
-      (memberShape.getId().toString().replaceAll("[.$#]", "_")).concat(
-          "_ToDafny("
-        );
-    nextVisitorFunction = funcName.concat(dataSource).concat(")");
+    final String funcName = funcNameGenerator(memberShape, "ToDafny");
+    nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
     return nextVisitorFunction;
   }
 }
