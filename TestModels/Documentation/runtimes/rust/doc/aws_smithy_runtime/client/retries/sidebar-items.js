@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["classifiers","strategy"],"struct":["ClientRateLimiter","ClientRateLimiterPartition","RetryPartition","TokenBucket"]};

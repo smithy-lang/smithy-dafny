@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["error"],"struct":["EndpointFuture","EndpointPrefix","EndpointResolverParams","SharedEndpointResolver"],"trait":["ResolveEndpoint"]};

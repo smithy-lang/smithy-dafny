@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["static_resolver"],"struct":["AuthSchemeEndpointConfig","AuthSchemeId","AuthSchemeOptionResolverParams","SharedAuthScheme","SharedAuthSchemeOptionResolver"],"trait":["AuthScheme","ResolveAuthSchemeOptions","Sign"]};

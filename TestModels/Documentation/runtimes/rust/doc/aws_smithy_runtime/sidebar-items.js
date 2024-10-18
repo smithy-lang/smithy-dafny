@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["client","expiring_cache","static_partition_map"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["IdentityCacheLocation"],"struct":["Identity","IdentityCachePartition","IdentityFuture","SharedIdentityCache","SharedIdentityResolver"],"trait":["ResolveCachedIdentity","ResolveIdentity"]};

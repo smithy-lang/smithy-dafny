@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["maybe_shared"],"trait":["FromUnshared","IntoShared"]};

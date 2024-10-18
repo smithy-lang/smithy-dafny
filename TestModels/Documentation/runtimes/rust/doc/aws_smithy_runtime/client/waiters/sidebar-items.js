@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["AcceptorState"],"fn":["attach_waiter_tracing_span"],"struct":["WaiterOrchestrator","WaiterOrchestratorBuilder"]};

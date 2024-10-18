@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["EncodingStrategy"],"fn":["fmt_string","fmt_timestamp"]};

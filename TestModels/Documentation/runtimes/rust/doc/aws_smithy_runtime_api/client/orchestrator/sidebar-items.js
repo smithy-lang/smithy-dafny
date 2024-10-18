@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["LoadedRequestBody"],"struct":["Metadata","OrchestratorError","SensitiveOutput"],"type":["HttpRequest","HttpResponse"]};

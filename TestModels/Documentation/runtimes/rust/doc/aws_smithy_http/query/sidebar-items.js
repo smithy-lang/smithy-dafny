@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["fmt_string","fmt_timestamp"],"struct":["Writer"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["endpoint","header","label","operation","query"]};

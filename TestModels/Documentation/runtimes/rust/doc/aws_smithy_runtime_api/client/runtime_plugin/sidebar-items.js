@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Order"],"struct":["RuntimePlugins","SharedRuntimePlugin","StaticRuntimePlugin"],"trait":["RuntimePlugin"]};

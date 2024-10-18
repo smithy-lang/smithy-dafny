@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["decode","encode","encoded_length"],"struct":["DecodeError"]};

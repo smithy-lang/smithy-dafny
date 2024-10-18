@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["http_client_fn"],"struct":["HttpConnectorFuture","HttpConnectorSettings","HttpConnectorSettingsBuilder","SharedHttpClient","SharedHttpConnector"],"trait":["HttpClient","HttpConnector"]};

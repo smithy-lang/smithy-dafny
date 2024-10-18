@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["ConstructionFailureBuilder","DispatchFailureBuilder","ResponseErrorBuilder","ServiceErrorBuilder","TimeoutErrorBuilder"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["OnlyReady"],"struct":["NowOrLater"],"type":["BoxFuture"]};

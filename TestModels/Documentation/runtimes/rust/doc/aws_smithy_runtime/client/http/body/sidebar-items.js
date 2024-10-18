@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["content_length_enforcement","minimum_throughput"]};
