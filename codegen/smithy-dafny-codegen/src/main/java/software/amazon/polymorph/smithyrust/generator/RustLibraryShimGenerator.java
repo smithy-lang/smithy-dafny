@@ -480,6 +480,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Stream<String> directErrorVariants = allErrorShapes()
       .map(errorShape ->
         IOUtils.evalTemplate(
+          docFromShape(errorShape) +
+          "\n" +
           """
           $rustErrorName:L {
               message: ::std::string::String,

@@ -1205,6 +1205,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("snakeCaseOperationName", toSnakeCase(opName));
     variables.put("snakeCaseOperationInputName", toSnakeCase(opInputName));
     variables.put("snakeCaseOperationOutputName", toSnakeCase(opOutputName));
+    variables.put("rustOperationComment", docFromShapeEmpty(operationShape));
     variables.put(
       "snakeCaseSyntheticOperationInputName",
       toSnakeCase(synOpInputName)
@@ -1395,6 +1396,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("structureName", structureName);
     variables.put("snakeCaseStructureName", toSnakeCase(structureName));
     variables.put("rustStructureName", rustStructureName(structureShape));
+    variables.put("rustStructureComment", docFromShape(structureShape));
     // TODO: Risky...
     variables.put(
       "dafnyTypesModuleName",
@@ -1422,6 +1424,15 @@ public abstract class AbstractRustShimGenerator {
       return "/// " + String.join("\n/// ", maybeDoc.get().split("\\r?\\n"));
     } else {
       return "#[allow(missing_docs)]";
+    }
+  }
+
+  protected String docFromShapeEmpty(Shape shape) {
+    Optional<String> maybeDoc = ModelUtils.getDocumentationOrJavadoc(shape);
+    if (maybeDoc.isPresent()) {
+      return "/// " + String.join("\n/// ", maybeDoc.get().split("\\r?\\n"));
+    } else {
+      return "///";
     }
   }
 

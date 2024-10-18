@@ -17,7 +17,7 @@ impl $pascalCaseOperationInputName:LBuilder {
     }
 }
 /// Fluent builder constructing a request to `$pascalCaseOperationName:L`.
-///
+$rustOperationComment:L
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct $pascalCaseOperationName:LFluentBuilder {
     $operationTargetName:L: $operationTargetType:L,
