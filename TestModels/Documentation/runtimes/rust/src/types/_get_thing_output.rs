@@ -3,7 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::fmt::Debug)]
-#[allow(missing_docs)]
+/// Outputs for getting a thing.
 pub struct GetThingOutput {
     /// The thing that you just got.
 pub thing: ::std::option::Option<crate::types::Thing>,
