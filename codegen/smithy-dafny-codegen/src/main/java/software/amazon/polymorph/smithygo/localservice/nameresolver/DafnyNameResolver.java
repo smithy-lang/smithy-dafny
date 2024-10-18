@@ -154,7 +154,7 @@ public class DafnyNameResolver {
       .concat("_");
   }
 
-  public static String getDafnyClient(final Shape shape, final String sdkId) {
+  public static String getDafnyClient(final String sdkId) {
     return sdkId.concat(DOT).concat(sdkId).concat("Client");
   }
 

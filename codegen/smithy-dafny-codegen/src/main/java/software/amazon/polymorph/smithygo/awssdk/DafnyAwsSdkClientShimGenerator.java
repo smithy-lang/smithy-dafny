@@ -13,6 +13,8 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+
 public class DafnyAwsSdkClientShimGenerator implements Runnable {
 
   private final GenerationContext context;
@@ -152,7 +154,7 @@ public class DafnyAwsSdkClientShimGenerator implements Runnable {
               clientResponse = "var _, native_error";
               returnResponse = "dafny.TupleOf()";
               writer.addImportFromModule(
-                "github.com/dafny-lang/DafnyRuntimeGo",
+                DAFNY_RUNTIME_GO_LIBRARY_MODULE,
                 "dafny"
               );
             } else {

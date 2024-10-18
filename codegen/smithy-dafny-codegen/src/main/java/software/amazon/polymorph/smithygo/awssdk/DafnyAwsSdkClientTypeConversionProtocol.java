@@ -38,8 +38,8 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   final ServiceShape serviceShape;
 
   public DafnyAwsSdkClientTypeConversionProtocol(
-    Model model,
-    ServiceShape serviceShape
+    final Model model,
+    final ServiceShape serviceShape
   ) {
     dafnyNonNormalizedModel = model;
     awsNormalizedModel =
@@ -59,7 +59,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   }
 
   @Override
-  public void generateSerializers(GenerationContext context) {
+  public void generateSerializers(final GenerationContext context) {
     final Set<ShapeId> alreadyVisited = new HashSet<>();
     final var symbolProvider = context.symbolProvider();
     final var writerDelegator = context.writerDelegator();
@@ -209,7 +209,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   }
 
   @Override
-  public void generateDeserializers(GenerationContext context) {
+  public void generateDeserializers(final GenerationContext context) {
     final Set<ShapeId> alreadyVisited = new HashSet<>();
     final var symbolProvider = context.symbolProvider();
     final var delegator = context.writerDelegator();
@@ -537,7 +537,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                 context.symbolProvider().toSymbol(errorShape).getName(),
                 DafnyNameResolver.getDafnyBaseErrorType(errorShape),
                 writer.consumer(w -> {
-                  String output = errorShape.accept(
+                  final String output = errorShape.accept(
                     new AwsSdkToDafnyShapeVisitor(
                       context,
                       "nativeInput",
@@ -599,7 +599,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             """,
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
-              for (var error : errorShapes) {
+              for (final var error : errorShapes) {
                 String errVariableName = context
                 .symbolProvider()
                 .toSymbol(
@@ -687,7 +687,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                 DafnyNameResolver.getDafnyBaseErrorType(errorShape),
                 context.symbolProvider().toSymbol(errorShape).getName(),
                 writer.consumer(w -> {
-                  String output = errorShape.accept(
+                  final String output = errorShape.accept(
                     new DafnyToAwsSdkShapeVisitor(
                       context,
                       "dafnyOutput",
@@ -747,7 +747,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             """,
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
-              for (var error : awsNormalizedModel.getShapesWithTrait(
+              for (final var error : awsNormalizedModel.getShapesWithTrait(
                 ErrorTrait.class
               )) {
                 w.write(
@@ -772,62 +772,50 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   }
 
   // Generates rest of the not visited shapes into a function
-  private void generateSerializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
-    var writerDelegator = context.writerDelegator();
+  // TODO: We should be able to optimize it to run along with the ShapeVisitors.
+  // But since this runs outside of any production code - we are okay with this for now
+  private void generateSerializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
+    final var writerDelegator = context.writerDelegator();
     final var model = context.model();
-    final var serviceShape = model.expectShape(
-      context.settings().getService(),
-      ServiceShape.class
-    );
-    writerDelegator.useFileWriter(
-      "%s/%s".formatted(
-          SmithyNameResolver.shapeNamespace(serviceShape),
-          TO_DAFNY
-        ),
+    final var serviceShape = model.expectShape(context.settings().getService(), ServiceShape.class);
+    writerDelegator.useFileWriter("%s/%s".formatted(SmithyNameResolver.shapeNamespace(serviceShape), TO_DAFNY),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        for (final MemberShape visitingMemberShape : AwsSdkToDafnyShapeVisitor.visitorFuncMap.keySet()) {
-          final Shape visitingShape = context
-            .model()
-            .expectShape(visitingMemberShape.getTarget());
+        for (final var visitingMemberShape : AwsSdkToDafnyShapeVisitor.getAllShapesRequiringConversionFunc()) {
+          final var visitingShape = context.model().expectShape(visitingMemberShape.getTarget());
           if (alreadyVisited.contains(visitingMemberShape.getId())) {
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          String inputType;
-          String outputType = ShapeVisitorHelper.toDafnyOptionalityMap.get(
-              visitingMemberShape
-            )
-            ? "Wrappers.Option"
-            : DafnyNameResolver.getDafnyType(
-              visitingShape,
-              context.symbolProvider().toSymbol(visitingShape)
-            );
-          inputType =
-          GoCodegenUtils.getType(
-            context.symbolProvider().toSymbol(visitingShape),
-            serviceShape.expectTrait(ServiceTrait.class)
+          final var outputType = ShapeVisitorHelper.isToDafnyShapeOptional(visitingMemberShape) ? "Wrappers.Option"
+            : DafnyNameResolver.getDafnyType(visitingShape,
+            context.symbolProvider().toSymbol(visitingShape)
+          );
+          var inputType =
+            GoCodegenUtils.getType(
+              context.symbolProvider().toSymbol(visitingShape),
+              serviceShape.expectTrait(ServiceTrait.class)
             );
           if (
             AwsSdkGoPointableIndex
-                .of(context.model())
-                .isPointable(visitingMemberShape)
+              .of(context.model())
+              .isPointable(visitingMemberShape)
           ) {
             inputType = "*".concat(inputType);
           }
           writer.write(
             """
-            func $L(input $L)($L) {
-                return $L
-            }
-            """,
+              func $L(input $L)($L) {
+                  return $L
+              }
+              """,
             ShapeVisitorHelper.funcNameGenerator(
               visitingMemberShape,
               "ToDafny"
             ),
             inputType,
             outputType,
-            AwsSdkToDafnyShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+            AwsSdkToDafnyShapeVisitor.getConversionFunc(visitingMemberShape)
           );
         }
       }
@@ -835,13 +823,10 @@ public class DafnyAwsSdkClientTypeConversionProtocol
   }
 
   // Generates rest of the not visited shapes into a function
-  private void generateDeserializerFunctions(final GenerationContext context, Set<ShapeId> alreadyVisited) {
-    var delegator = context.writerDelegator();
-    final var model = context.model();
-    final var serviceShape = model.expectShape(
-      context.settings().getService(),
-      ServiceShape.class
-    );
+  // TODO: We should be able to optimize it to run along with the ShapeVisitors.
+  // But since this runs outside of any production code - we are okay with this for now
+  private void generateDeserializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
+    final var delegator = context.writerDelegator();
     delegator.useFileWriter(
       "%s/%s".formatted(
           SmithyNameResolver.shapeNamespace(serviceShape),
@@ -849,20 +834,20 @@ public class DafnyAwsSdkClientTypeConversionProtocol
         ),
       SmithyNameResolver.shapeNamespace(serviceShape),
       writer -> {
-        ServiceTrait serviceTrait = context
+        final var serviceTrait = context
             .model()
             .expectShape(context.settings().getService(context.model()).toShapeId())
             .getTrait(ServiceTrait.class)
             .get();
-        for (MemberShape visitingMemberShape : DafnyToAwsSdkShapeVisitor.visitorFuncMap.keySet()) {
-          final Shape visitingShape = context
+        for (final var visitingMemberShape : DafnyToAwsSdkShapeVisitor.getAllShapesRequiringConversionFunc()) {
+          final var visitingShape = context
             .model()
             .expectShape(visitingMemberShape.getTarget());
           if (alreadyVisited.contains(visitingMemberShape.getId())) {
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          String outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);;
+          var outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
           switch (visitingShape.getType()) {
             case STRUCTURE:
             case UNION:
@@ -879,7 +864,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
               break;
           }
           if (
-            ShapeVisitorHelper.toNativeOutputPointerMap.get(visitingMemberShape)
+            ShapeVisitorHelper.isToNativeShapePointable(visitingMemberShape)
           ) {
             outputType = "*".concat(outputType);
           }
@@ -894,7 +879,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             ),
             "interface {}",
             outputType,
-            DafnyToAwsSdkShapeVisitor.visitorFuncMap.get(visitingMemberShape)
+            DafnyToAwsSdkShapeVisitor.getConversionFunc(visitingMemberShape)
           );
         }
       }

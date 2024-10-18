@@ -1,6 +1,11 @@
 package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +38,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.utils.StringUtils;
 
+// TODO: Remove anonymous function in each of the shape visitor and test if it will work
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   private final GenerationContext context;
@@ -40,7 +46,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   private final GoWriter writer;
   private final boolean isConfigShape;
   private final boolean isOptional;
-  public static final Map<MemberShape, String> visitorFuncMap = new HashMap<>();
+  //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
+  private static final Map<MemberShape, String> memberShapeConversionFuncMap = new HashMap<>();
 
   public DafnyToSmithyShapeVisitor(
     final GenerationContext context,
@@ -65,14 +72,26 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     this.isOptional = isOptional;
   }
 
-  protected String referenceStructureShape(StructureShape shape) {
-    ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
-    Shape resourceOrService = context
+  public static Set<MemberShape> getAllShapesRequiringConversionFunc() {
+    return memberShapeConversionFuncMap.keySet();
+  }
+
+  public static void putShapesWithConversionFunc(final MemberShape shape, final String conversionFunc) {
+    memberShapeConversionFuncMap.put(shape, conversionFunc);
+  }
+
+  public static String getConversionFunc(final MemberShape shape) {
+    return memberShapeConversionFuncMap.get(shape);
+  }
+
+  protected String referenceStructureShape(final StructureShape shape) {
+    final ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+    final Shape resourceOrService = context
       .model()
       .expectShape(referenceTrait.getReferentId());
     var namespace = "";
     if (resourceOrService.asResourceShape().isPresent()) {
-      var resourceShape = resourceOrService.asResourceShape().get();
+      final var resourceShape = resourceOrService.asResourceShape().get();
       if (
         !resourceOrService
           .toShapeId()
@@ -112,7 +131,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             )
         );
     } else {
-      var serviceShape = resourceOrService.asServiceShape().get();
+      final var serviceShape = resourceOrService.asServiceShape().get();
       if (
         !resourceOrService
           .toShapeId()
@@ -129,26 +148,11 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
       }
       if (!this.isOptional) {
-        writer.addImportFromModule(
-              SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                resourceOrService.toShapeId().getNamespace()
-              ),
-              DafnyNameResolver
-                .dafnyTypesNamespace(serviceShape)
-        );
-        String sdkId = serviceShape.toShapeId().getName();
-        String returnType;
-        if (sdkId.equals("DynamoDB_20120810") || sdkId.equals("TrentService")) {
-          returnType = DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) serviceShape, serviceShape.expectTrait(ServiceTrait.class));
-        } else {
-          returnType = DafnyNameResolver.getDafnyClient(
-            serviceShape,
-            serviceShape.toShapeId().getName()
-          );
-        }
-        return "return %1$s.(%2$s)".formatted(
-            dataSource, 
-            returnType
+        return "return %1$s{%2$s}".formatted(
+            namespace.concat(
+              context.symbolProvider().toSymbol(serviceShape).getName()
+            ),
+            dataSource
           );
       }
       return """
@@ -167,7 +171,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           ),
           dataSource,
           DafnyNameResolver.getDafnyClient(
-            serviceShape,
             serviceShape.toShapeId().getName()
           )
         );
@@ -175,7 +178,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  protected String getDefault(Shape shape) {
+  protected String getDefault(final Shape shape) {
     throw new CodegenException(
       String.format(
         "Unsupported conversion of %s to %s using the %s protocol",
@@ -187,8 +190,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String blobShape(BlobShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+  public String blobShape(final BlobShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     return """
     return func () []byte {
     var b []byte
@@ -218,10 +221,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       ),
       DafnyNameResolver.dafnyTypesNamespace(shape)
     );
-    String maybeAddress = (this.isOptional) ? "&" : "";
+    final String referenceType = (this.isOptional) ? "&" : "";
     builder.append(
       "return %1$s%2$s{".formatted(
-          maybeAddress,
+          referenceType,
           SmithyNameResolver
             .smithyTypesNamespace(shape)
             .concat(".")
@@ -236,7 +239,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         .expectShape(memberShape.getTarget());
       //TODO: Is it ever possible for structure to be nil?
       String maybeAssertion = "";
-      if (dataSource.equals("input")) maybeAssertion =
+      if (dataSource.equals("input")) {
+        maybeAssertion =
         ".(".concat(
             DafnyNameResolver.getDafnyType(
               shape,
@@ -244,6 +248,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             )
           )
           .concat(")");
+      }
       final boolean assertionRequired =
         memberShape.isOptional() &&
         targetShape.isStructureShape() &&
@@ -286,16 +291,15 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   // TODO: smithy-dafny-conversion library
   @Override
-  public String listShape(ListShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-    StringBuilder builder = new StringBuilder();
-
-    MemberShape memberShape = shape.getMember();
+  public String listShape(final ListShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
+    final StringBuilder builder = new StringBuilder();
+    final MemberShape memberShape = shape.getMember();
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
-    var symbol = context.symbolProvider().toSymbol(shape);
-    Boolean assertionRequired = targetShape.isStructureShape();
+    final var symbol = context.symbolProvider().toSymbol(shape);
+    final Boolean assertionRequired = targetShape.isStructureShape();
     builder.append(
       """
                            var fieldValue %s
@@ -328,15 +332,11 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String mapShape(MapShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-    StringBuilder builder = new StringBuilder();
-
-    MemberShape keyMemberShape = shape.getKey();
-    final Shape keyTargetShape = context
-      .model()
-      .expectShape(keyMemberShape.getTarget());
-    MemberShape valueMemberShape = shape.getValue();
+  public String mapShape(final MapShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
+    final StringBuilder builder = new StringBuilder();
+    final MemberShape keyMemberShape = shape.getKey();
+    final MemberShape valueMemberShape = shape.getValue();
     final Shape valueTargetShape = context
       .model()
       .expectShape(valueMemberShape.getTarget());
@@ -344,7 +344,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       valueTargetShape,
       context.symbolProvider().toSymbol(valueTargetShape)
     );
-    String valueDataSource = "(*val.(dafny.Tuple).IndexInt(1))";
+    final String valueDataSource = "(*val.(dafny.Tuple).IndexInt(1))";
     builder.append(
       """
                      var m map[string]%s = make(map[string]%s)
@@ -388,8 +388,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String booleanShape(BooleanShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+  public String booleanShape(final BooleanShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (this.isOptional) {
       return """
       return func() *bool {
@@ -413,8 +413,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String stringShape(StringShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+  public String stringShape(final StringShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (shape.hasTrait(EnumTrait.class)) {
       return """
          return func () *%s.%s {
@@ -457,11 +457,11 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         );
     }
 
-    var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
+    final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
       ? "uint8"
       : "dafny.Char";
     var strConv = "s = s + string(val.(%s))".formatted(underlyingType);
-    if (underlyingType == "uint8") {
+    if (underlyingType.equals("uint8")) {
       strConv =
         """
             // UTF bytes should be always converted from bytes to string in go
@@ -505,9 +505,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String integerShape(IntegerShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
-
+  public String integerShape(final IntegerShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (isOptional) {
       return (
         """
@@ -530,8 +529,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String longShape(LongShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+  public String longShape(final LongShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (isOptional) {
       return (
         """
@@ -555,8 +554,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String doubleShape(DoubleShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+  public String doubleShape(final DoubleShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     writer.addUseImports(SmithyGoDependency.MATH);
     if (isOptional) {
       return """
@@ -591,8 +590,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String unionShape(UnionShape shape) {
-    writer.addImportFromModule("github.com/dafny-lang/DafnyRuntimeGo", "dafny");
+  public String unionShape(final UnionShape shape) {
+    writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     String nilCheck = "";
     if (isOptional) {
       nilCheck =
@@ -606,8 +605,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           var union %s
           %s
       """.formatted(context.symbolProvider().toSymbol(shape), nilCheck);
-    StringBuilder eachMemberInUnion = new StringBuilder();
-    for (var member : shape.getAllMembers().values()) {
+    final StringBuilder eachMemberInUnion = new StringBuilder();
+    for (final var member : shape.getAllMembers().values()) {
       final Shape targetShape = context.model().expectShape(member.getTarget());
       final String memberName = context.symbolProvider().toMemberName(member);
       final String rawUnionDataSource =
@@ -623,25 +622,21 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       String unionDataSource =
         rawUnionDataSource +
         ".Dtor_" +
-        memberName.replace(shape.getId().getName() + "Member", "") +
+        memberName.replace(shape.getId().getName().concat("Member"), "") +
         "()";
-      final Boolean isMemberShapePointable =
+      final boolean isMemberShapePointable =
         (GoPointableIndex.of(context.model()).isPointable(member)) &&
         !targetShape.isStructureShape();
       final String pointerForPointableShape = isMemberShapePointable ? "*" : "";
-      final String isMemberCheck =
-        """
-        if ((%s).%s()) {""".formatted(
+      final String isMemberCheck = "if ((%s).%s()) {".formatted(
             rawUnionDataSource,
-            memberName.replace(shape.getId().getName() + "Member", "Is_")
+            memberName.replace(shape.getId().getName().concat("Member"), "Is_")
           );
       String wrappedDataSource = "";
       boolean requireAssertion = true;
       if (!(targetShape.isStructureShape())) {
         // All other shape except structure needs a Wrapper object but unionDataSource is not a Wrapper object.
-        wrappedDataSource =
-          """
-          var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)""".formatted(
+        wrappedDataSource ="var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)".formatted(
               unionDataSource
             );
         unionDataSource = "dataSource.UnwrapOr(nil)";
@@ -681,7 +676,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   @Override
-  public String timestampShape(TimestampShape shape) {
+  public String timestampShape(final TimestampShape shape) {
     // TODO: Figure out timestamp types when working on timestampShape 
     writer.addImport("time");
     return "nil";

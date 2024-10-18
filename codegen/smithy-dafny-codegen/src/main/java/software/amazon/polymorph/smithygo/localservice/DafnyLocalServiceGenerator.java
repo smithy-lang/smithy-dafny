@@ -28,6 +28,8 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+
 public class DafnyLocalServiceGenerator implements Runnable {
 
   private final GenerationContext context;
@@ -120,7 +122,6 @@ public class DafnyLocalServiceGenerator implements Runnable {
     writer.addUseImports(SmithyGoDependency.CONTEXT);
 
     final var dafnyClient = DafnyNameResolver.getDafnyClient(
-      service,
       serviceTrait.getSdkId()
     );
     writer.write(
@@ -308,7 +309,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
 
   void generateShim() {
     final var namespace =
-      "Wrapped%sService".formatted(DafnyNameResolver.dafnyNamespace(service.expectTrait(LocalServiceTrait.class)));
+      "Wrapped%sService".formatted(DafnyNameResolver.dafnyNamespace(service));
 
     writerDelegator.useFileWriter(
       "%s/shim.go".formatted(namespace),
@@ -421,7 +422,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
               clientResponse = "var native_error";
               returnResponse = "dafny.TupleOf()";
               writer.addImportFromModule(
-                "github.com/dafny-lang/DafnyRuntimeGo",
+                DAFNY_RUNTIME_GO_LIBRARY_MODULE,
                 "dafny"
               );
             } else {
@@ -701,7 +702,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
                     );
                 final var outputType = outputShape.hasTrait(UnitTypeTrait.class)
                   ? ""
-                  : "*%s".formatted(
+                  : "*%s,".formatted(
                       SmithyNameResolver.getSmithyType(
                         outputShape,
                         symbolProvider.toSymbol(outputShape)
@@ -758,7 +759,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
 
                 writer.write(
                   """
-                    func (this *$L) $L($L) ($L, error) {
+                    func (this *$L) $L($L) ($L error) {
                         $L
                         if (dafny_response.Is_Failure()) {
                             err := dafny_response.Dtor_error().($L.Error);
@@ -902,7 +903,7 @@ public class DafnyLocalServiceGenerator implements Runnable {
               clientResponse = "var native_error";
               returnResponse = "dafny.TupleOf()";
               writer.addImportFromModule(
-                "github.com/dafny-lang/DafnyRuntimeGo",
+                DAFNY_RUNTIME_GO_LIBRARY_MODULE,
                 "dafny"
               );
             } else {

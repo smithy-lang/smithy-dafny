@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -13,12 +14,18 @@ import software.amazon.smithy.model.traits.EnumTrait;
 
 public class ShapeVisitorHelper {
 
-  public static final Map<MemberShape, Boolean> toDafnyOptionalityMap =
+  private static final Map<MemberShape, Boolean> optionalShapesToDafny =
     new HashMap<>();
-  public static final Map<MemberShape, Boolean> toNativeOutputPointerMap =
+  private static final Map<MemberShape, Boolean> pointerShapesToNative =
     new HashMap<>();
-  public static final Map<MemberShape, String> toNativeNextFuncInput =
-    new HashMap<>();
+
+  public static boolean isToDafnyShapeOptional(final MemberShape shape) {
+    return optionalShapesToDafny.get(shape);
+  }
+
+  public static boolean isToNativeShapePointable(final MemberShape shape) {
+    return pointerShapesToNative.get(shape);
+  }
 
   /**
    * Generates functions Name for To Dafny and To Native conversion.
@@ -43,7 +50,7 @@ public class ShapeVisitorHelper {
     final MemberShape memberShape,
     final GenerationContext context,
     final String dataSource,
-    final Boolean assertionRequired,
+    final boolean assertionRequired,
     final GoWriter writer,
     final boolean isOptional,
     final boolean isPointable
@@ -62,11 +69,11 @@ public class ShapeVisitorHelper {
           )
           .concat(")");
     }
-    String nextVisitorFunction;
-    String funcDataSource = "input";
-    if (!DafnyToAwsSdkShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-      DafnyToAwsSdkShapeVisitor.visitorFuncMap.put(memberShape, "");
-      DafnyToAwsSdkShapeVisitor.visitorFuncMap.put(
+    final String nextVisitorFunction;
+    final String funcDataSource = "input";
+    if (!DafnyToAwsSdkShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+      DafnyToAwsSdkShapeVisitor.putShapesWithConversionFunc(memberShape, "");
+      DafnyToAwsSdkShapeVisitor.putShapesWithConversionFunc(
         memberShape,
         targetShape.accept(
           new DafnyToAwsSdkShapeVisitor(
@@ -78,9 +85,9 @@ public class ShapeVisitorHelper {
           )
         )
       );
-      toNativeOutputPointerMap.put(memberShape, isPointable);
+      pointerShapesToNative.put(memberShape, isPointable);
     }
-    String funcName = funcNameGenerator(memberShape, "FromDafny");
+    final String funcName = funcNameGenerator(memberShape, "FromDafny");
     nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
     return nextVisitorFunction;
   }
@@ -97,7 +104,7 @@ public class ShapeVisitorHelper {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
-    String nextVisitorFunction;
+      final String nextVisitorFunction;
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       return targetShape.accept(
         new AwsSdkToDafnyShapeVisitor(
@@ -110,11 +117,11 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcDataSource = "input";
-    if (!AwsSdkToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-      toDafnyOptionalityMap.put(memberShape, isOptional);
-      AwsSdkToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
-      AwsSdkToDafnyShapeVisitor.visitorFuncMap.put(
+    final String funcDataSource = "input";
+    if (!AwsSdkToDafnyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+      optionalShapesToDafny.put(memberShape, isOptional);
+      AwsSdkToDafnyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
+      AwsSdkToDafnyShapeVisitor.putShapesWithConversionFunc(
         memberShape,
         targetShape.accept(
           new AwsSdkToDafnyShapeVisitor(
@@ -128,7 +135,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcName =
+    final String funcName =
       (memberShape.getId().toString().replaceAll("[.$#]", "_")).concat(
           "_ToDafny("
         );

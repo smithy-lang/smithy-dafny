@@ -12,8 +12,12 @@ import software.amazon.smithy.model.shapes.Shape;
 
 public class ShapeVisitorHelper {
 
-  public static final Map<MemberShape, Boolean> toDafnyOptionalityMap =
+  private static final Map<MemberShape, Boolean> optionalShapesToDafny =
     new HashMap<>();
+
+  public static boolean isToDafnyShapeOptional(final MemberShape shape) {
+    return optionalShapesToDafny.get(shape);
+  }
 
   /**
    * Generates functions Name for To Dafny and To Native conversion.
@@ -38,7 +42,7 @@ public class ShapeVisitorHelper {
     final MemberShape memberShape,
     final GenerationContext context,
     final String dataSource,
-    final Boolean assertionRequired,
+    final boolean assertionRequired,
     final GoWriter writer,
     final boolean isConfigShape,
     final boolean isOptional
@@ -59,10 +63,10 @@ public class ShapeVisitorHelper {
     }
     // Resource shape already goes into a function
     if (targetShape.hasTrait(ReferenceTrait.class)) {
-      ReferenceTrait referenceTrait = targetShape.expectTrait(
+      final ReferenceTrait referenceTrait = targetShape.expectTrait(
         ReferenceTrait.class
       );
-      Shape resourceOrService = context
+      final Shape resourceOrService = context
         .model()
         .expectShape(referenceTrait.getReferentId());
       if (resourceOrService.isResourceShape()) {
@@ -77,11 +81,11 @@ public class ShapeVisitorHelper {
         );
       }
     }
-    String nextVisitorFunction;
-    String funcDataSource = "input";
-    if (!DafnyToSmithyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-      DafnyToSmithyShapeVisitor.visitorFuncMap.put(memberShape, "");
-      DafnyToSmithyShapeVisitor.visitorFuncMap.put(
+    final String nextVisitorFunction;
+    final String funcDataSource = "input";
+    if (!DafnyToSmithyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+      DafnyToSmithyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
+      DafnyToSmithyShapeVisitor.putShapesWithConversionFunc(
         memberShape,
         targetShape.accept(
           new DafnyToSmithyShapeVisitor(
@@ -94,7 +98,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcName = funcNameGenerator(memberShape, "FromDafny");
+    final String funcName = funcNameGenerator(memberShape, "FromDafny");
     nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
     return nextVisitorFunction;
   }
@@ -111,7 +115,7 @@ public class ShapeVisitorHelper {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
-    String nextVisitorFunction;
+    final String nextVisitorFunction;
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       return targetShape.accept(
         new SmithyToDafnyShapeVisitor(
@@ -124,11 +128,11 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcDataSource = "input";
-    if (!SmithyToDafnyShapeVisitor.visitorFuncMap.containsKey(memberShape)) {
-      toDafnyOptionalityMap.put(memberShape, isOptional);
-      SmithyToDafnyShapeVisitor.visitorFuncMap.put(memberShape, "");
-      SmithyToDafnyShapeVisitor.visitorFuncMap.put(
+    final String funcDataSource = "input";
+    if (!SmithyToDafnyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+      optionalShapesToDafny.put(memberShape, isOptional);
+      SmithyToDafnyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
+      SmithyToDafnyShapeVisitor.putShapesWithConversionFunc(
         memberShape,
         targetShape.accept(
           new SmithyToDafnyShapeVisitor(
@@ -142,7 +146,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    String funcName =
+    final String funcName =
       (memberShape.getId().toString().replaceAll("[.$#]", "_")).concat(
           "_ToDafny("
         );
