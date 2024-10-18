@@ -1,0 +1,11 @@
+{
+  "name": "smithy-dafny",
+  "templates": {
+    "tutorial": {
+      "documentation": "Add additional files to the main smithy source set.",
+      "path": "examples/tutorial",
+      "include": [
+      ]
+    }
+  }
+}
