@@ -1,8 +1,8 @@
 {
   "name": "smithy-dafny",
   "templates": {
-    "tutorial": {
-      "documentation": "Add additional files to the main smithy source set.",
+    "polymorph-tutorial": {
+      "documentation": "Basic Polymorphing tutorial.",
       "path": "examples/tutorial",
       "include": [
       ]
