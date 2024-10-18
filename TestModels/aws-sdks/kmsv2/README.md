@@ -2,28 +2,29 @@
 
 This project tests the [AWS KMS](https://aws.amazon.com/kms/) Operations `Encrypt, Decrypt, and GenerateDataKey` in `dafny`. The project utilizes the `aws-sdk-kms smithy model` to generate the dafny types using `polymorph`. This interface is then used in the dafny to call the appropriate operations. The actual implementation of the KMS Operations are provided by the native runtime. These integration tests aim to verify the correctness of the polymorph generated code and is run either as CI actions or manually.
 
-NOTE: The `model.json` in this project comes from [private-aws-encryption-sdk-dafny-staging/ComAmazonawsKms/Model/](https://github.com/aws/private-aws-encryption-sdk-dafny-staging/tree/v4-seperate-modules/ComAmazonawsKms/Model), and is different from the standard model at https://github.com/aws/aws-models/kms/
+NOTE: The `model.json` in this project comes from [private-aws-encryption-sdk-dafny-staging/ComAmazonawsKms/Model/](https://github.com/aws/private-aws-encryption-sdk-dafny-staging/tree/v4-seperate-modules/ComAmazonawsKms/Model), and is different from the standard model at https://github.com/aws/aws-models/kms/ .
+This v2 version uses the smithy 2.0 model and should be compatible with the latest/v2 sdk of a runtime.
 
 ## Build
 
-### .NET
+### Python
 
 1. Generate the Wrappers using `polymorph`
 
 ```
-make polymorph_dafny polymorph_dotnet
+make polymorph_dafny polymorph_python
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.
 
 ```
-make transpile_net
+make transpile_python
 ```
 
 3. Generate the executable in the .NET and execute the tests
 
 ```
-make test_net
+make test_python
 ```
 
 ## Development
@@ -34,4 +35,4 @@ make test_net
 
 _Example_
 
-`--output-dotnet <PATH>` in the `gradlew run` is used to generate the polymorph wrappers. Similarly `--compileTarget:<RUNTIME>` flags is used in dafny recipe to transpile to C#.
+`--output-python <PATH>` in the `gradlew run` is used to generate the polymorph wrappers. Similarly `translate <RUNTIME>` flags is used in dafny recipe to transpile to runtime.
