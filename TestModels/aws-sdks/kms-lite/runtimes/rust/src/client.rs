@@ -40,7 +40,7 @@ impl dafny_runtime::UpcastObject<dyn crate::r#software::amazon::cryptography::se
 
 impl crate::r#software::amazon::cryptography::services::kms::internaldafny::types::IKMSClient
   for Client {
-  fn Decrypt(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptRequest>)
+  fn Decrypt(&self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DecryptResponse>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
@@ -65,7 +65,7 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     crate::conversions::decrypt::_decrypt_response::to_dafny,
     crate::conversions::decrypt::to_dafny_error)
 }
- fn DeriveSharedSecret(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DeriveSharedSecretRequest>)
+ fn DeriveSharedSecret(&self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DeriveSharedSecretRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::DeriveSharedSecretResponse>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
@@ -89,7 +89,7 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     crate::conversions::derive_shared_secret::_derive_shared_secret_response::to_dafny,
     crate::conversions::derive_shared_secret::to_dafny_error)
 }
- fn Encrypt(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::EncryptRequest>)
+ fn Encrypt(&self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::EncryptRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::EncryptResponse>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
@@ -113,7 +113,7 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     crate::conversions::encrypt::_encrypt_response::to_dafny,
     crate::conversions::encrypt::to_dafny_error)
 }
- fn GenerateDataKey(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyRequest>)
+ fn GenerateDataKey(&self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyResponse>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
@@ -138,7 +138,7 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     crate::conversions::generate_data_key::_generate_data_key_response::to_dafny,
     crate::conversions::generate_data_key::to_dafny_error)
 }
- fn GenerateDataKeyWithoutPlaintext(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyWithoutPlaintextRequest>)
+ fn GenerateDataKeyWithoutPlaintext(&self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyWithoutPlaintextRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GenerateDataKeyWithoutPlaintextResponse>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
@@ -162,7 +162,7 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     crate::conversions::generate_data_key_without_plaintext::_generate_data_key_without_plaintext_response::to_dafny,
     crate::conversions::generate_data_key_without_plaintext::to_dafny_error)
 }
- fn GetPublicKey(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyRequest>)
+ fn GetPublicKey(&self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::GetPublicKeyResponse>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
@@ -182,7 +182,7 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     crate::conversions::get_public_key::_get_public_key_response::to_dafny,
     crate::conversions::get_public_key::to_dafny_error)
 }
- fn ReEncrypt(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptRequest>)
+ fn ReEncrypt(&self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::ReEncryptResponse>,
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
@@ -209,7 +209,7 @@ impl crate::r#software::amazon::cryptography::services::kms::internaldafny::type
     crate::conversions::re_encrypt::_re_encrypt_response::to_dafny,
     crate::conversions::re_encrypt::to_dafny_error)
 }
- fn UpdatePrimaryRegion(&mut self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::UpdatePrimaryRegionRequest>)
+ fn UpdatePrimaryRegion(&self, input: &std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::UpdatePrimaryRegionRequest>)
   -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
     (),
     std::rc::Rc<crate::r#software::amazon::cryptography::services::kms::internaldafny::types::Error>
