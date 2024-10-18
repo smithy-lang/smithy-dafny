@@ -35,5 +35,4 @@ make test_python
 
 _Example_
 
-
 `--output-python <PATH>` in the `gradlew run` is used to generate the polymorph wrappers. Similarly `translate <RUNTIME>` flags is used in dafny recipe to transpile to runtime.
