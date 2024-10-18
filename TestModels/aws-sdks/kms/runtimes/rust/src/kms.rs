@@ -6,7 +6,6 @@
 #![deny(clippy::all)]
 
 use aws_config::Region;
-use std::any::Any;
 use std::sync::LazyLock;
 
 static DAFNY_TOKIO_RUNTIME: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {

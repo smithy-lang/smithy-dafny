@@ -41,6 +41,9 @@ class JavaTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/kms-lite");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
+    // V2 Models are not yet supported in Java.
+    DISABLED_TESTS.add("aws-sdks/ddbv2");
+    DISABLED_TESTS.add("aws-sdks/kmsv2");
   }
 
   @ParameterizedTest
