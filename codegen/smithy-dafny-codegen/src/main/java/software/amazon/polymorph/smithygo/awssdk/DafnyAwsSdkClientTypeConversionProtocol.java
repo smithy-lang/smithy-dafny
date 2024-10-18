@@ -19,11 +19,15 @@ import software.amazon.polymorph.smithygo.awssdk.shapevisitor.ShapeVisitorHelper
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
+
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 public class DafnyAwsSdkClientTypeConversionProtocol
   implements ProtocolGenerator {
@@ -587,23 +591,28 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           writer.write(
             """
             func Error_ToDafny(err error)($L.Error) {
-                switch err.(type) {
                 // Service Errors
                 ${C|}
-
-                default:
-                    return OpaqueError_Input_ToDafny(err)
-                }
+                return OpaqueError_Input_ToDafny(err)
             }
             """,
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
               for (final var error : errorShapes) {
+                String errVariableName = context
+                .symbolProvider()
+                .toSymbol(
+                  awsNormalizedModel.expectShape(error.toShapeId())
+                ).getName();
+                w.addImport("errors");
                 w.write(
                   """
-                    case *$L:
-                        return $L(*err.(*$L))
+                    var $L *$L
+                    if (errors.As(err , &$L)) {
+                      return $L(*$L)
+                    }
                   """,
+                  errVariableName,
                   SmithyNameResolver.getSmithyTypeAws(
                     serviceShape.expectTrait(ServiceTrait.class),
                     context
@@ -613,20 +622,13 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                       ),
                     true
                   ),
+                  errVariableName,
                   SmithyNameResolver.getToDafnyMethodName(
                     serviceShape,
                     awsNormalizedModel.expectShape(error.toShapeId()),
                     ""
                   ),
-                  SmithyNameResolver.getSmithyTypeAws(
-                    serviceShape.expectTrait(ServiceTrait.class),
-                    context
-                      .symbolProvider()
-                      .toSymbol(
-                        awsNormalizedModel.expectShape(error.toShapeId())
-                      ),
-                    true
-                  )
+                  errVariableName
                 );
               }
             })
