@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["_simple_documentation_config"]};

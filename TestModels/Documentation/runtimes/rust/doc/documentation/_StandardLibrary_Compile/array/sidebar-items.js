@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["construct","construct_object","from_native","from_vec","get","get_usize","initialize","initialize_box","initialize_box_usize","initialize_usize","length","length_usize","placebos","placebos_box","placebos_box_usize","placebos_usize","placebos_usize_object","to_vec","update","update_usize"]};
