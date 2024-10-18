@@ -22,7 +22,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
@@ -845,27 +844,13 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          var outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
-          switch (visitingShape.getType()) {
-            case STRUCTURE:
-            case UNION:
-              if (visitingShape.hasTrait(EnumTrait.class)) {
-                outputType = SmithyNameResolver.getSmithyTypeAws(serviceTrait, context.symbolProvider().toSymbol(visitingShape), true);
-              }
-              break;
-            case LIST:
-            case MAP:
-              outputType = GoCodegenUtils.getType(
-                context.symbolProvider().toSymbol(visitingShape),
-                serviceTrait
-                );
-              break;
-          }
+          var outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), serviceTrait);
           if (
             ShapeVisitorHelper.isToNativeShapePointable(visitingMemberShape)
           ) {
             outputType = "*".concat(outputType);
           }
+          // TODO: we should able to change output type to specific shape from interface {}
           writer.write(
             """
             func $L(input $L)($L) {
