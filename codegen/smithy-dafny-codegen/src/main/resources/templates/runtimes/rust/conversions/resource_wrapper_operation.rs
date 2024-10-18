@@ -1,5 +1,5 @@
 fn r#_$operationName:L_k(
-    &mut self,
+    &self,
     input: $operationDafnyInputType:L,
 ) -> ::std::rc::Rc<
     crate::r#_Wrappers_Compile::Result<
