@@ -1775,9 +1775,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     }
     variables.put("operationOutputDafnyType", dafnyTypeForShape(outputShape));
 
-    final String selfParameter = operationShape.hasTrait(ReadonlyTrait.class)
-      ? "&self,"
-      : "&mut self,";
+    final String selfParameter = "&self,";
     if (inputShape.hasTrait(UnitTypeTrait.class)) {
       variables.put("operationInputParams", selfParameter);
     } else {
