@@ -9,7 +9,7 @@ namespace simple.resources
 service SimpleResources {
   version: "2021-11-01",
   resources: [],
-  operations: [ GetResources ],
+  operations: [ GetResources, GetMutableResources ],
   errors: [ SimpleResourcesException ],
 }
 
@@ -26,6 +26,11 @@ operation GetResources {
   output: GetResourcesOutput,
 }
 
+operation GetMutableResources {
+  input: GetMutableResourcesInput,
+  output: GetMutableResourcesOutput,
+}
+
 structure GetResourcesInput {
   value: String
 }
@@ -33,6 +38,15 @@ structure GetResourcesInput {
 structure GetResourcesOutput {
   @required
   output: SimpleResourceReference
+}
+
+structure GetMutableResourcesInput {
+  value: String
+}
+
+structure GetMutableResourcesOutput {
+  @required
+  output: MutableResourceReference
 }
 
 @aws.polymorph#reference(resource: SimpleResource)
@@ -83,3 +97,33 @@ structure SimpleResourcesException {
   message: String,
 }
 
+
+@aws.polymorph#reference(resource: MutableResource)
+structure MutableResourceReference {}
+
+@smithy.api#suppress(["MutableLocalStateTrait"])
+@aws.polymorph#mutableLocalState
+resource MutableResource {
+  operations: [ GetMutableResourceData ]
+}
+
+operation GetMutableResourceData {
+  input: GetMutableResourceDataInput,
+  output: GetMutableResourceDataOutput,
+}
+
+structure GetMutableResourceDataInput {
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  integerValue: Integer,
+  longValue: Long,
+}
+
+structure GetMutableResourceDataOutput {
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  integerValue: Integer,
+  longValue: Long,
+}

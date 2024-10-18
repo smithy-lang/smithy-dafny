@@ -509,6 +509,7 @@ public class DafnyApiCodegen {
               generateEnsuresPubliclyPredicate(serviceShape, operation),
               generateBodilessOperationMethodThatEnsuresCallEvents(
                 serviceShape,
+                Optional.empty(),
                 operation,
                 ImplementationType.CODEGEN
               ),
@@ -583,7 +584,11 @@ public class DafnyApiCodegen {
           .stream()
           .flatMap(operation ->
             Stream.of(
-              generateResourceOperationMethod(serviceShape, operation),
+              generateResourceOperationMethod(
+                serviceShape,
+                Optional.of(resource),
+                operation
+              ),
               TokenTree.empty()
             )
           )
@@ -753,20 +758,14 @@ public class DafnyApiCodegen {
             nameResolver.mutableStateFunctionName(),
             nameResolver.callHistoryFieldName()
           ),
-        mutableState
-          ? """
-          // Given that you are mutating state,
-          // your %s function is going to get complicated.
-          """.formatted(nameResolver.validStateInvariantName())
-          : """
+        """
           // If you do not need to mutate anything:
           // %s := {%s};
-          """.formatted(
-              nameResolver.mutableStateFunctionName(),
-              nameResolver.callHistoryFieldName()
-            ),
-        "ghost %s %s: set<object>".formatted(
-            mutableState ? "var" : "const",
+        """.formatted(
+            nameResolver.mutableStateFunctionName(),
+            nameResolver.callHistoryFieldName()
+          ),
+        "ghost const %s: set<object>".formatted(
             nameResolver.mutableStateFunctionName()
           ),
         "// For an unassigned field defined in a trait,",
@@ -787,40 +786,61 @@ public class DafnyApiCodegen {
         "// You MUST also ensure %s in your constructor.".formatted(
             nameResolver.validStateInvariantName()
           ),
-        mutableState
-          ? """
-          // Not only will you need to ensure
-          // that all your mutable elements are contained in %s,
-          // you MUST also ensure
-          // that your invariant does not rely on %s.
-          // This means your invariant will begin to look like:
-          // && %1$s in %2$s
-          // && this in %2$s                      // so we can read property
-          // && property in %2$s                  // so we can read properties of property
-          // && property != %1$s as object        // property really is not %1$s!
-          // && (forall m <- property.Modifies    // everything in property.Modifies
-          //    :: m in %2$s - %1$s)              // is in %2$s and really is not %1$s!
-          """.formatted(
-              nameResolver.callHistoryFieldName(),
-              nameResolver.mutableStateFunctionName()
-            )
-          : "",
         "predicate %s()".formatted(nameResolver.validStateInvariantName()),
-        mutableState ? readsClause : "",
-        "ensures %s() ==> %s in %s".formatted(
+        "ensures %s() ==> %s in %s %s".formatted(
             nameResolver.validStateInvariantName(),
             nameResolver.callHistoryFieldName(),
-            nameResolver.mutableStateFunctionName()
+            nameResolver.mutableStateFunctionName(),
+            // This makes it harder to prove false with the axiom.
+            // See MutableLocalStateTraitValidator
+            // By saying that the containing resource can be modified
+            // it is very difficult to create a contradiction.
+            mutableState
+              ? "&& this in " + nameResolver.mutableStateFunctionName()
+              : ""
           )
       )
       .dropEmpty()
       .lineSeparated()
-      .append(TokenTree.empty())
+      .append(
+        mutableState
+          ? TokenTree.of(
+            TokenTree.of(
+              """
+              // Dynamic mutable state MUST be internal to the resource.
+              // All your dynamic elements are copied in %1$s.
+              // This means your invariant will begin to look like:
+              // && %3$s !in %1$s
+              // && this in %1$s                      // so we can read property
+              // && property in %1$s                  // so we can read properties of property
+              // It is up to you to maintain control of your dynamically mutable elements
+              """.formatted(
+                  nameResolver.dynamicMutableStateFunctionName(),
+                  nameResolver.dynamicValidStateInvariantName(),
+                  nameResolver.callHistoryFieldName()
+                )
+            ),
+            TokenTree.of(
+              """
+                    ghost var %1$s: set<object>
+                    predicate %2$s()
+                      reads this`%1$s, %1$s
+                      ensures %2$s() ==> %3$s !in %1$s
+              """.formatted(
+                  nameResolver.dynamicMutableStateFunctionName(),
+                  nameResolver.dynamicValidStateInvariantName(),
+                  nameResolver.callHistoryFieldName()
+                )
+            )
+          )
+          : TokenTree.empty()
+      )
       .lineSeparated();
   }
 
   private TokenTree generateBodilessOperationMethodThatEnsuresCallEvents(
     final ServiceShape serviceShape,
+    final Optional<ResourceShape> resource,
     final ShapeId operationShapeId,
     final ImplementationType implementationType
   ) {
@@ -866,12 +886,17 @@ public class DafnyApiCodegen {
               .of(
                 generateMutableInvariantForMethod(
                   serviceShape,
+                  resource,
                   operationShapeId,
                   implementationType
                 ),
                 generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
                 !implementationType.equals(ImplementationType.ABSTRACT)
-                  ? generateEnsuresHistoricalCallEvents(operationShapeId)
+                  ? generateEnsuresHistoricalCallEvents(
+                    serviceShape,
+                    resource,
+                    operationShapeId
+                  )
                   : TokenTree.empty()
               )
               .dropEmpty()
@@ -902,6 +927,7 @@ public class DafnyApiCodegen {
 
   private TokenTree generateResourceOperationMethod(
     final ServiceShape serviceShape,
+    final Optional<ResourceShape> resource,
     final ShapeId operationShapeId
   ) {
     final OperationShape operationShape = model.expectShape(
@@ -909,11 +935,16 @@ public class DafnyApiCodegen {
       OperationShape.class
     );
 
+    final boolean mutableState =
+      resource.isPresent() &&
+      resource.get().hasTrait(MutableLocalStateTrait.class);
+
     return TokenTree
       .of(
         generateEnsuresPubliclyPredicate(serviceShape, operationShapeId),
         generateBodilessOperationMethodThatEnsuresCallEvents(
           serviceShape,
+          resource,
           operationShapeId,
           ImplementationType.CODEGEN
         ),
@@ -922,6 +953,22 @@ public class DafnyApiCodegen {
         // and return the result
         TokenTree
           .of(
+            mutableState
+              ? TokenTree.of(
+                """
+                // This axiom is intended to create a seperated class.
+                // The idea is that the memory inside the resource is controlled locally
+                // and that no external code gets to mutate this state.
+                // Dafny can not currently model this idea as a language feature.
+                // So this axiom is approximating it.
+                """,
+                "assume {:axiom} %s < %s && %s();".formatted(
+                    nameResolver.dynamicMutableStateFunctionName(),
+                    nameResolver.mutableStateFunctionName(),
+                    nameResolver.dynamicValidStateInvariantName()
+                  )
+              )
+              : TokenTree.empty(),
             TokenTree
               .of("output :=")
               .append(
@@ -934,6 +981,7 @@ public class DafnyApiCodegen {
               .append(TokenTree.of("(input);")),
             generateAccumulateHistoricalCallEvents(operationShapeId)
           )
+          .dropEmpty()
           .lineSeparated()
           .braced(),
         // This is method for the library developer to implement
@@ -957,6 +1005,7 @@ public class DafnyApiCodegen {
             generateOperationReturnsClause(serviceShape, operationShape),
             generateMutableInvariantForMethod(
               serviceShape,
+              resource,
               operationShapeId,
               ImplementationType.DEVELOPER
             ),
@@ -1010,6 +1059,7 @@ public class DafnyApiCodegen {
 
   private TokenTree generateMutableInvariantForMethod(
     final ServiceShape serviceShape,
+    final Optional<ResourceShape> resource,
     final ShapeId operationShapeId,
     final ImplementationType implementationType
   ) {
@@ -1021,14 +1071,17 @@ public class DafnyApiCodegen {
       : "";
 
     final TokenTree requires = OperationMemberRequires(
+      resource,
       operationShapeId,
       implementationType
     );
     final TokenTree ensures = OperationMemberEnsures(
+      resource,
       operationShapeId,
       implementationType
     );
     final TokenTree modifiesSet = OperationModifiesInputs(
+      resource,
       operationShapeId,
       implementationType
     );
@@ -1059,6 +1112,7 @@ public class DafnyApiCodegen {
   }
 
   private TokenTree OperationMemberRequires(
+    final Optional<ResourceShape> resource,
     final ShapeId operationShapeId,
     final ImplementationType implementationType
   ) {
@@ -1068,6 +1122,10 @@ public class DafnyApiCodegen {
       operationShapeId,
       OperationShape.class
     );
+
+    final boolean mutableState =
+      resource.isPresent() &&
+      resource.get().hasTrait(MutableLocalStateTrait.class);
 
     final TokenTree inputReferencesThatNeedValidState = operationShape
       .getInput()
@@ -1094,9 +1152,17 @@ public class DafnyApiCodegen {
       .orElse(TokenTree.empty());
     return Token
       .of(
-        !implementationType.equals(ImplementationType.ABSTRACT)
-          ? "\n && %s()".formatted(validStateInvariantName)
-          : "\n && %s(config)".formatted(nameResolver.validConfigPredicate())
+        implementationType.equals(ImplementationType.ABSTRACT)
+          ? "\n && %s(config)".formatted(nameResolver.validConfigPredicate())
+          : implementationType.equals(ImplementationType.DEVELOPER) &&
+            mutableState
+            ? "\n && %s()".formatted(
+                nameResolver.dynamicValidStateInvariantName()
+              )
+            // The expectation here is
+            // || implementationType.equals(ImplementationType.CODEGEN)
+            // || (implementationType.equals(ImplementationType.DEVELOPER) && !mutableState)
+            : "\n && %s()".formatted(validStateInvariantName)
       )
       .append(inputReferencesThatNeedValidState)
       .dropEmpty()
@@ -1104,9 +1170,14 @@ public class DafnyApiCodegen {
   }
 
   private TokenTree OperationMemberEnsures(
+    final Optional<ResourceShape> resource,
     final ShapeId operationShapeId,
     final ImplementationType implementationType
   ) {
+    final boolean mutableState =
+      resource.isPresent() &&
+      resource.get().hasTrait(MutableLocalStateTrait.class);
+
     final OperationShape operationShape = model.expectShape(
       operationShapeId,
       OperationShape.class
@@ -1145,9 +1216,17 @@ public class DafnyApiCodegen {
     return TokenTree
       .of(
         Token.of(
-          !implementationType.equals(ImplementationType.ABSTRACT)
-            ? "&& %s()".formatted(validStateInvariantName)
-            : "&& %s(config)".formatted(nameResolver.validConfigPredicate())
+          implementationType.equals(ImplementationType.ABSTRACT)
+            ? "&& %s(config)".formatted(nameResolver.validConfigPredicate())
+            : implementationType.equals(ImplementationType.DEVELOPER) &&
+              mutableState
+              ? "&& %s()".formatted(
+                  nameResolver.dynamicValidStateInvariantName()
+                )
+              // The expectation here is
+              // || implementationType.equals(ImplementationType.CODEGEN)
+              // || (implementationType.equals(ImplementationType.DEVELOPER) && !mutableState)
+              : "&& %s()".formatted(validStateInvariantName)
         ),
         outputReferencesThatNeedValidState
       )
@@ -1226,7 +1305,11 @@ public class DafnyApiCodegen {
     // so if they are added to our output
     // then we can not prove freshness of these items
     final TokenTree removeInputs = direction == InputOutput.OUTPUT
-      ? OperationModifiesInputs(operationShape.getId(), implementationType)
+      ? OperationModifiesInputs(
+        Optional.empty(),
+        operationShape.getId(),
+        implementationType
+      )
         .prependSeperated(Token.of("\n -"))
       : TokenTree.empty();
 
@@ -1404,13 +1487,23 @@ public class DafnyApiCodegen {
                 ),
                 isOutput
                   ? TokenTree.of(
-                    Token.of("&& fresh(%1$s)".formatted(varName)),
+                    Token.of(
+                      "&& fresh(%1$s.%2$s)".formatted(
+                          varName,
+                          s.getMemberName()
+                        )
+                    ),
                     Token
                       .of("&& fresh")
                       .append(
                         TokenTree
                           .of(
-                            Token.of("%1$s.Modifies".formatted(varName)),
+                            Token.of(
+                              "%1$s.%2$s.Modifies".formatted(
+                                  varName,
+                                  s.getMemberName()
+                                )
+                            ),
                             removeInputs
                           )
                           .parenthesized()
@@ -1428,9 +1521,14 @@ public class DafnyApiCodegen {
   }
 
   private TokenTree OperationModifiesInputs(
+    final Optional<ResourceShape> resource,
     final ShapeId operationShapeId,
     final ImplementationType implementationType
   ) {
+    final boolean mutableState =
+      resource.isPresent() &&
+      resource.get().hasTrait(MutableLocalStateTrait.class);
+
     final OperationShape operationShape = model.expectShape(
       operationShapeId,
       OperationShape.class
@@ -1455,16 +1553,21 @@ public class DafnyApiCodegen {
           ? Token.of(
             "%s(config)".formatted(nameResolver.modifiesInternalConfig())
           )
-          // The class has a `Modifies` property
-          // The `- {History} is important for consumers
-          // otherwise if they use multiple APIs
-          // Dafny will assume that each API can modify _any_ other History.
-          : Token.of(
-            "%s - {%s}".formatted(
-                nameResolver.mutableStateFunctionName(),
-                nameResolver.callHistoryFieldName()
-              )
-          )
+          : implementationType.equals(ImplementationType.DEVELOPER) &&
+            mutableState
+            ? Token.of(
+              "%s".format(nameResolver.dynamicMutableStateFunctionName())
+            )
+            // The class has a `Modifies` property
+            // The `- {History} is important for consumers
+            // otherwise if they use multiple APIs
+            // Dafny will assume that each API can modify _any_ other History.
+            : Token.of(
+              "%s - {%s}".formatted(
+                  nameResolver.mutableStateFunctionName(),
+                  nameResolver.callHistoryFieldName()
+                )
+            )
       )
       .flatten();
   }
@@ -1611,6 +1714,8 @@ public class DafnyApiCodegen {
   }
 
   private TokenTree generateEnsuresHistoricalCallEvents(
+    final ServiceShape serviceShape,
+    final Optional<ResourceShape> resource,
     final ShapeId operationShapeId
   ) {
     final OperationShape operationShape = model.expectShape(
@@ -1943,6 +2048,7 @@ public class DafnyApiCodegen {
                     .lineSeparated(),
                 generateBodilessOperationMethodThatEnsuresCallEvents(
                   serviceShape,
+                  Optional.empty(),
                   operation,
                   ImplementationType.CODEGEN
                 ),
@@ -2945,6 +3051,7 @@ public class DafnyApiCodegen {
                     generateEnsuresPubliclyPredicate(serviceShape, operation),
                     generateBodilessOperationMethodThatEnsuresCallEvents(
                       serviceShape,
+                      Optional.empty(),
                       operation,
                       ImplementationType.ABSTRACT
                     )
@@ -3028,6 +3135,7 @@ public class DafnyApiCodegen {
                     TokenTree.of("{true}"),
                     generateBodilessOperationMethodThatEnsuresCallEvents(
                       serviceShape,
+                      Optional.empty(),
                       operation,
                       ImplementationType.DEVELOPER
                     ),
