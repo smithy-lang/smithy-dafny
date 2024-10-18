@@ -1417,9 +1417,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected String docFromShape(Shape shape) {
-    Optional<String> maybeDoc = shape
-      .getTrait(DocumentationTrait.class)
-      .map(StringTrait::getValue);
+    Optional<String> maybeDoc = ModelUtils.getDocumentationOrJavadoc(shape);
     if (maybeDoc.isPresent()) {
       return "/// " + String.join("\n/// ", maybeDoc.get().split("\\r?\\n"));
     } else {
