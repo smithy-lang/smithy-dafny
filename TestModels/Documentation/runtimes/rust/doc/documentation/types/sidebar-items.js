@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["SomeKindOfThing","WidgetType"],"mod":["builders","error","simple_documentation_config","widget"],"struct":["GetThingInput","GetThingOutput","SetWidgetNameInput","Thing"]};

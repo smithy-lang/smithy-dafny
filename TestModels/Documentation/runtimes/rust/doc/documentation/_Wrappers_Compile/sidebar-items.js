@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"derive":["Debug","Default","Eq","Hash"],"enum":["Option","Outcome","Result","Sequence"],"fn":["string_utf16_of"],"struct":["DafnyCharUTF16","Formatter","Rc","_default"],"trait":["AsRef","DafnyPrint","DafnyType","Debug","Default","Eq","Hash","Hasher"]};
