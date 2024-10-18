@@ -336,8 +336,16 @@ public record DafnyNameResolver(
     return "Modifies";
   }
 
+  public String dynamicMutableStateFunctionName() {
+    return "InternalModifies";
+  }
+
   public String validStateInvariantName() {
     return "ValidState";
+  }
+
+  public String dynamicValidStateInvariantName() {
+    return "InternalValidState";
   }
 
   public String callHistoryFieldName() {
