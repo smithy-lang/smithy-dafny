@@ -10,6 +10,8 @@ NAMESPACE=com.amazonaws.sqs
 PROJECT_SERVICES := \
 	ComAmazonawsSqs \
 
+MAIN_SERVICE_FOR_RUST := ComAmazonawsSqs
+
 SERVICE_NAMESPACE_ComAmazonawsSqs=com.amazonaws.sqs
 
 SERVICE_DEPS_ComAmazonawsSqs :=
