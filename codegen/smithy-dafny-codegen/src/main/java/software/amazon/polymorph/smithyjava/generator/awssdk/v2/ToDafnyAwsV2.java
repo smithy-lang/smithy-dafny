@@ -480,7 +480,7 @@ public class ToDafnyAwsV2 extends ToDafny {
         builder
           .beginControlFlow(
             "case $L:",
-            subject.dafnyNameResolver.formatEnumCaseName(dafnyEnumClass, name)
+            subject.nativeNameResolver.v2FormattedEnumValue(shapeId, name)
           )
           .addStatement(
             "return $T.$L()",

@@ -112,7 +112,7 @@ public class AwsSdkNativeV2 extends Native {
       packageNameForAwsSdkV2Shape(shape),
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
         awsServiceSmithyNamespace,
-        sdkId(shape) + "Client"
+        CodegenNamingUtils.pascalCase(sdkId(shape)) + "Client"
       )
     );
   }
@@ -281,22 +281,11 @@ public class AwsSdkNativeV2 extends Native {
           smithyName.simpleName().replace("CMK", "CmK")
         );
       }
-      if (smithyName.simpleName().endsWith("InternalServerError")) {
-        return ClassName.get(
-          smithyName.packageName(),
-          smithyName
-            .simpleName()
-            .replace("InternalServerError", "InternalServerErrorException")
-        );
-      }
-      if (smithyName.simpleName().endsWith("RequestLimitExceeded")) {
-        return ClassName.get(
-          smithyName.packageName(),
-          smithyName
-            .simpleName()
-            .replace("RequestLimitExceeded", "RequestLimitExceededException")
-        );
-      }
+      return ClassName.get(
+        smithyName.packageName(),
+        smithyName
+          .simpleName() + "Exception"
+      );
     }
     return smithyName;
   }
@@ -358,7 +347,7 @@ public class AwsSdkNativeV2 extends Native {
       packageName,
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
         serviceShape.getId().getNamespace(),
-        sdkId(serviceShape) + "Client"
+        CodegenNamingUtils.pascalCase(sdkId(serviceShape)) + "Client"
       )
     );
   }
@@ -374,7 +363,7 @@ public class AwsSdkNativeV2 extends Native {
       modelPackage,
       AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.getOrDefault(
         serviceShape.getId().getNamespace(),
-        sdkId(serviceShape) + "Exception"
+        CodegenNamingUtils.pascalCase(sdkId(serviceShape)) + "Exception"
       )
     );
   }
