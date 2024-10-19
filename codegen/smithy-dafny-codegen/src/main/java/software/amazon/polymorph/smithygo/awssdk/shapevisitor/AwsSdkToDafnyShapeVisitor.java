@@ -1,14 +1,12 @@
 package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
-
 import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
@@ -47,7 +45,8 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   private final boolean isOptional;
   protected boolean isPointerType;
   //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
-  private static final Map<MemberShape, String> memberShapeConversionFuncMap = new HashMap<>();
+  private static final Map<MemberShape, String> memberShapeConversionFuncMap =
+    new HashMap<>();
 
   public AwsSdkToDafnyShapeVisitor(
     final GenerationContext context,
@@ -69,7 +68,10 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     return memberShapeConversionFuncMap.keySet();
   }
 
-  public static void putShapesWithConversionFunc(final MemberShape shape, final String conversionFunc) {
+  public static void putShapesWithConversionFunc(
+    final MemberShape shape,
+    final String conversionFunc
+  ) {
     memberShapeConversionFuncMap.put(shape, conversionFunc);
   }
 
@@ -242,23 +244,23 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           nilCheck,
           dataSource,
           ShapeVisitorHelper.toDafnyShapeVisitorWriter(
-              keyMemberShape,
-              context,
-              "key",
-              writer,
-              isConfigShape,
-              false,
-              false
-            ),
+            keyMemberShape,
+            context,
+            "key",
+            writer,
+            isConfigShape,
+            false,
+            false
+          ),
           ShapeVisitorHelper.toDafnyShapeVisitorWriter(
             valueMemberShape,
-              context,
-              "val",
-              writer,
-              isConfigShape,
-              false,
-              false
-            ),
+            context,
+            "val",
+            writer,
+            isConfigShape,
+            false,
+            false
+          ),
           someWrapIfRequired.formatted("fieldValue.ToMap()")
         )
     );
@@ -556,82 +558,96 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     final var serviceShape = context
       .model()
       .expectShape(context.settings().getService(context.model()).toShapeId())
-      .asServiceShape().get();
+      .asServiceShape()
+      .get();
 
     final var internalDafnyType = DafnyNameResolver.getDafnyType(
       shape,
       context.symbolProvider().toSymbol(shape)
     );
 
-    var returnType = DafnyNameResolver.getDafnyType(shape, context.symbolProvider().toSymbol(shape));
+    var returnType = DafnyNameResolver.getDafnyType(
+      shape,
+      context.symbolProvider().toSymbol(shape)
+    );
     var someWrapIfRequired = "%s(%s)";
     if (this.isOptional) {
       returnType = "Wrappers.Option";
-      someWrapIfRequired =
-        "Wrappers.Companion_Option_.Create_Some_(%s(%s))";
+      someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s(%s))";
     }
 
     final var functionInit =
       """
-        func() %s {
-            switch %s.(type) {""".formatted(returnType, dataSource);
+      func() %s {
+          switch %s.(type) {""".formatted(returnType, dataSource);
 
     final var eachMemberInUnion = new StringBuilder();
     for (final var member : shape.getAllMembers().values()) {
       final var memberName = context.symbolProvider().toMemberName(member);
       final var targetShape = context.model().expectShape(member.getTarget());
-      final var baseType = DafnyNameResolver.getDafnyType(targetShape, context.symbolProvider().toSymbol(targetShape));
+      final var baseType = DafnyNameResolver.getDafnyType(
+        targetShape,
+        context.symbolProvider().toSymbol(targetShape)
+      );
       final var dataSourceInput = dataSource
         .concat(".(*")
-        .concat(SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true))
+        .concat(
+          SmithyNameResolver.smithyTypesNamespaceAws(
+            serviceShape.expectTrait(ServiceTrait.class),
+            true
+          )
+        )
         .concat(DOT)
         .concat(context.symbolProvider().toMemberName(member))
         .concat(").Value");
       eachMemberInUnion.append(
         """
-          case *%s.%s:
-              var companion = %s
-              var inputToConversion = %s
-              return %s
-          """.formatted(
-          SmithyNameResolver.smithyTypesNamespaceAws(serviceShape.expectTrait(ServiceTrait.class), true),
-          context.symbolProvider().toMemberName(member),
-          internalDafnyType.replace(
-            shape.getId().getName(),
-            "CompanionStruct_".concat(shape.getId().getName()).concat("_{}")
-          ),
-          ShapeVisitorHelper.toDafnyShapeVisitorWriter(
-            member,
-            context,
-            dataSourceInput,
-            writer,
-            isConfigShape,
-            true,
-            false
-          ),
-          someWrapIfRequired.formatted(
-            DafnyNameResolver.getDafnyCreateFuncForUnionMemberShape(
-              shape,
-              memberName
+        case *%s.%s:
+            var companion = %s
+            var inputToConversion = %s
+            return %s
+        """.formatted(
+            SmithyNameResolver.smithyTypesNamespaceAws(
+              serviceShape.expectTrait(ServiceTrait.class),
+              true
             ),
-            "inputToConversion.UnwrapOr(nil)%s".formatted(
-              !baseType.isEmpty() ? ".(".concat(baseType).concat(")") : ""
+            context.symbolProvider().toMemberName(member),
+            internalDafnyType.replace(
+              shape.getId().getName(),
+              "CompanionStruct_".concat(shape.getId().getName()).concat("_{}")
+            ),
+            ShapeVisitorHelper.toDafnyShapeVisitorWriter(
+              member,
+              context,
+              dataSourceInput,
+              writer,
+              isConfigShape,
+              true,
+              false
+            ),
+            someWrapIfRequired.formatted(
+              DafnyNameResolver.getDafnyCreateFuncForUnionMemberShape(
+                shape,
+                memberName
+              ),
+              "inputToConversion.UnwrapOr(nil)%s".formatted(
+                  !baseType.isEmpty() ? ".(".concat(baseType).concat(")") : ""
+                )
             )
           )
-        )
       );
     }
 
     final var defaultCase =
       """
-                default:
-        panic("Unhandled union type")
-            }
-        }()""";
+              default:
+      panic("Unhandled union type")
+          }
+      }()""";
     return """
-      %s
-      %s
-      %s""".formatted(functionInit, eachMemberInUnion, defaultCase);
+    %s
+    %s
+    %s""".formatted(functionInit, eachMemberInUnion, defaultCase);
   }
 
   @Override
