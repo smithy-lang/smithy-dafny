@@ -30,9 +30,12 @@ module AmazonSQSExtendedImpl refines AbstractComAmazonawsSqsextendedOperations {
     expect messagesResult.Messages.Some?;
     var messages := messagesResult.Messages.value;
 
-    var i := 0;
-    while i < |messages| {
-      
+    for i := 0 to |messages| {
+      var messageResult := input.handler.HandleMessage(HandleMessageInput(message := messages[i]));
+
+      // TODO: Handle errors
     }
+
+    output := Success(());
   }
 }

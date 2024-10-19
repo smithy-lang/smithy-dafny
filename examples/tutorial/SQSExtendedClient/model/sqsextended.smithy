@@ -38,6 +38,7 @@ structure MessageHandlerReference {}
 
 operation HandleMessage {
   input := {
+    @required
     message: Message
   }
   errors: [RetryMessageError]
