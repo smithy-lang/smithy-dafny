@@ -372,7 +372,7 @@ public class ToDafnyAwsV2 extends ToDafny {
       return returnCodeBlockBuilder.add(".asByteArray()").build();
     }
 
-    // BinarySetAttributeValue conversion is special.
+    // List of Blob conversion is special.
     // The input Dafny type is DafnySequence<? extends DafnySequence<? extends Byte>>.
     // The output native type is List<SdkBytes>.
     // dafny-java-conversion can convert most input types directly to the output types;
@@ -384,12 +384,8 @@ public class ToDafnyAwsV2 extends ToDafny {
     // This is the only time when Polymorph needs to convert a list of a Dafny type to a list
     //     of a type that Polymorph does not know about. So this is a special case and warrants
     //     its own generation logic.
-    if (
-      targetShape
-        .getId()
-        .toString()
-        .equals("com.amazonaws.dynamodb#BinarySetAttributeValue")
-    ) {
+    final Shape memberTarget = subject.model.expectShape(memberShape.getTarget());
+    if (memberTarget.isBlobShape()) {
       return returnCodeBlockBuilder
         .add(
           ".stream()\n.map($L)\n.collect($L.toList())",
