@@ -1,21 +1,60 @@
 $version: "2"
 
-namespace polymorph.tutorial
+namespace com.amazonaws.sqsextended
+
+use com.amazonaws.sqs#Message
 
 @aws.polymorph#localService(
-  sdkId: "SQSExtendedClient",
+  sdkId: "SQSExtended",
   config: SQSExtendedClientConfig,
+  dependencies: [
+    com.amazonaws.sqs#AmazonSQS
+  ]
 )
-service SQSExtendedClient {
+service AmazonSQSExtended {
   version: "2021-11-01",
-  resources: [ AWSCredentialsProvider ],
+  resources: [ MessageHandler ],
   operations: [
-    CreateDefaultCredentialsProvider,
-    CreateQueue,
-    SendMessageThroughS3,
-    ReceiveMessageThroughS3
+    HandleMessages,
   ],
   errors: [],
 }
-structure SQSExtendedClientConfig {}
+structure SQSExtendedClientConfig {
+  @required
+  sqsClient: SQSClientReference
+}
 
+@aws.polymorph#reference(service: com.amazonaws.sqs#AmazonSQS)
+structure SQSClientReference {}
+
+resource MessageHandler {
+  operations: [
+    HandleMessage,
+  ],
+}
+
+@aws.polymorph#reference(resource: MessageHandler)
+structure MessageHandlerReference {}
+
+operation HandleMessage {
+  input := {
+    message: Message
+  }
+  errors: [RetryMessageError]
+}
+
+@error("client")
+structure RetryMessageError {
+
+}
+
+
+operation HandleMessages {
+  input := {
+    @required
+    receiveRequest: com.amazonaws.sqs#ReceiveMessageRequest,
+
+    @required
+    handler: MessageHandlerReference
+  }
+}
