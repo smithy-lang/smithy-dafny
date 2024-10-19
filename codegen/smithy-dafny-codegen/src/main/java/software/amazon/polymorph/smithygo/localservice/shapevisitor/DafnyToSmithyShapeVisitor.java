@@ -1,12 +1,11 @@
 package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
@@ -44,7 +43,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   private final boolean isConfigShape;
   private final boolean isOptional;
   //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
-  private static final Map<MemberShape, String> memberShapeConversionFuncMap = new HashMap<>();
+  private static final Map<MemberShape, String> memberShapeConversionFuncMap =
+    new HashMap<>();
 
   public DafnyToSmithyShapeVisitor(
     final GenerationContext context,
@@ -73,7 +73,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     return memberShapeConversionFuncMap.keySet();
   }
 
-  public static void putShapesWithConversionFunc(final MemberShape shape, final String conversionFunc) {
+  public static void putShapesWithConversionFunc(
+    final MemberShape shape,
+    final String conversionFunc
+  ) {
     memberShapeConversionFuncMap.put(shape, conversionFunc);
   }
 
@@ -82,7 +85,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   protected String referenceStructureShape(final StructureShape shape) {
-    final ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+    final ReferenceTrait referenceTrait = shape.expectTrait(
+      ReferenceTrait.class
+    );
     final Shape resourceOrService = context
       .model()
       .expectShape(referenceTrait.getReferentId());
@@ -167,9 +172,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             context.symbolProvider().toSymbol(serviceShape).getName()
           ),
           dataSource,
-          DafnyNameResolver.getDafnyClient(
-            serviceShape.toShapeId().getName()
-          )
+          DafnyNameResolver.getDafnyClient(serviceShape.toShapeId().getName())
         );
     }
   }
@@ -238,13 +241,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       String maybeAssertion = "";
       if (dataSource.equals("input")) {
         maybeAssertion =
-        ".(".concat(
-            DafnyNameResolver.getDafnyType(
-              shape,
-              context.symbolProvider().toSymbol(shape)
+          ".(".concat(
+              DafnyNameResolver.getDafnyType(
+                shape,
+                context.symbolProvider().toSymbol(shape)
+              )
             )
-          )
-          .concat(")");
+            .concat(")");
       }
       final boolean assertionRequired =
         memberShape.isOptional() &&
@@ -625,7 +628,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         (GoPointableIndex.of(context.model()).isPointable(member)) &&
         !targetShape.isStructureShape();
       final String pointerForPointableShape = isMemberShapePointable ? "*" : "";
-      final String isMemberCheck = "if ((%s).%s()) {".formatted(
+      final String isMemberCheck =
+        "if ((%s).%s()) {".formatted(
             rawUnionDataSource,
             memberName.replace(shape.getId().getName().concat("Member"), "Is_")
           );
@@ -633,7 +637,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       boolean requireAssertion = true;
       if (!(targetShape.isStructureShape())) {
         // All other shape except structure needs a Wrapper object but unionDataSource is not a Wrapper object.
-        wrappedDataSource ="var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)".formatted(
+        wrappedDataSource =
+          "var dataSource = Wrappers.Companion_Option_.Create_Some_(%s)".formatted(
               unionDataSource
             );
         unionDataSource = "dataSource.UnwrapOr(nil)";
@@ -674,7 +679,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String timestampShape(final TimestampShape shape) {
-    // TODO: Figure out timestamp types when working on timestampShape 
+    // TODO: Figure out timestamp types when working on timestampShape
     writer.addImport("time");
     return "nil";
   }
