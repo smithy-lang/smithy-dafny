@@ -13,7 +13,7 @@ module AmazonSQSExtendedImpl refines AbstractComAmazonawsSqsextendedOperations {
   }
   function ModifiesInternalConfig(config: InternalConfig): set<object>
   {
-    {config.sqsClient}
+    config.sqsClient.Modifies
   }
   predicate HandleMessagesEnsuresPublicly(input: HandleMessagesInput , output: Result<(), Error>)
   {true}
