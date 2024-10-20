@@ -2,17 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SQSExtendedImpl.dfy"
 
-module {:extern "com.amazonaws.sqsextended.internaldafny" } SQSExtended refines AbstractAmazonSQSExtendedService {
+module {:extern "com.amazonaws.sqsextended.internaldafny" } SQSExtended refines AbstractComAmazonawsSqsextendedService {
   import Operations = AmazonSQSExtendedImpl
-
-  function method DefaultSQSExtendedClientConfig(): SQSExtendedClientConfig {
-    SQSExtendedClientConfig
-  }
 
   method SQSExtended(config: SQSExtendedClientConfig)
     returns (res: Result<SQSExtendedClient, Error>)
   {
-    var client := new SQSExtendedClient(Operations.Config);
+    var client := new SQSExtendedClient(Operations.Config(
+                                        sqsClient := config.sqsClient
+                                        ));
     return Success(client);
   }
 

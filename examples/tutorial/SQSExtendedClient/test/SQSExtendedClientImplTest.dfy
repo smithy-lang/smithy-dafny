@@ -9,7 +9,7 @@ module {:options "--function-syntax:4"} SQSExtendedClientImplTest {
     import opened Wrappers
 
     method {:test} TestClient(){
-        var client :- expect SQSExtendedClient.SQSExtendedClient();
+        // var client :- expect SQSExtendedClient.SQSExtendedClient();
 
         expect false, "...that you'll write actual tests using the client here :)";
         // TestSomeOperation1(client);

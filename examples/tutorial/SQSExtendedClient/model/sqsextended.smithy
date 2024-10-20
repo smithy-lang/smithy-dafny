@@ -17,11 +17,16 @@ service AmazonSQSExtended {
   operations: [
     HandleMessages,
   ],
-  errors: [],
+  errors: [SQSExtendedError],
 }
 structure SQSExtendedClientConfig {
   @required
   sqsClient: SQSClientReference
+}
+@error("server")
+structure SQSExtendedError {
+  @required
+  message: String
 }
 
 @aws.polymorph#reference(service: com.amazonaws.sqs#AmazonSQS)
@@ -46,7 +51,8 @@ operation HandleMessage {
 
 @error("client")
 structure RetryMessageError {
-
+  @required
+  message: String
 }
 
 

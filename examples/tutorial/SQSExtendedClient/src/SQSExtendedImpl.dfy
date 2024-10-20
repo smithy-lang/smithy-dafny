@@ -41,16 +41,16 @@ module AmazonSQSExtendedImpl refines AbstractComAmazonawsSqsextendedOperations {
 
       if messageResult.Success? {
         var deleteResult := config.sqsClient.DeleteMessage(ComAmazonawsSqsTypes.DeleteMessageRequest(
-          QueueUrl := queueUrl,
-          ReceiptHandle := receiptHandle
-        ));
+                                                             QueueUrl := queueUrl,
+                                                             ReceiptHandle := receiptHandle
+                                                           ));
       } else {
         // TODO: Handle retryable errors
         var deleteResult := config.sqsClient.ChangeMessageVisibility(ComAmazonawsSqsTypes.ChangeMessageVisibilityRequest(
-          QueueUrl := queueUrl,
-          ReceiptHandle := receiptHandle,
-          VisibilityTimeout := 0
-        ));
+                                                                       QueueUrl := queueUrl,
+                                                                       ReceiptHandle := receiptHandle,
+                                                                       VisibilityTimeout := 0
+                                                                     ));
       }
     }
 
