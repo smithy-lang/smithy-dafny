@@ -24,16 +24,34 @@ module AmazonSQSExtendedImpl refines AbstractComAmazonawsSqsextendedOperations {
     returns (output: Result<(), Error>)
 
   {
+    var queueUrl := input.receiveRequest.QueueUrl;
+
     var maybeMessagesResult := config.sqsClient.ReceiveMessage(input.receiveRequest);
     var messagesResult :- maybeMessagesResult.MapFailure(e => ComAmazonawsSqs(e));
     // TODO: Handle error better
     expect messagesResult.Messages.Some?;
-    var messages := messagesResult.Messages.value;
+    var messages :- expect messagesResult.Messages;
 
     for i := 0 to |messages| {
-      var messageResult := input.handler.HandleMessage(HandleMessageInput(message := messages[i]));
+      var message := messages[i];
+      // TODO: Handle error better
+      var receiptHandle :- expect message.ReceiptHandle;
 
-      // TODO: Handle errors
+      var messageResult := input.handler.HandleMessage(HandleMessageInput(message := message));
+
+      if messageResult.Success? {
+        var deleteResult := config.sqsClient.DeleteMessage(ComAmazonawsSqsTypes.DeleteMessageRequest(
+          QueueUrl := queueUrl,
+          ReceiptHandle := receiptHandle
+        ));
+      } else {
+        // TODO: Handle retryable errors
+        var deleteResult := config.sqsClient.ChangeMessageVisibility(ComAmazonawsSqsTypes.ChangeMessageVisibilityRequest(
+          QueueUrl := queueUrl,
+          ReceiptHandle := receiptHandle,
+          VisibilityTimeout := 0
+        ));
+      }
     }
 
     output := Success(());
