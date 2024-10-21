@@ -295,17 +295,16 @@ public class SynchronousClientGenerator extends ClientGenerator {
             context,
             operation
           );
-          writer.addStdlibImport("asyncio");
           writer.write(
             """
-            return asyncio.run(self._execute_operation(
+            return self._execute_operation(
                 input=input,
                 plugins=[],
                 serialize=$T,
                 deserialize=$T,
                 config=self._config,
                 operation_name=$S,
-            ))
+            )
             """,
             serSymbol,
             deserSymbol,
@@ -376,9 +375,7 @@ public class SynchronousClientGenerator extends ClientGenerator {
     writer.addImport(".config", configSymbol.getName());
 
     writer.addStdlibImport("typing", "Callable");
-    writer.addStdlibImport("typing", "Awaitable");
     writer.addStdlibImport("typing", "cast");
-    writer.addStdlibImport("asyncio", "sleep");
 
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
     writer.addImport("smithy_python.exceptions", "SmithyRetryException");
@@ -393,17 +390,17 @@ public class SynchronousClientGenerator extends ClientGenerator {
     writer.indent();
     writer.write(
       """
-      async def _execute_operation(
+      def _execute_operation(
           self,
           input: Input,
           plugins: list[$1T],
-          serialize: Callable[[Input, $5L], Awaitable[$2T]],
-          deserialize: Callable[[$3T, $5L], Awaitable[Output]],
+          serialize: Callable[[Input, $5L], $2T],
+          deserialize: Callable[[$3T, $5L], Output],
           config: $5L,
           operation_name: str,
       ) -> Output:
           try:
-              return await self._handle_execution(
+              return self._handle_execution(
                   input, plugins, serialize, deserialize, config, operation_name
               )
           except Exception as e:
@@ -413,12 +410,12 @@ public class SynchronousClientGenerator extends ClientGenerator {
                   raise $4T(e) from e
               raise e
 
-      async def _handle_execution(
+      def _handle_execution(
           self,
           input: Input,
           plugins: list[$1T],
-          serialize: Callable[[Input, $5L], Awaitable[$2T]],
-          deserialize: Callable[[$3T, $5L], Awaitable[Output]],
+          serialize: Callable[[Input, $5L], $2T],
+          deserialize: Callable[[$3T, $5L], Output],
           config: $5L,
           operation_name: str,
       ) -> Output:
@@ -467,7 +464,7 @@ public class SynchronousClientGenerator extends ClientGenerator {
               context_with_transport_request = cast(
                   InterceptorContext[Input, None, $2T, None], context
               )
-              context_with_transport_request._transport_request = await serialize(
+              context_with_transport_request._transport_request = serialize(
                   context_with_transport_request.request, config
               )
 
@@ -488,7 +485,7 @@ public class SynchronousClientGenerator extends ClientGenerator {
               while True:
                   # Make an attempt, creating a copy of the context so we don't pass
                   # around old data.
-                  context_with_response = await self._handle_attempt(
+                  context_with_response = self._handle_attempt(
                       deserialize,
                       interceptors,
                       context_with_transport_request.copy(),
@@ -517,7 +514,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
                           )
                       except SmithyRetryException:
                           raise context_with_response.response
-                      await sleep(retry_token.retry_delay)
                   else:
                       # Step 8: Invoke record_success
                       retry_strategy.record_success(token=retry_token)
@@ -531,11 +527,11 @@ public class SynchronousClientGenerator extends ClientGenerator {
           execution_context = cast(
               InterceptorContext[Input, Output, $2T | None, $3T | None], context
           )
-          return await self._finalize_execution(interceptors, execution_context)
+          return self._finalize_execution(interceptors, execution_context)
 
-      async def _handle_attempt(
+      def _handle_attempt(
           self,
-          deserialize: Callable[[$3T, $5L], Awaitable[Output]],
+          deserialize: Callable[[$3T, $5L], Output],
           interceptors: list[Interceptor[Input, Output, $2T, $3T]],
           context: InterceptorContext[Input, None, $2T, None],
           config: $5L,
@@ -595,7 +591,7 @@ public class SynchronousClientGenerator extends ClientGenerator {
                   InterceptorContext[Input, Output, $1T, $2T],
                   context_with_response,
               )
-              context_with_output._response = await deserialize(
+              context_with_output._response = deserialize(
                   context_with_output._transport_response, config
               )
 
@@ -612,9 +608,9 @@ public class SynchronousClientGenerator extends ClientGenerator {
           attempt_context = cast(
               InterceptorContext[Input, Output, $1T, $2T | None], context
           )
-          return await self._finalize_attempt(interceptors, attempt_context)
+          return self._finalize_attempt(interceptors, attempt_context)
 
-      async def _finalize_attempt(
+      def _finalize_attempt(
           self,
           interceptors: list[Interceptor[Input, Output, $1T, $2T]],
           context: InterceptorContext[Input, Output, $1T, $2T | None],
@@ -637,7 +633,7 @@ public class SynchronousClientGenerator extends ClientGenerator {
 
           return context
 
-      async def _finalize_execution(
+      def _finalize_execution(
           self,
           interceptors: list[Interceptor[Input, Output, $1T, $2T]],
           context: InterceptorContext[Input, Output, $1T | None, $2T | None],

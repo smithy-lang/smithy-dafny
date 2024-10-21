@@ -14,6 +14,8 @@ NAMESPACE=simple.types.integer
 PROJECT_SERVICES := \
 	SimpleInteger
 
+MAIN_SERVICE_FOR_RUST := SimpleInteger
+
 SERVICE_NAMESPACE_SimpleInteger=simple.types.integer
 
 SERVICE_DEPS_SimpleInteger :=
@@ -32,7 +34,7 @@ TRANSLATION_RECORD_GO := \
 PYTHON_MODULE_NAME=simple_types_integer
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

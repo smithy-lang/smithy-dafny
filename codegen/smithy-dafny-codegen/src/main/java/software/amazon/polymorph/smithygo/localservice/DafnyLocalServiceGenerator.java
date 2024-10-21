@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph.smithygo.localservice;
 
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+
 import java.util.Collection;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
@@ -27,8 +29,6 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
-
-import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 public class DafnyLocalServiceGenerator implements Runnable {
 

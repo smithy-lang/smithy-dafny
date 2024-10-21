@@ -1,6 +1,5 @@
-use simple_resource::SimpleResourceRef;
+use simple_resources::types::simple_resource::SimpleResourceRef;
 use simple_resources::operation::get_resource_data::*;
-use simple_resources::types::*;
 use simple_resources::*;
 
 #[tokio::test]
@@ -23,19 +22,19 @@ async fn TestClient(config: SimpleResourcesConfig) {
 
 async fn TestNoneGetData(config: SimpleResourcesConfig, resource: SimpleResourceRef) {
     let input = allNone();
-    let result = resource.borrow_mut().get_resource_data(input).unwrap();
-    checkMostNone(config.name().to_string(), result);
+    let result = resource.inner.borrow_mut().get_resource_data(input).unwrap();
+    checkMostNone(config.name().clone().unwrap().to_string(), result);
 }
 
 async fn TestSomeGetData(config: SimpleResourcesConfig, resource: SimpleResourceRef) {
-    let input = allSome();
-    let result = resource.borrow_mut().get_resource_data(input).unwrap();
-    checkSome(config.name().to_string(), result);
+    let input: GetResourceDataInput = allSome();
+    let result = resource.inner.borrow_mut().get_resource_data(input).unwrap();
+    checkSome(config.name().clone().unwrap().to_string(), result);
 }
 
 async fn TestGetResources(client: Client) -> SimpleResourceRef {
     let output = client.get_resources().value("Test").send().await.unwrap();
-    output.output()
+    output.output().clone().unwrap()
 }
 
 pub fn client() -> Client {
@@ -50,9 +49,9 @@ pub fn allNone() -> GetResourceDataInput {
 pub fn checkMostNone(name: String, output: GetResourceDataOutput) {
     assert_eq!(Some(name), *output.string_value());
     assert_eq!(None, *output.blob_value());
-    assert_eq!(None, output.boolean_value());
-    assert_eq!(None, output.integer_value());
-    assert_eq!(None, output.long_value());
+    assert_eq!(None, *output.boolean_value());
+    assert_eq!(None, *output.integer_value());
+    assert_eq!(None, *output.long_value());
 }
 
 pub fn allSome() -> GetResourceDataInput {
@@ -69,7 +68,7 @@ pub fn allSome() -> GetResourceDataInput {
 pub fn checkSome(name: String, output: GetResourceDataOutput) {
     assert_eq!(Some(name + " Some"), *output.string_value());
     assert_eq!(Some(aws_smithy_types::Blob::new(vec![1u8])), *output.blob_value());
-    assert_eq!(Some(true), output.boolean_value());
-    assert_eq!(Some(1), output.integer_value());
-    assert_eq!(Some(1), output.long_value());
+    assert_eq!(Some(true), *output.boolean_value());
+    assert_eq!(Some(1), *output.integer_value());
+    assert_eq!(Some(1), *output.long_value());
 }

@@ -30,7 +30,7 @@ public class __default
       I$sdkID:LClient shim = new Shim(nativeClient, region.toString());
       return CreateSuccessOfClient(shim);
     } catch (Exception e) {
-      Error dafny_error = Error.create_Opaque(e);
+	Error dafny_error = Error.create_Opaque(e, dafny.DafnySequence.asString(e.getMessage()));
       return CreateFailureOfError(dafny_error);
     }
   }

@@ -10,6 +10,17 @@ format_java_misc-check: setup_prettier
 setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
 
+# Install packages via `python3 -m pip`,
+# which is the syntax Smithy-Python and Smithy-Dafny Python use
+# to invoke these packages.
+# This helps ensure these packages are installed to the correct Python installation.
+setup_smithy_dafny_python:
+	python3 -m pip install docformatter black
+
+setup_python: setup_smithy_dafny_python
+setup_python:
+	python3 -m pip install poetry
+
 mvn_local_deploy_polymorph_dependencies: mvn_local_deploy_polymorph_rust_dependencies mvn_local_deploy_polymorph_python_dependencies
 
 mvn_local_deploy_polymorph_rust_dependencies:

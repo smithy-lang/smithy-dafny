@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph.smithypython.wrappedlocalservice.extensions;
 
+import static software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin.transformStringEnumShapesToEnumShapes;
+
 import java.util.Map;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -39,6 +41,23 @@ public final class DafnyPythonWrappedLocalServiceClientCodegenPlugin
     SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(
       smithyNamespaceToPythonModuleNameMap
     );
+  }
+
+  /**
+   * Perform all transformations on the model before running wrapped localService codegen.
+   * @param model
+   * @param serviceShape
+   * @return
+   */
+  public static Model transformModelForWrappedLocalService(
+    Model model,
+    ServiceShape serviceShape
+  ) {
+    Model transformedModel = model;
+    transformedModel =
+      addWrappedLocalServiceTrait(transformedModel, serviceShape);
+    transformedModel = transformStringEnumShapesToEnumShapes(transformedModel);
+    return transformedModel;
   }
 
   /**
@@ -105,7 +124,7 @@ public final class DafnyPythonWrappedLocalServiceClientCodegenPlugin
       .expectShape(settings.getService())
       .asServiceShape()
       .get();
-    Model transformedModel = addWrappedLocalServiceTrait(
+    Model transformedModel = transformModelForWrappedLocalService(
       context.getModel(),
       serviceShape
     );

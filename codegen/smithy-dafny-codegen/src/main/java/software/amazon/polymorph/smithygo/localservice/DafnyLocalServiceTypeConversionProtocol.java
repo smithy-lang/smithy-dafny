@@ -14,10 +14,11 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.ShapeVisitorHelper;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
-import software.amazon.smithy.aws.traits.ServiceTrait;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -25,7 +26,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
-import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 
 public class DafnyLocalServiceTypeConversionProtocol
   implements ProtocolGenerator {
@@ -163,7 +163,10 @@ public class DafnyLocalServiceTypeConversionProtocol
         .expectTrait(ReferenceTrait.class)
         .getReferentId();
       if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
-        final var resourceShape = model.expectShape(resource, ResourceShape.class);
+        final var resourceShape = model.expectShape(
+          resource,
+          ResourceShape.class
+        );
         resourceShape
           .getOperations()
           .forEach(eachOperation -> {
@@ -453,7 +456,9 @@ public class DafnyLocalServiceTypeConversionProtocol
         }
       });
 
-    final var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
+    final var refResources = context
+      .model()
+      .getShapesWithTrait(ReferenceTrait.class);
     for (final var refResource : refResources) {
       final var resource = refResource
         .expectTrait(ReferenceTrait.class)
@@ -969,7 +974,9 @@ public class DafnyLocalServiceTypeConversionProtocol
               }
             }),
             writer.consumer(w -> {
-              final var dependencies = serviceShape.hasTrait(LocalServiceTrait.class)
+              final var dependencies = serviceShape.hasTrait(
+                  LocalServiceTrait.class
+                )
                 ? serviceShape
                   .expectTrait(LocalServiceTrait.class)
                   .getDependencies()
@@ -1231,7 +1238,9 @@ public class DafnyLocalServiceTypeConversionProtocol
               }
             }),
             writer.consumer(w -> {
-              final var dependencies = serviceShape.hasTrait(LocalServiceTrait.class)
+              final var dependencies = serviceShape.hasTrait(
+                  LocalServiceTrait.class
+                )
                 ? serviceShape
                   .expectTrait(LocalServiceTrait.class)
                   .getDependencies()
@@ -1241,7 +1250,10 @@ public class DafnyLocalServiceTypeConversionProtocol
               }
               final var sdkId = serviceShape.hasTrait(LocalServiceTrait.class)
                 ? serviceShape.expectTrait(LocalServiceTrait.class).getSdkId()
-                : serviceShape.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+                : serviceShape
+                  .expectTrait(ServiceTrait.class)
+                  .getSdkId()
+                  .toLowerCase();
               for (var dep : dependencies) {
                 final var depService = context
                   .model()
@@ -1266,7 +1278,10 @@ public class DafnyLocalServiceTypeConversionProtocol
   // Generates rest of the not visited shapes into a function
   // TODO: We should be able to optimize it to run along with the ShapeVisitors.
   // But since this runs outside of any production code - we are okay with this for now
-  private void generateSerializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
+  private void generateSerializerFunctions(
+    final GenerationContext context,
+    final Set<ShapeId> alreadyVisited
+  ) {
     final var writerDelegator = context.writerDelegator();
     final var model = context.model();
     final var serviceShape = model.expectShape(
@@ -1297,7 +1312,11 @@ public class DafnyLocalServiceTypeConversionProtocol
               visitingShape,
               context.symbolProvider().toSymbol(visitingShape)
             );
-          inputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
+          inputType =
+            GoCodegenUtils.getType(
+              context.symbolProvider().toSymbol(visitingShape),
+              visitingShape
+            );
           if (
             context
               .symbolProvider()
@@ -1329,7 +1348,10 @@ public class DafnyLocalServiceTypeConversionProtocol
   // Generates rest of the not visited shapes into a function
   // TODO: We should be able to optimize it to run along with the ShapeVisitors.
   // But since this runs outside of any production code - we are okay with this for now
-  private void generateDeserializerFunctions(final GenerationContext context, final Set<ShapeId> alreadyVisited) {
+  private void generateDeserializerFunctions(
+    final GenerationContext context,
+    final Set<ShapeId> alreadyVisited
+  ) {
     final var delegator = context.writerDelegator();
     final var model = context.model();
     final var serviceShape = model.expectShape(
@@ -1351,7 +1373,10 @@ public class DafnyLocalServiceTypeConversionProtocol
             continue;
           }
           alreadyVisited.add(visitingMemberShape.toShapeId());
-          var outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
+          var outputType = GoCodegenUtils.getType(
+            context.symbolProvider().toSymbol(visitingShape),
+            visitingShape
+          );
           if (visitingShape.hasTrait(ReferenceTrait.class)) {
             final var referenceTrait = visitingShape.expectTrait(
               ReferenceTrait.class
@@ -1359,7 +1384,11 @@ public class DafnyLocalServiceTypeConversionProtocol
             final var resourceOrService = context
               .model()
               .expectShape(referenceTrait.getReferentId());
-            outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
+            outputType =
+              GoCodegenUtils.getType(
+                context.symbolProvider().toSymbol(visitingShape),
+                visitingShape
+              );
             if (resourceOrService.isServiceShape()) {
               final var namespace = SmithyNameResolver
                 .shapeNamespace(resourceOrService)
@@ -1377,6 +1406,7 @@ public class DafnyLocalServiceTypeConversionProtocol
               .getProperty(POINTABLE, Boolean.class)
               .orElse(false)
           ) outputType = "*".concat(outputType);
+          // TODO: we should be able to change input type to specific shape from interface {}
           writer.write(
             """
             func $L(input interface{})($L) {

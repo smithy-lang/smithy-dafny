@@ -54,7 +54,7 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
       // TODO: Rewrite this as an actual extern.
       var opaqueObject := new SomeOpaqueGeneratedTypeForTesting();
 
-      var res := Error.Opaque( obj := opaqueObject );
+      var res := Error.Opaque( obj := opaqueObject, alt_text := "Some Generated Test" );
 
       return Failure(res);
   }

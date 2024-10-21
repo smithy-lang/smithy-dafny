@@ -57,6 +57,11 @@ public class BuilderMemberSpec {
       "obj",
       "The unexpected object encountered. It MIGHT BE an Exception," +
       " but that is not guaranteed."
+    ),
+    new BuilderMemberSpec(
+      TypeName.get(String.class),
+      "altText",
+      "A best effort text representation of obj."
     )
   );
   public static final List<BuilderMemberSpec> COLLECTION_ARGS = List.of(

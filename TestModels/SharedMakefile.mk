@@ -75,14 +75,11 @@ _polymorph_python: _polymorph
 _polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 _polymorph_python: _polymorph_wrapped
 
-_polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+_polymorph_rust: OUTPUT_RUST_WRAPPED=--output-rust $(LIBRARY_ROOT)/runtimes/rust
 _polymorph_rust: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 # For several TestModels we've just manually written the code generation target,
 # So we just want to ensure we can transpile and pass the tests in CI.
 # For those, make polymorph_rust should just be a no-op.
-_polymorph_rust: $(if $(RUST_BENERATED), , _polymorph)
-# TODO: This doesn't yet work for Rust because we are patching transpiled code,
-# so this target will complain about "patch does not apply" because it was already applied.
-# _polymorph_rust: OUTPUT_RUST_WRAPPED=--output-rust $(LIBRARY_ROOT)/runtimes/rust
-# _polymorph_rust: _polymorph_wrapped
+# We call _polymorph_wrapped directly because Rust builds everything at once.
+_polymorph_rust: $(if $(RUST_BENERATED), , _polymorph_wrapped)

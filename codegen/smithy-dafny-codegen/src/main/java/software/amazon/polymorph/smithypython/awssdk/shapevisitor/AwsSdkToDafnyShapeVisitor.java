@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -74,6 +75,10 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String blobShape(BlobShape shape) {
+    // if it's a streaming blob, read it first
+    if (shape.hasTrait(StreamingTrait.class)) {
+      return "Seq(" + dataSource + ".read())";
+    }
     writer.addStdlibImport("_dafny", "Seq");
     return "Seq(" + dataSource + ")";
   }
@@ -206,7 +211,12 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       return enumShape(EnumShape.fromStringShape(shape).get());
     }
 
-    return "Seq(" + dataSource + ")";
+    // Convert native Python string to Dafny Seq of UTF-16 characters
+    // TODO: This is a long conversion that is used often in generated code, since this is written for *all* strings.
+    // This should be refactored into the conversionwriter package.
+    return "Seq(''.join([chr(int.from_bytes(pair, 'big')) for pair in zip(*[iter(%1$s.encode('utf-16-be'))]*2)]))".formatted(
+        dataSource
+      );
   }
 
   @Override

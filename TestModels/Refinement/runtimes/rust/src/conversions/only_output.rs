@@ -11,7 +11,7 @@ pub fn to_dafny_error(
             crate::r#simple::refinement::internaldafny::types::Error::Opaque {
                 obj: ::dafny_runtime::upcast_object()(
                     ::dafny_runtime::object::new(unhandled),
-                ),
+                ), alt_text : ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string("foo")
             },
         ),
     }

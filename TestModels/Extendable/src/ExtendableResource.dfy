@@ -140,7 +140,7 @@ module ExtendableResource {
       ensures unchanged(History)
     {
       var obj: object := new OpaqueMessage();
-      return Failure(Types.Opaque(obj));
+      return Failure(Types.Opaque(obj, "lost in translation"));
     }
   }
 }
