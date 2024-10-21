@@ -14,6 +14,10 @@ PROJECT_SERVICES := \
 
 SERVICE_NAMESPACE_SimpleConstraints=simple.constraints
 
+NAMESPACE=simple.constraints
+
+MAIN_SERVICE_FOR_RUST := SimpleConstraints
+
 SERVICE_DEPS_SimpleConstraints :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
