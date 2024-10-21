@@ -77,7 +77,8 @@ module TestComAmazonawsS3 {
 
         expect ret.Failure?;
         // TODO: this fails in CI..?
-        // expect ret.error.NoSuchKey?;
+        print(ret.error);
+        expect ret.error.NoSuchKey?;
     }
 
     method PutObjectTest(
