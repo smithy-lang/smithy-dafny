@@ -148,12 +148,17 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
       }
       if (!this.isOptional) {
-        return "return %1$s{%2$s}".formatted(
-            namespace.concat(
-              context.symbolProvider().toSymbol(serviceShape).getName()
-            ),
-            dataSource
-          );
+        writer.addImportFromModule(
+              SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+                resourceOrService.toShapeId().getNamespace()
+              ),
+              DafnyNameResolver
+                .dafnyTypesNamespace(serviceShape)
+        );
+        return "return %1$s.(%2$s)".formatted(
+            dataSource,
+            DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) serviceShape, serviceShape.expectTrait(ServiceTrait.class))
+        );
       }
       return """
       return func () *%s {

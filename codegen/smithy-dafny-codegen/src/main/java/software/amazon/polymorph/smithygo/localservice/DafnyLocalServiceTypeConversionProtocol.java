@@ -1448,13 +1448,8 @@ public class DafnyLocalServiceTypeConversionProtocol
               .expectShape(referenceTrait.getReferentId());
             outputType = GoCodegenUtils.getType(context.symbolProvider().toSymbol(visitingShape), visitingShape);
             if (resourceOrService.isServiceShape()) {
-              final var namespace = SmithyNameResolver
-                .shapeNamespace(resourceOrService)
-                .concat(".");
               outputType =
-                namespace.concat(
-                  context.symbolProvider().toSymbol(resourceOrService).getName()
-                );
+                DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) resourceOrService, resourceOrService.expectTrait(ServiceTrait.class));
             }
           }
           if (
