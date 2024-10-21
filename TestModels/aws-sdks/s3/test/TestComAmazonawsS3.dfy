@@ -60,7 +60,6 @@ module TestComAmazonawsS3 {
         // we only care about the Body
         var MyBody := ret.value.Body;
         expect MyBody.Some?;
-        var byteString := MyBody.value[0];
         expect MyBody.value == expectedBody;
     }
 
