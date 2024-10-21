@@ -2,13 +2,6 @@ module github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleDouble/t
 
 go 1.23.0
 
-require github.com/dafny-lang/DafnyStandardLibGo v0.0.0
-
-require (
-	github.com/dafny-lang/DafnyRuntimeGo v0.0.0
-	github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleDouble v0.0.0
-)
-
 replace github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleDouble v0.0.0 => ../ImplementationFromDafny-go
 
 //TODO: Drop this after Dafny fixes the https://t.corp.amazon.com/P150784381

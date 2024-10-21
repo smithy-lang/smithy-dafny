@@ -718,7 +718,7 @@ clean_go:
 	rm -rf $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go
 
 test_go:
-	cd runtimes/go/TestsFromDafny-go && go run TestsFromDafny.go
+	cd runtimes/go/TestsFromDafny-go && go mod tidy && go run TestsFromDafny.go
 
 ########################## Python targets
 
