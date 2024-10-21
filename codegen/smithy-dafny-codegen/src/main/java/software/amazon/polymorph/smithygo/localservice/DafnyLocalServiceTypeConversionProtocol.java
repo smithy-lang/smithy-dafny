@@ -1257,9 +1257,9 @@ public class DafnyLocalServiceTypeConversionProtocol
                 final var sdkId = depService.hasTrait(LocalServiceTrait.class)
                   ? depService.expectTrait(LocalServiceTrait.class).getSdkId()
                   : depService
-                  .expectTrait(ServiceTrait.class)
-                  .getSdkId()
-                  .toLowerCase();
+                    .expectTrait(ServiceTrait.class)
+                    .getSdkId()
+                    .toLowerCase();
                 w.write(
                   """
                   if err.Is_$L() {
