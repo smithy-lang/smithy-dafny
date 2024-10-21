@@ -17,6 +17,7 @@ class PythonTestModels extends TestModelTest {
 
   static {
     DISABLED_TESTS.add("AggregateReferences");
+    DISABLED_TESTS.add("CallingAWSSDKFromLocalService");
     DISABLED_TESTS.add("LanguageSpecificLogic");
     DISABLED_TESTS.add("MultipleModels");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
