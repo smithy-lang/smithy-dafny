@@ -1,0 +1,14 @@
+file_format_version = "1.0"
+dafny_version = "4.8.1.0"
+[options_by_module.SimpleCallingAWSSDKFromLocalServiceImplTest]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test"
+legacy-module-names = false
+[options_by_module.WrappedAbstractSimpleCallingawssdkfromlocalserviceService]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test"
+legacy-module-names = false
+[options_by_module.WrappedSimpleCallingAWSSDKFromLocalServiceService]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test"
+legacy-module-names = false
+[options_by_module.WrappedSimpleCallingAWSSDKFromLocalServiceTest]
+go-module-name = "github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService/test"
+legacy-module-names = false
