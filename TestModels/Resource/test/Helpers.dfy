@@ -52,4 +52,50 @@ module Helpers {
     expect Some(1) == output.integerValue;
     expect Some(1) == output.longValue; 
   }
+
+  function method allMutableNone(): Types.GetMutableResourceDataInput
+  {
+   Types.GetMutableResourceDataInput(
+      blobValue := None,
+      booleanValue := None,
+      stringValue := None,
+      integerValue := None,
+      longValue := None
+    )
+  }
+
+  method checkMutableMostNone(
+    name: string,
+    output: Types.GetMutableResourceDataOutput
+  )
+  {
+    expect Some(name) == output.stringValue;
+    expect None == output.blobValue;
+    expect None == output.booleanValue;
+    expect None == output.integerValue;
+    expect None == output.longValue; 
+  }
+
+  function method allMutableSome(): Types.GetMutableResourceDataInput
+  {
+   Types.GetMutableResourceDataInput(
+      blobValue := Some([1]),
+      booleanValue := Some(true),
+      stringValue := Some("Some"),
+      integerValue := Some(1),
+      longValue := Some(1)
+    )
+  }
+
+  method checkMutableSome(
+    name: string,
+    output: Types.GetMutableResourceDataOutput
+  )
+  {
+    expect Some(name + " Some") == output.stringValue;
+    expect Some([1]) == output.blobValue;
+    expect Some(true) == output.booleanValue;
+    expect Some(1) == output.integerValue;
+    expect Some(1) == output.longValue; 
+  }
 }
