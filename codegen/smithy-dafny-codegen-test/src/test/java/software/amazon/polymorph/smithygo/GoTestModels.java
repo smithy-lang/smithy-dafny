@@ -31,6 +31,9 @@ class GoTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/kms-lite");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
+    //V1 Tests are not supported in Go
+    DISABLED_TESTS.add("aws-sdks/ddb");
+    DISABLED_TESTS.add("aws-sdks/kms");
   }
 
   @ParameterizedTest

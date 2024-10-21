@@ -4,6 +4,7 @@
 CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
+TRANSPILE_TESTS_IN_RUST=1
 
 include ../SharedMakefile.mk
 
@@ -11,6 +12,8 @@ NAMESPACE=simple.positional
 
 PROJECT_SERVICES := \
 	SimplePositional
+
+MAIN_SERVICE_FOR_RUST := SimplePositional
 
 SERVICE_NAMESPACE_SimplePositional=simple.positional
 
@@ -28,7 +31,7 @@ POLYMORPH_OPTIONS=--generate project-files,client-constructors
 PYTHON_MODULE_NAME=simple_positional
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

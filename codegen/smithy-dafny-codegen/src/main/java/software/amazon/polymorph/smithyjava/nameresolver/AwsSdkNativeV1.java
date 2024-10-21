@@ -164,7 +164,7 @@ public class AwsSdkNativeV1 extends Native {
     };
   }
 
-  public static ClassName classNameForAwsSdkShape(final Shape shape) {
+  public ClassName classNameForAwsSdkShape(final Shape shape) {
     return ClassName.get(
       defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
       StringUtils.capitalize(shape.getId().getName())
@@ -187,7 +187,7 @@ public class AwsSdkNativeV1 extends Native {
     }
     // check if this Shape is in AWS SDK for Java V1 package
     if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
-      AwsSdkNativeV1.classNameForAwsSdkShape(shape);
+      return classNameForAwsSdkShape(shape);
     }
     return super.classNameForStructure(shape);
   }

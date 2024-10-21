@@ -27,6 +27,9 @@ class DotnetTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
     DISABLED_TESTS.add("SimpleTypes/SimpleShort");
     DISABLED_TESTS.add("CallingAWSSDKFromLocalService");
+    // V2 Models are not yet supported in Net.
+    DISABLED_TESTS.add("aws-sdks/ddbv2");
+    DISABLED_TESTS.add("aws-sdks/kmsv2");
   }
 
   @ParameterizedTest

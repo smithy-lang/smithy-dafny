@@ -9,7 +9,7 @@ pub fn to_dafny_error(
 {
     match value {
     crate::operation::get_runtime_information::GetRuntimeInformationError::Unhandled(unhandled) =>
-      ::std::rc::Rc::new(crate::r#language::specific::logic::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
+      ::std::rc::Rc::new(crate::r#language::specific::logic::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)), alt_text: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string("foo") })
   }
 }
 

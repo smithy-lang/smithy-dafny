@@ -1,5 +1,7 @@
 package software.amazon.polymorph.smithygo.awssdk;
 
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+
 import software.amazon.polymorph.smithygo.codegen.AddOperationShapes;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoDelegator;
@@ -12,8 +14,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
-
-import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 public class DafnyAwsSdkClientShimGenerator implements Runnable {
 

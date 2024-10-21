@@ -14,6 +14,8 @@ NAMESPACE=simple.types.enumV2
 PROJECT_SERVICES := \
         SimpleTypesEnumV2
 
+MAIN_SERVICE_FOR_RUST := SimpleTypesEnumV2
+
 SERVICE_NAMESPACE_SimpleTypesEnumV2=simple.types.enumV2
 
 SERVICE_DEPS_SimpleTypesEnumV2 :=
@@ -32,7 +34,7 @@ TRANSLATION_RECORD_GO := \
 PYTHON_MODULE_NAME=simple_types_smithyenumv2
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

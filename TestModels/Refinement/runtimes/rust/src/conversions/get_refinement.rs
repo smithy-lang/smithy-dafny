@@ -8,7 +8,7 @@ pub fn to_dafny_error(
 ) -> ::std::rc::Rc<crate::r#simple::refinement::internaldafny::types::Error> {
     match value {
     crate::operation::get_refinement::GetRefinementError::Unhandled(unhandled) =>
-      ::std::rc::Rc::new(crate::r#simple::refinement::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)) })
+      ::std::rc::Rc::new(crate::r#simple::refinement::internaldafny::types::Error::Opaque { obj: ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(unhandled)), alt_text : ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string("foo") })
   }
 }
 

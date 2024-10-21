@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
@@ -83,7 +82,11 @@ public class ShapeVisitorHelper {
     }
     final String nextVisitorFunction;
     final String funcDataSource = "input";
-    if (!DafnyToSmithyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+    if (
+      !DafnyToSmithyShapeVisitor
+        .getAllShapesRequiringConversionFunc()
+        .contains(memberShape)
+    ) {
       DafnyToSmithyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
       DafnyToSmithyShapeVisitor.putShapesWithConversionFunc(
         memberShape,
@@ -129,7 +132,11 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcDataSource = "input";
-    if (!SmithyToDafnyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+    if (
+      !SmithyToDafnyShapeVisitor
+        .getAllShapesRequiringConversionFunc()
+        .contains(memberShape)
+    ) {
       optionalShapesToDafny.put(memberShape, isOptional);
       SmithyToDafnyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
       SmithyToDafnyShapeVisitor.putShapesWithConversionFunc(

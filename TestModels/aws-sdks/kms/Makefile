@@ -5,12 +5,19 @@ CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
 
+TRANSPILE_TESTS_IN_RUST=1
+
+RUST_OTHER_FILES := \
+	runtimes/rust/src/kms.rs
+
 include ../../SharedMakefile.mk
 
 NAMESPACE=com.amazonaws.kms
 
 PROJECT_SERVICES := \
 	ComAmazonawsKms\
+
+MAIN_SERVICE_FOR_RUST := ComAmazonawsKms
 
 SERVICE_NAMESPACE_ComAmazonawsKms=com.amazonaws.kms
 
@@ -48,7 +55,7 @@ clean: _clean
 PYTHON_MODULE_NAME=com_amazonaws_kms
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

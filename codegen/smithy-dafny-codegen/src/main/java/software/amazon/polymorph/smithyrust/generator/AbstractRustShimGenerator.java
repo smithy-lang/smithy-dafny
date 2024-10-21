@@ -4,19 +4,28 @@ import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
+import com.google.common.collect.MoreCollectors;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.BoundOperationShape;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.OperationBindingIndex;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
@@ -25,25 +34,57 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 public abstract class AbstractRustShimGenerator {
 
+  protected MergedServicesGenerator mergedGenerator;
+
   protected final Model model;
   protected final ServiceShape service;
-  protected final OperationIndex operationIndex;
 
-  public AbstractRustShimGenerator(Model model, ServiceShape service) {
+  protected final OperationIndex operationIndex;
+  protected final OperationBindingIndex operationBindingIndex;
+
+  private static final String TOP_LEVEL_MOD_DECLS =
+    """
+    pub mod client;
+    pub mod types;
+
+    /// Common errors and error handling utilities.
+    pub mod error;
+
+    /// All operations that this crate can perform.
+    pub mod operation;
+
+    pub mod conversions;
+
+    pub mod deps;
+
+    #[cfg(feature = "wrapped-client")]
+    pub mod wrapped;
+    """;
+
+  public AbstractRustShimGenerator(
+    final MergedServicesGenerator mergedGenerator,
+    Model model,
+    ServiceShape service
+  ) {
+    this.mergedGenerator = mergedGenerator;
     this.model = model;
     this.service = service;
     this.operationIndex = new OperationIndex(model);
+    this.operationBindingIndex = new OperationBindingIndex(model);
   }
 
   public void generate(final Path outputDir) {
@@ -57,118 +98,222 @@ public abstract class AbstractRustShimGenerator {
 
   protected abstract Set<RustFile> rustFiles();
 
-  protected Stream<OperationShape> serviceOperationShapes() {
-    return service
-      .getOperations()
+  protected Stream<BoundOperationShape> streamAllBoundOperationShapes() {
+    return operationBindingIndex
+      .getAllBindingShapes()
       .stream()
-      .sorted()
-      .map(shapeId -> model.expectShape(shapeId, OperationShape.class));
+      .filter(s -> ModelUtils.isInServiceNamespace(s, service))
+      .flatMap(s -> operationBindingIndex.getOperations(s).stream());
   }
 
   protected Stream<StructureShape> allErrorShapes() {
     return model
-      .getOperationShapes()
+      .getStructureShapes()
       .stream()
-      .flatMap(operationShape -> operationShape.getErrors().stream())
-      .distinct()
-      .map(errorShapeId -> model.expectShape(errorShapeId, StructureShape.class)
-      );
+      .filter(s -> s.hasTrait(ErrorTrait.class))
+      .filter(o -> ModelUtils.isInServiceNamespace(o, service));
+  }
+
+  protected final boolean isInputOrOutputStructure(
+    final StructureShape structureShape
+  ) {
+    return (
+      operationIndex.isInputStructure(structureShape) ||
+      operationIndex.isOutputStructure(structureShape)
+    );
   }
 
   protected boolean shouldGenerateStructForStructure(
     StructureShape structureShape
   ) {
     return (
-      !operationIndex.isInputStructure(structureShape) &&
-      !operationIndex.isOutputStructure(structureShape) &&
       !structureShape.hasTrait(ErrorTrait.class) &&
       !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
-      structureShape
-        .getId()
-        .getNamespace()
-        .equals(service.getId().getNamespace())
+      !structureShape.hasTrait(ReferenceTrait.class) &&
+      ModelUtils.isInServiceNamespace(structureShape, service)
     );
+  }
+
+  protected boolean shouldGenerateTraitForResource(
+    ResourceShape resourceShape
+  ) {
+    return ModelUtils.isInServiceNamespace(resourceShape, service);
+  }
+
+  protected final Stream<
+    StructureShape
+  > streamStructuresToGenerateStructsFor() {
+    return model
+      .getStructureShapes()
+      .stream()
+      .filter(this::shouldGenerateStructForStructure)
+      .sorted();
+  }
+
+  protected final Stream<ResourceShape> streamResourcesToGenerateTraitsFor() {
+    return model
+      .getStructureShapes()
+      .stream()
+      .filter(s -> s.hasTrait(ReferenceTrait.class))
+      .map(s -> s.expectTrait(ReferenceTrait.class))
+      .filter(t -> !t.isService())
+      .map(t -> model.expectShape(t.getReferentId(), ResourceShape.class))
+      .filter(this::shouldGenerateTraitForResource)
+      .sorted();
   }
 
   protected boolean shouldGenerateEnumForUnion(UnionShape unionShape) {
-    return unionShape
-      .getId()
-      .getNamespace()
-      .equals(service.getId().getNamespace());
-  }
-
-  protected RustFile conversionsErrorModule() {
-    TokenTree modulesDeclarations = declarePubModules(
-      allErrorShapes()
-        .map(structureShape -> toSnakeCase(structureShape.getId().getName()))
-    );
-    TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(
-      evalTemplate(
-        getClass(),
-        "runtimes/rust/conversions/error.rs",
-        serviceVariables()
-      )
-    );
-    return new RustFile(
-      Path.of("src", "conversions", "error.rs"),
-      TokenTree.of(modulesDeclarations, toDafnyOpaqueErrorFunctions)
-    );
-  }
-
-  protected TokenTree declarePubModules(Stream<String> moduleNames) {
-    return TokenTree
-      .of(
-        moduleNames
-          .sorted()
-          .map(module -> TokenTree.of("pub mod " + module + ";\n"))
-      )
-      .lineSeparated();
+    return ModelUtils.isInServiceNamespace(unionShape, service);
   }
 
   protected RustFile conversionsModule() {
-    Stream<String> operationModules = model
-      .getOperationShapes()
-      .stream()
-      .map(operationShape -> toSnakeCase(operationShape.getId().getName()));
+    final String namespace = service.getId().getNamespace();
+    Stream<String> operationModules = streamAllBoundOperationShapes()
+      .map(operationShape ->
+        toSnakeCase(operationShape.operationShape().getId().getName())
+      );
+    Stream<String> resourceModules = streamResourcesToGenerateTraitsFor()
+      .map(resourceShape -> toSnakeCase(resourceShape.getId().getName()));
 
     // smithy-dafny generally generates code for all shapes in the same namespace,
     // whereas most smithy code generators generate code for all shapes in the service closure.
     // Here we filter to "normal" structures and unions.
-    Stream<String> structureModules = model
-      .getStructureShapes()
-      .stream()
-      .filter(this::shouldGenerateStructForStructure)
+    Stream<String> structureModules = streamStructuresToGenerateStructsFor()
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
     Stream<String> unionModules = model
       .getUnionShapes()
       .stream()
       .filter(this::shouldGenerateEnumForUnion)
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
     Stream<String> enumModules = ModelUtils
       .streamEnumShapes(model, service.getId().getNamespace())
+      .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape -> toSnakeCase(structureShape.getId().getName()));
 
-    TokenTree content = declarePubModules(
+    TokenTree content = RustUtils.declarePubModules(
       Stream
         .of(
+          resourceModules,
           operationModules,
           structureModules,
           unionModules,
           enumModules,
-          Stream.of("error")
+          Stream.of("error"),
+          Stream.of("client")
         )
         .flatMap(s -> s)
     );
 
-    return new RustFile(Path.of("src", "conversions.rs"), content);
+    return new RustFile(
+      rootPathForNamespace(namespace).resolve("conversions.rs"),
+      content
+    );
+  }
+
+  protected RustFile structureConversionModule(
+    final StructureShape structureShape
+  ) {
+    String snakeCaseName = toSnakeCase(structureName(structureShape));
+    Path path = rootPathForShape(service)
+      .resolve("conversions")
+      .resolve(snakeCaseName + ".rs");
+    return new RustFile(
+      path,
+      TokenTree.of(
+        structureToDafnyFunction(structureShape),
+        structureFromDafnyFunction(structureShape)
+      )
+    );
+  }
+
+  protected TokenTree structureToDafnyFunction(
+    final StructureShape structureShape
+  ) {
+    final String template =
+      """
+      #[allow(dead_code)]
+      pub fn to_dafny(
+          value: &$rustTypesModuleName:L::$rustStructureName:L,
+      ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
+        ::std::rc::Rc::new(
+          crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+              $variants:L
+          }
+        )
+      }
+      """;
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      structureVariables(structureShape)
+    );
+    variables.put(
+      "variants",
+      toDafnyVariantsForStructure(structureShape).toString()
+    );
+
+    return TokenTree.of(evalTemplate(template, variables));
+  }
+
+  /**
+   * Returns whether the Rust struct builder for the given shape is fallible,
+   * i.e. its {@code build()} function returns {@code Result<T>}.
+   */
+  protected abstract boolean isStructureBuilderFallible(
+    final StructureShape structureShape
+  );
+
+  protected TokenTree structureFromDafnyFunction(
+    final StructureShape structureShape
+  ) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      structureVariables(structureShape)
+    );
+    variables.put(
+      "fluentMemberSetters",
+      fluentMemberSettersForStructure(structureShape).toString()
+    );
+
+    final String unwrapIfNeeded = isStructureBuilderFallible(structureShape)
+      ? ".unwrap()"
+      : "";
+    variables.put("unwrapIfNeeded", unwrapIfNeeded);
+
+    return TokenTree.of(
+      evalTemplate(
+        """
+        #[allow(dead_code)]
+        pub fn from_dafny(
+            dafny_value: ::std::rc::Rc<
+                crate::r#$dafnyTypesModuleName:L::$structureName:L,
+            >,
+        ) -> $rustTypesModuleName:L::$rustStructureName:L {
+            $rustTypesModuleName:L::$rustStructureName:L::builder()
+                  $fluentMemberSetters:L
+                  .build()
+                  $unwrapIfNeeded:L
+        }
+        """,
+        variables
+      )
+    );
   }
 
   protected RustFile operationRequestConversionModule(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
-    var toDafnyFunction = operationRequestToDafnyFunction(operationShape);
-    var fromDafnyFunction = operationRequestFromDafnyFunction(operationShape);
+    var toDafnyFunction = operationRequestToDafnyFunction(
+      bindingShape,
+      operationShape
+    );
+    var fromDafnyFunction = operationRequestFromDafnyFunction(
+      bindingShape,
+      operationShape
+    );
     var content = TokenTree
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
@@ -176,22 +321,29 @@ public abstract class AbstractRustShimGenerator {
     final String snakeCaseOperationName = toSnakeCase(
       operationName(operationShape)
     );
-    final Path path = Path.of(
-      "src",
-      "conversions",
-      snakeCaseOperationName,
-      "_%s.rs".formatted(
-          toSnakeCase(syntheticOperationInputName(operationShape))
-        )
-    );
+    final Path path = rootPathForShape(bindingShape)
+      .resolve("conversions")
+      .resolve(snakeCaseOperationName)
+      .resolve(
+        "_%s.rs".formatted(
+            toSnakeCase(syntheticOperationInputName(operationShape))
+          )
+      );
     return new RustFile(path, content);
   }
 
   protected RustFile operationResponseConversionModule(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
-    var toDafnyFunction = operationResponseToDafnyFunction(operationShape);
-    var fromDafnyFunction = operationResponseFromDafnyFunction(operationShape);
+    var toDafnyFunction = operationResponseToDafnyFunction(
+      bindingShape,
+      operationShape
+    );
+    var fromDafnyFunction = operationResponseFromDafnyFunction(
+      bindingShape,
+      operationShape
+    );
     var content = TokenTree
       .of(toDafnyFunction, fromDafnyFunction)
       .lineSeparated();
@@ -199,30 +351,34 @@ public abstract class AbstractRustShimGenerator {
     final String snakeCaseOperationName = toSnakeCase(
       operationName(operationShape)
     );
-    final Path path = Path.of(
-      "src",
-      "conversions",
-      snakeCaseOperationName,
-      "_%s.rs".formatted(
-          toSnakeCase(syntheticOperationOutputName(operationShape))
-        )
-    );
+    final Path path = rootPathForShape(bindingShape)
+      .resolve("conversions")
+      .resolve(snakeCaseOperationName)
+      .resolve(
+        "_%s.rs".formatted(
+            toSnakeCase(syntheticOperationOutputName(operationShape))
+          )
+      );
     return new RustFile(path, content);
   }
 
   protected abstract TokenTree operationRequestToDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
   protected abstract TokenTree operationRequestFromDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
   protected abstract TokenTree operationResponseToDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
   protected abstract TokenTree operationResponseFromDafnyFunction(
+    final Shape bindingShape,
     final OperationShape operationShape
   );
 
@@ -245,17 +401,19 @@ public abstract class AbstractRustShimGenerator {
       .lineSeparated();
   }
 
-  protected TokenTree toDafnyVariantsForStructure(Shape shape) {
+  protected TokenTree toDafnyVariantsForStructure(
+    final StructureShape structureShape
+  ) {
     return TokenTree
       .of(
-        shape
+        structureShape
           .members()
           .stream()
           .map(m ->
             TokenTree.of(
               m.getMemberName() +
               ": " +
-              toDafnyVariantMemberForOperationRequest(shape, m) +
+              toDafnyVariantMember(structureShape, m) +
               ","
             )
           )
@@ -285,30 +443,39 @@ public abstract class AbstractRustShimGenerator {
    */
   // TODO: There is obviously a lot of duplication here that should be easy to clean up.
   // TODO: Some cases do not handle all combinations of isRustOption and isDafnyOption.
-  private TokenTree fromDafny(
-    final Shape shape,
+  protected TokenTree fromDafny(
+    final Shape originalShape,
     final String dafnyValue,
     boolean isRustOption,
     boolean isDafnyOption
   ) {
+    // First handle the indirection of @reference to service or resource shapes
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
+      originalShape,
+      model
+    );
+    final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
+
     return switch (shape.getType()) {
       case STRING, ENUM -> {
         if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
           var enumShapeName = toSnakeCase(shape.toShapeId().getName());
+          String prefix = topLevelNameForShape(shape);
           if (isDafnyOption) {
             yield TokenTree.of(
               """
               match &**%s {
                   crate::r#_Wrappers_Compile::Option::Some { value } => Some(
-                      crate::conversions::%s::from_dafny(value)
+                      %s::conversions::%s::from_dafny(value)
                   ),
                   _ => None,
               }
-              """.formatted(dafnyValue, enumShapeName)
+              """.formatted(dafnyValue, prefix, enumShapeName)
             );
           } else {
             TokenTree result = TokenTree.of(
-              "crate::conversions::%s::from_dafny(%s)".formatted(
+              "%s::conversions::%s::from_dafny(%s)".formatted(
+                  prefix,
                   enumShapeName,
                   dafnyValue
                 )
@@ -337,7 +504,10 @@ public abstract class AbstractRustShimGenerator {
               valueToRust = "(%s).unwrap()".formatted(valueToRust);
             }
           } else {
-            valueToRust = dafnyToRust.formatted(dafnyValue + ".as_ref()");
+            valueToRust =
+              dafnyToRust.formatted(
+                "::std::borrow::Borrow::borrow(%s)".formatted(dafnyValue)
+              );
             if (isRustOption) {
               valueToRust = "Some(%s)".formatted(valueToRust);
             }
@@ -372,27 +542,28 @@ public abstract class AbstractRustShimGenerator {
               )
           );
         } else {
-          TokenTree result = TokenTree.of(dafnyValue);
+          TokenTree result = TokenTree.of(dafnyValue, ".clone()");
           if (isRustOption) {
             result =
-              TokenTree.of(
-                TokenTree.of("Some("),
-                result,
-                TokenTree.of(".clone())")
-              );
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
           }
           yield result;
         }
       }
       case INTEGER -> {
-        if (isRustOption) {
+        if (isDafnyOption) {
           yield TokenTree.of(
             "crate::standard_library_conversions::oint_from_dafny(%s.clone())".formatted(
                 dafnyValue
               )
           );
         } else {
-          yield TokenTree.of(dafnyValue);
+          TokenTree result = TokenTree.of(dafnyValue, ".clone()");
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
         }
       }
       case LONG -> {
@@ -403,31 +574,32 @@ public abstract class AbstractRustShimGenerator {
               )
           );
         } else {
-          TokenTree result = TokenTree.of(dafnyValue);
+          TokenTree result = TokenTree.of(dafnyValue, ".clone()");
           if (isRustOption) {
             result =
-              TokenTree.of(
-                TokenTree.of("Some("),
-                result,
-                TokenTree.of(".clone())")
-              );
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
           }
           yield result;
         }
       }
       case DOUBLE -> {
-        if (isRustOption) {
+        if (isDafnyOption) {
           yield TokenTree.of(
             "crate::standard_library_conversions::odouble_from_dafny(%s.clone())".formatted(
                 dafnyValue
               )
           );
         } else {
-          yield TokenTree.of(
+          TokenTree result = TokenTree.of(
             "crate::standard_library_conversions::double_from_dafny(&%s.clone())".formatted(
                 dafnyValue
               )
           );
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
         }
       }
       case TIMESTAMP -> {
@@ -477,13 +649,18 @@ public abstract class AbstractRustShimGenerator {
         Shape memberShape = model.expectShape(
           listShape.getMember().getTarget()
         );
+        String dafnyElementType = dafnyTypeForShape(memberShape);
         if (!isDafnyOption) {
           TokenTree result = TokenTree.of(
             """
             ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(%s,
-                |e| %s,
+                |e: &%s| %s,
             )
-            """.formatted(dafnyValue, fromDafny(memberShape, "e", false, false))
+            """.formatted(
+                dafnyValue,
+                dafnyElementType,
+                fromDafny(memberShape, "e", false, false)
+              )
           );
           if (isRustOption) {
             result =
@@ -497,12 +674,16 @@ public abstract class AbstractRustShimGenerator {
                 crate::r#_Wrappers_Compile::Option::Some { value } =>
                     Some(
                         ::dafny_runtime::dafny_runtime_conversions::dafny_sequence_to_vec(value,
-                            |e| %s,
+                            |e: &%s| %s,
                         )
                     ),
                 _ => None
             }
-            """.formatted(dafnyValue, fromDafny(memberShape, "e", false, false))
+            """.formatted(
+                dafnyValue,
+                dafnyElementType,
+                fromDafny(memberShape, "e", false, false)
+              )
           );
         }
       }
@@ -514,12 +695,14 @@ public abstract class AbstractRustShimGenerator {
           TokenTree result = TokenTree.of(
             """
             ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(&%s,
-                |k| %s,
-                |v| %s,
+                |k: &%s| %s,
+                |v: &%s| %s,
             )
             """.formatted(
                 dafnyValue,
+                dafnyTypeForShape(keyShape),
                 fromDafny(keyShape, "k", false, false),
+                dafnyTypeForShape(valueShape),
                 fromDafny(valueShape, "v", false, false)
               )
           );
@@ -535,37 +718,92 @@ public abstract class AbstractRustShimGenerator {
                 crate::r#_Wrappers_Compile::Option::Some { value } =>
                     Some(
                         ::dafny_runtime::dafny_runtime_conversions::dafny_map_to_hashmap(value,
-                            |k| %s,
-                            |v| %s,
+                            |k: &%s| %s,
+                            |v: &%s| %s,
                         )
                     ),
                 _ => None
             }
             """.formatted(
                 dafnyValue,
+                dafnyTypeForShape(keyShape),
                 fromDafny(keyShape, "k", false, false),
+                dafnyTypeForShape(valueShape),
                 fromDafny(valueShape, "v", false, false)
               )
           );
         }
       }
       case STRUCTURE, UNION -> {
-        var structureShapeName = toSnakeCase(shape.getId().getName());
+        var conversionsModule = mergedGenerator
+          .generatorForShape(shape)
+          .getRustConversionsModuleNameForShape(shape);
         if (isDafnyOption) {
           yield TokenTree.of(
             """
             match (*%s).as_ref() {
                 crate::r#_Wrappers_Compile::Option::Some { value } =>
-                    Some(crate::conversions::%s::from_dafny(value.clone())),
+                    Some(%s::from_dafny(value.clone())),
                 _ => None,
             }
-            """.formatted(dafnyValue, structureShapeName)
+            """.formatted(dafnyValue, conversionsModule)
           );
         } else {
           TokenTree result = TokenTree.of(
             """
-            crate::conversions::%s::from_dafny(%s.clone())
-            """.formatted(structureShapeName, dafnyValue)
+            %s::from_dafny(%s.clone())
+            """.formatted(conversionsModule, dafnyValue)
+          );
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
+        }
+      }
+      case RESOURCE -> {
+        var resourceShapeName = toSnakeCase(shape.getId().getName());
+        String prefix = topLevelNameForShape(shape);
+        if (isDafnyOption) {
+          yield TokenTree.of(
+            """
+            match (*%s).as_ref() {
+                crate::r#_Wrappers_Compile::Option::Some { value } =>
+                    Some(%s::conversions::%s::from_dafny(value.clone())),
+                _ => None,
+            }
+            """.formatted(dafnyValue, prefix, resourceShapeName)
+          );
+        } else {
+          TokenTree result = TokenTree.of(
+            """
+            %s::conversions::%s::from_dafny(%s.clone())
+            """.formatted(prefix, resourceShapeName, dafnyValue)
+          );
+          if (isRustOption) {
+            result =
+              TokenTree.of(TokenTree.of("Some("), result, TokenTree.of(")"));
+          }
+          yield result;
+        }
+      }
+      case SERVICE -> {
+        String prefix = topLevelNameForShape(shape);
+        if (isDafnyOption) {
+          yield TokenTree.of(
+            """
+            match (*%s).as_ref() {
+                crate::r#_Wrappers_Compile::Option::Some { value } =>
+                    Some(%s::conversions::client::from_dafny(value.clone())),
+                _ => None,
+            }
+            """.formatted(dafnyValue, prefix)
+          );
+        } else {
+          TokenTree result = TokenTree.of(
+            """
+            %s::conversions::client::from_dafny(%s.clone())
+            """.formatted(prefix, dafnyValue)
           );
           if (isRustOption) {
             result =
@@ -580,12 +818,12 @@ public abstract class AbstractRustShimGenerator {
     };
   }
 
-  private TokenTree toDafnyVariantMemberForOperationRequest(
-    Shape parent,
-    MemberShape member
+  private TokenTree toDafnyVariantMember(
+    final StructureShape parent,
+    final MemberShape member
   ) {
-    Shape targetShape = model.expectShape(member.getTarget());
-    String snakeCaseMemberName = toSnakeCase(member.getMemberName());
+    final Shape targetShape = model.expectShape(member.getTarget());
+    final String snakeCaseMemberName = toSnakeCase(member.getMemberName());
     return toDafny(
       targetShape,
       "value." + snakeCaseMemberName,
@@ -599,7 +837,7 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected boolean isRustFieldRequired(
-    final Shape parent,
+    final StructureShape parent,
     final MemberShape member
   ) {
     // These rules were mostly reverse-engineered from inspection of Rust SDKs,
@@ -613,6 +851,7 @@ public abstract class AbstractRustShimGenerator {
     );
   }
 
+  // TODO: unify overrides of toDafny by figuring out exactly where clones/borrows can be elided
   /**
    * @param isRustOption Whether the Rust type is an Option<...> or not.
    *                     Rust's structures avoid Options when not strictly necessary depending on context.
@@ -621,293 +860,12 @@ public abstract class AbstractRustShimGenerator {
    *                      We generally trust that Dafny codegen aligns with the constraints,
    *                      and hence is it safe to call unwrap() on Rust options when necessary.
    */
-  private TokenTree toDafny(
+  protected abstract TokenTree toDafny(
     final Shape shape,
     final String rustValue,
     boolean isRustOption,
     boolean isDafnyOption
-  ) {
-    return switch (shape.getType()) {
-      case STRING, ENUM -> {
-        if (shape.hasTrait(EnumTrait.class) || shape.isEnumShape()) {
-          var enumShapeName = toSnakeCase(shape.toShapeId().getName());
-          if (isDafnyOption) {
-            yield TokenTree.of(
-              """
-              ::std::rc::Rc::new(match &%s {
-                  Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(x.clone()) },
-                  None => crate::_Wrappers_Compile::Option::None { }
-              })
-              """.formatted(rustValue, enumShapeName)
-            );
-          } else if (isRustOption) {
-            yield TokenTree.of(
-              "crate::conversions::%s::to_dafny(%s.clone().unwrap())".formatted(
-                  enumShapeName,
-                  rustValue
-                )
-            );
-          } else {
-            yield TokenTree.of(
-              "crate::conversions::%s::to_dafny(%s.clone())".formatted(
-                  enumShapeName,
-                  rustValue
-                )
-            );
-          }
-        } else if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-          final String rustToDafny =
-            "dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.as_bytes().to_vec(), |b| *b)";
-          String valueToDafny;
-          if (isRustOption) {
-            valueToDafny =
-              """
-              match %s {
-                Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
-                None => crate::_Wrappers_Compile::Option::None {},
-              }""".formatted(rustValue, rustToDafny.formatted("s"));
-            if (!isDafnyOption) {
-              valueToDafny = "(%s).Extract()".formatted(valueToDafny);
-            }
-          } else {
-            valueToDafny = rustToDafny.formatted(rustValue);
-          }
-          yield TokenTree.of("::std::rc::Rc::new(%s)".formatted(valueToDafny));
-        } else {
-          if (isRustOption) {
-            var result = TokenTree.of(
-              "crate::standard_library_conversions::ostring_to_dafny(&%s)".formatted(
-                  rustValue
-                )
-            );
-            if (!isDafnyOption) {
-              result = TokenTree.of(result, TokenTree.of(".Extract()"));
-            }
-            yield result;
-          } else {
-            yield TokenTree.of(
-              "dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&%s)".formatted(
-                  rustValue
-                )
-            );
-          }
-        }
-      }
-      case BOOLEAN -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::obool_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(rustValue);
-        }
-      }
-      case INTEGER -> {
-        if (isDafnyOption) {
-          if (isRustOption) {
-            yield TokenTree.of(
-              "crate::standard_library_conversions::oint_to_dafny(%s)".formatted(
-                  rustValue
-                )
-            );
-          } else {
-            yield TokenTree.of(
-              "crate::standard_library_conversions::oint_to_dafny(Some(%s))".formatted(
-                  rustValue
-                )
-            );
-          }
-        } else {
-          yield TokenTree.of(rustValue);
-        }
-      }
-      case LONG -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::olong_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(rustValue);
-        }
-      }
-      case DOUBLE -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::odouble_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::double_to_dafny(*%s)".formatted(
-                rustValue
-              )
-          );
-        }
-      }
-      case TIMESTAMP -> {
-        if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::otimestamp_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::timestamp_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        }
-      }
-      case BLOB -> {
-        if (isDafnyOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::oblob_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        } else if (isRustOption) {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::oblob_to_dafny(&%s).Extract()".formatted(
-                rustValue
-              )
-          );
-        } else {
-          yield TokenTree.of(
-            "crate::standard_library_conversions::blob_to_dafny(&%s)".formatted(
-                rustValue
-              )
-          );
-        }
-      }
-      case LIST -> {
-        ListShape listShape = shape.asListShape().get();
-        Shape memberShape = model.expectShape(
-          listShape.getMember().getTarget()
-        );
-        if (!isDafnyOption) {
-          if (isRustOption) {
-            yield TokenTree.of(
-              """
-              ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s.clone().unwrap(),
-                  |e| %s,
-              )
-              """.formatted(rustValue, toDafny(memberShape, "e", false, false))
-            );
-          } else {
-            yield TokenTree.of(
-              """
-              ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(&%s,
-                  |e| %s,
-              )
-              """.formatted(rustValue, toDafny(memberShape, "e", false, false))
-            );
-          }
-        } else {
-          yield TokenTree.of(
-            """
-            ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
-                    ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
-                        |e| %s,
-                    )
-                },
-                None => crate::r#_Wrappers_Compile::Option::None {}
-            })
-            """.formatted(rustValue, toDafny(memberShape, "e", false, false))
-          );
-        }
-      }
-      case MAP -> {
-        MapShape mapShape = shape.asMapShape().get();
-        Shape keyShape = model.expectShape(mapShape.getKey().getTarget());
-        Shape valueShape = model.expectShape(mapShape.getValue().getTarget());
-        if (!isDafnyOption) {
-          if (isRustOption) {
-            yield TokenTree.of(
-              """
-              ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone().unwrap(),
-                  |k| %s,
-                  |v| %s,
-              )
-              """.formatted(
-                  rustValue,
-                  toDafny(keyShape, "k", false, false),
-                  toDafny(valueShape, "v", false, false)
-                )
-            );
-          } else {
-            yield TokenTree.of(
-              """
-              ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(&%s.clone(),
-                  |k| %s,
-                  |v| %s,
-              )
-              """.formatted(
-                  rustValue,
-                  toDafny(keyShape, "k", false, false),
-                  toDafny(valueShape, "v", false, false)
-                )
-            );
-          }
-        } else {
-          yield TokenTree.of(
-            """
-
-            ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
-                    ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
-                        |k| %s,
-                        |v| %s,
-                    )
-                },
-                None => crate::r#_Wrappers_Compile::Option::None {}
-            })
-            """.formatted(
-                rustValue,
-                toDafny(keyShape, "k", false, false),
-                toDafny(valueShape, "v", false, false)
-              )
-          );
-        }
-      }
-      case STRUCTURE, UNION -> {
-        var structureShapeName = toSnakeCase(shape.getId().getName());
-        if (!isDafnyOption) {
-          if (isRustOption) {
-            yield TokenTree.of(
-              """
-              crate::conversions::%s::to_dafny(&%s.clone().unwrap())
-              """.formatted(structureShapeName, rustValue)
-            );
-          } else {
-            yield TokenTree.of(
-              """
-              crate::conversions::%s::to_dafny(&%s)
-              """.formatted(structureShapeName, rustValue)
-            );
-          }
-        } else {
-          yield TokenTree.of(
-            """
-            ::std::rc::Rc::new(match &%s {
-                Some(x) => crate::_Wrappers_Compile::Option::Some { value: crate::conversions::%s::to_dafny(&x) },
-                None => crate::_Wrappers_Compile::Option::None { }
-            })
-            """.formatted(rustValue, structureShapeName)
-          );
-        }
-      }
-      default -> throw new IllegalArgumentException(
-        "Unsupported shape type: %s".formatted(shape.getType())
-      );
-    };
-  }
+  );
 
   protected TokenTree enumToDafnyFunction(final EnumShape enumShape) {
     final Map<String, String> variables = MapUtils.merge(
@@ -988,22 +946,96 @@ public abstract class AbstractRustShimGenerator {
   }
 
   protected Set<RustFile> allOperationConversionModules() {
-    return serviceOperationShapes()
-      .map(this::operationConversionModules)
+    return streamAllBoundOperationShapes()
+      .map(this::boundOperationConversionModules)
       .flatMap(Collection::stream)
       .collect(Collectors.toSet());
   }
 
-  protected abstract Set<RustFile> operationConversionModules(
-    final OperationShape operationShape
-  );
+  protected Set<RustFile> boundOperationConversionModules(
+    final BoundOperationShape boundOperationShape
+  ) {
+    final Shape bindingShape = boundOperationShape.bindingShape();
+    final OperationShape operationShape = boundOperationShape.operationShape();
+
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      operationVariables(bindingShape, operationShape)
+    );
+
+    final String operationModuleName = toSnakeCase(
+      operationName(operationShape)
+    );
+
+    Optional<StructureShape> inputStructure = operationIndex.getInputShape(
+      operationShape
+    );
+    final boolean hasInputStructure =
+      inputStructure.isPresent() &&
+      !inputStructure.get().hasTrait(PositionalTrait.class) &&
+      !inputStructure.get().hasTrait(UnitTypeTrait.class);
+    Optional<StructureShape> outputStructure = operationIndex.getOutputShape(
+      operationShape
+    );
+    final boolean hasOutputStructure =
+      outputStructure.isPresent() &&
+      !outputStructure.get().hasTrait(PositionalTrait.class) &&
+      !outputStructure.get().hasTrait(UnitTypeTrait.class);
+
+    final Set<String> childModules = new HashSet<>();
+    if (hasInputStructure) {
+      childModules.add(
+        "_" + variables.get("snakeCaseSyntheticOperationInputName")
+      );
+    }
+    if (hasOutputStructure) {
+      childModules.add(
+        "_" + variables.get("snakeCaseSyntheticOperationOutputName")
+      );
+    }
+    final RustFile outerModule = new RustFile(
+      rootPathForShape(bindingShape)
+        .resolve("conversions")
+        .resolve(operationModuleName + ".rs"),
+      TokenTree
+        .of(
+          operationErrorConversionFunctions(boundOperationShape),
+          RustUtils.declarePubModules(childModules.stream())
+        )
+        .lineSeparated()
+    );
+
+    Set<RustFile> result = new HashSet<>(Set.of(outerModule));
+
+    if (hasInputStructure) {
+      final RustFile requestModule = operationRequestConversionModule(
+        bindingShape,
+        operationShape
+      );
+      result.add(requestModule);
+    }
+    if (hasOutputStructure) {
+      final RustFile responseModule = operationResponseConversionModule(
+        bindingShape,
+        operationShape
+      );
+      result.add(responseModule);
+    }
+
+    return result;
+  }
+
+  protected TokenTree operationErrorConversionFunctions(
+    final BoundOperationShape boundOperationShape
+  ) {
+    // By default none necessary, but SDKs need them
+    return TokenTree.empty();
+  }
 
   protected RustFile enumConversionModule(final EnumShape enumShape) {
-    Path path = Path.of(
-      "src",
-      "conversions",
-      toSnakeCase(enumName(enumShape)) + ".rs"
-    );
+    Path path = rootPathForShape(service)
+      .resolve("conversions")
+      .resolve(toSnakeCase(enumName(enumShape)) + ".rs");
 
     return new RustFile(
       path,
@@ -1013,58 +1045,160 @@ public abstract class AbstractRustShimGenerator {
     );
   }
 
+  protected RustFile unionConversionModule(final UnionShape unionShape) {
+    final Map<String, String> variables = MapUtils.merge(
+      serviceVariables(),
+      unionVariables(unionShape)
+    );
+
+    final List<Map<String, String>> perMemberVariables = unionShape
+      .members()
+      .stream()
+      .map(memberShape -> {
+        final Map<String, String> memberVariables = MapUtils.merge(
+          variables,
+          unionMemberVariables(memberShape)
+        );
+        final Shape targetShape = model.expectShape(memberShape.getTarget());
+        memberVariables.put(
+          "innerToDafny",
+          toDafny(targetShape, "x", false, false).toString()
+        );
+        memberVariables.put(
+          "innerFromDafny",
+          fromDafny(targetShape, "x", false, false).toString()
+        );
+        return memberVariables;
+      })
+      .toList();
+
+    variables.put(
+      "toDafnyVariants",
+      perMemberVariables
+        .stream()
+        .map(memberVariables ->
+          IOUtils.evalTemplate(
+            """
+            $qualifiedRustUnionName:L::$rustUnionMemberName:L(x) =>
+                crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
+                    $dafnyUnionMemberName:L: $innerToDafny:L,
+                },
+            """,
+            memberVariables
+          )
+        )
+        .collect(Collectors.joining("\n"))
+    );
+    variables.put(
+      "fromDafnyVariants",
+      perMemberVariables
+        .stream()
+        .map(memberVariables ->
+          IOUtils.evalTemplate(
+            """
+            crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
+                $dafnyUnionMemberName:L: x @ _,
+            } => $qualifiedRustUnionName:L::$rustUnionMemberName:L($innerFromDafny:L),
+            """,
+            memberVariables
+          )
+        )
+        .collect(Collectors.joining("\n"))
+    );
+
+    final String content = IOUtils.evalTemplate(
+      getClass(),
+      "runtimes/rust/conversions/union.rs",
+      variables
+    );
+    final Path path = rootPathForShape(service)
+      .resolve("conversions")
+      .resolve("%s.rs".formatted(toSnakeCase(unionName(unionShape))));
+    return new RustFile(path, TokenTree.of(content));
+  }
+
   /**
    * Generates values for variables commonly used in service-specific templates.
    */
   protected HashMap<String, String> serviceVariables() {
+    final String namespace = service.getId().getNamespace();
     final HashMap<String, String> variables = new HashMap<>();
+    variables.put("sdkId", getSdkId());
     variables.put("serviceName", service.getId().getName(service));
-    variables.put("dafnyModuleName", getDafnyModuleName());
-    variables.put("dafnyInternalModuleName", getDafnyInternalModuleName());
-    variables.put("dafnyTypesModuleName", getDafnyTypesModuleName());
+    variables.put("rustClientType", qualifiedRustServiceType(service));
+    variables.put("dafnyModuleName", getDafnyModuleName(namespace));
+    variables.put(
+      "dafnyInternalModuleName",
+      getDafnyInternalModuleName(namespace)
+    );
+    variables.put("dafnyTypesModuleName", getDafnyTypesModuleName(namespace));
+    variables.put("rustRootModuleName", getRustRootModuleName(namespace));
     variables.put("rustTypesModuleName", getRustTypesModuleName());
+    variables.put(
+      "rustConversionsModuleName",
+      getRustConversionsModuleName(namespace)
+    );
     return variables;
   }
 
-  protected String getDafnyModuleName() {
-    return service
-      .getId()
-      .getNamespace()
-      .replace(".", "::")
-      .toLowerCase(Locale.ROOT);
+  protected String getDafnyModuleName(final String namespace) {
+    String dafnyExternName = NamespaceHelper.standardize(namespace);
+    return dafnyExternName.replace(".", "::").toLowerCase(Locale.ROOT);
   }
 
-  protected String getDafnyInternalModuleName() {
-    return "%s::internaldafny".formatted(getDafnyModuleName());
+  protected String getDafnyInternalModuleName(final String namespace) {
+    return "%s::internaldafny".formatted(getDafnyModuleName(namespace));
   }
 
-  protected String getDafnyTypesModuleName() {
-    return "%s::types".formatted(getDafnyInternalModuleName());
+  protected String getDafnyTypesModuleName(final String namespace) {
+    return "%s::types".formatted(getDafnyInternalModuleName(namespace));
+  }
+
+  protected String getRustRootModuleName(final String namespace) {
+    return mergedGenerator.isMainNamespace(namespace)
+      ? "crate"
+      : "crate::deps::" + RustUtils.rustModuleForSmithyNamespace(namespace);
   }
 
   protected abstract String getRustTypesModuleName();
+
+  protected String getRustConversionsModuleName(final String namespace) {
+    return getRustRootModuleName(namespace) + "::conversions";
+  }
+
+  protected String getRustConversionsModuleNameForShape(final Shape shape) {
+    final String namespace = shape.getId().getNamespace();
+    return switch (shape.getType()) {
+      case STRUCTURE, UNION, ENUM -> getRustConversionsModuleName(namespace) +
+      "::" +
+      toSnakeCase(shape.getId().getName());
+      default -> "crate::standard_library_conversions";
+    };
+  }
 
   /**
    * Generates values for variables commonly used in operation-specific templates.
    */
   protected HashMap<String, String> operationVariables(
+    final Shape bindingShape,
     final OperationShape operationShape
   ) {
     final String opName = operationName(operationShape);
     final String opInputName = operationInputName(operationShape);
     final String opOutputName = operationOutputName(operationShape);
+    final String opErrorName = operationErrorTypeName(operationShape);
     final String synOpInputName = syntheticOperationInputName(operationShape);
     final String synOpOutputName = syntheticOperationOutputName(operationShape);
-    final String snakeCaseOpName = toSnakeCase(opName);
 
     final HashMap<String, String> variables = new HashMap<>();
+    variables.put("rustRootModuleName", topLevelNameForShape(bindingShape));
     variables.put("operationName", opName);
     variables.put("operationInputName", opInputName);
     variables.put("operationOutputName", opOutputName);
-    variables.put("operationErrorName", operationErrorTypeName(operationShape));
+    variables.put("operationErrorName", opErrorName);
     variables.put("syntheticOperationInputName", synOpInputName);
     variables.put("syntheticOperationOutputName", synOpOutputName);
-    variables.put("snakeCaseOperationName", snakeCaseOpName);
+    variables.put("snakeCaseOperationName", toSnakeCase(opName));
     variables.put("snakeCaseOperationInputName", toSnakeCase(opInputName));
     variables.put("snakeCaseOperationOutputName", toSnakeCase(opOutputName));
     variables.put(
@@ -1075,6 +1209,92 @@ public abstract class AbstractRustShimGenerator {
       "snakeCaseSyntheticOperationOutputName",
       toSnakeCase(synOpOutputName)
     );
+    variables.put("pascalCaseOperationName", toPascalCase(opName));
+    variables.put("pascalCaseOperationInputName", toPascalCase(opInputName));
+    variables.put("pascalCaseOperationOutputName", toPascalCase(opOutputName));
+    variables.put("pascalCaseOperationErrorName", toPascalCase(opErrorName));
+
+    if (bindingShape.isServiceShape()) {
+      variables.put("operationTargetName", "client");
+      variables.put(
+        "operationTargetType",
+        qualifiedRustServiceType((ServiceShape) bindingShape)
+      );
+    } else {
+      Map<String, String> resourceVariables = resourceVariables(
+        bindingShape.asResourceShape().get()
+      );
+      variables.put(
+        "operationTargetName",
+        resourceVariables.get("snakeCaseResourceName")
+      );
+      variables.put(
+        "operationTargetType",
+        evalTemplate(
+          "$rustRootModuleName:L::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
+          MapUtils.merge(variables, resourceVariables)
+        )
+      );
+    }
+
+    final StructureShape inputShape = operationIndex
+      .getInputShape(operationShape)
+      .get();
+    variables.put(
+      "operationInputType",
+      evalTemplate(
+        "$rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L",
+        variables
+      )
+    );
+    if (inputShape.hasTrait(PositionalTrait.class)) {
+      Shape resolvedInputShape = model.expectShape(
+        ModelUtils.resolveShape(inputShape, model).resolvedId()
+      );
+      variables.put(
+        "operationDafnyInputType",
+        dafnyTypeForShape(resolvedInputShape)
+      );
+    } else {
+      Map<String, String> inputShapeVariables = structureVariables(inputShape);
+      variables.put(
+        "operationDafnyInputType",
+        evalTemplate(
+          "&::std::rc::Rc<crate::$dafnyTypesModuleName:L::$structureName:L>",
+          inputShapeVariables
+        )
+      );
+    }
+
+    final StructureShape outputShape = operationIndex
+      .getOutputShape(operationShape)
+      .get();
+    if (
+      outputShape.hasTrait(PositionalTrait.class) ||
+      outputShape.hasTrait(UnitTypeTrait.class)
+    ) {
+      variables.put("operationOutputType", rustTypeForShape(outputShape));
+      variables.put("operationDafnyOutputType", dafnyTypeForShape(outputShape));
+    } else {
+      variables.put(
+        "operationOutputType",
+        evalTemplate(
+          "$rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L",
+          variables
+        )
+      );
+      Map<String, String> outputShapeVariables = structureVariables(
+        outputShape
+      );
+      variables.put(
+        "operationDafnyOutputType",
+        evalTemplate(
+          "::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>",
+          outputShapeVariables
+        )
+      );
+    }
+
     return variables;
   }
 
@@ -1102,6 +1322,112 @@ public abstract class AbstractRustShimGenerator {
     return "%sError".formatted(operationName(operationShape));
   }
 
+  protected String structureName(final StructureShape structureShape) {
+    return structureShape.getId().getName(service);
+  }
+
+  protected String rustStructureName(final StructureShape structureShape) {
+    return toPascalCase(structureName(structureShape));
+  }
+
+  protected String qualifiedRustStructureType(
+    final StructureShape structureShape
+  ) {
+    return "%s::%s".formatted(
+        mergedGenerator
+          .generatorForShape(structureShape)
+          .getRustTypesModuleName(),
+        rustStructureName(structureShape)
+      );
+  }
+
+  protected String topLevelNameForShape(final ToShapeId toShapeId) {
+    final ShapeId shapeId = toShapeId.toShapeId();
+    if (mergedGenerator.isMainNamespace(shapeId.getNamespace())) {
+      return "crate";
+    } else {
+      return (
+        "crate::deps::" +
+        RustUtils.rustModuleForSmithyNamespace(shapeId.getNamespace())
+      );
+    }
+  }
+
+  public Path rootPathForNamespace(final String namespace) {
+    if (mergedGenerator.isMainNamespace(namespace)) {
+      return Path.of("src");
+    } else {
+      return Path.of(
+        "src",
+        "deps",
+        RustUtils.rustModuleForSmithyNamespace(namespace)
+      );
+    }
+  }
+
+  public Path rootPathForShape(final ToShapeId toShapeId) {
+    return rootPathForNamespace(toShapeId.toShapeId().getNamespace());
+  }
+
+  protected String qualifiedRustServiceType(final ServiceShape serviceShape) {
+    return topLevelNameForShape(serviceShape) + "::client::Client";
+  }
+
+  protected String qualifiedRustResourceType(
+    final ResourceShape resourceShape
+  ) {
+    return evalTemplate(
+      topLevelNameForShape(resourceShape) +
+      "::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
+      resourceVariables(resourceShape)
+    );
+  }
+
+  protected HashMap<String, String> structureVariables(
+    final StructureShape structureShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String structureName = structureName(structureShape);
+    variables.put("structureName", structureName);
+    variables.put("snakeCaseStructureName", toSnakeCase(structureName));
+    variables.put("rustStructureName", rustStructureName(structureShape));
+    // TODO: Risky...
+    variables.put(
+      "dafnyTypesModuleName",
+      getDafnyTypesModuleName(structureShape.getId().getNamespace())
+    );
+    return variables;
+  }
+
+  protected HashMap<String, String> resourceVariables(
+    final ResourceShape resourceShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String resourceName = resourceName(resourceShape);
+    variables.put("resourceName", resourceName);
+    variables.put("snakeCaseResourceName", toSnakeCase(resourceName));
+    variables.put("rustResourceName", rustResourceTraitName(resourceShape));
+    variables.put("dafnyResourceName", dafnyResourceTraitName(resourceShape));
+    return variables;
+  }
+
+  /**
+   * Generates values for variables commonly used in templates specific to standard structures
+   * (e.g. not operation-related or {@code @error} structures).
+   */
+  protected HashMap<String, String> standardStructureVariables(
+    final StructureShape structureShape
+  ) {
+    final HashMap<String, String> variables = structureVariables(
+      structureShape
+    );
+    variables.put(
+      "qualifiedRustStructureType",
+      qualifiedRustStructureType(structureShape)
+    );
+    return variables;
+  }
+
   protected String enumName(final EnumShape enumShape) {
     return enumShape.getId().getName(service);
   }
@@ -1112,7 +1438,7 @@ public abstract class AbstractRustShimGenerator {
 
   protected String qualifiedRustEnumType(final EnumShape enumShape) {
     return "%s::%s".formatted(
-        getRustTypesModuleName(),
+        mergedGenerator.generatorForShape(enumShape).getRustTypesModuleName(),
         rustEnumName(enumShape)
       );
   }
@@ -1143,5 +1469,339 @@ public abstract class AbstractRustShimGenerator {
     variables.put("dafnyEnumMemberName", dafnyEnumMemberName(memberName));
     variables.put("rustEnumMemberName", rustEnumMemberName(memberName));
     return variables;
+  }
+
+  protected String resourceName(final ResourceShape resource) {
+    return resource.getId().getName(service);
+  }
+
+  protected String rustResourceTraitName(final ResourceShape resource) {
+    return toPascalCase(resourceName(resource));
+  }
+
+  protected String dafnyResourceTraitName(final ResourceShape resource) {
+    return "I" + resourceName(resource);
+  }
+
+  protected String unionName(final UnionShape unionShape) {
+    return unionShape.getId().getName(service);
+  }
+
+  protected String rustUnionName(final UnionShape unionShape) {
+    return toPascalCase(unionName(unionShape));
+  }
+
+  protected String qualifiedRustUnionName(final UnionShape unionShape) {
+    return "%s::%s".formatted(
+        mergedGenerator.generatorForShape(unionShape).getRustTypesModuleName(),
+        rustUnionName(unionShape)
+      );
+  }
+
+  /**
+   * Generates values for variables commonly used in union-specific templates.
+   */
+  protected HashMap<String, String> unionVariables(
+    final UnionShape unionShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String unionName = unionName(unionShape);
+    variables.put("unionName", unionName);
+    variables.put("snakeCaseUnionName", toSnakeCase(unionName));
+    variables.put("dafnyUnionName", unionName);
+    variables.put("rustUnionName", rustUnionName(unionShape));
+    variables.put("qualifiedRustUnionName", qualifiedRustUnionName(unionShape));
+    return variables;
+  }
+
+  protected String unionMemberName(final MemberShape memberShape) {
+    return memberShape.getMemberName();
+  }
+
+  protected String rustUnionMemberName(final MemberShape memberShape) {
+    return toPascalCase(unionMemberName(memberShape));
+  }
+
+  protected String dafnyUnionMemberName(final MemberShape memberShape) {
+    return DafnyNameResolver.escapeName(unionMemberName(memberShape));
+  }
+
+  /**
+   * Generates values for variables commonly used in union-member-specific templates.
+   */
+  protected HashMap<String, String> unionMemberVariables(
+    final MemberShape memberShape
+  ) {
+    final String memberName = unionMemberName(memberShape);
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
+
+    final HashMap<String, String> variables = new HashMap<>();
+    variables.put("unionMemberName", memberName);
+    variables.put("snakeCaseUnionMemberName", toSnakeCase(memberName));
+    variables.put("dafnyUnionMemberName", dafnyUnionMemberName(memberShape));
+    variables.put("rustUnionMemberName", rustUnionMemberName(memberShape));
+    variables.put("unionMemberType", rustTypeForShape(targetShape));
+    return variables;
+  }
+
+  /**
+   * Generates values for variables commonly used in structure-member-specific templates.
+   */
+  protected HashMap<String, String> structureMemberVariables(
+    final MemberShape memberShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String memberName = memberShape.getMemberName();
+    final Shape targetShape = model.expectShape(memberShape.getTarget());
+    variables.put("memberName", memberName);
+    variables.put("fieldName", toSnakeCase(memberName));
+    variables.put("fieldType", mergedGeneratorRustTypeForShape(targetShape));
+    return variables;
+  }
+
+  protected String qualifiedRustServiceErrorType() {
+    return "%s::error::Error".formatted(getRustTypesModuleName());
+  }
+
+  protected String errorName(final StructureShape errorShape) {
+    return errorShape.getId().getName(serviceForShape(model, errorShape));
+  }
+
+  protected String rustErrorName(final StructureShape errorShape) {
+    return toPascalCase(errorName(errorShape));
+  }
+
+  protected HashMap<String, String> errorVariables(
+    final StructureShape errorShape
+  ) {
+    final HashMap<String, String> variables = new HashMap<>();
+    final String errorName = errorName(errorShape);
+    final String rustErrorName = rustErrorName(errorShape);
+    variables.put("errorName", errorName);
+    variables.put("snakeCaseErrorName", toSnakeCase(errorName));
+    variables.put("rustErrorName", rustErrorName);
+    variables.put(
+      "qualifiedRustErrorVariant",
+      "%s::%s".formatted(qualifiedRustServiceErrorType(), rustErrorName)
+    );
+    variables.put(
+      "qualifiedRustServiceErrorType",
+      qualifiedRustServiceErrorType()
+    );
+
+    // This is where smithy-dafny's assumption about error shapes shows up
+    var messageMember = errorShape
+      .members()
+      .stream()
+      .filter(m -> m.getMemberName().equalsIgnoreCase("message"))
+      .collect(MoreCollectors.onlyElement());
+    variables.put("errorMessageMemberName", messageMember.getMemberName());
+
+    return variables;
+  }
+
+  protected String mergedGeneratorRustTypeForShape(final Shape shape) {
+    AbstractRustShimGenerator forShape = mergedGenerator.generatorForShape(
+      shape
+    );
+    return forShape != null
+      ? forShape.rustTypeForShape(shape)
+      : rustTypeForShape(shape);
+  }
+
+  protected String rustTypeForShape(final Shape originalShape) {
+    // First handle indirection like @reference
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
+      originalShape,
+      model
+    );
+    final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
+
+    if (shape.hasTrait(UnitTypeTrait.class)) {
+      return "()";
+    }
+
+    return switch (shape.getType()) {
+      case BOOLEAN -> "::std::primitive::bool";
+      // integral
+      case BYTE -> "::std::primitive::i8";
+      case SHORT -> "::std::primitive::i16";
+      case INTEGER -> "::std::primitive::i32";
+      case LONG -> "::std::primitive::i64";
+      // floats
+      case FLOAT -> "::std::primitive::f32";
+      case DOUBLE -> "::std::primitive::f64";
+      // special numerics
+      case BIG_INTEGER -> "::num::bigint::BigInt";
+      case BIG_DECIMAL -> "::num::rational::BigRational";
+      // special collections
+      case BLOB -> "::aws_smithy_types::Blob";
+      case STRING -> {
+        //noinspection deprecation
+        if (shape.hasTrait(EnumTrait.class)) {
+          yield qualifiedRustEnumType(
+            ModelUtils.stringToEnumShape(shape.asStringShape().orElseThrow())
+          );
+        }
+        yield "::std::string::String";
+      }
+      case ENUM -> qualifiedRustEnumType(shape.asEnumShape().orElseThrow());
+      // other simple shapes
+      case TIMESTAMP -> "::aws_smithy_types::DateTime";
+      // aggregates
+      case LIST -> {
+        final ListShape listShape = (ListShape) shape;
+        final String memberType = rustTypeForShape(
+          model.expectShape(listShape.getMember().getTarget())
+        );
+        yield "::std::vec::Vec<%s>".formatted(memberType);
+      }
+      case MAP -> {
+        final MapShape mapShape = (MapShape) shape;
+        final String keyType = rustTypeForShape(
+          model.expectShape(mapShape.getKey().getTarget())
+        );
+        final String valueType = rustTypeForShape(
+          model.expectShape(mapShape.getValue().getTarget())
+        );
+        yield "::std::collections::HashMap<%s, %s>".formatted(
+            keyType,
+            valueType
+          );
+      }
+      case STRUCTURE -> qualifiedRustStructureType((StructureShape) shape);
+      case UNION -> qualifiedRustUnionName((UnionShape) shape);
+      case RESOURCE -> qualifiedRustResourceType((ResourceShape) shape);
+      case SERVICE -> qualifiedRustServiceType((ServiceShape) shape);
+      default -> throw new UnsupportedOperationException(
+        "Unsupported shape type: " + shape.getType()
+      );
+    };
+  }
+
+  protected String dafnyTypeForShape(final Shape originalShape) {
+    // First handle indirection like @reference and @positional
+    final ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(
+      originalShape,
+      model
+    );
+    final Shape shape = model.expectShape(resolvedShapeId.resolvedId());
+
+    if (shape.hasTrait(UnitTypeTrait.class)) {
+      return "()";
+    }
+
+    return switch (shape.getType()) {
+      case BOOLEAN -> "::std::primitive::bool";
+      // integral
+      case BYTE -> "::std::primitive::i8";
+      case SHORT -> "::std::primitive::i16";
+      case INTEGER -> "::std::primitive::i32";
+      case LONG -> "::std::primitive::i64";
+      // floats
+      case FLOAT -> "::dafny_runtime::Sequence<u8>";
+      case DOUBLE -> "::dafny_runtime::Sequence<u8>";
+      // special numerics
+      case BIG_INTEGER -> "::num::bigint::BigInt";
+      case BIG_DECIMAL -> "::num::rational::BigRational";
+      // special collections
+      case BLOB -> "::dafny_runtime::dafny_runtime_conversions::DafnySequence<u8>";
+      case STRING -> {
+        //noinspection deprecation
+        if (shape.hasTrait(EnumTrait.class)) {
+          EnumShape enumShape = ModelUtils.stringToEnumShape(
+            shape.asStringShape().orElseThrow()
+          );
+          yield "::std::rc::Rc<crate::" +
+          getDafnyTypesModuleName(shape.getId().getNamespace()) +
+          "::" +
+          enumName(enumShape) +
+          ">";
+        }
+        if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+          yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<u8>";
+        }
+        yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>";
+      }
+      case ENUM -> "::std::rc::Rc<crate::" +
+      getDafnyTypesModuleName(shape.getId().getNamespace()) +
+      "::" +
+      enumName((EnumShape) shape) +
+      ">";
+      // other simple shapes
+      case TIMESTAMP -> "::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>";
+      // aggregates
+      case LIST -> {
+        final ListShape listShape = (ListShape) shape;
+        final String memberType = dafnyTypeForShape(
+          model.expectShape(listShape.getMember().getTarget())
+        );
+        yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<%s>".formatted(
+            memberType
+          );
+      }
+      case MAP -> {
+        final MapShape mapShape = (MapShape) shape;
+        final String keyType = dafnyTypeForShape(
+          model.expectShape(mapShape.getKey().getTarget())
+        );
+        final String valueType = dafnyTypeForShape(
+          model.expectShape(mapShape.getValue().getTarget())
+        );
+        yield "::dafny_runtime::dafny_runtime_conversions::DafnyMap<%s, %s>".formatted(
+            keyType,
+            valueType
+          );
+      }
+      case STRUCTURE -> "::std::rc::Rc<crate::r#" +
+      getDafnyTypesModuleName(shape.getId().getNamespace()) +
+      "::" +
+      structureName((StructureShape) shape) +
+      ">";
+      case UNION -> "::std::rc::Rc<crate::r#" +
+      getDafnyTypesModuleName(shape.getId().getNamespace()) +
+      "::" +
+      unionName((UnionShape) shape) +
+      ">";
+      case RESOURCE -> "::dafny_runtime::Object<dyn crate::r#" +
+      getDafnyTypesModuleName(shape.getId().getNamespace()) +
+      "::I" +
+      resourceName((ResourceShape) shape) +
+      ">";
+      case SERVICE -> {
+        ServiceShape service = (ServiceShape) shape;
+        yield "::dafny_runtime::Object<dyn crate::r#" +
+        getDafnyTypesModuleName(shape.getId().getNamespace()) +
+        "::I" +
+        mergedGenerator.generatorForShape(service).getSdkId() +
+        "Client>";
+      }
+      default -> throw new UnsupportedOperationException(
+        "Unsupported shape type: " + shape.getType()
+      );
+    };
+  }
+
+  public abstract TokenTree topLevelModuleDeclarations();
+
+  public RustFile depTopLevelModule() {
+    final String rustModule = RustUtils.rustModuleForSmithyNamespace(
+      service.getId().getNamespace()
+    );
+    return new RustFile(
+      Path.of("src", "deps", rustModule + ".rs"),
+      topLevelModuleDeclarations()
+    );
+  }
+
+  protected abstract String getSdkId();
+
+  protected ServiceShape serviceForShape(final Model model, final Shape shape) {
+    if (shape.isServiceShape()) {
+      return (ServiceShape) shape;
+    } else {
+      final String namespace = shape.getId().getNamespace();
+      return ModelUtils.serviceFromNamespace(model, namespace);
+    }
   }
 }
