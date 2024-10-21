@@ -18,9 +18,7 @@ class RustTestModels extends TestModelTest {
   static {
     DISABLED_TESTS.add("AggregateReferences");
     DISABLED_TESTS.add("CodegenPatches");
-    DISABLED_TESTS.add("Constraints");
     DISABLED_TESTS.add("Dependencies");
-    DISABLED_TESTS.add("Extendable");
     DISABLED_TESTS.add("Extern");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
@@ -31,6 +29,9 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/lakeformation");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
+    // V2 Models are not yet supported in Rust.
+    DISABLED_TESTS.add("aws-sdks/ddbv2");
+    DISABLED_TESTS.add("aws-sdks/kmsv2");
   }
 
   @ParameterizedTest
