@@ -96,7 +96,7 @@ Resources:
               - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*"
 
   S3DafnyTestBucket:
-    Type: 'AWS::S3::Bucket'
+    Type: "AWS::S3::Bucket"
     Properties:
       BucketName: s3-dafny-test-bucket
       LifecycleConfiguration:
@@ -111,7 +111,7 @@ Resources:
         RestrictPublicBuckets: false
 
   S3DafnyTestBucketUsage:
-    Type: 'AWS::IAM::ManagedPolicy'
+    Type: "AWS::IAM::ManagedPolicy"
     Properties:
       ManagedPolicyName: S3-Dafny-Test-Bucket-Policy
       PolicyDocument:
@@ -119,11 +119,11 @@ Resources:
         Statement:
           - Effect: Allow
             Action:
-              - 's3:PutObject'
-              - 's3:GetObject'
-              - 's3:DeleteObject'
+              - "s3:PutObject"
+              - "s3:GetObject"
+              - "s3:DeleteObject"
             Resource:
-              - !Join [ "", [ !GetAtt S3DafnyTestBucket.Arn, '/*'] ]
+              - !Join ["", [!GetAtt S3DafnyTestBucket.Arn, "/*"]]
 
   GitHubCIRole:
     Type: "AWS::IAM::Role"
