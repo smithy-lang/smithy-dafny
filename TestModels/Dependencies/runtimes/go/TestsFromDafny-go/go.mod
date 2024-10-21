@@ -20,9 +20,6 @@ require (
 
 replace github.com/smithy-lang/smithy-dafny/TestModels/Dependencies v0.0.0 => ../ImplementationFromDafny-go
 
-//TODO: Drop this after Dafny fixes the https://t.corp.amazon.com/P150784381
-replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/
-
 replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/
 
 replace github.com/smithy-lang/smithy-dafny/TestModels/Constraints v0.0.0 => ../../../../Constraints/runtimes/go/ImplementationFromDafny-go
