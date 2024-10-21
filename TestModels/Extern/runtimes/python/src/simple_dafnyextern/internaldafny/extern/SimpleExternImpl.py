@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from simple_dafnyextern.internaldafny.generated.SimpleExternImpl import *
 from simple_dafnyextern.internaldafny.generated import SimpleDafnyExternTypes
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 
 @staticmethod
 def GetExtern(config, input):
@@ -18,7 +18,7 @@ def GetExtern(config, input):
 @staticmethod
 def ExternMustError(config, input):
   exception = Exception(input)
-  return Wrappers.Result_Failure(SimpleDafnyExternTypes.Error_Opaque(exception))
+  return Wrappers.Result_Failure(SimpleDafnyExternTypes.Error_Opaque(exception, repr(input)))
 
 default__.GetExtern = GetExtern
 default__.ExternMustError = ExternMustError

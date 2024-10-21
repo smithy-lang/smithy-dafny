@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -129,14 +130,28 @@ public class CodegenCli {
       .withServiceModel(serviceModel)
       .withDependentModelPaths(cliArguments.dependentModelPaths)
       .withDependencyLibraryNames(cliArguments.dependencyLibraryNames)
-      .withNamespace(cliArguments.namespace)
+      .withNamespaces(cliArguments.namespaces)
       .withTargetLangOutputDirs(outputDirs)
       .withTargetLangTestOutputDirs(testOutputDirs)
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
-      .withLocalServiceTest(cliArguments.localServiceTest)
       .withDafnyVersion(cliArguments.dafnyVersion)
       .withUpdatePatchFiles(cliArguments.updatePatchFiles)
       .withGenerationAspects(cliArguments.generationAspects);
+    // Rust currently generates all code for all dependencies at once,
+    // and the makefile structure makes it very difficult to avoid passing --local-service-test
+    // when we don't actually want it for --aws-sdk style projects.
+    // For now just ignoring it with a warning.
+    if (
+      outputDirs.containsKey(TargetLanguage.RUST) &&
+      cliArguments.awsSdkStyle &&
+      cliArguments.localServiceTest
+    ) {
+      LOGGER.warn(
+        "Ignoring --local-service-test because --output-rust and --aws-sdk are also present"
+      );
+    } else {
+      engineBuilder.withLocalServiceTest(cliArguments.localServiceTest);
+    }
     cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
     cliArguments.javaAwsSdkVersion.ifPresent(
       engineBuilder::withJavaAwsSdkVersion
@@ -148,10 +163,8 @@ public class CodegenCli {
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
     final CodegenEngine engine = engineBuilder.build();
     switch (cliArguments.command) {
-      case GENERATE:
-        engine.run();
-      case PATCH_AFTER_TRANSPILE:
-        engine.patchAfterTranspiling();
+      case GENERATE -> engine.run();
+      case PATCH_AFTER_TRANSPILE -> engine.patchAfterTranspiling();
     }
   }
 
@@ -203,7 +216,7 @@ public class CodegenCli {
           .longOpt("namespace")
           .desc("smithy namespace to generate code for, such as 'com.foo'")
           .hasArg()
-          .required()
+          .valueSeparator(',')
           .build()
       )
       .addOption(
@@ -431,6 +444,13 @@ public class CodegenCli {
           .hasArgs()
           .valueSeparator(',')
           .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("local-service-test")
+          .desc("<optional> generate Dafny that tests a local service")
+          .build()
       );
   }
 
@@ -453,7 +473,7 @@ public class CodegenCli {
     Path modelPath,
     Path[] dependentModelPaths,
     Map<String, String> dependencyLibraryNames,
-    String namespace,
+    Set<String> namespaces,
     Optional<String> libraryName,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
@@ -526,7 +546,10 @@ public class CodegenCli {
             .collect(Collectors.toMap(i -> i[0], i -> i[1]))
           : new HashMap<>();
 
-      final String namespace = commandLine.getOptionValue('n');
+      final Set<String> namespaces = Optional
+        .ofNullable(commandLine.getOptionValues("namespace"))
+        .<Set<String>>map(ns -> new HashSet<>(Arrays.asList(ns)))
+        .orElse(Collections.emptySet());
 
       final Optional<String> libraryName = Optional.ofNullable(
         commandLine.getOptionValue("library-name")
@@ -623,7 +646,7 @@ public class CodegenCli {
           modelPath,
           dependentModelPaths,
           dependencyNamespacesToLibraryNamesMap,
-          namespace,
+          namespaces,
           libraryName,
           outputDotnetDir,
           outputJavaDir,

@@ -10,6 +10,8 @@ include ../SharedMakefile.mk
 PROJECT_SERVICES := \
 	LanguageSpecificLogic
 
+MAIN_SERVICE_FOR_RUST := LanguageSpecificLogic
+
 SERVICE_NAMESPACE_LanguageSpecificLogic=language.specific.logic
 
 SERVICE_DEPS_LanguageSpecificLogic :=
@@ -38,4 +40,4 @@ TRANSLATION_RECORD_GO := \
 PYTHON_MODULE_NAME=language_specific_logic
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr

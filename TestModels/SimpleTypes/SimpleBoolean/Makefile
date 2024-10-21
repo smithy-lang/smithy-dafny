@@ -15,6 +15,8 @@ GO_NAMESPACE=simpletypesboolean
 PROJECT_SERVICES := \
 	SimpleBoolean
 
+MAIN_SERVICE_FOR_RUST := SimpleBoolean
+
 SERVICE_NAMESPACE_SimpleBoolean=simple.types.boolean
 
 SERVICE_DEPS_SimpleBoolean :=
@@ -30,7 +32,7 @@ TRANSLATION_RECORD_GO := \
 PYTHON_MODULE_NAME=simple_types_boolean
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

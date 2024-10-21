@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "projections": {
+    "operation-subset": {
+      "transforms": [
+        {
+          "name": "excludeShapesBySelector",
+          "args": {
+            "selector": "operation [id|name = GetWorkUnitResults]"
+          }
+        },
+        {
+          "name": "removeUnusedShapes",
+          "args": {}
+        }
+      ],
+      "plugins": {
+        "dafny-client-codegen": {
+          "edition": "2023",
+          "service": "com.amazonaws.lakeformation#AWSLakeFormation",
+          "dafnyVersion": "${DAFNY_VERSION}",
+          "targetLanguages": ["dotnet", "java"],
+          "includeDafnyFile": "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
+        }
+      }
+    }
+  }
+}

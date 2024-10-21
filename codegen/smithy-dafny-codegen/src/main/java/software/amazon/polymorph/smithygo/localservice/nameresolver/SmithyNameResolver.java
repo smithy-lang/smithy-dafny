@@ -110,9 +110,7 @@ public class SmithyNameResolver {
     }
     // TODO: Figure out the type of timestamp
     if (shape.isTimestampShape()) {
-      return "time"
-        .concat(DOT)
-        .concat(symbol.getName());
+      return "time".concat(DOT).concat(symbol.getName());
     }
     return SmithyNameResolver
       .smithyTypesNamespace(shape)
@@ -141,7 +139,7 @@ public class SmithyNameResolver {
     }
     // TODO: Figure types of Timestamp shape after completing timestamps
     if (symbol.getFullName().equals("time.Time")) {
-      return(symbol.getFullName());
+      return (symbol.getFullName());
     }
     return SmithyNameResolver
       .smithyTypesNamespaceAws(serviceTrait, subtype)
