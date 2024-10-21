@@ -148,6 +148,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
       }
       if (!this.isOptional) {
+        // TODO: will this work in MPL?
         writer.addImportFromModule(
               SmithyNameResolver.getGoModuleNameForSmithyNamespace(
                 resourceOrService.toShapeId().getNamespace()
