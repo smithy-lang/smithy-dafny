@@ -1,0 +1,25 @@
+[package]
+name = "simple_extendable"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+wrapped-client = []
+
+[dependencies]
+aws-smithy-runtime = {version = "1.7.1", features=["client"]}
+aws-smithy-runtime-api = {version = "1.7.2", features=["client"]}
+aws-smithy-types = "1.2.4"
+dafny_runtime = { path = "../../../dafny-dependencies/dafny_runtime_rust"}
+
+[dependencies.tokio]
+version = "1.26.0"
+features = ["full"]
+
+[dev-dependencies]
+simple_extendable = { path = ".", features = ["wrapped-client"] }
+
+[lib]
+path = "src/implementation_from_dafny.rs"
