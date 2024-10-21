@@ -5,13 +5,13 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
-	_dafny "github.com/dafny-lang/DafnyRuntimeGo/dafny"
+	_dafny "github.com/dafny-lang/DafnyRuntimeGo/v4/dafny"
 	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
-	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kms/ComAmazonawsKmsTypes"
-	"github.com/smithy-lang/smithy-dafny/kms/KMSwrapped"
+	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kmsv2/ComAmazonawsKmsTypes"
+	"github.com/smithy-lang/smithy-dafny/kmsv2/KMSwrapped"
 )
 
-func (_static *CompanionStruct_Default___) KMSClient() Wrappers.Result {
+func (_static CompanionStruct_Default___) KMSClient() Wrappers.Result {
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile("default"))
 	if err != nil {
 		panic(err)
@@ -21,7 +21,7 @@ func (_static *CompanionStruct_Default___) KMSClient() Wrappers.Result {
 	})})
 }
 
-func (_static *CompanionStruct_Default___) RegionMatch(k ComAmazonawsKmsTypes.IKMSClient, S _dafny.Sequence) Wrappers.Option {
+func (_static CompanionStruct_Default___) RegionMatch(k ComAmazonawsKmsTypes.IKMSClient, S _dafny.Sequence) Wrappers.Option {
 	var r = func() *string {
 		var s string
 		for i := _dafny.Iterate(S); ; {
