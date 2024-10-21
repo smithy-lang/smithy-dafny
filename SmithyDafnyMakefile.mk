@@ -468,8 +468,7 @@ polymorph_go:
 _polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_go: MODULE_NAME=--library-name $(GO_MODULE_NAME)
 _polymorph_go: DEPENDENCY_MODULE_NAMES = $(GO_DEPENDENCY_MODULE_NAMES)
-#TODO: Drop go_imports till Dafny bugs are fix otherwise this fails
-_polymorph_go: _polymorph _mv_polymorph_go
+_polymorph_go: _polymorph _mv_polymorph_go run_goimports
 
 run_goimports:
 	cd runtimes/go/ImplementationFromDafny-go && goimports -w .

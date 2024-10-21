@@ -1250,16 +1250,16 @@ public class DafnyLocalServiceTypeConversionProtocol
               if (dependencies == null) {
                 return;
               }
-              final var sdkId = serviceShape.hasTrait(LocalServiceTrait.class)
-                ? serviceShape.expectTrait(LocalServiceTrait.class).getSdkId()
-                : serviceShape
-                  .expectTrait(ServiceTrait.class)
-                  .getSdkId()
-                  .toLowerCase();
               for (var dep : dependencies) {
                 final var depService = context
                   .model()
                   .expectShape(dep, ServiceShape.class);
+                final var sdkId = depService.hasTrait(LocalServiceTrait.class)
+                  ? depService.expectTrait(LocalServiceTrait.class).getSdkId()
+                  : depService
+                  .expectTrait(ServiceTrait.class)
+                  .getSdkId()
+                  .toLowerCase();
                 w.write(
                   """
                   if err.Is_$L() {
