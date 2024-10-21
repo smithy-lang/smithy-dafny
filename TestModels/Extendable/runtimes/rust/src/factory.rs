@@ -4,7 +4,7 @@
 #![deny(warnings, unconditional_panic)]
 #![deny(clippy::all)]
 
-use std::rc::Rc;
+use crate::_SimpleExtendableResourcesTest_Compile::ExtendableResource;
 use crate::r#_Wrappers_Compile::Result;
 use crate::simple::extendable::resources::internaldafny::types::Error;
 use crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceDataInput;
@@ -12,7 +12,7 @@ use crate::simple::extendable::resources::internaldafny::types::GetExtendableRes
 use crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput;
 use crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsOutput;
 use crate::simple::extendable::resources::internaldafny::types::IExtendableResource;
-use crate::_SimpleExtendableResourcesTest_Compile::ExtendableResource;
+use std::rc::Rc;
 
 pub mod simple {
     pub mod extendable {
@@ -27,7 +27,7 @@ pub mod simple {
 }
 
 pub struct NativeResource {
-    pub inner: Box<dyn IExtendableResource>
+    pub inner: Box<dyn IExtendableResource>,
 }
 
 impl dafny_runtime::UpcastObject<dyn std::any::Any> for NativeResource {
