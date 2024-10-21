@@ -135,7 +135,7 @@ Resources:
         - !Ref KMSUsage
         - !Ref DDBDafnyTestTableUsage
         - !Ref SQSUsage
-	- !Ref S3DafnyTestBucketUsage
+        - !Ref S3DafnyTestBucketUsage
       AssumeRolePolicyDocument: !Sub |
         {
           "Version": "2012-10-17",   
