@@ -11,18 +11,18 @@ PROJECT_SERVICES := \
 	SimpleCallingAWSSDKFromLocalService
 
 PROJECT_DEPENDENCIES := \
-	aws-sdks/kms \
-	aws-sdks/ddb 
+	aws-sdks/kmsv2 \
+	aws-sdks/ddbv2 
 
 PROJECT_INDEX := \
-	aws-sdks/kms/src/Index.dfy \
-	aws-sdks/ddb/src/Index.dfy
+	aws-sdks/kmsv2/src/Index.dfy \
+	aws-sdks/ddbv2/src/Index.dfy
 
 SERVICE_NAMESPACE_SimpleCallingAWSSDKFromLocalService=simple.callingawssdkfromlocalservice
 
 SERVICE_DEPS_SimpleCallingAWSSDKFromLocalService := \
-	aws-sdks/kms \
-	aws-sdks/ddb 
+	aws-sdks/kmsv2 \
+	aws-sdks/ddbv2
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
@@ -36,8 +36,8 @@ PYTHON_DEPENDENCY_MODULE_NAMES := \
 
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr \
-    --translation-record ../aws-sdks/ddb/runtimes/python/src/com_amazonaws_dynamodb/internaldafny/generated/dafny_src-py.dtr \
-    --translation-record ../aws-sdks/kms/runtimes/python/src/com_amazonaws_kms/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../aws-sdks/ddbv2/runtimes/python/src/com_amazonaws_dynamodb/internaldafny/generated/dafny_src-py.dtr \
+    --translation-record ../aws-sdks/kmsv2/runtimes/python/src/com_amazonaws_kms/internaldafny/generated/dafny_src-py.dtr
 
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
@@ -66,5 +66,5 @@ GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFrom
 
 TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
-	aws-sdks/kms/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
-	aws-sdks/ddb/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr 
+	aws-sdks/kmsv2/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	aws-sdks/ddbv2/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr 
