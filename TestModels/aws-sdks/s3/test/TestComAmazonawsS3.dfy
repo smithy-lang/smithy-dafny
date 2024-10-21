@@ -12,53 +12,48 @@ module TestComAmazonawsS3 {
     const testObjectKey := "smithy-dafny-test-model-object-key"
 
     method {:test} BasicRoundTripTests() {
-        var client :- expect S3.S3Client();
         DeleteObjectTest(
             input := S3.Types.DeleteObjectRequest(
                 Bucket := testBucket,
                 Key := testObjectKey
-            ),
-            s3Client := client
+            )
         );
         PutObjectTest(
             input := S3.Types.PutObjectRequest(
                 Bucket := testBucket,
                 Key := testObjectKey,
                 Body := Wrappers.Some([ 97, 115, 100, 102 ])
-            ),
-            s3Client := client
+            )
         );
         GetObjectTest(
             input := S3.Types.GetObjectRequest(
                 Bucket := testBucket,
                 Key := testObjectKey
             ),
-            expectedBody := ([ 97, 115, 100, 102 ]),
-            s3Client := client
+            expectedBody := ([ 97, 115, 100, 102 ])
         );
         DeleteObjectTest(
             input := S3.Types.DeleteObjectRequest(
                 Bucket := testBucket,
                 Key := testObjectKey
-            ),
-            s3Client := client
+            )
         );
         GetObjectTestFailureNoSuchKey(
             input := S3.Types.GetObjectRequest(
                 Bucket := testBucket,
                 Key := testObjectKey
-            ),
-            s3Client := client
+            )
         );
     }
 
     method GetObjectTest(
         nameonly input: S3.Types.GetObjectRequest,
-        nameonly expectedBody: S3.Types.StreamingBlob,
-        nameonly s3Client: S3.Types.IS3Client
+        nameonly expectedBody: S3.Types.StreamingBlob
     )
     {
-        var ret := s3Client.GetObject(input);
+        var client :- expect S3.S3Client();
+
+        var ret := client.GetObject(input);
 
         expect(ret.Success?);
 
@@ -69,24 +64,24 @@ module TestComAmazonawsS3 {
     }
 
     method GetObjectTestFailureNoSuchKey(
-        nameonly input: S3.Types.GetObjectRequest,
-        nameonly s3Client: S3.Types.IS3Client
+        nameonly input: S3.Types.GetObjectRequest
     )
     {
-        var ret := s3Client.GetObject(input);
+        var client :- expect S3.S3Client();
+
+        var ret := client.GetObject(input);
 
         expect ret.Failure?;
-        // TODO: this fails in CI..?
-        print(ret.error);
         expect ret.error.NoSuchKey?;
     }
 
     method PutObjectTest(
-        nameonly input: S3.Types.PutObjectRequest,
-        nameonly s3Client: S3.Types.IS3Client
+        nameonly input: S3.Types.PutObjectRequest
     )
     {
-        var ret := s3Client.PutObject(input);
+        var client :- expect S3.S3Client();
+
+        var ret := client.PutObject(input);
 
         expect(ret.Success?);
 
@@ -97,11 +92,12 @@ module TestComAmazonawsS3 {
     }
 
     method DeleteObjectTest(
-        nameonly input: S3.Types.DeleteObjectRequest,
-        nameonly s3Client: S3.Types.IS3Client
+        nameonly input: S3.Types.DeleteObjectRequest
     )
     {
-        var ret := s3Client.DeleteObject(input);
+        var client :- expect S3.S3Client();
+
+        var ret := client.DeleteObject(input);
 
         expect(ret.Success?);
     }
