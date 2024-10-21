@@ -8,7 +8,7 @@ module TestComAmazonawsS3 {
     import opened StandardLibrary.UInt
     import opened Wrappers
 
-    const testBucket := "smithy-dafny-s3-test-bucket"
+    const testBucket := "s3-dafny-test-bucket"
     const testObjectKey := "smithy-dafny-test-model-object-key"
 
     method {:test} BasicRoundTripTests() {
