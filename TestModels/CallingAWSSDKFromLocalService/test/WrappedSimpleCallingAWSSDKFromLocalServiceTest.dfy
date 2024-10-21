@@ -5,7 +5,7 @@ include "SimpleCallingAWSSDKFromLocalServiceImplTest.dfy"
 
 module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
   import Com.Amazonaws.Kms
-  import DDB = Com.Amazonaws.Dynamodb
+  import Com.Amazonaws.Dynamodb
   import SimpleCallingAWSSDKFromLocalService
 
   import opened WrappedSimpleCallingAWSSDKFromLocalServiceService
@@ -56,7 +56,7 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
     modifies client.Modifies
     ensures client.ValidState()
   {
-    var ddbClient :- expect DDB.DynamoDBClient();
+    var ddbClient :- expect Dynamodb.DynamoDBClient();
     var resFailure := client.CallDDBScan(SimpleCallingAWSSDKFromLocalService.Types.CallDDBScanInput(ddbClient := ddbClient, tableArn := TABLE_ARN_FAILURE_CASE));
     expect resFailure.Failure?;
   }
