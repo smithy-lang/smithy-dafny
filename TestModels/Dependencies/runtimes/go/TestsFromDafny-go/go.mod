@@ -4,8 +4,6 @@ go 1.23.0
 
 require github.com/dafny-lang/DafnyStandardLibGo v0.0.0
 
-require github.com/dafny-lang/DafnyRuntimeGo v0.0.0 // indirect
-
 require github.com/smithy-lang/smithy-dafny/TestModels/Constraints v0.0.0
 
 require github.com/smithy-lang/smithy-dafny/TestModels/Extendable v0.0.0

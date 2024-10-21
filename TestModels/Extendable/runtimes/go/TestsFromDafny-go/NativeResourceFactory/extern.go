@@ -1,7 +1,7 @@
 package NativeResourceFactory
 
 import (
-	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
+	"github.com/dafny-lang/DafnyRuntimeGo/v4/dafny"
 	ExtendableResource "github.com/smithy-lang/smithy-dafny/TestModels/Extendable/ExtendableResource"
 	SimpleExtendableResourcesTypes "github.com/smithy-lang/smithy-dafny/TestModels/Extendable/SimpleExtendableResourcesTypes"
 	"github.com/smithy-lang/smithy-dafny/TestModels/Extendable/test/simpleextendableresourcessmithygenerated"
