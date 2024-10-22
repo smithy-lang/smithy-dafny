@@ -1,0 +1,23 @@
+[package]
+name = "documentation"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+wrapped-client = []
+
+[dependencies]
+aws-smithy-runtime = {version = "1.6.0", features = ["client"] }
+aws-smithy-runtime-api = {version = "1.7.0", features = ["client"] }
+aws-smithy-types = "1.2.0"
+dafny_runtime = { path = "../../../dafny-dependencies/dafny_runtime_rust"}
+
+[dev-dependencies]
+documentation = { path = ".", features = ["wrapped-client"] }
+
+[dependencies.tokio]
+version = "1.26.0"
+features = ["full"]
+
+[lib]
+path = "src/implementation_from_dafny.rs"
