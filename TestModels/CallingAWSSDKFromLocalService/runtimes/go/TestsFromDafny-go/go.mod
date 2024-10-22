@@ -6,7 +6,8 @@ require github.com/dafny-lang/DafnyStandardLibGo v0.0.0
 
 require (
 	github.com/aws/smithy-go v1.20.4
-	github.com/dafny-lang/DafnyRuntimeGo v0.0.0
+	github.com/dafny-lang/DafnyStandardLibGo v0.0.0
+	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.8.0
 	github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService v0.0.0
 	github.com/smithy-lang/smithy-dafny/ddb v0.0.0
 	github.com/smithy-lang/smithy-dafny/kms v0.0.0
@@ -32,9 +33,6 @@ require (
 )
 
 replace github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService v0.0.0 => ../ImplementationFromDafny-go
-
-//TODO: Drop this after Dafny fixes the https://t.corp.amazon.com/P150784381
-replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/
 
 replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/
 
