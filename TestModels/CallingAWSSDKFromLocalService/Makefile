@@ -1,7 +1,7 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-CORES=10
+CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
 
@@ -43,8 +43,8 @@ WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleCallingAWSSDKFromL
 # Go
 
 GO_DEPENDENCY_MODULE_NAMES := \
-	--dependency-library-name=com.amazonaws.dynamodb=github.com/smithy-lang/smithy-dafny/ddb \
-	--dependency-library-name=com.amazonaws.kms=github.com/smithy-lang/smithy-dafny/kms
+	--dependency-library-name=com.amazonaws.kms=github.com/smithy-lang/smithy-dafny/kmsv2 \
+	--dependency-library-name=com.amazonaws.dynamodb=github.com/smithy-lang/smithy-dafny/ddbv2
 
 GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService"
 
