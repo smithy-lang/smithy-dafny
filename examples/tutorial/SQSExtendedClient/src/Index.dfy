@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SQSExtendedImpl.dfy"
 
-module {:extern "com.amazonaws.sqsextended.internaldafny" } SQSExtended refines AbstractComAmazonawsSqsextendedService {
+module {:extern "polymorph.tutorial.sqsextended.internaldafny" } SQSExtended refines AbstractPolymorphTutorialSqsextendedService {
   import Operations = AmazonSQSExtendedImpl
 
   method SQSExtended(config: SQSExtendedClientConfig)

@@ -5,7 +5,7 @@ include "../src/Index.dfy"
 module {:options "--function-syntax:4"} SQSExtendedClientImplTest {
 
     import SQSExtended
-    import opened ComAmazonawsSqsextendedTypes
+    import opened PolymorphTutorialSqsextendedTypes
     import opened Wrappers
 
     method {:test} TestClient(){

@@ -22,13 +22,11 @@ PROJECT_DEPENDENCIES := \
 PROJECT_INDEX := \
 	SQS/src/Index.dfy
 
-SERVICE_NAMESPACE_SQSExtendedClient=com.amazonaws.sqsextended
+SERVICE_NAMESPACE_SQSExtendedClient=polymorph.tutorial.sqsextended
 
 # Dependencies for each local service
 SERVICE_DEPS_SQSExtendedClient := \
 	SQS
-
-POLYMORPH_OPTIONS=--generate project-files
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated

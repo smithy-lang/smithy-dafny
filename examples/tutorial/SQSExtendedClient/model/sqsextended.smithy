@@ -1,12 +1,13 @@
 $version: "2"
 
-namespace com.amazonaws.sqsextended
+namespace polymorph.tutorial.sqsextended
 
 use com.amazonaws.sqs#Message
 
 @aws.polymorph#localService(
   sdkId: "SQSExtended",
   config: SQSExtendedClientConfig,
+  configRequired: true,
   dependencies: [
     com.amazonaws.sqs#AmazonSQS
   ]
@@ -54,7 +55,6 @@ structure RetryMessageError {
   @required
   message: String
 }
-
 
 operation HandleMessages {
   input := {
