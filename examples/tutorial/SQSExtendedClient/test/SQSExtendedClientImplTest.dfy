@@ -16,28 +16,43 @@ module {:options "--function-syntax:4"} SQSExtendedClientImplTest {
             SQSExtendedClientConfig(sqsClient := sqsClient)
         );
 
-        expect false, "...that you'll write actual tests using the client here :)";
-        // TestSomeOperation1(client);
-        // TestSomeOperation2(client);
-        // ...
+        TestHandleMessages(sqsClient, extendedClient);
     }
 
-    method TestHandleMessages(client: SQSExtended.SQSExtendedClient)
-        requires client.ValidState()
-        modifies client.Modifies
+    method TestHandleMessages(sqsClient: ComAmazonawsSqsTypes.ISQSClient, extendedClient: SQSExtended.SQSExtendedClient)
+        requires sqsClient.ValidState()
+        requires extendedClient.ValidState()
+        modifies 
+            sqsClient.Modifies, 
+            sqsClient.History,
+            extendedClient.Modifies
      {
+        // Create test queue
+        var createQueueResponse :- expect sqsClient.CreateQueue(ComAmazonawsSqsTypes.CreateQueueRequest(
+            QueueName := "PolymorphExtendedSQSTest"
+        ));
+        var queueUrl :- expect createQueueResponse.QueueUrl;
+        
+        // Send a message
+        var sendMessageResponse :- expect sqsClient.SendMessage(ComAmazonawsSqsTypes.SendMessageRequest(
+            QueueUrl := queueUrl,
+            MessageBody := "Hello world!"
+        ));
+
+        // Receive and handle the message
         var receiveMessagesRequest := ComAmazonawsSqsTypes.ReceiveMessageRequest(
-            QueueUrl := "foo"
+            QueueUrl := queueUrl,
+            WaitTimeSeconds := Some(20)
         );
         var handler := new MyMessageHandler();
-        var result := client.HandleMessages(PolymorphTutorialSqsextendedTypes.HandleMessagesInput(
+        var result :- expect extendedClient.HandleMessages(HandleMessagesInput(
             receiveRequest := receiveMessagesRequest,
             handler := handler
         )); 
     }
 
 
-    class MyMessageHandler extends PolymorphTutorialSqsextendedTypes.IMessageHandler {
+    class MyMessageHandler extends IMessageHandler {
         constructor() 
             ensures ValidState()
             ensures fresh(History)
