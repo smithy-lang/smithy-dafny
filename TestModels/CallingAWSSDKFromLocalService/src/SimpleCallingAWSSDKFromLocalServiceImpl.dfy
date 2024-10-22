@@ -33,6 +33,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
       return Failure(ComAmazonawsDynamodb(retScan.error));
     }
   }
+  
   method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
     returns (output: Result<CallKMSEncryptOutput, Error>) {
     var encryptInput := Kms.Types.EncryptRequest(
