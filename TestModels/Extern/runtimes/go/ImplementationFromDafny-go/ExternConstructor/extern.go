@@ -3,10 +3,9 @@ package ExternConstructor
 import (
 	"fmt"
 
-	"github.com/Smithy-dafny/TestModels/Extern/simpledafnyexterninternaldafnytypes"
-	"github.com/Smithy-dafny/TestModels/Extern/simpledafnyexterntypes"
-	"github.com/dafny-lang/DafnyRuntimeGo/dafny"
+	"github.com/dafny-lang/DafnyRuntimeGo/v4/dafny"
 	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
+	"github.com/smithy-lang/smithy-dafny/TestModels/Extern/SimpleDafnyExternTypes"
 )
 
 type ExternConstructorClass struct {
@@ -25,9 +24,9 @@ var Companion_ExternConstructorClass_ = CompanionStruct_ExternConstructorClass_{
 func (CompanionStruct_ExternConstructorClass_) Build(input dafny.Sequence) Wrappers.Result {
 	if input.Equals(dafny.SeqOfChars([]dafny.Char("Error")...)) {
 		return Wrappers.Companion_Result_.Create_Failure_(
-			simpledafnyexterninternaldafnytypes.Companion_Error_.Create_Opaque_(simpledafnyexterntypes.OpaqueError{
-				ErrObject: fmt.Errorf("Exception"),
-			}))
+			SimpleDafnyExternTypes.Companion_Error_.Create_Opaque_(
+				fmt.Errorf("Exception"), dafny.SeqOfChars([]dafny.Char("ExceptionMessage")...)),
+		)
 	}
 	return Wrappers.Companion_Result_.Create_Success_(&ExternConstructorClass{func() *string {
 		var s string
