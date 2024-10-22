@@ -283,11 +283,13 @@ public class AwsSdkNativeV2 extends Native {
           smithyName.simpleName().replace("CMK", "CmK")
         );
       }
-      return ClassName.get(
-        smithyName.packageName(),
-        smithyName
-          .simpleName() + "Exception"
-      );
+      if (!smithyName.simpleName().endsWith("Exception")) {
+        return ClassName.get(
+          smithyName.packageName(),
+          smithyName
+            .simpleName() + "Exception"
+        );
+      }
     }
     return smithyName;
   }

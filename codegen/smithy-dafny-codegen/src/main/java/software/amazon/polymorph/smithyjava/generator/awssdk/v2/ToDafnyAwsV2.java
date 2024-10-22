@@ -384,15 +384,17 @@ public class ToDafnyAwsV2 extends ToDafny {
     // This is the only time when Polymorph needs to convert a list of a Dafny type to a list
     //     of a type that Polymorph does not know about. So this is a special case and warrants
     //     its own generation logic.
-    final Shape memberTarget = subject.model.expectShape(memberShape.getTarget());
-    if (memberTarget.isBlobShape()) {
-      return returnCodeBlockBuilder
-        .add(
-          ".stream()\n.map($L)\n.collect($L.toList())",
-          SDK_BYTES_AS_BYTE_BUFFER.asFunctionalReference(),
-          Constants.JAVA_UTIL_STREAM_COLLECTORS
-        )
-        .build();
+    if (targetShape.isListShape()) {
+      final Shape listMemberTarget = subject.model.expectShape(targetShape.asListShape().get().getMember().getTarget());
+      if (listMemberTarget.isBlobShape()) {
+        return returnCodeBlockBuilder
+          .add(
+            ".stream()\n.map($L)\n.collect($L.toList())",
+            SDK_BYTES_AS_BYTE_BUFFER.asFunctionalReference(),
+            Constants.JAVA_UTIL_STREAM_COLLECTORS
+          )
+          .build();
+      }
     }
     return inputVar;
   }
