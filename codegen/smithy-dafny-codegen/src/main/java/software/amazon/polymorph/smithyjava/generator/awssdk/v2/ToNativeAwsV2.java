@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.datatypeConstructorIs;
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.datatypeDeconstructor;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import com.squareup.javapoet.ClassName;
@@ -11,19 +13,26 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
+
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -176,6 +185,7 @@ public class ToNativeAwsV2 extends ToNative {
       .addMethods(convertServiceErrors)
       .addMethod(modeledService(subject.serviceShape))
       .addMethod(errorOpaque())
+      .addMethod(dafnyError())
       .build();
   }
 
@@ -565,5 +575,51 @@ public class ToNativeAwsV2 extends ToNative {
         VAR_INPUT
       )
       .build();
+  }
+
+  MethodSpec dafnyError() {
+    ClassName inputType = subject.dafnyNameResolver.abstractClassForError();
+    ClassName returnType = ClassName.get(RuntimeException.class);
+    MethodSpec.Builder method = super.initializeErrorMethodSpec(
+      inputType,
+      returnType
+    );
+    // We need a list of `<datatypeConstructor>`.
+    // We have the logic exposed to look up the ClassName,
+    // which, as a string, will be <modelPackage>.Error_<datatypeConstructor>.
+    // We get the "simpleName" (i.e.: Error_<datatypeConstructor>),
+    // and, finally, replace "Error_" with nothing, thus getting just "<datatypeConstructor>".
+    List<String> allDafnyErrorConstructors = ModelUtils
+      .streamServiceErrors(subject.model, subject.serviceShape)
+      .map(subject.dafnyNameResolver::classForError)
+      .map(ClassName::simpleName)
+      .map(simpleName -> simpleName.replaceFirst("Error_", ""))
+      .collect(Collectors.toCollection(ArrayList::new)); // We need a mutable list, so we can't use stream().toList()
+    allDafnyErrorConstructors.add("Opaque");
+    allDafnyErrorConstructors.forEach(constructorName ->
+      method
+        .beginControlFlow(
+          "if ($L.$L())",
+          VAR_INPUT,
+          datatypeConstructorIs(constructorName)
+        )
+        .addStatement(
+          "return $T.Error(($T) $L)",
+          thisClassName,
+          subject.dafnyNameResolver.classForDatatypeConstructor(
+            "Error",
+            constructorName
+          ),
+          VAR_INPUT
+        )
+        .endControlFlow()
+    );
+    method.addStatement("""
+      // TODO This should indicate a codegen bug; every error Should have been taken care of.
+      return new IllegalStateException(
+        String.format("Unknown error thrown while calling service. %s", dafnyValue)
+      );
+      """);
+    return method.build();
   }
 }
