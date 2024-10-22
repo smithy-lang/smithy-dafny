@@ -2634,7 +2634,7 @@ public class DafnyApiCodegen {
     final String defaultFunctionMethodName =
       "Default%s".formatted(localServiceTrait.getConfigId().getName());
 
-    final TokenTree defaultConfig = TokenTree.of(
+    final TokenTree defaultConfig = localServiceTrait.getConfigRequired() ? TokenTree.empty() : TokenTree.of(
       "function method %s(): %s".formatted(
           defaultFunctionMethodName,
           configTypeName
@@ -2651,6 +2651,13 @@ public class DafnyApiCodegen {
 
     TokenTree serviceMethod = TokenTree
       .of(
+        localServiceTrait.getConfigRequired()
+          ?
+          "method %s(config: %s)".formatted(
+            localServiceTrait.getSdkId(),
+            configTypeName
+          )
+          :
         "method %s(config: %s := %s())".formatted(
             localServiceTrait.getSdkId(),
             configTypeName,
