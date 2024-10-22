@@ -86,5 +86,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := NONEXISTENT_KEY_ID, plaintext := PLAIN_TEXT));
     
     expect resFailure_NonExistent.Failure?;
+    expect resFailure_NonExistent.error.ComAmazonawsKms?;
+    expect resFailure_NonExistent.error.ComAmazonawsKms.NotFoundException?;
   }
 }
