@@ -75,7 +75,6 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     ensures client.ValidState()
   {
     var kmsClient :- expect Kms.KMSClient();
-
     // Test with NonExistent
     var input_NonExistent := Kms.Types.EncryptRequest(
       KeyId := NONEXISTENT_KEY_ID,
