@@ -27,7 +27,7 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 
-import static software.amazon.polymorph.smithygo.utils.Constants.funcNameGenerator;
+import software.amazon.polymorph.smithygo.utils.Constants;
 
 public class DafnyLocalServiceTypeConversionProtocol
   implements ProtocolGenerator {
@@ -1315,7 +1315,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                 return $L
             }
             """,
-            funcNameGenerator(
+            Constants.funcNameGenerator(
               visitingMemberShape,
               "ToDafny"
             ),
@@ -1384,7 +1384,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             func $L(input interface{})($L) {
                 $L
             }""",
-            funcNameGenerator(
+            Constants.funcNameGenerator(
               visitingMemberShape,
               "FromDafny"
             ),

@@ -26,7 +26,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
-import static software.amazon.polymorph.smithygo.utils.Constants.funcNameGenerator;
+import software.amazon.polymorph.smithygo.utils.Constants;
 
 public class DafnyAwsSdkClientTypeConversionProtocol
   implements ProtocolGenerator {
@@ -809,7 +809,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                   return $L
               }
               """,
-            funcNameGenerator(
+              Constants.funcNameGenerator(
               visitingMemberShape,
               "ToDafny"
             ),
@@ -873,7 +873,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             func $L(input $L)($L) {
                 return $L
             }""",
-            funcNameGenerator(
+            Constants.funcNameGenerator(
               visitingMemberShape,
               "FromDafny"
             ),

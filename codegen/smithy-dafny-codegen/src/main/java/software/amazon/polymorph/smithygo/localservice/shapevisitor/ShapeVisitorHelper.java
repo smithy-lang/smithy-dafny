@@ -10,7 +10,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 
-import static software.amazon.polymorph.smithygo.utils.Constants.funcNameGenerator;
+import software.amazon.polymorph.smithygo.utils.Constants;
 
 public class ShapeVisitorHelper {
 
@@ -80,7 +80,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    final String funcName = funcNameGenerator(memberShape, "FromDafny");
+    final String funcName = Constants.funcNameGenerator(memberShape, "FromDafny");
     return (funcName.concat("(").concat(dataSource).concat(")"));
   }
 
@@ -126,7 +126,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    final String funcName = funcNameGenerator(memberShape, "ToDafny");
+    final String funcName = Constants.funcNameGenerator(memberShape, "ToDafny");
     return (funcName.concat("(").concat(dataSource).concat(")"));
   }
 }
