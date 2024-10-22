@@ -6,7 +6,6 @@ use aws.polymorph#reference
 use com.amazonaws.dynamodb#DynamoDB_20120810
 use com.amazonaws.kms#TrentService
 
-
 @reference(service: DynamoDB_20120810)
 structure DdbClientReference {}
 

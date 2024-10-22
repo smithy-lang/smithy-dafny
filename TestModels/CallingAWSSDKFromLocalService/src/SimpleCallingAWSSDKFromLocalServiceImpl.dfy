@@ -4,8 +4,8 @@ include "../Model/SimpleCallingawssdkfromlocalserviceTypes.dfy"
 
 module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawssdkfromlocalserviceOperations  {
   import ComAmazonawsKmsTypes
-  import KMS = Com.Amazonaws.Kms
-  import DDB = Com.Amazonaws.Dynamodb
+  import Com.Amazonaws.Kms
+  import Com.Amazonaws.Dynamodb
 
   datatype Config = Config
   type InternalConfig = Config
@@ -23,7 +23,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
 
   method CallDDBScan ( config: InternalConfig,  input: CallDDBScanInput )
     returns (output: Result<CallDDBScanOutput, Error>) {
-    var ScanInput := DDB.Types.ScanInput(
+    var ScanInput := Dynamodb.Types.ScanInput(
       TableName := input.tableArn
     );
     var retScan := input.ddbClient.Scan(ScanInput);
@@ -35,7 +35,7 @@ module SimpleCallingAWSSDKFromLocalServiceImpl refines AbstractSimpleCallingawss
   }
   method CallKMSEncrypt ( config: InternalConfig,  input: CallKMSEncryptInput )
     returns (output: Result<CallKMSEncryptOutput, Error>) {
-    var encryptInput := KMS.Types.EncryptRequest(
+    var encryptInput := Kms.Types.EncryptRequest(
       KeyId := input.keyId,
       Plaintext := input.plaintext,
       EncryptionContext := Wrappers.None,

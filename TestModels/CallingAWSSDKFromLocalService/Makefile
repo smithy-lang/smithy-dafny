@@ -52,3 +52,4 @@ TRANSLATION_RECORD_GO := \
     dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
 	aws-sdks/kmsv2/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
 	aws-sdks/ddbv2/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr 
+	
