@@ -20,6 +20,7 @@ impl GetThingInputBuilder {
     }
 }
 /// Fluent builder constructing a request to `GetThing`.
+///
 /// Call this to get a thing.
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct GetThingFluentBuilder {
