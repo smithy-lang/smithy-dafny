@@ -1,9 +1,11 @@
 
+$rustResourceComment:L
 pub trait $rustResourceName:L {
   $resourceOperations:L
 }
 
 #[derive(::std::clone::Clone)]
+/// A reference to a $rustResourceName:L
 pub struct $rustResourceName:LRef {
   pub inner: ::std::rc::Rc<std::cell::RefCell<dyn $rustResourceName:L>>
 }
