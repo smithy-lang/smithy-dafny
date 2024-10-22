@@ -37,7 +37,6 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
     ensures client.ValidState()
   {
     var kmsClient :- expect Kms.KMSClient();
-
     // Test with NonExistent
     var input_NonExistent := Kms.Types.EncryptRequest(
       KeyId := NONEXISTENT_KEY_ID,
@@ -47,7 +46,9 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
       EncryptionAlgorithm := Wrappers.None
     );
     var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := NONEXISTENT_KEY_ID, plaintext := PLAIN_TEXT));
+    
     expect resFailure_NonExistent.Failure?;
+    expect resFailure_NonExistent.error.ComAmazonawsKms?;
     expect resFailure_NonExistent.error.ComAmazonawsKms.NotFoundException?;
   }
 
@@ -58,6 +59,7 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
   {
     var ddbClient :- expect Dynamodb.DynamoDBClient();
     var resFailure := client.CallDDBScan(SimpleCallingAWSSDKFromLocalService.Types.CallDDBScanInput(ddbClient := ddbClient, tableArn := TABLE_ARN_FAILURE_CASE));
+    
     expect resFailure.Failure?;
   }
 }

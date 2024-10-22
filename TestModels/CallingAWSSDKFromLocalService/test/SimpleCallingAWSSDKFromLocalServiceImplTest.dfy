@@ -64,6 +64,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
   {
     var kmsClient :- expect Kms.KMSClient();
     var resSuccess := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := KEY_ID_SUCCESS_CASE, plaintext := PLAIN_TEXT));
+    
     expect resSuccess.Success?;
     expect resSuccess.value.encryptOutput == KEY_ID_SUCCESS_CASE;
   }
@@ -84,6 +85,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
       EncryptionAlgorithm := Wrappers.None
     );
     var resFailure_NonExistent := client.CallKMSEncrypt(SimpleCallingAWSSDKFromLocalService.Types.CallKMSEncryptInput(kmsClient := kmsClient, keyId := NONEXISTENT_KEY_ID, plaintext := PLAIN_TEXT));
+    
     expect resFailure_NonExistent.Failure?;
   }
 }
