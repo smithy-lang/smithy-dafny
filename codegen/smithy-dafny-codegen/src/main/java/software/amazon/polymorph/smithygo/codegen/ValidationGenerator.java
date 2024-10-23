@@ -20,7 +20,6 @@ import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
-import software.amazon.smithy.utils.CaseUtils;
 
 // Renders constraint validation
 public class ValidationGenerator {

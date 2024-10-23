@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
@@ -90,7 +89,6 @@ public class ShapeVisitorHelper {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
-    final String nextVisitorFunction;
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       return targetShape.accept(
         new AwsSdkToDafnyShapeVisitor(
