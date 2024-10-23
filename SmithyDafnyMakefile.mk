@@ -468,8 +468,7 @@ polymorph_go:
 _polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_go: MODULE_NAME=--library-name $(GO_MODULE_NAME)
 _polymorph_go: DEPENDENCY_MODULE_NAMES = $(GO_DEPENDENCY_MODULE_NAMES)
-#TODO: Drop go_imports till Dafny bugs are fix otherwise this fails
-_polymorph_go: _polymorph _mv_polymorph_go
+_polymorph_go: _polymorph _mv_polymorph_go run_goimports
 
 run_goimports:
 	cd runtimes/go/ImplementationFromDafny-go && goimports -w .
@@ -696,17 +695,19 @@ transpile_go: $(if $(ENABLE_EXTERN_PROCESSING), _no_extern_post_transpile, )
 
 transpile_implementation_go: TARGET=go
 transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
+transpile_implementation_go: DAFNY_OPTIONS=--allow-warnings
 transpile_implementation_go: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 transpile_implementation_go: TRANSLATION_RECORD=$(patsubst %, --translation-record:$(PROJECT_ROOT)/%, $(TRANSLATION_RECORD_GO))
 transpile_implementation_go: TRANSPILE_MODULE_NAME=--go-module-name $(GO_MODULE_NAME)
-transpile_implementation_go: _transpile_implementation_all_new_cli
+transpile_implementation_go: _transpile_implementation_all
 
 transpile_test_go: TARGET=go
 transpile_test_go: OUT=runtimes/go/TestsFromDafny
+transpile_test_go: DAFNY_OPTIONS=--allow-warnings --include-test-runner
 transpile_test_go: TRANSPILE_DEPENDENCIES=$(patsubst %, --library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 transpile_test_go: TRANSLATION_RECORD=$(patsubst %, --translation-record:$(PROJECT_ROOT)/%, $(TRANSLATION_RECORD_GO)) $(patsubst %, --translation-record:$(LIBRARY_ROOT)/%, runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr)
 transpile_test_go: TRANSPILE_MODULE_NAME=--go-module-name $(GO_MODULE_NAME)/test
-transpile_test_go: _transpile_test_all_new_cli
+transpile_test_go: _transpile_test_all
 
 transpile_dependencies_go: LANG=go
 transpile_dependencies_go: transpile_dependencies
@@ -716,7 +717,7 @@ clean_go:
 	rm -rf $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go
 
 test_go:
-	cd runtimes/go/TestsFromDafny-go && go run TestsFromDafny.go
+	cd runtimes/go/TestsFromDafny-go && go mod tidy && go run TestsFromDafny.go
 
 ########################## Python targets
 

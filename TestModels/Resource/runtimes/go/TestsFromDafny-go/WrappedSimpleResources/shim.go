@@ -5,6 +5,7 @@ package WrappedSimpleResources
 import (
 	"context"
 
+	"github.com/dafny-lang/DafnyRuntimeGo/v4/dafny"
 	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 	"github.com/smithy-lang/smithy-dafny/TestModels/Resource/SimpleResourcesTypes"
 	"github.com/smithy-lang/smithy-dafny/TestModels/Resource/simpleresourcessmithygenerated"
@@ -19,7 +20,7 @@ func (_static *CompanionStruct_Default___) WrappedSimpleResources(inputConfig Si
 	var nativeConfig = simpleresourcessmithygenerated.SimpleResourcesConfig_FromDafny(inputConfig)
 	var nativeClient, nativeError = simpleresourcessmithygenerated.NewClient(nativeConfig)
 	if nativeError != nil {
-		return Wrappers.Companion_Result_.Create_Failure_(SimpleResourcesTypes.Companion_Error_.Create_Opaque_(nativeError))
+		return Wrappers.Companion_Result_.Create_Failure_(SimpleResourcesTypes.Companion_Error_.Create_Opaque_(nativeError, dafny.SeqOfChars([]dafny.Char(nativeError.Error())...)))
 	}
 	return Wrappers.Companion_Result_.Create_Success_(&Shim{client: nativeClient})
 }
@@ -31,4 +32,13 @@ func (shim *Shim) GetResources(input SimpleResourcesTypes.GetResourcesInput) Wra
 		return Wrappers.Companion_Result_.Create_Failure_(simpleresourcessmithygenerated.Error_ToDafny(native_error))
 	}
 	return Wrappers.Companion_Result_.Create_Success_(simpleresourcessmithygenerated.GetResourcesOutput_ToDafny(*native_response))
+}
+
+func (shim *Shim) GetMutableResources(input SimpleResourcesTypes.GetMutableResourcesInput) Wrappers.Result {
+	var native_request = simpleresourcessmithygenerated.GetMutableResourcesInput_FromDafny(input)
+	var native_response, native_error = shim.client.GetMutableResources(context.Background(), native_request)
+	if native_error != nil {
+		return Wrappers.Companion_Result_.Create_Failure_(simpleresourcessmithygenerated.Error_ToDafny(native_error))
+	}
+	return Wrappers.Companion_Result_.Create_Success_(simpleresourcessmithygenerated.GetMutableResourcesOutput_ToDafny(*native_response))
 }

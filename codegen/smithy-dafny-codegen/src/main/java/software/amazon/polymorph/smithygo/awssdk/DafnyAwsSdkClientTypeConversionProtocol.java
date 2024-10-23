@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithygo.awssdk;
 
 import static software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceTypeConversionProtocol.TO_DAFNY;
 import static software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceTypeConversionProtocol.TO_NATIVE;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -564,10 +565,11 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           ),
         SmithyNameResolver.shapeNamespace(serviceShape),
         writer -> {
+          writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
           writer.write(
             """
             func OpaqueError_Input_ToDafny(nativeInput error)($L.Error) {
-            	return $L.Companion_Error_.Create_Opaque_(nativeInput)
+            	return $L.Companion_Error_.Create_Opaque_(nativeInput, dafny.SeqOfChars([]dafny.Char(nativeInput.Error())...))
             }""",
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             DafnyNameResolver.dafnyTypesNamespace(serviceShape)

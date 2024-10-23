@@ -14,6 +14,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
@@ -650,10 +651,22 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     for (final var member : shape.getAllMembers().values()) {
       final String memberName = context.symbolProvider().toMemberName(member);
       final Shape targetShape = context.model().expectShape(member.getTarget());
-      final String baseType = DafnyNameResolver.getDafnyType(
-        targetShape,
-        context.symbolProvider().toSymbol(targetShape)
-      );
+      final var refShape = targetShape.hasTrait(ReferenceTrait.class)
+        ? targetShape.expectTrait(ReferenceTrait.class).getReferentId()
+        : null;
+      final String baseType = refShape == null
+        ? DafnyNameResolver.getDafnyType(
+          targetShape,
+          context.symbolProvider().toSymbol(targetShape)
+        )
+        : DafnyNameResolver.getDafnyType(
+          context.model().expectShape(refShape),
+          context
+            .symbolProvider()
+            .toSymbol(member)
+            .getProperty("Referred", Symbol.class)
+            .get()
+        );
       eachMemberInUnion.append(
         """
         case *%s.%s:
@@ -678,7 +691,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
               ").Value",
               writer,
               isConfigShape,
-              true,
+              true, // Unions can't have required members otherwise they'll always end up taking the required type
               false
             ),
             someWrapIfRequired.formatted(
