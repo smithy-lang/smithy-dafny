@@ -54,7 +54,7 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     // If KMS is not opaque, it returns ComAmazonawsKms error.
     expect resFailure.error.ComAmazonawsDynamodb?;
     // If a table is not found and IAM user have permission on limited DDB table, DDB client returns an opaque error.
-    expect resFailure.error.ComAmazonawsDynamodb.OpaqueError?;
+    expect resFailure.error.ComAmazonawsDynamodb.Opaque?;
   }
 
   method{:test} CallKMSEncrypt(){
