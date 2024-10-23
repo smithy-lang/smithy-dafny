@@ -989,6 +989,11 @@ public class DafnyLocalServiceTypeConversionProtocol
                   .getDependencies()
                 : new LinkedList<ShapeId>();
               if (dependencies != null) {
+                // If we have dependencies:
+                // 1. Check if we have both KMS and DDB dependencies
+                //    - If KMS is opaque, it is going to delegate to DDB. And return a DDB error (opaque or non opaque)
+                //    - If KMS is not opaque, it returns ComAmazonawsKms error.
+                // 2. If we have only one KMS or DDB dependencies, delegate to that and return error 
                 if (dependencies.size() != 0) {
                   Optional<ShapeId> kmsShapeId = dependencies
                     .stream()
@@ -1346,12 +1351,22 @@ public class DafnyLocalServiceTypeConversionProtocol
                 final var depService = context
                   .model()
                   .expectShape(dep, ServiceShape.class);
-                final var sdkId = depService.hasTrait(LocalServiceTrait.class)
-                  ? depService.expectTrait(LocalServiceTrait.class).getSdkId()
-                  : depService
+                final String sdkId;
+                if (depService.hasTrait(LocalServiceTrait.class)) {
+                  sdkId = depService.expectTrait(LocalServiceTrait.class).getSdkId();
+                } else {
+                  var tempSdkId = depService
                     .expectTrait(ServiceTrait.class)
                     .getSdkId()
                     .toLowerCase();
+                  if (tempSdkId.equals("kms")) {
+                    sdkId = "ComAmazonawsKms";
+                  } else if (tempSdkId.equals("dynamodb")) {
+                    sdkId = "ComAmazonawsDynamodb";
+                  } else {
+                    throw new IllegalArgumentException("Go polymorph only supports KMS and DDB model");
+                  }
+                }
                 w.write(
                   """
                   if err.Is_$L() {
