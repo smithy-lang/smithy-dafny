@@ -3,7 +3,6 @@ package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
@@ -53,7 +52,11 @@ public class ShapeVisitorHelper {
           .concat(")");
     }
     final String funcDataSource = "input";
-    if (!DafnyToAwsSdkShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+    if (
+      !DafnyToAwsSdkShapeVisitor
+        .getAllShapesRequiringConversionFunc()
+        .contains(memberShape)
+    ) {
       DafnyToAwsSdkShapeVisitor.putShapesWithConversionFunc(memberShape, "");
       DafnyToAwsSdkShapeVisitor.putShapesWithConversionFunc(
         memberShape,
@@ -85,6 +88,7 @@ public class ShapeVisitorHelper {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
+    final String nextVisitorFunction;
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       return targetShape.accept(
         new AwsSdkToDafnyShapeVisitor(
@@ -98,7 +102,11 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcDataSource = "input";
-    if (!AwsSdkToDafnyShapeVisitor.getAllShapesRequiringConversionFunc().contains(memberShape)) {
+    if (
+      !AwsSdkToDafnyShapeVisitor
+        .getAllShapesRequiringConversionFunc()
+        .contains(memberShape)
+    ) {
       optionalShapesToDafny.put(memberShape, isOptional);
       AwsSdkToDafnyShapeVisitor.putShapesWithConversionFunc(memberShape, "");
       AwsSdkToDafnyShapeVisitor.putShapesWithConversionFunc(

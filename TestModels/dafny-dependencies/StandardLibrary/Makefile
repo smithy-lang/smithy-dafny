@@ -8,7 +8,7 @@ TRANSPILE_TESTS_IN_RUST=true
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
-PYTHON_MODULE_NAME=standard_library
+PYTHON_MODULE_NAME=smithy_dafny_standard_library
 LIBRARIES :=
 
 GO_MODULE_NAME="github.com/dafny-lang/DafnyStandardLibGo"
@@ -36,23 +36,23 @@ polymorph_dafny :
 	--dependent-model $(PROJECT_ROOT)/$(STD_LIBRARY)/../Model \
 	";
 
-polymorph_dotnet :
+polymorph_dotnet:
 	echo "Skipping polymorph_dotnet for StandardLibrary"
 
-polymorph_java :
+polymorph_java:
 	echo "Skipping polymorph_java for StandardLibrary"
 
-polymorph_python :
+polymorph_python:
 	echo "Skipping polymorph_python for StandardLibrary"
 
 polymorph_go :
 	echo "Skipping polymorph_go for StandardLibrary"
 
-# Using this target for the side-effect of maintaining patches,
-# Since Dafny Rust code generation is incomplete and also needs to be patched.
-# That only works if you run transpile_rust first.
-polymorph_rust :
+polymorph_rust:
 	echo "Skipping polymorph_rust for StandardLibrary"
+
+patch_after_transpile_rust:
+	echo "Skipping patch_after_transpile_rust for StandardLibrary"
 
 _polymorph_dependencies: 
 	echo "Skipping _polymorph_dependencies for StandardLibrary"
@@ -80,6 +80,12 @@ transpile_rust: | transpile_implementation_rust
 
 RUST_OTHER_FILES=runtimes/rust/src/conversion.rs runtimes/rust/src/UTF8_externs.rs
 
+# These are necessary just for the patch_after_transpile_rust target
+MAIN_SERVICE_FOR_RUST := StandardLibrary
+SERVICE_NAMESPACE_StandardLibrary=aws.polymorph
+SERVICE_DEPS_StandardLibrary :=
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # Override this target to not insert a dependency on the standard library.
 _mv_implementation_rust:
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
@@ -91,29 +97,8 @@ transpile_dependencies:
 
 # Override SharedMakefile's transpile_implementation to not reference
 # StandardLibrary as a Library
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
-	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-		-stdin \
-		-noVerify \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:1 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		$(DAFNY_OPTIONS) \
-		$(DAFNY_OTHER_FILES) \
-		-out $(OUT)
-
-# TODO-new-cli: As part of supporting Dafny 4.8+, Java and NET SHOULD migrate to the new Dafny CLI,
-# the `transpile_implementation` target should start using the new Dafny CLI,
-# and the `transpile_implementation_new_cli` target should be removed
-# in favor of `transpile_implementation` using the new CLI.
-transpile_implementation_new_cli: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
-transpile_implementation_new_cli:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 	translate $(TARGET) \
 		--stdin \
@@ -122,7 +107,6 @@ transpile_implementation_new_cli:
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
-		--allow-warnings \
 		--output $(OUT) \
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \

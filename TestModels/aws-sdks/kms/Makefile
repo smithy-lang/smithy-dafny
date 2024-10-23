@@ -5,12 +5,19 @@ CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
 
+TRANSPILE_TESTS_IN_RUST=1
+
+RUST_OTHER_FILES := \
+	runtimes/rust/src/kms.rs
+
 include ../../SharedMakefile.mk
 
 NAMESPACE=com.amazonaws.kms
 
 PROJECT_SERVICES := \
 	ComAmazonawsKms\
+
+MAIN_SERVICE_FOR_RUST := ComAmazonawsKms
 
 SERVICE_NAMESPACE_ComAmazonawsKms=com.amazonaws.kms
 
@@ -19,13 +26,6 @@ SERVICE_DEPS_ComAmazonawsKms :=
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 AWS_SDK_CMD=--aws-sdk
-GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/kms"
-
-GO_DEPENDENCY_MODULE_NAMES := \
-	--dependency-library-name=sdk.com.amazonaws.kms=github.com/aws/aws-sdk-go-v2/service/kms \
-
-TRANSLATION_RECORD_GO := \
-    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 
 # This project has no dependencies
 # DEPENDENT-MODELS:=
@@ -48,7 +48,7 @@ clean: _clean
 PYTHON_MODULE_NAME=com_amazonaws_kms
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

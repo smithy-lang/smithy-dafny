@@ -13,6 +13,8 @@ NAMESPACE=simple.refinement
 PROJECT_SERVICES := \
 	SimpleRefinement
 
+MAIN_SERVICE_FOR_RUST := SimpleRefinement
+
 SERVICE_NAMESPACE_SimpleRefinement=simple.refinement
 
 SERVICE_DEPS_SimpleRefinement :=
@@ -31,7 +33,7 @@ TRANSLATION_RECORD_GO := \
 PYTHON_MODULE_NAME=simple_refinement
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

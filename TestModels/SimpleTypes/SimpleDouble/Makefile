@@ -14,6 +14,8 @@ NAMESPACE=simple.types.smithyDouble
 PROJECT_SERVICES := \
 	SimpleDouble
 
+MAIN_SERVICE_FOR_RUST := SimpleDouble
+
 SERVICE_NAMESPACE_SimpleDouble=simple.types.smithyDouble
 
 SERVICE_DEPS_SimpleDouble :=
@@ -37,7 +39,7 @@ format_net:
 PYTHON_MODULE_NAME=simple_types_smithydouble
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # Constants for languages that drop extern names (Python, Go)
 

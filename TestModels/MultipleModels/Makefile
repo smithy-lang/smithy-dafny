@@ -4,6 +4,7 @@
 CORES=2
 
 ENABLE_EXTERN_PROCESSING=1
+TRANSPILE_TESTS_IN_RUST=1
 
 include ../SharedMakefile.mk
 
@@ -13,6 +14,8 @@ DIR_STRUCTURE_V2=V2
 PROJECT_SERVICES := \
 	DependencyProject \
 	PrimaryProject \
+
+MAIN_SERVICE_FOR_RUST := PrimaryProject
 
 SERVICE_NAMESPACE_PrimaryProject=simple.multiplemodels.primaryproject
 SERVICE_NAMESPACE_DependencyProject=simple.multiplemodels.dependencyproject
@@ -42,7 +45,7 @@ PYTHON_DEPENDENCY_MODULE_NAMES := \
 	--dependency-library-name=simple.multiplemodels.dependencyproject=multiple_models
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 PRIMARY_PROJECT_TYPES_FILE_PATH=dafny/PrimaryProject/Model/SimpleMultiplemodelsPrimaryprojectTypes.dfy
 PRIMARY_PROJECT_TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.multiplemodels.primaryproject.internaldafny.types\" } SimpleMultiplemodelsPrimaryprojectTypes"

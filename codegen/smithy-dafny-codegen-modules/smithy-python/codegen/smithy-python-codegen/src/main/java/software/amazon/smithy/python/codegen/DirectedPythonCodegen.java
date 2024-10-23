@@ -338,6 +338,7 @@ public class DirectedPythonCodegen implements DirectedCodegen<GenerationContext,
             CodegenUtils.runCommand("python3 " + file, fileManifest.getBaseDir());
         }
         formatCode(fileManifest);
+        formatDocstrings(fileManifest);
         runMypy(fileManifest);
     }
 
@@ -350,6 +351,23 @@ public class DirectedPythonCodegen implements DirectedCodegen<GenerationContext,
         }
         LOGGER.info("Running code formatter on generated code");
         CodegenUtils.runCommand("python3 -m black . --exclude \"\"", fileManifest.getBaseDir());
+    }
+
+    private void formatDocstrings(FileManifest fileManifest) {
+        try {
+            CodegenUtils.runCommand("python3 -m docformatter -h", fileManifest.getBaseDir());
+        } catch (CodegenException e) {
+            LOGGER.warning("Unable to find the python package docformatter. Skipping formatting.");
+            return;
+        }
+        LOGGER.info("Running docformatter on generated code");
+        // docformatter exit codes:
+        // 0: docformatter did not make changes
+        // 1: docformatter made changes
+        // 2: Invalid docformatter usage (incorrect arguments, etc.)
+        // If docformatter returns exit codes 0 or 1, then exit 0 to CodegenUtils. Otherwise, exit 1.
+        CodegenUtils.runCommand(
+        "python3 -m docformatter --recursive --in-place .; [ $? -eq 0 ] || [ $? -eq 1 ] || exit 1", fileManifest.getBaseDir());
     }
 
     private void runMypy(FileManifest fileManifest) {

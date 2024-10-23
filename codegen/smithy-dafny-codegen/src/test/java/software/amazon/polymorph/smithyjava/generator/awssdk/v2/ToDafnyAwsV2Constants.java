@@ -47,7 +47,7 @@ public class ToDafnyAwsV2Constants {
   protected static String GENERATE_CONVERT_LIST =
     """
     public static dafny.DafnySequence<? extends software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType> KeyUsageTypes (
-        java.util.List<java.lang.String> nativeValue
+        java.util.List<software.amazon.awssdk.services.kms.model.KeyUsageType> nativeValue
     ) {
       return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
           nativeValue,
@@ -107,31 +107,31 @@ public class ToDafnyAwsV2Constants {
 
   protected static String GENERATE_CONVERT_OPAQUE_ERROR =
     """
-    public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
-            java.lang.Exception nativeValue
-    ) {
-      // While this is logically identical to the other Opaque Error case,
-      // it is semantically distinct.
-      // An un-modeled Service Error is different from a Java Heap Exhaustion error.
-      // In the future, Smithy-Dafny MAY allow for this distinction.
-      // Which would allow Dafny developers to treat the two differently.
-      return software.amazon.cryptography.services.kms.internaldafny.types.Error.create_Opaque(nativeValue);
-    }
-    """;
+       public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
+               java.lang.Exception nativeValue
+       ) {
+         // While this is logically identical to the other Opaque Error case,
+         // it is semantically distinct.
+         // An un-modeled Service Error is different from a Java Heap Exhaustion error.
+         // In the future, Smithy-Dafny MAY allow for this distinction.
+         // Which would allow Dafny developers to treat the two differently.
+    return software.amazon.cryptography.services.kms.internaldafny.types.Error.create_Opaque(nativeValue, dafny.DafnySequence.asString(nativeValue.getMessage()));
+       }
+       """;
 
   protected static String GENERATE_CONVERT_OPAQUE_ERROR_WITH_TYPE_DESCRIPTORS =
     """
-    public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
-      java.lang.Exception nativeValue
-    ) {
-      // While this is logically identical to the other Opaque Error case,
-      // it is semantically distinct.
-      // An un-modeled Service Error is different from a Java Heap Exhaustion error.
-      // In the future, Smithy-Dafny MAY allow for this distinction.
-      // Which would allow Dafny developers to treat the two differently.
-      return software.amazon.cryptography.services.kms.internaldafny.types.Error.create_Opaque(nativeValue);
-    }
-    """;
+       public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
+         java.lang.Exception nativeValue
+       ) {
+         // While this is logically identical to the other Opaque Error case,
+         // it is semantically distinct.
+         // An un-modeled Service Error is different from a Java Heap Exhaustion error.
+         // In the future, Smithy-Dafny MAY allow for this distinction.
+         // Which would allow Dafny developers to treat the two differently.
+    return software.amazon.cryptography.services.kms.internaldafny.types.Error.create_Opaque(nativeValue, dafny.DafnySequence.asString(nativeValue.getMessage()));
+       }
+       """;
 
   protected static final String KMS_A_STRING_OPERATION_JAVA_FILE =
     """

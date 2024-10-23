@@ -3,7 +3,7 @@
 import simple_dafnyextern.internaldafny.generated.ExternConstructor
 from simple_dafnyextern.internaldafny.generated.ExternConstructor import *
 from simple_dafnyextern.internaldafny.generated import SimpleDafnyExternTypes
-import standard_library.internaldafny.generated.Wrappers as Wrappers
+import smithy_dafny_standard_library.internaldafny.generated.Wrappers as Wrappers
 import _dafny
 
 class ExternConstructorClass:
@@ -21,6 +21,6 @@ class ExternConstructorClass:
       try:
         return Wrappers.Result_Success(ExternConstructorClass(input))
       except Exception as e:
-        return Wrappers.Result_Failure(SimpleDafnyExternTypes.Error_Opaque(e))
+        return Wrappers.Result_Failure(SimpleDafnyExternTypes.Error_Opaque(e, repr(e)))
 
 simple_dafnyextern.internaldafny.generated.ExternConstructor.ExternConstructorClass = ExternConstructorClass
