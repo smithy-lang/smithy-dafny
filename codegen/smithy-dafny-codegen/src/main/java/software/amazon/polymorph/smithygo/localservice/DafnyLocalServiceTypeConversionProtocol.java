@@ -946,7 +946,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                     error, ok := err.($L.OpaqueError)
                     if !ok {
                       // We expect to get error string for opaque error from SDK error
-                      error = $L.OpaqueError{ErrObject: err}  
+                      error = $L.OpaqueError{ErrObject: err}
                     }
                     return OpaqueError_Input_ToDafny(error)
                 }
@@ -990,60 +990,71 @@ public class DafnyLocalServiceTypeConversionProtocol
                 : new LinkedList<ShapeId>();
               if (dependencies != null) {
                 if (dependencies.size() != 0) {
-                  Optional<ShapeId> kmsShapeId = dependencies.stream()
+                  Optional<ShapeId> kmsShapeId = dependencies
+                    .stream()
                     .filter(shapeId -> "TrentService".equals(shapeId.getName()))
                     .findFirst();
-                  Optional<ShapeId> ddbShapeId = dependencies.stream()
-                      .filter(shapeId -> "DynamoDB_20120810".equals(shapeId.getName()))
-                      .findFirst();
+                  Optional<ShapeId> ddbShapeId = dependencies
+                    .stream()
+                    .filter(shapeId ->
+                      "DynamoDB_20120810".equals(shapeId.getName())
+                    )
+                    .findFirst();
                   if (kmsShapeId.isPresent() && ddbShapeId.isPresent()) {
-                    var kmsShape = context.model().expectShape(kmsShapeId.get());
-                    var ddbShape = context.model().expectShape(ddbShapeId.get());
+                    var kmsShape = context
+                      .model()
+                      .expectShape(kmsShapeId.get());
+                    var ddbShape = context
+                      .model()
+                      .expectShape(ddbShapeId.get());
                     writer.addImportFromModule(
                       SmithyNameResolver.getGoModuleNameForSmithyNamespace(
                         ddbShape.getId().getNamespace()
                       ),
-                      SmithyNameResolver.shapeNamespace(
-                        ddbShape
-                      )
+                      SmithyNameResolver.shapeNamespace(ddbShape)
                     );
                     writer.addImportFromModule(
                       SmithyNameResolver.getGoModuleNameForSmithyNamespace(
                         kmsShape.getId().getNamespace()
                       ),
-                      SmithyNameResolver.shapeNamespace(
-                        kmsShape
-                      )
+                      SmithyNameResolver.shapeNamespace(kmsShape)
                     );
-                    String kmsShapeNamespace = SmithyNameResolver.shapeNamespace(kmsShape);
-                    String ddbShapeNamespace = SmithyNameResolver.shapeNamespace(ddbShape);
-                    w.write("""
-                        case smithy.APIError:
-		                      kmsError := $L.Error_ToDafny(err)
-                          // There is no generic way to know if the error is a kms or a ddb error. So, we check for Opaque error.
-                          if(kmsError.Is_Opaque()) {
-                            ddbError := $L.Error_ToDafny(err)
-                            return $L.Create_$L_(ddbError)
-                          } else {
-                            return $L.Create_$L_(kmsError)
-                          }
-                        """, 
-                          kmsShapeNamespace,
-                          ddbShapeNamespace,
-                          DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-                          DafnyNameResolver.dafnyNamespace(ddbShape),
-                          DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-                          DafnyNameResolver.dafnyNamespace(kmsShape)
-                          );
+                    String kmsShapeNamespace =
+                      SmithyNameResolver.shapeNamespace(kmsShape);
+                    String ddbShapeNamespace =
+                      SmithyNameResolver.shapeNamespace(ddbShape);
+                    w.write(
+                      """
+                      case smithy.APIError:
+                      kmsError := $L.Error_ToDafny(err)
+                        // There is no generic way to know if the error is a kms or a ddb error. So, we check for Opaque error.
+                        if(kmsError.Is_Opaque()) {
+                          ddbError := $L.Error_ToDafny(err)
+                          return $L.Create_$L_(ddbError)
+                        } else {
+                          return $L.Create_$L_(kmsError)
+                        }
+                      """,
+                      kmsShapeNamespace,
+                      ddbShapeNamespace,
+                      DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
+                      DafnyNameResolver.dafnyNamespace(ddbShape),
+                      DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
+                      DafnyNameResolver.dafnyNamespace(kmsShape)
+                    );
                   } else if (kmsShapeId.isPresent() || ddbShapeId.isPresent()) {
-                    var depShape = context.model().expectShape(kmsShapeId.isPresent() ? kmsShapeId.get() : ddbShapeId.get());
+                    var depShape = context
+                      .model()
+                      .expectShape(
+                        kmsShapeId.isPresent()
+                          ? kmsShapeId.get()
+                          : ddbShapeId.get()
+                      );
                     writer.addImportFromModule(
                       SmithyNameResolver.getGoModuleNameForSmithyNamespace(
                         depShape.getId().getNamespace()
                       ),
-                      SmithyNameResolver.shapeNamespace(
-                        depShape
-                      )
+                      SmithyNameResolver.shapeNamespace(depShape)
                     );
                     w.write(
                       """
@@ -1057,23 +1068,25 @@ public class DafnyLocalServiceTypeConversionProtocol
                     );
                   }
                 }
-                for (final var dep : dependencies) {     
+                for (final var dep : dependencies) {
                   final var depShape = context.model().expectShape(dep);
-                  if (dep.getName().equals("TrentService") || dep.getName().equals("DynamoDB_20120810")) {
+                  if (
+                    dep.getName().equals("TrentService") ||
+                    dep.getName().equals("DynamoDB_20120810")
+                  ) {
                     continue;
-                  }
-                  else {
+                  } else {
                     w.write(
-                    """
-                    case $L.$LBaseException:
-                        return $L.Create_$L_($L.Error_ToDafny(err))
-                    """,
-                    SmithyNameResolver.smithyTypesNamespace(depShape),
-                    dep.getName(),
-                    DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-                    dep.getName(),
-                    SmithyNameResolver.shapeNamespace(depShape)
-                  );
+                      """
+                      case $L.$LBaseException:
+                          return $L.Create_$L_($L.Error_ToDafny(err))
+                      """,
+                      SmithyNameResolver.smithyTypesNamespace(depShape),
+                      dep.getName(),
+                      DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
+                      dep.getName(),
+                      SmithyNameResolver.shapeNamespace(depShape)
+                    );
                   }
                 }
               }
@@ -1469,7 +1482,10 @@ public class DafnyLocalServiceTypeConversionProtocol
               );
             if (resourceOrService.isServiceShape()) {
               outputType =
-                DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) resourceOrService, resourceOrService.expectTrait(ServiceTrait.class));
+                DafnyNameResolver.getDafnyInterfaceClient(
+                  (ServiceShape) resourceOrService,
+                  resourceOrService.expectTrait(ServiceTrait.class)
+                );
             }
           }
           if (

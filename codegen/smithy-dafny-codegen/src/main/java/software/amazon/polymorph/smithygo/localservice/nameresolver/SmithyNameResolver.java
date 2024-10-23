@@ -62,12 +62,13 @@ public class SmithyNameResolver {
   }
 
   public static String smithyTypesNamespace(final Shape shape) {
-    if (shape.getId().getName().equals("TrentService") || shape.getId().getName().equals("DynamoDB_20120810"))  {
-      return CaseUtils.toPascalCase(shape
-      .toShapeId()
-      .getNamespace()
-      .replace(DOT, " "))
-      .concat("Types");
+    if (
+      shape.getId().getName().equals("TrentService") ||
+      shape.getId().getName().equals("DynamoDB_20120810")
+    ) {
+      return CaseUtils
+        .toPascalCase(shape.toShapeId().getNamespace().replace(DOT, " "))
+        .concat("Types");
     }
     return shape
       .toShapeId()

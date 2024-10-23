@@ -577,16 +577,16 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     if (shape.hasTrait(ReferenceTrait.class)) {
       var referredShape = model.expectShape(
         shape.expectTrait(ReferenceTrait.class).getReferentId()
-        );
+      );
       builder.putProperty(
-          "Referred",
-          symbolBuilderFor(
-            referredShape,
-            "I".concat(getDefaultShapeName(referredShape))
-          )
-            .putProperty(SymbolUtils.POINTABLE, false)
-            .build()
-        );
+        "Referred",
+        symbolBuilderFor(
+          referredShape,
+          "I".concat(getDefaultShapeName(referredShape))
+        )
+          .putProperty(SymbolUtils.POINTABLE, false)
+          .build()
+      );
     }
 
     return builder.build();

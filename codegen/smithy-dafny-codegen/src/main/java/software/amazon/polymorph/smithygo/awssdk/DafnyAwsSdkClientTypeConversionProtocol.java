@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithygo.awssdk;
 
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 import static software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceTypeConversionProtocol.TO_DAFNY;
 import static software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceTypeConversionProtocol.TO_NATIVE;
 import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
@@ -28,8 +29,6 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
-
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 public class DafnyAwsSdkClientTypeConversionProtocol
   implements ProtocolGenerator {
@@ -602,18 +601,10 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
               for (final var error : errorShapes) {
-<<<<<<< HEAD
-                String errVariableName = context
-                .symbolProvider()
-                .toSymbol(
-                  awsNormalizedModel.expectShape(error.toShapeId())
-                ).getName();
-=======
                 final String errVariableName = context
                   .symbolProvider()
                   .toSymbol(awsNormalizedModel.expectShape(error.toShapeId()))
                   .getName();
->>>>>>> Golang/dev
                 w.addImport("errors");
                 w.write(
                   """

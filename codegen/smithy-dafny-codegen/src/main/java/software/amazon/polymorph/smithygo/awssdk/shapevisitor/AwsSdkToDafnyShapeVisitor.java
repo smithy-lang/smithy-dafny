@@ -7,7 +7,6 @@ import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_G
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;

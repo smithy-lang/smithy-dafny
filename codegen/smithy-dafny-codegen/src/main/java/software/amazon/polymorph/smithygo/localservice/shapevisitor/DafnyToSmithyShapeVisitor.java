@@ -6,7 +6,6 @@ import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_G
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
@@ -155,16 +154,18 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       if (!this.isOptional) {
         // TODO: will this work in MPL?
         writer.addImportFromModule(
-              SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-                resourceOrService.toShapeId().getNamespace()
-              ),
-              DafnyNameResolver
-                .dafnyTypesNamespace(serviceShape)
+          SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+            resourceOrService.toShapeId().getNamespace()
+          ),
+          DafnyNameResolver.dafnyTypesNamespace(serviceShape)
         );
         return "return %1$s.(%2$s)".formatted(
             dataSource,
-            DafnyNameResolver.getDafnyInterfaceClient((ServiceShape) serviceShape, serviceShape.expectTrait(ServiceTrait.class))
-        );
+            DafnyNameResolver.getDafnyInterfaceClient(
+              (ServiceShape) serviceShape,
+              serviceShape.expectTrait(ServiceTrait.class)
+            )
+          );
       }
       return """
       return func () *%s {
