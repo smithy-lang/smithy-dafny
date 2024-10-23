@@ -31,15 +31,12 @@ class GoTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/kms-lite");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
-    //TODO: We should ne able to support below models.
+    //TODO: We should be able to support below models, but isn't a priority.
     DISABLED_TESTS.add("MultipleModels");
     DISABLED_TESTS.add("LocalService");
 
     //TODO: Pending PR Merge
     DISABLED_TESTS.add("Positional");
-
-    //TODO: Fix this before main merge
-    DISABLED_TESTS.add("Dependencies");
 
     //V1 Tests are not supported in Go
     DISABLED_TESTS.add("aws-sdks/ddb");
@@ -52,10 +49,13 @@ class GoTestModels extends TestModelTest {
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);
+    // Order is important here otherwise we might run into formatting issues.
     make(testModelPath, "setup_prettier");
     make(testModelPath, "polymorph_dafny");
-    make(testModelPath, "polymorph_go");
     make(testModelPath, "transpile_go");
+    make(testModelPath, "polymorph_go");
+    //TODO: Remove this TODO line once run_goimports TODO in SmithyDafnyMakefile is fixed.
+    make(testModelPath, "run_goimports");
     make(testModelPath, "test_go");
   }
 }
