@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph.smithygo.localservice;
 
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+
 import java.util.Collection;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
@@ -27,8 +29,6 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
-
-import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 public class DafnyLocalServiceGenerator implements Runnable {
 
@@ -355,13 +355,15 @@ public class DafnyLocalServiceGenerator implements Runnable {
             SmithyNameResolver.shapeNamespace(service)
           );
 
+          writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
+
           writer.write(
             """
             func (_static *CompanionStruct_Default___) Wrapped$L(inputConfig $L) Wrappers.Result {
                 var nativeConfig = $L.$L(inputConfig)
                 var nativeClient, nativeError = $L.NewClient(nativeConfig)
                 if nativeError != nil {
-                   return Wrappers.Companion_Result_.Create_Failure_($L.Companion_Error_.Create_Opaque_(nativeError))
+                   return Wrappers.Companion_Result_.Create_Failure_($L.Companion_Error_.Create_Opaque_(nativeError, dafny.SeqOfChars([]dafny.Char(nativeError.Error())...)))
                 }
                 return Wrappers.Companion_Result_.Create_Success_(&Shim{client: nativeClient})
             }

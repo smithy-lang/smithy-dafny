@@ -7,6 +7,7 @@ import static software.amazon.smithy.utils.CaseUtils.toSnakeCase;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Streams;
 import com.squareup.javapoet.ClassName;
 import java.io.IOException;
@@ -53,6 +54,8 @@ import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
+import software.amazon.polymorph.smithyrust.generator.AbstractRustShimGenerator;
+import software.amazon.polymorph.smithyrust.generator.MergedServicesGenerator;
 import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
 import software.amazon.polymorph.smithyrust.generator.RustLibraryShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -80,7 +83,7 @@ public class CodegenEngine {
   private final boolean fromSmithyBuildPlugin;
   private final Path libraryRoot;
   private final Path[] dependentModelPaths;
-  private final String namespace;
+  private final Set<String> namespaces;
   private final Map<TargetLanguage, Path> targetLangOutputDirs;
   private final Map<TargetLanguage, Path> targetLangTestOutputDirs;
   private final DafnyVersion dafnyVersion;
@@ -109,7 +112,7 @@ public class CodegenEngine {
     final boolean fromSmithyBuildPlugin,
     final Model serviceModel,
     final Path[] dependentModelPaths,
-    final String namespace,
+    final Set<String> namespaces,
     final Map<TargetLanguage, Path> targetLangOutputDirs,
     final Map<TargetLanguage, Path> targetLangTestOutputDirs,
     final DafnyVersion dafnyVersion,
@@ -128,7 +131,7 @@ public class CodegenEngine {
     // To be provided to constructor
     this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
     this.dependentModelPaths = dependentModelPaths;
-    this.namespace = namespace;
+    this.namespaces = namespaces;
     this.targetLangOutputDirs = targetLangOutputDirs;
     this.targetLangTestOutputDirs = targetLangTestOutputDirs;
     this.dafnyVersion = dafnyVersion;
@@ -150,8 +153,13 @@ public class CodegenEngine {
         ? ModelUtils.addMissingErrorMessageMembers(serviceModel)
         : serviceModel;
 
+    // TODO: This should not be used by Rust since it supports (or really requires)
+    // generating for multiple namespaces.
     this.serviceShape =
-      ModelUtils.serviceFromNamespace(this.model, this.namespace);
+      ModelUtils.serviceFromNamespace(
+        this.model,
+        this.namespaces.stream().findFirst().get()
+      );
   }
 
   /**
@@ -681,50 +689,21 @@ public class CodegenEngine {
       "Rust code generation is incomplete and may not function correctly!"
     );
 
-    // Clear out all contents of src first to make sure if we didn't intend to generate it,
-    // it doesn't show up as generated code. This ensures patching has the right baseline.
-    // It would be great to do this for all languages,
-    // but we're not currently precise enough and do multiple passes
-    // to generate code for things like wrapped services.
-    //
-    // Be sure to NOT delete src/implementation_from_dafny.rs though,
-    // by temporarily moving it out of src/
-    //
-    // Note this has no effect if we're being run from the Smithy build plugin,
-    // since outputDir will be something like `build/smithyprojections/...`
-    // and therefore not have any existing content.
-    Path outputSrcDir = outputDir.resolve("src");
-    Path implementationFromDafnyPath = outputSrcDir.resolve(
-      "implementation_from_dafny.rs"
-    );
-    Path tmpPath = null;
-    try {
-      if (Files.exists(implementationFromDafnyPath)) {
-        tmpPath = outputDir.resolve("implementation_from_dafny.rs");
-        Files.move(implementationFromDafnyPath, tmpPath);
-      }
-      software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
-      outputSrcDir.toFile().mkdirs();
-      if (tmpPath != null) {
-        Files.move(tmpPath, implementationFromDafnyPath);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    // TODO: Can't get makefile working yet
+    final var namespacesToGenerate = model
+      .getServiceShapes()
+      .stream()
+      .map(s -> s.getId().getNamespace())
+      .collect(Collectors.toSet());
 
-    if (awsSdkStyle) {
-      RustAwsSdkShimGenerator generator = new RustAwsSdkShimGenerator(
-        model,
-        serviceShape
-      );
-      generator.generate(outputDir);
-    } else {
-      RustLibraryShimGenerator generator = new RustLibraryShimGenerator(
-        model,
-        serviceShape
-      );
-      generator.generate(outputDir);
-    }
+    final MergedServicesGenerator generator = new MergedServicesGenerator(
+      model,
+      serviceShape,
+      namespacesToGenerate,
+      localServiceTest,
+      generationAspects
+    );
+    generator.generateAllNamespaces(outputDir);
 
     // TODO: These should be part of the StandardLibrary instead,
     // but since the Dafny Rust code generator doesn't yet support multiple crates,
@@ -910,10 +889,36 @@ public class CodegenEngine {
     }
   }
 
+  private static final TokenTree EXTRA_SINGLE_CRATE_DECLARATIONS = TokenTree.of(
+    """
+    mod standard_library_conversions;
+    mod standard_library_externs;
+    """
+  );
+
   private void patchRustAfterTranspiling() {
-    final String extraDeclarations = awsSdkStyle
-      ? extraDeclarationsForSDK()
-      : extraDeclarationsForLocalService();
+    final MergedServicesGenerator generator = new MergedServicesGenerator(
+      model,
+      serviceShape,
+      namespaces,
+      localServiceTest,
+      generationAspects
+    );
+
+    final TokenTree extraRootServiceDeclarations = generator
+      .generatorForShape(serviceShape)
+      .topLevelModuleDeclarations();
+    String extraDeclarations = TokenTree
+      .of(extraRootServiceDeclarations, EXTRA_SINGLE_CRATE_DECLARATIONS)
+      .lineSeparated()
+      .toString();
+    if (!awsSdkStyle && serviceShape.hasTrait(LocalServiceTrait.class)) {
+      extraDeclarations =
+        extraDeclarations +
+        System.lineSeparator() +
+        extraTopLevelDeclarationsForLocalService(serviceShape) +
+        System.lineSeparator();
+    }
     final Path implementationFromDafnyPath = libraryRoot
       .resolve("runtimes")
       .resolve("rust")
@@ -923,10 +928,6 @@ public class CodegenEngine {
       final List<String> lines = Files.readAllLines(
         implementationFromDafnyPath
       );
-      // TODO fix root cause of duplicate extra declarations
-      if (lines.contains("// (extra-declarations)")) {
-        return;
-      }
       final int firstModDeclIndex = IntStream
         .range(0, lines.size())
         .filter(i -> lines.get(i).trim().startsWith("pub mod"))
@@ -939,15 +940,9 @@ public class CodegenEngine {
     }
   }
 
-  private String extraDeclarationsForSDK() {
-    return """
-    mod client;
-    mod conversions;
-    mod standard_library_conversions;
-    """;
-  }
-
-  private String extraDeclarationsForLocalService() {
+  private String extraTopLevelDeclarationsForLocalService(
+    ServiceShape serviceShape
+  ) {
     final String configStructName = serviceShape
       .expectTrait(LocalServiceTrait.class)
       .getConfigId()
@@ -956,35 +951,16 @@ public class CodegenEngine {
 
     return IOUtils.evalTemplate(
       """
-      // (extra-declarations)
-
-      pub mod client;
-      pub mod types;
-
-      /// Common errors and error handling utilities.
-      pub mod error;
-
-      /// All operations that this crate can perform.
-      pub mod operation;
-
-      mod conversions;
-
-      /// Copied from StandardLibrary
-      mod standard_library_conversions;
-      mod standard_library_externs;
-
-      #[cfg(feature = "wrapped-client")]
-      pub mod wrapped;
-
       pub use client::Client;
       pub use types::$configSnakeCase:L::$configStructName:L;
-
       """,
       Map.of(
         "configSnakeCase",
         configSnakeCase,
         "configStructName",
-        configStructName
+        configStructName,
+        "sharedTopLevelDecls",
+        RustLibraryShimGenerator.TOP_LEVEL_MOD_DECLS
       )
     );
   }
@@ -1060,7 +1036,7 @@ public class CodegenEngine {
     private boolean fromSmithyBuildPlugin = false;
     private Model serviceModel;
     private Path[] dependentModelPaths;
-    private String namespace;
+    private Set<String> namespaces;
     private Map<TargetLanguage, Path> targetLangOutputDirs =
       Collections.emptyMap();
     private Map<TargetLanguage, Path> targetLangTestOutputDirs =
@@ -1097,10 +1073,10 @@ public class CodegenEngine {
     }
 
     /**
-     * Sets the Smithy namespace for which to generate code (e.g. "com.foo").
+     * Sets the Smithy namespaces for which to generate code (e.g. "com.foo").
      */
-    public Builder withNamespace(final String namespace) {
-      this.namespace = namespace;
+    public Builder withNamespaces(final Set<String> namespaces) {
+      this.namespaces = namespaces;
       return this;
     }
 
@@ -1254,12 +1230,27 @@ public class CodegenEngine {
 
     public CodegenEngine build() {
       final Model serviceModel = Objects.requireNonNull(this.serviceModel);
+
+      if (this.namespaces.isEmpty()) {
+        throw new IllegalStateException(
+          "at least one namespace must be provided"
+        );
+      }
+      if (this.namespaces.size() > 1) {
+        for (final TargetLanguage targetLanguage : this.targetLangOutputDirs.keySet()) {
+          if (!targetLanguage.equals(TargetLanguage.RUST)) {
+            throw new IllegalStateException(
+              "generating for %s does not support multiple namespaces".formatted(
+                  targetLanguage
+                )
+            );
+          }
+        }
+      }
+
       final Path[] dependentModelPaths = this.dependentModelPaths == null
         ? new Path[] {}
         : this.dependentModelPaths.clone();
-      if (Strings.isNullOrEmpty(this.namespace)) {
-        throw new IllegalStateException("No namespace provided");
-      }
 
       final Map<String, String> dependencyLibraryNames =
         this.dependencyLibraryNames == null
@@ -1329,7 +1320,7 @@ public class CodegenEngine {
         fromSmithyBuildPlugin,
         serviceModel,
         dependentModelPaths,
-        this.namespace,
+        this.namespaces,
         targetLangOutputDirs,
         targetLangTestOutputDirs,
         dafnyVersion,

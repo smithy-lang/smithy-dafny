@@ -14,6 +14,8 @@ NAMESPACE=simple.types.blob
 PROJECT_SERVICES := \
 	SimpleBlob
 
+MAIN_SERVICE_FOR_RUST := SimpleBlob
+
 SERVICE_NAMESPACE_SimpleBlob=simple.types.blob
 
 SERVICE_DEPS_SimpleBlob :=
@@ -29,7 +31,7 @@ TRANSLATION_RECORD_GO := \
 PYTHON_MODULE_NAME=simple_types_blob
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:=

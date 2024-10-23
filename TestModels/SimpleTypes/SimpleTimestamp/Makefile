@@ -14,6 +14,8 @@ NAMESPACE=simple.types.timestamp
 PROJECT_SERVICES := \
 	SimpleTypesTimestamp
 
+MAIN_SERVICE_FOR_RUST := SimpleTypesTimestamp
+
 SERVICE_NAMESPACE_SimpleTypesTimestamp=simple.types.timestamp
 
 SERVICE_DEPS_SimpleTypesTimestamp :=

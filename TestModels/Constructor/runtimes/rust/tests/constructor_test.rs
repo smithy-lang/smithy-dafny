@@ -1,5 +1,5 @@
 use constructor::{
-    operation::get_constructor::{GetConstructorInput, GetConstructorOutput},
+    operation::get_constructor::{GetConstructorOutput},
     *,
 };
 /*
@@ -57,17 +57,18 @@ use constructor::{
 } */
 #[tokio::test]
 async fn test_get_constructor_with_default_config() {
-    let config = SimpleConstructorConfig::builder().build();
+    let config = SimpleConstructorConfig::builder().build().unwrap();
     let client = Client::from_conf(config).unwrap();
 
     let expected_output = GetConstructorOutput::builder()
         .internal_config_string("inputString".to_string())
-        .blob_value(vec![0])
-        .boolean_value(false)
+        .blob_value(aws_smithy_types::Blob::new(vec![0u8]))
+        .boolean_value(true)
         .string_value("".to_string())
         .integer_value(0)
         .long_value(0)
-        .build();
+        .build()
+        .unwrap();
 
     test_get_constructor(client, expected_output).await;
 }
@@ -75,23 +76,25 @@ async fn test_get_constructor_with_default_config() {
 #[tokio::test]
 async fn test_get_constructor_with_param_config() {
     let config = SimpleConstructorConfig::builder()
-        .blob_value(vec![0, 0, 7])
+        .blob_value(aws_smithy_types::Blob::new(vec![0, 0, 7]))
         .boolean_value(true)
         .string_value("ParamString".to_string())
         .integer_value(7)
         .long_value(7)
-        .build();
+        .build()
+        .unwrap();
 
     let client = Client::from_conf(config).unwrap();
 
     let expected_output = GetConstructorOutput::builder()
         .internal_config_string("inputString".to_string())
-        .blob_value(vec![0, 0, 7])
+        .blob_value(aws_smithy_types::Blob::new(vec![0, 0, 7]))
         .boolean_value(true)
         .string_value("ParamString".to_string())
         .integer_value(7)
         .long_value(7)
-        .build();
+        .build()
+        .unwrap();
 
     test_get_constructor(client, expected_output).await;
 }

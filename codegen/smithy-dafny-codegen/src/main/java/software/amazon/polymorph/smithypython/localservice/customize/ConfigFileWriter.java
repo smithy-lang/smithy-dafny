@@ -58,20 +58,6 @@ public class ConfigFileWriter implements CustomFileWriter {
 
           writer.write(
             """
-            class $L(Config):
-                ""\"
-                Smithy-modelled localService Config shape for this localService.
-                ""\"
-                ${C|}
-
-                def __init__(
-                    self,
-                    ${C|}
-                ):
-                    ${C|}
-                    super().__init__()
-                    ${C|}
-
             def dafny_config_to_smithy_config(dafny_config) -> $L:
                 ""\"
                 Converts the provided Dafny shape for this localService's config
@@ -86,31 +72,6 @@ public class ConfigFileWriter implements CustomFileWriter {
                 ""\"
                 ${C|}
             """,
-            configShape.getId().getName(),
-            writer.consumer(w ->
-              generateConfigClassFields(configShape, codegenContext, w)
-            ),
-            writer.consumer(w ->
-              generateConfigConstructorParameters(
-                configShape,
-                codegenContext,
-                w
-              )
-            ),
-            writer.consumer(w ->
-              generateConfigConstructorDocumentation(
-                configShape,
-                codegenContext,
-                w
-              )
-            ),
-            writer.consumer(w ->
-              generateConfigConstructorFieldAssignments(
-                configShape,
-                codegenContext,
-                w
-              )
-            ),
             configShape.getId().getName(),
             writer.consumer(w ->
               generateDafnyConfigToSmithyConfigFunctionBody(
@@ -130,149 +91,6 @@ public class ConfigFileWriter implements CustomFileWriter {
           );
         }
       );
-  }
-
-  /**
-   * Generates the members of the Smithy-modelled localService Config shape's class. Called when
-   * writing the class.
-   *
-   * @param configShape
-   * @param codegenContext
-   * @param writer
-   */
-  private void generateConfigClassFields(
-    StructureShape configShape,
-    GenerationContext codegenContext,
-    PythonWriter writer
-  ) {
-    Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
-    NullableIndex index = NullableIndex.of(codegenContext.model());
-    for (Entry<
-      String,
-      MemberShape
-    > memberShapeEntry : memberShapeSet.entrySet()) {
-      MemberShape memberShape = memberShapeEntry.getValue();
-      final Shape targetShape = codegenContext
-        .model()
-        .expectShape(memberShape.getTarget());
-      Symbol targetShapeSymbol = codegenContext
-        .symbolProvider()
-        .toSymbol(targetShape);
-      if (index.isMemberNullable(memberShape)) {
-        writer.addStdlibImport("typing", "Optional");
-        writer.write(
-          "$L: Optional[$T]",
-          CaseUtils.toSnakeCase(memberShape.getMemberName()),
-          targetShapeSymbol
-        );
-      } else {
-        writer.write(
-          "$L: $T",
-          CaseUtils.toSnakeCase(memberShape.getMemberName()),
-          targetShapeSymbol
-        );
-      }
-    }
-  }
-
-  /**
-   * Generates constructor parameters for the localService's Config class. Called when writing
-   * parameters for the Config class' constructor (__init__ method).
-   *
-   * @param configShape
-   * @param codegenContext
-   * @param writer
-   */
-  private void generateConfigConstructorParameters(
-    StructureShape configShape,
-    GenerationContext codegenContext,
-    PythonWriter writer
-  ) {
-    Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
-    NullableIndex index = NullableIndex.of(codegenContext.model());
-    for (MemberShape memberShape : memberShapeSet.values()) {
-      final Shape targetShape = codegenContext
-        .model()
-        .expectShape(memberShape.getTarget());
-      Symbol targetShapeSymbol = codegenContext
-        .symbolProvider()
-        .toSymbol(targetShape);
-      if (index.isMemberNullable(memberShape)) {
-        writer.addStdlibImport("typing", "Optional");
-        writer.write(
-          "$L: Optional[$T] = None,",
-          CaseUtils.toSnakeCase(memberShape.getMemberName()),
-          targetShapeSymbol
-        );
-      } else {
-        writer.write(
-          "$L: $T,",
-          CaseUtils.toSnakeCase(memberShape.getMemberName()),
-          targetShapeSymbol
-        );
-      }
-    }
-  }
-
-  /**
-   * Generates constructor documentation for the localService's Config class. Called when writing
-   * parameters for the Config class' constructor (__init__ method).
-   *
-   * @param configShape
-   * @param codegenContext
-   * @param writer
-   */
-  private void generateConfigConstructorDocumentation(
-    StructureShape configShape,
-    GenerationContext codegenContext,
-    PythonWriter writer
-  ) {
-    Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
-    writer.writeDocs(() -> {
-      var constructorDocs = configShape
-        .getTrait(DocumentationTrait.class)
-        .map(StringTrait::getValue)
-        .orElse(
-          String.format("Constructor for %s.", configShape.getId().getName())
-        );
-      writer.write(constructorDocs + "\n");
-      for (MemberShape memberShape : memberShapeSet.values()) {
-        memberShape
-          .getMemberTrait(codegenContext.model(), DocumentationTrait.class)
-          .ifPresent(trait -> {
-            String memberName = codegenContext
-              .symbolProvider()
-              .toMemberName(memberShape);
-            String memberDocs = writer.formatDocs(
-              String.format(":param %s: %s", memberName, trait.getValue())
-            );
-            writer.write(memberDocs);
-          });
-      }
-    });
-  }
-
-  /**
-   * Generates assignments to fields for the localService's Config class. Called when writing the
-   * Config class' constructor.
-   *
-   * @param configShape
-   * @param codegenContext
-   * @param writer
-   */
-  private void generateConfigConstructorFieldAssignments(
-    StructureShape configShape,
-    GenerationContext codegenContext,
-    PythonWriter writer
-  ) {
-    Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
-    for (String memberName : memberShapeSet.keySet()) {
-      writer.write(
-        "self.$L = $L",
-        CaseUtils.toSnakeCase(memberName),
-        CaseUtils.toSnakeCase(memberName)
-      );
-    }
   }
 
   /**

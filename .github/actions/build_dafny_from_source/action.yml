@@ -25,7 +25,7 @@ runs:
     - name: Load Z3
       shell: bash
       run: |
-        sudo apt-get install -qq libarchive-tools
+        sudo apt-get update && sudo apt-get install -qq libarchive-tools
         mkdir -p dafny/Binaries/z3/bin
         wget -qO- https://github.com/dafny-lang/solver-builds/releases/download/snapshot-2023-08-02/z3-4.12.1-x64-ubuntu-20.04-bin.zip | bsdtar -xf -
         mv z3-4.12.1 dafny/Binaries/z3/bin/
@@ -56,8 +56,12 @@ runs:
 
     # update the copy of the Rust runtime we have inside TestModels
     # (since it's not published yet)
-    - name: Update dafny_runtime_rust
-      shell: bash
-      run: |
-        rm -rf TestModels/dafny-dependencies/dafny_runtime_rust
-        cp -r dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust
+    # TODO: Temporarily not doing this because we need a targeted fix to the runtime,
+    # but can't pick it up by moving to a newer Dafny commit because that would pull in
+    # other breaking changes.
+
+#    - name: Update dafny_runtime_rust
+#      shell: bash
+#      run: |
+#        rm -rf TestModels/dafny-dependencies/dafny_runtime_rust
+#        cp -r dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -18,7 +19,6 @@ import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
-import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 
 // Renders constraint validation
 public class ValidationGenerator {
@@ -89,7 +89,7 @@ public class ValidationGenerator {
     for (final MemberShape key : validationFuncMap.keySet()) {
       String inputType = "";
       if (validationFuncInputTypeMap.containsKey(key)) {
-        inputType = "Value ".concat(validationFuncInputTypeMap.get(key));
+        inputType = "Value %s".formatted(validationFuncInputTypeMap.get(key));
       }
       writer.openBlock(
         "func (input $L) $L($L) (error) {",
@@ -118,12 +118,11 @@ public class ValidationGenerator {
       .sorted(sortedMembers)
       .forEach(member -> {
         final String memberName;
-        if (
-          containerShape.isListShape() || containerShape.isMapShape()
-        ) {
+        if (containerShape.isListShape() || containerShape.isMapShape()) {
           memberName = dataSource;
         } else {
-          memberName = dataSource.concat(".").concat(symbolProvider.toMemberName(member));
+          memberName =
+            dataSource.concat(".").concat(symbolProvider.toMemberName(member));
         }
         renderValidatorForEachShape(
           model.expectShape(member.getTarget()),
@@ -163,7 +162,7 @@ public class ValidationGenerator {
     ) {
       if (
         symbol.getProperty(POINTABLE, Boolean.class).orElse(false) &&
-          memberShape.isOptional()
+        memberShape.isOptional()
       ) {
         pointableString = "*";
       }
@@ -182,13 +181,28 @@ public class ValidationGenerator {
     // And for key, value := range %s looked good for map
     switch (currentShape.getType()) {
       case LIST:
-        renderListShape(currentShape.asListShape().orElseThrow(), memberShape, validationCode, dataSource);
+        renderListShape(
+          currentShape.asListShape().orElseThrow(),
+          memberShape,
+          validationCode,
+          dataSource
+        );
         break;
       case MAP:
-        renderMapShape(currentShape.asMapShape().orElseThrow(), memberShape, validationCode, dataSource);
+        renderMapShape(
+          currentShape.asMapShape().orElseThrow(),
+          memberShape,
+          validationCode,
+          dataSource
+        );
         break;
       case UNION:
-        renderUnionShape(currentShape.asUnionShape().orElseThrow(), memberShape, validationCode, dataSource);
+        renderUnionShape(
+          currentShape.asUnionShape().orElseThrow(),
+          memberShape,
+          validationCode,
+          dataSource
+        );
         break;
       case STRUCTURE:
         if (!currentShape.hasTrait(ReferenceTrait.class)) {
@@ -218,7 +232,9 @@ public class ValidationGenerator {
     } else {
       return rangeCheck;
     }
-    final RangeTrait rangeTraitShape = currentShape.expectTrait(RangeTrait.class);
+    final RangeTrait rangeTraitShape = currentShape.expectTrait(
+      RangeTrait.class
+    );
     final Optional<BigDecimal> min = rangeTraitShape.getMin();
     final Optional<BigDecimal> max = rangeTraitShape.getMax();
     if (pointableString.equals("*")) {
@@ -287,7 +303,9 @@ public class ValidationGenerator {
     } else {
       return lengthCheck;
     }
-    final LengthTrait lengthTraitShape = currentShape.expectTrait(LengthTrait.class);
+    final LengthTrait lengthTraitShape = currentShape.expectTrait(
+      LengthTrait.class
+    );
     final Optional<Long> min = lengthTraitShape.getMin();
     final Optional<Long> max = lengthTraitShape.getMax();
     if (pointableString.equals("*")) {
@@ -390,9 +408,7 @@ public class ValidationGenerator {
     ) {
       return requiredCheck;
     }
-    if (
-      GoPointableIndex.of(model).isPointable(memberShape)
-    ) {
+    if (GoPointableIndex.of(model).isPointable(memberShape)) {
       requiredCheck.append(
         """
         if ( %s == nil ) {
@@ -441,17 +457,37 @@ public class ValidationGenerator {
     return utfCheck;
   }
 
-  private void renderListShape(final ListShape currentShape, final MemberShape  memberShape, final StringBuilder validationCode, final String dataSource) {
-    final var itemMember = currentShape.getAllMembers().values().iterator().next();
+  private void renderListShape(
+    final ListShape currentShape,
+    final MemberShape memberShape,
+    final StringBuilder validationCode,
+    final String dataSource
+  ) {
+    final var itemMember = currentShape
+      .getAllMembers()
+      .values()
+      .iterator()
+      .next();
     final var itemValidation = new StringBuilder();
     var dataSourceForList = dataSource;
-    renderValidatorForEachShape(model.expectShape(itemMember.getTarget()), itemMember, false, LIST_ITEM, itemValidation);
+    renderValidatorForEachShape(
+      model.expectShape(itemMember.getTarget()),
+      itemMember,
+      false,
+      LIST_ITEM,
+      itemValidation
+    );
     // If the validation function is not created and the list shape does have some constraints
-    if (!validationFuncMap.containsKey(memberShape) && !itemValidation.isEmpty()) {
+    if (
+      !validationFuncMap.containsKey(memberShape) && !itemValidation.isEmpty()
+    ) {
       final String funcName = funcNameGenerator(memberShape, "validate");
       final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
       if (!funcInput.isEmpty()) {
-        var inputType = GoCodegenUtils.getType(symbolProvider.toSymbol(currentShape), currentShape);
+        var inputType = GoCodegenUtils.getType(
+          symbolProvider.toSymbol(currentShape),
+          currentShape
+        );
         // remove the package name because this code is generated inside smithyTypesNamespace itself
         inputType =
           inputType.replace(
@@ -461,11 +497,10 @@ public class ValidationGenerator {
         validationFuncInputTypeMap.put(memberShape, inputType);
         dataSourceForList = "Value";
       }
-      final var funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
+      final var funcCall =
+        "input.".concat(funcName).concat("(%s)".formatted(funcInput));
       validationCode.append(
-        CHECK_AND_RETURN_ERROR.formatted(
-          funcCall, funcCall
-        )
+        CHECK_AND_RETURN_ERROR.formatted(funcCall, funcCall)
       );
       validationFuncMap.put(memberShape, null);
       final var listValidation = new StringBuilder();
@@ -484,23 +519,46 @@ public class ValidationGenerator {
     }
   }
 
-  private void renderMapShape(final MapShape currentShape, final MemberShape  memberShape, final StringBuilder validationCode, final String dataSource) {
+  private void renderMapShape(
+    final MapShape currentShape,
+    final MemberShape memberShape,
+    final StringBuilder validationCode,
+    final String dataSource
+  ) {
     final var keyMember = currentShape.getKey();
     final var valueMember = currentShape.getValue();
     final var keyValidation = new StringBuilder();
     final var valueValidation = new StringBuilder();
     var dataSourceForMap = dataSource;
-    renderValidatorForEachShape(model.expectShape(keyMember.getTarget()), keyMember, false, MAP_KEY, keyValidation);
-    renderValidatorForEachShape(model.expectShape(valueMember.getTarget()), valueMember, false, MAP_VALUE, valueValidation);
+    renderValidatorForEachShape(
+      model.expectShape(keyMember.getTarget()),
+      keyMember,
+      false,
+      MAP_KEY,
+      keyValidation
+    );
+    renderValidatorForEachShape(
+      model.expectShape(valueMember.getTarget()),
+      valueMember,
+      false,
+      MAP_VALUE,
+      valueValidation
+    );
     // Put map key or value to _ if no constraints in key or value
     final var maybeMapKey = keyValidation.isEmpty() ? "_" : MAP_KEY;
     final var maybeMapValue = valueValidation.isEmpty() ? "_" : MAP_VALUE;
     // If the validation function is not created and the map shape does have some constraints in its key and value
-    if (!validationFuncMap.containsKey(memberShape) && (!keyValidation.isEmpty() || !valueValidation.isEmpty())) {
+    if (
+      !validationFuncMap.containsKey(memberShape) &&
+      (!keyValidation.isEmpty() || !valueValidation.isEmpty())
+    ) {
       final var funcName = funcNameGenerator(memberShape, "validate");
       final var funcInput = dataSource.startsWith("input") ? "" : dataSource;
       if (!funcInput.isEmpty()) {
-        var inputType = GoCodegenUtils.getType(symbolProvider.toSymbol(currentShape), currentShape);
+        var inputType = GoCodegenUtils.getType(
+          symbolProvider.toSymbol(currentShape),
+          currentShape
+        );
         // remove the package name because this code is generated inside smithyTypesNamespace itself
         inputType =
           inputType.replace(
@@ -510,11 +568,10 @@ public class ValidationGenerator {
         validationFuncInputTypeMap.put(memberShape, inputType);
         dataSourceForMap = "Value";
       }
-      final var funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
+      final var funcCall =
+        "input.".concat(funcName).concat("(%s)".formatted(funcInput));
       validationCode.append(
-        CHECK_AND_RETURN_ERROR.formatted(
-          funcCall, funcCall
-        )
+        CHECK_AND_RETURN_ERROR.formatted(funcCall, funcCall)
       );
       validationFuncMap.put(memberShape, null);
       final var mapValidation = new StringBuilder();
@@ -534,7 +591,12 @@ public class ValidationGenerator {
     }
   }
 
-  private void renderUnionShape(final UnionShape currentShape, final MemberShape  memberShape, final StringBuilder validationCode, final String dataSource) {
+  private void renderUnionShape(
+    final UnionShape currentShape,
+    final MemberShape memberShape,
+    final StringBuilder validationCode,
+    final String dataSource
+  ) {
     final var funcName = funcNameGenerator(memberShape, "validate");
     final var funcInput = dataSource.startsWith("input") ? "" : dataSource;
     var dataSourceForUnion = dataSource;
@@ -543,12 +605,9 @@ public class ValidationGenerator {
       validationFuncInputTypeMap.put(memberShape, inputType);
       dataSourceForUnion = "Value";
     }
-    final var funcCall = "input.".concat(funcName).concat("(%s)".formatted(funcInput));
-    validationCode.append(
-      CHECK_AND_RETURN_ERROR.formatted(
-        funcCall, funcCall
-      )
-    );
+    final var funcCall =
+      "input.".concat(funcName).concat("(%s)".formatted(funcInput));
+    validationCode.append(CHECK_AND_RETURN_ERROR.formatted(funcCall, funcCall));
     if (!validationFuncMap.containsKey(memberShape)) {
       validationFuncMap.put(memberShape, null);
       final var unionValidation = new StringBuilder();

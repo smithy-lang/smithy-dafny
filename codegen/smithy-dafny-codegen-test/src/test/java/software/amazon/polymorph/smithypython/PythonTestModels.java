@@ -18,6 +18,7 @@ class PythonTestModels extends TestModelTest {
   static {
     DISABLED_TESTS.add("AggregateReferences");
     DISABLED_TESTS.add("LanguageSpecificLogic");
+    DISABLED_TESTS.add("MultipleModels");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
@@ -30,11 +31,13 @@ class PythonTestModels extends TestModelTest {
     DISABLED_TESTS.add("aws-sdks/kms-lite");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
+    //TODO: Add support for Recursive shapes.
+    DISABLED_TESTS.add("RecursiveShape");
   }
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForJava(String relativeTestModelPath) {
+  void testModelsForPython(String relativeTestModelPath) {
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

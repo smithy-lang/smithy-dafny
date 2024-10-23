@@ -3,8 +3,9 @@
 
 CORES=2
 
+TRANSPILE_TESTS_IN_RUST=1
+
 ENABLE_EXTERN_PROCESSING=1
-RUST_BENERATED=1
 
 include ../SharedMakefile.mk
 
@@ -12,6 +13,8 @@ NAMESPACE=simple.resources
 
 PROJECT_SERVICES := \
 	SimpleResources
+
+MAIN_SERVICE_FOR_RUST := SimpleResources
 
 SERVICE_NAMESPACE_SimpleResources=simple.resources
 
@@ -32,7 +35,7 @@ TRANSLATION_RECORD_GO := \
 PYTHON_MODULE_NAME=simple_resources
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
 format_net:
 	pushd runtimes/net && dotnet format && popd
