@@ -123,8 +123,6 @@ module TestComAmazonawsKms {
 
     var ret := client.Decrypt(input);
 
-    // print ret;
-
     expect(ret.Failure?);
     expect(ret.error.IncorrectKeyException?);
   }
