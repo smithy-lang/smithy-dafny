@@ -468,7 +468,7 @@ polymorph_go:
 _polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_go: MODULE_NAME=--library-name $(GO_MODULE_NAME)
 _polymorph_go: DEPENDENCY_MODULE_NAMES = $(GO_DEPENDENCY_MODULE_NAMES)
-_polymorph_go: _polymorph _mv_polymorph_go run_goimports
+_polymorph_go: _polymorph _mv_polymorph_go
 
 run_goimports:
 	cd runtimes/go/ImplementationFromDafny-go && goimports -w .

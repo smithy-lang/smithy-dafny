@@ -49,10 +49,12 @@ class GoTestModels extends TestModelTest {
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);
+    // Order is important here otherwise we might run into formatting issues.
     make(testModelPath, "setup_prettier");
     make(testModelPath, "polymorph_dafny");
-    make(testModelPath, "polymorph_go");
     make(testModelPath, "transpile_go");
+    make(testModelPath, "polymorph_go");
+    make(testModelPath, "run_goimports");
     make(testModelPath, "test_go");
   }
 }
