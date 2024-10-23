@@ -24,6 +24,12 @@ SERVICE_DEPS_SimpleExtendableResources :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Extendable"
+
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 

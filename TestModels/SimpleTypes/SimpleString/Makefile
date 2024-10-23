@@ -11,6 +11,8 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.smithyString
 
+GO_NAMESPACE=simpletypessmithystring
+
 PROJECT_SERVICES := \
 	SimpleString
 
@@ -22,6 +24,10 @@ SERVICE_DEPS_SimpleString :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleString"
+
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # This project has no dependencies 
 # DEPENDENT-MODELS:=
 

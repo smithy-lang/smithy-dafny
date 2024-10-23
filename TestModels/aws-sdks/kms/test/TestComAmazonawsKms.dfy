@@ -9,6 +9,7 @@ module TestComAmazonawsKms {
   import opened Wrappers
 
   const keyId :=  "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7f";
+  const keyIdFailureCase := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7d";
   // One test depends on knowing the region it is being run it.
   // For now, hardcode this value to the region we are currently using to test,
   // which is the same region that our test KMS Key lives in.
@@ -42,7 +43,7 @@ module TestComAmazonawsKms {
         3, 208,  72, 171,  64, 207, 175
     ];
 
-    BasicDecryptTest(
+    BasicDecryptTestSuccessCase(
       input := Kms.Types.DecryptRequest(
         CiphertextBlob := workAround(CiphertextBlob),
         EncryptionContext := Wrappers.None,
@@ -52,6 +53,18 @@ module TestComAmazonawsKms {
       ),
       expectedPlaintext := [ 165, 191, 67, 62 ],
       expectedKeyId := keyId
+    );
+
+    BasicDecryptTestFailureCase(
+      input := Kms.Types.DecryptRequest(
+        CiphertextBlob := workAround(CiphertextBlob),
+        EncryptionContext := Wrappers.None,
+        GrantTokens := Wrappers.None,
+        KeyId := Wrappers.Some(keyIdFailureCase),
+        EncryptionAlgorithm := Wrappers.None
+      ),
+      expectedPlaintext := [ 165, 191, 67, 62 ],
+      expectedKeyId := keyIdFailureCase
     );
   }
 
@@ -80,7 +93,7 @@ module TestComAmazonawsKms {
     );
   }
 
-  method BasicDecryptTest(
+  method BasicDecryptTestSuccessCase(
     nameonly input: Kms.Types.DecryptRequest,
     nameonly expectedPlaintext: Kms.Types.PlaintextType,
     nameonly expectedKeyId: Kms.Types.KeyIdType
@@ -98,6 +111,20 @@ module TestComAmazonawsKms {
     expect KeyId.Some?;
     expect Plaintext.value == expectedPlaintext;
     expect KeyId.value == expectedKeyId;
+  }
+
+  method BasicDecryptTestFailureCase(
+    nameonly input: Kms.Types.DecryptRequest,
+    nameonly expectedPlaintext: Kms.Types.PlaintextType,
+    nameonly expectedKeyId: Kms.Types.KeyIdType
+  )
+  {
+    var client :- expect Kms.KMSClient();
+
+    var ret := client.Decrypt(input);
+
+    expect(ret.Failure?);
+    expect(ret.error.IncorrectKeyException?);
   }
 
   method BasicGenerateTest(
@@ -126,7 +153,7 @@ module TestComAmazonawsKms {
       EncryptionAlgorithm := Wrappers.None
     );
 
-    BasicDecryptTest(
+    BasicDecryptTestSuccessCase(
       input := decryptInput,
       expectedPlaintext := Plaintext.value,
       expectedKeyId := input.KeyId
@@ -156,7 +183,7 @@ module TestComAmazonawsKms {
       EncryptionAlgorithm := input.EncryptionAlgorithm
     );
 
-    BasicDecryptTest(
+    BasicDecryptTestSuccessCase(
       input := decryptInput,
       expectedPlaintext := input.Plaintext,
       expectedKeyId := input.KeyId

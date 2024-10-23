@@ -28,6 +28,10 @@ RUST_TEST_INDEX=test/replaces/rust
 
 RUST_OTHER_FILES=runtimes/rust/src/externs.rs
 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/LanguageSpecificLogic"
+
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # This project has no dependencies 
 # DEPENDENT-MODELS:=
 
