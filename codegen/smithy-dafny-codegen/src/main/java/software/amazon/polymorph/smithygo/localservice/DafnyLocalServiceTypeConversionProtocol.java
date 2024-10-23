@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithygo.localservice;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -16,6 +17,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.ShapeVisitorHelper;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.smithygo.utils.Constants;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -891,6 +893,7 @@ public class DafnyLocalServiceTypeConversionProtocol
           ),
         SmithyNameResolver.shapeNamespace(serviceShape),
         writer -> {
+          writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
           writer.write(
             """
             func CollectionOfErrors_Input_ToDafny(nativeInput $L.CollectionOfErrors)($L.Error) {
@@ -901,7 +904,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             	return $L.Companion_Error_.Create_CollectionOfErrors_(dafny.SeqOf(e...), dafny.SeqOfChars([]dafny.Char(nativeInput.Message)...))
             }
             func OpaqueError_Input_ToDafny(nativeInput $L.OpaqueError)($L.Error) {
-            	return $L.Companion_Error_.Create_Opaque_(nativeInput.ErrObject)
+            	return $L.Companion_Error_.Create_Opaque_(nativeInput.ErrObject, dafny.SeqOfChars([]dafny.Char(nativeInput.Error())...))
             }""",
             SmithyNameResolver.smithyTypesNamespace(serviceShape),
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
@@ -1326,32 +1329,25 @@ public class DafnyLocalServiceTypeConversionProtocol
               if (dependencies == null) {
                 return;
               }
-              final var sdkId = serviceShape.hasTrait(LocalServiceTrait.class)
-                ? serviceShape.expectTrait(LocalServiceTrait.class).getSdkId()
-                : serviceShape
-                  .expectTrait(ServiceTrait.class)
-                  .getSdkId()
-                  .toLowerCase();
               for (var dep : dependencies) {
                 final var depService = context
                   .model()
                   .expectShape(dep, ServiceShape.class);
-                String shapeNamespace;
-                if (depService.hasTrait(LocalServiceTrait.class)) {
-                  shapeNamespace = depService.expectTrait(LocalServiceTrait.class).getSdkId();
-                }
-                else {
-                  shapeNamespace = DafnyNameResolver.dafnyNamespace(depService);
-                }
+                final var sdkId = depService.hasTrait(LocalServiceTrait.class)
+                  ? depService.expectTrait(LocalServiceTrait.class).getSdkId()
+                  : depService
+                    .expectTrait(ServiceTrait.class)
+                    .getSdkId()
+                    .toLowerCase();
                 w.write(
                   """
                   if err.Is_$L() {
                       return $L.Error_FromDafny(err.Dtor_$L())
                   }
                   """,
-                  shapeNamespace,
+                  sdkId,
                   SmithyNameResolver.shapeNamespace(depService),
-                  shapeNamespace
+                  sdkId
                 );
               }
             })
@@ -1417,10 +1413,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                 return $L
             }
             """,
-            ShapeVisitorHelper.funcNameGenerator(
-              visitingMemberShape,
-              "ToDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "ToDafny"),
             inputType,
             outputType,
             SmithyToDafnyShapeVisitor.getConversionFunc(visitingMemberShape)
@@ -1492,10 +1485,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             func $L(input interface{})($L) {
                 $L
             }""",
-            ShapeVisitorHelper.funcNameGenerator(
-              visitingMemberShape,
-              "FromDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
             outputType,
             DafnyToSmithyShapeVisitor.getConversionFunc(visitingMemberShape)
           );

@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -84,7 +86,51 @@ public class UnionGenerator {
           if (target instanceof SimpleShape) {
             writer.write("Value $T", memberSymbol);
           } else {
-            writer.write("Value $P", memberSymbol);
+            // Handling smithy-dafny Reference Trait begins
+            var namespace = SmithyNameResolver.smithyTypesNamespace(target);
+            var newMemberSymbol = memberSymbol;
+            if (target.hasTrait(ReferenceTrait.class)) {
+              newMemberSymbol =
+                newMemberSymbol.getProperty("Referred", Symbol.class).get();
+              var refShape = target.expectTrait(ReferenceTrait.class);
+              if (refShape.isService()) {
+                namespace =
+                  SmithyNameResolver.shapeNamespace(
+                    model.expectShape(refShape.getReferentId())
+                  );
+              }
+              if (
+                !member
+                  .toShapeId()
+                  .getNamespace()
+                  .equals(refShape.getReferentId().getNamespace())
+              ) {
+                writer.addImportFromModule(
+                  SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+                    refShape.getReferentId().getNamespace()
+                  ),
+                  namespace
+                );
+              }
+            } else {
+              if (
+                !member
+                  .toShapeId()
+                  .getNamespace()
+                  .equals(target.toShapeId().getNamespace()) &&
+                !target.toShapeId().getNamespace().startsWith("smithy") &&
+                target.asStructureShape().isPresent()
+              ) {
+                writer.addImportFromModule(
+                  SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+                    target.toShapeId().getNamespace()
+                  ),
+                  namespace
+                );
+              }
+            }
+            // Handling smithy-dafny Reference Trait ends.
+            writer.write("Value $P", newMemberSymbol);
           }
           writer.write("");
         }

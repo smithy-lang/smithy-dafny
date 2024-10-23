@@ -5,7 +5,9 @@ import java.util.Map;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithygo.utils.Constants;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 
@@ -16,25 +18,6 @@ public class ShapeVisitorHelper {
 
   public static boolean isToDafnyShapeOptional(final MemberShape shape) {
     return optionalShapesToDafny.get(shape);
-  }
-
-  /**
-   * Generates functions Name for To Dafny and To Native conversion.
-   *
-   * @param memberShape       MemberShape to generate function name for.
-   * @param suffix            Suffix to add to the function. As of this writing, we only put FromDafny or ToNative suffix.
-   * @return the function Name
-   */
-  public static String funcNameGenerator(
-    final MemberShape memberShape,
-    final String suffix
-  ) {
-    return memberShape
-      .getId()
-      .toString()
-      .replaceAll("[.$#]", "_")
-      .concat("_")
-      .concat(suffix);
   }
 
   public static String toNativeShapeVisitorWriter(
@@ -51,14 +34,23 @@ public class ShapeVisitorHelper {
       .expectShape(memberShape.getTarget());
     String maybeAssertion = "";
     if (assertionRequired) {
-      maybeAssertion =
-        ".(".concat(
-            DafnyNameResolver.getDafnyType(
-              targetShape,
-              context.symbolProvider().toSymbol(targetShape)
-            )
-          )
-          .concat(")");
+      final var refShape = targetShape.hasTrait(ReferenceTrait.class)
+        ? targetShape.expectTrait(ReferenceTrait.class).getReferentId()
+        : null;
+      final String baseType = refShape == null
+        ? DafnyNameResolver.getDafnyType(
+          targetShape,
+          context.symbolProvider().toSymbol(targetShape)
+        )
+        : DafnyNameResolver.getDafnyType(
+          context.model().expectShape(refShape),
+          context
+            .symbolProvider()
+            .toSymbol(memberShape)
+            .getProperty("Referred", Symbol.class)
+            .get()
+        );
+      maybeAssertion = ".(".concat(baseType).concat(")");
     }
     // Resource shape already goes into a function
     if (targetShape.hasTrait(ReferenceTrait.class)) {
@@ -80,7 +72,6 @@ public class ShapeVisitorHelper {
         );
       }
     }
-    final String nextVisitorFunction;
     final String funcDataSource = "input";
     if (
       !DafnyToSmithyShapeVisitor
@@ -101,9 +92,11 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    final String funcName = funcNameGenerator(memberShape, "FromDafny");
-    nextVisitorFunction = funcName.concat("(").concat(dataSource).concat(")");
-    return nextVisitorFunction;
+    final String funcName = Constants.funcNameGenerator(
+      memberShape,
+      "FromDafny"
+    );
+    return (funcName.concat("(").concat(dataSource).concat(")"));
   }
 
   public static String toDafnyShapeVisitorWriter(
@@ -118,7 +111,6 @@ public class ShapeVisitorHelper {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
-    final String nextVisitorFunction;
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       return targetShape.accept(
         new SmithyToDafnyShapeVisitor(
@@ -153,11 +145,7 @@ public class ShapeVisitorHelper {
         )
       );
     }
-    final String funcName =
-      (memberShape.getId().toString().replaceAll("[.$#]", "_")).concat(
-          "_ToDafny("
-        );
-    nextVisitorFunction = funcName.concat(dataSource).concat(")");
-    return nextVisitorFunction;
+    final String funcName = Constants.funcNameGenerator(memberShape, "ToDafny");
+    return (funcName.concat("(").concat(dataSource).concat(")"));
   }
 }

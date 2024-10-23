@@ -355,13 +355,15 @@ public class DafnyLocalServiceGenerator implements Runnable {
             SmithyNameResolver.shapeNamespace(service)
           );
 
+          writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
+
           writer.write(
             """
             func (_static *CompanionStruct_Default___) Wrapped$L(inputConfig $L) Wrappers.Result {
                 var nativeConfig = $L.$L(inputConfig)
                 var nativeClient, nativeError = $L.NewClient(nativeConfig)
                 if nativeError != nil {
-                   return Wrappers.Companion_Result_.Create_Failure_($L.Companion_Error_.Create_Opaque_(nativeError))
+                   return Wrappers.Companion_Result_.Create_Failure_($L.Companion_Error_.Create_Opaque_(nativeError, dafny.SeqOfChars([]dafny.Char(nativeError.Error())...)))
                 }
                 return Wrappers.Companion_Result_.Create_Success_(&Shim{client: nativeClient})
             }

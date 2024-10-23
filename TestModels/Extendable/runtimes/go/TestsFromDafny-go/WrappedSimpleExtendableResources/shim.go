@@ -5,6 +5,7 @@ package WrappedSimpleExtendableResources
 import (
 	"context"
 
+	"github.com/dafny-lang/DafnyRuntimeGo/v4/dafny"
 	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 	"github.com/smithy-lang/smithy-dafny/TestModels/Extendable/SimpleExtendableResourcesTypes"
 	"github.com/smithy-lang/smithy-dafny/TestModels/Extendable/simpleextendableresourcessmithygenerated"
@@ -19,7 +20,7 @@ func (_static *CompanionStruct_Default___) WrappedSimpleExtendableResources(inpu
 	var nativeConfig = simpleextendableresourcessmithygenerated.SimpleExtendableResourcesConfig_FromDafny(inputConfig)
 	var nativeClient, nativeError = simpleextendableresourcessmithygenerated.NewClient(nativeConfig)
 	if nativeError != nil {
-		return Wrappers.Companion_Result_.Create_Failure_(SimpleExtendableResourcesTypes.Companion_Error_.Create_Opaque_(nativeError))
+		return Wrappers.Companion_Result_.Create_Failure_(SimpleExtendableResourcesTypes.Companion_Error_.Create_Opaque_(nativeError, dafny.SeqOfChars([]dafny.Char(nativeError.Error())...)))
 	}
 	return Wrappers.Companion_Result_.Create_Success_(&Shim{client: nativeClient})
 }

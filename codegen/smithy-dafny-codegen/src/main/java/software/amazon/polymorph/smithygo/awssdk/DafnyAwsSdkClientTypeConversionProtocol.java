@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithygo.awssdk;
 
 import static software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceTypeConversionProtocol.TO_DAFNY;
 import static software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceTypeConversionProtocol.TO_NATIVE;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +17,7 @@ import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.utils.Constants;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
@@ -568,10 +570,11 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           ),
         SmithyNameResolver.shapeNamespace(serviceShape),
         writer -> {
+          writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
           writer.write(
             """
             func OpaqueError_Input_ToDafny(nativeInput error)($L.Error) {
-            	return $L.Companion_Error_.Create_Opaque_(nativeInput)
+            	return $L.Companion_Error_.Create_Opaque_(nativeInput, dafny.SeqOfChars([]dafny.Char(nativeInput.Error())...))
             }""",
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             DafnyNameResolver.dafnyTypesNamespace(serviceShape)
@@ -599,11 +602,18 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
               for (final var error : errorShapes) {
+<<<<<<< HEAD
                 String errVariableName = context
                 .symbolProvider()
                 .toSymbol(
                   awsNormalizedModel.expectShape(error.toShapeId())
                 ).getName();
+=======
+                final String errVariableName = context
+                  .symbolProvider()
+                  .toSymbol(awsNormalizedModel.expectShape(error.toShapeId()))
+                  .getName();
+>>>>>>> Golang/dev
                 w.addImport("errors");
                 w.write(
                   """
@@ -823,10 +833,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                 return $L
             }
             """,
-            ShapeVisitorHelper.funcNameGenerator(
-              visitingMemberShape,
-              "ToDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "ToDafny"),
             inputType,
             outputType,
             AwsSdkToDafnyShapeVisitor.getConversionFunc(visitingMemberShape)
@@ -881,10 +888,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             func $L(input $L)($L) {
                 return $L
             }""",
-            ShapeVisitorHelper.funcNameGenerator(
-              visitingMemberShape,
-              "FromDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
             "interface {}",
             outputType,
             DafnyToAwsSdkShapeVisitor.getConversionFunc(visitingMemberShape)

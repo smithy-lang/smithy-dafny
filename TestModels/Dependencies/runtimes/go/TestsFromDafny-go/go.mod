@@ -4,13 +4,14 @@ go 1.23.0
 
 require github.com/dafny-lang/DafnyStandardLibGo v0.0.0
 
-require github.com/dafny-lang/DafnyRuntimeGo v0.0.0
-
 require github.com/smithy-lang/smithy-dafny/TestModels/Constraints v0.0.0
 
 require github.com/smithy-lang/smithy-dafny/TestModels/Extendable v0.0.0
 
-require github.com/smithy-lang/smithy-dafny/TestModels/Resource v0.0.0
+require (
+	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.8.0
+	github.com/smithy-lang/smithy-dafny/TestModels/Resource v0.0.0
+)
 
 require (
 	github.com/smithy-lang/smithy-dafny/TestModels/Dependencies v0.0.0
@@ -18,9 +19,6 @@ require (
 )
 
 replace github.com/smithy-lang/smithy-dafny/TestModels/Dependencies v0.0.0 => ../ImplementationFromDafny-go
-
-//TODO: Drop this after Dafny fixes the https://t.corp.amazon.com/P150784381
-replace github.com/dafny-lang/DafnyRuntimeGo => ../../../../../DafnyRuntimeGo/
 
 replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/
 
