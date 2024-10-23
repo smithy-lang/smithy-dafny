@@ -13,25 +13,21 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.smithy.go.codegen;
+package software.amazon.polymorph.smithygo.codegen;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 import software.amazon.smithy.utils.SetUtils;
 import software.amazon.smithy.utils.SmithyBuilder;
 
-/**
- *
- */
-public final class GoDependency
-  implements SymbolDependencyContainer, Comparable<GoDependency> {
+public final class GoDependency implements SymbolDependencyContainer {
 
   private final Type type;
   private final String sourcePath;
@@ -60,44 +56,6 @@ public final class GoDependency
         .packageName(this.sourcePath)
         .version(this.version)
         .build();
-  }
-
-  /**
-   * Given two {@link SymbolDependency} referring to the same package, return the minimum dependency version using
-   * minimum version selection. The version strings must be semver compatible.
-   *
-   * @param dx the first dependency
-   * @param dy the second dependency
-   * @return the minimum dependency
-   */
-  public static SymbolDependency mergeByMinimumVersionSelection(
-    SymbolDependency dx,
-    SymbolDependency dy
-  ) {
-    SemanticVersion sx = SemanticVersion.parseVersion(dx.getVersion());
-    SemanticVersion sy = SemanticVersion.parseVersion(dy.getVersion());
-
-    // This *shouldn't* happen in Go since the Go module import path must end with the major version component.
-    // Exception is the case where the major version is 0 or 1.
-    if (
-      sx.getMajor() != sy.getMajor() &&
-      !(sx.getMajor() == 0 || sy.getMajor() == 0)
-    ) {
-      throw new CodegenException(
-        String.format(
-          "Dependency %s has conflicting major versions",
-          dx.getPackageName()
-        )
-      );
-    }
-
-    int cmp = sx.compareTo(sy);
-    if (cmp < 0) {
-      return dy;
-    } else if (cmp > 0) {
-      return dx;
-    }
-    return dx;
   }
 
   /**
@@ -170,7 +128,7 @@ public final class GoDependency
     );
 
     symbolDependencySet.addAll(
-      resolveDependencies(getGoDependencies(), new TreeSet<>(SetUtils.of(this)))
+      resolveDependencies(getGoDependencies(), new HashSet<>(SetUtils.of(this)))
     );
 
     return new ArrayList<>(symbolDependencySet);
@@ -238,27 +196,6 @@ public final class GoDependency
     );
   }
 
-  @Override
-  public int compareTo(GoDependency o) {
-    if (equals(o)) {
-      return 0;
-    }
-
-    int importPathCompare = importPath.compareTo(o.importPath);
-    if (importPathCompare != 0) {
-      return importPathCompare;
-    }
-
-    if (alias != null) {
-      int aliasCompare = alias.compareTo(o.alias);
-      if (aliasCompare != 0) {
-        return aliasCompare;
-      }
-    }
-
-    return version.compareTo(o.version);
-  }
-
   /**
    * Represents a dependency type.
    */
@@ -294,9 +231,9 @@ public final class GoDependency
     String version,
     String alias
   ) {
-    GoDependency.Builder builder = GoDependency
+    Builder builder = GoDependency
       .builder()
-      .type(GoDependency.Type.DEPENDENCY)
+      .type(Type.DEPENDENCY)
       .sourcePath(sourcePath)
       .importPath(importPath)
       .version(version);
@@ -319,7 +256,7 @@ public final class GoDependency
   ) {
     return GoDependency
       .builder()
-      .type(GoDependency.Type.STANDARD_LIBRARY)
+      .type(Type.STANDARD_LIBRARY)
       .importPath(importPath)
       .version(version)
       .build();
@@ -338,9 +275,9 @@ public final class GoDependency
     String version,
     String alias
   ) {
-    GoDependency.Builder builder = GoDependency
+    Builder builder = GoDependency
       .builder()
-      .type(GoDependency.Type.STANDARD_LIBRARY)
+      .type(Type.STANDARD_LIBRARY)
       .importPath(importPath)
       .version(version);
 

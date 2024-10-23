@@ -13,35 +13,36 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.smithy.go.codegen;
+package software.amazon.polymorph.smithygo.codegen;
 
-import java.util.Map;
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.go.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
-import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SetUtils;
 
 /**
  * Renders structures.
  */
-final class StructureGenerator implements Runnable {
+public final class StructureGenerator implements Runnable {
 
-  private static final Map<String, String> STANDARD_ERROR_MEMBERS = MapUtils.of(
-    "ErrorCode",
-    "string",
-    "ErrorMessage",
-    "string",
-    "ErrorFault",
-    "string"
-  );
   private static final Set<String> ERROR_MEMBER_NAMES = SetUtils.of(
     "ErrorMessage",
     "Message",
@@ -52,26 +53,21 @@ final class StructureGenerator implements Runnable {
   private final SymbolProvider symbolProvider;
   private final GoWriter writer;
   private final StructureShape shape;
-  private final Symbol symbol;
-  private final ServiceShape service;
-  private final ProtocolGenerator protocolGenerator;
+  private final GenerationContext context;
+  private final ValidationGenerator validationGenerator;
 
-  StructureGenerator(
-    Model model,
-    SymbolProvider symbolProvider,
+  public StructureGenerator(
+    final GenerationContext context,
     GoWriter writer,
-    ServiceShape service,
-    StructureShape shape,
-    Symbol symbol,
-    ProtocolGenerator protocolGenerator
+    StructureShape shape
   ) {
-    this.model = model;
-    this.symbolProvider = symbolProvider;
+    this.context = context;
+    this.model = context.model();
+    this.symbolProvider = context.symbolProvider();
     this.writer = writer;
-    this.service = service;
     this.shape = shape;
-    this.symbol = symbol;
-    this.protocolGenerator = protocolGenerator;
+    this.validationGenerator =
+      new ValidationGenerator(model, symbolProvider, writer);
   }
 
   @Override
@@ -101,9 +97,9 @@ final class StructureGenerator implements Runnable {
    * @param isInputStructure A boolean indicating if input variants for member symbols should be used.
    */
   public void renderStructure(Runnable runnable, boolean isInputStructure) {
-    writer.writeShapeDocs(shape);
+    writer.addImport("fmt");
+    Symbol symbol = symbolProvider.toSymbol(shape);
     writer.openBlock("type $L struct {", symbol.getName());
-
     CodegenUtils.SortedMembers sortedMembers = new CodegenUtils.SortedMembers(
       symbolProvider
     );
@@ -117,30 +113,64 @@ final class StructureGenerator implements Runnable {
         writer.write("");
 
         String memberName = symbolProvider.toMemberName(member);
-        writer.writeMemberDocs(model, member);
 
         Symbol memberSymbol = symbolProvider.toSymbol(member);
+
+        var targetShape = model.expectShape(member.getTarget());
+
         if (isInputStructure) {
           memberSymbol =
             memberSymbol
               .getProperty(SymbolUtils.INPUT_VARIANT, Symbol.class)
               .orElse(memberSymbol);
         }
+        var namespace = SmithyNameResolver.smithyTypesNamespace(targetShape);
+
+        if (targetShape.hasTrait(ReferenceTrait.class)) {
+          memberSymbol =
+            memberSymbol.getProperty("Referred", Symbol.class).get();
+          var refShape = targetShape.expectTrait(ReferenceTrait.class);
+          if (refShape.isService()) {
+            namespace =
+              SmithyNameResolver.shapeNamespace(
+                model.expectShape(refShape.getReferentId())
+              );
+          }
+          if (
+            !member
+              .toShapeId()
+              .getNamespace()
+              .equals(refShape.getReferentId().getNamespace())
+          ) {
+            writer.addImportFromModule(
+              SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+                refShape.getReferentId().getNamespace()
+              ),
+              namespace
+            );
+          }
+        } else {
+          if (
+            !member
+              .toShapeId()
+              .getNamespace()
+              .equals(targetShape.toShapeId().getNamespace()) &&
+            !targetShape.toShapeId().getNamespace().startsWith("smithy") &&
+            targetShape.asStructureShape().isPresent()
+          ) {
+            writer.addImportFromModule(
+              SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+                targetShape.toShapeId().getNamespace()
+              ),
+              namespace
+            );
+          }
+        }
 
         writer.write("$L $P", memberName, memberSymbol);
       });
-
-    runnable.run();
-
-    // At this moment there is no support for the concept of modeled document structure types.
-    // We embed the NoSerde type to prevent usage of the generated structure shapes from being used
-    // as document types themselves, or part of broader document-type structures. This avoids making backwards
-    // incompatible changes if the document type representation changes if it is later annotated as a modeled
-    // document type. This restriction may be relaxed later by removing this constraint.
-    writer.write("");
-    writer.write("$L", ProtocolDocumentGenerator.NO_DOCUMENT_SERDE_TYPE_NAME);
-
     writer.closeBlock("}").write("");
+    validationGenerator.renderValidator(shape, isInputStructure);
   }
 
   /**
@@ -148,103 +178,53 @@ final class StructureGenerator implements Runnable {
    */
   private void renderErrorStructure() {
     Symbol structureSymbol = symbolProvider.toSymbol(shape);
-    writer.addUseImports(SmithyGoDependency.SMITHY);
     writer.addUseImports(SmithyGoDependency.FMT);
     ErrorTrait errorTrait = shape.expectTrait(ErrorTrait.class);
 
     // Write out a struct to hold the error data.
-    writer.writeShapeDocs(shape);
     writer
       .openBlock(
         "type $L struct {",
         "}",
         structureSymbol.getName(),
         () -> {
-          // The message is the only part of the standard APIError interface that isn't known ahead of time.
-          // Message is a pointer mostly for the sake of consistency.
-          writer.write("Message *string").write("");
-          writer.write("ErrorCodeOverride *string").write("");
-
+          writer.write(
+            "$LBaseException",
+            context.settings().getService().getName()
+          );
+          Set<String> memberNameSet = new HashSet<>();
+          // TODO: Revisit if message has to be strictly pointer or not (even with required trait).
+          // When any shape is required we don't add pointer in local service but AWS SDK does.
           for (MemberShape member : shape.getAllMembers().values()) {
             String memberName = symbolProvider.toMemberName(member);
-            // error messages are represented under Message for consistency
-            if (!ERROR_MEMBER_NAMES.contains(memberName)) {
-              writer.write(
-                "$L $P",
-                memberName,
-                symbolProvider.toSymbol(member)
-              );
-            }
+            memberNameSet.add(memberName);
+            writer.write("$L $P", memberName, symbolProvider.toSymbol(member));
           }
 
-          writer.write("");
-          writer.write(
-            "$L",
-            ProtocolDocumentGenerator.NO_DOCUMENT_SERDE_TYPE_NAME
-          );
+          // The message is the only part of the standard APIError interface that isn't known ahead of time.
+          // Message is a pointer mostly for the sake of consistency.
+
+          // If Message and ErrorCodeOverride is not defined in model.
+          if (!memberNameSet.contains("Message")) {
+            writer.write("Message *string").write("");
+          }
+          if (!memberNameSet.contains("ErrorCodeOverride")) {
+            writer.write("ErrorCodeOverride *string").write("");
+          }
         }
       )
       .write("");
 
     // write the Error method to satisfy the standard error interface
     writer.openBlock(
-      "func (e *$L) Error() string {",
+      "func (e $L) Error() string {",
       "}",
       structureSymbol.getName(),
       () -> {
         writer.write(
-          "return fmt.Sprintf(\"%s: %s\", e.ErrorCode(), e.ErrorMessage())"
+          "return fmt.Sprintf(\"%s: %s\", e.ErrorCodeOverride, e.Message)"
         );
       }
-    );
-
-    // Write out methods to satisfy the APIError interface. All but the message are known ahead of time,
-    // and for those we just encode the information in the method itself.
-    writer.openBlock(
-      "func (e *$L) ErrorMessage() string {",
-      "}",
-      structureSymbol.getName(),
-      () -> {
-        writer.openBlock(
-          "if e.Message == nil {",
-          "}",
-          () -> {
-            writer.write("return \"\"");
-          }
-        );
-        writer.write("return *e.Message");
-      }
-    );
-
-    String errorCode = protocolGenerator == null
-      ? shape.getId().getName(service)
-      : protocolGenerator.getErrorCode(service, shape);
-    writer.openBlock(
-      "func (e *$L) ErrorCode() string {",
-      "}",
-      structureSymbol.getName(),
-      () -> {
-        writer.openBlock(
-          "if e == nil || e.ErrorCodeOverride == nil {",
-          "}",
-          () -> {
-            writer.write("return $S", errorCode);
-          }
-        );
-        writer.write("return *e.ErrorCodeOverride");
-      }
-    );
-
-    String fault = "smithy.FaultUnknown";
-    if (errorTrait.isClientError()) {
-      fault = "smithy.FaultClient";
-    } else if (errorTrait.isServerError()) {
-      fault = "smithy.FaultServer";
-    }
-    writer.write(
-      "func (e *$L) ErrorFault() smithy.ErrorFault { return $L }",
-      structureSymbol.getName(),
-      fault
     );
   }
 }

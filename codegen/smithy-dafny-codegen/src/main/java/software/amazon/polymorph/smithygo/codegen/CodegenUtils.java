@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.smithy.go.codegen;
+package software.amazon.polymorph.smithygo.codegen;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.go.codegen.knowledge.GoPointableIndex;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -310,7 +310,7 @@ public final class CodegenUtils {
   }
 
   /**
-   * Returns the shape unpacked as a CollectionShape. Throws and exception if the passed in
+   * Returns the shape unpacked as a CollectionShape. Throws an exception if the passed in
    * shape is not a list or set.
    *
    * @param shape the list or set shape.
@@ -330,7 +330,7 @@ public final class CodegenUtils {
   }
 
   /**
-   * Returns the shape unpacked as a MapShape. Throws and exception if the passed in
+   * Returns the shape unpacked as a MapShape. Throws an exception if the passed in
    * shape is not a map.
    *
    * @param shape the map shape.

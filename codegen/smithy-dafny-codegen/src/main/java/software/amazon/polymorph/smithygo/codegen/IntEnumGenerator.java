@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.smithy.go.codegen;
+package software.amazon.polymorph.smithygo.codegen;
 
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -31,7 +31,7 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Renders intEnums and their constants.
  */
-final class IntEnumGenerator implements Runnable {
+public final class IntEnumGenerator implements Runnable {
 
   private static final Logger LOGGER = Logger.getLogger(
     IntEnumGenerator.class.getName()
@@ -41,7 +41,7 @@ final class IntEnumGenerator implements Runnable {
   private final GoWriter writer;
   private final IntEnumShape shape;
 
-  IntEnumGenerator(
+  public IntEnumGenerator(
     SymbolProvider symbolProvider,
     GoWriter writer,
     IntEnumShape shape
@@ -59,7 +59,6 @@ final class IntEnumGenerator implements Runnable {
     // protocol generators is prioritized.
     writer.write("type $L = int32", symbol.getName()).write("");
 
-    writer.writeDocs(String.format("Enum values for %s", symbol.getName()));
     Set<String> constants = new LinkedHashSet<>();
     writer
       .openBlock(
@@ -98,10 +97,6 @@ final class IntEnumGenerator implements Runnable {
             }
             constants.add(label);
 
-            entry
-              .getValue()
-              .getTrait(DocumentationTrait.class)
-              .ifPresent(trait -> writer.writeDocs(trait.getValue()));
             writer.write(
               "$L $L = $L",
               label,
@@ -118,16 +113,16 @@ final class IntEnumGenerator implements Runnable {
     // TODO(smithy): type aliases don't allow defining methods on base types (e.g. int32).
     // Uncomment generating the Value() method when the type alias is migrated to type definition.
     /*
-        writer.writeDocs(String.format("Values returns all known values for %s. Note that this can be expanded in the "
-                + "future, and so it is only as up to date as the client.%n%nThe ordering of this slice is not "
-                + "guaranteed to be stable across updates.", symbol.getName()));
-        writer.openBlock("func ($L) Values() []$L {", "}", symbol.getName(), symbol.getName(), () -> {
-            writer.openBlock("return []$L{", "}", symbol.getName(), () -> {
-                for (Map.Entry<String, Integer> entry : shape.getEnumValues().entrySet()) {
-                    writer.write("$L,", entry.getValue());
-                }
-            });
-        });
-        */
+   writer.writeDocs(String.format("Values returns all known values for %s. Note that this can be expanded in the "
+           + "future, and so it is only as up to date as the client.%n%nThe ordering of this slice is not "
+           + "guaranteed to be stable across updates.", symbol.getName()));
+   writer.openBlock("func ($L) Values() []$L {", "}", symbol.getName(), symbol.getName(), () -> {
+       writer.openBlock("return []$L{", "}", symbol.getName(), () -> {
+           for (Map.Entry<String, Integer> entry : shape.getEnumValues().entrySet()) {
+               writer.write("$L,", entry.getValue());
+           }
+       });
+   });
+*/
   }
 }

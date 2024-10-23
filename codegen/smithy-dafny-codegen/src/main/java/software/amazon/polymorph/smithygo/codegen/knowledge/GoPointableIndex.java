@@ -15,7 +15,7 @@
  *
  */
 
-package software.amazon.smithy.go.codegen.knowledge;
+package software.amazon.polymorph.smithygo.codegen.knowledge;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,6 +33,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.SetUtils;
 
@@ -90,6 +91,18 @@ public class GoPointableIndex implements KnowledgeIndex {
     ShapeType.UNION,
     ShapeType.DOCUMENT,
     // known pointer types.
+    ShapeType.BIG_DECIMAL,
+    ShapeType.BIG_INTEGER
+  );
+
+  // All the known pointer type if not required
+  private static final Set<ShapeType> KNOWN_POINTER_TYPE = SetUtils.of(
+    ShapeType.BYTE,
+    ShapeType.SHORT,
+    ShapeType.INTEGER,
+    ShapeType.LONG,
+    ShapeType.FLOAT,
+    ShapeType.DOUBLE,
     ShapeType.BIG_DECIMAL,
     ShapeType.BIG_INTEGER
   );
@@ -160,11 +173,24 @@ public class GoPointableIndex implements KnowledgeIndex {
       return false;
     }
 
-    if (
-      INHERENTLY_VALUE.contains(targetShape.getType()) ||
-      isShapeEnum(targetShape)
-    ) {
+    if (INHERENTLY_VALUE.contains(targetShape.getType())) {
       return false;
+    }
+
+    //if membershape is required return it is not pointable
+    if (member.hasTrait(RequiredTrait.class)) {
+      return false;
+    }
+
+    if (model.expectShape(member.getContainer()).isMapShape()) {
+      return false;
+    }
+
+    if (
+      KNOWN_POINTER_TYPE.contains(targetShape.getType()) &&
+      !model.expectShape(member.getContainer()).isUnionShape()
+    ) {
+      return true;
     }
 
     return nullableIndex.isMemberNullable(
@@ -210,8 +236,16 @@ public class GoPointableIndex implements KnowledgeIndex {
       return true;
     }
 
-    if (INHERENTLY_VALUE.contains(shape.getType()) || isShapeEnum(shape)) {
+    if (INHERENTLY_VALUE.contains(shape.getType())) {
       return false;
+    }
+
+    if (shape.hasTrait(RequiredTrait.class)) {
+      return false;
+    }
+
+    if (KNOWN_POINTER_TYPE.contains(shape.getType())) {
+      return true;
     }
 
     return nullableIndex.isNullable(shape);

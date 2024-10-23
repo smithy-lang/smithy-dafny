@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.smithy.go.codegen;
+package software.amazon.polymorph.smithygo.codegen;
 
 import java.util.TreeSet;
 import java.util.logging.Logger;
@@ -56,71 +56,56 @@ public final class AddOperationShapes {
     );
 
     Model.Builder modelBuilder = model.toBuilder();
-
     for (OperationShape operation : operations) {
+      OperationShape.Builder operationBuilder = operation.toBuilder();
       ShapeId operationId = operation.getId();
       LOGGER.info(() -> "building unique input/output shapes for " + operationId
       );
-
-      StructureShape newInputShape = operation
-        .getInput()
-        .map(shapeId ->
-          cloneOperationShape(
-            service,
-            operationId,
-            (StructureShape) model.expectShape(shapeId),
-            "Input"
+      if (operation.getInput().isPresent()) {
+        StructureShape newInputShape = operation
+          .getInput()
+          .map(shapeId ->
+            cloneOperationShape(
+              service,
+              operationId,
+              (StructureShape) model.expectShape(shapeId),
+              "Input"
+            )
           )
-        )
-        .orElseGet(() -> emptyOperationStructure(service, operationId, "Input")
-        );
+          .get();
+        modelBuilder.addShape(newInputShape);
+        operationBuilder.input(newInputShape.toShapeId());
+      }
 
-      StructureShape newOutputShape = operation
-        .getOutput()
-        .map(shapeId ->
-          cloneOperationShape(
-            service,
-            operationId,
-            (StructureShape) model.expectShape(shapeId),
-            "Output"
+      if (operation.getOutput().isPresent()) {
+        StructureShape newOutputShape = operation
+          .getOutput()
+          .map(shapeId ->
+            cloneOperationShape(
+              service,
+              operationId,
+              (StructureShape) model.expectShape(shapeId),
+              "Output"
+            )
           )
-        )
-        .orElseGet(() -> emptyOperationStructure(service, operationId, "Output")
-        );
-
-      // Add new input/output to model
-      modelBuilder.addShape(newInputShape);
-      modelBuilder.addShape(newOutputShape);
+          .get();
+        modelBuilder.addShape(newOutputShape);
+        operationBuilder.output(newOutputShape.toShapeId());
+      }
 
       // Update operation model with the input/output shape ids
-      modelBuilder.addShape(
-        operation
-          .toBuilder()
-          .input(newInputShape.toShapeId())
-          .output(newOutputShape.toShapeId())
-          .build()
-      );
+      modelBuilder.addShape(operationBuilder.build());
     }
 
     return modelBuilder.build();
   }
 
-  private static StructureShape emptyOperationStructure(
-    ServiceShape service,
-    ShapeId opShapeId,
-    String suffix
-  ) {
-    return StructureShape
-      .builder()
-      .id(
-        ShapeId.fromParts(
-          CodegenUtils.getSyntheticTypeNamespace(),
-          opShapeId.getName(service) + suffix
-        )
-      )
-      .addTrait(Synthetic.builder().build())
-      .build();
-  }
+  //    private static StructureShape emptyOperationStructure(ServiceShape service, ShapeId opShapeId, String suffix) {
+  //        return StructureShape.builder()
+  //                             .id(ShapeId.fromParts(service.toShapeId().getNamespace(), opShapeId.getName(service) + suffix))
+  //                             .addTrait(Synthetic.builder().build())
+  //                             .build();
+  //    }
 
   private static StructureShape cloneOperationShape(
     ServiceShape service,
@@ -136,7 +121,7 @@ public final class AddOperationShapes {
 
   private static Shape cloneShape(Shape shape, String cloneShapeName) {
     ShapeId cloneShapeId = ShapeId.fromParts(
-      CodegenUtils.getSyntheticTypeNamespace(),
+      shape.toShapeId().getNamespace(),
       cloneShapeName
     );
 
