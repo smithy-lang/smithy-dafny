@@ -22,7 +22,6 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.go.codegen.GoDelegator;
 import software.amazon.smithy.go.codegen.GoSettings;
 import software.amazon.smithy.go.codegen.GoWriter;
-import software.amazon.smithy.go.codegen.TriConsumer;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.Shape;
 
