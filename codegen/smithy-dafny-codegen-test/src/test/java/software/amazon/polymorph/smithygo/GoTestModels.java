@@ -54,6 +54,7 @@ class GoTestModels extends TestModelTest {
     make(testModelPath, "polymorph_dafny");
     make(testModelPath, "transpile_go");
     make(testModelPath, "polymorph_go");
+    //TODO: Remove this TODO line once run_goimports TODO in SmithyDafnyMakefile is fixed.
     make(testModelPath, "run_goimports");
     make(testModelPath, "test_go");
   }
