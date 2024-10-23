@@ -20,7 +20,8 @@ import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.CaseUtils;
-import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
+
+import software.amazon.polymorph.smithygo.utils.Constants;
 
 // Renders constraint validation
 public class ValidationGenerator {
@@ -56,29 +57,6 @@ public class ValidationGenerator {
     this.sortedMembers = new CodegenUtils.SortedMembers(symbolProvider);
   }
 
-  /**
-   * Generates a function name to validate constraints.
-   * 
-   * This method creates a unique function name by combining:
-   * 1. The namespace of the MemberShape (with dots removed and converted to camelCase)
-   * 2. The name of the MemberShape
-   * 3. A provided suffix 
-   * 
-   * @param memberShape The visiting MemberShape
-   * @param suffix A string to be appended at the end of the generated function name
-   * @return A string representing the generated function name
-   */
-  public static String funcNameGenerator(
-    final MemberShape memberShape,
-    final String suffix
-  ) {
-    final var memberNameSpace =  memberShape.getId().getNamespace().replaceAll("[.]", "_");
-    final var memberNameSpaceCamelCase = CaseUtils.toCamelCase(memberNameSpace);
-    return memberNameSpaceCamelCase
-      .concat(memberShape.getId().getName())
-      .concat(suffix);
-  }
-
   public void renderValidator(
     final Shape shape,
     final boolean isInputStructure
@@ -107,7 +85,7 @@ public class ValidationGenerator {
       writer.openBlock(
         "func (input $L) $L($L) (error) {",
         symbol.getName(),
-        funcNameGenerator(key, "Validate"),
+        Constants.funcNameGenerator(key, "Validate"),
         inputType
       );
       writer.write(validationFuncMap.get(key));
@@ -494,7 +472,7 @@ public class ValidationGenerator {
     if (
       !validationFuncMap.containsKey(memberShape) && !itemValidation.isEmpty()
     ) {
-      final String funcName = funcNameGenerator(memberShape, "Validate");
+      final String funcName = Constants.funcNameGenerator(memberShape, "Validate");
       final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
       if (!funcInput.isEmpty()) {
         var inputType = GoCodegenUtils.getType(
@@ -565,7 +543,7 @@ public class ValidationGenerator {
       !validationFuncMap.containsKey(memberShape) &&
       (!keyValidation.isEmpty() || !valueValidation.isEmpty())
     ) {
-      final var funcName = funcNameGenerator(memberShape, "Validate");
+      final var funcName = Constants.funcNameGenerator(memberShape, "Validate");
       final var funcInput = dataSource.startsWith("input") ? "" : dataSource;
       if (!funcInput.isEmpty()) {
         var inputType = GoCodegenUtils.getType(
@@ -610,7 +588,7 @@ public class ValidationGenerator {
     final StringBuilder validationCode,
     final String dataSource
   ) {
-    final var funcName = funcNameGenerator(memberShape, "Validate");
+    final var funcName = Constants.funcNameGenerator(memberShape, "Validate");
     final var funcInput = dataSource.startsWith("input") ? "" : dataSource;
     var dataSourceForUnion = dataSource;
     if (!funcInput.isEmpty()) {
