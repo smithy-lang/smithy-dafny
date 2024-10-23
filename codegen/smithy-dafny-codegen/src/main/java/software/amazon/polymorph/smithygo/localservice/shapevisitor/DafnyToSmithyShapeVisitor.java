@@ -14,6 +14,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameRes
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -237,6 +238,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       final var targetShape = context
         .model()
         .expectShape(memberShape.getTarget());
+      final String DtorConversion; 
+      if (!shape.hasTrait(PositionalTrait.class)) {
+          DtorConversion = ".Dtor_%s()".formatted(memberName);
+      } else {
+          // Shapes with PositionalTrait already gets input unwrapped so no conversion needed.
+          DtorConversion = "";
+      }
       //TODO: Is it ever possible for structure to be nil?
       String maybeAssertion = "";
       if (dataSource.equals("input")) {
@@ -257,7 +265,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         "%1$s%2$s%3$s%4$s%5$s".formatted(
             dataSource,
             maybeAssertion,
-            ".Dtor_%s()".formatted(memberName),
+            DtorConversion,
             memberShape.isOptional() ? ".UnwrapOr(nil)" : "",
             assertionRequired
               ? ".(%s)".formatted(
