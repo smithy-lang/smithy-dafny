@@ -1,0 +1,28 @@
+[package]
+name = "extended_sqs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+wrapped-client = []
+
+[dependencies]
+aws-sdk-sqs = "1.45.0"
+aws-config = "1.5.4"
+aws-smithy-runtime = {version = "1.6.0", features = ["client"] }
+aws-smithy-runtime-api = {version = "1.7.0", features = ["client"] }
+aws-smithy-types = "1.2.0"
+# TODO: Wrong path according to the tutorial instructions
+dafny_runtime = { path = "../../../../../TestModels/dafny-dependencies/dafny_runtime_rust"}
+
+[dev-dependencies]
+extended_sqs = { path = ".", features = ["wrapped-client"] }
+
+[dependencies.tokio]
+version = "1.26.0"
+features = ["full"]
+
+[lib]
+path = "src/implementation_from_dafny.rs"

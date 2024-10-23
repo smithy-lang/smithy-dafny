@@ -7,26 +7,28 @@ TRANSPILE_TESTS_IN_RUST=1
 
 include ../SharedMakefile.mk
 
-PROJECT_SERVICES := \
-	SQSExtendedClient
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-MAIN_SERVICE_FOR_RUST := SQSExtendedClient
+PROJECT_SERVICES := \
+	SQSExtended
+
+MAIN_SERVICE_FOR_RUST := SQSExtended
 
 # Dependencies external to this project
 # Order is important
 # In java they MUST be built
 # in the order they depend on each other
 PROJECT_DEPENDENCIES := \
-	SQS
+	aws-sdks/sqs-via-cli
 
 PROJECT_INDEX := \
-	SQS/src/Index.dfy
+	aws-sdks/sqs-via-cli/src/Index.dfy
 
-SERVICE_NAMESPACE_SQSExtendedClient=polymorph.tutorial.sqsextended
+SERVICE_NAMESPACE_SQSExtended=polymorph.tutorial.sqsextended
 
 # Dependencies for each local service
-SERVICE_DEPS_SQSExtendedClient := \
-	SQS
+SERVICE_DEPS_SQSExtended := \
+	aws-sdks/sqs-via-cli
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
