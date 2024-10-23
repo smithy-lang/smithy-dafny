@@ -49,6 +49,12 @@ module SimpleCallingAWSSDKFromLocalServiceImplTest {
     var resFailure := client.CallDDBScan(SimpleCallingAWSSDKFromLocalService.Types.CallDDBScanInput(ddbClient := ddbClient, tableArn := TABLE_ARN_FAILURE_CASE));
 
     expect resFailure.Failure?;
+    // Note: As of this writing, Go delegates the error first to KMS. 
+    // If KMS is opaque, it is going to delegate to DDB. And return a DDB error (opaque or non opaque)
+    // If KMS is not opaque, it returns ComAmazonawsKms error.
+    expect resFailure.error.ComAmazonawsDynamodb?;
+    // If a table is not found and IAM user have permission on limited DDB table, DDB client returns an opaque error.
+    expect resFailure.error.ComAmazonawsDynamodb.OpaqueError?;
   }
 
   method{:test} CallKMSEncrypt(){
