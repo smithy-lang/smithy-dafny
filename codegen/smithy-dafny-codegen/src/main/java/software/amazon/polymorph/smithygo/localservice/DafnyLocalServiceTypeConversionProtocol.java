@@ -15,6 +15,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.ShapeVisitorHelper;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.smithygo.utils.Constants;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -1334,10 +1335,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                 return $L
             }
             """,
-            ShapeVisitorHelper.funcNameGenerator(
-              visitingMemberShape,
-              "ToDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "ToDafny"),
             inputType,
             outputType,
             SmithyToDafnyShapeVisitor.getConversionFunc(visitingMemberShape)
@@ -1414,10 +1412,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             func $L(input interface{})($L) {
                 $L
             }""",
-            ShapeVisitorHelper.funcNameGenerator(
-              visitingMemberShape,
-              "FromDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
             outputType,
             DafnyToSmithyShapeVisitor.getConversionFunc(visitingMemberShape)
           );
