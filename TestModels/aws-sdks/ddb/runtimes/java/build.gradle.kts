@@ -65,7 +65,7 @@ dependencies {
     implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     implementation("software.amazon.smithy.dafny:conversion:0.1.1")
-    implementation(platform("software.amazon.awssdk:bom:2.19.1"))
+    implementation(platform("software.amazon.awssdk:bom:2.28.28"))
     implementation("software.amazon.awssdk:dynamodb")
 }
 
