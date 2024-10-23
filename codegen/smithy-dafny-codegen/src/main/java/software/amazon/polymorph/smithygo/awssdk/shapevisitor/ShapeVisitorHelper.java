@@ -6,12 +6,11 @@ import java.util.Set;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithygo.utils.Constants;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.EnumTrait;
-
-import software.amazon.polymorph.smithygo.utils.Constants;
 
 public class ShapeVisitorHelper {
 
@@ -72,8 +71,11 @@ public class ShapeVisitorHelper {
       );
       pointerShapesToNative.put(memberShape, isPointable);
     }
-    final String funcName = Constants.funcNameGenerator(memberShape, "FromDafny");
-    return(funcName.concat("(").concat(dataSource).concat(")"));
+    final String funcName = Constants.funcNameGenerator(
+      memberShape,
+      "FromDafny"
+    );
+    return (funcName.concat("(").concat(dataSource).concat(")"));
   }
 
   public static String toDafnyShapeVisitorWriter(
@@ -124,6 +126,6 @@ public class ShapeVisitorHelper {
       );
     }
     final String funcName = Constants.funcNameGenerator(memberShape, "ToDafny");
-    return(funcName.concat("(").concat(dataSource).concat(")"));
+    return (funcName.concat("(").concat(dataSource).concat(")"));
   }
 }

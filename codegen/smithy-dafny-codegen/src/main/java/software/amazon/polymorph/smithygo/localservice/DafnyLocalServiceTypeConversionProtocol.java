@@ -15,6 +15,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.ShapeVisitorHelper;
 import software.amazon.polymorph.smithygo.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.smithygo.utils.Constants;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -27,8 +28,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
-
-import software.amazon.polymorph.smithygo.utils.Constants;
 
 public class DafnyLocalServiceTypeConversionProtocol
   implements ProtocolGenerator {
@@ -1336,10 +1335,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                 return $L
             }
             """,
-            Constants.funcNameGenerator(
-              visitingMemberShape,
-              "ToDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "ToDafny"),
             inputType,
             outputType,
             SmithyToDafnyShapeVisitor.getConversionFunc(visitingMemberShape)
@@ -1416,10 +1412,7 @@ public class DafnyLocalServiceTypeConversionProtocol
             func $L(input interface{})($L) {
                 $L
             }""",
-            Constants.funcNameGenerator(
-              visitingMemberShape,
-              "FromDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
             outputType,
             DafnyToSmithyShapeVisitor.getConversionFunc(visitingMemberShape)
           );

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.utils.Constants;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -20,8 +21,6 @@ import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.CaseUtils;
-
-import software.amazon.polymorph.smithygo.utils.Constants;
 
 // Renders constraint validation
 public class ValidationGenerator {
@@ -472,7 +471,10 @@ public class ValidationGenerator {
     if (
       !validationFuncMap.containsKey(memberShape) && !itemValidation.isEmpty()
     ) {
-      final String funcName = Constants.funcNameGenerator(memberShape, "Validate");
+      final String funcName = Constants.funcNameGenerator(
+        memberShape,
+        "Validate"
+      );
       final String funcInput = dataSource.startsWith("input") ? "" : dataSource;
       if (!funcInput.isEmpty()) {
         var inputType = GoCodegenUtils.getType(

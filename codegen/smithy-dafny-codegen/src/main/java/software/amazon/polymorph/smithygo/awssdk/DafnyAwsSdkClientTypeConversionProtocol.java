@@ -17,6 +17,7 @@ import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithygo.utils.Constants;
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
@@ -25,8 +26,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
-
-import software.amazon.polymorph.smithygo.utils.Constants;
 
 public class DafnyAwsSdkClientTypeConversionProtocol
   implements ProtocolGenerator {
@@ -601,7 +600,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             }
             """,
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
-              writer.consumer(w -> {
+            writer.consumer(w -> {
               for (final var error : errorShapes) {
                 w.write(
                   """
@@ -825,10 +824,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                 return $L
             }
             """,
-              Constants.funcNameGenerator(
-              visitingMemberShape,
-              "ToDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "ToDafny"),
             inputType,
             outputType,
             AwsSdkToDafnyShapeVisitor.getConversionFunc(visitingMemberShape)
@@ -883,10 +879,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             func $L(input $L)($L) {
                 return $L
             }""",
-            Constants.funcNameGenerator(
-              visitingMemberShape,
-              "FromDafny"
-            ),
+            Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
             "interface {}",
             outputType,
             DafnyToAwsSdkShapeVisitor.getConversionFunc(visitingMemberShape)
