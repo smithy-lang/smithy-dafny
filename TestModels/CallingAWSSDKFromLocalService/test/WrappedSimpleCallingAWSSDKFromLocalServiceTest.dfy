@@ -37,6 +37,7 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
     var resFailure := client.CallDDBScan(SimpleCallingAWSSDKFromLocalService.Types.CallDDBScanInput(ddbClient := ddbClient, tableArn := TABLE_ARN_FAILURE_CASE));
 
     expect resFailure.Failure?;
+
     // If a table is not found and IAM user have permission on limited DDB table, DDB client returns an opaque error.
     expect resFailure.error.Opaque?;
   }
