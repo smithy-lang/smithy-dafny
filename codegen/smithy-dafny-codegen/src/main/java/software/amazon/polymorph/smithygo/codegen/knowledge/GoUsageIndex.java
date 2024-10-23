@@ -34,57 +34,83 @@ import software.amazon.smithy.model.shapes.ToShapeId;
  * Provides {@link KnowledgeIndex} of how shapes are used in the model.
  */
 public class GoUsageIndex implements KnowledgeIndex {
-    private final Model model;
-    private final Walker walker;
 
-    private final Set<ShapeId> inputShapes = new HashSet<>();
-    private final Set<ShapeId> outputShapes = new HashSet<>();
+  private final Model model;
+  private final Walker walker;
 
-    public GoUsageIndex(Model model) {
-        this.model = model;
-        this.walker = new Walker(model);
+  private final Set<ShapeId> inputShapes = new HashSet<>();
+  private final Set<ShapeId> outputShapes = new HashSet<>();
 
-        TopDownIndex topDownIndex = TopDownIndex.of(model);
-        OperationIndex operationIndex = OperationIndex.of(model);
+  public GoUsageIndex(Model model) {
+    this.model = model;
+    this.walker = new Walker(model);
 
-        model.shapes(ServiceShape.class).forEach(serviceShape -> {
-            topDownIndex.getContainedOperations(serviceShape).forEach(operationShape -> {
-                StructureShape inputShape = operationIndex.getInput(operationShape).get();
-                StructureShape outputShape = operationIndex.getOutput(operationShape).get();
+    TopDownIndex topDownIndex = TopDownIndex.of(model);
+    OperationIndex operationIndex = OperationIndex.of(model);
 
-                inputShapes.addAll(walker.walkShapes(inputShape, relationship ->
-                        relationship.getDirection() == RelationshipDirection.DIRECTED).stream()
-                        .map(Shape::toShapeId).collect(Collectors.toList()));
+    model
+      .shapes(ServiceShape.class)
+      .forEach(serviceShape -> {
+        topDownIndex
+          .getContainedOperations(serviceShape)
+          .forEach(operationShape -> {
+            StructureShape inputShape = operationIndex
+              .getInput(operationShape)
+              .get();
+            StructureShape outputShape = operationIndex
+              .getOutput(operationShape)
+              .get();
 
-                outputShapes.addAll(walker.walkShapes(outputShape, relationship ->
-                        relationship.getDirection() == RelationshipDirection.DIRECTED).stream()
-                        .map(Shape::toShapeId).collect(Collectors.toList()));
+            inputShapes.addAll(
+              walker
+                .walkShapes(
+                  inputShape,
+                  relationship ->
+                    relationship.getDirection() ==
+                    RelationshipDirection.DIRECTED
+                )
+                .stream()
+                .map(Shape::toShapeId)
+                .collect(Collectors.toList())
+            );
 
-            });
-        });
-    }
+            outputShapes.addAll(
+              walker
+                .walkShapes(
+                  outputShape,
+                  relationship ->
+                    relationship.getDirection() ==
+                    RelationshipDirection.DIRECTED
+                )
+                .stream()
+                .map(Shape::toShapeId)
+                .collect(Collectors.toList())
+            );
+          });
+      });
+  }
 
-    /**
-     * Returns whether shape is used as part of an input to an operation.
-     *
-     * @param shape the shape
-     * @return whether the shape is used as input.
-     */
-    public boolean isUsedForInput(ToShapeId shape) {
-        return inputShapes.contains(shape.toShapeId());
-    }
+  /**
+   * Returns whether shape is used as part of an input to an operation.
+   *
+   * @param shape the shape
+   * @return whether the shape is used as input.
+   */
+  public boolean isUsedForInput(ToShapeId shape) {
+    return inputShapes.contains(shape.toShapeId());
+  }
 
-    /**
-     * Returns whether shape is used as output of an operation.
-     *
-     * @param shape the shape
-     * @return whether the shape is used as input.
-     */
-    public boolean isUsedForOutput(ToShapeId shape) {
-        return outputShapes.contains(shape.toShapeId());
-    }
+  /**
+   * Returns whether shape is used as output of an operation.
+   *
+   * @param shape the shape
+   * @return whether the shape is used as input.
+   */
+  public boolean isUsedForOutput(ToShapeId shape) {
+    return outputShapes.contains(shape.toShapeId());
+  }
 
-    public static GoUsageIndex of(Model model) {
-        return model.getKnowledge(GoUsageIndex.class, GoUsageIndex::new);
-    }
+  public static GoUsageIndex of(Model model) {
+    return model.getKnowledge(GoUsageIndex.class, GoUsageIndex::new);
+  }
 }
