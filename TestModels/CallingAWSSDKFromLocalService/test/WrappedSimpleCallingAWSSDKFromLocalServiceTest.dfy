@@ -14,11 +14,6 @@ module WrappedSimpleCallingAWSSDKFromLocalServiceTest {
   import opened StandardLibrary.UInt
   import opened SimpleCallingawssdkfromlocalserviceTypes
 
-  const TABLE_ARN_FAILURE_CASE := "arn:aws:dynamodb:us-west-2:370957321024:table/TestTableFailure"
-  const NONEXISTENT_KEY_ID := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7g"
-  // The string "asdf" as bytes
-  const PLAIN_TEXT: Kms.Types.PlaintextType := [ 97, 115, 100, 102 ]
-
   method{:test} TestCallDDBScan() {
     var client :- expect WrappedSimpleCallingAWSSDKFromLocalServiceService.WrappedSimpleCallingAWSSDKFromLocalService();
     SimpleCallingAWSSDKFromLocalServiceImplTest.TestCallDDBScan_Success(client);
