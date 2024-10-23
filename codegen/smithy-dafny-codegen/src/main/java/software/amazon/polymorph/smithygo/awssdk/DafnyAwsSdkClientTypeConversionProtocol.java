@@ -598,10 +598,9 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             writer.consumer(w -> {
               for (final var error : errorShapes) {
                 final String errVariableName = context
-                .symbolProvider()
-                .toSymbol(
-                  awsNormalizedModel.expectShape(error.toShapeId())
-                ).getName();
+                  .symbolProvider()
+                  .toSymbol(awsNormalizedModel.expectShape(error.toShapeId()))
+                  .getName();
                 w.addImport("errors");
                 w.write(
                   """
