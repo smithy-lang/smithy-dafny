@@ -272,13 +272,12 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
       settings.getService(),
       ServiceShape.class
     );
-    return switch (shape.getId().getName(serviceShape)) {
-      case "TrentService" -> "KMSClient";
-      case "DynamoDB_20120810" -> "DynamoDBClient";
-      default -> StringUtils.capitalize(
-        removeLeadingInvalidIdentCharacters(shape.getId().getName(serviceShape))
-      );
-    };
+    if (shape.hasTrait(ServiceTrait.class)) {
+      return DafnyNameResolver.getDafnyClient(serviceShape.expectTrait(ServiceTrait.class).getSdkId())
+    }
+    return StringUtils.capitalize(
+      removeLeadingInvalidIdentCharacters(shape.getId().getName(serviceShape))
+    );
   }
 
   private String getDefaultMemberName(MemberShape shape) {
