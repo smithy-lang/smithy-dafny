@@ -273,7 +273,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
       ServiceShape.class
     );
     if (shape.hasTrait(ServiceTrait.class)) {
-      return DafnyNameResolver.getDafnyClient(serviceShape.expectTrait(ServiceTrait.class).getSdkId())
+      return DafnyNameResolver.getDafnyClient(serviceShape.expectTrait(ServiceTrait.class).getSdkId());
     }
     return StringUtils.capitalize(
       removeLeadingInvalidIdentCharacters(shape.getId().getName(serviceShape))
