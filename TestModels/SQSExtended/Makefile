@@ -7,6 +7,8 @@ TRANSPILE_TESTS_IN_RUST=1
 
 include ../SharedMakefile.mk
 
+SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/model
+
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 PROJECT_SERVICES := \
