@@ -100,12 +100,6 @@ public final class AddOperationShapes {
     return modelBuilder.build();
   }
 
-  //    private static StructureShape emptyOperationStructure(ServiceShape service, ShapeId opShapeId, String suffix) {
-  //        return StructureShape.builder()
-  //                             .id(ShapeId.fromParts(service.toShapeId().getNamespace(), opShapeId.getName(service) + suffix))
-  //                             .addTrait(Synthetic.builder().build())
-  //                             .build();
-  //    }
 
   private static StructureShape cloneOperationShape(
     ServiceShape service,
