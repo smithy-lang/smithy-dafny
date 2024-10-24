@@ -1098,7 +1098,6 @@ public class DafnyLocalServiceTypeConversionProtocol
             }),
             SmithyNameResolver.smithyTypesNamespace(serviceShape),
             SmithyNameResolver.smithyTypesNamespace(serviceShape),
-            SmithyNameResolver.smithyTypesNamespace(serviceShape),
             SmithyNameResolver.smithyTypesNamespace(serviceShape)
           );
         }
