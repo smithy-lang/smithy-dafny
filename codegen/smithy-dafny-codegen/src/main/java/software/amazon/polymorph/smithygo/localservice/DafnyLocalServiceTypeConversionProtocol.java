@@ -1497,11 +1497,21 @@ public class DafnyLocalServiceTypeConversionProtocol
                 visitingShape
               );
             if (resourceOrService.isServiceShape()) {
-              outputType =
+              if (resourceOrService.hasTrait(ServiceTrait.class)) {
+                outputType =
                 DafnyNameResolver.getDafnyInterfaceClient(
                   (ServiceShape) resourceOrService,
                   resourceOrService.expectTrait(ServiceTrait.class)
                 );
+              }
+              else {
+              final var namespace = SmithyNameResolver
+                .shapeNamespace(resourceOrService)
+                .concat(".");
+              outputType =
+                namespace.concat(
+                  context.symbolProvider().toSymbol(resourceOrService).getName());
+              }
             }
           }
           if (

@@ -152,20 +152,28 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
       }
       if (!this.isOptional) {
-        // TODO: will this work in MPL?
-        writer.addImportFromModule(
-          SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-            resourceOrService.toShapeId().getNamespace()
-          ),
-          DafnyNameResolver.dafnyTypesNamespace(serviceShape)
-        );
-        return "return %1$s.(%2$s)".formatted(
-            dataSource,
-            DafnyNameResolver.getDafnyInterfaceClient(
-              (ServiceShape) serviceShape,
-              serviceShape.expectTrait(ServiceTrait.class)
-            )
+        if (serviceShape.hasTrait(ServiceTrait.class)) {
+          writer.addImportFromModule(
+            SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+              resourceOrService.toShapeId().getNamespace()
+            ),
+            DafnyNameResolver.dafnyTypesNamespace(serviceShape)
           );
+          return "return %1$s.(%2$s)".formatted(
+              dataSource,
+              DafnyNameResolver.getDafnyInterfaceClient(
+                (ServiceShape) serviceShape,
+                serviceShape.expectTrait(ServiceTrait.class)
+              )
+            );
+        }
+        else {
+          return "return %1$s{%2$s}".formatted(
+          namespace.concat(
+            context.symbolProvider().toSymbol(serviceShape).getName()
+          ),
+          dataSource);
+        }
       }
       return """
       return func () *%s {
