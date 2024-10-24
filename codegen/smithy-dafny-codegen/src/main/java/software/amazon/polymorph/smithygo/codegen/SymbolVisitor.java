@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -578,15 +579,29 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
       var referredShape = model.expectShape(
         shape.expectTrait(ReferenceTrait.class).getReferentId()
       );
-      builder.putProperty(
-        "Referred",
-        symbolBuilderFor(
-          referredShape,
-          "I".concat(getDefaultShapeName(referredShape))
-        )
-          .putProperty(SymbolUtils.POINTABLE, false)
-          .build()
-      );
+      var isService = shape.expectTrait(ReferenceTrait.class).isService();
+      if (isService && !referredShape.hasTrait(ServiceTrait.class)) {
+        builder.putProperty(
+          "Referred",
+          symbolBuilderFor(
+            referredShape,
+            "Client",
+            SmithyNameResolver.shapeNamespace(referredShape)
+          )
+            .putProperty(SymbolUtils.POINTABLE, true)
+            .build()
+        );
+      } else {
+        builder.putProperty(
+          "Referred",
+          symbolBuilderFor(
+            referredShape,
+            "I".concat(getDefaultShapeName(referredShape))
+          )
+            .putProperty(SymbolUtils.POINTABLE, false)
+            .build()
+        );
+      }
     }
 
     return builder.build();
