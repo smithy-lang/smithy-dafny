@@ -4,13 +4,13 @@ import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Set;
 import software.amazon.polymorph.smithygo.codegen.ApplicationProtocol;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoDelegator;
+import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
@@ -26,7 +26,6 @@ import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
@@ -1006,6 +1005,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                     )
                     .findFirst();
                   if (kmsShapeId.isPresent() && ddbShapeId.isPresent()) {
+                    writer.addImport(SmithyGoDependency.SMITHY_SOURCE_PATH);
                     var kmsShape = context
                       .model()
                       .expectShape(kmsShapeId.get());
@@ -1048,6 +1048,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                       DafnyNameResolver.dafnyNamespace(kmsShape)
                     );
                   } else if (kmsShapeId.isPresent() || ddbShapeId.isPresent()) {
+                    writer.addImport(SmithyGoDependency.SMITHY_SOURCE_PATH);
                     var depShape = context
                       .model()
                       .expectShape(
