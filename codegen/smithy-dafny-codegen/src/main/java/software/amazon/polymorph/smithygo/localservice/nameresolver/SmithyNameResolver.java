@@ -2,20 +2,14 @@ package software.amazon.polymorph.smithygo.localservice.nameresolver;
 
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
-
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.UNDERSCORE;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
-import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.utils.CaseUtils;
 
 public class SmithyNameResolver {
@@ -67,7 +61,7 @@ public class SmithyNameResolver {
       shape.getId().getName().equals("DynamoDB_20120810")
     ) {
       return CaseUtils
-        .toPascalCase(shape.toShapeId().getNamespace().replace(DOT, " "))
+        .toPascalCase(shape.toShapeId().getNamespace().replace(DOT, UNDERSCORE))
         .concat("Types");
     }
     return shape

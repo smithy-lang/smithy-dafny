@@ -15,26 +15,19 @@
 
 package software.amazon.polymorph.smithygo.codegen;
 
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.UNDERSCORE;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.LengthTrait;
-import software.amazon.smithy.model.traits.RangeTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.SetUtils;
@@ -136,7 +129,7 @@ public final class StructureGenerator implements Runnable {
               namespace =
                 CaseUtils
                   .toPascalCase(
-                    refShape.getReferentId().getNamespace().replace(".", " ")
+                    refShape.getReferentId().getNamespace().replace(DOT, UNDERSCORE)
                   )
                   .concat("Types");
             } else if (
@@ -145,7 +138,7 @@ public final class StructureGenerator implements Runnable {
               namespace =
                 CaseUtils
                   .toPascalCase(
-                    refShape.getReferentId().getNamespace().replace(".", " ")
+                    refShape.getReferentId().getNamespace().replace(DOT, UNDERSCORE)
                   )
                   .concat("Types");
             } else namespace =
