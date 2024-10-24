@@ -142,7 +142,7 @@ public final class StructureGenerator implements Runnable {
                       .replace(DOT, UNDERSCORE)
                   )
                   .concat("Types");
-            } else { 
+            } else {
               namespace =
                 SmithyNameResolver.shapeNamespace(
                   model.expectShape(refShape.getReferentId())
