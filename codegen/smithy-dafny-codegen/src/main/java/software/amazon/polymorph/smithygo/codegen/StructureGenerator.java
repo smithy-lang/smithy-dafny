@@ -142,10 +142,12 @@ public final class StructureGenerator implements Runnable {
                       .replace(DOT, UNDERSCORE)
                   )
                   .concat("Types");
-            } else namespace =
-              SmithyNameResolver.shapeNamespace(
-                model.expectShape(refShape.getReferentId())
-              );
+            } else { 
+              namespace =
+                SmithyNameResolver.shapeNamespace(
+                  model.expectShape(refShape.getReferentId())
+                );
+            }
           }
           if (
             !member
