@@ -580,7 +580,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         shape.expectTrait(ReferenceTrait.class).getReferentId()
       );
       var isService = shape.expectTrait(ReferenceTrait.class).isService();
-      if (!isService && referredShape.hasTrait(ServiceTrait.class)) {
+      if (!isService || referredShape.hasTrait(ServiceTrait.class)) {
         builder.putProperty(
           "Referred",
           symbolBuilderFor(
