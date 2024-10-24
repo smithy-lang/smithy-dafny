@@ -1,0 +1,22 @@
+diff --git a/TestModels/aws-sdks/kmsv2/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java b/TestModels/aws-sdks/kmsv2/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
+index 4d97660a9..dc4ab452d 100644
+--- a/TestModels/aws-sdks/kmsv2/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
++++ b/TestModels/aws-sdks/kmsv2/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/kms/internaldafny/ToDafny.java
+@@ -5680,7 +5680,7 @@ public class ToDafny {
+         {
+           return AlgorithmSpec.create_RSA__AES__KEY__WRAP__SHA__256();
+         }
+-      case SM2PKE:
++      case SM2_PKE:
+         {
+           return AlgorithmSpec.create_SM2PKE();
+         }
+@@ -6487,7 +6487,7 @@ public class ToDafny {
+         {
+           return SigningAlgorithmSpec.create_ECDSA__SHA__512();
+         }
+-      case SM2DSA:
++      case SM2_DSA:
+         {
+           return SigningAlgorithmSpec.create_SM2DSA();
+         }
