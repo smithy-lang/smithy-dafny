@@ -1067,21 +1067,21 @@ public class DafnyLocalServiceTypeConversionProtocol
       writer.write(
         """
         case smithy.APIError:
-        kmsError := $L.Error_ToDafny(err)
+          kmsError := $L.Error_ToDafny(err)
+          ddbError := $L.Error_ToDafny(err)
           // There is no generic way to know if the error is a kms or a ddb error. So, we check for Opaque error.
-          if(kmsError.Is_Opaque()) {
-            ddbError := $L.Error_ToDafny(err)
-            return $L.Create_$L_(ddbError)
-          } else {
+          if(!kmsError.Is_Opaque()) {
             return $L.Create_$L_(kmsError)
+          } else {
+            return $L.Create_$L_(ddbError)
           }
         """,
         kmsShapeNamespace,
         ddbShapeNamespace,
         DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-        DafnyNameResolver.dafnyNamespace(ddbShape),
+        DafnyNameResolver.dafnyNamespace(kmsShape),
         DafnyNameResolver.getDafnyErrorCompanion(serviceShape),
-        DafnyNameResolver.dafnyNamespace(kmsShape)
+        DafnyNameResolver.dafnyNamespace(ddbShape)
       );
     } else if (kmsShapeId.isPresent() || ddbShapeId.isPresent()) {
       writer.addImport(SmithyGoDependency.SMITHY_SOURCE_PATH);
