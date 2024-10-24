@@ -112,7 +112,7 @@ public class IOUtils {
   ) {
     final String template = IoUtils.readUtf8Resource(
       klass,
-      "/templates/" + handleSemicolons(templatePath)
+      "/templates/" + templatePath
     );
     return evalTemplate(template, context);
   }
