@@ -20,8 +20,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -270,6 +272,11 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
       settings.getService(),
       ServiceShape.class
     );
+    if (shape.hasTrait(ServiceTrait.class)) {
+      return DafnyNameResolver.getDafnyClientName(
+        shape.expectTrait(ServiceTrait.class).getSdkId()
+      );
+    }
     return StringUtils.capitalize(
       removeLeadingInvalidIdentCharacters(shape.getId().getName(serviceShape))
     );
@@ -384,19 +391,20 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
   }
 
   private Symbol.Builder symbolBuilderFor(Shape shape, String typeName) {
+    final String namespace;
+    if (shape.hasTrait(ServiceTrait.class)) {
+      namespace = DafnyNameResolver.dafnyTypesNamespace(shape);
+    } else {
+      namespace = SmithyNameResolver.smithyTypesNamespace(shape);
+    }
     if (pointableIndex.isPointable(shape)) {
       return SymbolUtils.createPointableSymbolBuilder(
         shape,
         typeName,
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        namespace
       );
     }
-
-    return SymbolUtils.createValueSymbolBuilder(
-      shape,
-      typeName,
-      SmithyNameResolver.smithyTypesNamespace(shape)
-    );
+    return SymbolUtils.createValueSymbolBuilder(shape, typeName, namespace);
   }
 
   private Symbol.Builder symbolBuilderFor(
@@ -575,7 +583,17 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         shape.expectTrait(ReferenceTrait.class).getReferentId()
       );
       var isService = shape.expectTrait(ReferenceTrait.class).isService();
-      if (isService) {
+      if (!isService || referredShape.hasTrait(ServiceTrait.class)) {
+        builder.putProperty(
+          "Referred",
+          symbolBuilderFor(
+            referredShape,
+            "I".concat(getDefaultShapeName(referredShape))
+          )
+            .putProperty(SymbolUtils.POINTABLE, false)
+            .build()
+        );
+      } else {
         builder.putProperty(
           "Referred",
           symbolBuilderFor(
@@ -584,16 +602,6 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             SmithyNameResolver.shapeNamespace(referredShape)
           )
             .putProperty(SymbolUtils.POINTABLE, true)
-            .build()
-        );
-      } else {
-        builder.putProperty(
-          "Referred",
-          symbolBuilderFor(
-            referredShape,
-            "I".concat(getDefaultShapeName(referredShape))
-          )
-            .putProperty(SymbolUtils.POINTABLE, false)
             .build()
         );
       }

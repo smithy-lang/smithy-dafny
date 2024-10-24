@@ -15,27 +15,23 @@
 
 package software.amazon.polymorph.smithygo.codegen;
 
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.UNDERSCORE;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.LengthTrait;
-import software.amazon.smithy.model.traits.RangeTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.SetUtils;
 
 /**
@@ -131,10 +127,25 @@ public final class StructureGenerator implements Runnable {
             memberSymbol.getProperty("Referred", Symbol.class).get();
           var refShape = targetShape.expectTrait(ReferenceTrait.class);
           if (refShape.isService()) {
-            namespace =
-              SmithyNameResolver.shapeNamespace(
-                model.expectShape(refShape.getReferentId())
-              );
+            // Ideally, this should be done in SmithyNameResolver
+            // but aws sdk uses SmithyNameResolver.shapeNamespace for a lot of things.
+            // So, changes to SmithyNameResolver.shapeNamespace will break the codegen
+            // For example, smithycode is generated in comamazonawsdynamodbsmithygenerated which comes from SmithyNameResolver.shapeNamespace
+            if (
+              model
+                .expectShape(refShape.getReferentId())
+                .hasTrait(ServiceTrait.class)
+            ) {
+              namespace =
+                DafnyNameResolver.dafnyTypesNamespace(
+                  model.expectShape(refShape.getReferentId())
+                );
+            } else {
+              namespace =
+                SmithyNameResolver.shapeNamespace(
+                  model.expectShape(refShape.getReferentId())
+                );
+            }
           }
           if (
             !member

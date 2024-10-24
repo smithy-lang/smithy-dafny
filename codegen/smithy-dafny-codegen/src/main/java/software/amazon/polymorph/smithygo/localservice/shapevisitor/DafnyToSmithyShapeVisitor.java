@@ -15,6 +15,7 @@ import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameRe
 import software.amazon.polymorph.smithygo.utils.GoCodegenUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
@@ -24,6 +25,7 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -150,12 +152,28 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
       }
       if (!this.isOptional) {
-        return "return %1$s{%2$s}".formatted(
-            namespace.concat(
-              context.symbolProvider().toSymbol(serviceShape).getName()
+        if (serviceShape.hasTrait(ServiceTrait.class)) {
+          writer.addImportFromModule(
+            SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+              resourceOrService.toShapeId().getNamespace()
             ),
-            dataSource
+            DafnyNameResolver.dafnyTypesNamespace(serviceShape)
           );
+          return "return %1$s.(%2$s)".formatted(
+              dataSource,
+              DafnyNameResolver.getDafnyInterfaceClient(
+                (ServiceShape) serviceShape,
+                serviceShape.expectTrait(ServiceTrait.class)
+              )
+            );
+        } else {
+          return "return %1$s{%2$s}".formatted(
+              namespace.concat(
+                context.symbolProvider().toSymbol(serviceShape).getName()
+              ),
+              dataSource
+            );
+        }
       }
       return """
       return func () *%s {

@@ -713,11 +713,14 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           ),
         SmithyNameResolver.shapeNamespace(serviceShape),
         writer -> {
-          writer.addUseImports(SmithyGoDependency.FMT);
+          writer.addImport(SmithyGoDependency.SMITHY_SOURCE_PATH);
           writer.write(
             """
             func OpaqueError_Output_FromDafny(dafnyOutput $L.Error)(error) {
-                return fmt.Errorf(fmt.Sprintf("%v", dafnyOutput.Dtor_obj()))
+                apiError := &smithy.GenericAPIError{
+                  Message: dafnyOutput.Dtor_obj().(*smithy.OperationError).Err.Error(),
+                }
+                return apiError
             }""",
             DafnyNameResolver.dafnyTypesNamespace(serviceShape)
           );
