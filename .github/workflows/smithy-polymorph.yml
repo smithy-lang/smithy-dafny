@@ -46,6 +46,11 @@ jobs:
           arguments: :smithy-dafny-codegen:test
           build-root-directory: codegen
 
+      - name: Build a test model (just to test multiple OS')
+        shell: bash
+        working-directory: TestModels/SimpleTypes/SimpleString
+        run: make polymorph_dafny
+
       - name: not-grep
         if: matrix.os == 'ubuntu-latest'
         uses: mattsb42-meta/not-grep@1.0.0
