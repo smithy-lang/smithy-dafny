@@ -996,8 +996,10 @@ public class DafnyLocalServiceTypeConversionProtocol
                   // Service error handled outside the for loop because we don't want writer to print two duplicate block case smithy.APIError twice
                   // For example: if we have DDB and KMS in a model then writer will handle dependency twice and case smithy.APIError will be written twice
                   if (
-                    dep.getName().equals("TrentService") ||
-                    dep.getName().equals("DynamoDB_20120810")
+                    context
+                      .model()
+                      .expectShape(dep)
+                      .hasTrait(ServiceTrait.class)
                   ) {
                     continue;
                   } else {
