@@ -31,6 +31,6 @@ require (
 
 replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/
 
-replace github.com/smithy-lang/smithy-dafny/kmsv2 => /Users/rishavkj/Documents/Storage/Team-Repos/smithy-dafny/TestModels/aws-sdks/kmsv2/runtimes/go/ImplementationFromDafny-go/
+replace github.com/smithy-lang/smithy-dafny/kmsv2 => ../../../../aws-sdks/kmsv2/runtimes/go/ImplementationFromDafny-go/
 
-replace github.com/smithy-lang/smithy-dafny/ddbv2 => /Users/rishavkj/Documents/Storage/Team-Repos/smithy-dafny/TestModels/aws-sdks/ddbv2/runtimes/go/ImplementationFromDafny-go/
+replace github.com/smithy-lang/smithy-dafny/ddbv2 => ../../../../aws-sdks/ddbv2/runtimes/go/ImplementationFromDafny-go/
