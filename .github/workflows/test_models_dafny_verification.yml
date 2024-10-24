@@ -30,7 +30,7 @@ jobs:
         dafny-version:
           - ${{ inputs.dafny }}
         shard: ${{ fromJson(needs.populate-matrix-dimensions.outputs.shard-list) }}
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-12]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
