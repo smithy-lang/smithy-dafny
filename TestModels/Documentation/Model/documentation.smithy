@@ -86,9 +86,6 @@ structure CouldntGetTheThingError {
   // because it special-cases message and adds its own docstring.
   @required
   message: String
-
-  /// The name of the thing we couldn't get
-  thingName: String
 }
 
 /// Either kind of thing.
