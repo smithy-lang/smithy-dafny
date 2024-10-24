@@ -182,7 +182,15 @@ public class DafnyApiCodegen {
         // Error types are generated *after*
         // all other types to account
         // for any dependent modules
-        modeledErrorDataType
+        modeledErrorDataType,
+        TokenTree.of("""
+          // This dummy subset type is included to make sure Dafny
+          // always generates a _ExternBase___default.java class.
+          type DummySubsetType = x: int | IsDummySubsetType(x) witness 1
+          predicate method IsDummySubsetType(x: int) {
+            0 < x
+          }
+          """)
       )
       .lineSeparated()
       .braced();

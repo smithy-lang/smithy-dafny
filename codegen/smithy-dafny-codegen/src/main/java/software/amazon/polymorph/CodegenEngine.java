@@ -499,6 +499,10 @@ public class CodegenEngine {
           "runtimes/java/src/main/java/$dafnyNamespaceDir;L/__default.java",
           parameters
         );
+        writeTemplatedFile(
+          "runtimes/java/src/main/java/$dafnyNamespaceDir;L/types/__default.java",
+          parameters
+        );
       }
     } else {
       final String serviceConfig = serviceShape
