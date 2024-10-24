@@ -87,7 +87,7 @@ public class IOUtils {
       parameters
     );
     final Path outputPath = rootPath.resolve(
-      evalTemplate(handleSemicolons(templateOutputPath), parameters)
+      safeEvalPathTemplate(templateOutputPath, parameters)
     );
 
     try {
@@ -98,6 +98,25 @@ public class IOUtils {
 
     IOUtils.writeToFile(content, outputPath.toFile());
     LOGGER.info("Additional templated content written to {}", outputPath);
+  }
+
+  /**
+   * Evaluate a template string representing a file path.
+   * Note that ':' can't be used in file paths on Windows,
+   * so we use ';' instead and replace it with ':' before evaluating the templated path.
+   * We also explicitly reject ':' in paths in case someone accidentally
+   * uses that and doesn't test on Windows (purely hypothetically :)
+   */
+  public static String safeEvalPathTemplate(
+    final String pathTemplate,
+    final Map<String, String> parameters
+  ) {
+    if (pathTemplate.contains(":")) {
+      throw new IllegalArgumentException(
+        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
+      );
+    }
+    return evalTemplate(pathTemplate.replace(';', ':'), parameters);
   }
 
   /**
