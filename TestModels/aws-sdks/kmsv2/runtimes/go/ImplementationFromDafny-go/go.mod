@@ -9,6 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kms v1.35.5
 	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.8.0
 	github.com/dafny-lang/DafnyStandardLibGo v0.0.0-00010101000000-000000000000
+	github.com/aws/smithy-go v1.22.0
 )
 
 require (
@@ -23,5 +24,4 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.24.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.32.2 // indirect
-	github.com/aws/smithy-go v1.22.0 // indirect
 )
