@@ -49,9 +49,9 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
   protected String baseTypeForEnum(final EnumShape enumShape) {
     if (isGeneratedInSdk(enumShape.getId())) {
       return "%s.%s".formatted(
-        namespaceForService(),
-        classForEnum(enumShape.getId())
-      );
+          namespaceForService(),
+          classForEnum(enumShape.getId())
+        );
     }
     return super.baseTypeForEnum(enumShape);
   }
