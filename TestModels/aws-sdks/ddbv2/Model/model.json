@@ -3604,10 +3604,10 @@
     "com.amazonaws.dynamodb#DisableKinesisStreamingDestination": {
       "type": "operation",
       "input": {
-        "target": "com.amazonaws.dynamodb#KinesisStreamingDestinationInput"
+        "target": "com.amazonaws.dynamodb#DisableKinesisStreamingDestinationInput"
       },
       "output": {
-        "target": "com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"
+        "target": "com.amazonaws.dynamodb#DisableKinesisStreamingDestinationOutput"
       },
       "errors": [
         {
@@ -4944,10 +4944,10 @@
     "com.amazonaws.dynamodb#EnableKinesisStreamingDestination": {
       "type": "operation",
       "input": {
-        "target": "com.amazonaws.dynamodb#KinesisStreamingDestinationInput"
+        "target": "com.amazonaws.dynamodb#EnableKinesisStreamingDestinationInput"
       },
       "output": {
-        "target": "com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"
+        "target": "com.amazonaws.dynamodb#EnableKinesisStreamingDestinationOutput"
       },
       "errors": [
         {
@@ -7232,6 +7232,114 @@
       }
     },
     "com.amazonaws.dynamodb#KinesisStreamingDestinationOutput": {
+      "type": "structure",
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableName",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the table being modified.</p>"
+          }
+        },
+        "StreamArn": {
+          "target": "com.amazonaws.dynamodb#StreamArn",
+          "traits": {
+            "smithy.api#documentation": "<p>The ARN for the specific Kinesis data stream.</p>"
+          }
+        },
+        "DestinationStatus": {
+          "target": "com.amazonaws.dynamodb#DestinationStatus",
+          "traits": {
+            "smithy.api#documentation": "<p>The current status of the replication.</p>"
+          }
+        },
+        "EnableKinesisStreamingConfiguration": {
+          "target": "com.amazonaws.dynamodb#EnableKinesisStreamingConfiguration",
+          "traits": {
+            "smithy.api#documentation": "<p>The destination for the Kinesis streaming information that is being enabled.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.dynamodb#DisableKinesisStreamingDestinationInput": {
+      "type": "structure",
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the DynamoDB table. You can also provide the Amazon Resource Name (ARN) of the\n            table in this parameter.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "StreamArn": {
+          "target": "com.amazonaws.dynamodb#StreamArn",
+          "traits": {
+            "smithy.api#documentation": "<p>The ARN for a Kinesis data stream.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "EnableKinesisStreamingConfiguration": {
+          "target": "com.amazonaws.dynamodb#EnableKinesisStreamingConfiguration",
+          "traits": {
+            "smithy.api#documentation": "<p>The source for the Kinesis streaming information that is being enabled.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.dynamodb#DisableKinesisStreamingDestinationOutput": {
+      "type": "structure",
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableName",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the table being modified.</p>"
+          }
+        },
+        "StreamArn": {
+          "target": "com.amazonaws.dynamodb#StreamArn",
+          "traits": {
+            "smithy.api#documentation": "<p>The ARN for the specific Kinesis data stream.</p>"
+          }
+        },
+        "DestinationStatus": {
+          "target": "com.amazonaws.dynamodb#DestinationStatus",
+          "traits": {
+            "smithy.api#documentation": "<p>The current status of the replication.</p>"
+          }
+        },
+        "EnableKinesisStreamingConfiguration": {
+          "target": "com.amazonaws.dynamodb#EnableKinesisStreamingConfiguration",
+          "traits": {
+            "smithy.api#documentation": "<p>The destination for the Kinesis streaming information that is being enabled.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.dynamodb#EnableKinesisStreamingDestinationInput": {
+      "type": "structure",
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#documentation": "<p>The name of the DynamoDB table. You can also provide the Amazon Resource Name (ARN) of the\n            table in this parameter.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "StreamArn": {
+          "target": "com.amazonaws.dynamodb#StreamArn",
+          "traits": {
+            "smithy.api#documentation": "<p>The ARN for a Kinesis data stream.</p>",
+            "smithy.api#required": {}
+          }
+        },
+        "EnableKinesisStreamingConfiguration": {
+          "target": "com.amazonaws.dynamodb#EnableKinesisStreamingConfiguration",
+          "traits": {
+            "smithy.api#documentation": "<p>The source for the Kinesis streaming information that is being enabled.</p>"
+          }
+        }
+      }
+    },
+    "com.amazonaws.dynamodb#EnableKinesisStreamingDestinationOutput": {
       "type": "structure",
       "members": {
         "TableName": {
