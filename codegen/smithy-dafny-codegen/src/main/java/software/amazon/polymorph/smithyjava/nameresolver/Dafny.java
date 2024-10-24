@@ -356,6 +356,7 @@ public class Dafny extends NameResolver {
       case RESOURCE -> classNameForResource(shape.asResourceShape().get());
       // Unions are identical to Structures (in this context).
       case UNION -> classForNotErrorNotUnitShape(shape.asUnionShape().get());
+      case ENUM -> typeForString(shape.asStringShape().get());
       default -> throw new UnsupportedOperationException(
         "Unsupported shape " + shapeId
       );

@@ -230,6 +230,7 @@ public class ToNativeAwsV2 extends ToNative {
       case MAP -> modeledMap(shape.asMapShape().get());
       case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
       case UNION -> modeledUnion(shape.asUnionShape().get());
+      case ENUM -> generateConvertEnum(shapeId);
       default -> throw new UnsupportedOperationException(
         "ShapeId %s is of Type %s, which is not yet supported for ToNative".formatted(
             shapeId,
