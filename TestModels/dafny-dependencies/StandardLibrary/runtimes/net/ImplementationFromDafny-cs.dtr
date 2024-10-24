@@ -1,7 +1,12 @@
 file_format_version = "1.0"
-dafny_version = "4.7.0.0"
+dafny_version = "4.8.1.0"
 [options_by_module.Wrappers]
+legacy-module-names = false
 [options_by_module."StandardLibrary.UInt"]
+legacy-module-names = false
 [options_by_module.StandardLibrary]
+legacy-module-names = false
 [options_by_module.UTF8]
+legacy-module-names = false
 [options_by_module.StandardLibraryInterop]
+legacy-module-names = false
