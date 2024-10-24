@@ -580,7 +580,17 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         shape.expectTrait(ReferenceTrait.class).getReferentId()
       );
       var isService = shape.expectTrait(ReferenceTrait.class).isService();
-      if (isService && !referredShape.hasTrait(ServiceTrait.class)) {
+      if (!isService && referredShape.hasTrait(ServiceTrait.class)) {
+        builder.putProperty(
+          "Referred",
+          symbolBuilderFor(
+            referredShape,
+            "I".concat(getDefaultShapeName(referredShape))
+          )
+            .putProperty(SymbolUtils.POINTABLE, false)
+            .build()
+        );
+      } else {
         builder.putProperty(
           "Referred",
           symbolBuilderFor(
@@ -589,16 +599,6 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             SmithyNameResolver.shapeNamespace(referredShape)
           )
             .putProperty(SymbolUtils.POINTABLE, true)
-            .build()
-        );
-      } else {
-        builder.putProperty(
-          "Referred",
-          symbolBuilderFor(
-            referredShape,
-            "I".concat(getDefaultShapeName(referredShape))
-          )
-            .putProperty(SymbolUtils.POINTABLE, false)
             .build()
         );
       }
