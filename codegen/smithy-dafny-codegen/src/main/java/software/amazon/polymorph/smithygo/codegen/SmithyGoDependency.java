@@ -95,7 +95,7 @@ public final class SmithyGoDependency {
   public static final GoDependency GO_JMESPATH = goJmespath(null);
   public static final GoDependency MATH = stdlib("math");
 
-  private static final String SMITHY_SOURCE_PATH = "github.com/aws/smithy-go";
+  public static final String SMITHY_SOURCE_PATH = "github.com/aws/smithy-go";
   private static final String GO_CMP_SOURCE_PATH = "github.com/google/go-cmp";
   private static final String GO_JMESPATH_SOURCE_PATH =
     "github.com/jmespath/go-jmespath";
