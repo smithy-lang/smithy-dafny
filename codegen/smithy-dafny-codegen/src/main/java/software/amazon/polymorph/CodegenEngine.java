@@ -76,6 +76,8 @@ public class CodegenEngine {
     CodegenEngine.class
   );
 
+  private static final DafnyVersion MIN_DAFNY_VERSION = DafnyVersion.parse("4.5");
+
   // Used to distinguish different conventions between the CLI
   // and the Smithy build plugin, such as where .NET project files live.
   private final boolean fromSmithyBuildPlugin;
@@ -932,7 +934,7 @@ public class CodegenEngine {
   /**
    * Runs the given command and throws an exception if the exit code is nonzero.
    */
-  private String runCommandOrThrow(Path workingDir, String... args) {
+  private static String runCommandOrThrow(Path workingDir, String... args) {
     final CommandResult result = runCommand(workingDir, args);
     if (result.exitCode != 0) {
       throw new RuntimeException(
@@ -945,7 +947,7 @@ public class CodegenEngine {
   /**
    * Runs the given command.
    */
-  private CommandResult runCommand(Path workingDir, String... args) {
+  private static CommandResult runCommand(Path workingDir, String... args) {
     final List<String> argsList = List.of(args);
     final StringBuilder output = new StringBuilder();
     final int exitCode = IoUtils.runCommand(
@@ -1003,7 +1005,7 @@ public class CodegenEngine {
       Collections.emptyMap();
     private Map<TargetLanguage, Path> targetLangTestOutputDirs =
       Collections.emptyMap();
-    private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
+    private DafnyVersion dafnyVersion;
     private Path propertiesFile;
     private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
     private Path includeDafnyFile;
@@ -1235,9 +1237,15 @@ public class CodegenEngine {
       final Map<TargetLanguage, Path> targetLangTestOutputDirs =
         ImmutableMap.copyOf(targetLangTestOutputDirsRaw);
 
-      final DafnyVersion dafnyVersion = Objects.requireNonNull(
+      final DafnyVersion dafnyVersion = Optional.ofNullable(
         this.dafnyVersion
-      );
+      ).orElseGet(CodegenEngine::getDafnyVersionFromDafny);
+      if (dafnyVersion.compareTo(MIN_DAFNY_VERSION) < 0) {
+        throw new IllegalStateException(
+          "A minimum Dafny version of " + MIN_DAFNY_VERSION.unparse() + " is required"
+        );
+      }
+
       final Optional<Path> propertiesFile = Optional
         .ofNullable(this.propertiesFile)
         .map(path -> path.toAbsolutePath().normalize());
@@ -1299,6 +1307,11 @@ public class CodegenEngine {
         libraryName
       );
     }
+  }
+
+  private static DafnyVersion getDafnyVersionFromDafny() {
+    String versionString = runCommandOrThrow(Path.of("."), "dafny", "--version");
+    return DafnyVersion.parse(versionString.trim());
   }
 
   public enum TargetLanguage {
