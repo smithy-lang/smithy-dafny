@@ -20,8 +20,10 @@ import static software.amazon.polymorph.smithygo.localservice.nameresolver.Const
 
 import java.util.HashSet;
 import java.util.Set;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -130,18 +132,14 @@ public final class StructureGenerator implements Runnable {
             // So, changes to SmithyNameResolver.shapeNamespace will break the codegen
             // For example, smithycode is generated in comamazonawsdynamodbsmithygenerated which comes from SmithyNameResolver.shapeNamespace
             if (
-              refShape.getReferentId().getName().equals("TrentService") ||
-              refShape.getReferentId().getName().equals("DynamoDB_20120810")
+              model
+                .expectShape(refShape.getReferentId())
+                .hasTrait(ServiceTrait.class)
             ) {
               namespace =
-                CaseUtils
-                  .toPascalCase(
-                    refShape
-                      .getReferentId()
-                      .getNamespace()
-                      .replace(DOT, UNDERSCORE)
-                  )
-                  .concat("Types");
+                DafnyNameResolver.dafnyTypesNamespace(
+                  model.expectShape(refShape.getReferentId())
+                );
             } else {
               namespace =
                 SmithyNameResolver.shapeNamespace(
