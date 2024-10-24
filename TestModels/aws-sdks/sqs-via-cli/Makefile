@@ -18,6 +18,8 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 AWS_SDK_CMD=--aws-sdk
 
+POLYMORPH_OPTIONS=--generate project-files --generate client-constructors
+
 # This project has no dependencies
 # DEPENDENT-MODELS:=
 
