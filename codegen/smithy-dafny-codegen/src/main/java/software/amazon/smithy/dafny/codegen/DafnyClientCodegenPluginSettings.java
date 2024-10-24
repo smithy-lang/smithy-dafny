@@ -144,7 +144,8 @@ class DafnyClientCodegenPluginSettings {
     }
 
     // This is now optional since we can get it from dafny itself
-    final DafnyVersion dafnyVersionString = node.getStringMember("dafnyVersion")
+    final DafnyVersion dafnyVersionString = node
+      .getStringMember("dafnyVersion")
       .map(StringNode::getValue)
       .map(DafnyVersion::parse)
       .orElse(null);

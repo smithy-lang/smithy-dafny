@@ -5,9 +5,7 @@ package software.amazon.polymorph;
 
 import static software.amazon.smithy.utils.CaseUtils.toSnakeCase;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Streams;
 import com.squareup.javapoet.ClassName;
 import java.io.IOException;
@@ -52,9 +50,7 @@ import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
-import software.amazon.polymorph.smithyrust.generator.AbstractRustShimGenerator;
 import software.amazon.polymorph.smithyrust.generator.MergedServicesGenerator;
-import software.amazon.polymorph.smithyrust.generator.RustAwsSdkShimGenerator;
 import software.amazon.polymorph.smithyrust.generator.RustLibraryShimGenerator;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
@@ -76,7 +72,9 @@ public class CodegenEngine {
     CodegenEngine.class
   );
 
-  private static final DafnyVersion MIN_DAFNY_VERSION = DafnyVersion.parse("4.5");
+  private static final DafnyVersion MIN_DAFNY_VERSION = DafnyVersion.parse(
+    "4.5"
+  );
 
   // Used to distinguish different conventions between the CLI
   // and the Smithy build plugin, such as where .NET project files live.
@@ -222,7 +220,13 @@ public class CodegenEngine {
       "dafnyVersion",
       dafnyVersionString
     );
-    writeTemplatedFile("project.properties", outputPath.toString(), parameters);
+    // Don't use writeTemplatedFile since outputPath is an absolute path
+    final String propertiesFileContent = IOUtils.evalTemplateResource(
+      getClass(),
+      "project.properties",
+      parameters
+    );
+    IOUtils.writeToFile(propertiesFileContent, outputPath.toFile());
   }
 
   private void generateDafny(final Path outputDir) {
@@ -1237,12 +1241,14 @@ public class CodegenEngine {
       final Map<TargetLanguage, Path> targetLangTestOutputDirs =
         ImmutableMap.copyOf(targetLangTestOutputDirsRaw);
 
-      final DafnyVersion dafnyVersion = Optional.ofNullable(
-        this.dafnyVersion
-      ).orElseGet(CodegenEngine::getDafnyVersionFromDafny);
+      final DafnyVersion dafnyVersion = Optional
+        .ofNullable(this.dafnyVersion)
+        .orElseGet(CodegenEngine::getDafnyVersionFromDafny);
       if (dafnyVersion.compareTo(MIN_DAFNY_VERSION) < 0) {
         throw new IllegalStateException(
-          "A minimum Dafny version of " + MIN_DAFNY_VERSION.unparse() + " is required"
+          "A minimum Dafny version of " +
+          MIN_DAFNY_VERSION.unparse() +
+          " is required"
         );
       }
 
@@ -1310,7 +1316,11 @@ public class CodegenEngine {
   }
 
   private static DafnyVersion getDafnyVersionFromDafny() {
-    String versionString = runCommandOrThrow(Path.of("."), "dafny", "--version");
+    String versionString = runCommandOrThrow(
+      Path.of("."),
+      "dafny",
+      "--version"
+    );
     return DafnyVersion.parse(versionString.trim());
   }
 

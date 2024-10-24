@@ -1,6 +1,5 @@
 package software.amazon.polymorph.smithyrust.generator;
 
-import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
@@ -254,7 +253,7 @@ public abstract class AbstractRustShimGenerator {
       toDafnyVariantsForStructure(structureShape).toString()
     );
 
-    return TokenTree.of(evalTemplate(template, variables));
+    return TokenTree.of(IOUtils.evalTemplate(template, variables));
   }
 
   /**
@@ -283,7 +282,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("unwrapIfNeeded", unwrapIfNeeded);
 
     return TokenTree.of(
-      evalTemplate(
+      IOUtils.evalTemplate(
         """
         #[allow(dead_code)]
         pub fn from_dafny(
@@ -877,7 +876,7 @@ public abstract class AbstractRustShimGenerator {
       .keySet()
       .stream()
       .map(memberName ->
-        evalTemplate(
+        IOUtils.evalTemplate(
           "$rustTypesModuleName:L::$rustEnumName:L::$rustEnumMemberName:L => crate::r#$dafnyTypesModuleName:L::$enumName:L::$dafnyEnumMemberName:L {},",
           MapUtils.merge(variables, enumMemberVariables(memberName))
         )
@@ -891,7 +890,7 @@ public abstract class AbstractRustShimGenerator {
     // This could be handled more cleanly if conversion functions returned Results,
     // but that would be a large and disruptive change to the overall code flow.
     return TokenTree.of(
-      evalTemplate(
+      IOUtils.evalTemplate(
         """
         #[allow(dead_code)]
 
@@ -920,7 +919,7 @@ public abstract class AbstractRustShimGenerator {
       .keySet()
       .stream()
       .map(memberName ->
-        evalTemplate(
+        IOUtils.evalTemplate(
           "crate::r#$dafnyTypesModuleName:L::$enumName:L::$dafnyEnumMemberName:L {} => $rustTypesModuleName:L::$rustEnumName:L::$rustEnumMemberName:L,",
           MapUtils.merge(variables, enumMemberVariables(memberName))
         )
@@ -929,7 +928,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("branches", branches);
 
     return TokenTree.of(
-      evalTemplate(
+      IOUtils.evalTemplate(
         """
         #[allow(dead_code)]
         pub fn from_dafny(
@@ -1106,7 +1105,7 @@ public abstract class AbstractRustShimGenerator {
         .collect(Collectors.joining("\n"))
     );
 
-    final String content = IOUtils.evalTemplate(
+    final String content = IOUtils.evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/union.rs",
       variables
@@ -1230,7 +1229,7 @@ public abstract class AbstractRustShimGenerator {
       );
       variables.put(
         "operationTargetType",
-        evalTemplate(
+        IOUtils.evalTemplate(
           "$rustRootModuleName:L::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
           MapUtils.merge(variables, resourceVariables)
         )
@@ -1242,7 +1241,7 @@ public abstract class AbstractRustShimGenerator {
       .get();
     variables.put(
       "operationInputType",
-      evalTemplate(
+      IOUtils.evalTemplate(
         "$rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationInputName:L",
         variables
       )
@@ -1259,7 +1258,7 @@ public abstract class AbstractRustShimGenerator {
       Map<String, String> inputShapeVariables = structureVariables(inputShape);
       variables.put(
         "operationDafnyInputType",
-        evalTemplate(
+        IOUtils.evalTemplate(
           "&::std::rc::Rc<crate::$dafnyTypesModuleName:L::$structureName:L>",
           inputShapeVariables
         )
@@ -1278,7 +1277,7 @@ public abstract class AbstractRustShimGenerator {
     } else {
       variables.put(
         "operationOutputType",
-        evalTemplate(
+        IOUtils.evalTemplate(
           "$rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationOutputName:L",
           variables
         )
@@ -1288,7 +1287,7 @@ public abstract class AbstractRustShimGenerator {
       );
       variables.put(
         "operationDafnyOutputType",
-        evalTemplate(
+        IOUtils.evalTemplate(
           "::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>",
           outputShapeVariables
         )
@@ -1376,7 +1375,7 @@ public abstract class AbstractRustShimGenerator {
   protected String qualifiedRustResourceType(
     final ResourceShape resourceShape
   ) {
-    return evalTemplate(
+    return IOUtils.evalTemplate(
       topLevelNameForShape(resourceShape) +
       "::types::$snakeCaseResourceName:L::$rustResourceName:LRef",
       resourceVariables(resourceShape)

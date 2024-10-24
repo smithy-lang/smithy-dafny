@@ -51,7 +51,13 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
     String[] splitByDots = majorMinorPatch.split("\\.");
     switch (splitByDots.length) {
       case 1:
-        return new DafnyVersion(Integer.parseInt(splitByDots[0]), 0, 0, suffix, build);
+        return new DafnyVersion(
+          Integer.parseInt(splitByDots[0]),
+          0,
+          0,
+          suffix,
+          build
+        );
       case 2:
         return new DafnyVersion(
           Integer.parseInt(splitByDots[0]),
@@ -81,7 +87,13 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
     this(major, minor, patch, prerelease, null);
   }
 
-  public DafnyVersion(int major, int minor, int patch, String prerelease, String build) {
+  public DafnyVersion(
+    int major,
+    int minor,
+    int patch,
+    String prerelease,
+    String build
+  ) {
     this.major = requireNonNegative(major);
     this.minor = requireNonNegative(minor);
     this.patch = requireNonNegative(patch);
