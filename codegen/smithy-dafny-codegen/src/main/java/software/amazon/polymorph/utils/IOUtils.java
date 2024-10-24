@@ -69,10 +69,9 @@ public class IOUtils {
   /**
    * Evaluate a simple template as a resource under "/templates/<templatePath>"
    * and then write it to "<rootPath>/<templateOutputPath>".
-   * The template output path is also evaluated as in {@link #safeEvalPathTemplate(String, Map)}
+   * The template output path is also evaluated as in {@link #evalTemplate(String, Map)}
    * so the path can be customized by parameter values as well.
    *
-   * @see #safeEvalPathTemplate(String, Map)
    * @see #evalTemplate(String, Map)
    */
   public static void writeTemplatedFile(
@@ -84,7 +83,7 @@ public class IOUtils {
   ) {
     final String content = evalTemplate(klass, templatePath, parameters);
     final Path outputPath = rootPath.resolve(
-      safeEvalPathTemplate(templateOutputPath, parameters)
+      evalTemplate(templateOutputPath, parameters)
     );
 
     try {
@@ -98,37 +97,29 @@ public class IOUtils {
   }
 
   /**
-   * Evaluate a template string representing a file path.
-   * Note that ':' can't be used in file paths on Windows,
-   * so we use ';' instead and replace it with ':' before evaluating the templated path.
-   * We also explicitly reject ':' in paths in case someone accidentally
-   * uses that and doesn't test on Windows (purely hypothetically :)
-   */
-  public static String safeEvalPathTemplate(
-    final String pathTemplate,
-    final Map<String, String> parameters
-  ) {
-    if (pathTemplate.contains(":")) {
-      throw new IllegalArgumentException(
-        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
-      );
-    }
-    return evalTemplate(pathTemplate.replace(';', ':'), parameters);
-  }
-
-  /**
    * Evaluate a simple template from a resource file using a {@link SimpleCodeWriter}.
    * See {@link software.amazon.smithy.utils.AbstractCodeWriter} for documentation
    * on the templating syntax.
+   *
+   * Note that ':' can't be used in resource paths on Windows,
+   * so we use ';' instead and replace it with ':' before evaluating the templated path.
+   * We also explicitly reject ':' in paths in case someone accidentally
+   * uses that and doesn't test on Windows (purely hypothetically :)
    */
   public static String evalTemplate(
     Class<?> klass,
     String templatePath,
     Map<String, String> context
   ) {
+    if (templatePath.contains(":")) {
+      throw new IllegalArgumentException(
+        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
+      );
+    }
+
     final String template = IoUtils.readUtf8Resource(
       klass,
-      "/templates/" + templatePath
+      "/templates/" + templatePath.replace(';', ':')
     );
     return evalTemplate(template, context);
   }
