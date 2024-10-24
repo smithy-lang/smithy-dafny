@@ -83,7 +83,7 @@ public class IOUtils {
   ) {
     final String content = evalTemplate(klass, templatePath, parameters);
     final Path outputPath = rootPath.resolve(
-      evalTemplate(templateOutputPath, parameters)
+      evalTemplate(handleSemicolons(templateOutputPath), parameters)
     );
 
     try {
@@ -100,28 +100,32 @@ public class IOUtils {
    * Evaluate a simple template from a resource file using a {@link SimpleCodeWriter}.
    * See {@link software.amazon.smithy.utils.AbstractCodeWriter} for documentation
    * on the templating syntax.
-   *
-   * Note that ':' can't be used in resource paths on Windows,
-   * so we use ';' instead and replace it with ':' before evaluating the templated path.
-   * We also explicitly reject ':' in paths in case someone accidentally
-   * uses that and doesn't test on Windows (purely hypothetically :)
    */
   public static String evalTemplate(
     Class<?> klass,
     String templatePath,
     Map<String, String> context
   ) {
-    if (templatePath.contains(":")) {
+    final String template = IoUtils.readUtf8Resource(
+      klass,
+      "/templates/" + handleSemicolons(templatePath)
+    );
+    return evalTemplate(template, context);
+  }
+
+  /**
+   * Note that ':' can't be used in resource paths on Windows,
+   * so we use ';' instead and replace it with ':' before evaluating the templated path.
+   * We also explicitly reject ':' in paths in case someone accidentally
+   * uses that and doesn't test on Windows (purely hypothetically :)
+   */
+  private static String handleSemicolons(String path) {
+    if (path.contains(":")) {
       throw new IllegalArgumentException(
         "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
       );
     }
-
-    final String template = IoUtils.readUtf8Resource(
-      klass,
-      "/templates/" + templatePath.replace(';', ':')
-    );
-    return evalTemplate(template, context);
+    return path.replace(';', ':');
   }
 
   /**
