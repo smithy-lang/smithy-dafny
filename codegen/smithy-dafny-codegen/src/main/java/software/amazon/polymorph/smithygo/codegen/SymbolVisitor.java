@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
+import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -389,19 +390,20 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
   }
 
   private Symbol.Builder symbolBuilderFor(Shape shape, String typeName) {
+    final String namespace;
+    if (shape.hasTrait(ServiceTrait.class)) {
+      namespace = DafnyNameResolver.dafnyTypesNamespace(shape);
+    } else {
+      namespace = SmithyNameResolver.smithyTypesNamespace(shape);
+    }
     if (pointableIndex.isPointable(shape)) {
       return SymbolUtils.createPointableSymbolBuilder(
         shape,
         typeName,
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        namespace
       );
     }
-
-    return SymbolUtils.createValueSymbolBuilder(
-      shape,
-      typeName,
-      SmithyNameResolver.smithyTypesNamespace(shape)
-    );
+    return SymbolUtils.createValueSymbolBuilder(shape, typeName, namespace);
   }
 
   private Symbol.Builder symbolBuilderFor(
