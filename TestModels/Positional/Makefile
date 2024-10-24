@@ -46,3 +46,8 @@ INDEX_FILE_WITHOUT_EXTERN_STRING="module SimplePositional refines AbstractSimple
 WRAPPED_INDEX_FILE_PATH=src/WrappedSimplePositionalImpl.dfy
 WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:options \"--function-syntax:4\"} {:extern \"simple.positional.internaldafny.wrapped\"} WrappedSimplePositionalService refines WrappedAbstractSimplePositionalService {"
 WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module {:options \"--function-syntax:4\"} WrappedSimplePositionalService refines WrappedAbstractSimplePositionalService {"
+
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Positional"
+
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
