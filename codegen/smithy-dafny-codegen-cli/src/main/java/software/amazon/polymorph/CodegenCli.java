@@ -588,17 +588,15 @@ public class CodegenCli {
         }
       }
 
-      DafnyVersion dafnyVersion;
+      DafnyVersion dafnyVersion = null;
       String versionStr = commandLine.getOptionValue("dafny-version");
-      if (versionStr == null) {
-        LOGGER.error("--dafny-version option is required");
-        System.exit(-1);
-      }
-      try {
-        dafnyVersion = DafnyVersion.parse(versionStr.trim());
-      } catch (IllegalArgumentException ex) {
-        LOGGER.error("Could not parse --dafny-version: {}", versionStr);
-        throw ex;
+      if (versionStr != null) {
+        try {
+          dafnyVersion = DafnyVersion.parse(versionStr.trim());
+        } catch (IllegalArgumentException ex) {
+          LOGGER.error("Could not parse --dafny-version: {}", versionStr);
+          throw ex;
+        }
       }
 
       Optional<Path> propertiesFile = Optional

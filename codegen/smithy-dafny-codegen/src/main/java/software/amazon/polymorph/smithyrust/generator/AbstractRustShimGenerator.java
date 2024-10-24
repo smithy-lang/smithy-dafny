@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyrust.generator;
 
 import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.polymorph.utils.IOUtils.evalTemplateResource;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
@@ -1080,7 +1081,7 @@ public abstract class AbstractRustShimGenerator {
       perMemberVariables
         .stream()
         .map(memberVariables ->
-          IOUtils.evalTemplate(
+          evalTemplate(
             """
             $qualifiedRustUnionName:L::$rustUnionMemberName:L(x) =>
                 crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
@@ -1097,7 +1098,7 @@ public abstract class AbstractRustShimGenerator {
       perMemberVariables
         .stream()
         .map(memberVariables ->
-          IOUtils.evalTemplate(
+          evalTemplate(
             """
             crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
                 $dafnyUnionMemberName:L: x @ _,
@@ -1109,7 +1110,7 @@ public abstract class AbstractRustShimGenerator {
         .collect(Collectors.joining("\n"))
     );
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/union.rs",
       variables

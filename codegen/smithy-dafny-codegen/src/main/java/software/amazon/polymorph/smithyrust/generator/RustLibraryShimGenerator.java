@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyrust.generator;
 
 import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.polymorph.utils.IOUtils.evalTemplateResource;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
@@ -20,7 +21,6 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.BoundOperationShape;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
-import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
@@ -40,7 +40,6 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
-import software.amazon.smithy.model.traits.ReadonlyTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 /**
@@ -237,7 +236,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         )
         .collect(Collectors.joining("\n\n"))
     );
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/client.rs",
       variables
@@ -250,7 +249,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   protected RustFile conversionsClientModule() {
     TokenTree clientConversionFunctions = TokenTree.of(
-      evalTemplate(
+      evalTemplateResource(
         getClass(),
         "runtimes/rust/conversions/client_localservice.rs",
         serviceVariables()
@@ -286,7 +285,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "outputDoc",
       operationClientOutputDoc(bindingShape, operationShape)
     );
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/operation/operation_builder.rs",
       variables
@@ -327,7 +326,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           opVariables,
           structureMemberVariables(memberShape)
         );
-        return IOUtils.evalTemplate(template, variables);
+        return evalTemplate(template, variables);
       })
       .collect(Collectors.joining("\n"));
   }
@@ -357,7 +356,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           opVariables,
           structureMemberVariables(memberShape)
         );
-        return IOUtils.evalTemplate(template, variables);
+        return evalTemplate(template, variables);
       })
       .collect(Collectors.joining("\n"));
   }
@@ -369,7 +368,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String resourceModules = streamResourcesToGenerateTraitsFor()
       .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(resourceShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           pub mod $snakeCaseResourceName:L;
           pub use $snakeCaseResourceName:L::$rustResourceName:L;
@@ -383,7 +382,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String structureModules = streamStructuresToGenerateStructsFor()
       .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(structureShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           mod _$snakeCaseStructureName:L;
           pub use $rustTypesModuleName:L::_$snakeCaseStructureName:L::$rustStructureName:L;
@@ -398,7 +397,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .streamEnumShapes(model, service.getId().getNamespace())
       .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(enumShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           mod _$snakeCaseEnumName:L;
           pub use $rustTypesModuleName:L::_$snakeCaseEnumName:L::$rustEnumName:L;
@@ -415,7 +414,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .filter(this::shouldGenerateEnumForUnion)
       .filter(o -> o.getId().getNamespace().equals(namespace))
       .map(unionShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           mod _$snakeCaseUnionName:L;
           pub use $rustTypesModuleName:L::_$snakeCaseUnionName:L::$rustUnionName:L;
@@ -426,7 +425,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n"));
     variables.put("unionModules", unionModules);
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/types.rs",
       variables
@@ -447,7 +446,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       standardStructureVariables(configShape),
       structureModuleVariables(configShape)
     );
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/types/config.rs",
       variables
@@ -463,7 +462,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String content = streamStructuresToGenerateStructsFor()
       .filter(s -> ModelUtils.isInServiceNamespace(s, service))
       .map(structureShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           "pub use $rustTypesModuleName:L::_$snakeCaseStructureName:L::$rustStructureName:LBuilder;",
           MapUtils.merge(variables, structureVariables(structureShape))
         )
@@ -479,7 +478,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Map<String, String> variables = serviceVariables();
     final Stream<String> directErrorVariants = allErrorShapes()
       .map(errorShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           docFromShape(errorShape) +
           "\n" +
           """
@@ -494,7 +493,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       ModelUtils.streamLocalServiceDependencies(model, service);
     final Stream<String> dependencyErrorVariants =
       dependencies.map(dependentService -> {
-        return IOUtils.evalTemplate(
+        return evalTemplate(
           """
           $rustErrorName:L {
               error: $rustDependentRootModuleName:L::types::error::Error,
@@ -511,7 +510,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n\n"));
     variables.put("modeledErrorVariants", modeledErrorVariants);
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/types/error.rs",
       variables
@@ -542,7 +541,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String displayVariants = memberNames
       .stream()
       .map(memberName ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           "$rustEnumName:L::$rustEnumMemberName:L => write!(f, \"$enumMemberName:L\"),",
           MapUtils.merge(variables, enumMemberVariables(memberName))
         )
@@ -550,7 +549,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n"));
     variables.put("displayVariants", displayVariants);
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/types/enum.rs",
       variables
@@ -576,7 +575,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String variants = memberShapes
       .stream()
       .map(memberName ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           docFromShape(memberName) +
           "\n" +
           """
@@ -591,7 +590,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String asImpls = memberShapes
       .stream()
       .map(memberName ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           /// Tries to convert the enum instance into [`$rustUnionMemberName:L`]($qualifiedRustUnionName:L::$rustUnionMemberName:L), extracting the inner [`$unionMemberType:L`]($unionMemberType:L).
           /// Returns `Err(&Self)` if it can't be converted.
@@ -612,7 +611,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final String isImpls = memberShapes
       .stream()
       .map(memberName ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           /// Returns true if this is a [`$rustUnionMemberName:L`]($qualifiedRustUnionName:L::$rustUnionMemberName:L).
           pub fn is_$snakeCaseUnionMemberName:L(&self) -> ::std::primitive::bool {
@@ -625,7 +624,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n"));
     variables.put("isImpls", isImpls);
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/types/union.rs",
       variables
@@ -656,7 +655,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             variables,
             operationVariables(resourceShape, operationShape)
           );
-          return IOUtils.evalTemplate(
+          return evalTemplateResource(
             getClass(),
             "runtimes/rust/types/resource_operation.rs",
             operationVariables
@@ -676,7 +675,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .collect(Collectors.joining("\n\n"))
     );
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/types/resource.rs",
       variables
@@ -715,7 +714,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .getOperations(bindingShape)
       .stream()
       .map(o -> operationVariables(bindingShape, o.operationShape()))
-      .map(opVariables -> IOUtils.evalTemplate(opTemplate, opVariables));
+      .map(opVariables -> evalTemplate(opTemplate, opVariables));
   }
 
   private Set<RustFile> allOperationImplementationModules() {
@@ -813,7 +812,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
       variables.put(
         "operationSendBody",
-        IOUtils.evalTemplate(
+        evalTemplateResource(
           getClass(),
           "runtimes/rust/operation/outer_send_body.rs",
           variables
@@ -832,7 +831,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       );
     }
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/operation/outer.rs",
       variables
@@ -862,7 +861,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     @Override
     protected String validateRequired(final MemberShape memberShape) {
-      return IOUtils.evalTemplate(
+      return evalTemplate(
         """
         if input.$fieldName:L.is_none() {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::missing_field(
@@ -897,7 +896,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             max.map(val -> "=" + val).orElse("")
           );
       final var rangeDescription = describeMinMax(min, max);
-      return IOUtils.evalTemplate(
+      return evalTemplate(
         """
         if matches!(input.$fieldName:L, Some(x) if %s) {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
@@ -942,7 +941,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
             len
           );
       final var rangeDescription = describeMinMax(min, max);
-      return IOUtils.evalTemplate(
+      return evalTemplate(
         """
         if matches!(input.$fieldName:L, Some(ref x) if %s) {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
@@ -993,7 +992,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       structureVariables(structureShape),
       structureModuleVariables(structureShape)
     );
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/operation/structure.rs",
       variables
@@ -1011,7 +1010,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       standardStructureVariables(structureShape),
       structureModuleVariables(structureShape)
     );
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/types/structure.rs",
       variables
@@ -1065,10 +1064,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       """
       pub $fieldName:L: ::std::option::Option<$fieldType:L>,
       """;
-    return IOUtils.evalTemplate(
-      template,
-      structureMemberVariables(memberShape)
-    );
+    return evalTemplate(template, structureMemberVariables(memberShape));
   }
 
   private String structureGetter(final MemberShape memberShape) {
@@ -1081,11 +1077,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           &self.$fieldName:L
       }
       """;
-    return IOUtils.evalTemplate(template, variables);
+    return evalTemplate(template, variables);
   }
 
   private String structureBuilderField(final MemberShape memberShape) {
-    return IOUtils.evalTemplate(
+    return evalTemplate(
       "pub(crate) $fieldName:L: ::std::option::Option<$fieldType:L>,",
       structureMemberVariables(memberShape)
     );
@@ -1116,14 +1112,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           &self.$fieldName:L
       }
       """;
-    return IOUtils.evalTemplate(
-      template,
-      structureMemberVariables(memberShape)
-    );
+    return evalTemplate(template, structureMemberVariables(memberShape));
   }
 
   private String structureBuilderAssignment(final MemberShape memberShape) {
-    return IOUtils.evalTemplate(
+    return evalTemplate(
       "$fieldName:L: self.$fieldName:L,",
       structureMemberVariables(memberShape)
     );
@@ -1148,7 +1141,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
     variables.put("accessors", accessors);
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/operation/builders.rs",
       variables
@@ -1185,14 +1178,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           self.inner.get_$fieldName:L()
       }
       """;
-    return IOUtils.evalTemplate(
-      template,
-      structureMemberVariables(memberShape)
-    );
+    return evalTemplate(template, structureMemberVariables(memberShape));
   }
 
   private RustFile errorModule() {
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/error.rs",
       Map.of()
@@ -1204,7 +1194,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private RustFile sealedUnhandledErrorModule() {
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/error/sealed_unhandled.rs",
       Map.of()
@@ -1220,7 +1210,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     final Stream<String> directToDafnyArms = allErrorShapes()
       .map(errorShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           $qualifiedRustErrorVariant:L { message } =>
               crate::r#$dafnyTypesModuleName:L::Error::$errorName:L {
@@ -1233,7 +1223,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Stream<String> dependencyToDafnyArms = ModelUtils
       .streamLocalServiceDependencies(model, service)
       .map(dependentService ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           $qualifiedRustErrorVariant:L { error } =>
               crate::r#$dafnyTypesModuleName:L::Error::$errorName:L {
@@ -1253,7 +1243,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
     final Stream<String> directFromDafnyArms = allErrorShapes()
       .map(errorShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           crate::r#$dafnyTypesModuleName:L::Error::$errorName:L { message } =>
               $qualifiedRustErrorVariant:L {
@@ -1266,7 +1256,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Stream<String> dependencyFromDafnyArms = ModelUtils
       .streamLocalServiceDependencies(model, service)
       .map(dependentService ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           crate::r#$dafnyTypesModuleName:L::Error::$errorName:L { $errorName:L } =>
               $qualifiedRustErrorVariant:L {
@@ -1284,12 +1274,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n"));
     variables.put("fromDafnyArms", fromDafnyArms);
 
-    final String libraryContent = IOUtils.evalTemplate(
+    final String libraryContent = evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/error_library.rs",
       variables
     );
-    final String commonContent = IOUtils.evalTemplate(
+    final String commonContent = evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/error_common.rs",
       variables
@@ -1319,7 +1309,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
     final String snakeCaseConfigName = variables.get("snakeCaseConfigName");
 
-    final String outerContent = IOUtils.evalTemplate(
+    final String outerContent = evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/config.rs",
       variables
@@ -1332,7 +1322,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       TokenTree.of(outerContent)
     );
 
-    final String innerContent = IOUtils.evalTemplate(
+    final String innerContent = evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/config/_config.rs",
       variables
@@ -1364,7 +1354,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "fluentMemberSetters",
       fluentMemberSettersForStructure(structureShape).toString()
     );
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/standard_structure.rs",
       variables
@@ -1418,7 +1408,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .collect(Collectors.joining("\n\n"))
     );
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/resource.rs",
       variables
@@ -1482,7 +1472,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       );
     }
 
-    return IOUtils.evalTemplate(
+    return evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/resource_wrapper_operation.rs",
       variables
@@ -1543,7 +1533,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       );
     }
 
-    return IOUtils.evalTemplate(
+    return evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/resource_dafny_wrapper_operation.rs",
       variables
@@ -1676,7 +1666,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   }
 
   private RustFile wrappedModule() {
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/wrapped.rs",
       serviceVariables()
@@ -1697,7 +1687,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .map(o -> wrappedClientOperationImpl(service, o.operationShape()))
         .collect(Collectors.joining("\n\n"))
     );
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/wrapped/client.rs",
       variables
@@ -1788,7 +1778,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       );
     }
 
-    return IOUtils.evalTemplate(
+    return evalTemplateResource(
       getClass(),
       "runtimes/rust/wrapped/client_operation_impl.part.rs",
       variables
