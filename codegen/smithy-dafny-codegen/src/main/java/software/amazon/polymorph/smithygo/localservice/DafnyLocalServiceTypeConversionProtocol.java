@@ -1042,8 +1042,8 @@ public class DafnyLocalServiceTypeConversionProtocol
     // 2. If we have only one KMS or DDB dependencies, delegate to that and return error
     if (kmsShapeId.isPresent() && ddbShapeId.isPresent()) {
       writer.addImport(SmithyGoDependency.SMITHY_SOURCE_PATH);
-      var kmsShape = context.model().expectShape(kmsShapeId.get());
-      var ddbShape = context.model().expectShape(ddbShapeId.get());
+      final var kmsShape = context.model().expectShape(kmsShapeId.get());
+      final var ddbShape = context.model().expectShape(ddbShapeId.get());
       writer.addImportFromModule(
         SmithyNameResolver.getGoModuleNameForSmithyNamespace(
           ddbShape.getId().getNamespace()
@@ -1056,8 +1056,8 @@ public class DafnyLocalServiceTypeConversionProtocol
         ),
         SmithyNameResolver.shapeNamespace(kmsShape)
       );
-      String kmsShapeNamespace = SmithyNameResolver.shapeNamespace(kmsShape);
-      String ddbShapeNamespace = SmithyNameResolver.shapeNamespace(ddbShape);
+      final String kmsShapeNamespace = SmithyNameResolver.shapeNamespace(kmsShape);
+      final String ddbShapeNamespace = SmithyNameResolver.shapeNamespace(ddbShape);
       writer.write(
         """
         case smithy.APIError:
@@ -1079,7 +1079,7 @@ public class DafnyLocalServiceTypeConversionProtocol
       );
     } else if (kmsShapeId.isPresent() || ddbShapeId.isPresent()) {
       writer.addImport(SmithyGoDependency.SMITHY_SOURCE_PATH);
-      var depShape = context
+      final var depShape = context
         .model()
         .expectShape(
           kmsShapeId.isPresent() ? kmsShapeId.get() : ddbShapeId.get()
