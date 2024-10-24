@@ -1,11 +1,19 @@
 
+$rustResourceComment:L
 pub trait $rustResourceName:L {
   $resourceOperations:L
 }
 
 #[derive(::std::clone::Clone)]
+/// A reference to a $rustResourceName:L
 pub struct $rustResourceName:LRef {
   pub inner: ::std::rc::Rc<std::cell::RefCell<dyn $rustResourceName:L>>
+}
+
+impl<T : $rustResourceName:L + 'static> From<T> for $rustResourceName:LRef {
+    fn from(value: T) -> Self {
+        Self { inner: std::rc::Rc::new(std::cell::RefCell::new(value)) }
+    }
 }
 
 impl ::std::cmp::PartialEq for $rustResourceName:LRef {
