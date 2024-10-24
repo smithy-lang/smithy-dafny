@@ -993,6 +993,8 @@ public class DafnyLocalServiceTypeConversionProtocol
                 for (final var dep : dependencies) {
                   final var depShape = context.model().expectShape(dep);
                   // Service error is already handled with call to handleServiceError function
+                  // Service error handled outside the for loop because we don't want writer to print two duplicate block case smithy.APIError twice
+                  // For example: if we have DDB and KMS in a model then writer will handle dependency twice and case smithy.APIError will be written twice
                   if (
                     dep.getName().equals("TrentService") ||
                     dep.getName().equals("DynamoDB_20120810")
@@ -1056,8 +1058,12 @@ public class DafnyLocalServiceTypeConversionProtocol
         ),
         SmithyNameResolver.shapeNamespace(kmsShape)
       );
-      final String kmsShapeNamespace = SmithyNameResolver.shapeNamespace(kmsShape);
-      final String ddbShapeNamespace = SmithyNameResolver.shapeNamespace(ddbShape);
+      final String kmsShapeNamespace = SmithyNameResolver.shapeNamespace(
+        kmsShape
+      );
+      final String ddbShapeNamespace = SmithyNameResolver.shapeNamespace(
+        ddbShape
+      );
       writer.write(
         """
         case smithy.APIError:
