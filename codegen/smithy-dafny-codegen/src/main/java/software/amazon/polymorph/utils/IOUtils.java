@@ -69,9 +69,10 @@ public class IOUtils {
   /**
    * Evaluate a simple template as a resource under "/templates/<templatePath>"
    * and then write it to "<rootPath>/<templateOutputPath>".
-   * The template output path is also evaluated as in {@link #evalTemplate(String, Map)}
+   * The template output path is also evaluated as in {@link #safeEvalPathTemplate(String, Map)}
    * so the path can be customized by parameter values as well.
    *
+   * @see #safeEvalPathTemplate(String, Map)
    * @see #evalTemplate(String, Map)
    */
   public static void writeTemplatedFile(
@@ -134,21 +135,6 @@ public class IOUtils {
       "/templates/" + templatePath
     );
     return evalTemplate(template, context);
-  }
-
-  /**
-   * Note that ':' can't be used in resource paths on Windows,
-   * so we use ';' instead and replace it with ':' before evaluating the templated path.
-   * We also explicitly reject ':' in paths in case someone accidentally
-   * uses that and doesn't test on Windows (purely hypothetically :)
-   */
-  private static String handleSemicolons(String path) {
-    if (path.contains(":")) {
-      throw new IllegalArgumentException(
-        "':' cannot be used in template paths since they are not allowed on Windows. Use ';' instead."
-      );
-    }
-    return path.replace(';', ':');
   }
 
   /**

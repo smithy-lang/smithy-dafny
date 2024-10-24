@@ -1248,7 +1248,8 @@ public class CodegenEngine {
         throw new IllegalStateException(
           "A minimum Dafny version of " +
           MIN_DAFNY_VERSION.unparse() +
-          " is required"
+          " is required, but found " +
+          dafnyVersion.unparse()
         );
       }
 
