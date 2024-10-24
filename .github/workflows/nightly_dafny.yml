@@ -31,7 +31,10 @@ jobs:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
-      dafny: "nightly-latest"
+      # Rust currently depends on building Dafny from source,
+      # so we can't rely on setup-dafny-action's support for "nightly-latest"
+      # (until https://github.com/dafny-lang/setup-dafny-action/issues/24 is done at least)
+      dafny: "master"
   dafny-nightly-python:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_python_tests.yml

@@ -479,6 +479,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final Stream<String> directErrorVariants = allErrorShapes()
       .map(errorShape ->
         evalTemplate(
+          docFromShape(errorShape) +
+          "\n" +
           """
           $rustErrorName:L {
               message: ::std::string::String,
@@ -574,8 +576,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       .stream()
       .map(memberName ->
         evalTemplate(
+          docFromShape(memberName) +
+          "\n" +
           """
-          #[allow(missing_docs)] // documentation missing in model
           $rustUnionMemberName:L($unionMemberType:L),
           """,
           MapUtils.merge(variables, unionMemberVariables(memberName))
@@ -1056,8 +1059,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private String structureField(final MemberShape memberShape) {
     final String template =
+      docFromShape(memberShape) +
+      "\n" +
       """
-      #[allow(missing_docs)] // documentation missing in model
       pub $fieldName:L: ::std::option::Option<$fieldType:L>,
       """;
     return evalTemplate(template, structureMemberVariables(memberShape));
@@ -1066,8 +1070,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   private String structureGetter(final MemberShape memberShape) {
     final Map<String, String> variables = structureMemberVariables(memberShape);
     final String template =
+      docFromShape(memberShape) +
+      "\n" +
       """
-      #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(&self) -> &::std::option::Option<$fieldType:L> {
           &self.$fieldName:L
       }
@@ -1084,18 +1089,25 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private String structureBuilderAccessors(final MemberShape memberShape) {
     final String template =
+      docFromShape(memberShape) +
+      "\n" +
       """
-      #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
           self.$fieldName:L = ::std::option::Option::Some(input.into());
           self
       }
-      #[allow(missing_docs)] // documentation missing in model
+      """ +
+      docFromShape(memberShape) +
+      "\n" +
+      """
       pub fn set_$fieldName:L(mut self, input: ::std::option::Option<$fieldType:L>) -> Self {
           self.$fieldName:L = input;
           self
       }
-      #[allow(missing_docs)] // documentation missing in model
+      """ +
+      docFromShape(memberShape) +
+      "\n" +
+      """
       pub fn get_$fieldName:L(&self) -> &::std::option::Option<$fieldType:L> {
           &self.$fieldName:L
       }
@@ -1143,18 +1155,25 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     final MemberShape memberShape
   ) {
     final String template =
+      docFromShape(memberShape) +
+      "\n" +
       """
-      #[allow(missing_docs)] // documentation missing in model
       pub fn $fieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
           self.inner = self.inner.$fieldName:L(input.into());
           self
       }
-      #[allow(missing_docs)] // documentation missing in model
+      """ +
+      docFromShape(memberShape) +
+      "\n" +
+      """
       pub fn set_$fieldName:L(mut self, input: ::std::option::Option<$fieldType:L>) -> Self {
           self.inner = self.inner.set_$fieldName:L(input);
           self
       }
-      #[allow(missing_docs)] // documentation missing in model
+      """ +
+      docFromShape(memberShape) +
+      "\n" +
+      """
       pub fn get_$fieldName:L(&self) -> &::std::option::Option<$fieldType:L> {
           self.inner.get_$fieldName:L()
       }

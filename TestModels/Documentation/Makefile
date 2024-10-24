@@ -10,6 +10,8 @@ include ../SharedMakefile.mk
 PROJECT_SERVICES := \
 	SimpleDocumentation
 
+MAIN_SERVICE_FOR_RUST := SimpleDocumentation
+
 SERVICE_NAMESPACE_SimpleDocumentation=simple.documentation
 
 SERVICE_DEPS_SimpleDocumentation :=
