@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithygo.localservice.nameresolver;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.UNDERSCORE;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;

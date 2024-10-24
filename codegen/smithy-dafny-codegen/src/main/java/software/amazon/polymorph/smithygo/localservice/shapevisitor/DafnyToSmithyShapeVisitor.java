@@ -166,13 +166,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 serviceShape.expectTrait(ServiceTrait.class)
               )
             );
-        }
-        else {
+        } else {
           return "return %1$s{%2$s}".formatted(
-          namespace.concat(
-            context.symbolProvider().toSymbol(serviceShape).getName()
-          ),
-          dataSource);
+              namespace.concat(
+                context.symbolProvider().toSymbol(serviceShape).getName()
+              ),
+              dataSource
+            );
         }
       }
       return """

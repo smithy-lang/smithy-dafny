@@ -15,8 +15,8 @@
 
 package software.amazon.polymorph.smithygo.codegen;
 
-import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.UNDERSCORE;
 import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.DOT;
+import static software.amazon.polymorph.smithygo.localservice.nameresolver.Constants.UNDERSCORE;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -125,14 +125,20 @@ public final class StructureGenerator implements Runnable {
             memberSymbol.getProperty("Referred", Symbol.class).get();
           var refShape = targetShape.expectTrait(ReferenceTrait.class);
           if (refShape.isService()) {
-            // Ideally, this should be done in SmithyNameResolver 
+            // Ideally, this should be done in SmithyNameResolver
             // but aws sdk uses SmithyNameResolver.shapeNamespace for a lot of things which will break the codegen
             // For example, smithycode is generated in comamazonawsdynamodbsmithygenerated which comes from SmithyNameResolver.shapeNamespace
-            if (refShape.getReferentId().getName().equals("TrentService") || refShape.getReferentId().getName().equals("DynamoDB_20120810")) {
+            if (
+              refShape.getReferentId().getName().equals("TrentService") ||
+              refShape.getReferentId().getName().equals("DynamoDB_20120810")
+            ) {
               namespace =
                 CaseUtils
                   .toPascalCase(
-                    refShape.getReferentId().getNamespace().replace(DOT, UNDERSCORE)
+                    refShape
+                      .getReferentId()
+                      .getNamespace()
+                      .replace(DOT, UNDERSCORE)
                   )
                   .concat("Types");
             } else namespace =

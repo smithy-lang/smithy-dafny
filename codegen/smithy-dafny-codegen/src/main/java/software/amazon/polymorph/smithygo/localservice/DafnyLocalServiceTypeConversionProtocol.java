@@ -992,7 +992,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                 // 1. Check if we have both KMS and DDB dependencies
                 //    - If KMS is opaque, it is going to delegate to DDB. And return a DDB error (opaque or non opaque)
                 //    - If KMS is not opaque, it returns ComAmazonawsKms error.
-                // 2. If we have only one KMS or DDB dependencies, delegate to that and return error 
+                // 2. If we have only one KMS or DDB dependencies, delegate to that and return error
                 if (dependencies.size() != 0) {
                   Optional<ShapeId> kmsShapeId = dependencies
                     .stream()
@@ -1354,7 +1354,8 @@ public class DafnyLocalServiceTypeConversionProtocol
                   .expectShape(dep, ServiceShape.class);
                 final String sdkId;
                 if (depService.hasTrait(LocalServiceTrait.class)) {
-                  sdkId = depService.expectTrait(LocalServiceTrait.class).getSdkId();
+                  sdkId =
+                    depService.expectTrait(LocalServiceTrait.class).getSdkId();
                 } else {
                   var tempSdkId = depService
                     .expectTrait(ServiceTrait.class)
@@ -1365,7 +1366,9 @@ public class DafnyLocalServiceTypeConversionProtocol
                   } else if (tempSdkId.equals("dynamodb")) {
                     sdkId = "ComAmazonawsDynamodb";
                   } else {
-                    throw new IllegalArgumentException("Go polymorph only supports KMS and DDB model");
+                    throw new IllegalArgumentException(
+                      "Go polymorph only supports KMS and DDB model"
+                    );
                   }
                 }
                 w.write(
@@ -1499,18 +1502,21 @@ public class DafnyLocalServiceTypeConversionProtocol
             if (resourceOrService.isServiceShape()) {
               if (resourceOrService.hasTrait(ServiceTrait.class)) {
                 outputType =
-                DafnyNameResolver.getDafnyInterfaceClient(
-                  (ServiceShape) resourceOrService,
-                  resourceOrService.expectTrait(ServiceTrait.class)
-                );
-              }
-              else {
-              final var namespace = SmithyNameResolver
-                .shapeNamespace(resourceOrService)
-                .concat(".");
-              outputType =
-                namespace.concat(
-                  context.symbolProvider().toSymbol(resourceOrService).getName());
+                  DafnyNameResolver.getDafnyInterfaceClient(
+                    (ServiceShape) resourceOrService,
+                    resourceOrService.expectTrait(ServiceTrait.class)
+                  );
+              } else {
+                final var namespace = SmithyNameResolver
+                  .shapeNamespace(resourceOrService)
+                  .concat(".");
+                outputType =
+                  namespace.concat(
+                    context
+                      .symbolProvider()
+                      .toSymbol(resourceOrService)
+                      .getName()
+                  );
               }
             }
           }
