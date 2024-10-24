@@ -126,7 +126,8 @@ public final class StructureGenerator implements Runnable {
           var refShape = targetShape.expectTrait(ReferenceTrait.class);
           if (refShape.isService()) {
             // Ideally, this should be done in SmithyNameResolver
-            // but aws sdk uses SmithyNameResolver.shapeNamespace for a lot of things which will break the codegen
+            // but aws sdk uses SmithyNameResolver.shapeNamespace for a lot of things.
+            // So, changes to SmithyNameResolver.shapeNamespace will break the codegen
             // For example, smithycode is generated in comamazonawsdynamodbsmithygenerated which comes from SmithyNameResolver.shapeNamespace
             if (
               refShape.getReferentId().getName().equals("TrentService") ||
