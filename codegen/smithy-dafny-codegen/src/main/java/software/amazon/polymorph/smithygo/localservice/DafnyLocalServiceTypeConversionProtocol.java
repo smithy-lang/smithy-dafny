@@ -944,8 +944,7 @@ public class DafnyLocalServiceTypeConversionProtocol
                 default:
                     error, ok := err.($L.OpaqueError)
                     if !ok {
-                      // We expect to get error string for opaque error from SDK error
-                      error = $L.OpaqueError{ErrObject: err}
+                      panic("Error is not an OpaqueError")
                     }
                     return OpaqueError_Input_ToDafny(error)
                 }
