@@ -718,7 +718,6 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             """
             func OpaqueError_Output_FromDafny(dafnyOutput $L.Error)(error) {
                 apiError := &smithy.GenericAPIError{
-                  Code:    dafnyOutput.Dtor_obj().(*smithy.OperationError).ServiceID,
                   Message: dafnyOutput.Dtor_obj().(*smithy.OperationError).Err.Error(),
                 }
                 return apiError
