@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.smithy.go.codegen.knowledge;
+package software.amazon.polymorph.smithygo.codegen.knowledge;
 
 import java.util.HashSet;
 import java.util.Set;

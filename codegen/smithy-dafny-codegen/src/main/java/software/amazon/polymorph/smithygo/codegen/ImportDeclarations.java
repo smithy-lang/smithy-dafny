@@ -1,29 +1,13 @@
-/*
- * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
-package software.amazon.smithy.go.codegen;
+package software.amazon.polymorph.smithygo.codegen;
 
 import java.util.Map;
 import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.ImportContainer;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.utils.StringUtils;
 
-/**
- * Container and formatter for go imports.
- */
-final class ImportDeclarations {
+public class ImportDeclarations implements ImportContainer {
 
   private final Map<String, String> imports = new TreeMap<>();
 
@@ -37,20 +21,6 @@ final class ImportDeclarations {
         );
       }
       importAlias = alias;
-    }
-    // Ensure that multiple packages cannot be imported with the same name.
-    if (
-      imports.containsKey(importAlias) &&
-      !imports.get(importAlias).equals(importPath)
-    ) {
-      throw new CodegenException(
-        "Import name collision: " +
-        importAlias +
-        ". Previous: " +
-        imports.get(importAlias) +
-        "New: " +
-        importPath
-      );
     }
     imports.putIfAbsent(importAlias, importPath);
     return this;
@@ -86,5 +56,10 @@ final class ImportDeclarations {
         .equals(entry.getKey())
       ? formattedPackageName
       : entry.getKey() + " " + formattedPackageName;
+  }
+
+  @Override
+  public void importSymbol(Symbol symbol, String alias) {
+    addImport(symbol.getName(), alias);
   }
 }

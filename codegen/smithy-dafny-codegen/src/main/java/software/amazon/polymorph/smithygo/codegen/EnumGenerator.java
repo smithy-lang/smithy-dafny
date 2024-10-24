@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.smithy.go.codegen;
+package software.amazon.polymorph.smithygo.codegen;
 
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.model.shapes.EnumShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -29,7 +31,7 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Renders enums and their constants.
  */
-final class EnumGenerator implements Runnable {
+public final class EnumGenerator implements Runnable {
 
   private static final Logger LOGGER = Logger.getLogger(
     EnumGenerator.class.getName()
@@ -37,12 +39,12 @@ final class EnumGenerator implements Runnable {
 
   private final SymbolProvider symbolProvider;
   private final GoWriter writer;
-  private final StringShape shape;
+  private final Shape shape;
 
-  EnumGenerator(
+  public EnumGenerator(
     SymbolProvider symbolProvider,
     GoWriter writer,
-    StringShape shape
+    Shape shape
   ) {
     this.symbolProvider = symbolProvider;
     this.writer = writer;
@@ -60,7 +62,6 @@ final class EnumGenerator implements Runnable {
     // look at one, since Smithy validates that if one has a name then they must all have
     // a name.
     if (enumTrait.getValues().get(0).getName().isPresent()) {
-      writer.writeDocs(String.format("Enum values for %s", symbol.getName()));
       Set<String> constants = new LinkedHashSet<>();
       writer
         .openBlock(
@@ -97,7 +98,6 @@ final class EnumGenerator implements Runnable {
               }
               constants.add(label);
 
-              definition.getDocumentation().ifPresent(writer::writeDocs);
               writer.write(
                 "$L $L = $S",
                 label,
@@ -110,14 +110,6 @@ final class EnumGenerator implements Runnable {
         .write("");
     }
 
-    writer.writeDocs(
-      String.format(
-        "Values returns all known values for %s. Note that this can be expanded in the " +
-        "future, and so it is only as up to date as the client.%n%nThe ordering of this slice is not " +
-        "guaranteed to be stable across updates.",
-        symbol.getName()
-      )
-    );
     writer.openBlock(
       "func ($L) Values() []$L {",
       "}",

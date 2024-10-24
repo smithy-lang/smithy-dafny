@@ -1,65 +1,27 @@
-/*
- * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
-package software.amazon.smithy.go.codegen;
+package software.amazon.polymorph.smithygo.codegen;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolContainer;
 import software.amazon.smithy.codegen.core.SymbolDependency;
-import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.go.codegen.knowledge.GoUsageIndex;
+import software.amazon.smithy.codegen.core.SymbolWriter;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.Prelude;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
-import software.amazon.smithy.model.traits.DocumentationTrait;
-import software.amazon.smithy.model.traits.HttpPrefixHeadersTrait;
-import software.amazon.smithy.model.traits.MediaTypeTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
-import software.amazon.smithy.model.traits.StringTrait;
-import software.amazon.smithy.utils.AbstractCodeWriter;
 import software.amazon.smithy.utils.StringUtils;
 
-/**
- * Specialized code writer for managing Go dependencies.
- *
- * <p>Use the {@code $T} formatter to refer to {@link Symbol}s without using pointers.
- *
- * <p>Use the {@code $P} formatter to refer to {@link Symbol}s using pointers where appropriate.
- */
-public final class GoWriter extends AbstractCodeWriter<GoWriter> {
+public class GoWriter extends SymbolWriter<GoWriter, ImportDeclarations> {
 
-  private static final Logger LOGGER = Logger.getLogger(
-    GoWriter.class.getName()
-  );
-  private static final int DEFAULT_DOC_WRAP_LENGTH = 80;
   private static final Pattern ARGUMENT_NAME_PATTERN = Pattern.compile(
     "\\$([a-z][a-zA-Z_0-9]+)(:\\w)?"
   );
@@ -68,21 +30,17 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
   private final List<SymbolDependency> dependencies = new ArrayList<>();
   private final boolean innerWriter;
 
-  private int docWrapLength = DEFAULT_DOC_WRAP_LENGTH;
-  private AbstractCodeWriter<GoWriter> packageDocs;
-
   /**
    * Initializes the GoWriter for the package and filename to be written to.
    *
    * @param fullPackageName package and filename to be written to.
    */
   public GoWriter(String fullPackageName) {
-    this.fullPackageName = fullPackageName;
-    this.innerWriter = false;
-    init();
+    this(fullPackageName, false);
   }
 
   private GoWriter(String fullPackageName, boolean innerWriter) {
+    super(new ImportDeclarations());
     this.fullPackageName = fullPackageName;
     this.innerWriter = innerWriter;
     init();
@@ -95,10 +53,6 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
     putFormatter('T', new GoSymbolFormatter());
     putFormatter('P', new PointableGoSymbolFormatter());
     putFormatter('W', new GoWritableInjector());
-
-    if (!innerWriter) {
-      packageDocs = new GoWriter(this.fullPackageName, true);
-    }
   }
 
   // TODO figure out better way to annotate where the failure occurs, check templates and args
@@ -120,6 +74,16 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
     return (GoWriter w) -> {
       w.writeGoTemplate(contents, args);
     };
+  }
+
+  public static final class GoWriterFactory
+    implements SymbolWriter.Factory<GoWriter> {
+
+    @Override
+    public GoWriter apply(String filename, String namespace) {
+      GoWriter writer = new GoWriter(namespace);
+      return writer;
+    }
   }
 
   /**
@@ -555,27 +519,6 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
   }
 
   /**
-   * Sets the wrap length of doc strings written.
-   *
-   * @param wrapLength The wrap length of the doc string.
-   * @return Returns the writer.
-   */
-  public GoWriter setDocWrapLength(final int wrapLength) {
-    this.docWrapLength = wrapLength;
-    return this;
-  }
-
-  /**
-   * Sets the wrap length of doc strings written to the default value for the Go writer.
-   *
-   * @return Returns the writer.
-   */
-  public GoWriter setDocWrapLength() {
-    this.docWrapLength = DEFAULT_DOC_WRAP_LENGTH;
-    return this;
-  }
-
-  /**
    * Imports one or more symbols if necessary, using the name of the
    * symbol and only "USE" references.
    *
@@ -619,47 +562,6 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
     return addImport(goDependency.getImportPath(), goDependency.getAlias());
   }
 
-  /**
-   * Imports a symbol if necessary using a package alias and list of context options.
-   *
-   * @param symbol       Symbol to optionally import.
-   * @param packageAlias The alias to refer to the symbol's package by.
-   * @param options      The list of context options (e.g., is it a USE or DECLARE symbol).
-   * @return Returns the writer.
-   */
-  public GoWriter addImport(
-    Symbol symbol,
-    String packageAlias,
-    SymbolReference.ContextOption... options
-  ) {
-    LOGGER.finest(() -> {
-      StringJoiner stackTrace = new StringJoiner("\n");
-      for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
-        stackTrace.add(element.toString());
-      }
-      return String.format(
-        "Adding Go import %s as `%s` (%s); Stack trace: %s",
-        symbol.getNamespace(),
-        packageAlias,
-        Arrays.toString(options),
-        stackTrace
-      );
-    });
-
-    // Always add dependencies.
-    dependencies.addAll(symbol.getDependencies());
-
-    if (isExternalNamespace(symbol.getNamespace())) {
-      addImport(symbol.getNamespace(), packageAlias);
-    }
-
-    // Just because the direct symbol wasn't imported doesn't mean that the
-    // symbols it needs to be declared don't need to be imported.
-    addImportReferences(symbol, options);
-
-    return this;
-  }
-
   private GoWriter addImports(GoWriter other) {
     this.imports.addImports(other.imports);
     return this;
@@ -697,239 +599,28 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
     return this;
   }
 
-  /**
-   * Adds one or more dependencies to the generated code.
-   *
-   * <p>The dependencies of all writers created by the {@link GoDelegator}
-   * are merged together to eventually generate a go.mod file.
-   *
-   * @param dependencies Go dependency to add.
-   * @return Returns the writer.
-   */
-  public GoWriter addDependency(SymbolDependencyContainer dependencies) {
-    this.dependencies.addAll(dependencies.getDependencies());
+  public GoWriter addImportFromModule(
+    String moduleName,
+    String packageName,
+    String as
+  ) {
+    imports.addImport(moduleName.concat("/").concat(packageName), as);
+    return this;
+  }
+
+  public GoWriter addImportFromModule(String moduleName, String packageName) {
+    imports.addImport(moduleName.concat("/").concat(packageName), "");
+    return this;
+  }
+
+  public GoWriter addImport(String packageName) {
+    imports.addImport(packageName, "");
     return this;
   }
 
   private GoWriter addDependencies(GoWriter other) {
     this.dependencies.addAll(other.getDependencies());
     return this;
-  }
-
-  Collection<SymbolDependency> getDependencies() {
-    return dependencies;
-  }
-
-  /**
-   * Writes documentation comments.
-   *
-   * @param runnable Runnable that handles actually writing docs with the writer.
-   * @return Returns the writer.
-   */
-  private void writeDocs(
-    AbstractCodeWriter<GoWriter> writer,
-    Runnable runnable
-  ) {
-    writer.pushState("docs");
-    writer.setNewlinePrefix("// ");
-    runnable.run();
-    writer.setNewlinePrefix("");
-    writer.popState();
-  }
-
-  private void writeDocs(
-    AbstractCodeWriter<GoWriter> writer,
-    int docWrapLength,
-    String docs
-  ) {
-    String convertedDoc = DocumentationConverter.convert(docs, docWrapLength);
-    writeDocs(writer, () -> writer.write(convertedDoc.replace("$", "$$")));
-  }
-
-  /**
-   * Writes documentation comments from a string.
-   *
-   * <p>This function escapes "$" characters so formatters are not run.
-   *
-   * @param docs Documentation to write.
-   * @return Returns the writer.
-   */
-  public GoWriter writeDocs(String docs) {
-    writeDocs(this, docWrapLength, docs);
-    return this;
-  }
-
-  /**
-   * Writes documentation from an arbitrary Writable.
-   *
-   * @param writable Contents to be written.
-   * @return Returns the writer.
-   */
-  public GoWriter writeRenderedDocs(Writable writable) {
-    writeRenderedDocs(this, docWrapLength, writable);
-    return this;
-  }
-
-  private void writeRenderedDocs(
-    AbstractCodeWriter<GoWriter> writer,
-    int docWrapLength,
-    Writable writable
-  ) {
-    var innerWriter = new GoWriter(fullPackageName, true);
-    writable.accept(innerWriter);
-    var wrappedDocs = StringUtils.wrap(
-      innerWriter.toString().trim(),
-      docWrapLength
-    );
-    writeDocs(writer, () -> writer.write(wrappedDocs.replace("$", "$$")));
-  }
-
-  /**
-   * Writes the doc to the Go package docs that are written prior to the go package statement.
-   *
-   * @param docs documentation to write to package doc.
-   * @return writer
-   */
-  public GoWriter writePackageDocs(String docs) {
-    writeDocs(packageDocs, docWrapLength, docs);
-    return this;
-  }
-
-  /**
-   * Writes the doc to the Go package docs that are written prior to the go package statement. This does not perform
-   * line wrapping and the provided formatting must be valid Go doc.
-   *
-   * @param docs documentation to write to package doc.
-   * @return writer
-   */
-  public GoWriter writeRawPackageDocs(String docs) {
-    writeDocs(
-      packageDocs,
-      () -> {
-        packageDocs.write(docs);
-      }
-    );
-    return this;
-  }
-
-  /**
-   * Writes shape documentation comments if docs are present.
-   *
-   * @param shape Shape to write the documentation of.
-   * @return Returns true if docs were written.
-   */
-  boolean writeShapeDocs(Shape shape) {
-    return shape
-      .getTrait(DocumentationTrait.class)
-      .map(DocumentationTrait::getValue)
-      .map(docs -> {
-        writeDocs(docs);
-        return true;
-      })
-      .orElse(false);
-  }
-
-  /**
-   * Writes shape documentation comments to the writer's package doc if docs are present.
-   *
-   * @param shape Shape to write the documentation of.
-   * @return Returns true if docs were written.
-   */
-  boolean writePackageShapeDocs(Shape shape) {
-    return shape
-      .getTrait(DocumentationTrait.class)
-      .map(DocumentationTrait::getValue)
-      .map(docs -> {
-        writePackageDocs(docs);
-        return true;
-      })
-      .orElse(false);
-  }
-
-  /**
-   * Writes member shape documentation comments if docs are present.
-   *
-   * @param model  Model used to dereference targets.
-   * @param member Shape to write the documentation of.
-   * @return Returns true if docs were written.
-   */
-  boolean writeMemberDocs(Model model, MemberShape member) {
-    boolean hasDocs;
-
-    hasDocs =
-      member
-        .getMemberTrait(model, DocumentationTrait.class)
-        .map(DocumentationTrait::getValue)
-        .map(docs -> {
-          writeDocs(docs);
-          return true;
-        })
-        .orElse(false);
-
-    Optional<String> stringOptional = member
-      .getMemberTrait(model, MediaTypeTrait.class)
-      .map(StringTrait::getValue);
-    if (stringOptional.isPresent()) {
-      if (hasDocs) {
-        writeDocs("");
-      }
-      writeDocs(
-        "This value conforms to the media type: " + stringOptional.get()
-      );
-      hasDocs = true;
-    }
-
-    GoUsageIndex usageIndex = GoUsageIndex.of(model);
-    if (usageIndex.isUsedForOutput(member)) {
-      if (
-        member.getMemberTrait(model, HttpPrefixHeadersTrait.class).isPresent()
-      ) {
-        if (hasDocs) {
-          writeDocs("");
-        }
-        writeDocs("Map keys will be normalized to lower-case.");
-        hasDocs = true;
-      }
-    }
-
-    if (member.getMemberTrait(model, RequiredTrait.class).isPresent()) {
-      if (hasDocs) {
-        writeDocs("");
-      }
-      writeDocs("This member is required.");
-      hasDocs = true;
-    }
-
-    Optional<DeprecatedTrait> deprecatedTrait = member.getMemberTrait(
-      model,
-      DeprecatedTrait.class
-    );
-    if (
-      member.getTrait(DeprecatedTrait.class).isPresent() ||
-      isTargetDeprecated(model, member)
-    ) {
-      if (hasDocs) {
-        writeDocs("");
-      }
-      final String defaultMessage = "This member has been deprecated.";
-      String message = defaultMessage;
-      if (deprecatedTrait.isPresent()) {
-        message =
-          deprecatedTrait
-            .get()
-            .getMessage()
-            .map(s -> {
-              if (s.length() == 0) {
-                return defaultMessage;
-              }
-              return s;
-            })
-            .orElse(defaultMessage);
-      }
-      writeDocs("Deprecated: " + message);
-    }
-
-    return hasDocs;
   }
 
   private boolean isTargetDeprecated(Model model, MemberShape member) {
@@ -972,7 +663,6 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
       }
     }
 
-    String packageDocs = this.packageDocs.toString();
     String packageStatement = String.format("package %s%n%n", packageName);
 
     String importString = imports.toString();
@@ -986,7 +676,7 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
       return header + strippedImportString + "\n" + strippedContents;
     }
 
-    return header + packageDocs + packageStatement + importString + contents;
+    return header + packageStatement + importString + contents;
   }
 
   /**
@@ -1094,6 +784,8 @@ public final class GoWriter extends AbstractCodeWriter<GoWriter> {
             .getProperty(SymbolUtils.POINTABLE, Boolean.class)
             .orElse(false)
         );
+      } else if (type instanceof String) {
+        return true;
       } else {
         throw new CodegenException(
           "Invalid type provided to $P. Expected a Symbol, but found `" +
