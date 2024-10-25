@@ -60,7 +60,6 @@ class DafnyClientCodegenPluginSettings {
    * This is used to ensure both Dafny source compatibility
    * and compatibility with the Dafny compiler and runtime internals,
    * which shim code generation currently depends on.
-   * Required when the edition is 2023.10 or later.
    */
   public final DafnyVersion dafnyVersion;
 
@@ -144,15 +143,12 @@ class DafnyClientCodegenPluginSettings {
       );
     }
 
-    final String dafnyVersionString;
-    if (
-      edition.ordinal() >= DafnyClientCodegenEdition.EDITION_2023_10.ordinal()
-    ) {
-      // Required from this edition on
-      dafnyVersionString = node.expectStringMember("dafnyVersion").getValue();
-    } else {
-      dafnyVersionString = node.getStringMemberOrDefault("dafnyVersion", "4.1");
-    }
+    // This is now optional since we can get it from dafny itself
+    final DafnyVersion dafnyVersionString = node
+      .getStringMember("dafnyVersion")
+      .map(StringNode::getValue)
+      .map(DafnyVersion::parse)
+      .orElse(null);
 
     return Optional.of(
       new DafnyClientCodegenPluginSettings(
@@ -160,7 +156,7 @@ class DafnyClientCodegenPluginSettings {
         serviceId,
         targetLanguages,
         includeDafnyFileNormalized,
-        DafnyVersion.parse(dafnyVersionString)
+        dafnyVersionString
       )
     );
   }

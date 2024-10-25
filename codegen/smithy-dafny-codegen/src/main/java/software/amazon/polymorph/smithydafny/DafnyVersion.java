@@ -20,7 +20,9 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
   private final int minor;
   private final int patch;
   // Will be non-null only if there was a pre-release suffix
-  private final String suffix;
+  private final String prerelease;
+  // Will be non-null only if there was a build suffix
+  private final String build;
 
   // Anything with a pre-release suffix should be considered less
   // than a matching version without one.
@@ -28,33 +30,49 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
     Comparator.nullsLast(Comparator.naturalOrder());
 
   public static DafnyVersion parse(String versionString) {
-    if (!versionString.matches("[0-9\\.A-Za-z\\-]*")) {
+    if (!versionString.matches("[0-9.A-Za-z\\-+]*")) {
       throw new IllegalArgumentException();
     }
-    int firstHyphenIndex = versionString.indexOf("-");
     String majorMinorPatch = versionString;
     String suffix = null;
+    String build = null;
+
+    int plusIndex = majorMinorPatch.indexOf("+");
+    if (plusIndex >= 0) {
+      build = majorMinorPatch.substring(plusIndex + 1);
+      majorMinorPatch = versionString.substring(0, plusIndex);
+    }
+
+    int firstHyphenIndex = majorMinorPatch.indexOf("-");
     if (firstHyphenIndex >= 0) {
-      majorMinorPatch = versionString.substring(0, firstHyphenIndex);
-      suffix = versionString.substring(firstHyphenIndex + 1);
+      suffix = majorMinorPatch.substring(firstHyphenIndex + 1);
+      majorMinorPatch = majorMinorPatch.substring(0, firstHyphenIndex);
     }
     String[] splitByDots = majorMinorPatch.split("\\.");
     switch (splitByDots.length) {
       case 1:
-        return new DafnyVersion(Integer.parseInt(splitByDots[0]), 0, 0, suffix);
+        return new DafnyVersion(
+          Integer.parseInt(splitByDots[0]),
+          0,
+          0,
+          suffix,
+          build
+        );
       case 2:
         return new DafnyVersion(
           Integer.parseInt(splitByDots[0]),
           Integer.parseInt(splitByDots[1]),
           0,
-          suffix
+          suffix,
+          build
         );
       case 3:
         return new DafnyVersion(
           Integer.parseInt(splitByDots[0]),
           Integer.parseInt(splitByDots[1]),
           Integer.parseInt(splitByDots[2]),
-          suffix
+          suffix,
+          build
         );
       default:
         throw new IllegalArgumentException();
@@ -65,11 +83,22 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
     this(major, minor, patch, null);
   }
 
-  public DafnyVersion(int major, int minor, int patch, String suffix) {
+  public DafnyVersion(int major, int minor, int patch, String prerelease) {
+    this(major, minor, patch, prerelease, null);
+  }
+
+  public DafnyVersion(
+    int major,
+    int minor,
+    int patch,
+    String prerelease,
+    String build
+  ) {
     this.major = requireNonNegative(major);
     this.minor = requireNonNegative(minor);
     this.patch = requireNonNegative(patch);
-    this.suffix = suffix;
+    this.prerelease = prerelease;
+    this.build = build;
   }
 
   private int requireNonNegative(int value) {
@@ -91,8 +120,12 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
     return patch;
   }
 
-  public String getSuffix() {
-    return suffix;
+  public String getPrerelease() {
+    return prerelease;
+  }
+
+  public String getBuild() {
+    return build;
   }
 
   @Override
@@ -108,13 +141,14 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
       major == that.major &&
       minor == that.minor &&
       patch == that.patch &&
-      Objects.equals(suffix, that.suffix)
+      Objects.equals(prerelease, that.prerelease) &&
+      Objects.equals(build, that.build)
     );
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(major, minor, patch, suffix);
+    return Objects.hash(major, minor, patch, prerelease, build);
   }
 
   @Override
@@ -134,7 +168,7 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
       return patchComparison;
     }
 
-    return SUFFIX_COMPARATOR.compare(this.suffix, other.suffix);
+    return SUFFIX_COMPARATOR.compare(this.prerelease, other.prerelease);
   }
 
   public String unparse() {
@@ -144,9 +178,13 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
     builder.append(minor);
     builder.append('.');
     builder.append(patch);
-    if (suffix != null) {
+    if (prerelease != null) {
       builder.append('-');
-      builder.append(suffix);
+      builder.append(prerelease);
+    }
+    if (build != null) {
+      builder.append('+');
+      builder.append(build);
     }
     return builder.toString();
   }
@@ -161,8 +199,11 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
       minor +
       ", patch=" +
       patch +
-      ", suffix='" +
-      suffix +
+      ", prerelease='" +
+      prerelease +
+      '\'' +
+      ", build='" +
+      build +
       '\'' +
       '}'
     );

@@ -26,7 +26,6 @@ endif
 polymorph_dafny :
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
-	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(PROJECT_ROOT)/$(STD_LIBRARY)/project.properties \
 	--model $(PROJECT_ROOT)/$(STD_LIBRARY)/Model \
