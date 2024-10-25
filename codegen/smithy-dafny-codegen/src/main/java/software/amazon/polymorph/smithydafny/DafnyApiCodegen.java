@@ -182,7 +182,15 @@ public class DafnyApiCodegen {
         // Error types are generated *after*
         // all other types to account
         // for any dependent modules
-        modeledErrorDataType
+        modeledErrorDataType,
+        TokenTree.of("""
+          // This dummy subset type is included to make sure Dafny
+          // always generates a _ExternBase___default.java class.
+          type DummySubsetType = x: int | IsDummySubsetType(x) witness 1
+          predicate method IsDummySubsetType(x: int) {
+            0 < x
+          }
+          """)
       )
       .lineSeparated()
       .braced();
@@ -2634,7 +2642,7 @@ public class DafnyApiCodegen {
     final String defaultFunctionMethodName =
       "Default%s".formatted(localServiceTrait.getConfigId().getName());
 
-    final TokenTree defaultConfig = TokenTree.of(
+    final TokenTree defaultConfig = localServiceTrait.getConfigRequired() ? TokenTree.empty() : TokenTree.of(
       "function method %s(): %s".formatted(
           defaultFunctionMethodName,
           configTypeName
@@ -2651,6 +2659,13 @@ public class DafnyApiCodegen {
 
     TokenTree serviceMethod = TokenTree
       .of(
+        localServiceTrait.getConfigRequired()
+          ?
+          "method %s(config: %s)".formatted(
+            localServiceTrait.getSdkId(),
+            configTypeName
+          )
+          :
         "method %s(config: %s := %s())".formatted(
             localServiceTrait.getSdkId(),
             configTypeName,

@@ -112,7 +112,7 @@ public class AwsSdkNativeV2 extends Native {
       packageNameForAwsSdkV2Shape(shape),
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
         awsServiceSmithyNamespace,
-        sdkId(shape) + "Client"
+        CodegenNamingUtils.pascalCase(sdkId(shape)) + "Client"
       )
     );
   }
@@ -156,12 +156,14 @@ public class AwsSdkNativeV2 extends Native {
       return JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES;
     }
 
-    // BinarySetAttributeValue is the only list of bytes
-    if (shapeId.getName().contains("BinarySetAttributeValue")) {
-      return ParameterizedTypeName.get(
-        ClassName.get(List.class),
-        JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES
-      );
+    if (shape.isListShape()) {
+      final Shape memberShape = model.expectShape(shape.asListShape().get().getMember().getTarget());
+      if (memberShape.isBlobShape()) {
+        return ParameterizedTypeName.get(
+          ClassName.get(List.class),
+          JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES
+        );
+      }
     }
 
     return super.typeForShape(shapeId);
@@ -281,20 +283,11 @@ public class AwsSdkNativeV2 extends Native {
           smithyName.simpleName().replace("CMK", "CmK")
         );
       }
-      if (smithyName.simpleName().endsWith("InternalServerError")) {
+      if (!smithyName.simpleName().endsWith("Exception")) {
         return ClassName.get(
           smithyName.packageName(),
           smithyName
-            .simpleName()
-            .replace("InternalServerError", "InternalServerErrorException")
-        );
-      }
-      if (smithyName.simpleName().endsWith("RequestLimitExceeded")) {
-        return ClassName.get(
-          smithyName.packageName(),
-          smithyName
-            .simpleName()
-            .replace("RequestLimitExceeded", "RequestLimitExceededException")
+            .simpleName() + "Exception"
         );
       }
     }
@@ -358,7 +351,7 @@ public class AwsSdkNativeV2 extends Native {
       packageName,
       AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.getOrDefault(
         serviceShape.getId().getNamespace(),
-        sdkId(serviceShape) + "Client"
+        CodegenNamingUtils.pascalCase(sdkId(serviceShape)) + "Client"
       )
     );
   }
@@ -374,7 +367,7 @@ public class AwsSdkNativeV2 extends Native {
       modelPackage,
       AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.getOrDefault(
         serviceShape.getId().getNamespace(),
-        sdkId(serviceShape) + "Exception"
+        CodegenNamingUtils.pascalCase(sdkId(serviceShape)) + "Exception"
       )
     );
   }

@@ -372,7 +372,7 @@ public class ToDafnyAwsV2 extends ToDafny {
       return returnCodeBlockBuilder.add(".asByteArray()").build();
     }
 
-    // BinarySetAttributeValue conversion is special.
+    // List of Blob conversion is special.
     // The input Dafny type is DafnySequence<? extends DafnySequence<? extends Byte>>.
     // The output native type is List<SdkBytes>.
     // dafny-java-conversion can convert most input types directly to the output types;
@@ -384,19 +384,17 @@ public class ToDafnyAwsV2 extends ToDafny {
     // This is the only time when Polymorph needs to convert a list of a Dafny type to a list
     //     of a type that Polymorph does not know about. So this is a special case and warrants
     //     its own generation logic.
-    if (
-      targetShape
-        .getId()
-        .toString()
-        .equals("com.amazonaws.dynamodb#BinarySetAttributeValue")
-    ) {
-      return returnCodeBlockBuilder
-        .add(
-          ".stream()\n.map($L)\n.collect($L.toList())",
-          SDK_BYTES_AS_BYTE_BUFFER.asFunctionalReference(),
-          Constants.JAVA_UTIL_STREAM_COLLECTORS
-        )
-        .build();
+    if (targetShape.isListShape()) {
+      final Shape listMemberTarget = subject.model.expectShape(targetShape.asListShape().get().getMember().getTarget());
+      if (listMemberTarget.isBlobShape()) {
+        return returnCodeBlockBuilder
+          .add(
+            ".stream()\n.map($L)\n.collect($L.toList())",
+            SDK_BYTES_AS_BYTE_BUFFER.asFunctionalReference(),
+            Constants.JAVA_UTIL_STREAM_COLLECTORS
+          )
+          .build();
+      }
     }
     return inputVar;
   }
@@ -480,7 +478,7 @@ public class ToDafnyAwsV2 extends ToDafny {
         builder
           .beginControlFlow(
             "case $L:",
-            subject.dafnyNameResolver.formatEnumCaseName(dafnyEnumClass, name)
+            subject.nativeNameResolver.v2FormattedEnumValue(shapeId, name)
           )
           .addStatement(
             "return $T.$L()",

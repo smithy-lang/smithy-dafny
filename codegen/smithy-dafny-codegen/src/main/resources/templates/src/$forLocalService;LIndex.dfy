@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "$sdkID:LImpl.dfy"
 
-module {:extern "$namespace:L.internaldafny" } $sdkID:L refines Abstract$service:LService {
+module {:extern "$namespace:L.internaldafny" } $sdkID:L refines Abstract$dafnyModuleName:LService {
   import Operations = $service:LImpl
 
   function method Default$serviceConfig:L(): $serviceConfig:L {

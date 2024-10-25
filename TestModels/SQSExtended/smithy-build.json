@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "sources": ["model"],
+  "maven": {
+      "dependencies": [
+        "software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0",
+        "software.amazon.smithy.dafny:sqs-model:1.0"
+      ],
+      "repositories": [
+        { "url": "file:///Users/salkeldr/.m2/repository/" }
+      ]
+  }
+}

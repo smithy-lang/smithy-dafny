@@ -51,6 +51,7 @@ public class LocalServiceTrait
 
   protected static final String SDKID = "sdkId";
   protected static final String CONFIG = "config";
+  protected static final String CONFIG_REQUIRED = "configRequired";
   private static final String DEPENDENCIES = "dependencies";
 
   @Nonnull
@@ -59,6 +60,9 @@ public class LocalServiceTrait
   @Nonnull
   private final ShapeId configId;
 
+  @Nonnull
+  private final boolean configRequired;
+
   @Nullable
   private final LinkedHashSet<ShapeId> dependencies;
 
@@ -66,6 +70,7 @@ public class LocalServiceTrait
     super(LOCAL_SERVICE_ID, builder.getSourceLocation());
     this.sdkId = builder.sdkId;
     this.configId = builder.configId;
+    this.configRequired = builder.configRequired;
     this.dependencies = builder.dependencies;
   }
 
@@ -79,6 +84,7 @@ public class LocalServiceTrait
     public Trait createTrait(ShapeId target, Node value) {
       ObjectNode objectNode = value.expectObjectNode();
       ShapeId configId = objectNode.expectStringMember(CONFIG).expectShapeId();
+      objectNode.expectStringMember(CONFIG).expectShapeId();
       String sdkId = objectNode.expectStringMember(SDKID).toString();
       Optional<ArrayNode> maybeRawDependencies = objectNode.getArrayMember(
         DEPENDENCIES
@@ -93,6 +99,8 @@ public class LocalServiceTrait
           .collect(Collectors.toCollection(LinkedHashSet::new));
         builder.dependencies(dependencies);
       }
+      objectNode.getMember(CONFIG_REQUIRED).map(configRequired ->
+        builder.configRequired(configRequired.expectBooleanNode().getValue()));
 
       return builder.sdkId(sdkId).configId(configId).build();
     }
@@ -110,6 +118,10 @@ public class LocalServiceTrait
   @Nonnull
   public ShapeId getConfigId() {
     return configId;
+  }
+
+  public boolean getConfigRequired() {
+    return configRequired;
   }
 
   @Nullable
@@ -147,6 +159,7 @@ public class LocalServiceTrait
       .sourceLocation(getSourceLocation())
       .sdkId(this.getSdkId())
       .configId(this.getConfigId())
+      .configRequired(this.getConfigRequired())
       .dependencies(this.getDependencies());
   }
 
@@ -156,6 +169,7 @@ public class LocalServiceTrait
 
     private String sdkId;
     private ShapeId configId;
+    private boolean configRequired = false;
     private LinkedHashSet<ShapeId> dependencies;
 
     private Builder() {}
@@ -172,6 +186,11 @@ public class LocalServiceTrait
 
     public LocalServiceTrait.Builder configId(ShapeId configId) {
       this.configId = configId;
+      return this;
+    }
+
+    public LocalServiceTrait.Builder configRequired(boolean configRequired) {
+      this.configRequired = configRequired;
       return this;
     }
 
@@ -238,6 +257,17 @@ public class LocalServiceTrait
       )
       .target("smithy.api#String")
       .build();
+    final MemberShape configRequiredShape = MemberShape
+      .builder()
+      .id(
+        ShapeId.fromParts(
+          LOCAL_SERVICE_ID.getNamespace(),
+          LOCAL_SERVICE_ID.getName(),
+          CONFIG_REQUIRED
+        )
+      )
+      .target("smithy.api#Boolean")
+      .build();
     final Trait localServiceTraitDefinition = TraitDefinition
       .builder()
       .selector(Selector.parse("service"))
@@ -248,6 +278,7 @@ public class LocalServiceTrait
       .addTrait(localServiceTraitDefinition)
       .addMember(skidShape)
       .addMember(configShape)
+      .addMember(configRequiredShape)
       .addMember(DEPENDENCIES, LocalServiceTrait.SERVICE_LIST_ID)
       .build();
     return Stream.of(serviceListShape, localService);

@@ -9,20 +9,20 @@
 include "../src/Index.dfy"
 
 module TestComAmazonawsSqs {
-  import Com.Amazonaws.Sqs
+  import Com.Amazonaws.SQS
   import opened StandardLibrary.UInt
   import opened Wrappers
 
   method {:test} BasicSanityTest()
   {
-    var client :- expect Sqs.SQSClient();
+    var client :- expect SQS.SQSClient();
 
-    var input := Sqs.Types.ListQueuesRequest(
+    var input := SQS.Types.ListQueuesRequest(
       QueueNamePrefix := None,
       NextToken := None,
       MaxResults := None
     );
-    var ret: Sqs.Types.ListQueuesResult :- expect client.ListQueues(input);
+    var ret: SQS.Types.ListQueuesResult :- expect client.ListQueues(input);
 
     var ListQueuesResult(NextToken, QueueUrls) := ret;
 

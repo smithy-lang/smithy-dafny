@@ -32,6 +32,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 /**
@@ -586,14 +587,12 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       "fluentMemberSetters",
       fluentMemberSettersForStructure(outputShape).toString()
     );
+    final boolean needsUnwrap =
+      outputShape.members().stream().anyMatch(memberShape ->
+        memberShape.hasTrait(RequiredTrait.class) && !model.expectShape(memberShape.getTarget()).isStructureShape());
     variables.put(
       "unwrapIfNecessary",
-      // TODO: Can't figure out why this one is fallible but not other similar output structures
-      outputShape
-          .getId()
-          .equals(
-            ShapeId.from("com.amazonaws.dynamodb#DescribeEndpointsResponse")
-          )
+     needsUnwrap
         ? ".unwrap()"
         : ""
     );
@@ -946,7 +945,13 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             );
           }
         } else {
-          yield TokenTree.of(rustValue);
+          if (isRustOption) {
+            yield TokenTree.of("%s.unwrap()".formatted(
+              rustValue
+            ));
+          } else {
+            yield TokenTree.of(rustValue);
+          }
         }
       }
       case LONG -> {

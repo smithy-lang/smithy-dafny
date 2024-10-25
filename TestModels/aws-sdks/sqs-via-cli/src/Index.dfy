@@ -1,11 +1,10 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-
 include "../Model/ComAmazonawsSqsTypes.dfy"
 
-module {:extern "software.amazon.cryptography.services.sqs.internaldafny"} Com.Amazonaws.Sqs refines AbstractComAmazonawsSqsService {
+module {:options "--function-syntax:4"}{:extern "software.amazon.cryptography.services.sqs.internaldafny"} Com.Amazonaws.SQS refines AbstractComAmazonawsSqsService {
 
-  function method DefaultSQSClientConfigType() : SQSClientConfigType {
+  function DefaultSQSClientConfigType() : SQSClientConfigType {
     SQSClientConfigType
   }
 
