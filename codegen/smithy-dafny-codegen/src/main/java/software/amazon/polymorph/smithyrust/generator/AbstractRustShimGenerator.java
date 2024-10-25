@@ -1,11 +1,13 @@
 package software.amazon.polymorph.smithyrust.generator;
 
 import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.polymorph.utils.IOUtils.evalTemplateResource;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
 import com.google.common.collect.MoreCollectors;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,9 +43,11 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 public abstract class AbstractRustShimGenerator {
@@ -1077,7 +1081,7 @@ public abstract class AbstractRustShimGenerator {
       perMemberVariables
         .stream()
         .map(memberVariables ->
-          IOUtils.evalTemplate(
+          evalTemplate(
             """
             $qualifiedRustUnionName:L::$rustUnionMemberName:L(x) =>
                 crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
@@ -1094,7 +1098,7 @@ public abstract class AbstractRustShimGenerator {
       perMemberVariables
         .stream()
         .map(memberVariables ->
-          IOUtils.evalTemplate(
+          evalTemplate(
             """
             crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L::$unionMemberName:L {
                 $dafnyUnionMemberName:L: x @ _,
@@ -1106,7 +1110,7 @@ public abstract class AbstractRustShimGenerator {
         .collect(Collectors.joining("\n"))
     );
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/conversions/union.rs",
       variables
@@ -1127,6 +1131,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("serviceName", service.getId().getName(service));
     variables.put("rustClientType", qualifiedRustServiceType(service));
     variables.put("dafnyModuleName", getDafnyModuleName(namespace));
+    variables.put("rustStructureComment", docFromShape(service));
     variables.put(
       "dafnyInternalModuleName",
       getDafnyInternalModuleName(namespace)
@@ -1201,6 +1206,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("snakeCaseOperationName", toSnakeCase(opName));
     variables.put("snakeCaseOperationInputName", toSnakeCase(opInputName));
     variables.put("snakeCaseOperationOutputName", toSnakeCase(opOutputName));
+    variables.put("rustOperationComment", docFromShapeEmpty(operationShape));
     variables.put(
       "snakeCaseSyntheticOperationInputName",
       toSnakeCase(synOpInputName)
@@ -1391,6 +1397,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("structureName", structureName);
     variables.put("snakeCaseStructureName", toSnakeCase(structureName));
     variables.put("rustStructureName", rustStructureName(structureShape));
+    variables.put("rustStructureComment", docFromShape(structureShape));
     // TODO: Risky...
     variables.put(
       "dafnyTypesModuleName",
@@ -1408,7 +1415,28 @@ public abstract class AbstractRustShimGenerator {
     variables.put("snakeCaseResourceName", toSnakeCase(resourceName));
     variables.put("rustResourceName", rustResourceTraitName(resourceShape));
     variables.put("dafnyResourceName", dafnyResourceTraitName(resourceShape));
+    variables.put("rustResourceComment", docFromShape(resourceShape));
     return variables;
+  }
+
+  protected String docFromShape(Shape shape) {
+    Optional<String> maybeDoc = ModelUtils.getDocumentationOrJavadoc(shape);
+    if (maybeDoc.isPresent()) {
+      return "/// " + String.join("\n/// ", maybeDoc.get().split("\\r?\\n"));
+    } else {
+      return "#[allow(missing_docs)]";
+    }
+  }
+
+  protected String docFromShapeEmpty(Shape shape) {
+    Optional<String> maybeDoc = ModelUtils.getDocumentationOrJavadoc(shape);
+    if (maybeDoc.isPresent()) {
+      return (
+        "///\n/// " + String.join("\n/// ", maybeDoc.get().split("\\r?\\n"))
+      );
+    } else {
+      return "///";
+    }
   }
 
   /**
@@ -1425,6 +1453,7 @@ public abstract class AbstractRustShimGenerator {
       "qualifiedRustStructureType",
       qualifiedRustStructureType(structureShape)
     );
+    variables.put("rustStructureComment", docFromShape(structureShape));
     return variables;
   }
 
@@ -1450,6 +1479,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("snakeCaseEnumName", toSnakeCase(enumName));
     variables.put("rustEnumName", rustEnumName(enumShape));
     variables.put("qualifiedRustEnumType", qualifiedRustEnumType(enumShape));
+    variables.put("rustEnumComment", docFromShape(enumShape));
     return variables;
   }
 
@@ -1511,6 +1541,7 @@ public abstract class AbstractRustShimGenerator {
     variables.put("dafnyUnionName", unionName);
     variables.put("rustUnionName", rustUnionName(unionShape));
     variables.put("qualifiedRustUnionName", qualifiedRustUnionName(unionShape));
+    variables.put("rustUnionComment", docFromShape(unionShape));
     return variables;
   }
 

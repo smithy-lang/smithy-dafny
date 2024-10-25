@@ -39,7 +39,7 @@ VERIFY_TIMEOUT := 100
 
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
-LIBRARY_ROOT := $(shell pwd)
+LIBRARY_ROOT := $(CURDIR)
 # Smithy Dafny code gen needs to know
 # where the smithy model is.
 # This is generally in the same directory as the library.
@@ -55,8 +55,6 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 
 CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
 GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
-
-DAFNY_VERSION := $(shell $(SMITHY_DAFNY_ROOT)/scripts/check_dafny_version.sh)
 
 include $(SMITHY_DAFNY_ROOT)/SmithyDafnySedMakefile.mk
 
@@ -276,7 +274,6 @@ _polymorph: mvn_local_deploy_polymorph_dependencies
 _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
 	./../gradlew run --args="\
-	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
@@ -303,7 +300,6 @@ _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
 	./../gradlew run --args="\
-	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(INPUT_DAFNY) \
@@ -604,7 +600,6 @@ _patch_after_transpile_rust:
 	cd $(CODEGEN_CLI_ROOT); \
 	./../gradlew run --args="\
 	patch-after-transpile \
-	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	$(OUTPUT_RUST) \
 	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \

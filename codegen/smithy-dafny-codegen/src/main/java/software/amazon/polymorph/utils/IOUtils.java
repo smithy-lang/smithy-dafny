@@ -82,7 +82,11 @@ public class IOUtils {
     String templateOutputPath,
     Map<String, String> parameters
   ) {
-    final String content = evalTemplate(klass, templatePath, parameters);
+    final String content = evalTemplateResource(
+      klass,
+      templatePath,
+      parameters
+    );
     final Path outputPath = rootPath.resolve(
       safeEvalPathTemplate(templateOutputPath, parameters)
     );
@@ -121,7 +125,7 @@ public class IOUtils {
    * See {@link software.amazon.smithy.utils.AbstractCodeWriter} for documentation
    * on the templating syntax.
    */
-  public static String evalTemplate(
+  public static String evalTemplateResource(
     Class<?> klass,
     String templatePath,
     Map<String, String> context

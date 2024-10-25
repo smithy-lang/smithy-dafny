@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyrust.generator;
 
 import static software.amazon.polymorph.utils.IOUtils.evalTemplate;
+import static software.amazon.polymorph.utils.IOUtils.evalTemplateResource;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toPascalCase;
 import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCase;
 
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.utils.BoundOperationShape;
-import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.MapUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -264,7 +264,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
   protected RustFile conversionsClientModule() {
     TokenTree clientConversionFunctions = TokenTree.of(
-      evalTemplate(
+      evalTemplateResource(
         getClass(),
         "runtimes/rust/conversions/client_awssdk.rs",
         serviceVariables()
@@ -291,7 +291,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
     final String toDafnyArms = allErrorShapes()
       .map(errorShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           $qualifiedRustServiceErrorType:L::$rustErrorName:L { error } =>
               $rustRootModuleName:L::conversions::error::$snakeCaseErrorName:L::to_dafny(error),
@@ -304,7 +304,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
 
     final String fromDafnyArms = allErrorShapes()
       .map(errorShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           crate::r#$dafnyTypesModuleName:L::Error::$errorName:L { $errorMessageMemberName:L, .. } =>
             $qualifiedRustServiceErrorType:L::$rustErrorName:L {
@@ -320,14 +320,14 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     variables.put("fromDafnyArms", fromDafnyArms);
 
     final TokenTree sdkContent = TokenTree.of(
-      IOUtils.evalTemplate(
+      evalTemplateResource(
         getClass(),
         "runtimes/rust/conversions/error_awssdk.rs",
         variables
       )
     );
     final TokenTree toDafnyOpaqueErrorFunctions = TokenTree.of(
-      IOUtils.evalTemplate(
+      evalTemplateResource(
         getClass(),
         "runtimes/rust/conversions/error_common.rs",
         variables
@@ -684,7 +684,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final Map<String, String> variables = serviceVariables();
     final String directErrorVariants = allErrorShapes()
       .map(errorShape ->
-        IOUtils.evalTemplate(
+        evalTemplate(
           """
           $rustErrorName:L {
               error: $sdkCrate:L::types::error::$rustErrorName:L,
@@ -696,7 +696,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       .collect(Collectors.joining("\n\n"));
     variables.put("modeledErrorVariants", directErrorVariants);
 
-    final String content = IOUtils.evalTemplate(
+    final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/types/error_awssdk.rs",
       variables
