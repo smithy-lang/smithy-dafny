@@ -557,7 +557,19 @@ public class ModelUtils {
     final String namespace
   ) {
     if (shape.hasTrait(ReferenceTrait.class)) {
-      return !namespace.equalsIgnoreCase(shape.getId().getNamespace());
+      return isDependantModuleType(shape, namespace);
+    } else {
+      return false;
+    }
+  }
+
+  public static Boolean isDependantModuleType(
+    final Shape shape,
+    final String namespace
+  ) {
+    final String shapeNamespace = shape.getId().getNamespace();
+    if (!shapeNamespace.toLowerCase().startsWith("smithy.api") && !namespace.equalsIgnoreCase(shapeNamespace)) {
+      return true;
     } else {
       return false;
     }
