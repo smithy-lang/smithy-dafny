@@ -378,6 +378,8 @@ _polymorph_dafny: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dafny: _polymorph
 
+dafny: polymorph_dafny verify
+
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_dotnet
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
