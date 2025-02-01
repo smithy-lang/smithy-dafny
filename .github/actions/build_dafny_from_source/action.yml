@@ -1,3 +1,4 @@
+# TODO: Replace this with the setup-dafny-action version when it is working.
 name: "Build Dafny from source"
 description: "Builds the given branch of Dafny from source"
 inputs:

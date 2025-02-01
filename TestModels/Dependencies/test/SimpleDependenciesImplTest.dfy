@@ -13,9 +13,13 @@ module SimpleDependenciesImplTest {
     import SimpleResourcesTypes
     import opened Wrappers
     
+
     method{:test} TestDependenciesWithDefaultConfig()
     {        
-        var client :- expect SimpleDependencies.SimpleDependencies();
+        // TODO: This looks like a legit Dafny regression:
+        // this is changing the test and not valid.
+        var defaultConfig := SimpleDependencies.DefaultSimpleDependenciesConfig();
+        var client :- expect SimpleDependencies.SimpleDependencies(defaultConfig);
         TestGetSimpleResource(client);
         TestUseSimpleResource(client);
         TestUseLocalExtendableResource(client);
