@@ -313,11 +313,6 @@ public class DafnyNameResolver {
     String enumValue,
     GenerationContext context
   ) {
-    if (enumValue.equals("RestoreStatus")) {
-      System.out.println("!!!!!!!!1");
-      System.out.println(enumValue);
-      System.out.println(stringShape);
-    }
     if (!stringShape.hasTrait(EnumTrait.class)) {
       throw new IllegalArgumentException(
         "Argument is not a StringShape with EnumTrait: " + stringShape.getId()
