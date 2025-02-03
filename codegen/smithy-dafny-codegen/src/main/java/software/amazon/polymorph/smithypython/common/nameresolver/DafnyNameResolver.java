@@ -287,11 +287,6 @@ public class DafnyNameResolver {
     StringShape stringShape,
     String enumValue
   ) {
-    if (enumValue.equals("RestoreStatus")) {
-      System.out.println("!!!!!");
-      System.out.println(stringShape);
-      System.out.println(enumValue);
-    }
     if (
       !stringShape.hasTrait(EnumTrait.class) || !stringShape.isStringShape()
     ) {
