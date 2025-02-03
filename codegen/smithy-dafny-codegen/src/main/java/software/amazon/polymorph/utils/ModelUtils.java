@@ -568,13 +568,7 @@ public class ModelUtils {
     final String namespace
   ) {
     final String shapeNamespace = shape.getId().getNamespace();
-    final Map<String, String> serviceToShapeNameSpace = new HashMap<>();
-    serviceToShapeNameSpace.put(namespace, "com.amazonaws.dynamodb");
-    System.out.println("Shape namespace: " + shapeNamespace);
-    System.out.println("Service namespace: " + namespace);
-    // This *should* work; however, in the case of the DynamoDB and KMS Modules
-    // the shapeNamespace and the namespace are different, when really they are the same.
-    if (!shapeNamespace.toLowerCase().startsWith("smithy.api") ) {
+    if (!shapeNamespace.toLowerCase().startsWith("smithy.api") && !namespace.equalsIgnoreCase(shapeNamespace)) {
       return true;
     } else {
       return false;
