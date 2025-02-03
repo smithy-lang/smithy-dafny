@@ -568,8 +568,8 @@ public class ModelUtils {
     final String namespace
   ) {
     final String shapeNamespace = shape.getId().getNamespace();
-    System.out.println(shapeNamespace);
-    System.out.println(namespace);
+    // This *should* work; however, in the case of the DynamoDB and KMS Modules
+    // the shapeNamespace and the namespace are different, when really they are the same.
     if (!shapeNamespace.toLowerCase().startsWith("smithy.api") && !namespace.equalsIgnoreCase(shapeNamespace)) {
       return true;
     } else {
