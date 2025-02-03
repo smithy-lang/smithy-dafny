@@ -345,40 +345,28 @@ public class DafnyApiCodegen {
     final EnumTrait enumTrait = stringShape
       .getTrait(EnumTrait.class)
       .orElseThrow();
-    if (enumTrait.getEnumDefinitionValues().get(0).equals("RestoreStatus")) {
-      System.out.println(enumTrait.getEnumDefinitionValues().get(0));
-      System.out.println(enumTrait.getValues().get(0).getValue());
-      System.out.println(enumTrait.getValues().get(0).getName());
-    }
 
     if (!enumTrait.hasNames()) {
       throw new UnsupportedOperationException("Unnamed enums not supported");
     }
 
+    // Dafny uses the enum's name, rather than its value here.
+    // Python (and possibly other runtimes) use values.
+    // Most of the time the name and value match so it isn't an issue (e.g. all KMS and DDB enums).
+    // Some of the time they don't. In many cases, this is coincidentally resolved
+    // because the only difference is the delimiter, which gets rewritten later on such that the replaced value
+    // matches the name. (E.g. the name/value AWS_KMS/aws:kms becomes AWS_KMS/AWS_KMS.)
+    // In at least one case, S3's OptionalObjectAttributes, this pattern is broken, so in order to make the
+    // name and value match later on, we prefer the value in Dafny for this shape only.
+    final List<String> enumValuesToOverride = new ArrayList<>(1);
+    enumValuesToOverride.add("RestoreStatus");
+
     //noinspection OptionalGetWithoutIsPresent
-//    final TokenTree constructors = TokenTree.of(
-//      enumTrait
-//        .getValues()
-//        .stream()
-//        .map(enumDefinition -> enumDefinition.getName().get().equals(enumDefinition.getValue()) ? enumDefinition.getName().get() : enumDefinition.getValue())
-//        .peek(name -> {
-//          if (!ModelUtils.isValidEnumDefinitionName(name)) {
-//            throw new UnsupportedOperationException(
-//              "Invalid enum definition name: %s".formatted(name)
-//            );
-//          }
-//        })
-//        .map(name -> TokenTree.of("\n\t|", name))
-//    );
-//
-
-
-    //    //noinspection OptionalGetWithoutIsPresent
     final TokenTree constructors = TokenTree.of(
       enumTrait
         .getValues()
         .stream()
-        .map(enumDefinition -> enumDefinition.getName().get())
+        .map(enumDefinition -> enumValuesToOverride.contains(enumDefinition.getValue()) ? enumDefinition.getValue() : enumDefinition.getName().get())
         .peek(name -> {
           if (!ModelUtils.isValidEnumDefinitionName(name)) {
             throw new UnsupportedOperationException(
