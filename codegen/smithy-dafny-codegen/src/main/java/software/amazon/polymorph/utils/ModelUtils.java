@@ -568,6 +568,8 @@ public class ModelUtils {
     final String namespace
   ) {
     final String shapeNamespace = shape.getId().getNamespace();
+    System.out.println(shapeNamespace);
+    System.out.println(namespace);
     if (!shapeNamespace.toLowerCase().startsWith("smithy.api") && !namespace.equalsIgnoreCase(shapeNamespace)) {
       return true;
     } else {
