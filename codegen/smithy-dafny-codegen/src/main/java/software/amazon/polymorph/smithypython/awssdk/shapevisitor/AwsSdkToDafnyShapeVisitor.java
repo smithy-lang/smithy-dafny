@@ -261,6 +261,10 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String enumShape(EnumShape shape) {
+    if (shape.getId().getName().equals("com.amazonaws.s3#OptionalObjectAttributes")) {
+      System.out.println("here's a shape eyhhh");
+      System.out.println(shape);
+    }
     DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(
       shape,
       context,

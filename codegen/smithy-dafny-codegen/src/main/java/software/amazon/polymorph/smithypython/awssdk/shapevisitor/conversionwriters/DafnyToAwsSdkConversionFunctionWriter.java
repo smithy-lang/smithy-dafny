@@ -267,6 +267,10 @@ public class DafnyToAwsSdkConversionFunctionWriter
   public void writeStringEnumShapeConverter(
     StringShape stringShapeWithEnumTrait
   ) {
+    if (stringShapeWithEnumTrait.getId().getName().equals("com.amazonaws.s3#OptionalObjectAttributes")) {
+      System.out.println("printing string shape with enum trait");
+      System.out.println(stringShapeWithEnumTrait);
+    }
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
       SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(

@@ -345,11 +345,35 @@ public class DafnyApiCodegen {
     final EnumTrait enumTrait = stringShape
       .getTrait(EnumTrait.class)
       .orElseThrow();
+    if (enumTrait.getEnumDefinitionValues().get(0).equals("RestoreStatus")) {
+      System.out.println(enumTrait.getEnumDefinitionValues().get(0));
+      System.out.println(enumTrait.getValues().get(0).getValue());
+      System.out.println(enumTrait.getValues().get(0).getName());
+    }
 
     if (!enumTrait.hasNames()) {
       throw new UnsupportedOperationException("Unnamed enums not supported");
     }
+
     //noinspection OptionalGetWithoutIsPresent
+//    final TokenTree constructors = TokenTree.of(
+//      enumTrait
+//        .getValues()
+//        .stream()
+//        .map(enumDefinition -> enumDefinition.getName().get().equals(enumDefinition.getValue()) ? enumDefinition.getName().get() : enumDefinition.getValue())
+//        .peek(name -> {
+//          if (!ModelUtils.isValidEnumDefinitionName(name)) {
+//            throw new UnsupportedOperationException(
+//              "Invalid enum definition name: %s".formatted(name)
+//            );
+//          }
+//        })
+//        .map(name -> TokenTree.of("\n\t|", name))
+//    );
+//
+
+
+    //    //noinspection OptionalGetWithoutIsPresent
     final TokenTree constructors = TokenTree.of(
       enumTrait
         .getValues()

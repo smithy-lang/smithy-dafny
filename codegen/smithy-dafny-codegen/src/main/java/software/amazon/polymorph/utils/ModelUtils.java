@@ -200,6 +200,7 @@ public class ModelUtils {
   }
 
   public static boolean isValidEnumDefinitionName(final String name) {
+    System.out.println("having a check up on " + name);
     return ENUM_NAME_PATTERN.matcher(name).matches();
   }
 
