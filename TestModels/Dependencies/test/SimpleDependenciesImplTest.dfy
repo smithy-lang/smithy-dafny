@@ -16,10 +16,7 @@ module SimpleDependenciesImplTest {
 
     method{:test} TestDependenciesWithDefaultConfig()
     {        
-        // TODO: This looks like a legit Dafny regression:
-        // this is changing the test and not valid.
-        var defaultConfig := SimpleDependencies.DefaultSimpleDependenciesConfig();
-        var client :- expect SimpleDependencies.SimpleDependencies(defaultConfig);
+        var client :- expect SimpleDependencies.SimpleDependencies();
         TestGetSimpleResource(client);
         TestUseSimpleResource(client);
         TestUseLocalExtendableResource(client);
