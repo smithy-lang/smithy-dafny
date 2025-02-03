@@ -2010,9 +2010,10 @@ public class TypeConversionCodegen {
     // they will need to wrap and unwrap reference types.
     // This is more controlled than exposing
     // the NativeWrapper and the Dafny wrapped type.
-    System.out.println(DafnyNameResolverHelpers.packageNameForNamespace(nameResolver.namespaceForService()));
+//    System.out.println(DafnyNameResolverHelpers.packageNameForNamespace(nameResolver.namespaceForService()));
+    System.out.println(nameResolver.serviceShape.getId().getNamespace());
     final boolean isDependantModuleType =
-      ModelUtils. isDependantModuleType(
+      ModelUtils.isDependantModuleType(
         shape,
         nameResolver.namespaceForService()
       );
