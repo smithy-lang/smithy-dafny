@@ -366,7 +366,11 @@ public class DafnyApiCodegen {
       enumTrait
         .getValues()
         .stream()
-        .map(enumDefinition -> enumValuesToOverride.contains(enumDefinition.getValue()) ? enumDefinition.getValue() : enumDefinition.getName().get())
+        .map(enumDefinition ->
+          enumValuesToOverride.contains(enumDefinition.getValue())
+            ? enumDefinition.getValue()
+            : enumDefinition.getName().get()
+        )
         .peek(name -> {
           if (!ModelUtils.isValidEnumDefinitionName(name)) {
             throw new UnsupportedOperationException(
