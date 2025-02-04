@@ -383,11 +383,15 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       return """
              func () %s {
       	var index int
+        numOfValues := len(%s.Values())
       	for _, enumVal := range %s.Values() {
       		index++
       		if enumVal == %s{
       			break;
       		}
+          if index == numOfValues {
+            return Wrappers.Companion_Option_.Create_None_()
+          }
       	}
       	var enum interface{}
       	for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
@@ -400,6 +404,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       	return %s
       }()""".formatted(
           returnType,
+          dataSource,
           dataSource,
           dataSource,
           DafnyNameResolver.getDafnyCompanionStructType(
