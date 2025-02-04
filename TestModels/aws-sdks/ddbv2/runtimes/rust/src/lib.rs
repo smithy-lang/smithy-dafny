@@ -8,12 +8,12 @@
 
 pub mod client;
 pub mod conversions;
+pub mod ddb;
 pub mod deps;
 pub(crate) mod implementation_from_dafny;
 mod standard_library_conversions;
 mod standard_library_externs;
 pub mod types;
-pub mod ddb;
 pub(crate) use crate::implementation_from_dafny::_Wrappers_Compile;
 pub use crate::implementation_from_dafny::software;
 pub use client::Client;

@@ -752,14 +752,14 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             var inputToConversion = %s
             return %s
         """.formatted(
-            SmithyNameResolver.smithyTypesNamespace(shape),
+            SmithyNameResolver.smithyTypesNamespace(shape, context.model()),
             context.symbolProvider().toMemberName(member),
             ShapeVisitorHelper.toDafnyShapeVisitorWriter(
               member,
               context,
               dataSource +
               ".(*" +
-              SmithyNameResolver.smithyTypesNamespace(shape) +
+              SmithyNameResolver.smithyTypesNamespace(shape, context.model()) +
               "." +
               context.symbolProvider().toMemberName(member) +
               ").Value",

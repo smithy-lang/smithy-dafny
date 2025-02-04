@@ -12,7 +12,7 @@ use crate::simple::extendable::resources::internaldafny::types::GetExtendableRes
 use crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsInput;
 use crate::simple::extendable::resources::internaldafny::types::GetExtendableResourceErrorsOutput;
 use crate::simple::extendable::resources::internaldafny::types::IExtendableResource;
-use std::rc::Rc;
+use ::dafny_runtime::Rc;
 
 pub mod simple {
     pub mod extendable {
@@ -30,8 +30,8 @@ pub struct NativeResource {
     pub inner: Box<dyn IExtendableResource>,
 }
 
-impl dafny_runtime::UpcastObject<dyn std::any::Any> for NativeResource {
-    dafny_runtime::UpcastObjectFn!(dyn std::any::Any);
+impl dafny_runtime::UpcastObject<::dafny_runtime::DynAny> for NativeResource {
+    dafny_runtime::UpcastObjectFn!(::dafny_runtime::DynAny);
 }
 
 impl IExtendableResource for NativeResource {

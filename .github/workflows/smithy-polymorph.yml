@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-22.04, windows-latest, macos-13]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v3
@@ -47,5 +47,5 @@ jobs:
         run: make polymorph_dafny
 
       - name: not-grep
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         uses: mattsb42-meta/not-grep@1.0.0

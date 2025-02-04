@@ -1,8 +1,8 @@
 
 pub fn to_dafny(
     value: $qualifiedRustServiceErrorType:L,
-) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error> {
-    ::std::rc::Rc::new(match value {
+) -> ::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::Error> {
+    ::dafny_runtime::Rc::new(match value {
         $toDafnyArms:L
         $qualifiedRustServiceErrorType:L::CollectionOfErrors { list, message } =>
             crate::r#$dafnyTypesModuleName:L::Error::CollectionOfErrors {
@@ -12,7 +12,7 @@ pub fn to_dafny(
         $qualifiedRustServiceErrorType:L::ValidationError(inner) =>
             crate::r#$dafnyTypesModuleName:L::Error::Opaque {
                 obj: {
-                    let rc = ::std::rc::Rc::new(inner) as ::std::rc::Rc<dyn ::std::any::Any>;
+                    let rc = ::dafny_runtime::Rc::new(inner) as ::dafny_runtime::Rc<::dafny_runtime::DynAny>;
                     // safety: `rc` is new, ensuring it has refcount 1 and is uniquely owned.
                     // we should use `dafny_runtime_conversions::rc_struct_to_dafny_class` once it
                     // accepts unsized types (https://github.com/dafny-lang/dafny/pull/5769)
@@ -33,7 +33,7 @@ pub fn to_dafny(
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::std::rc::Rc<
+    dafny_value: ::dafny_runtime::Rc<
         crate::r#$dafnyTypesModuleName:L::Error,
     >,
 ) -> $qualifiedRustServiceErrorType:L {

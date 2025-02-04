@@ -1,10 +1,10 @@
 #[allow(dead_code)]
 pub fn to_dafny(
     value: &$qualifiedRustUnionName:L,
-) -> ::std::rc::Rc<
+) -> ::dafny_runtime::Rc<
     crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L,
 > {
-    ::std::rc::Rc::new(match value {
+    ::dafny_runtime::Rc::new(match value {
         $toDafnyVariants:L
         _ => panic!("Unknown union variant: {:?}", value),
     })
@@ -12,11 +12,11 @@ pub fn to_dafny(
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::std::rc::Rc<
+    dafny_value: ::dafny_runtime::Rc<
         crate::r#$dafnyTypesModuleName:L::$dafnyUnionName:L,
     >,
 ) -> $qualifiedRustUnionName:L {
-    match &::std::rc::Rc::unwrap_or_clone(dafny_value) {
+    match &::dafny_runtime::Rc::unwrap_or_clone(dafny_value) {
         $fromDafnyVariants:L
     }
 }

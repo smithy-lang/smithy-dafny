@@ -235,7 +235,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         SmithyNameResolver.getGoModuleNameForSmithyNamespace(
           resourceOrService.toShapeId().getNamespace()
         ),
-        SmithyNameResolver.smithyTypesNamespace(resourceShape)
+        SmithyNameResolver.smithyTypesNamespace(resourceShape, context.model())
       );
       namespace =
         SmithyNameResolver.shapeNamespace(resourceOrService).concat(".");
@@ -253,7 +253,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         }
         return %s
     }()""".formatted(
-        SmithyNameResolver.smithyTypesNamespace(resourceShape),
+        SmithyNameResolver.smithyTypesNamespace(resourceShape, context.model()),
         resourceShape.getId().getName(),
         dataSource,
         "%s_FromDafny(%s.(%s.I%s))".formatted(
@@ -285,7 +285,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
@@ -315,7 +315,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     if (shape.hasTrait(ReferenceTrait.class)) {
@@ -350,7 +350,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       "return %1$s%2$s{".formatted(
           referenceType,
           SmithyNameResolver
-            .smithyTypesNamespace(shape)
+            .smithyTypesNamespace(shape, context.model())
             .concat(".")
             .concat(shape.getId().getName())
         )
@@ -430,7 +430,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     final StringBuilder typeConversionMethodBuilder = new StringBuilder();
@@ -459,7 +459,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       	}
       	fieldValue = append(fieldValue, %s)}
       	""".formatted(
-          GoCodegenUtils.getType(symbol, shape, true),
+          GoCodegenUtils.getType(symbol, true, context.model()),
           dataSource,
           ShapeVisitorHelper.toNativeShapeVisitorWriter(
             memberShape,
@@ -485,7 +485,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     final StringBuilder typeConversionMethodBuilder = new StringBuilder();
@@ -496,7 +496,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       .expectShape(valueMemberShape.getTarget());
     final var type = SmithyNameResolver.getSmithyType(
       valueTargetShape,
-      context.symbolProvider().toSymbol(valueTargetShape)
+      context.symbolProvider().toSymbol(valueTargetShape),
+      context.model()
     );
     final String valueDataSource = "(*val.(dafny.Tuple).IndexInt(1))";
     typeConversionMethodBuilder.append(
@@ -550,7 +551,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     if (this.isOptional) {
@@ -584,7 +585,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     if (shape.hasTrait(EnumTrait.class)) {
@@ -622,9 +623,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
         	return &u.Values()[index]
         }()""".formatted(
-            SmithyNameResolver.smithyTypesNamespace(shape),
+            SmithyNameResolver.smithyTypesNamespace(shape, context.model()),
             context.symbolProvider().toSymbol(shape).getName(),
-            SmithyNameResolver.smithyTypesNamespace(shape),
+            SmithyNameResolver.smithyTypesNamespace(shape, context.model()),
             context.symbolProvider().toSymbol(shape).getName(),
             dataSource,
             dataSource,
@@ -659,9 +660,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
         	return u.Values()[index]
         }()""".formatted(
-            SmithyNameResolver.smithyTypesNamespace(shape),
+            SmithyNameResolver.smithyTypesNamespace(shape, context.model()),
             context.symbolProvider().toSymbol(shape).getName(),
-            SmithyNameResolver.smithyTypesNamespace(shape),
+            SmithyNameResolver.smithyTypesNamespace(shape, context.model()),
             context.symbolProvider().toSymbol(shape).getName(),
             dataSource,
             DafnyNameResolver.getDafnyType(
@@ -738,7 +739,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     if (isOptional) {
@@ -771,7 +772,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     if (isOptional) {
@@ -805,7 +806,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
     writer.addUseImports(SmithyGoDependency.MATH);
@@ -850,7 +851,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.getId().getNamespace()
         ),
         "types",
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
       );
     }
 
@@ -923,7 +924,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         """.formatted(
             isMemberCheck,
             wrappedDataSource,
-            SmithyNameResolver.smithyTypesNamespace(shape),
+            SmithyNameResolver.smithyTypesNamespace(shape, context.model()),
             memberName,
             pointerForPointableShape,
             ShapeVisitorHelper.toNativeShapeVisitorWriter(
