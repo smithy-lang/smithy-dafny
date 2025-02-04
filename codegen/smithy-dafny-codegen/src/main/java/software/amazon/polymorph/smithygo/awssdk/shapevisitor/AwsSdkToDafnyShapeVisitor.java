@@ -245,11 +245,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
       returnType = "Wrappers.Option";
     }
-    var nilCheck = "";
-    if (isPointerType) {
-      nilCheck =
-        "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
-    }
+    var nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
     typeConversionMethodBuilder.append(
       """
       func () %s {
