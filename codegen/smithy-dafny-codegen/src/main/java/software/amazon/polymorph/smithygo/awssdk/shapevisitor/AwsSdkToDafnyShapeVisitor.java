@@ -245,8 +245,11 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
       returnType = "Wrappers.Option";
     }
-    var nilCheck =
-      "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
+    var nilCheck = "";
+    if (isPointerType) {
+      nilCheck =
+        "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
+    }
     typeConversionMethodBuilder.append(
       """
       func () %s {
@@ -371,24 +374,29 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         shape,
         context.symbolProvider().toSymbol(shape)
       );
-
+      var noEnumMatchedCheck = "";
       if (this.isOptional) {
         someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
         returnType = "Wrappers.Option";
+        // In AWS SDK, some shapes don't have required trait and also don't have pointers in it.
+        // This will result the default value of the string be "" if not provided.
+        noEnumMatchedCheck =
+          """
+            if index == len(%s.Values()) {
+              return Wrappers.Companion_Option_.Create_None_()
+            }
+          """.formatted(dataSource);
       }
 
       return """
              func () %s {
       	var index int
-        numOfValues := len(%s.Values())
       	for _, enumVal := range %s.Values() {
       		index++
       		if enumVal == %s{
       			break;
       		}
-          if index == numOfValues {
-            return Wrappers.Companion_Option_.Create_None_()
-          }
+          %s
       	}
       	var enum interface{}
       	for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
@@ -403,7 +411,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           returnType,
           dataSource,
           dataSource,
-          dataSource,
+          noEnumMatchedCheck,
           DafnyNameResolver.getDafnyCompanionStructType(
             shape,
             context.symbolProvider().toSymbol(shape)
