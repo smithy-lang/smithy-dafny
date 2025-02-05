@@ -469,6 +469,7 @@ public class AwsSdkToDafnyConversionFunctionWriter
                     )
                   )
                 );
+              String value = enumDefinition.getValue();
               conversionWriter.write(
                 """
                 $L $L == "$L":
@@ -477,7 +478,7 @@ public class AwsSdkToDafnyConversionFunctionWriter
                 // with `elif`
                 shouldOpenNewIfBlock ? "if" : "elif",
                 dataSourceInsideConversionFunction,
-                name,
+                value,
                 DafnyNameResolver.getDafnyTypeForStringShapeWithEnumTrait(
                   stringShapeWithEnumTrait,
                   name

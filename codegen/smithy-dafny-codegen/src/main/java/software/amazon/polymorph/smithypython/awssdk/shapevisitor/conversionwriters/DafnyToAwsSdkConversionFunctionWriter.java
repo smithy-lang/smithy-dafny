@@ -322,6 +322,7 @@ public class DafnyToAwsSdkConversionFunctionWriter
                     )
                   )
                 );
+              String value = enumDefinition.getValue();
               conversionWriter.write(
                 """
                 $L isinstance($L, $L):
@@ -333,7 +334,7 @@ public class DafnyToAwsSdkConversionFunctionWriter
                 dataSourceInsideConversionFunction,
                 DafnyNameResolver.getDafnyTypeForStringShapeWithEnumTrait(
                   stringShapeWithEnumTrait,
-                  name
+                  value
                 ),
                 name
               );
