@@ -350,17 +350,6 @@ public class DafnyApiCodegen {
       throw new UnsupportedOperationException("Unnamed enums not supported");
     }
 
-    // Dafny uses the enum's name, rather than its value here.
-    // Python (and possibly other runtimes) use values.
-    // Most of the time the name and value match so it isn't an issue (e.g. all KMS and DDB enums).
-    // Some of the time they don't. In many cases, this is coincidentally resolved
-    // because the only difference is the delimiter, which gets rewritten later on such that the replaced value
-    // matches the name. (E.g. the name/value AWS_KMS/aws:kms becomes AWS_KMS/AWS_KMS.)
-    // In at least one case, S3's OptionalObjectAttributes, this pattern is broken, so in order to make the
-    // name and value match later on, we prefer the value in Dafny for this shape only.
-//    final List<String> enumValuesToOverride = new ArrayList<>(1);
-//    enumValuesToOverride.add("RestoreStatus");
-
     //noinspection OptionalGetWithoutIsPresent
     final TokenTree constructors = TokenTree.of(
       enumTrait
