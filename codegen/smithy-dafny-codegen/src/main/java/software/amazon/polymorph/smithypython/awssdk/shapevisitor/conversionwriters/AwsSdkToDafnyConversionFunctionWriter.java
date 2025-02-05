@@ -459,7 +459,16 @@ public class AwsSdkToDafnyConversionFunctionWriter
               .getTrait(EnumTrait.class)
               .get()
               .getValues()) {
-              String name = enumDefinition.getName().orElseThrow(() -> new CodegenException(String.format("Invalid enum - %s is missing a name!", enumDefinition)));
+              String name = enumDefinition
+                .getName()
+                .orElseThrow(() ->
+                  new CodegenException(
+                    String.format(
+                      "Invalid enum - %s is missing a name!",
+                      enumDefinition
+                    )
+                  )
+                );
               conversionWriter.write(
                 """
                 $L $L == "$L":

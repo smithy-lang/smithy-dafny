@@ -514,7 +514,6 @@ public class DafnyToLocalServiceConversionFunctionWriter
   protected void writeStringEnumShapeConverter(
     StringShape stringShapeWithEnumTrait
   ) {
-
     final WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     final String moduleName =
       SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
