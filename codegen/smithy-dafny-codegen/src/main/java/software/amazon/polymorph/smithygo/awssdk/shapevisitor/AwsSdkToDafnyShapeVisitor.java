@@ -239,14 +239,12 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     var nilWrapIfRequired = "nil";
     var someWrapIfRequired = "%s";
     var returnType = "dafny.Map";
+    var nilCheck = "";
 
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
       returnType = "Wrappers.Option";
-    }
-    var nilCheck = "";
-    if (isPointerType) {
       nilCheck =
         "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
     }
