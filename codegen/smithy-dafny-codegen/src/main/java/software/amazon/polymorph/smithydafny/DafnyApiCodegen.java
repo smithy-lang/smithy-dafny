@@ -358,15 +358,15 @@ public class DafnyApiCodegen {
     // matches the name. (E.g. the name/value AWS_KMS/aws:kms becomes AWS_KMS/AWS_KMS.)
     // In at least one case, S3's OptionalObjectAttributes, this pattern is broken, so in order to make the
     // name and value match later on, we prefer the value in Dafny for this shape only.
-    final List<String> enumValuesToOverride = new ArrayList<>(1);
-    enumValuesToOverride.add("RestoreStatus");
+//    final List<String> enumValuesToOverride = new ArrayList<>(1);
+//    enumValuesToOverride.add("RestoreStatus");
 
     //noinspection OptionalGetWithoutIsPresent
     final TokenTree constructors = TokenTree.of(
       enumTrait
         .getValues()
         .stream()
-        .map(enumDefinition -> enumValuesToOverride.contains(enumDefinition.getValue()) ? enumDefinition.getValue() : enumDefinition.getName().get())
+        .map(enumDefinition -> enumDefinition.getName().get())
         .peek(name -> {
           if (!ModelUtils.isValidEnumDefinitionName(name)) {
             throw new UnsupportedOperationException(
