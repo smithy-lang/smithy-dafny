@@ -9,6 +9,7 @@ import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkToDafnyS
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumDefinition;
@@ -458,7 +459,7 @@ public class AwsSdkToDafnyConversionFunctionWriter
               .getTrait(EnumTrait.class)
               .get()
               .getValues()) {
-              String value = enumDefinition.getValue();
+              String name = enumDefinition.getName().orElseThrow(() -> new CodegenException(String.format("Invalid enum - %s is missing a name!", enumDefinition)));
               conversionWriter.write(
                 """
                 $L $L == "$L":
@@ -467,10 +468,10 @@ public class AwsSdkToDafnyConversionFunctionWriter
                 // with `elif`
                 shouldOpenNewIfBlock ? "if" : "elif",
                 dataSourceInsideConversionFunction,
-                value,
+                name,
                 DafnyNameResolver.getDafnyTypeForStringShapeWithEnumTrait(
                   stringShapeWithEnumTrait,
-                  value
+                  name
                 )
               );
               shouldOpenNewIfBlock = false;
@@ -478,7 +479,7 @@ public class AwsSdkToDafnyConversionFunctionWriter
               DafnyNameResolver.importDafnyTypeForStringShapeWithEnumTrait(
                 conversionWriter,
                 stringShapeWithEnumTrait,
-                value,
+                name,
                 context
               );
             }

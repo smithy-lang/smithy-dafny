@@ -288,7 +288,7 @@ public class DafnyNameResolver {
     String enumValue
   ) {
     if (enumValue.equals("RestoreStatus")) {
-      System.out.println("!!!!!");
+      System.out.println("!!!!! - DafnyNameResolver");
       System.out.println(stringShape);
       System.out.println(enumValue);
     }

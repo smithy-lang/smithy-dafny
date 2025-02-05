@@ -498,6 +498,7 @@ public class LocalServiceToDafnyConversionFunctionWriter
   protected void writeStringEnumShapeConverter(
     StringShape stringShapeWithEnumTrait
   ) {
+    System.out.println("dafny to aws enum eyhhh " + stringShapeWithEnumTrait.getId().getName() + ". \n\n\n 0000000000");
     final WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     final String moduleName =
       SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
