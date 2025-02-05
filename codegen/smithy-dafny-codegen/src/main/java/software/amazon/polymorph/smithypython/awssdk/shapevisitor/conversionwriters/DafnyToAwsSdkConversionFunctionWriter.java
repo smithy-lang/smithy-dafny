@@ -334,9 +334,9 @@ public class DafnyToAwsSdkConversionFunctionWriter
                 dataSourceInsideConversionFunction,
                 DafnyNameResolver.getDafnyTypeForStringShapeWithEnumTrait(
                   stringShapeWithEnumTrait,
-                  value
+                  name
                 ),
-                name
+                value
               );
               shouldOpenNewIfBlock = false;
 
