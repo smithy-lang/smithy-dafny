@@ -32,13 +32,12 @@ This setup will work for “simple” projects that only define nested extern mo
 
 Examples:
 
-* [Constraints TestModel](https://github.com/smithy-lang/smithy-dafny/blob/main-1.x/TestModels/Constraints/Makefile). Almost all TestModels are “simple.” 
-* [DDB TestModel](https://github.com/smithy-lang/smithy-dafny/blob/main-1.x/TestModels/aws-sdks/ddb/Makefile). All AWS SDK projects should be simple.
-
+- [Constraints TestModel](https://github.com/smithy-lang/smithy-dafny/blob/main-1.x/TestModels/Constraints/Makefile). Almost all TestModels are “simple.”
+- [DDB TestModel](https://github.com/smithy-lang/smithy-dafny/blob/main-1.x/TestModels/aws-sdks/ddb/Makefile). All AWS SDK projects should be simple.
 
 **Complex “nested” externs**
 Some projects use nested extern modules in files other than `Index.dfy` and the types file.
-For these “complex” projects, you will need to define new sed strings *and* override the default Makefile targets.
+For these “complex” projects, you will need to define new sed strings _and_ override the default Makefile targets.
 If you have a file `MySpecialFile.dfy` that requires sed replacement, you will need to override some targets:
 
 ```
@@ -56,7 +55,7 @@ MY_SPECIAL_FILE_WITHOUT_EXTERN_STRING="module MySpecialFile"
 _sed_index_file_add_extern:
     $(MAKE) _sed_file SED_FILE_PATH=$(MY_SPECIAL_FILE_FILE_PATH) SED_BEFORE_STRING=$(MY_SPECIAL_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(MY_SPECIAL_FILE_WITH_EXTERN_STRING)
     $(MAKE) _sed_file SED_FILE_PATH=$(INDEX_FILE_PATH) SED_BEFORE_STRING=$(INDEX_FILE_WITHOUT_EXTERN_STRING) SED_AFTER_STRING=$(INDEX_FILE_WITH_EXTERN_STRING)
-    
+
 _sed_index_file_remove_extern:
     $(MAKE) _sed_file SED_FILE_PATH=$(MY_SPECIAL_FILE_FILE_PATH) SED_BEFORE_STRING=$(MY_SPECIAL_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(MY_SPECIAL_FILE_WITHOUT_EXTERN_STRING)
     $(MAKE) _sed_file SED_FILE_PATH=$(INDEX_FILE_PATH) SED_BEFORE_STRING=$(INDEX_FILE_WITH_EXTERN_STRING) SED_AFTER_STRING=$(INDEX_FILE_WITHOUT_EXTERN_STRING)
@@ -64,8 +63,8 @@ _sed_index_file_remove_extern:
 
 Examples:
 
-* [MultipleModels TestModel](https://github.com/smithy-lang/smithy-dafny/blob/main-1.x/TestModels/MultipleModels/Makefile). Any Smithy-Dafny project with multiple local services is “Complex.”
-* [Crypto Tools’ MPL](https://github.com/aws/aws-cryptographic-material-providers-library/blob/main/AwsCryptographicMaterialProviders/Makefile). This project has multiple local services, but also applies nested extern attributes to some of its other modules (SynchronizedLocalCMC and StormTrackingCMC). 
+- [MultipleModels TestModel](https://github.com/smithy-lang/smithy-dafny/blob/main-1.x/TestModels/MultipleModels/Makefile). Any Smithy-Dafny project with multiple local services is “Complex.”
+- [Crypto Tools’ MPL](https://github.com/aws/aws-cryptographic-material-providers-library/blob/main/AwsCryptographicMaterialProviders/Makefile). This project has multiple local services, but also applies nested extern attributes to some of its other modules (SynchronizedLocalCMC and StormTrackingCMC).
 
 The following Makefile targets exist and can be overridden:
 
