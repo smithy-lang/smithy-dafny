@@ -349,6 +349,7 @@ public class DafnyApiCodegen {
     if (!enumTrait.hasNames()) {
       throw new UnsupportedOperationException("Unnamed enums not supported");
     }
+
     //noinspection OptionalGetWithoutIsPresent
     final TokenTree constructors = TokenTree.of(
       enumTrait
