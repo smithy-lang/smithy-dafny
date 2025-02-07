@@ -508,8 +508,10 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         // If string is not pointer and enum did not match to any value panic
         noEnumMatchedCheck =
           """
+          if index == len(%s.Values()) {
             panic("Input value did not found in enum values")
-          """;
+          }
+          """.formatted(dataSource);
       }
       return """
         func () %s {
