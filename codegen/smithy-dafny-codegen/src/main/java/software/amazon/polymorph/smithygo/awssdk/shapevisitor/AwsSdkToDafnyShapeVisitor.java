@@ -374,7 +374,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       );
       var noEnumMatchedCheck =
         """
-          panic("Enum value %s not found in enum values")
+        if index == len(%s.Values()) {
+          panic("Input value did not found in enum values")
+        }
         """.formatted(dataSource);
       if (this.isOptional) {
         someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
