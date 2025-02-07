@@ -5,9 +5,14 @@ from smithy_dafny_standard_library.internaldafny.generated.Std_Streams import By
 from smithy_dafny_standard_library.internaldafny.generated.Std_Enumerators import Enumerator
 from smithy_dafny_standard_library.internaldafny.generated.Std_Wrappers import Option, Option_Some, Option_None
 
+# Adaptor classes for wrapping up Python-native types as their
+# corresponding Dafny interfaces, and vice-versa.
+# These are the equivalent of type conversions,
+# but avoiding having to load all data into memory at once.
 
 class DafnyByteStreamAsByteStream(ByteStream):
-  
+  """Wrapper class adapting a Dafny ByteStream as a native ByteStream."""
+
   def __init__(self, dafny_byte_stream):
     self.dafny_byte_stream = dafny_byte_stream
 
@@ -22,6 +27,9 @@ class DafnyByteStreamAsByteStream(ByteStream):
 
 
 class RewindableDafnyByteStreamAsByteStream(DafnyByteStreamAsByteStream):
+  """Wrapper class adapting a Dafny RewindableByteStream as a native ByteStream
+  that supports tell and seek.
+  """
 
   def __init__(self, dafny_byte_stream):
     if not isinstance(dafny_byte_stream, DafnyRewindableByteStream):
@@ -43,7 +51,8 @@ class RewindableDafnyByteStreamAsByteStream(DafnyByteStreamAsByteStream):
 
 
 class StreamingBlobAsDafnyDataStream(DafnyByteStream):
-  
+  """Wrapper class adapting a native StreamingBlob as a Dafny ByteStream."""
+
   def __init__(self, streaming_blob):
     self.streaming_blob = streaming_blob
 

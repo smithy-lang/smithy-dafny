@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 include "../Model/SimpleStreamingTypes.dfy"
-module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
+module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
-  import opened Std.Enumerators
-  import opened Std.Aggregators
+  import Std.Enumerators
+  import Std.Aggregators
   import Std.Collections.Seq
   import opened Chunker
   
@@ -21,11 +21,11 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   method CountBits ( config: InternalConfig , input: CountBitsInput )
     returns (output: Result<CountBitsOutput, Error>)
   {
-    var counter := new Folder<BoundedInts.bytes, int>(0, (sum, byte) => sum + BytesBitCount(byte));
+    var counter := new Aggregators.FoldingAccumulator<BoundedInts.bytes, int>(0, (sum, byte) => sum + BytesBitCount(byte));
  
-    ForEach(input.bits, counter);
+    Enumerators.ForEach(input.bits, counter);
 
-    // Should really have the Folder fail instead,
+    // Should really have the FoldingAccumulator fail instead,
     // but this is a simpler correct approach.
     if 0 <= counter.value < INT32_MAX_LIMIT {
       return Success(CountBitsOutput(sum := counter.value as int32));
@@ -34,11 +34,11 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
     }
   }
 
-  function method BytesBitCount(b: BoundedInts.bytes): int {
+  function BytesBitCount(b: BoundedInts.bytes): int {
     Seq.FoldLeft((sum, byte) => sum + BitCount(byte), 0 as int, b)
   }
 
-  function method BitCount(x: BoundedInts.uint8): int {
+  function BitCount(x: BoundedInts.uint8): int {
     if x == 0 then
       0
     else if x % 2 == 1 then
@@ -58,7 +58,7 @@ module SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
   {
     // TODO: Actually compute the binary
     var fakeBinary: seq<BoundedInts.bytes> := [[12], [34, 56]];
-    var fakeBinaryEnumerator := new SeqEnumerator(fakeBinary);
+    var fakeBinaryEnumerator := new Enumerators.SeqEnumerator(fakeBinary);
     var fakeBinaryStream := new EnumeratorDataStream(fakeBinaryEnumerator, 3 as BoundedInts.uint64);
     
     return Success(BinaryOfOutput(binary := fakeBinaryStream));
@@ -91,6 +91,7 @@ module Chunker {
   import opened Std.Enumerators
   import opened Std.Aggregators
 
+  @AssumeCrossModuleTermination
   class Chunker extends Pipeline<BoundedInts.bytes, BoundedInts.bytes> {
 
     const chunkSize: CountingInteger
