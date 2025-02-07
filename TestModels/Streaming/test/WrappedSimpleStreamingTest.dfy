@@ -10,5 +10,6 @@ module WrappedSimpleTypesStringTest {
     method{:test} TestCountBits() {
         var client :- expect WrappedSimpleStreamingService.WrappedSimpleStreaming();
         SimpleStreamingImplTest.TestCountBits(client);
+        SimpleStreamingImplTest.TestBinaryOf(client);
     }
 }
