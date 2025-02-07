@@ -372,7 +372,10 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         shape,
         context.symbolProvider().toSymbol(shape)
       );
-      var noEnumMatchedCheck = "";
+      var noEnumMatchedCheck =
+        """
+          panic("Enum value %s not found in enum values")
+        """.formatted(dataSource);
       if (this.isOptional) {
         someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
         returnType = "Wrappers.Option";

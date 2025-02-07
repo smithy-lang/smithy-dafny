@@ -35,6 +35,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -497,10 +498,18 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       }
 
       var nilCheck = "";
+      var noEnumMatchedCheck = "";
       final var dereferenceIfRequired = isPointerType ? "*" : "";
       if (isPointerType) {
         nilCheck =
           "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
+      } else {
+        // String is not pointer when its required.
+        // If string is not pointer and enum did not match to any value panic
+        noEnumMatchedCheck =
+          """
+            panic("Input value did not found in enum values")
+          """;
       }
       return """
         func () %s {
@@ -511,6 +520,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       		if enumVal == %s%s{
       			break;
       		}
+          %s
       	}
       	var enum interface{}
       	for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
@@ -527,6 +537,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           dataSource,
           dereferenceIfRequired,
           dataSource,
+          noEnumMatchedCheck,
           DafnyNameResolver.getDafnyCompanionStructType(
             shape,
             context.symbolProvider().toSymbol(shape)
