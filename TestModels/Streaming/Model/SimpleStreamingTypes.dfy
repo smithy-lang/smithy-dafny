@@ -123,6 +123,8 @@ module {:extern "simple.streaming.internaldafny.types" } SimpleStreamingTypes
         && ValidState()
       ensures ChunksEnsuresPublicly(input, output)
       ensures History.Chunks == old(History.Chunks) + [DafnyCallEvent(input, output)]
+      // TODO: smithy-dafny isn't yet generating this
+      ensures output.Success? ==> output.value.bytesOut.Valid() && fresh(output.value.bytesOut.Repr)
 
   }
   datatype SimpleStreamingConfig = | SimpleStreamingConfig (

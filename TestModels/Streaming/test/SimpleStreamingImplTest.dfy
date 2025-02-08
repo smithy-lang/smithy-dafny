@@ -27,7 +27,7 @@ module SimpleStreamingImplTest {
         var s: seq<BoundedInts.bytes> := [[0x0], [0x1, 0x2], [0x3], [], [0x4, 0x5]];
         var e := new Enumerators.SeqEnumerator(s);
         var stream := new EnumeratorDataStream(e, 5 as BoundedInts.uint64);
-        var input: CountBitsInput := CountBitsInput(bits:=stream);
+        var input: CountBitsInput := CountBitsInput(bits := stream);
 
         var ret :- expect client.CountBits(input);
 
@@ -39,8 +39,6 @@ module SimpleStreamingImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-        var s: seq<BoundedInts.bytes> := [[0x0], [0x1, 0x2], [0x3], [], [0x4, 0x5]];
-        var stream := new Enumerators.SeqEnumerator(s);
         var input: BinaryOfInput := BinaryOfInput(number:=42);
 
         var ret :- expect client.BinaryOf(input);
@@ -50,5 +48,24 @@ module SimpleStreamingImplTest {
         Enumerators.ForEach(ret.binary, collector);
 
         expect collector.values == [[12], [34, 56]];
+    }
+
+    method TestChunks(client: ISimpleStreamingClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        var s: seq<BoundedInts.bytes> := [[0x0], [0x1, 0x2], [0x3], [], [0x4, 0x5]];
+        var e := new Enumerators.SeqEnumerator(s);
+        var stream := new EnumeratorDataStream(e, 5 as BoundedInts.uint64);
+        var input: ChunksInput := ChunksInput(bytesIn := stream, chunkSize := 2);
+
+        var ret :- expect client.Chunks(input);
+
+        var collector := new Aggregators.Collector<BoundedInts.bytes>();
+ 
+        Enumerators.ForEach(ret.bytesOut, collector);
+
+        expect collector.values == [[0x0, 0x1], [0x2, 0x3], [0x4, 0x5]];
     }
 }
