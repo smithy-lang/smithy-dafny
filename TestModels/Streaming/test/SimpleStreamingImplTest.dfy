@@ -26,7 +26,7 @@ module SimpleStreamingImplTest {
     {
         var s: seq<BoundedInts.bytes> := [[0x0], [0x1, 0x2], [0x3], [], [0x4, 0x5]];
         var e := new Enumerators.SeqEnumerator(s);
-        var stream := new EnumeratorDataStream(e, 5 as BoundedInts.uint64);
+        var stream := new EnumeratorDataStream(e, length := 5 as BoundedInts.uint64);
         var input: CountBitsInput := CountBitsInput(bits := stream);
 
         var ret :- expect client.CountBits(input);
