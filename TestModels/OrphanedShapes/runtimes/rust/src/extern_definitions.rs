@@ -3,8 +3,8 @@
 
 use crate::r#_Wrappers_Compile::Result;
 use dafny_runtime::rcmut;
+use dafny_runtime::Rc;
 use std::cell::UnsafeCell;
-use std::rc::Rc;
 
 pub mod internal_ExternDefinitions_Compile {
 
@@ -14,6 +14,7 @@ pub mod internal_ExternDefinitions_Compile {
     use crate::simple::orphaned::internaldafny::types as internaldafny_types;
     use crate::simple::orphaned::internaldafny::types::*;
     use crate::types::*;
+    use dafny_runtime::Rc;
 
     impl _default {
         pub fn InitializeOrphanedStructure(
@@ -37,7 +38,7 @@ pub mod internal_ExternDefinitions_Compile {
         {
             let native_resource_ref =
                 crate::conversions::orphaned_resource::from_dafny(dafny_resource.clone());
-            let native_resource = native_resource_ref.inner.borrow();
+            let native_resource = native_resource_ref.inner.lock().unwrap();
             let native_output = native_resource.orphaned_resource_operation(
                 crate::operation::orphaned_resource_operation::OrphanedResourceOperationInput {
                     some_string: std::option::Option::Some(
@@ -52,7 +53,7 @@ pub mod internal_ExternDefinitions_Compile {
                     native_output.unwrap(),
                 );
 
-            ::std::rc::Rc::new(Result::<
+            Rc::new(Result::<
                 Rc<internaldafny_types::OrphanedResourceOperationOutput>,
                 Rc<Error>,
             >::Success {

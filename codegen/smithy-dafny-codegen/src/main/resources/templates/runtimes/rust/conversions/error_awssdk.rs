@@ -1,15 +1,15 @@
 
 pub fn to_dafny(
     value: $qualifiedRustServiceErrorType:L,
-) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error> {
+) -> ::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::Error> {
     match value {
         $toDafnyArms:L
         $qualifiedRustServiceErrorType:L::Opaque { obj } =>
-            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::Error::Opaque {
+            ::dafny_runtime::Rc::new(crate::r#$dafnyTypesModuleName:L::Error::Opaque {
                 obj: ::dafny_runtime::Object(obj.0)
             }),
         $qualifiedRustServiceErrorType:L::OpaqueWithText { obj, objMessage } =>
-            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::Error::OpaqueWithText {
+            ::dafny_runtime::Rc::new(crate::r#$dafnyTypesModuleName:L::Error::OpaqueWithText {
                 obj: ::dafny_runtime::Object(obj.0),
                 objMessage: ::dafny_runtime::dafny_runtime_conversions::unicode_chars_false::string_to_dafny_string(&objMessage),
             }),
@@ -18,7 +18,7 @@ pub fn to_dafny(
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::std::rc::Rc<
+    dafny_value: ::dafny_runtime::Rc<
         crate::r#$dafnyTypesModuleName:L::Error,
     >,
 ) -> $qualifiedRustServiceErrorType:L {

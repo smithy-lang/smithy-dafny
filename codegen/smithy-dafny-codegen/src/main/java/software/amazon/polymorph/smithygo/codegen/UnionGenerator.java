@@ -89,7 +89,10 @@ public class UnionGenerator {
             writer.write("Value $T", memberSymbol);
           } else {
             // Handling smithy-dafny Reference Trait begins
-            var namespace = SmithyNameResolver.smithyTypesNamespace(target);
+            var namespace = SmithyNameResolver.smithyTypesNamespace(
+              target,
+              model
+            );
             var newMemberSymbol = memberSymbol;
             if (target.hasTrait(ReferenceTrait.class)) {
               newMemberSymbol =

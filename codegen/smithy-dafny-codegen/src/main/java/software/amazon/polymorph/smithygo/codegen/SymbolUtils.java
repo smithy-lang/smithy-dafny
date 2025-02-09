@@ -29,6 +29,7 @@ public final class SymbolUtils {
   public static final String GO_SLICE = "goSlice";
   public static final String GO_MAP = "goMap";
   public static final String GO_ELEMENT_TYPE = "goElementType";
+  public static final String SHAPE = "shape";
 
   // Used when a given shape must be represented differently on input.
   public static final String INPUT_VARIANT = "inputVariant";
@@ -66,7 +67,7 @@ public final class SymbolUtils {
     Shape shape,
     String typeName
   ) {
-    return createValueSymbolBuilder(typeName).putProperty("shape", shape);
+    return createValueSymbolBuilder(typeName).putProperty(SHAPE, shape);
   }
 
   /**
@@ -80,7 +81,7 @@ public final class SymbolUtils {
     Shape shape,
     String typeName
   ) {
-    return createPointableSymbolBuilder(typeName).putProperty("shape", shape);
+    return createPointableSymbolBuilder(typeName).putProperty(SHAPE, shape);
   }
 
   /**

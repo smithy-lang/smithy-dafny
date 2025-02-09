@@ -2,15 +2,15 @@
 
 pub fn to_dafny(
     value: $rustTypesModuleName:L::$snakeCaseConfigName:L::$configName:L,
-) -> ::std::rc::Rc<
+) -> ::dafny_runtime::Rc<
     crate::r#$dafnyTypesModuleName:L::$configName:L,
 > {
-    ::std::rc::Rc::new(to_dafny_plain(value))
+    ::dafny_runtime::Rc::new(to_dafny_plain(value))
 }
 
 #[allow(dead_code)]
 pub fn from_dafny(
-    dafny_value: ::std::rc::Rc<
+    dafny_value: ::dafny_runtime::Rc<
         crate::r#$dafnyTypesModuleName:L::$configName:L,
     >,
 ) -> $rustTypesModuleName:L::$snakeCaseConfigName:L::$configName:L {

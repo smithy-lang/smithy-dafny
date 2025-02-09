@@ -400,11 +400,10 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
   private Symbol.Builder symbolBuilderFor(Shape shape, String typeName) {
     final String namespace;
-    if (shape.hasTrait(ServiceTrait.class)) {
-      namespace =
-        shape.expectTrait(ServiceTrait.class).getSdkId().toLowerCase();
+    if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
+      namespace = SmithyNameResolver.smithyTypesNamespace(shape, model);
     } else {
-      namespace = SmithyNameResolver.smithyTypesNamespace(shape);
+      namespace = SmithyNameResolver.smithyTypesNamespace(shape, model);
     }
     if (pointableIndex.isPointable(shape)) {
       return SymbolUtils.createPointableSymbolBuilder(
@@ -541,11 +540,11 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
       return symbolBuilderFor(
         shape,
         name,
-        SmithyNameResolver.smithyTypesNamespace(shape)
+        SmithyNameResolver.smithyTypesNamespace(shape, model)
       )
         .definitionFile(
           "./%s/enums.go".formatted(
-              SmithyNameResolver.smithyTypesNamespace(shape)
+              SmithyNameResolver.smithyTypesNamespace(shape, model)
             )
         )
         .build();
@@ -576,13 +575,13 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     if (shape.hasTrait(ErrorTrait.ID)) {
       builder.definitionFile(
         "./%s/errors.go".formatted(
-            SmithyNameResolver.smithyTypesNamespace(shape)
+            SmithyNameResolver.smithyTypesNamespace(shape, model)
           )
       );
     } else {
       builder.definitionFile(
         "./%s/types.go".formatted(
-            SmithyNameResolver.smithyTypesNamespace(shape)
+            SmithyNameResolver.smithyTypesNamespace(shape, model)
           )
       );
     }
@@ -646,7 +645,7 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     return symbolBuilderFor(
       shape,
       name,
-      SmithyNameResolver.smithyTypesNamespace(shape)
+      SmithyNameResolver.smithyTypesNamespace(shape, model)
     )
       .definitionFile("./types/types.go")
       .build();
@@ -672,11 +671,11 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     return symbolBuilderFor(
       shape,
       name,
-      SmithyNameResolver.smithyTypesNamespace(settings.getService(model))
+      SmithyNameResolver.smithyTypesNamespace(settings.getService(model), model)
     )
       .definitionFile(
         "./%s/enums.go".formatted(
-            SmithyNameResolver.smithyTypesNamespace(shape)
+            SmithyNameResolver.smithyTypesNamespace(shape, model)
           )
       )
       .build();

@@ -1,24 +1,24 @@
 
 $rustResourceComment:L
-pub trait $rustResourceName:L {
+pub trait $rustResourceName:L : Send + Sync {
   $resourceOperations:L
 }
 
 #[derive(::std::clone::Clone)]
 /// A reference to a $rustResourceName:L
 pub struct $rustResourceName:LRef {
-  pub inner: ::std::rc::Rc<std::cell::RefCell<dyn $rustResourceName:L>>
+  pub inner: ::dafny_runtime::Rc<::dafny_runtime::RefCell<dyn $rustResourceName:L>>
 }
 
 impl<T : $rustResourceName:L + 'static> From<T> for $rustResourceName:LRef {
     fn from(value: T) -> Self {
-        Self { inner: std::rc::Rc::new(std::cell::RefCell::new(value)) }
+        Self { inner: dafny_runtime::Rc::new(::dafny_runtime::RefCell::new(value)) }
     }
 }
 
 impl ::std::cmp::PartialEq for $rustResourceName:LRef {
     fn eq(&self, other: &$rustResourceName:LRef) -> bool {
-        ::std::rc::Rc::ptr_eq(&self.inner, &other.inner)
+        ::dafny_runtime::Rc::ptr_eq(&self.inner, &other.inner)
     }
 }
 

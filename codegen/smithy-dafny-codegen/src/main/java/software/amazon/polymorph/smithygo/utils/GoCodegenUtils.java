@@ -54,20 +54,24 @@ public class GoCodegenUtils {
 
   public static String getType(
     final Symbol symbol,
-    final Shape shape,
-    final Boolean includeNamespace
+    final Boolean includeNamespace,
+    final Model model
   ) {
     if (
       symbol.getProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class).isEmpty()
     ) {
       return includeNamespace
-        ? SmithyNameResolver.getSmithyType(shape, symbol)
+        ? SmithyNameResolver.getSmithyType(
+          symbol.expectProperty(SymbolUtils.SHAPE, Shape.class),
+          symbol,
+          model
+        )
         : symbol.getName();
     }
     var type = getType(
       symbol.expectProperty(SymbolUtils.GO_ELEMENT_TYPE, Symbol.class),
-      shape,
-      includeNamespace
+      includeNamespace,
+      model
     );
     if (symbol.getProperty(SymbolUtils.GO_MAP).isPresent()) {
       type = "map[string]" + type;
@@ -179,7 +183,8 @@ public class GoCodegenUtils {
       return (
         SmithyNameResolver.getSmithyType(
           curShape,
-          symbolProvider.toSymbol(curShape)
+          symbolProvider.toSymbol(curShape),
+          model
         )
       );
     } else {
