@@ -75,12 +75,16 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String blobShape(BlobShape shape) {
-    // if it's a streaming blob, read it first
     if (shape.hasTrait(StreamingTrait.class)) {
-      return "Seq(" + dataSource + ".read())";
+      writer.addStdlibImport(
+        "smithy_dafny_standard_library.internaldafny.extern.streams",
+        "StreamingBlobAsDafnyDataStream"
+      );
+      return "StreamingBlobAsDafnyDataStream(%1$s)".formatted(dataSource);
+    } else {
+      writer.addStdlibImport("_dafny", "Seq");
+      return "Seq(" + dataSource + ")";
     }
-    writer.addStdlibImport("_dafny", "Seq");
-    return "Seq(" + dataSource + ")";
   }
 
   @Override

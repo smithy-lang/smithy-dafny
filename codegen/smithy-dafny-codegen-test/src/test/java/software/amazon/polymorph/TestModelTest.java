@@ -33,7 +33,11 @@ public abstract class TestModelTest {
       .resolve("TestModels");
     var allTestModels = Files
       .walk(testModelRoot)
-      .filter(p -> Files.exists(p.resolve("Makefile")))
+      .filter(p ->
+        Files.exists(p.resolve("Makefile")) &&
+        (Files.isDirectory(p.resolve("Model")) ||
+          Files.isDirectory(p.resolve("model")))
+      )
       .map(testModelRoot::relativize)
       .map(Path::toString);
 
@@ -82,5 +86,19 @@ public abstract class TestModelTest {
       .resolve("..")
       .resolve("TestModels")
       .resolve(relativeTestModelPath);
+  }
+
+  protected void testModels(String relativeTestModelPath) {
+    // The @streaming support depends on our subset of the Dafny standard libraries
+    // which cannot be built for old versions of Dafny.
+    if (
+      relativeTestModelPath.endsWith("Streaming") ||
+      relativeTestModelPath.endsWith("s3")
+    ) {
+      DafnyVersion dafnyVersion = CodegenEngine.getDafnyVersionFromDafny();
+      if (dafnyVersion.compareTo(DafnyVersion.parse("4.9.0")) < 0) {
+        Assumptions.assumeTrue(false);
+      }
+    }
   }
 }
