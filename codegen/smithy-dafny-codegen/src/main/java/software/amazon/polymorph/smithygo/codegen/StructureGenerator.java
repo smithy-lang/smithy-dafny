@@ -16,6 +16,7 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
@@ -25,6 +26,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -90,6 +92,7 @@ public final class StructureGenerator implements Runnable {
   public void renderStructure(Runnable runnable, boolean isInputStructure) {
     writer.addImport("fmt");
     Symbol symbol = symbolProvider.toSymbol(shape);
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     writer.openBlock("type $L struct {", symbol.getName());
     CodegenUtils.SortedMembers sortedMembers = new CodegenUtils.SortedMembers(
       symbolProvider
