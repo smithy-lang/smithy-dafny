@@ -197,6 +197,7 @@ public final class StructureGenerator implements Runnable {
     writer.addUseImports(SmithyGoDependency.FMT);
     ErrorTrait errorTrait = shape.expectTrait(ErrorTrait.class);
 
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     // Write out a struct to hold the error data.
     writer
       .openBlock(
@@ -231,6 +232,7 @@ public final class StructureGenerator implements Runnable {
       )
       .write("");
 
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     // write the Error method to satisfy the standard error interface
     writer.openBlock(
       "func (e $L) Error() string {",

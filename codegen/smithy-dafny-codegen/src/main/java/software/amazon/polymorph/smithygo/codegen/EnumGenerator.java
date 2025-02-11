@@ -63,6 +63,7 @@ public final class EnumGenerator implements Runnable {
     // a name.
     if (enumTrait.getValues().get(0).getName().isPresent()) {
       Set<String> constants = new LinkedHashSet<>();
+      writer.openBlock(CodegenUtils.docFromShape(shape));
       writer
         .openBlock(
           "const (",
@@ -110,12 +111,14 @@ public final class EnumGenerator implements Runnable {
         .write("");
     }
 
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     writer.openBlock(
       "func ($L) Values() []$L {",
       "}",
       symbol.getName(),
       symbol.getName(),
       () -> {
+        writer.openBlock(CodegenUtils.docFromShape(shape));
         writer.openBlock(
           "return []$L{",
           "}",

@@ -472,9 +472,10 @@ public final class CodegenUtils {
     Optional<String> maybeDoc = ModelUtils.getDocumentationOrJavadoc(shape);
     if (maybeDoc.isPresent()) {
       return (
-        "//\n// " + String.join("\n// ", maybeDoc.get().split("\\r?\\n"))
+        "// " + String.join("\n// ", maybeDoc.get().split("\\r?\\n"))
       );
     } else {
+      // Don't create a documentation string if the smithy model doesn't have one
       return "//";
     }
   }

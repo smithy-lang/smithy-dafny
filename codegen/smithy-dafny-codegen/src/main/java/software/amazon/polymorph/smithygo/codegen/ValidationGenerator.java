@@ -66,6 +66,7 @@ public class ValidationGenerator {
     final boolean isInputStructure
   ) {
     final Symbol symbol = symbolProvider.toSymbol(shape);
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     writer.openBlock("func (input $L) Validate() (error) {", symbol.getName());
     writer.write(
       renderValidatorHelper(
