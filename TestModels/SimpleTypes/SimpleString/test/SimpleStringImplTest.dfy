@@ -39,10 +39,10 @@ module  SimpleStringImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-        // utf8EncodedString holds a value of UTF-16 encoded Hindi word "Anar" (pomegranate, similar to A -> Apple) in it's native script
-        var utf16EncodedString := "\u0905\u0928\u093e\u0930";
-        var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some(utf16EncodedString)));
-        expect ret.value.UnwrapOr("") == utf16EncodedString;
+        var a: seq<bv16> := [55296, 56322];
+        var result := seq(|a|, i requires 0 <= i < |a| => a[i] as char);
+        var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some(result)));
+        expect ret.value.UnwrapOr("") == result;
         print ret;
     }
     method TestGetStringUTF8(client: ISimpleTypesStringClient)
