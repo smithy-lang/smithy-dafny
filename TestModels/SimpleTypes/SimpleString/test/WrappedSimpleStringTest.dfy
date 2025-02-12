@@ -13,5 +13,6 @@ module WrappedSimpleTypesStringTest {
         SimpleStringImplTest.TestGetStringKnownValue(client);
         SimpleStringImplTest.TestGetStringUTF8(client);
         SimpleStringImplTest.TestGetStringNonAscii(client);
+        SimpleStringImplTest.TestGetStringSurrogatePair(client);
     }
 }
