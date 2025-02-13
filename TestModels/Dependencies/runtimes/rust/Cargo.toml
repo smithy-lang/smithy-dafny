@@ -11,7 +11,7 @@ wrapped-client = []
 [dependencies]
 aws-smithy-runtime-api = {version = "1.7.0", features = ["client"] }
 aws-smithy-types = "1.2.0"
-dafny_runtime = { path = "../../../dafny-dependencies/dafny_runtime_rust"}
+dafny_runtime = { path = "../../../dafny-dependencies/dafny_runtime_rust", features = ["sync"]}
 
 [dev-dependencies]
 dependencies = { path = ".", features = ["wrapped-client"] }

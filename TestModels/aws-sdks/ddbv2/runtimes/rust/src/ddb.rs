@@ -16,10 +16,10 @@ static DAFNY_TOKIO_RUNTIME: LazyLock<tokio::runtime::Runtime> = LazyLock::new(||
 
 #[allow(non_snake_case)]
 impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::_default {
-    pub fn DynamoDBClient() -> ::std::rc::Rc<
+    pub fn DynamoDBClient() -> ::dafny_runtime::Rc<
   crate::r#_Wrappers_Compile::Result<
     ::dafny_runtime::Object<dyn crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::IDynamoDBClient>,
-    ::std::rc::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
+    ::dafny_runtime::Rc<crate::r#software::amazon::cryptography::services::dynamodb::internaldafny::types::Error>
     >
     >{
         let shared_config = match tokio::runtime::Handle::try_current() {
@@ -35,7 +35,7 @@ impl crate::r#software::amazon::cryptography::services::dynamodb::internaldafny:
         let inner = aws_sdk_dynamodb::Client::new(&shared_config);
         let client = crate::client::Client { inner };
         let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
-        std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success {
+        dafny_runtime::Rc::new(crate::r#_Wrappers_Compile::Result::Success {
             value: dafny_client,
         })
     }

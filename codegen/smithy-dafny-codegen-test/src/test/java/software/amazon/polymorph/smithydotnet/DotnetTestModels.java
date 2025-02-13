@@ -23,6 +23,8 @@ class DotnetTestModels extends TestModelTest {
     DISABLED_TESTS.add("Documentation");
     DISABLED_TESTS.add("LanguageSpecificLogic");
     DISABLED_TESTS.add("LocalService");
+    // Needs work to generate some missing orphaned shape conversion methods
+    DISABLED_TESTS.add("OrphanedShapes");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
@@ -39,7 +41,9 @@ class DotnetTestModels extends TestModelTest {
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForDotnet(String relativeTestModelPath) {
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
+
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

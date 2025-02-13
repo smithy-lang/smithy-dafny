@@ -34,6 +34,26 @@
 # Polymorph Generated Python
 **/runtimes/python/src/**/smithygenerated/
 
+# Polymorph Generated Rust
+**/src/client.rs
+**/src/client
+**/src/conversions.rs
+**/src/conversions
+**/src/deps.rs
+**/src/deps
+**/src/error.rs
+**/src/error
+**/src/operation.rs
+**/src/operation
+**/src/standard_library_conversions.rs
+**/src/standard_library_externs.rs
+**/src/types.rs
+**/src/types
+**/target
+**/src/validation.rs
+**/src/wrapped
+**/src/wrapped.rs
+
 # .NET Artifacts
 **/bin
 **/obj

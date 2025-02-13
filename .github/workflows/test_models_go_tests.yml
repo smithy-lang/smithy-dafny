@@ -14,7 +14,7 @@ on:
 
 jobs:
   populate-matrix-dimensions:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Populate shard list
         id: populate-shard-list
@@ -27,7 +27,7 @@ jobs:
       fail-fast: false # at least for development; see all errors
       matrix:
         shard: ${{ fromJson(needs.populate-matrix-dimensions.outputs.shard-list) }}
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-22.04"
     permissions:
       id-token: write
       contents: read

@@ -9,9 +9,9 @@
 pub mod client;
 pub mod conversions;
 pub mod deps;
+pub(crate) mod implementation_from_dafny;
 /// Common errors and error handling utilities.
 pub mod kms;
-pub(crate) mod implementation_from_dafny;
 /// All operations that this crate can perform.
 mod standard_library_conversions;
 mod standard_library_externs;

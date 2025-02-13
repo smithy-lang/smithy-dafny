@@ -15,7 +15,7 @@ on:
 
 jobs:
   populate-matrix-dimensions:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Populate shard list
         id: populate-shard-list
@@ -30,7 +30,7 @@ jobs:
         dafny-version:
           - ${{ inputs.dafny }}
         shard: ${{ fromJson(needs.populate-matrix-dimensions.outputs.shard-list) }}
-        os: [ubuntu-latest]
+        os: [ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     defaults:
       run:

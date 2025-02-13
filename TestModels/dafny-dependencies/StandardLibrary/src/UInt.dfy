@@ -9,6 +9,8 @@ module StandardLibrary.UInt {
   newtype uint32 = x | 0 <= x < 0x1_0000_0000
   newtype uint64 = x | 0 <= x < 0x1_0000_0000_0000_0000
 
+  type bytes = seq<uint8>
+
   newtype int32 = x | -0x8000_0000 <= x < 0x8000_0000
   newtype int64 = x | -0x8000_0000_0000_0000 <= x < 0x8000_0000_0000_0000
   newtype posInt64 = x | 0 < x < 0x8000_0000_0000_0000 witness 1

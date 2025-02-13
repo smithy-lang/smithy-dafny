@@ -10,8 +10,8 @@ pub fn to_dafny(
 ) ->
   ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$sdkId:LClient>
 {
-  let x: std::rc::Rc<$rustClientType:L> = std::rc::Rc::new(value.clone());
-  let y = x as std::rc::Rc<dyn crate::r#$dafnyTypesModuleName:L::I$sdkId:LClient>;
+  let x: dafny_runtime::Rc<$rustClientType:L> = dafny_runtime::Rc::new(value.clone());
+  let y = x as dafny_runtime::Rc<dyn crate::r#$dafnyTypesModuleName:L::I$sdkId:LClient>;
   unsafe {
     ::dafny_runtime::dafny_runtime_conversions::object::rc_struct_to_dafny_class(y)
   }

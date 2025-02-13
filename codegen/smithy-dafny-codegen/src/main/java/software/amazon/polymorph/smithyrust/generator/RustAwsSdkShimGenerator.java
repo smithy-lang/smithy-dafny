@@ -131,8 +131,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
                   .unwrap()
         });
 
-        impl dafny_runtime::UpcastObject<dyn std::any::Any> for Client {
-            ::dafny_runtime::UpcastObjectFn!(dyn::std::any::Any);
+        impl dafny_runtime::UpcastObject<::dafny_runtime::DynAny> for Client {
+            ::dafny_runtime::UpcastObjectFn!(::dafny_runtime::DynAny);
         }
 
         impl dafny_runtime::UpcastObject<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L> for Client {
@@ -160,17 +160,17 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
             """
             #[allow(non_snake_case)]
             impl crate::r#$dafnyInternalModuleName:L::_default {
-              pub fn $clientName:L() -> ::std::rc::Rc<
+              pub fn $clientName:L() -> ::dafny_runtime::Rc<
                 crate::r#_Wrappers_Compile::Result<
                   ::dafny_runtime::Object<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L>,
-                  ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
+                  ::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::Error>
                   >
                 > {
                 let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
                 let inner = $sdkCrate:L::Client::new(&shared_config);
                 let client = Client { inner };
                 let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
-                std::rc::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
+                dafny_runtime::Rc::new(crate::r#_Wrappers_Compile::Result::Success { value: dafny_client })
               }
             }
             """,
@@ -205,7 +205,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     final String outputType = outputShape.hasTrait(UnitTypeTrait.class)
       ? "()"
       : evalTemplate(
-        "std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$operationOutputName:L>",
+        "dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::$operationOutputName:L>",
         variables
       );
     variables.put("outputType", outputType);
@@ -217,7 +217,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         .stream()
         .map(member ->
           evalTemplate(
-            ".set_$fieldName:L(inner_input.$fieldName:L)",
+            ".set_$fieldName:L(inner_input.r#$fieldName:L)",
             structureMemberVariables(member)
           )
         )
@@ -237,10 +237,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     return TokenTree.of(
       evalTemplate(
         """
-        fn $operationName:L(&self, input: &std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$operationInputName:L>)
-          -> std::rc::Rc<crate::r#_Wrappers_Compile::Result<
+        fn $operationName:L(&self, input: &dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::$operationInputName:L>)
+          -> dafny_runtime::Rc<crate::r#_Wrappers_Compile::Result<
             $outputType:L,
-            std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>
+            dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::Error>
           >
         > {
           let inner_input = $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone());
@@ -416,10 +416,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         #[allow(dead_code)]
         pub fn to_dafny(
             value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationInputStruct:L,
-        ) -> ::std::rc::Rc<
+        ) -> ::dafny_runtime::Rc<
             crate::r#$dafnyTypesModuleName:L::$operationInputName:L,
         >{
-            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$operationInputName:L::$operationInputName:L {
+            ::dafny_runtime::Rc::new(crate::r#$dafnyTypesModuleName:L::$operationInputName:L::$operationInputName:L {
                 $variants:L
             })
         }
@@ -500,7 +500,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         """
         #[allow(dead_code)]
         pub fn from_dafny(
-            dafny_value: ::std::rc::Rc<
+            dafny_value: ::dafny_runtime::Rc<
                 crate::r#$dafnyTypesModuleName:L::$operationInputName:L,
             >
         ) -> $sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationInputStruct:L {
@@ -556,10 +556,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           #[allow(dead_code)]
           pub fn to_dafny(
               value: &$sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationOutputStruct:L
-          ) -> ::std::rc::Rc<
+          ) -> ::dafny_runtime::Rc<
               crate::r#$dafnyTypesModuleName:L::$structureName:L,
           >{
-              ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+              ::dafny_runtime::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
                   $variants:L
               })
           }
@@ -601,7 +601,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         """
         #[allow(dead_code)]
         pub fn from_dafny(
-            dafny_value: ::std::rc::Rc<
+            dafny_value: ::dafny_runtime::Rc<
                 crate::r#$dafnyTypesModuleName:L::$operationOutputName:L,
             >
         ) -> $sdkCrate:L::operation::$snakeCaseOperationName:L::$sdkOperationOutputStruct:L {
@@ -661,7 +661,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
                 $sdkCrate:L::operation::$snakeCaseOperationName:L::$operationName:LError,
                 ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
             >,
-        ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error> {
+        ) -> ::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::Error> {
             match value {
               $sdkCrate:L::error::SdkError::ServiceError(service_error) => match service_error.err() {
                 $errorCases:L
@@ -752,8 +752,8 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
       #[allow(dead_code)]
       pub fn to_dafny(
           value: $rustTypesModuleName:L::error::$pascalCaseName:L,
-      ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::Error>{
-        ::std::rc::Rc::new(
+      ) -> ::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::Error>{
+        ::dafny_runtime::Rc::new(
           crate::r#$dafnyTypesModuleName:L::Error::$structureName:L {
             $variants:L
           }
@@ -860,7 +860,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           if (isDafnyOption) {
             yield TokenTree.of(
               """
-              ::std::rc::Rc::new(match &%s {
+              ::dafny_runtime::Rc::new(match &%s {
                   Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                   None => crate::_Wrappers_Compile::Option::None { }
               })
@@ -900,7 +900,9 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           } else {
             valueToDafny = rustToDafny.formatted(rustValue);
           }
-          yield TokenTree.of("::std::rc::Rc::new(%s)".formatted(valueToDafny));
+          yield TokenTree.of(
+            "::dafny_runtime::Rc::new(%s)".formatted(valueToDafny)
+          );
         } else {
           if (isRustOption) {
             var result = TokenTree.of(
@@ -1067,7 +1069,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         } else {
           yield TokenTree.of(
             """
-            ::std::rc::Rc::new(match &%s {
+            ::dafny_runtime::Rc::new(match &%s {
                 Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
                     ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
                         |e| %s,
@@ -1115,7 +1117,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           yield TokenTree.of(
             """
 
-            ::std::rc::Rc::new(match &%s {
+            ::dafny_runtime::Rc::new(match &%s {
                 Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
                     ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
                         |k| %s,
@@ -1151,7 +1153,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         } else {
           yield TokenTree.of(
             """
-            ::std::rc::Rc::new(match &%s {
+            ::dafny_runtime::Rc::new(match &%s {
                 Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })

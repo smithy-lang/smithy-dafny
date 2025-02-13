@@ -1,3 +1,7 @@
 [submodule "smithy-dafny-codegen-modules/smithy-rs"]
 	path = smithy-dafny-codegen-modules/smithy-rs
 	url = https://github.com/smithy-lang/smithy-rs.git
+[submodule "TestModels/dafny-dependencies/dafny"]
+	path = TestModels/dafny-dependencies/dafny
+	url = git@github.com:dafny-lang/dafny.git
+	branch = actions-and-streaming-stdlibs
