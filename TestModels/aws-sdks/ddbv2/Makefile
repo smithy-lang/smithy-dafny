@@ -51,6 +51,14 @@ PYTHON_MODULE_NAME=com_amazonaws_dynamodb
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/ddbv2"
+
+GO_DEPENDENCY_MODULE_NAMES := \
+	--dependency-library-name=sdk.com.amazonaws.dynamodb=github.com/aws/aws-sdk-go-v2/service/dynamodb \
+
+TRANSLATION_RECORD_GO := \
+	dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+
 # Constants for languages that drop extern names (Python, Go)
 
 TYPES_FILE_PATH=Model/ComAmazonawsDynamodbTypes.dfy

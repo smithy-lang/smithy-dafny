@@ -25,11 +25,6 @@ import software.amazon.smithy.utils.IoUtils;
  */
 public abstract class TestModelTest {
 
-  protected static final Set<String> TESTS_THAT_NEED_DAFNY_4_4 = Set.of(
-    "LanguageSpecificLogic",
-    "Extendable"
-  );
-
   protected static Stream<String> discoverTestModels() throws IOException {
     var testModelRoot = Paths
       .get(".")
@@ -38,22 +33,15 @@ public abstract class TestModelTest {
       .resolve("TestModels");
     var allTestModels = Files
       .walk(testModelRoot)
-      .filter(p -> Files.exists(p.resolve("Makefile")))
+      .filter(p ->
+        Files.exists(p.resolve("Makefile")) &&
+        (Files.isDirectory(p.resolve("Model")) ||
+          Files.isDirectory(p.resolve("model")))
+      )
       .map(testModelRoot::relativize)
-      .map(Path::toString)
-      .filter(TestModelTest::testModelSupportedForDafnyVersion);
+      .map(Path::toString);
 
     return selectShard(allTestModels);
-  }
-
-  private static boolean testModelSupportedForDafnyVersion(String testModel) {
-    if (TESTS_THAT_NEED_DAFNY_4_4.contains(testModel)) {
-      DafnyVersion dafnyVersion = DafnyVersion.parse(
-        System.getenv("DAFNY_VERSION")
-      );
-      return dafnyVersion.compareTo(DafnyVersion.parse("4.4.0")) >= 0;
-    }
-    return true;
   }
 
   private static Stream<String> selectShard(Stream<String> list) {
@@ -100,39 +88,17 @@ public abstract class TestModelTest {
       .resolve(relativeTestModelPath);
   }
 
-  protected Set<String> passthroughEnvrionmentVariables() {
-    return Set.of("PATH", "DAFNY_VERSION");
-  }
-
-  protected void make(Path workdir, String... makeArgs) {
-    List<String> missingEnvVars = passthroughEnvrionmentVariables()
-      .stream()
-      .filter(name -> System.getenv(name) == null)
-      .toList();
-    if (!missingEnvVars.isEmpty()) {
-      throw new IllegalStateException(
-        "Missing required environment variables: " + missingEnvVars
-      );
-    }
-
-    Map<String, String> env = passthroughEnvrionmentVariables()
-      .stream()
-      .collect(Collectors.toMap(identity(), System::getenv));
-    List<String> args = Stream
-      .concat(Stream.of("make"), Stream.of(makeArgs))
-      .toList();
-
-    StringBuffer output = new StringBuffer();
-    int exitCode = IoUtils.runCommand(args, workdir, output, env);
-    if (exitCode != 0) {
-      throw new RuntimeException(
-        "make command [" +
-        args +
-        "] failed (exit code: " +
-        exitCode +
-        "). Output:\n" +
-        output
-      );
+  protected void testModels(String relativeTestModelPath) {
+    // The @streaming support depends on our subset of the Dafny standard libraries
+    // which cannot be built for old versions of Dafny.
+    if (
+      relativeTestModelPath.endsWith("Streaming") ||
+      relativeTestModelPath.endsWith("s3")
+    ) {
+      DafnyVersion dafnyVersion = CodegenEngine.getDafnyVersionFromDafny();
+      if (dafnyVersion.compareTo(DafnyVersion.parse("4.9.0")) < 0) {
+        Assumptions.assumeTrue(false);
+      }
     }
   }
 }

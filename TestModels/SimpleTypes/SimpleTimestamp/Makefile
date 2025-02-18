@@ -21,7 +21,10 @@ SERVICE_NAMESPACE_SimpleTypesTimestamp=simple.types.timestamp
 SERVICE_DEPS_SimpleTypesTimestamp :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleTimestamp"
 
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 

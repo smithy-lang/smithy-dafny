@@ -15,7 +15,8 @@ impl $pascalCaseOperationName:L {
         $operationOutputType:L,
         $qualifiedRustServiceErrorType:L,
     > {
-        $inputValidations:L
+        $rustRootModuleName:L::validation::$inputValidationFunctionName:L(&input)
+            .map_err($qualifiedRustServiceErrorType:L::wrap_validation_err)?;
         $operationSendBody:L
     }
 }

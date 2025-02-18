@@ -25,6 +25,14 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 AWS_SDK_CMD=--aws-sdk
 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/ddb"
+
+GO_DEPENDENCY_MODULE_NAMES := \
+	--dependency-library-name=sdk.com.amazonaws.dynamodb=github.com/aws/aws-sdk-go-v2/service/dynamodb \
+
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 

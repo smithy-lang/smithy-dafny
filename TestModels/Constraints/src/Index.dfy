@@ -6,7 +6,7 @@ module {:extern "simple.constraints.internaldafny" } SimpleConstraints refines A
   import Operations = SimpleConstraintsImpl
 
   function method DefaultSimpleConstraintsConfig(): SimpleConstraintsConfig {
-    SimpleConstraintsConfig
+    SimpleConstraintsConfig(RequiredString := "default")
   }
 
   method SimpleConstraints(config: SimpleConstraintsConfig)

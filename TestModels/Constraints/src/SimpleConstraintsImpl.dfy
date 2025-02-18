@@ -25,9 +25,11 @@ module SimpleConstraintsImpl refines AbstractSimpleConstraintsOperations  {
       MyList := input.MyList,
       NonEmptyList := input.NonEmptyList,
       ListLessThanOrEqualToTen := input.ListLessThanOrEqualToTen,
+      ListWithConstraint := input.ListWithConstraint,
       MyMap := input.MyMap,
       NonEmptyMap := input.NonEmptyMap,
       MapLessThanOrEqualToTen := input.MapLessThanOrEqualToTen,
+      MapWithConstraint := input.MapWithConstraint,
       // Alphabetic := input.Alphabetic,
       OneToTen := input.OneToTen,
       GreaterThanOne := input.GreaterThanOne,
@@ -35,7 +37,9 @@ module SimpleConstraintsImpl refines AbstractSimpleConstraintsOperations  {
       // MyUniqueList := input.MyUniqueList,
       // MyComplexUniqueList := input.MyComplexUniqueList,
       MyUtf8Bytes := input.MyUtf8Bytes,
-      MyListOfUtf8Bytes := input.MyListOfUtf8Bytes
+      MyListOfUtf8Bytes := input.MyListOfUtf8Bytes,
+      UnionWithConstraint := input.UnionWithConstraint,
+      ComplexStructureList := input.ComplexStructureList
     );
 
     return Success(res);

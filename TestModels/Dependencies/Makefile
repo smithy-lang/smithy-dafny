@@ -41,6 +41,21 @@ SERVICE_DEPS_SimpleDependencies := \
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Dependencies"
+
+GO_DEPENDENCY_MODULE_NAMES := \
+	--dependency-library-name=simple.constraints=github.com/smithy-lang/smithy-dafny/TestModels/Constraints \
+	--dependency-library-name=simple.errors=github.com/smithy-lang/smithy-dafny/TestModels/Errors \
+	--dependency-library-name=simple.extendable.resources=github.com/smithy-lang/smithy-dafny/TestModels/Extendable \
+	--dependency-library-name=simple.resources=github.com/smithy-lang/smithy-dafny/TestModels/Resource
+
+TRANSLATION_RECORD_GO := \
+	Resource/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	Errors/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	Extendable/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+	Constraints/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated

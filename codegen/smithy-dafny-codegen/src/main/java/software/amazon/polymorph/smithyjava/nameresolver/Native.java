@@ -34,6 +34,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 
 /**
  * Provides a consistent mapping between names of

@@ -52,7 +52,7 @@ impl $pascalCaseOperationName:LFluentBuilder {
             .map_err(|mut e| {
 	     let msg = format!("{:?}", e);
              $qualifiedRustServiceErrorType:L::OpaqueWithText {
-                obj: ::dafny_runtime::Object::from_ref(&mut e as &mut dyn ::std::any::Any),
+                obj: ::dafny_runtime::Object::from_ref(&mut e as &mut ::dafny_runtime::DynAny),
 		objMessage: msg
              }})?;
         $rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.$operationTargetName:L, input).await

@@ -12,8 +12,10 @@ import org.commonmark.node.Paragraph;
 import org.commonmark.node.SoftLineBreak;
 import org.commonmark.node.Text;
 import org.commonmark.parser.Parser;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.neighbor.Walker;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.validation.AbstractValidator;
@@ -35,6 +37,19 @@ public class NoMarkupInDocumentationTraitsValidator extends AbstractValidator {
       LocalServiceTrait.class
     )) {
       for (Shape shape : new Walker(model).walkShapes(localService)) {
+        // We may hit shapes in other services, especially AWS services.
+        // We don't want to warn against those shapes since they aren't in the scope
+        // of what we're generating.
+        // Note a more robust way to distinguish the scope of which shapes
+        // we're generating vs just importing is to use the
+        // "sources" vs. "imports" concept for Smithy build plugins:
+        // https://smithy.io/2.0/guides/smithy-build-json.html#using-smithy-build-json
+        if (
+          !ModelUtils.isInServiceNamespace(shape, (ServiceShape) localService)
+        ) {
+          continue;
+        }
+
         var trait = shape.getTrait(DocumentationTrait.class);
         if (trait.isPresent()) {
           String docContent = trait.get().getValue();

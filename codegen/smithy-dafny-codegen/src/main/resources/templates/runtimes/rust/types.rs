@@ -1,5 +1,6 @@
 /// Types for the `$configName:L`
 pub mod $snakeCaseConfigName:L;
+pub use $qualifiedRustConfigName:L;
 
 pub mod builders;
 

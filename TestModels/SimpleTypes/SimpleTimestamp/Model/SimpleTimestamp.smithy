@@ -9,7 +9,7 @@ namespace simple.types.timestamp
 service SimpleTypesTimestamp {
   version: "2021-11-01",
   resources: [],
-  operations: [ GetTimestamp ],
+  operations: [ GetTimestamp,  GetTimestampRequired],
   errors: [],
 }
 
@@ -25,5 +25,20 @@ structure GetTimestampInput {
 }
 
 structure GetTimestampOutput {
+  value: Timestamp
+}
+
+operation GetTimestampRequired {
+  input: GetTimestampRequiredInput,
+  output: GetTimestampRequiredOutput,
+}
+
+structure GetTimestampRequiredInput {
+  @required
+  value: Timestamp
+}
+
+structure GetTimestampRequiredOutput {
+  @required
   value: Timestamp
 }

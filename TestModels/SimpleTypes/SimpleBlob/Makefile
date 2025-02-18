@@ -22,6 +22,10 @@ SERVICE_DEPS_SimpleBlob :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleBlob"
+
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 # Python
 
 PYTHON_MODULE_NAME=simple_types_blob

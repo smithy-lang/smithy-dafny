@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.DafnyPythonWrappedLocalServiceProtocolGenerator;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -95,6 +97,12 @@ public abstract class BaseConversionWriter {
       Shape toGenerate = shapesToGenerate.remove(0);
       generatedShapes.add(toGenerate);
 
+      if (!shapeShouldHaveConversionFunction(toGenerate)) {
+        throw new IllegalArgumentException(
+          "Unsupported shape passed to ConversionWriter: " + toGenerate
+        );
+      }
+
       if (toGenerate.isStructureShape()) {
         writeStructureShapeConverter(toGenerate.asStructureShape().get());
       } else if (toGenerate.isUnionShape()) {
@@ -121,4 +129,34 @@ public abstract class BaseConversionWriter {
   protected abstract void writeStringEnumShapeConverter(
     StringShape stringShapeWithEnumTrait
   );
+
+  /**
+   * Returns true if a conversion function should be written for the shape, false otherwise.
+   * Conversion functions are only written for "complex" shapes:
+   *  - StructureShapes ("complex" because StructureShapes can be recursive)
+   *    - except for non-AWS SDK StructureShapes with ErrorTrait; these aren't "complex"
+   *  - UnionShapes ("complex" because the conversion is not a one-liner)
+   *  - EnumShapes or StringShapes with EnumTrait ("complex" because the conversion is not a one-liner)
+   * @param shape
+   * @return
+   */
+  public static boolean shapeShouldHaveConversionFunction(Shape shape) {
+    if (shape.isStructureShape()) {
+      if (
+        !AwsSdkNameResolver.isAwsSdkShape(shape) &&
+        shape.hasTrait(ErrorTrait.class)
+      ) {
+        return false;
+      }
+      return true;
+    } else if (shape.isUnionShape()) {
+      return true;
+    } else if (
+      (shape.isStringShape() && shape.hasTrait(EnumTrait.class)) ||
+      shape.isEnumShape()
+    ) {
+      return true;
+    }
+    return false;
+  }
 }

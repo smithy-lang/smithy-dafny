@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph.smithyrust;
 
+import static software.amazon.smithy.dafny.codegen.TestUtils.make;
+
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,23 +22,37 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("CodegenPatches");
     DISABLED_TESTS.add("Dependencies");
     DISABLED_TESTS.add("Extern");
+    DISABLED_TESTS.add("LanguageSpecificLogic");
+    DISABLED_TESTS.add("Refinement");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
+    DISABLED_TESTS.add("SimpleTypes/SimpleDocument");
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
     DISABLED_TESTS.add("SimpleTypes/SimpleShort");
+    DISABLED_TESTS.add("Streaming");
     DISABLED_TESTS.add("SQSExtended");
     DISABLED_TESTS.add("aws-sdks/glue");
     DISABLED_TESTS.add("aws-sdks/lakeformation");
     DISABLED_TESTS.add("aws-sdks/sqs");
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli");
+    //TODO: Add support for Recursive shapes.
+    DISABLED_TESTS.add("RecursiveShape");
     // S3 is not yet supported
     DISABLED_TESTS.add("aws-sdks/s3");
+
+    //TODO: https://github.com/smithy-lang/smithy-dafny/issues/599
+    DISABLED_TESTS.add("Positional");
+
+    //TODO: https://github.com/smithy-lang/smithy-dafny/issues/699
+    DISABLED_TESTS.add("SimpleTypes/SimpleTimestamp");
   }
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForRust(String relativeTestModelPath) {
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
+
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);
