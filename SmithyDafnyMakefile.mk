@@ -248,7 +248,7 @@ transpile_test:
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
+		$(if $(USE_DAFNY_STANDARD_LIBRARIES) , $(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ), ) \
 		$(TRANSLATION_RECORD) \
 		$(SOURCE_TRANSLATION_RECORD) \
 		$(TRANSPILE_MODULE_NAME) \
