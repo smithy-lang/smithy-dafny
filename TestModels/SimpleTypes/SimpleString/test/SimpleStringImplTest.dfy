@@ -12,6 +12,9 @@ module  SimpleStringImplTest {
         TestGetString(client);
         TestGetStringKnownValue(client);
         TestGetStringNonAscii(client);
+        TestGetStringSurrogatePair(client);
+        TestGetStringMultipleSurrogatePair(client);
+        TestGetStringMultipleSurrogatePairAsString(client);
         TestGetStringUTF8(client);
         TestGetStringUTF8KnownValue(client);
     }
@@ -43,6 +46,48 @@ module  SimpleStringImplTest {
         var utf16EncodedString := "\u0905\u0928\u093e\u0930";
         var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some(utf16EncodedString)));
         expect ret.value.UnwrapOr("") == utf16EncodedString;
+        print ret;
+    }
+    method TestGetStringSurrogatePair(client: ISimpleTypesStringClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        // Formula to combine high and low surrogate to get the unicode codepoint:
+        //     codepoint = (highSurrogate - 0xD800) * 0x400 + (lowSurrogate - 0xDC00) + 0x10000
+        // The unicode codepoint of 𐀂 is 65538.
+        // 𐀂 has high surrogate 55296 (0xD800) and low surrogate 56322 (0xDC02)
+        // So,
+        // 1. (55296 - 0xD800) * 0x400 = 0 * 1024 = 0
+        // 2. (56322 - 0xDC00) = 2
+        // 3. 0 + 2 + 0x10000 = 65538
+        var surrogatePair: seq<char> := [0xD800 as char, 0xDC02 as char];
+        var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some(surrogatePair)));
+        expect ret.value.UnwrapOr("") == surrogatePair;
+        print ret;
+    }
+    method TestGetStringMultipleSurrogatePair(client: ISimpleTypesStringClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        // 𐀂 := [0xD800 as char, 0xDC02 as char], 𐐷 := [0xD801 as char, 0xDC37 as char]
+        // => 𐀂𐐷 := [0xD800 as char, 0xDC02 as char, 0xD801 as char, 0xDC37 as char]
+        var surrogatePair: seq<char> := [0xD800 as char, 0xDC02 as char, 0xD801 as char, 0xDC37 as char];
+        var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some(surrogatePair)));
+        expect ret.value.UnwrapOr("") == surrogatePair;
+        print ret;
+    }
+    method TestGetStringMultipleSurrogatePairAsString(client: ISimpleTypesStringClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        // 𐀂 := [0xD800 as char, 0xDC02 as char], 𐐷 := [0xD801 as char, 0xDC37 as char]
+        // => 𐀂𐐷 := [0xD800 as char, 0xDC02 as char, 0xD801 as char, 0xDC37 as char]
+        var surrogatePair := "\uD800\uDC02\uD801\uDC37";
+        var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some(surrogatePair)));
+        expect ret.value.UnwrapOr("") == surrogatePair;
         print ret;
     }
     method TestGetStringUTF8(client: ISimpleTypesStringClient)

@@ -681,53 +681,40 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       }
     }
 
+    var nilCheck =
+      """
+      if %s == nil {
+           return nil
+       }
+      """.formatted(dataSource);
+    var strConv =
+      """
+      a := UTF8.Encode(%s.(dafny.Sequence)).Dtor_value()
+      s := string(dafny.ToByteArray(a.(dafny.Sequence)))
+      """.formatted(dataSource);
+
     //Handle the @utf8Bytes Trait
-    final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
-      ? "uint8"
-      : "dafny.Char";
-    var strConv = "s = s + string(val.(%s))".formatted(underlyingType);
-    if (underlyingType.equals("uint8")) {
+    if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
       strConv =
         """
             // UTF bytes should be always converted from bytes to string in go
             // Otherwise go treats the string as a unicode codepoint
 
-            var valUint, _ = val.(%s)
-            var byteSlice = []byte{valUint}
-            s = s + string(byteSlice)
-        """.formatted(underlyingType);
+            s := string(dafny.ToByteArray(%s.(dafny.Sequence)))
+        """.formatted(dataSource);
     }
 
-    if (isOptional) {
-      return """
-       return func() (*string) {
-           var s string
-       if %s == nil {
-           return nil
-       }
-           for i := dafny.Iterate(%s) ; ; {
-               val, ok := i()
-               if !ok {
-                   return &[]string{s}[0]
-               } else {
-                   %s
-               }
-          }
-      }()""".formatted(dataSource, dataSource, strConv);
-    } else {
-      return """
-       return func() (string) {
-           var s string
-           for i := dafny.Iterate(%s) ; ; {
-               val, ok := i()
-               if !ok {
-                   return s
-               } else {
-                   %s
-               }
-          }
-      }()""".formatted(dataSource, strConv);
-    }
+    return """
+     return func() (%sstring) {
+         %s
+         %s
+         return %ss
+    }()""".formatted(
+        isOptional ? "*" : "",
+        isOptional ? nilCheck : "",
+        strConv,
+        isOptional ? "&" : ""
+      );
   }
 
   @Override

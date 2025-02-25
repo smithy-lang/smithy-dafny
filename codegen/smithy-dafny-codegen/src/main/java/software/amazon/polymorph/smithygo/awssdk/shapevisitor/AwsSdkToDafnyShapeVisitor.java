@@ -434,28 +434,21 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       }
 
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-        writer.addUseImports(SmithyGoDependency.stdlib("unicode/utf8"));
+        throw new UnsupportedOperationException(
+          "Dafny utf8bytes trait is not supported in aws sdk models: " +
+          shape.toShapeId().getName()
+        );
       }
-      final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
-        ? """
-            dafny.SeqOf(func () []interface{} {
-            utf8.ValidString(%s%s)
-            b := []byte(%s%s)
-            f := make([]interface{}, len(b))
-            for i, v := range b {
-                f[i] = v
+      final var underlyingType =
+        """
+        dafny.SeqFromArray(func () []interface{} {
+            var i []interface{}
+            e := utf16.Encode([]rune(%s%s))
+            for _, i2 := range e {
+                i = append(i, dafny.Char(i2))
             }
-            return f
-        }()...)""".formatted(
-            dereferenceIfRequired,
-            dataSource,
-            dereferenceIfRequired,
-            dataSource
-          )
-        : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(
-            dereferenceIfRequired,
-            dataSource
-          );
+            return i
+        }(), true)""".formatted(dereferenceIfRequired, dataSource);
 
       return """
       func () %s {

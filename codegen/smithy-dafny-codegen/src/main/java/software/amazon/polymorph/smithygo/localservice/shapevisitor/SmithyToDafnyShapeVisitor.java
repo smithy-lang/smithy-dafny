@@ -564,7 +564,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
         ? """
             dafny.SeqOf(func () []interface{} {
-            utf8.ValidString(%s%s)
+            if !utf8.ValidString(%s%s) {
+                panic("invalid utf8 input provided")
+            }
             b := []byte(%s%s)
             f := make([]interface{}, len(b))
             for i, v := range b {
@@ -577,10 +579,15 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             dereferenceIfRequired,
             dataSource
           )
-        : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(
-            dereferenceIfRequired,
-            dataSource
-          );
+        : """
+        dafny.SeqFromArray(func () []interface{} {
+          var i []interface{}
+          e := utf16.Encode([]rune(%s%s))
+          for _, i2 := range e {
+            i = append(i, dafny.Char(i2))
+          }
+          return i
+          }(), true)""".formatted(dereferenceIfRequired, dataSource);
 
       return """
       func () %s {
