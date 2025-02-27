@@ -17,8 +17,10 @@ class DafnyByteStreamAsByteStream(ByteStream):
     self.dafny_byte_stream = dafny_byte_stream
 
   def read(self, size: int = -1) -> bytes:
-    # TODO: assert size is -1, buffer, 
-    # or define a more specialized Action<int, bytes> type for streams.
+    # We could define a more specialized Action<int, bytes> type for streams
+    # if we wanted to support this level of control in all languages.
+    if size != -1:
+      raise ValueError(f"A read size other than -1 is not supported: {size}")
     next = self.dafny_byte_stream.Next()
     while next.is_Some and len(next.value) == 0:
       next = self.dafny_byte_stream.Next()
