@@ -82,7 +82,11 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     final String propertyName = nameResolver.classPropertyForStructureMember(
       memberShape
     );
-    return TokenTree.of(type, varName, "= value.%s;".formatted(propertyName));
+    return TokenTree.of(
+      type,
+      varName,
+      "= (%s)value.%s;".formatted(type, propertyName)
+    );
   }
 
   @Override
