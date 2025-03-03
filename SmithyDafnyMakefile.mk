@@ -90,6 +90,7 @@ verify:DAFNY_OPTIONS=--allow-warnings
 verify:
 	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny verify \
 		--cores $(Z3_PROCESSES) \
+		--enforce-determinism \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format csv \
@@ -106,6 +107,7 @@ verify_single:DAFNY_OPTIONS=--allow-warnings
 verify_single:
 	dafny verify \
 		--cores $(CORES) \
+		--enforce-determinism \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format text \
@@ -122,6 +124,7 @@ verify_service:
 	@: $(if ${SERVICE},,$(error You must pass the SERVICE to generate for));
 	dafny verify \
 		--cores $(CORES) \
+		--enforce-determinism \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format text \
@@ -201,6 +204,7 @@ transpile_implementation:
 		--stdin \
 		--no-verify \
 		--cores:$(CORES) \
+		--enforce-determinism \
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
@@ -241,6 +245,7 @@ transpile_test:
 		--stdin \
 		--no-verify \
 		--cores:$(CORES) \
+		--enforce-determinism \
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
