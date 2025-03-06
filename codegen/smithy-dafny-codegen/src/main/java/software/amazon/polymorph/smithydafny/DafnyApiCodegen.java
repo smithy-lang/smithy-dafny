@@ -151,7 +151,7 @@ public class DafnyApiCodegen {
       .of(
         Stream
           .concat(
-            DafnyNameResolver.modulePreludeStandardImports(),
+            DafnyNameResolver.modulePreludeStandardImports(model, serviceShape),
             nameResolver
               .dependentModels()
               .stream()
@@ -319,7 +319,14 @@ public class DafnyApiCodegen {
     final Optional<TokenTree> lengthConstraint = blobShape
       .getTrait(LengthTrait.class)
       .map(DafnyApiCodegen::generateLengthConstraint);
-    return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);
+    if (blobShape.hasTrait(StreamingTrait.class)) {
+      // TODO: need to handle @length too,
+      // something like `forall produced | a.CanProduce(produced) :: min <= |Enumerated(produced)| <= max
+      // (which should have a simpler helper predicate version, especially when allowing for reference types)
+      return generateTypeSynonym(blobShapeId, "ByteStream");
+    } else {
+      return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);
+    }
   }
 
   public TokenTree generateBoolTypeDefinition(final ShapeId boolShapeId) {
@@ -349,6 +356,7 @@ public class DafnyApiCodegen {
     if (!enumTrait.hasNames()) {
       throw new UnsupportedOperationException("Unnamed enums not supported");
     }
+
     //noinspection OptionalGetWithoutIsPresent
     final TokenTree constructors = TokenTree.of(
       enumTrait
@@ -1982,7 +1990,7 @@ public class DafnyApiCodegen {
 
   public TokenTree generateAbstractBody() {
     final TokenTree abstractModulePrelude = TokenTree
-      .of(DafnyNameResolver.abstractModulePrelude(serviceShape))
+      .of(DafnyNameResolver.abstractModulePrelude(model, serviceShape))
       .lineSeparated();
 
     if (serviceShape.hasTrait(ServiceTrait.class)) {
@@ -2004,7 +2012,7 @@ public class DafnyApiCodegen {
   // This method needs to be called before typesModulePrelude is calculated
   public TokenTree generateAbstractServiceModule(ServiceShape serviceShape) {
     final TokenTree abstractModulePrelude = TokenTree
-      .of(DafnyNameResolver.abstractModulePrelude(serviceShape))
+      .of(DafnyNameResolver.abstractModulePrelude(model, serviceShape))
       .lineSeparated();
     final TokenTree moduleHeader = TokenTree.of(
       "abstract module %s".formatted(
@@ -2818,7 +2826,7 @@ public class DafnyApiCodegen {
       "abstract module WrappedAbstract%sService".formatted(baseModuleName)
     );
     final TokenTree abstractModulePrelude = TokenTree
-      .of(DafnyNameResolver.wrappedAbstractModulePrelude(serviceShape))
+      .of(DafnyNameResolver.wrappedAbstractModulePrelude(model, serviceShape))
       .lineSeparated();
 
     final String configTypeName = nameResolver.baseTypeForShape(
@@ -3047,7 +3055,9 @@ public class DafnyApiCodegen {
 
     final TokenTree body = TokenTree
       .of(
-        TokenTree.of(DafnyNameResolver.abstractModulePrelude(serviceShape)),
+        TokenTree.of(
+          DafnyNameResolver.abstractModulePrelude(model, serviceShape)
+        ),
         TokenTree.of("type %s".formatted(internalConfigType)),
         TokenTree.of(
           "predicate %s(config: %s)".formatted(

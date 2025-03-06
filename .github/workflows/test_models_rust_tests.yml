@@ -51,10 +51,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Dafny (build from source)
-        uses: ./.github/actions/build_dafny_from_source
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.8.0
         with:
-          dafny: ${{ inputs.dafny }}
+          dafny-version: ${{ inputs.dafny }}
 
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1

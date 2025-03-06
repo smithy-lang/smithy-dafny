@@ -11,16 +11,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest, macos-13]
+        # TODO: Re-enable macOS after https://t.corp.amazon.com/P205755286
+        os: [
+            ubuntu-22.04,
+            windows-latest,
+            # macos-13
+          ]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+
       - uses: actions/setup-java@v3
         with:
           distribution: "corretto"
           java-version: "17"
+
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
@@ -45,7 +52,3 @@ jobs:
         shell: bash
         working-directory: TestModels/SimpleTypes/SimpleString
         run: make polymorph_dafny
-
-      - name: not-grep
-        if: matrix.os == 'ubuntu-22.04'
-        uses: mattsb42-meta/not-grep@1.0.0

@@ -3,6 +3,7 @@
 
 ENABLE_EXTERN_PROCESSING=1
 CORES=2
+USE_DAFNY_STANDARD_LIBRARIES=1
 
 include ../../SharedMakefile.mk
 

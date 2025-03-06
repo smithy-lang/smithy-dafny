@@ -11,7 +11,9 @@ import java.util.Set;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.TestModelTest;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 
 class PythonTestModels extends TestModelTest {
 
@@ -29,7 +31,6 @@ class PythonTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
     DISABLED_TESTS.add("SimpleTypes/SimpleShort");
     DISABLED_TESTS.add("SimpleTypes/SimpleTimestamp");
-    DISABLED_TESTS.add("Streaming");
     DISABLED_TESTS.add("SQSExtended");
     DISABLED_TESTS.add("aws-sdks/ddb-lite");
     DISABLED_TESTS.add("aws-sdks/glue");
@@ -43,7 +44,9 @@ class PythonTestModels extends TestModelTest {
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForPython(String relativeTestModelPath) {
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
+
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

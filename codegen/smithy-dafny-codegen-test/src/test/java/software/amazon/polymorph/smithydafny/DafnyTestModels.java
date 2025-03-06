@@ -29,7 +29,9 @@ class DafnyTestModels extends TestModelTest {
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForDafny(String relativeTestModelPath) {
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
+
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

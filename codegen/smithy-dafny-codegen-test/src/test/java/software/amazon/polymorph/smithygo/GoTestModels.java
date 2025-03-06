@@ -47,7 +47,9 @@ class GoTestModels extends TestModelTest {
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForGo(final String relativeTestModelPath) {
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
+
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);
