@@ -50,7 +50,9 @@ class RustTestModels extends TestModelTest {
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForRust(String relativeTestModelPath) {
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
+
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

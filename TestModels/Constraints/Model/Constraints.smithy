@@ -22,7 +22,7 @@ structure SimpleConstraintsConfig {
 
 // This is just a sanity check on the smokeTests support.
 // We need to actually convert all the tests in test/WrappedSimpleConstraintsImplTest.dfy
-// to smoke tests once https://github.com/smithy-lang/smithy-dafny/issues/278
+// to smoke tests now that https://github.com/smithy-lang/smithy-dafny/issues/278
 // is fixed.
 @smithy.test#smokeTests([
   {
@@ -45,16 +45,21 @@ structure SimpleConstraintsConfig {
     }
   },
   {
+    id: "GetConstraintsSuccessNoParams"
+    vendorParams: {
+      RequiredString: "foobar",
+    }
+    params: {}
+    expect: {
+        success: {}
+    }
+  },
+  {
     id: "GetConstraintsFailure"
     vendorParams: {
       RequiredString: "foobar",
     }
     params: {
-      // These two always have to be present because of https://github.com/smithy-lang/smithy-dafny/issues/278,
-      // because otherwise they are interpreted as 0.
-      OneToTen: 5,
-      GreaterThanOne: 2,
-      // This is the member that's actually invalid
       NonEmptyBlob: ""
     }
     expect: {

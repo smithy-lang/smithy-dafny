@@ -1,67 +1,57 @@
-#
-# This local action builds Dafny from source
-# rather than using the setup-dafny-action.
-# Currently it's only used to test Rust support
-# against a feature branch of Dafny.
-#
-
+# TODO: Replace this with the setup-dafny-action version when it is working.
 name: "Build Dafny from source"
-description: "Drop-in replacement for setup-dafny-action that builds the given branch of Dafny from source"
+description: "Builds the given branch of Dafny from source"
 inputs:
-  dafny:
-    description: "The Dafny branch to use"
+  dafny-version:
+    description: "Dafny version to build from source"
+    required: true
+    type: string
+  ref:
+    description: "The Dafny branch, tag or SHA to build"
     required: true
     type: string
 runs:
   using: "composite"
   steps:
+    - uses: actions/setup-java@v3
+      with:
+        distribution: "corretto"
+        java-version: "17"
+
     - name: Checkout Dafny
       uses: actions/checkout@v4
       with:
         repository: dafny-lang/dafny
         path: dafny
-        ref: ${{ inputs.dafny }}
+        ref: ${{ inputs.ref }}
 
-    - name: Load Z3
-      shell: bash
-      run: |
-        sudo apt-get update && sudo apt-get install -qq libarchive-tools
-        mkdir -p dafny/Binaries/z3/bin
-        wget -qO- https://github.com/dafny-lang/solver-builds/releases/download/snapshot-2023-08-02/z3-4.12.1-x64-ubuntu-20.04-bin.zip | bsdtar -xf -
-        mv z3-4.12.1 dafny/Binaries/z3/bin/
-        chmod +x dafny/Binaries/z3/bin/z3-4.12.1
-        mkdir -p unzippedRelease/dafny/z3/bin
-        ln dafny/Binaries/z3/bin/z3-4.12.1 unzippedRelease/dafny/z3/bin/z3-4.12.1
-
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v4
+    - name: Setup Z3
+      uses: cda-tum/setup-z3@v1.6.3
       with:
-        dotnet-version: 6.0.x
+        version: 4.12.1
 
     - name: Build Dafny
       shell: bash
       run: |
-        dotnet build dafny/Source/Dafny.sln
+        make -C dafny exe
 
-    - name: Add dafny to PATH
+    - name: Add dafny to PATH (non-Windows)
+      if: runner.os != 'Windows'
       shell: bash
       run: |
         echo ${{ github.workspace }}/dafny/Scripts >> $GITHUB_PATH
+    - name: Add dafny to PATH (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Add-Content $env:GITHUB_PATH "${{ github.workspace }}/dafny/Scripts"
 
-    # Hard-coding this for now since it's a pain to extract from an arbitrary branch
     - name: Export DAFNY_VERSION
       shell: bash
       run: |
-        echo "DAFNY_VERSION=4.7.0" >> $GITHUB_ENV
+        echo "DAFNY_VERSION=${{ inputs.dafny-version }}" >> $GITHUB_ENV
 
-    # update the copy of the Rust runtime we have inside TestModels
-    # (since it's not published yet)
-    # TODO: Temporarily not doing this because we need a targeted fix to the runtime,
-    # but can't pick it up by moving to a newer Dafny commit because that would pull in
-    # other breaking changes.
-
-#    - name: Update dafny_runtime_rust
-#      shell: bash
-#      run: |
-#        rm -rf TestModels/dafny-dependencies/dafny_runtime_rust
-#        cp -r dafny/Source/DafnyRuntime/DafnyRuntimeRust TestModels/dafny-dependencies/dafny_runtime_rust
+    - name: Install reportgenerator
+      shell: bash
+      run: |
+        dotnet tool install -g dafny-reportgenerator --version 1.*

@@ -95,6 +95,7 @@ verify:
 		--log-format csv \
 		--verification-time-limit $(VERIFY_TIMEOUT) \
 		--resource-limit $(MAX_RESOURCE_COUNT) \
+		$(if $(USE_DAFNY_STANDARD_LIBRARIES), --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(DAFNY_OPTIONS) \
 		%
 
@@ -110,6 +111,7 @@ verify_single:
 		--log-format text \
 		--verification-time-limit $(VERIFY_TIMEOUT) \
 		--resource-limit $(MAX_RESOURCE_COUNT) \
+		$(if $(USE_DAFNY_STANDARD_LIBRARIES), --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(DAFNY_OPTIONS) \
 		$(if ${PROC},-proc:*$(PROC)*,) \
 		$(FILE)
@@ -207,6 +209,7 @@ transpile_implementation:
 		$(DAFNY_OTHER_FILES) \
 		$(TRANSPILE_MODULE_NAME) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(if $(USE_DAFNY_STANDARD_LIBRARIES) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(TRANSLATION_RECORD) \
 		$(TRANSPILE_DEPENDENCIES)
 
@@ -245,6 +248,7 @@ transpile_test:
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(if $(USE_DAFNY_STANDARD_LIBRARIES) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(TRANSLATION_RECORD) \
 		$(SOURCE_TRANSLATION_RECORD) \
 		$(TRANSPILE_MODULE_NAME) \
@@ -253,7 +257,7 @@ transpile_test:
 # If we are not the StandardLibrary, transpile the StandardLibrary.
 # Transpile all other dependencies
 transpile_dependencies:
-	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG), )
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG) USE_DAFNY_STANDARD_LIBRARIES=$(USE_DAFNY_STANDARD_LIBRARIES), )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(PROJECT_DEPENDENCIES))
 
 transpile_dependencies_test:
@@ -326,7 +330,7 @@ _polymorph_wrapped:
 	$(POLYMORPH_OPTIONS)";
 
 _polymorph_dependencies:
-	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_$(POLYMORPH_LANGUAGE_TARGET) LIBRARY_ROOT=$(PROJECT_ROOT)/$(STD_LIBRARY), )
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_$(POLYMORPH_LANGUAGE_TARGET) LIBRARY_ROOT=$(PROJECT_ROOT)/$(STD_LIBRARY) USE_DAFNY_STANDARD_LIBRARIES=$(USE_DAFNY_STANDARD_LIBRARIES), )
 	@$(foreach dependency, \
 		$(PROJECT_DEPENDENCIES), \
 		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
@@ -377,6 +381,8 @@ _polymorph_dafny: OUTPUT_DAFNY=\
 _polymorph_dafny: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dafny: _polymorph
+
+dafny: polymorph_dafny verify
 
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_dotnet
@@ -631,7 +637,7 @@ _mv_implementation_rust:
 # Pre-process the Dafny-generated Rust code to remove them.
 	sed -i -e 's/[[:space:]]*$$//' runtimes/rust/src/implementation_from_dafny.rs 
 	rm -f runtimes/rust/src/implementation_from_dafny.rs-e
-#	rustfmt --edition 2021 runtimes/rust/src/implementation_from_dafny.rs
+	rustfmt --edition 2021 runtimes/rust/src/implementation_from_dafny.rs
 	rm -rf implementation_from_dafny-rust
 
 build_rust:
@@ -642,6 +648,11 @@ test_rust:
 	rustc --version
 	cd runtimes/rust; \
 	cargo test --release -- --nocapture
+
+test_rust_debug:
+	rustc --version
+	cd runtimes/rust; \
+	cargo test -- --nocapture
 
 ########################## Cleanup targets
 
@@ -687,6 +698,8 @@ test_go:
 	cd runtimes/go/TestsFromDafny-go && go mod tidy && go run TestsFromDafny.go
 
 ########################## Python targets
+
+python: polymorph_dafny transpile_python polymorph_python test_python
 
 # Install packages via `python3 -m pip`,
 # which is the syntax Smithy-Python and Smithy-Dafny Python use

@@ -46,6 +46,13 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
   }
 
   @Override
+  protected String baseTypeForMember(final MemberShape memberShape) {
+    // The AWS SDK uses primitive types for required members.
+    return memberShapeIsOptional(memberShape)
+      ? super.baseTypeForMember(memberShape)
+      : baseTypeForShape(memberShape.getTarget());
+  }
+
   protected String baseTypeForEnum(final EnumShape enumShape) {
     if (isGeneratedInSdk(enumShape.getId())) {
       return "%s.%s".formatted(

@@ -59,7 +59,9 @@ class JavaTestModels extends TestModelTest {
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForJava(String relativeTestModelPath) {
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
+
     // This test is hacked up to pass for Java in a way that doesn't work
     // for older Dafny versions.
     if (relativeTestModelPath.endsWith("Constraints")) {
