@@ -265,7 +265,7 @@ public abstract class ToDafny extends Generator {
     Shape targetShape = subject.model.expectShape(memberShape.getTarget());
     if (
       Constants.LIST_MAP_SET_SHAPE_TYPES.contains(targetShape.getType())
-      && AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getTarget())
+        && AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getTarget())
     ) {
       isSetCheck = CodeBlock.of("($L && $L.size() > 0)", isNullCheck, inputVar);
     }
