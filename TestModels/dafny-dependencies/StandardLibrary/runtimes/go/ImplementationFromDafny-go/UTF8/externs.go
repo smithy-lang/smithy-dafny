@@ -19,18 +19,12 @@ import (
 // we need to encode the result in compatible dafny utf16 string before returning
 // the result.
 func Decode(utf8EncodedDafnySeq dafny.Sequence) Wrappers.Result {
-	utf8EncodedByteArray := dafny.ToByteArray(utf8EncodedDafnySeq)
-
-	utf16Encoded := utf16.Encode([]rune(string(utf8EncodedByteArray)))
-	var dafnyCharArray []dafny.Char
-	for _, c := range utf16Encoded {
-		if c == unicode.ReplacementChar {
-			err := fmt.Errorf("Encountered Not Allowed Replacement Character: %s ", unicode.ReplacementChar)
-			return Wrappers.Companion_Result_.Create_Failure_(dafny.SeqOfString(err.Error()))
-		}
-		dafnyCharArray = append(dafnyCharArray, dafny.Char(c))
+	res, err := DecodeFromNativeGoByteArray(dafny.ToByteArray(utf8EncodedDafnySeq))
+	if err != nil {
+		return Wrappers.Companion_Result_.Create_Failure_(dafny.SeqOfString(err.Error()))
 	}
-	return Wrappers.Companion_Result_.Default(dafny.SeqOfChars(dafnyCharArray...))
+
+	return Wrappers.Companion_Result_.Create_Success_(res)
 }
 
 // Encode encodes utf16 encoded dafny char (rune) to utf-8 Go rune sequence.
@@ -49,6 +43,20 @@ func Encode(utf16EncodedDafnySeq dafny.Sequence) Wrappers.Result {
 		utf8EncodedBytes = append(utf8EncodedBytes, buf[:n]...)
 	}
 	return Wrappers.Companion_Result_.Create_Success_(dafny.SeqOfBytes(utf8EncodedBytes))
+}
+
+// This method is to be called from the Type Conversion layer.
+// We reuse the same method so that all conversions are consistent.
+func DecodeFromNativeGoByteArray(utf8EncodedByteArray []byte) (dafny.Sequence, error) {
+	if !utf8.Valid(utf8EncodedByteArray) {
+		return nil, fmt.Errorf("invalid utf8 encoded sequence: %v", utf8EncodedByteArray)
+	}
+	utf16Encoded := utf16.Encode([]rune(string(utf8EncodedByteArray)))
+	var dafnyCharArray []dafny.Char
+	for _, c := range utf16Encoded {
+		dafnyCharArray = append(dafnyCharArray, dafny.Char(c))
+	}
+	return dafny.SeqOfChars(dafnyCharArray...), nil
 }
 
 func utf16EncodedDafnySeqToUint16(seq dafny.Sequence) []uint16 {

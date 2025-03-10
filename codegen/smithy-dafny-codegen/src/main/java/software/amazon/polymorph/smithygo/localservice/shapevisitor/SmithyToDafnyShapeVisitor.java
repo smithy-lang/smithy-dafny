@@ -1,17 +1,17 @@
 package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
-import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
-import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
-import static software.amazon.polymorph.smithygo.utils.Constants.SMITHY_DAFNY_STD_LIB_GO;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
+import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+import static software.amazon.polymorph.smithygo.utils.Constants.SMITHY_DAFNY_STD_LIB_GO;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -580,14 +580,13 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             dataSource
           )
         : """
-        dafny.SeqFromArray(func () []interface{} {
-          var i []interface{}
-          e := utf16.Encode([]rune(%s%s))
-          for _, i2 := range e {
-            i = append(i, dafny.Char(i2))
-          }
-          return i
-          }(), true)""".formatted(dereferenceIfRequired, dataSource);
+        func () dafny.Sequence {
+        res, err := UTF8.DecodeFromNativeGoByteArray([]byte(%s%s))
+        if err != nil {
+          panic("invalid utf8 input provided")
+        }
+        return res
+    }()""".formatted(dereferenceIfRequired, dataSource);
 
       return """
       func () %s {
