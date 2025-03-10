@@ -2,7 +2,6 @@ package UTF8
 
 import (
 	"fmt"
-	"unicode"
 	"unicode/utf16"
 	"unicode/utf8"
 
@@ -35,9 +34,6 @@ func Encode(utf16EncodedDafnySeq dafny.Sequence) Wrappers.Result {
 	decodedUtf16 := utf16.Decode(encodedUtf16)
 	var utf8EncodedBytes []byte
 	for _, r := range decodedUtf16 {
-		if !utf8.ValidRune(r) || r == unicode.ReplacementChar {
-			return Wrappers.Companion_Result_.Create_Failure_(dafny.SeqOfString("Failed to utf8 encode rune"))
-		}
 		buf := make([]byte, utf8.RuneLen(r))
 		n := utf8.EncodeRune(buf, r)
 		utf8EncodedBytes = append(utf8EncodedBytes, buf[:n]...)
