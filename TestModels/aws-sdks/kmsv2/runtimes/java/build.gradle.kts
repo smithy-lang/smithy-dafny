@@ -67,7 +67,7 @@ dependencies {
     implementation("software.amazon.smithy.dafny:conversion:0.1.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     /*implementation("com.amazonaws:aws-java-sdk-kms:1.12.417")*/
-    implementation(platform("software.amazon.awssdk:bom:2.28.28"))
+    implementation(platform("software.amazon.awssdk:bom:2.30.36"))
     implementation("software.amazon.awssdk:kms")
 }
 
