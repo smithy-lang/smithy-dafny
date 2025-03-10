@@ -9,7 +9,7 @@ edition = "2021"
 wrapped-client = []
 
 [dependencies]
-aws-sdk-kms = "1.43.0"
+aws-sdk-kms = "1.62.0"
 aws-config = "1.5.4"
 aws-smithy-runtime = {version = "1.6.0", features = ["client"] }
 aws-smithy-runtime-api = {version = "1.7.0", features = ["client"] }
