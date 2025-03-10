@@ -25,6 +25,14 @@
       {
         "id": "Service",
         "namespace": "*"
+      },
+      {
+        "id": "RuleSetAwsBuiltIn.AWS::Auth::AccountIdEndpointMode",
+        "namespace": "*"
+      },
+      {
+        "id": "RuleSetAwsBuiltIn.AWS::Auth::AccountId",
+        "namespace": "*"
       }
     ]
   },
@@ -117,7 +125,7 @@
         }
       },
       "traits": {
-        "smithy.api#documentation": "<p>Represents an attribute for describing the schema for the table and\n            indexes.</p>"
+        "smithy.api#documentation": "<p>Represents an attribute for describing the schema for the table and indexes.</p>"
       }
     },
     "com.amazonaws.dynamodb#AttributeDefinitions": {
@@ -1001,7 +1009,7 @@
         "Item": {
           "target": "com.amazonaws.dynamodb#AttributeMap",
           "traits": {
-            "smithy.api#documentation": "<p>The item which caused the condition check to fail. This will be set if ReturnValuesOnConditionCheckFailure is specified as <code>ALL_OLD</code>.</p>"
+            "smithy.api#documentation": "<p>The item which caused the condition check to fail. This will be set if\n            ReturnValuesOnConditionCheckFailure is specified as <code>ALL_OLD</code>.</p>"
           }
         }
       },
@@ -1567,27 +1575,27 @@
         "TableName": {
           "target": "com.amazonaws.dynamodb#TableArn",
           "traits": {
-            "smithy.api#documentation": "<p>Name of the table for the check item request. You can also provide the Amazon Resource Name (ARN) of the table in this parameter.</p>",
+            "smithy.api#documentation": "<p>Name of the table for the check item request. You can also provide the Amazon Resource Name (ARN) of\n            the table in this parameter.</p>",
             "smithy.api#required": {}
           }
         },
         "ConditionExpression": {
           "target": "com.amazonaws.dynamodb#ConditionExpression",
           "traits": {
-            "smithy.api#documentation": "<p>A condition that must be satisfied in order for a conditional update to\n            succeed. For more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html\">Condition expressions</a> in the <i>Amazon DynamoDB Developer\n                    Guide</i>.</p>",
+            "smithy.api#documentation": "<p>A condition that must be satisfied in order for a conditional update to succeed. For\n            more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html\">Condition expressions</a> in the <i>Amazon DynamoDB Developer\n                Guide</i>.</p>",
             "smithy.api#required": {}
           }
         },
         "ExpressionAttributeNames": {
           "target": "com.amazonaws.dynamodb#ExpressionAttributeNameMap",
           "traits": {
-            "smithy.api#documentation": "<p>One or more substitution tokens for attribute names in an expression. For more information, see\n            <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeNames.html\">Expression attribute names</a> \n            in the <i>Amazon DynamoDB Developer Guide</i>.</p>"
+            "smithy.api#documentation": "<p>One or more substitution tokens for attribute names in an expression. For more\n            information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeNames.html\">Expression attribute names</a> in the <i>Amazon DynamoDB Developer\n                Guide</i>.</p>"
           }
         },
         "ExpressionAttributeValues": {
           "target": "com.amazonaws.dynamodb#ExpressionAttributeValueMap",
           "traits": {
-            "smithy.api#documentation": "<p>One or more values that can be substituted in an expression. For more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html\">Condition expressions</a> in the <i>Amazon DynamoDB Developer Guide</i>.</p>"
+            "smithy.api#documentation": "<p>One or more values that can be substituted in an expression. For more information, see\n                <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html\">Condition expressions</a> in the <i>Amazon DynamoDB Developer\n                Guide</i>.</p>"
           }
         },
         "ReturnValuesOnConditionCheckFailure": {
@@ -1657,7 +1665,7 @@
         "TableName": {
           "target": "com.amazonaws.dynamodb#TableArn",
           "traits": {
-            "smithy.api#documentation": "<p>The name of the table that was affected by the operation. If you had specified the Amazon Resource Name (ARN) of a table in the input, you'll see the table ARN in the response.</p>"
+            "smithy.api#documentation": "<p>The name of the table that was affected by the operation. If you had specified the\n            Amazon Resource Name (ARN) of a table in the input, you'll see the table ARN in the response.</p>"
           }
         },
         "CapacityUnits": {
@@ -1963,7 +1971,13 @@
         "OnDemandThroughput": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughput",
           "traits": {
-            "smithy.api#documentation": "<p>The maximum number of read and write units for the global secondary index being created. If you use this parameter, you must specify <code>MaxReadRequestUnits</code>, <code>MaxWriteRequestUnits</code>, or both.</p>"
+            "smithy.api#documentation": "<p>The maximum number of read and write units for the global secondary index being\n            created. If you use this parameter, you must specify <code>MaxReadRequestUnits</code>,\n                <code>MaxWriteRequestUnits</code>, or both.</p>"
+          }
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput value (in read units per second and write units per\n            second) when creating a secondary index.</p>"
           }
         }
       },
@@ -2079,7 +2093,7 @@
         "OnDemandThroughputOverride": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
           "traits": {
-            "smithy.api#documentation": "<p>The maximum on-demand throughput settings for the specified replica table being created. You can only modify <code>MaxReadRequestUnits</code>, because you can't modify <code>MaxWriteRequestUnits</code> for individual replica tables.\n        </p>"
+            "smithy.api#documentation": "<p>The maximum on-demand throughput settings for the specified replica table being\n            created. You can only modify <code>MaxReadRequestUnits</code>, because you can't modify\n                <code>MaxWriteRequestUnits</code> for individual replica tables. </p>"
           }
         },
         "GlobalSecondaryIndexes": {
@@ -2206,6 +2220,12 @@
             "smithy.api#documentation": "<p>Indicates whether deletion protection is to be enabled (true) or disabled (false) on\n            the table.</p>"
           }
         },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput (in read units per second and write units per second) for creating a table.</p>"
+          }
+        },
         "ResourcePolicy": {
           "target": "com.amazonaws.dynamodb#ResourcePolicy",
           "traits": {
@@ -2307,7 +2327,7 @@
         "TableName": {
           "target": "com.amazonaws.dynamodb#TableArn",
           "traits": {
-            "smithy.api#documentation": "<p>Name of the table in which the item to be deleted resides. You can also provide the Amazon Resource Name (ARN) of the table in this parameter.</p>",
+            "smithy.api#documentation": "<p>Name of the table in which the item to be deleted resides. You can also provide the\n            Amazon Resource Name (ARN) of the table in this parameter.</p>",
             "smithy.api#required": {}
           }
         },
@@ -2439,6 +2459,9 @@
         },
         {
           "target": "com.amazonaws.dynamodb#ProvisionedThroughputExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ReplicatedWriteConflictException"
         },
         {
           "target": "com.amazonaws.dynamodb#RequestLimitExceeded"
@@ -2862,7 +2885,7 @@
         "aws.api#clientDiscoveredEndpoint": {
           "required": false
         },
-        "smithy.api#documentation": "<p>Checks the status of continuous backups and point in time recovery on the specified\n            table. Continuous backups are <code>ENABLED</code> on all tables at table creation. If\n            point in time recovery is enabled, <code>PointInTimeRecoveryStatus</code> will be set to\n            ENABLED.</p>\n         <p> After continuous backups and point in time recovery are enabled, you can restore to\n            any point in time within <code>EarliestRestorableDateTime</code> and\n                <code>LatestRestorableDateTime</code>. </p>\n         <p>\n            <code>LatestRestorableDateTime</code> is typically 5 minutes before the current time.\n            You can restore your table to any point in time during the last 35 days. </p>\n         <p>You can call <code>DescribeContinuousBackups</code> at a maximum rate of 10 times per\n            second.</p>"
+        "smithy.api#documentation": "<p>Checks the status of continuous backups and point in time recovery on the specified\n            table. Continuous backups are <code>ENABLED</code> on all tables at table creation. If\n            point in time recovery is enabled, <code>PointInTimeRecoveryStatus</code> will be set to\n            ENABLED.</p>\n         <p> After continuous backups and point in time recovery are enabled, you can restore to\n            any point in time within <code>EarliestRestorableDateTime</code> and\n                <code>LatestRestorableDateTime</code>. </p>\n         <p>\n            <code>LatestRestorableDateTime</code> is typically 5 minutes before the current time.\n            You can restore your table to any point in time in the last 35 days. You can set the recovery period to any value between 1 and 35 days. </p>\n         <p>You can call <code>DescribeContinuousBackups</code> at a maximum rate of 10 times per\n            second.</p>"
       }
     },
     "com.amazonaws.dynamodb#DescribeContinuousBackupsInput": {
@@ -3604,10 +3627,10 @@
     "com.amazonaws.dynamodb#DisableKinesisStreamingDestination": {
       "type": "operation",
       "input": {
-        "target": "com.amazonaws.dynamodb#DisableKinesisStreamingDestinationInput"
+        "target": "com.amazonaws.dynamodb#KinesisStreamingDestinationInput"
       },
       "output": {
-        "target": "com.amazonaws.dynamodb#DisableKinesisStreamingDestinationOutput"
+        "target": "com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"
       },
       "errors": [
         {
@@ -3874,6 +3897,18 @@
               "required": false,
               "documentation": "Override the endpoint used to send this request",
               "type": "String"
+            },
+            "AccountId": {
+              "builtIn": "AWS::Auth::AccountId",
+              "required": false,
+              "documentation": "The AWS AccountId used for the request.",
+              "type": "String"
+            },
+            "AccountIdEndpointMode": {
+              "builtIn": "AWS::Auth::AccountIdEndpointMode",
+              "required": false,
+              "documentation": "The AccountId Endpoint Mode.",
+              "type": "String"
             }
           },
           "rules": [
@@ -3922,9 +3957,7 @@
                 {
                   "conditions": [],
                   "endpoint": {
-                    "url": {
-                      "ref": "Endpoint"
-                    },
+                    "url": "{Endpoint}",
                     "properties": {},
                     "headers": {}
                   },
@@ -3961,6 +3994,176 @@
                     {
                       "conditions": [
                         {
+                          "fn": "stringEquals",
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            },
+                            "local"
+                          ]
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "fn": "booleanEquals",
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ]
+                            }
+                          ],
+                          "error": "Invalid Configuration: FIPS and local endpoint are not supported",
+                          "type": "error"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "fn": "booleanEquals",
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ]
+                            }
+                          ],
+                          "error": "Invalid Configuration: Dualstack and local endpoint are not supported",
+                          "type": "error"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "url": "http://localhost:8000",
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4",
+                                  "signingName": "dynamodb",
+                                  "signingRegion": "us-east-1"
+                                }
+                              ]
+                            },
+                            "headers": {}
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "fn": "isSet",
+                          "argv": [
+                            {
+                              "ref": "AccountIdEndpointMode"
+                            }
+                          ]
+                        },
+                        {
+                          "fn": "stringEquals",
+                          "argv": [
+                            {
+                              "ref": "AccountIdEndpointMode"
+                            },
+                            "required"
+                          ]
+                        },
+                        {
+                          "fn": "not",
+                          "argv": [
+                            {
+                              "fn": "isSet",
+                              "argv": [
+                                {
+                                  "ref": "AccountId"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "error": "AccountIdEndpointMode is required but no AccountID was provided or able to be loaded.",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "fn": "isSet",
+                          "argv": [
+                            {
+                              "ref": "AccountId"
+                            }
+                          ]
+                        },
+                        {
+                          "fn": "stringEquals",
+                          "argv": [
+                            {
+                              "fn": "getAttr",
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ]
+                            },
+                            "aws"
+                          ]
+                        },
+                        {
+                          "fn": "not",
+                          "argv": [
+                            {
+                              "fn": "booleanEquals",
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "fn": "not",
+                          "argv": [
+                            {
+                              "fn": "booleanEquals",
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "fn": "not",
+                          "argv": [
+                            {
+                              "fn": "isValidHostLabel",
+                              "argv": [
+                                {
+                                  "ref": "AccountId"
+                                },
+                                false
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "error": "Credentials-sourced account ID parameter is invalid",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [
+                        {
                           "fn": "booleanEquals",
                           "argv": [
                             {
@@ -3985,7 +4188,6 @@
                             {
                               "fn": "booleanEquals",
                               "argv": [
-                                true,
                                 {
                                   "fn": "getAttr",
                                   "argv": [
@@ -3994,13 +4196,13 @@
                                     },
                                     "supportsFIPS"
                                   ]
-                                }
+                                },
+                                true
                               ]
                             },
                             {
                               "fn": "booleanEquals",
                               "argv": [
-                                true,
                                 {
                                   "fn": "getAttr",
                                   "argv": [
@@ -4009,11 +4211,39 @@
                                     },
                                     "supportsDualStack"
                                   ]
-                                }
+                                },
+                                true
                               ]
                             }
                           ],
                           "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "fn": "isSet",
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "fn": "stringEquals",
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    },
+                                    "disabled"
+                                  ]
+                                }
+                              ],
+                              "endpoint": {
+                                "url": "https://dynamodb-fips.{Region}.{PartitionResult#dualStackDnsSuffix}",
+                                "properties": {},
+                                "headers": {}
+                              },
+                              "type": "endpoint"
+                            },
                             {
                               "conditions": [],
                               "endpoint": {
@@ -4084,8 +4314,68 @@
                                   ]
                                 }
                               ],
+                              "rules": [
+                                {
+                                  "conditions": [
+                                    {
+                                      "fn": "isSet",
+                                      "argv": [
+                                        {
+                                          "ref": "AccountIdEndpointMode"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "fn": "stringEquals",
+                                      "argv": [
+                                        {
+                                          "ref": "AccountIdEndpointMode"
+                                        },
+                                        "disabled"
+                                      ]
+                                    }
+                                  ],
+                                  "endpoint": {
+                                    "url": "https://dynamodb.{Region}.{PartitionResult#dnsSuffix}",
+                                    "properties": {},
+                                    "headers": {}
+                                  },
+                                  "type": "endpoint"
+                                },
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "url": "https://dynamodb.{Region}.{PartitionResult#dnsSuffix}",
+                                    "properties": {},
+                                    "headers": {}
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "fn": "isSet",
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "fn": "stringEquals",
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    },
+                                    "disabled"
+                                  ]
+                                }
+                              ],
                               "endpoint": {
-                                "url": "https://dynamodb.{Region}.amazonaws.com",
+                                "url": "https://dynamodb-fips.{Region}.{PartitionResult#dnsSuffix}",
                                 "properties": {},
                                 "headers": {}
                               },
@@ -4129,7 +4419,6 @@
                             {
                               "fn": "booleanEquals",
                               "argv": [
-                                true,
                                 {
                                   "fn": "getAttr",
                                   "argv": [
@@ -4138,11 +4427,39 @@
                                     },
                                     "supportsDualStack"
                                   ]
-                                }
+                                },
+                                true
                               ]
                             }
                           ],
                           "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "fn": "isSet",
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "fn": "stringEquals",
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    },
+                                    "disabled"
+                                  ]
+                                }
+                              ],
+                              "endpoint": {
+                                "url": "https://dynamodb.{Region}.{PartitionResult#dualStackDnsSuffix}",
+                                "properties": {},
+                                "headers": {}
+                              },
+                              "type": "endpoint"
+                            },
                             {
                               "conditions": [],
                               "endpoint": {
@@ -4166,26 +4483,87 @@
                     {
                       "conditions": [
                         {
+                          "fn": "isSet",
+                          "argv": [
+                            {
+                              "ref": "AccountIdEndpointMode"
+                            }
+                          ]
+                        },
+                        {
                           "fn": "stringEquals",
                           "argv": [
                             {
-                              "ref": "Region"
+                              "ref": "AccountIdEndpointMode"
                             },
-                            "local"
+                            "disabled"
                           ]
                         }
                       ],
                       "endpoint": {
-                        "url": "http://localhost:8000",
-                        "properties": {
-                          "authSchemes": [
+                        "url": "https://dynamodb.{Region}.{PartitionResult#dnsSuffix}",
+                        "properties": {},
+                        "headers": {}
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "fn": "isSet",
+                          "argv": [
                             {
-                              "name": "sigv4",
-                              "signingName": "dynamodb",
-                              "signingRegion": "us-east-1"
+                              "ref": "AccountId"
                             }
                           ]
                         },
+                        {
+                          "fn": "stringEquals",
+                          "argv": [
+                            {
+                              "fn": "getAttr",
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ]
+                            },
+                            "aws"
+                          ]
+                        },
+                        {
+                          "fn": "not",
+                          "argv": [
+                            {
+                              "fn": "booleanEquals",
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "fn": "not",
+                          "argv": [
+                            {
+                              "fn": "booleanEquals",
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "endpoint": {
+                        "url": "https://{AccountId}.ddb.{Region}.{PartitionResult#dnsSuffix}",
+                        "properties": {},
                         "headers": {}
                       },
                       "type": "endpoint"
@@ -4921,6 +5299,843 @@
               "expect": {
                 "error": "Invalid Configuration: Missing Region"
               }
+            },
+            {
+              "documentation": "For custom endpoint with account ID available, FIPS enabled, and DualStack enabled",
+              "expect": {
+                "error": "Invalid Configuration: FIPS and custom endpoint are not supported"
+              },
+              "params": {
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": true,
+                "Endpoint": "https://example.com"
+              }
+            },
+            {
+              "documentation": "For custom endpoint with account ID available, FIPS enabled, and DualStack disabled",
+              "expect": {
+                "error": "Invalid Configuration: FIPS and custom endpoint are not supported"
+              },
+              "params": {
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": false,
+                "Endpoint": "https://example.com"
+              }
+            },
+            {
+              "documentation": "For custom endpoint with account ID available, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "error": "Invalid Configuration: Dualstack and custom endpoint are not supported"
+              },
+              "params": {
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": true,
+                "Endpoint": "https://example.com"
+              }
+            },
+            {
+              "documentation": "For custom endpoint with account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://example.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "SDK::Endpoint": "https://example.com",
+                    "AWS::Auth::AccountId": "012345678901"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": false,
+                "Endpoint": "https://example.com"
+              }
+            },
+            {
+              "documentation": "For custom endpoint with empty account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://example.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "SDK::Endpoint": "https://example.com",
+                    "AWS::Auth::AccountId": ""
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "AccountId": "",
+                "UseFIPS": false,
+                "UseDualStack": false,
+                "Endpoint": "https://example.com"
+              }
+            },
+            {
+              "documentation": "For region local with account ID available, FIPS enabled, and DualStack enabled",
+              "expect": {
+                "error": "Invalid Configuration: FIPS and local endpoint are not supported"
+              },
+              "params": {
+                "Region": "local",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region local with account ID available, FIPS enabled, and DualStack disabled",
+              "expect": {
+                "error": "Invalid Configuration: FIPS and local endpoint are not supported"
+              },
+              "params": {
+                "Region": "local",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region local with account ID available, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "error": "Invalid Configuration: Dualstack and local endpoint are not supported"
+              },
+              "params": {
+                "Region": "local",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region local with account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "properties": {
+                    "authSchemes": [
+                      {
+                        "name": "sigv4",
+                        "signingName": "dynamodb",
+                        "signingRegion": "us-east-1"
+                      }
+                    ]
+                  },
+                  "url": "http://localhost:8000"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "local",
+                    "AWS::Auth::AccountId": "012345678901"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "local",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region local with empty account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "properties": {
+                    "authSchemes": [
+                      {
+                        "name": "sigv4",
+                        "signingName": "dynamodb",
+                        "signingRegion": "us-east-1"
+                      }
+                    ]
+                  },
+                  "url": "http://localhost:8000"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "local",
+                    "AWS::Auth::AccountId": ""
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "local",
+                "AccountId": "",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For AccountIdEndpointMode required and no AccountId set",
+              "expect": {
+                "error": "AccountIdEndpointMode is required but no AccountID was provided or able to be loaded."
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountIdEndpointMode": "required"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountIdEndpointMode": "required"
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, FIPS enabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb-fips.us-east-1.api.aws"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::UseFIPS": true,
+                    "AWS::UseDualStack": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, FIPS enabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb-fips.us-east-1.amazonaws.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::UseFIPS": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, AccountIdEndpointMode preferred, FIPS enabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb-fips.us-east-1.amazonaws.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::Auth::AccountIdEndpointMode": "preferred",
+                    "AWS::UseFIPS": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "AccountIdEndpointMode": "preferred",
+                "UseFIPS": true,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, AccountIdEndpointMode required, FIPS enabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb-fips.us-east-1.amazonaws.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::Auth::AccountIdEndpointMode": "required",
+                    "AWS::UseFIPS": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "AccountIdEndpointMode": "required",
+                "UseFIPS": true,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-east-1.api.aws"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::UseDualStack": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-east-1.api.aws"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::UseDualStack": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, AccountIdEndpointMode preferred, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "AccountIdEndpointMode": "preferred",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, AccountIdEndpointMode disabled, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "AccountIdEndpointMode": "disabled",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, AccountIdEndpointMode required, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "AccountIdEndpointMode": "required",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, AccountIdEndpointMode preferred, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://012345678901.ddb.us-east-1.amazonaws.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::Auth::AccountIdEndpointMode": "preferred"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": false,
+                "AccountIdEndpointMode": "preferred"
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, AccountIdEndpointMode required, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://012345678901.ddb.us-east-1.amazonaws.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::Auth::AccountIdEndpointMode": "required"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": false,
+                "AccountIdEndpointMode": "required"
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with account ID available, AccountIdEndpointMode disabled, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-east-1.amazonaws.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::Auth::AccountIdEndpointMode": "disabled"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": false,
+                "AccountIdEndpointMode": "disabled"
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with empty account ID, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "error": "Credentials-sourced account ID parameter is invalid"
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-east-1",
+                    "AWS::Auth::AccountId": " "
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-east-1",
+                "AccountId": "",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with account ID available, FIPS enabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb-fips.cn-north-1.api.amazonwebservices.com.cn"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "cn-north-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::UseFIPS": true,
+                    "AWS::UseDualStack": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "cn-north-1",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with account ID available, FIPS enabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb-fips.cn-north-1.amazonaws.com.cn"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "cn-north-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::UseFIPS": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "cn-north-1",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with account ID available, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.cn-north-1.api.amazonwebservices.com.cn"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "cn-north-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::UseDualStack": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "cn-north-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.cn-north-1.amazonaws.com.cn"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "cn-north-1",
+                    "AWS::Auth::AccountId": "012345678901"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "cn-north-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with account ID available, AccountIdEndpointMode preferred, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.cn-north-1.amazonaws.com.cn"
+                }
+              },
+              "params": {
+                "Region": "cn-north-1",
+                "AccountId": "012345678901",
+                "AccountIdEndpointMode": "preferred",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with account ID available, AccountIdEndpointMode disabled, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.cn-north-1.amazonaws.com.cn"
+                }
+              },
+              "params": {
+                "Region": "cn-north-1",
+                "AccountId": "012345678901",
+                "AccountIdEndpointMode": "disabled",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with account ID available, AccountIdEndpointMode required, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.cn-north-1.amazonaws.com.cn"
+                }
+              },
+              "params": {
+                "Region": "cn-north-1",
+                "AccountId": "012345678901",
+                "AccountIdEndpointMode": "required",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with empty account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.cn-north-1.amazonaws.com.cn"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "cn-north-1",
+                    "AWS::Auth::AccountId": ""
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "cn-north-1",
+                "AccountId": "",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-iso-east-1 with account ID available, FIPS enabled, and DualStack enabled",
+              "expect": {
+                "error": "FIPS and DualStack are enabled, but this partition does not support one or both"
+              },
+              "params": {
+                "Region": "us-iso-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-iso-east-1 with account ID available, FIPS enabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb-fips.us-iso-east-1.c2s.ic.gov"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-iso-east-1",
+                    "AWS::Auth::AccountId": "012345678901",
+                    "AWS::UseFIPS": true
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-iso-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-iso-east-1 with account ID available, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "error": "DualStack is enabled but this partition does not support DualStack"
+              },
+              "params": {
+                "Region": "us-iso-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-iso-east-1 with account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-iso-east-1.c2s.ic.gov"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-iso-east-1",
+                    "AWS::Auth::AccountId": "012345678901"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-iso-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-iso-east-1 with empty account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-iso-east-1.c2s.ic.gov"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-iso-east-1",
+                    "AWS::Auth::AccountId": "012345678901"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-iso-east-1",
+                "AccountId": "",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with account ID available, FIPS enabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb-fips.us-gov-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-gov-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with account ID available, FIPS enabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-gov-east-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-gov-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": true,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with account ID available, FIPS disabled, and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-gov-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-gov-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": true
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-gov-east-1.amazonaws.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-gov-east-1",
+                    "AWS::Auth::AccountId": "012345678901"
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-gov-east-1",
+                "AccountId": "012345678901",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with empty account ID available, FIPS disabled, and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://dynamodb.us-gov-east-1.amazonaws.com"
+                }
+              },
+              "operationInputs": [
+                {
+                  "builtInParams": {
+                    "AWS::Region": "us-gov-east-1",
+                    "AWS::Auth::AccountId": ""
+                  },
+                  "operationName": "ListTables"
+                }
+              ],
+              "params": {
+                "Region": "us-gov-east-1",
+                "AccountId": "",
+                "UseFIPS": false,
+                "UseDualStack": false
+              }
             }
           ],
           "version": "1.0"
@@ -4933,7 +6148,7 @@
         "ApproximateCreationDateTimePrecision": {
           "target": "com.amazonaws.dynamodb#ApproximateCreationDateTimePrecision",
           "traits": {
-            "smithy.api#documentation": "<p>Toggle for the precision of Kinesis data stream timestamp. The values are either <code>MILLISECOND</code> or <code>MICROSECOND</code>.</p>"
+            "smithy.api#documentation": "<p>Toggle for the precision of Kinesis data stream timestamp. The values are either\n                <code>MILLISECOND</code> or <code>MICROSECOND</code>.</p>"
           }
         }
       },
@@ -4944,10 +6159,10 @@
     "com.amazonaws.dynamodb#EnableKinesisStreamingDestination": {
       "type": "operation",
       "input": {
-        "target": "com.amazonaws.dynamodb#EnableKinesisStreamingDestinationInput"
+        "target": "com.amazonaws.dynamodb#KinesisStreamingDestinationInput"
       },
       "output": {
-        "target": "com.amazonaws.dynamodb#EnableKinesisStreamingDestinationOutput"
+        "target": "com.amazonaws.dynamodb#KinesisStreamingDestinationOutput"
       },
       "errors": [
         {
@@ -5400,7 +6615,7 @@
         "ExportType": {
           "target": "com.amazonaws.dynamodb#ExportType",
           "traits": {
-            "smithy.api#documentation": "<p>The type of export that was performed. Valid values are <code>FULL_EXPORT</code> or <code>INCREMENTAL_EXPORT</code>.</p>"
+            "smithy.api#documentation": "<p>The type of export that was performed. Valid values are <code>FULL_EXPORT</code> or\n                <code>INCREMENTAL_EXPORT</code>.</p>"
           }
         },
         "IncrementalExportSpecification": {
@@ -5505,7 +6720,7 @@
         "ExportType": {
           "target": "com.amazonaws.dynamodb#ExportType",
           "traits": {
-            "smithy.api#documentation": "<p>The type of export that was performed. Valid values are <code>FULL_EXPORT</code> or <code>INCREMENTAL_EXPORT</code>.</p>"
+            "smithy.api#documentation": "<p>The type of export that was performed. Valid values are <code>FULL_EXPORT</code> or\n                <code>INCREMENTAL_EXPORT</code>.</p>"
           }
         }
       },
@@ -5748,7 +6963,7 @@
         "TableName": {
           "target": "com.amazonaws.dynamodb#TableArn",
           "traits": {
-            "smithy.api#documentation": "<p>The name of the table from which to retrieve the specified item. You can also provide the Amazon Resource Name (ARN) of the table in this parameter.</p>",
+            "smithy.api#documentation": "<p>The name of the table from which to retrieve the specified item. You can also provide\n            the Amazon Resource Name (ARN) of the table in this parameter.</p>",
             "smithy.api#required": {}
           }
         },
@@ -5999,7 +7214,13 @@
         "OnDemandThroughput": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughput",
           "traits": {
-            "smithy.api#documentation": "<p>The maximum number of read and write units for the specified global secondary index. If you use this parameter, you must specify <code>MaxReadRequestUnits</code>, <code>MaxWriteRequestUnits</code>, or both.</p>"
+            "smithy.api#documentation": "<p>The maximum number of read and write units for the specified global secondary index.\n            If you use this parameter, you must specify <code>MaxReadRequestUnits</code>,\n                <code>MaxWriteRequestUnits</code>, or both.</p>"
+          }
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput value (in read units per second and write units per\n            second) for the specified secondary index. If you use this parameter, you must specify\n                <code>ReadUnitsPerSecond</code>, <code>WriteUnitsPerSecond</code>, or both.</p>"
           }
         }
       },
@@ -6095,7 +7316,13 @@
         "OnDemandThroughput": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughput",
           "traits": {
-            "smithy.api#documentation": "<p>The maximum number of read and write units for the specified global secondary index. If you use this parameter, you must specify <code>MaxReadRequestUnits</code>, <code>MaxWriteRequestUnits</code>, or both.</p>"
+            "smithy.api#documentation": "<p>The maximum number of read and write units for the specified global secondary index.\n            If you use this parameter, you must specify <code>MaxReadRequestUnits</code>,\n                <code>MaxWriteRequestUnits</code>, or both.</p>"
+          }
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexWarmThroughputDescription",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput value (in read units per second and write units per\n            second) for the specified secondary index.</p>"
           }
         }
       },
@@ -6180,6 +7407,32 @@
       "type": "list",
       "member": {
         "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexUpdate"
+      }
+    },
+    "com.amazonaws.dynamodb#GlobalSecondaryIndexWarmThroughputDescription": {
+      "type": "structure",
+      "members": {
+        "ReadUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents warm throughput read units per second value for a global secondary\n            index.</p>"
+          }
+        },
+        "WriteUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents warm throughput write units per second value for a global secondary\n            index.</p>"
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.dynamodb#IndexStatus",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput status being created or updated on a global secondary\n            index. The status can only be <code>UPDATING</code> or <code>ACTIVE</code>.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>The description of the warm throughput value on a global secondary index.</p>"
       }
     },
     "com.amazonaws.dynamodb#GlobalSecondaryIndexes": {
@@ -6731,19 +7984,19 @@
         "ExportFromTime": {
           "target": "com.amazonaws.dynamodb#ExportFromTime",
           "traits": {
-            "smithy.api#documentation": "<p>Time in the past which provides the inclusive start range for the export table's data, counted in seconds from the start of the Unix epoch. The incremental export will reflect the table's state including and after this point in time.</p>"
+            "smithy.api#documentation": "<p>Time in the past which provides the inclusive start range for the export table's data,\n            counted in seconds from the start of the Unix epoch. The incremental export will reflect\n            the table's state including and after this point in time.</p>"
           }
         },
         "ExportToTime": {
           "target": "com.amazonaws.dynamodb#ExportToTime",
           "traits": {
-            "smithy.api#documentation": "<p>Time in the past which provides the exclusive end range for the export table's data, counted in seconds from the start of the Unix epoch. The incremental export will reflect the table's state just prior to this point in time. If this is not provided, the latest time with data available will be used.</p>"
+            "smithy.api#documentation": "<p>Time in the past which provides the exclusive end range for the export table's data,\n            counted in seconds from the start of the Unix epoch. The incremental export will reflect\n            the table's state just prior to this point in time. If this is not provided, the latest\n            time with data available will be used.</p>"
           }
         },
         "ExportViewType": {
           "target": "com.amazonaws.dynamodb#ExportViewType",
           "traits": {
-            "smithy.api#documentation": "<p>The view type that was chosen for the export. Valid values are <code>NEW_AND_OLD_IMAGES</code> and <code>NEW_IMAGES</code>. The default value is <code>NEW_AND_OLD_IMAGES</code>.</p>"
+            "smithy.api#documentation": "<p>The view type that was chosen for the export. Valid values are\n                <code>NEW_AND_OLD_IMAGES</code> and <code>NEW_IMAGES</code>. The default value is\n                <code>NEW_AND_OLD_IMAGES</code>.</p>"
           }
         }
       },
@@ -7192,7 +8445,7 @@
         "ApproximateCreationDateTimePrecision": {
           "target": "com.amazonaws.dynamodb#ApproximateCreationDateTimePrecision",
           "traits": {
-            "smithy.api#documentation": "<p>The precision of the Kinesis data stream timestamp. The values are either <code>MILLISECOND</code> or <code>MICROSECOND</code>.</p>"
+            "smithy.api#documentation": "<p>The precision of the Kinesis data stream timestamp. The values are either\n                <code>MILLISECOND</code> or <code>MICROSECOND</code>.</p>"
           }
         }
       },
@@ -7232,114 +8485,6 @@
       }
     },
     "com.amazonaws.dynamodb#KinesisStreamingDestinationOutput": {
-      "type": "structure",
-      "members": {
-        "TableName": {
-          "target": "com.amazonaws.dynamodb#TableName",
-          "traits": {
-            "smithy.api#documentation": "<p>The name of the table being modified.</p>"
-          }
-        },
-        "StreamArn": {
-          "target": "com.amazonaws.dynamodb#StreamArn",
-          "traits": {
-            "smithy.api#documentation": "<p>The ARN for the specific Kinesis data stream.</p>"
-          }
-        },
-        "DestinationStatus": {
-          "target": "com.amazonaws.dynamodb#DestinationStatus",
-          "traits": {
-            "smithy.api#documentation": "<p>The current status of the replication.</p>"
-          }
-        },
-        "EnableKinesisStreamingConfiguration": {
-          "target": "com.amazonaws.dynamodb#EnableKinesisStreamingConfiguration",
-          "traits": {
-            "smithy.api#documentation": "<p>The destination for the Kinesis streaming information that is being enabled.</p>"
-          }
-        }
-      }
-    },
-    "com.amazonaws.dynamodb#DisableKinesisStreamingDestinationInput": {
-      "type": "structure",
-      "members": {
-        "TableName": {
-          "target": "com.amazonaws.dynamodb#TableArn",
-          "traits": {
-            "smithy.api#documentation": "<p>The name of the DynamoDB table. You can also provide the Amazon Resource Name (ARN) of the\n            table in this parameter.</p>",
-            "smithy.api#required": {}
-          }
-        },
-        "StreamArn": {
-          "target": "com.amazonaws.dynamodb#StreamArn",
-          "traits": {
-            "smithy.api#documentation": "<p>The ARN for a Kinesis data stream.</p>",
-            "smithy.api#required": {}
-          }
-        },
-        "EnableKinesisStreamingConfiguration": {
-          "target": "com.amazonaws.dynamodb#EnableKinesisStreamingConfiguration",
-          "traits": {
-            "smithy.api#documentation": "<p>The source for the Kinesis streaming information that is being enabled.</p>"
-          }
-        }
-      }
-    },
-    "com.amazonaws.dynamodb#DisableKinesisStreamingDestinationOutput": {
-      "type": "structure",
-      "members": {
-        "TableName": {
-          "target": "com.amazonaws.dynamodb#TableName",
-          "traits": {
-            "smithy.api#documentation": "<p>The name of the table being modified.</p>"
-          }
-        },
-        "StreamArn": {
-          "target": "com.amazonaws.dynamodb#StreamArn",
-          "traits": {
-            "smithy.api#documentation": "<p>The ARN for the specific Kinesis data stream.</p>"
-          }
-        },
-        "DestinationStatus": {
-          "target": "com.amazonaws.dynamodb#DestinationStatus",
-          "traits": {
-            "smithy.api#documentation": "<p>The current status of the replication.</p>"
-          }
-        },
-        "EnableKinesisStreamingConfiguration": {
-          "target": "com.amazonaws.dynamodb#EnableKinesisStreamingConfiguration",
-          "traits": {
-            "smithy.api#documentation": "<p>The destination for the Kinesis streaming information that is being enabled.</p>"
-          }
-        }
-      }
-    },
-    "com.amazonaws.dynamodb#EnableKinesisStreamingDestinationInput": {
-      "type": "structure",
-      "members": {
-        "TableName": {
-          "target": "com.amazonaws.dynamodb#TableArn",
-          "traits": {
-            "smithy.api#documentation": "<p>The name of the DynamoDB table. You can also provide the Amazon Resource Name (ARN) of the\n            table in this parameter.</p>",
-            "smithy.api#required": {}
-          }
-        },
-        "StreamArn": {
-          "target": "com.amazonaws.dynamodb#StreamArn",
-          "traits": {
-            "smithy.api#documentation": "<p>The ARN for a Kinesis data stream.</p>",
-            "smithy.api#required": {}
-          }
-        },
-        "EnableKinesisStreamingConfiguration": {
-          "target": "com.amazonaws.dynamodb#EnableKinesisStreamingConfiguration",
-          "traits": {
-            "smithy.api#documentation": "<p>The source for the Kinesis streaming information that is being enabled.</p>"
-          }
-        }
-      }
-    },
-    "com.amazonaws.dynamodb#EnableKinesisStreamingDestinationOutput": {
       "type": "structure",
       "members": {
         "TableName": {
@@ -7821,7 +8966,22 @@
           "outputToken": "LastEvaluatedTableName",
           "items": "TableNames",
           "pageSize": "Limit"
-        }
+        },
+        "smithy.test#smokeTests": [
+          {
+            "id": "ListTablesSuccess",
+            "params": {
+              "Limit": 1
+            },
+            "vendorParams": {
+              "region": "us-west-2"
+            },
+            "vendorParamsShape": "aws.test#AwsVendorParams",
+            "expect": {
+              "success": {}
+            }
+          }
+        ]
       }
     },
     "com.amazonaws.dynamodb#ListTablesInput": {
@@ -8077,6 +9237,23 @@
         "target": "com.amazonaws.dynamodb#AttributeValue"
       }
     },
+    "com.amazonaws.dynamodb#MultiRegionConsistency": {
+      "type": "enum",
+      "members": {
+        "EVENTUAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EVENTUAL"
+          }
+        },
+        "STRONG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STRONG"
+          }
+        }
+      }
+    },
     "com.amazonaws.dynamodb#NextTokenString": {
       "type": "string"
     },
@@ -8127,18 +9304,18 @@
         "MaxReadRequestUnits": {
           "target": "com.amazonaws.dynamodb#LongObject",
           "traits": {
-            "smithy.api#documentation": "<p>Maximum number of read request units for the specified table.</p>\n         <p>To specify a maximum <code>OnDemandThroughput</code> on your table, set the value of <code>MaxReadRequestUnits</code> as greater than or equal to 1. To remove the maximum <code>OnDemandThroughput</code> that is currently set on your table, set the value of <code>MaxReadRequestUnits</code> to -1.</p>"
+            "smithy.api#documentation": "<p>Maximum number of read request units for the specified table.</p>\n         <p>To specify a maximum <code>OnDemandThroughput</code> on your table, set the value of\n                <code>MaxReadRequestUnits</code> as greater than or equal to 1. To remove the\n            maximum <code>OnDemandThroughput</code> that is currently set on your table, set the\n            value of <code>MaxReadRequestUnits</code> to -1.</p>"
           }
         },
         "MaxWriteRequestUnits": {
           "target": "com.amazonaws.dynamodb#LongObject",
           "traits": {
-            "smithy.api#documentation": "<p>Maximum number of write request units for the specified table.</p>\n         <p>To specify a maximum <code>OnDemandThroughput</code> on your table, set the value of <code>MaxWriteRequestUnits</code> as greater than or equal to 1. To remove the maximum <code>OnDemandThroughput</code> that is currently set on your table, set the value of <code>MaxWriteRequestUnits</code> to -1.</p>"
+            "smithy.api#documentation": "<p>Maximum number of write request units for the specified table.</p>\n         <p>To specify a maximum <code>OnDemandThroughput</code> on your table, set the value of\n                <code>MaxWriteRequestUnits</code> as greater than or equal to 1. To remove the\n            maximum <code>OnDemandThroughput</code> that is currently set on your table, set the\n            value of <code>MaxWriteRequestUnits</code> to -1.</p>"
           }
         }
       },
       "traits": {
-        "smithy.api#documentation": "<p>Sets the maximum number of read and write units for the specified on-demand table. If you use this parameter, you must specify <code>MaxReadRequestUnits</code>, <code>MaxWriteRequestUnits</code>, or both.</p>"
+        "smithy.api#documentation": "<p>Sets the maximum number of read and write units for the specified on-demand table. If\n            you use this parameter, you must specify <code>MaxReadRequestUnits</code>,\n                <code>MaxWriteRequestUnits</code>, or both.</p>"
       }
     },
     "com.amazonaws.dynamodb#OnDemandThroughputOverride": {
@@ -8152,7 +9329,7 @@
         }
       },
       "traits": {
-        "smithy.api#documentation": "<p>Overrides the on-demand throughput settings for this replica table. If you don't specify a value for this parameter, it uses the source table's on-demand throughput settings.</p>"
+        "smithy.api#documentation": "<p>Overrides the on-demand throughput settings for this replica table. If you don't\n            specify a value for this parameter, it uses the source table's on-demand throughput\n            settings.</p>"
       }
     },
     "com.amazonaws.dynamodb#ParameterizedStatement": {
@@ -8174,7 +9351,7 @@
         "ReturnValuesOnConditionCheckFailure": {
           "target": "com.amazonaws.dynamodb#ReturnValuesOnConditionCheckFailure",
           "traits": {
-            "smithy.api#documentation": "<p>An optional parameter that returns the item attributes for a PartiQL\n            <code>ParameterizedStatement</code> operation that failed a condition check.</p>\n         <p>There is no additional cost associated with requesting a return value aside from the\n            small network and processing overhead of receiving a larger response. No read capacity\n            units are consumed.</p>"
+            "smithy.api#documentation": "<p>An optional parameter that returns the item attributes for a PartiQL\n                <code>ParameterizedStatement</code> operation that failed a condition check.</p>\n         <p>There is no additional cost associated with requesting a return value aside from the\n            small network and processing overhead of receiving a larger response. No read capacity\n            units are consumed.</p>"
           }
         }
       },
@@ -8239,6 +9416,12 @@
             "smithy.api#documentation": "<p>The current state of point in time recovery:</p>\n         <ul>\n            <li>\n               <p>\n                  <code>ENABLED</code> - Point in time recovery is enabled.</p>\n            </li>\n            <li>\n               <p>\n                  <code>DISABLED</code> - Point in time recovery is disabled.</p>\n            </li>\n         </ul>"
           }
         },
+        "RecoveryPeriodInDays": {
+          "target": "com.amazonaws.dynamodb#RecoveryPeriodInDays",
+          "traits": {
+            "smithy.api#documentation": "<p>The number of preceding days for which continuous backups are taken and maintained.\n            Your table data is only recoverable to any point-in-time from within the configured\n            recovery period. This parameter is optional. If no value is provided, the value will\n            default to 35.</p>"
+          }
+        },
         "EarliestRestorableDateTime": {
           "target": "com.amazonaws.dynamodb#Date",
           "traits": {
@@ -8264,6 +9447,12 @@
           "traits": {
             "smithy.api#documentation": "<p>Indicates whether point in time recovery is enabled (true) or disabled (false) on the\n            table.</p>",
             "smithy.api#required": {}
+          }
+        },
+        "RecoveryPeriodInDays": {
+          "target": "com.amazonaws.dynamodb#RecoveryPeriodInDays",
+          "traits": {
+            "smithy.api#documentation": "<p>The number of preceding days for which continuous backups are taken and maintained.\n            Your table data is only recoverable to any point-in-time from within the configured\n            recovery period. This parameter is optional. If no value is provided, the value will\n            default to 35.</p>"
           }
         }
       },
@@ -8409,14 +9598,14 @@
         "ReadCapacityUnits": {
           "target": "com.amazonaws.dynamodb#PositiveLongObject",
           "traits": {
-            "smithy.api#documentation": "<p>The maximum number of strongly consistent reads consumed per second before DynamoDB\n            returns a <code>ThrottlingException</code>. For more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ProvisionedThroughput.html\">Specifying Read and Write Requirements</a> in the <i>Amazon DynamoDB\n                Developer Guide</i>.</p>\n         <p>If read/write capacity mode is <code>PAY_PER_REQUEST</code> the value is set to\n            0.</p>",
+            "smithy.api#documentation": "<p>The maximum number of strongly consistent reads consumed per second before DynamoDB\n            returns a <code>ThrottlingException</code>. For more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ProvisionedThroughput.html\">Specifying\n                Read and Write Requirements</a> in the <i>Amazon DynamoDB Developer\n                Guide</i>.</p>\n         <p>If read/write capacity mode is <code>PAY_PER_REQUEST</code> the value is set to\n            0.</p>",
             "smithy.api#required": {}
           }
         },
         "WriteCapacityUnits": {
           "target": "com.amazonaws.dynamodb#PositiveLongObject",
           "traits": {
-            "smithy.api#documentation": "<p>The maximum number of writes consumed per second before DynamoDB returns a\n                <code>ThrottlingException</code>. For more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ProvisionedThroughput.html\">Specifying Read and Write Requirements</a> in the <i>Amazon DynamoDB\n                Developer Guide</i>.</p>\n         <p>If read/write capacity mode is <code>PAY_PER_REQUEST</code> the value is set to\n            0.</p>",
+            "smithy.api#documentation": "<p>The maximum number of writes consumed per second before DynamoDB returns a\n                <code>ThrottlingException</code>. For more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ProvisionedThroughput.html\">Specifying\n                Read and Write Requirements</a> in the <i>Amazon DynamoDB Developer\n                Guide</i>.</p>\n         <p>If read/write capacity mode is <code>PAY_PER_REQUEST</code> the value is set to\n            0.</p>",
             "smithy.api#required": {}
           }
         }
@@ -8505,7 +9694,7 @@
         "TableName": {
           "target": "com.amazonaws.dynamodb#TableArn",
           "traits": {
-            "smithy.api#documentation": "<p>Name of the table in which to write the item. You can also provide the Amazon Resource Name (ARN) of the table in this parameter.</p>",
+            "smithy.api#documentation": "<p>Name of the table in which to write the item. You can also provide the Amazon Resource Name (ARN) of\n            the table in this parameter.</p>",
             "smithy.api#required": {}
           }
         },
@@ -8561,6 +9750,9 @@
         },
         {
           "target": "com.amazonaws.dynamodb#ProvisionedThroughputExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ReplicatedWriteConflictException"
         },
         {
           "target": "com.amazonaws.dynamodb#RequestLimitExceeded"
@@ -9033,6 +10225,15 @@
         "smithy.api#output": {}
       }
     },
+    "com.amazonaws.dynamodb#RecoveryPeriodInDays": {
+      "type": "integer",
+      "traits": {
+        "smithy.api#range": {
+          "min": 1,
+          "max": 35
+        }
+      }
+    },
     "com.amazonaws.dynamodb#RegionName": {
       "type": "string"
     },
@@ -9177,7 +10378,13 @@
         "OnDemandThroughputOverride": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
           "traits": {
-            "smithy.api#documentation": "<p>Overrides the maximum on-demand throughput settings for the specified replica table.</p>"
+            "smithy.api#documentation": "<p>Overrides the maximum on-demand throughput settings for the specified replica\n            table.</p>"
+          }
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#TableWarmThroughputDescription",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput value for this replica.</p>"
           }
         },
         "GlobalSecondaryIndexes": {
@@ -9225,7 +10432,7 @@
         "OnDemandThroughputOverride": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
           "traits": {
-            "smithy.api#documentation": "<p>Overrides the maximum on-demand throughput settings for the specified global secondary index in the specified replica table.</p>"
+            "smithy.api#documentation": "<p>Overrides the maximum on-demand throughput settings for the specified global secondary\n            index in the specified replica table.</p>"
           }
         }
       },
@@ -9306,7 +10513,13 @@
         "OnDemandThroughputOverride": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
           "traits": {
-            "smithy.api#documentation": "<p>Overrides the maximum on-demand throughput for the specified global secondary index in the specified replica table.</p>"
+            "smithy.api#documentation": "<p>Overrides the maximum on-demand throughput for the specified global secondary index in\n            the specified replica table.</p>"
+          }
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexWarmThroughputDescription",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput of the global secondary index for this replica.</p>"
           }
         }
       },
@@ -9635,6 +10848,18 @@
         "target": "com.amazonaws.dynamodb#ReplicaUpdate"
       }
     },
+    "com.amazonaws.dynamodb#ReplicatedWriteConflictException": {
+      "type": "structure",
+      "members": {
+        "message": {
+          "target": "com.amazonaws.dynamodb#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>The request was rejected because one or more items in the request are being modified by a request in another Region. </p>",
+        "smithy.api#error": "client"
+      }
+    },
     "com.amazonaws.dynamodb#ReplicationGroupUpdate": {
       "type": "structure",
       "members": {
@@ -9704,7 +10929,7 @@
         }
       },
       "traits": {
-        "smithy.api#documentation": "<p>The operation conflicts with the resource's availability. For example, you\n            attempted to recreate an existing table, or tried to delete a table currently in the\n                <code>CREATING</code> state.</p>",
+        "smithy.api#documentation": "<p>The operation conflicts with the resource's availability. For example:</p>\n         <ul>\n            <li>\n               <p>You attempted to recreate an existing table.</p>\n            </li>\n            <li>\n               <p>You tried to delete a table currently in the <code>CREATING</code> state.</p>\n            </li>\n            <li>\n               <p>You tried to update a resource that was already being updated.</p>\n            </li>\n         </ul>\n         <p>When appropriate, wait for the ongoing update to complete and attempt the request again.</p>",
         "smithy.api#error": "client"
       }
     },
@@ -9908,7 +11133,7 @@
         "aws.api#clientDiscoveredEndpoint": {
           "required": false
         },
-        "smithy.api#documentation": "<p>Restores the specified table to the specified point in time within\n                <code>EarliestRestorableDateTime</code> and <code>LatestRestorableDateTime</code>.\n            You can restore your table to any point in time during the last 35 days. Any number of\n            users can execute up to 50 concurrent restores (any type of restore) in a given account. </p>\n         <p>When you restore using point in time recovery, DynamoDB restores your table data to\n            the state based on the selected date and time (day:hour:minute:second) to a new table. </p>\n         <p>Along with data, the following are also included on the new restored table using point\n            in time recovery: </p>\n         <ul>\n            <li>\n               <p>Global secondary indexes (GSIs)</p>\n            </li>\n            <li>\n               <p>Local secondary indexes (LSIs)</p>\n            </li>\n            <li>\n               <p>Provisioned read and write capacity</p>\n            </li>\n            <li>\n               <p>Encryption settings</p>\n               <important>\n                  <p> All these settings come from the current settings of the source table at\n                        the time of restore. </p>\n               </important>\n            </li>\n         </ul>\n         <p>You must manually set up the following on the restored table:</p>\n         <ul>\n            <li>\n               <p>Auto scaling policies</p>\n            </li>\n            <li>\n               <p>IAM policies</p>\n            </li>\n            <li>\n               <p>Amazon CloudWatch metrics and alarms</p>\n            </li>\n            <li>\n               <p>Tags</p>\n            </li>\n            <li>\n               <p>Stream settings</p>\n            </li>\n            <li>\n               <p>Time to Live (TTL) settings</p>\n            </li>\n            <li>\n               <p>Point in time recovery settings</p>\n            </li>\n         </ul>"
+        "smithy.api#documentation": "<p>Restores the specified table to the specified point in time within\n                <code>EarliestRestorableDateTime</code> and <code>LatestRestorableDateTime</code>.\n            You can restore your table to any point in time in the last 35 days. You can set the recovery period to any value between 1 and 35 days. Any number of\n            users can execute up to 50 concurrent restores (any type of restore) in a given account. </p>\n         <p>When you restore using point in time recovery, DynamoDB restores your table data to\n            the state based on the selected date and time (day:hour:minute:second) to a new table. </p>\n         <p>Along with data, the following are also included on the new restored table using point\n            in time recovery: </p>\n         <ul>\n            <li>\n               <p>Global secondary indexes (GSIs)</p>\n            </li>\n            <li>\n               <p>Local secondary indexes (LSIs)</p>\n            </li>\n            <li>\n               <p>Provisioned read and write capacity</p>\n            </li>\n            <li>\n               <p>Encryption settings</p>\n               <important>\n                  <p> All these settings come from the current settings of the source table at\n                        the time of restore. </p>\n               </important>\n            </li>\n         </ul>\n         <p>You must manually set up the following on the restored table:</p>\n         <ul>\n            <li>\n               <p>Auto scaling policies</p>\n            </li>\n            <li>\n               <p>IAM policies</p>\n            </li>\n            <li>\n               <p>Amazon CloudWatch metrics and alarms</p>\n            </li>\n            <li>\n               <p>Tags</p>\n            </li>\n            <li>\n               <p>Stream settings</p>\n            </li>\n            <li>\n               <p>Time to Live (TTL) settings</p>\n            </li>\n            <li>\n               <p>Point in time recovery settings</p>\n            </li>\n         </ul>"
       }
     },
     "com.amazonaws.dynamodb#RestoreTableToPointInTimeInput": {
@@ -11045,13 +12270,25 @@
         "DeletionProtectionEnabled": {
           "target": "com.amazonaws.dynamodb#DeletionProtectionEnabled",
           "traits": {
-            "smithy.api#documentation": "<p>Indicates whether deletion protection is enabled (true) or disabled (false) on the table.</p>"
+            "smithy.api#documentation": "<p>Indicates whether deletion protection is enabled (true) or disabled (false) on the\n            table.</p>"
           }
         },
         "OnDemandThroughput": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughput",
           "traits": {
-            "smithy.api#documentation": "<p>The maximum number of read and write units for the specified on-demand table. If you use this parameter, you must specify <code>MaxReadRequestUnits</code>, <code>MaxWriteRequestUnits</code>, or both.</p>"
+            "smithy.api#documentation": "<p>The maximum number of read and write units for the specified on-demand table. If you\n            use this parameter, you must specify <code>MaxReadRequestUnits</code>,\n                <code>MaxWriteRequestUnits</code>, or both.</p>"
+          }
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#TableWarmThroughputDescription",
+          "traits": {
+            "smithy.api#documentation": "<p>Describes the warm throughput value of the base table.</p>"
+          }
+        },
+        "MultiRegionConsistency": {
+          "target": "com.amazonaws.dynamodb#MultiRegionConsistency",
+          "traits": {
+            "smithy.api#documentation": "<p>Indicates one of the following consistency modes for a global table:</p>\n         <ul>\n            <li>\n               <p>\n                  <code>EVENTUAL</code>: Indicates that the global table is configured for multi-Region eventual consistency.</p>\n            </li>\n            <li>\n               <p>\n                  <code>STRONG</code>: Indicates that the global table is configured for multi-Region strong consistency (preview).</p>\n               <note>\n                  <p>Multi-Region strong consistency (MRSC) is a new DynamoDB global tables capability currently available in preview mode. For more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PreviewFeatures.html#multi-region-strong-consistency-gt\">Global tables multi-Region strong consistency</a>.</p>\n               </note>\n            </li>\n         </ul>\n         <p>If you don't specify this field, the global table consistency mode defaults to <code>EVENTUAL</code>.</p>"
           }
         }
       },
@@ -11152,6 +12389,32 @@
         }
       }
     },
+    "com.amazonaws.dynamodb#TableWarmThroughputDescription": {
+      "type": "structure",
+      "members": {
+        "ReadUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the base table's warm throughput value in read units per second.</p>"
+          }
+        },
+        "WriteUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the base table's warm throughput value in write units per second.</p>"
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.dynamodb#TableStatus",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents warm throughput value of the base table..</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Represents the warm throughput value (in read units per second and write units per\n            second) of the base table.</p>"
+      }
+    },
     "com.amazonaws.dynamodb#Tag": {
       "type": "structure",
       "members": {
@@ -11224,7 +12487,7 @@
         "aws.api#clientDiscoveredEndpoint": {
           "required": false
         },
-        "smithy.api#documentation": "<p>Associate a set of tags with an Amazon DynamoDB resource. You can then activate these\n            user-defined tags so that they appear on the Billing and Cost Management console for\n            cost allocation tracking. You can call TagResource up to five times per second, per\n            account. </p>\n         <p>For an overview on tagging DynamoDB resources, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tagging.html\">Tagging for DynamoDB</a>\n            in the <i>Amazon DynamoDB Developer Guide</i>.</p>"
+        "smithy.api#documentation": "<p>Associate a set of tags with an Amazon DynamoDB resource. You can then activate these\n            user-defined tags so that they appear on the Billing and Cost Management console for\n            cost allocation tracking. You can call TagResource up to five times per second, per\n            account. </p>\n         <ul>\n            <li>\n               <p>\n                  <code>TagResource</code> is an asynchronous operation. If you issue a <a>ListTagsOfResource</a> request immediately after a <code>TagResource</code> request, DynamoDB might return your previous tag set, if there was one, or an empty tag set. This is because <code>ListTagsOfResource</code> uses an eventually consistent query, and the metadata for your tags or table might not be available at that moment. Wait for a few seconds, and then try the <code>ListTagsOfResource</code> request again.</p>\n            </li>\n            <li>\n               <p>The application or removal of tags using <code>TagResource</code> and <code>UntagResource</code> APIs is eventually consistent. <code>ListTagsOfResource</code> API will only reflect the changes after a few seconds.</p>\n            </li>\n         </ul>\n         <p>For an overview on tagging DynamoDB resources, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tagging.html\">Tagging for DynamoDB</a>\n            in the <i>Amazon DynamoDB Developer Guide</i>.</p>"
       }
     },
     "com.amazonaws.dynamodb#TagResourceInput": {
@@ -11657,7 +12920,7 @@
         "aws.api#clientDiscoveredEndpoint": {
           "required": false
         },
-        "smithy.api#documentation": "<p>Removes the association of tags from an Amazon DynamoDB resource. You can call\n                <code>UntagResource</code> up to five times per second, per account. </p>\n         <p>For an overview on tagging DynamoDB resources, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tagging.html\">Tagging for DynamoDB</a>\n            in the <i>Amazon DynamoDB Developer Guide</i>.</p>"
+        "smithy.api#documentation": "<p>Removes the association of tags from an Amazon DynamoDB resource. You can call\n                <code>UntagResource</code> up to five times per second, per account. </p>\n         <ul>\n            <li>\n               <p>\n                  <code>UntagResource</code> is an asynchronous operation. If you issue a <a>ListTagsOfResource</a> request immediately after an <code>UntagResource</code> request, DynamoDB might return your previous tag set, if there was one, or an empty tag set. This is because <code>ListTagsOfResource</code> uses an eventually consistent query, and the metadata for your tags or table might not be available at that moment. Wait for a few seconds, and then try the <code>ListTagsOfResource</code> request again.</p>\n            </li>\n            <li>\n               <p>The application or removal of tags using <code>TagResource</code> and <code>UntagResource</code> APIs is eventually consistent. <code>ListTagsOfResource</code> API will only reflect the changes after a few seconds.</p>\n            </li>\n         </ul>\n         <p>For an overview on tagging DynamoDB resources, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tagging.html\">Tagging for DynamoDB</a>\n            in the <i>Amazon DynamoDB Developer Guide</i>.</p>"
       }
     },
     "com.amazonaws.dynamodb#UntagResourceInput": {
@@ -11702,7 +12965,7 @@
         "TableName": {
           "target": "com.amazonaws.dynamodb#TableArn",
           "traits": {
-            "smithy.api#documentation": "<p>Name of the table for the <code>UpdateItem</code> request. You can also provide the Amazon Resource Name (ARN) of the table in this parameter.</p>",
+            "smithy.api#documentation": "<p>Name of the table for the <code>UpdateItem</code> request. You can also provide the\n            Amazon Resource Name (ARN) of the table in this parameter.</p>",
             "smithy.api#required": {}
           }
         },
@@ -11761,7 +13024,7 @@
         "aws.api#clientDiscoveredEndpoint": {
           "required": false
         },
-        "smithy.api#documentation": "<p>\n            <code>UpdateContinuousBackups</code> enables or disables point in time recovery for\n            the specified table. A successful <code>UpdateContinuousBackups</code> call returns the\n            current <code>ContinuousBackupsDescription</code>. Continuous backups are\n                <code>ENABLED</code> on all tables at table creation. If point in time recovery is\n            enabled, <code>PointInTimeRecoveryStatus</code> will be set to ENABLED.</p>\n         <p> Once continuous backups and point in time recovery are enabled, you can restore to\n            any point in time within <code>EarliestRestorableDateTime</code> and\n                <code>LatestRestorableDateTime</code>. </p>\n         <p>\n            <code>LatestRestorableDateTime</code> is typically 5 minutes before the current time.\n            You can restore your table to any point in time during the last 35 days. </p>"
+        "smithy.api#documentation": "<p>\n            <code>UpdateContinuousBackups</code> enables or disables point in time recovery for\n            the specified table. A successful <code>UpdateContinuousBackups</code> call returns the\n            current <code>ContinuousBackupsDescription</code>. Continuous backups are\n                <code>ENABLED</code> on all tables at table creation. If point in time recovery is\n            enabled, <code>PointInTimeRecoveryStatus</code> will be set to ENABLED.</p>\n         <p> Once continuous backups and point in time recovery are enabled, you can restore to\n            any point in time within <code>EarliestRestorableDateTime</code> and\n                <code>LatestRestorableDateTime</code>. </p>\n         <p>\n            <code>LatestRestorableDateTime</code> is typically 5 minutes before the current time.\n            You can restore your table to any point in time in the last 35 days. You can set the recovery period to any value between 1 and 35 days.</p>"
       }
     },
     "com.amazonaws.dynamodb#UpdateContinuousBackupsInput": {
@@ -11896,7 +13159,13 @@
         "OnDemandThroughput": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughput",
           "traits": {
-            "smithy.api#documentation": "<p>Updates the maximum number of read and write units for the specified global secondary index. If you use this parameter, you must specify <code>MaxReadRequestUnits</code>, <code>MaxWriteRequestUnits</code>, or both.</p>"
+            "smithy.api#documentation": "<p>Updates the maximum number of read and write units for the specified global secondary\n            index. If you use this parameter, you must specify <code>MaxReadRequestUnits</code>,\n                <code>MaxWriteRequestUnits</code>, or both.</p>"
+          }
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput value of the new provisioned throughput settings to be\n            applied to a global secondary index.</p>"
           }
         }
       },
@@ -12101,6 +13370,9 @@
         },
         {
           "target": "com.amazonaws.dynamodb#ProvisionedThroughputExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ReplicatedWriteConflictException"
         },
         {
           "target": "com.amazonaws.dynamodb#RequestLimitExceeded"
@@ -12526,10 +13798,22 @@
             "smithy.api#documentation": "<p>Indicates whether deletion protection is to be enabled (true) or disabled (false) on\n            the table.</p>"
           }
         },
+        "MultiRegionConsistency": {
+          "target": "com.amazonaws.dynamodb#MultiRegionConsistency",
+          "traits": {
+            "smithy.api#documentation": "<p>Specifies the consistency mode for a new global table. This parameter is only valid when you create a global table by specifying one or more <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_ReplicationGroupUpdate.html#DDB-Type-ReplicationGroupUpdate-Create\">Create</a> actions in the <a href=\"https://docs.aws.amazon.com/https:/docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_UpdateTable.html#DDB-UpdateTable-request-ReplicaUpdates\">ReplicaUpdates</a> action list.</p>\n         <p>You can specify one of the following consistency modes:</p>\n         <ul>\n            <li>\n               <p>\n                  <code>EVENTUAL</code>: Configures a new global table for multi-Region eventual consistency. This is the default consistency mode for global tables.</p>\n            </li>\n            <li>\n               <p>\n                  <code>STRONG</code>: Configures a new global table for multi-Region strong consistency (preview).</p>\n               <note>\n                  <p>Multi-Region strong consistency (MRSC) is a new DynamoDB global tables capability currently available in preview mode. For more information, see <a href=\"https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PreviewFeatures.html#multi-region-strong-consistency-gt\">Global tables multi-Region strong consistency</a>.</p>\n               </note>\n            </li>\n         </ul>\n         <p>If you don't specify this parameter, the global table consistency mode defaults to <code>EVENTUAL</code>.</p>"
+          }
+        },
         "OnDemandThroughput": {
           "target": "com.amazonaws.dynamodb#OnDemandThroughput",
           "traits": {
             "smithy.api#documentation": "<p>Updates the maximum number of read and write units for the specified table in\n            on-demand capacity mode. If you use this parameter, you must specify\n                <code>MaxReadRequestUnits</code>, <code>MaxWriteRequestUnits</code>, or both.</p>"
+          }
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the warm throughput (in read units per second and write units per second) for updating a table.</p>"
           }
         }
       },
@@ -12690,6 +13974,26 @@
       },
       "traits": {
         "smithy.api#output": {}
+      }
+    },
+    "com.amazonaws.dynamodb#WarmThroughput": {
+      "type": "structure",
+      "members": {
+        "ReadUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the number of read operations your base table can instantaneously\n            support.</p>"
+          }
+        },
+        "WriteUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {
+            "smithy.api#documentation": "<p>Represents the number of write operations your base table can instantaneously\n            support.</p>"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#documentation": "<p>Provides visibility into the number of read and write operations your table or\n            secondary index can instantaneously support. The settings can be modified using the\n                <code>UpdateTable</code> operation to meet the throughput requirements of an\n            upcoming peak event.</p>"
       }
     },
     "com.amazonaws.dynamodb#WriteRequest": {
