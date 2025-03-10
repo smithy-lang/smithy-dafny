@@ -6,7 +6,7 @@ replace github.com/aws/aws-cryptographic-material-providers-library/releases/go/
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.28.3
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.37.0
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.41.1
 	github.com/aws/smithy-go v1.22.0
 	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1
 	github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library v0.0.0-00010101000000-000000000000
