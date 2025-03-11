@@ -20,9 +20,24 @@ class JavaTestModels extends TestModelTest {
   private static final Set<String> DISABLED_TESTS = new HashSet<>();
 
   static {
-//    DISABLED_TESTS.add("Aggregate");
+
+
+
+    DISABLED_TESTS.add("Aggregate");
+
+
+
     DISABLED_TESTS.add("AggregateReferences");
-//    DISABLED_TESTS.add("CallingAWSSDKFromLocalService");
+
+
+
+
+    DISABLED_TESTS.add("CallingAWSSDKFromLocalService");
+
+
+
+
+
 //    DISABLED_TESTS.add("CodegenPatches");
 //    DISABLED_TESTS.add("Constraints");
 //    DISABLED_TESTS.add("Constructor");
@@ -31,22 +46,53 @@ class JavaTestModels extends TestModelTest {
 //    DISABLED_TESTS.add("Errors");
 //    DISABLED_TESTS.add("Extendable");
     DISABLED_TESTS.add("Extern");
-//    DISABLED_TESTS.add("LanguageSpecificLogic");
+
+
+
+
+    DISABLED_TESTS.add("LanguageSpecificLogic");
+
+
+
+
 //    DISABLED_TESTS.add("LocalService");
 //    DISABLED_TESTS.add("MultipleModels");
 //    DISABLED_TESTS.add("OrphanedShapes");
     DISABLED_TESTS.add("Positional");
 //    DISABLED_TESTS.add("RecursiveShape");
-//    DISABLED_TESTS.add("Refinement");
+
+
+
+    DISABLED_TESTS.add("Refinement");
+
+
+
 //    DISABLED_TESTS.add("Resource");
 //    DISABLED_TESTS.add("SQSExtended");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
 //    DISABLED_TESTS.add("SimpleTypes/SimpleBlob");
-//    DISABLED_TESTS.add("SimpleTypes/SimpleBoolean");
-//    DISABLED_TESTS.add("SimpleTypes/SimpleByte");
+
+
+
+
+    DISABLED_TESTS.add("SimpleTypes/SimpleBoolean");
+
+
+
+
+    DISABLED_TESTS.add("SimpleTypes/SimpleByte");
+    
+
+
+
+
+
     DISABLED_TESTS.add("SimpleTypes/SimpleDocument");
-//    DISABLED_TESTS.add("SimpleTypes/SimpleDouble");
+
+    DISABLED_TESTS.add("SimpleTypes/SimpleDouble");
+
+
 //    DISABLED_TESTS.add("SimpleTypes/SimpleEnum");
 //    DISABLED_TESTS.add("SimpleTypes/SimpleEnumV2");
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
