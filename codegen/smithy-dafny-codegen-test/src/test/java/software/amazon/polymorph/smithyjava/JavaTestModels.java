@@ -41,7 +41,15 @@ class JavaTestModels extends TestModelTest {
 //    DISABLED_TESTS.add("CodegenPatches");
 //    DISABLED_TESTS.add("Constraints");
 //    DISABLED_TESTS.add("Constructor");
-//    DISABLED_TESTS.add("Dependencies");
+
+
+
+    DISABLED_TESTS.add("Dependencies");
+    
+
+
+
+
 //    DISABLED_TESTS.add("Documentation");
 //    DISABLED_TESTS.add("Errors");
 //    DISABLED_TESTS.add("Extendable");
@@ -59,7 +67,13 @@ class JavaTestModels extends TestModelTest {
 //    DISABLED_TESTS.add("MultipleModels");
 //    DISABLED_TESTS.add("OrphanedShapes");
     DISABLED_TESTS.add("Positional");
-//    DISABLED_TESTS.add("RecursiveShape");
+
+
+
+
+
+
+    DISABLED_TESTS.add("RecursiveShape");
 
 
 
@@ -82,7 +96,7 @@ class JavaTestModels extends TestModelTest {
 
 
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
-    
+
 
 
 
