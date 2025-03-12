@@ -9,7 +9,15 @@ module  SimpleStringImplTest {
     import UTF8
     method{:test} GetString(){
         var client :- expect SimpleString.SimpleString();
-        TestGetString(client);
+        TestAllCases(client);
+    }
+
+    method TestAllCases(client: ISimpleTypesStringClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+      TestGetString(client);
         TestGetStringKnownValue(client);
         TestGetStringNonAscii(client);
         TestGetStringSurrogatePair(client);

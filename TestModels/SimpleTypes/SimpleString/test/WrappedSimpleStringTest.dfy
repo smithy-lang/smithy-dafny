@@ -9,12 +9,6 @@ module WrappedSimpleTypesStringTest {
     import opened Wrappers
     method{:test} GetString() {
         var client :- expect WrappedSimpleTypesStringService.WrappedSimpleString();
-        SimpleStringImplTest.TestGetString(client);
-        SimpleStringImplTest.TestGetStringKnownValue(client);
-        SimpleStringImplTest.TestGetStringUTF8(client);
-        SimpleStringImplTest.TestGetStringNonAscii(client);
-        SimpleStringImplTest.TestGetStringSurrogatePair(client);
-        SimpleStringImplTest.TestGetStringMultipleSurrogatePair(client);
-        SimpleStringImplTest.TestGetStringMultipleSurrogatePairAsString(client);
+        SimpleStringImplTest.TestAllCases(client);
     }
 }
