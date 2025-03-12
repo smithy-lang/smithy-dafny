@@ -6,7 +6,6 @@ import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SymbolUtils;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -224,5 +223,31 @@ public class GoCodegenUtils {
       return true;
     }
     return false;
+  }
+
+  public static void importAwsSDKShape(
+    final Shape shape,
+    final Model model,
+    final GoWriter writer
+  ) {
+    final var typesNamespace = SmithyNameResolver.smithyTypesNamespace(
+      shape,
+      model
+    );
+    if (typesNamespace.endsWith("types")) {
+      writer.addImportFromModule(
+        SmithyNameResolver.getGoModuleNameForSdkNamespace(
+          shape.getId().getNamespace()
+        ),
+        "types",
+        typesNamespace
+      );
+    } else {
+      writer.addImport(
+        SmithyNameResolver.getGoModuleNameForSdkNamespace(
+          shape.getId().getNamespace()
+        )
+      );
+    }
   }
 }

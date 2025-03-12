@@ -518,13 +518,7 @@ public class ValidationGenerator {
         );
         if (isExternalShape) {
           if (SmithyNameResolver.isShapeFromAWSSDK(currentShape)) {
-            writer.addImportFromModule(
-              SmithyNameResolver.getGoModuleNameForSdkNamespace(
-                currentShape.getId().getNamespace()
-              ),
-              "types",
-              SmithyNameResolver.smithyTypesNamespace(currentShape, model)
-            );
+            GoCodegenUtils.importAwsSDKShape(currentShape, model, writer);
           } else {
             writer.addImportFromModule(
               SmithyNameResolver.getGoModuleNameForSmithyNamespace(
@@ -611,13 +605,7 @@ public class ValidationGenerator {
         );
         if (isExternalShape) {
           if (SmithyNameResolver.isShapeFromAWSSDK(currentShape)) {
-            writer.addImportFromModule(
-              SmithyNameResolver.getGoModuleNameForSdkNamespace(
-                currentShape.getId().getNamespace()
-              ),
-              "types",
-              SmithyNameResolver.smithyTypesNamespace(currentShape, model)
-            );
+            GoCodegenUtils.importAwsSDKShape(currentShape, model, writer);
           } else {
             writer.addImportFromModule(
               SmithyNameResolver.getGoModuleNameForSmithyNamespace(
@@ -682,13 +670,7 @@ public class ValidationGenerator {
       );
       if (isExternalShape) {
         if (SmithyNameResolver.isShapeFromAWSSDK(currentShape)) {
-          writer.addImportFromModule(
-            SmithyNameResolver.getGoModuleNameForSdkNamespace(
-              currentShape.getId().getNamespace()
-            ),
-            "types",
-            SmithyNameResolver.smithyTypesNamespace(currentShape, model)
-          );
+          GoCodegenUtils.importAwsSDKShape(currentShape, model, writer);
         } else {
           writer.addImportFromModule(
             SmithyNameResolver.getGoModuleNameForSmithyNamespace(
