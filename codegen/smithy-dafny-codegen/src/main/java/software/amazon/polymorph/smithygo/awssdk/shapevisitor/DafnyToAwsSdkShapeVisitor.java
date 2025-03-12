@@ -133,7 +133,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       : dataSource;
     return """
     func () []byte {
-    var b []byte
+    b := []byte{}
     if %s == nil {
         return nil
     }
@@ -488,6 +488,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       }
     }
 
+    writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "UTF8");
     return """
     func() (%sstring) {
       %s

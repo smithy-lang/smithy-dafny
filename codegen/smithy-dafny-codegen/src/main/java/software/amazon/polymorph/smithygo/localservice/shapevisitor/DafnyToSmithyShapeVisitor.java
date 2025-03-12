@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
 import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+import static software.amazon.polymorph.smithygo.utils.Constants.SMITHY_DAFNY_STD_LIB_GO;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -286,7 +287,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     // Blob shape is inherently value type
     return """
     return func () []byte {
-    var b []byte
+    b := []byte{}
     if %s == nil {
         return nil
     }
@@ -666,6 +667,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
             s := string(dafny.ToByteArray(%s.(dafny.Sequence)))
         """.formatted(dataSource);
+    } else {
+      writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "UTF8");
     }
 
     return """
