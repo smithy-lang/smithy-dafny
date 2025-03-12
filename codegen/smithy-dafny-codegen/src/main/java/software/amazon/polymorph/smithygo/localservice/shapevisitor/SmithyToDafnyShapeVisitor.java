@@ -560,7 +560,10 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
         writer.addUseImports(SmithyGoDependency.stdlib("unicode/utf8"));
+      } else {
+        writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "UTF8");
       }
+
       final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
         ? """
             dafny.SeqOf(func () []interface{} {
