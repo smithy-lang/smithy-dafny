@@ -280,13 +280,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String blobShape(final BlobShape shape) {
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     // Blob shape is inherently value type
@@ -310,13 +304,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String structureShape(final StructureShape shape) {
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     if (shape.hasTrait(ReferenceTrait.class)) {
       return referenceStructureShape(shape);
@@ -425,13 +413,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String listShape(final ListShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     final StringBuilder typeConversionMethodBuilder = new StringBuilder();
     final MemberShape memberShape = shape.getMember();
@@ -480,13 +462,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String mapShape(final MapShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     final StringBuilder typeConversionMethodBuilder = new StringBuilder();
     final MemberShape keyMemberShape = shape.getKey();
@@ -546,13 +522,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String booleanShape(final BooleanShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     if (this.isOptional) {
       return """
@@ -580,13 +550,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String stringShape(final StringShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     if (shape.hasTrait(EnumTrait.class)) {
       if (
@@ -721,13 +685,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String integerShape(final IntegerShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     if (isOptional) {
       return (
@@ -754,13 +712,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String longShape(final LongShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     if (isOptional) {
       return (
@@ -788,13 +740,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String doubleShape(final DoubleShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
     writer.addUseImports(SmithyGoDependency.MATH);
     if (isOptional) {
@@ -833,13 +779,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String unionShape(final UnionShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
     if (SmithyNameResolver.isShapeFromAWSSDK(shape)) {
-      writer.addImportFromModule(
-        SmithyNameResolver.getGoModuleNameForSdkNamespace(
-          shape.getId().getNamespace()
-        ),
-        "types",
-        SmithyNameResolver.smithyTypesNamespace(shape, context.model())
-      );
+      GoCodegenUtils.importAwsSDKShape(shape, context.model(), writer);
     }
 
     String nilCheck = "";
