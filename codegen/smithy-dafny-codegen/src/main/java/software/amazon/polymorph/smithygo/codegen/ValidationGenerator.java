@@ -200,6 +200,11 @@ public class ValidationGenerator {
         );
         break;
       case STRUCTURE:
+        // We don't generate aws sdk shapes. So, we cannot call Validate in aws sdk shapes.
+        // Constraint in AWS SDK should be validated by AWS SDK.
+        if (SmithyNameResolver.isShapeFromAWSSDK(currentShape)) {
+          return;
+        }
         if (!currentShape.hasTrait(ReferenceTrait.class)) {
           final boolean maybeNull =
             memberShape.isOptional() &&
