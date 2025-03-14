@@ -18,9 +18,9 @@ var props = Properties().apply {
 }
 var dafnyVersion = props.getProperty("dafnyVersion")
 
-group = "simple"
+group = "simple.simpleenumv2"
 version = "1.0-SNAPSHOT"
-description = "Constraints"
+description = "SimpleEnumV2"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(8))
@@ -49,6 +49,11 @@ dependencies {
 }
 
 publishing {
+    publications.create<MavenPublication>("mavenLocal") {
+        groupId = group as String?
+        artifactId = description
+        from(components["java"])
+    }
     publications.create<MavenPublication>("maven") {
         groupId = "simple"
         artifactId = "Constraints"
