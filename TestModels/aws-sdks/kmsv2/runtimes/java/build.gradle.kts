@@ -19,7 +19,7 @@ var dafnyVersion = props.getProperty("dafnyVersion")
 
 group = "software.amazon.cryptography"
 version = "1.0-SNAPSHOT"
-description = "ComAmazonawsKms"
+description = "ComAmazonawsKmsV2"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(8))

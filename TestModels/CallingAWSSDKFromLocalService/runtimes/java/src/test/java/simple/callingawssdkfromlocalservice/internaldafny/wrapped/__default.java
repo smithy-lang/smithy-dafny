@@ -3,26 +3,26 @@
 package simple.callingawssdkfromlocalservice.internaldafny.wrapped;
 
 import Wrappers_Compile.Result;
-import simple.callingawssdkfromlocalservice.SimpleCallingAWSSDKFromLocalService;
+import simple.callingawssdkfromlocalservice.SimpleCallingawssdkfromlocalservice;
 import simple.callingawssdkfromlocalservice.ToNative;
 import simple.callingawssdkfromlocalservice.internaldafny.types.Error;
 import simple.callingawssdkfromlocalservice.internaldafny.types.ISimpleCallingAWSSDKFromLocalServiceClient;
-import simple.callingawssdkfromlocalservice.internaldafny.types.SimpleCallingAWSSDKFromLocalServiceConfig;
-import simple.callingawssdkfromlocalservice.wrapped.TestSimpleCallingAWSSDKFromLocalService;
+import simple.callingawssdkfromlocalservice.internaldafny.types.SimpleCallingawssdkfromlocalserviceConfig;
+import simple.callingawssdkfromlocalservice.wrapped.TestSimpleCallingawssdkfromlocalservice;
 
 public class __default extends _ExternBase___default {
 
   public static Result<
     ISimpleCallingAWSSDKFromLocalServiceClient,
     Error
-  > WrappedSimpleCallingAWSSDKFromLocalService(SimpleCallingAWSSDKFromLocalServiceConfig config) {
-    simple.callingawssdkfromlocalservice.model.SimpleCallingAWSSDKFromLocalServiceConfig wrappedConfig =
-      ToNative.SimpleCallingAWSSDKFromLocalServiceConfig(config);
-    simple.callingawssdkfromlocalservice.SimpleCallingAWSSDKFromLocalService impl = SimpleCallingAWSSDKFromLocalService
+  > WrappedSimpleCallingawssdkfromlocalservice(SimpleCallingawssdkfromlocalserviceConfig config) {
+    simple.callingawssdkfromlocalservice.model.SimpleCallingawssdkfromlocalserviceConfig wrappedConfig =
+      ToNative.SimpleCallingawssdkfromlocalserviceConfig(config);
+    simple.callingawssdkfromlocalservice.SimpleCallingawssdkfromlocalservice impl = SimpleCallingawssdkfromlocalservice
       .builder()
-      .SimpleCallingAWSSDKFromLocalServiceConfig(wrappedConfig)
+      .SimpleCallingawssdkfromlocalserviceConfig(wrappedConfig)
       .build();
-    TestSimpleCallingAWSSDKFromLocalService wrappedClient = TestSimpleCallingAWSSDKFromLocalService
+    TestSimpleCallingawssdkfromlocalservice wrappedClient = TestSimpleCallingawssdkfromlocalservice
       .builder()
       .impl(impl)
       .build();
