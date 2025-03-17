@@ -45,6 +45,10 @@ dependencies {
     implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
+    implementation("simple.errors:Errors:1.0-SNAPSHOT")
+    implementation("simple.extendable.resources:SimpleExtendableResources:1.0-SNAPSHOT")
+    implementation("simple.resources:SimpleResources:1.0-SNAPSHOT")
+    implementation("simple.constraints:Constraints:1.0-SNAPSHOT")
     testImplementation("org.testng:testng:7.5")
 }
 
