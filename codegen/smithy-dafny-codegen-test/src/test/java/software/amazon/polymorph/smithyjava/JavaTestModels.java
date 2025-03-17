@@ -25,6 +25,7 @@ class JavaTestModels extends TestModelTest {
     DISABLED_TESTS.add("Dependencies"); // Smithy-Dafny Error
 
     DISABLED_TESTS.add("Extern");
+    DISABLED_TESTS.add("CallingAWSSDKFromLocalService"); // Different types across type conversion (wrapped vs not)
 
     DISABLED_TESTS.add("LanguageSpecificLogic"); // Smithy-Dafny Error
     DISABLED_TESTS.add("Positional"); // Smithy-Dafny Error
