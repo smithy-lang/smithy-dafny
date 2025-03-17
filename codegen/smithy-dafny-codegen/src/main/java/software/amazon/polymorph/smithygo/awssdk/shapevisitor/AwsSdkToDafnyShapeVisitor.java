@@ -439,6 +439,8 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           shape.toShapeId().getName()
         );
       }
+
+      writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "UTF8");
       final var underlyingType =
         """
             func () dafny.Sequence {
