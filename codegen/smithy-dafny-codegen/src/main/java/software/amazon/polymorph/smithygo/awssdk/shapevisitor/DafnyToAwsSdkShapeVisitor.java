@@ -722,7 +722,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     return """
     	func() %stime.Time {
     	%s
-      a := UTF8.Encode(%s).Dtor_value()
+      a := UTF8.Encode(%s.(dafny.Sequence)).Dtor_value()
       s := string(dafny.ToByteArray(a.(dafny.Sequence)))
     	if len(s) == 0 {
     		panic("timestamp string is empty")

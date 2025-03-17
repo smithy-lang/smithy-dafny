@@ -885,14 +885,14 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
               if %s == nil {
             		return nil
             	}
-      """;
+      """.formatted(dataSource);
     var nilReturn = isOptional
       ? "return nil"
       : "panic(\"timestamp string is empty\")";
     return """
     	return func() %stime.Time {
     	%s
-    	a := UTF8.Encode(%s).Dtor_value()
+    	a := UTF8.Encode(%s.(dafny.Sequence)).Dtor_value()
       s := string(dafny.ToByteArray(a.(dafny.Sequence)))
     	if len(s) == 0 {
     	%s
