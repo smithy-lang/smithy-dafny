@@ -880,54 +880,35 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String timestampShape(final TimestampShape shape) {
     writer.addImport("time");
-    if (isOptional) {
-      return """
-      	return func() *time.Time {
-      	var s string
-      	if %s == nil {
-      		return nil
-      	}
-      	for i := dafny.Iterate(%s.(dafny.Sequence)); ; {
-      		val, ok := i()
-      		if !ok {
-      			break
-      		} else {
-      			s = s + string(val.(dafny.Char))
-      		}
-      	}
-      	if len(s) == 0 {
-      		return nil
-      	} else {
-      		t, err := time.Parse("2006-01-02T15:04:05.999999Z", s)
-      		if err != nil {
-      			panic(err)
-      		}
-      		return &t
-      	}
-      }()""".formatted(dataSource, dataSource);
-    } else {
-      return """
-      	return func() time.Time {
-      	var s string
-
-      	for i := dafny.Iterate(%s); ; {
-      		val, ok := i()
-      		if !ok {
-      			break
-      		} else {
-      			s = s + string(val.(dafny.Char))
-      		}
-      	}
-      	if len(s) == 0 {
-      		panic("timestamp string is empty")
-      	} else {
-      		t, err := time.Parse("2006-01-02T15:04:05.999999Z", s)
-      		if err != nil {
-      			panic(err)
-      		}
-      		return t
-      	}
-      }()""".formatted(dataSource);
-    }
+    var nilCheck =
+      """
+              if %s == nil {
+            		return nil
+            	}
+      """.formatted(dataSource);
+    var nilReturn = isOptional
+      ? "return nil"
+      : "panic(\"timestamp string is empty\")";
+    return """
+    	return func() %stime.Time {
+    	%s
+    	a := UTF8.Encode(%s.(dafny.Sequence)).Dtor_value()
+      s := string(dafny.ToByteArray(a.(dafny.Sequence)))
+    	if len(s) == 0 {
+    	%s
+    	} else {
+    		t, err := time.Parse("2006-01-02T15:04:05.999999Z", s)
+    		if err != nil {
+    			panic(err)
+    		}
+    		return %st
+    	}
+    }()""".formatted(
+        isOptional ? "*" : "",
+        isOptional ? nilCheck : "",
+        dataSource,
+        nilReturn,
+        isOptional ? "&" : ""
+      );
   }
 }

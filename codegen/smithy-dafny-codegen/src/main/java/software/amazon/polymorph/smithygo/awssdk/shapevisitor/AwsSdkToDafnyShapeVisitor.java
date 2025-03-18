@@ -684,7 +684,14 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           nilCheck,
           dataSource,
           someWrapIfRequired.formatted(
-            "dafny.SeqOfChars([]dafny.Char(formattedTime)...)"
+            """
+            func () dafny.Sequence {
+              res, err := UTF8.DecodeFromNativeGoByteArray([]byte(formattedTime))
+              if err != nil {
+                panic("invalid utf8 input provided")
+               }
+            return res
+            }()"""
           )
         );
     return conversionCode;

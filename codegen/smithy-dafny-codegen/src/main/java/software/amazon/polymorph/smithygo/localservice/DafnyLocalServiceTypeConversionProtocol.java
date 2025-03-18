@@ -1351,7 +1351,13 @@ public class DafnyLocalServiceTypeConversionProtocol
             	for _, i2 := range nativeInput.ListOfErrors {
                    e = append(e, Error_ToDafny(i2))
             	}
-            	return $L.Companion_Error_.Create_CollectionOfErrors_(dafny.SeqOf(e...), dafny.SeqOfChars([]dafny.Char(nativeInput.Message)...))
+              return $L.Companion_Error_.Create_CollectionOfErrors_(dafny.SeqOf(e...), func () dafny.Sequence {
+                                                                                         res, err := UTF8.DecodeFromNativeGoByteArray([]byte(nativeInput.Message))
+                                                                                         if err != nil {
+                                                                                           panic("invalid utf8 input provided")
+                                                                                         }
+                                                                                         return res
+                                                                                       }())
             }
             func OpaqueError_Input_ToDafny(nativeInput $L.OpaqueError)($L.Error) {
             	return $L.Companion_Error_.Create_Opaque_(nativeInput.ErrObject)
@@ -1744,29 +1750,23 @@ public class DafnyLocalServiceTypeConversionProtocol
         writer -> {
           writer.write(
             """
-            func CollectionOfErrors_Output_FromDafny(dafnyOutput $L.Error)($L.CollectionOfErrors) {
-                listOfErrors := dafnyOutput.Dtor_list()
-                message := dafnyOutput.Dtor_message()
-                t := $L.CollectionOfErrors {}
-                for i := dafny.Iterate(listOfErrors) ; ; {
-                    val, ok := i()
-                    if !ok {
-                        break;
-                    }
-                    err := val.($L.Error)
-                    t.ListOfErrors = append(t.ListOfErrors, Error_FromDafny(err))
+                 func CollectionOfErrors_Output_FromDafny(dafnyOutput $L.Error)($L.CollectionOfErrors) {
+                     listOfErrors := dafnyOutput.Dtor_list()
+                     message := dafnyOutput.Dtor_message()
+                     t := $L.CollectionOfErrors {}
+                     for i := dafny.Iterate(listOfErrors) ; ; {
+                         val, ok := i()
+                         if !ok {
+                             break;
+                         }
+                         err := val.($L.Error)
+                         t.ListOfErrors = append(t.ListOfErrors, Error_FromDafny(err))
 
                 }
                 t.Message = func() (string) {
-                    var s string
-                    for i := dafny.Iterate(message) ; ; {
-                        val, ok := i()
-                        if !ok {
-                            return s
-                        } else {
-                            s = s + string(val.(dafny.Char))
-                        }
-                    }
+                 a := UTF8.Encode(message.(dafny.Sequence)).Dtor_value()
+                 s := string(dafny.ToByteArray(a.(dafny.Sequence)))
+                 return s;
                 }()
                 return t
             }
