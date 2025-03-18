@@ -9,7 +9,6 @@ module WrappedSimpleTypesStringTest {
     import opened Wrappers
     method{:test} GetAggregate() {
         var client :- expect WrappedSimpleAggregateService.WrappedSimpleAggregate();
-        SimpleAggregateImplTest.TestGetAggregate(client);
-        SimpleAggregateImplTest.TestGetAggregateKnownValue(client);
+        SimpleAggregateImplTest.TestAggregate(client);
     }
 }

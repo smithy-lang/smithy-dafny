@@ -7,9 +7,19 @@ module SimpleAggregateImplTest {
     import opened SimpleAggregateTypes
     import opened Wrappers
     method{:test} GetAggregate(){
-        var client :- expect SimpleAggregate.SimpleAggregate();
-        TestGetAggregate(client);
-        TestGetAggregateKnownValue(client);
+      var client :- expect SimpleAggregate.SimpleAggregate();
+      TestAggregate(client);
+    }
+
+    method TestAggregate(client: ISimpleAggregateClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+      TestGetAggregate(client);
+      TestGetAggregateKnownValue(client);
+      TestEmptyAggregate(client);
+      TestNoneAggregate(client);
     }
 
     method TestGetAggregate(client: ISimpleAggregateClient)
@@ -37,7 +47,7 @@ module SimpleAggregateImplTest {
     }
 
     method TestGetAggregateKnownValue(client: ISimpleAggregateClient)
-    requires client.ValidState()
+      requires client.ValidState()
       modifies client.Modifies
       ensures client.ValidState()
       {
@@ -57,6 +67,52 @@ module SimpleAggregateImplTest {
         expect ret.simpleStringMap.UnwrapOr(map[]) == simpleStringMap;
         expect ret.simpleIntegerMap.UnwrapOr(map[]) == simpleIntegerMap;
         expect ret.nestedStructure.UnwrapOr(NestedStructure(stringStructure := Some(StringStructure(value := Some(""))))) == nestedStructure;
+        print ret;
+    }
+
+    method TestEmptyAggregate(client: ISimpleAggregateClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+      {
+        var stringList := [];
+        var simpleStringMap := map[];
+        var structureList :=[];
+        var simpleIntegerMap := map[];
+        var nestedStructure := NestedStructure(stringStructure := Some(StringStructure(value := Some("Nested"))));
+        var ret :- expect client.GetAggregate(GetAggregateInput(simpleIntegerMap := Some(simpleIntegerMap),
+                                                                simpleStringMap := Some(simpleStringMap),
+                                                                simpleStringList := Some(stringList),
+                                                                structureList := Some(structureList),
+                                                                nestedStructure := Some(nestedStructure))
+                                                                );
+        expect ret.simpleStringList == Some(stringList);
+        expect ret.structureList == Some(structureList);
+        expect ret.simpleStringMap == Some(simpleStringMap);
+        expect ret.simpleIntegerMap == Some(simpleIntegerMap);
+        expect ret.nestedStructure.UnwrapOr(NestedStructure(stringStructure := Some(StringStructure(value := Some(""))))) == nestedStructure;
+        print ret;
+    }
+
+    method TestNoneAggregate(client: ISimpleAggregateClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+      {
+
+        var ret :- expect client.GetAggregate(
+          GetAggregateInput(
+            simpleIntegerMap := None,
+            simpleStringMap := None,
+            simpleStringList := None,
+            structureList := None,
+            nestedStructure := None)
+          );
+        expect ret.simpleStringList == None;
+        expect ret.structureList == None;
+        expect ret.simpleStringMap == None;
+        expect ret.simpleIntegerMap == None;
+        expect ret.nestedStructure == None;
         print ret;
     }
 }

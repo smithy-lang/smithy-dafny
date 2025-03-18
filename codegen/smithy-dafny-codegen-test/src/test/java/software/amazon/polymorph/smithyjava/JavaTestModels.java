@@ -20,7 +20,6 @@ class JavaTestModels extends TestModelTest {
   private static final Set<String> DISABLED_TESTS = new HashSet<>();
 
   static {
-    DISABLED_TESTS.add("Aggregate");
     DISABLED_TESTS.add("AggregateReferences");
     DISABLED_TESTS.add("CallingAWSSDKFromLocalService");
     DISABLED_TESTS.add("Constructor");
