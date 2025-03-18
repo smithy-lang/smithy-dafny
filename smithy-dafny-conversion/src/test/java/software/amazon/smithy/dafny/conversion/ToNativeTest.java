@@ -112,16 +112,12 @@ public class ToNativeTest {
     Map<String, Integer> expected = new LinkedHashMap<>();
     expected.put("one", 1);
     expected.put("two", 2);
-    Map<
-      DafnySequence<? extends Character>,
-      Integer
-      > temp = new LinkedHashMap<>();
+    Map<DafnySequence<? extends Character>, Integer> temp =
+      new LinkedHashMap<>();
     temp.put(DafnySequence.asString("one"), 1);
     temp.put(DafnySequence.asString("two"), 2);
-    DafnyMap<
-      DafnySequence<? extends Character>,
-      ? extends Integer
-      > input = new DafnyMap<>(temp);
+    DafnyMap<DafnySequence<? extends Character>, ? extends Integer> input =
+      new DafnyMap<>(temp);
     // This conversion would not work in a smithy-dafny project,
     // but it ensures that if we update the `ToNative.Aggregate.GenericToMap` type signature,
     // that it will start working with Function.identity().

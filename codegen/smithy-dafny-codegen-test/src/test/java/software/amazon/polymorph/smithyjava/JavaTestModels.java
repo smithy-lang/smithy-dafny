@@ -20,7 +20,6 @@ class JavaTestModels extends TestModelTest {
   private static final Set<String> DISABLED_TESTS = new HashSet<>();
 
   static {
-
     DISABLED_TESTS.add("Dependencies"); // Smithy-Dafny Error
     DISABLED_TESTS.add("CallingAWSSDKFromLocalService"); // Different types across type conversion (wrapped vs not)
 
