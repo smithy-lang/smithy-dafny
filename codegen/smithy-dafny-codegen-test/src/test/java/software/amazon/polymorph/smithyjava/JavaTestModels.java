@@ -23,8 +23,6 @@ class JavaTestModels extends TestModelTest {
     DISABLED_TESTS.add("Aggregate");
 
     DISABLED_TESTS.add("Dependencies"); // Smithy-Dafny Error
-
-    DISABLED_TESTS.add("Extern");
     DISABLED_TESTS.add("CallingAWSSDKFromLocalService"); // Different types across type conversion (wrapped vs not)
 
     DISABLED_TESTS.add("LanguageSpecificLogic"); // Smithy-Dafny Error
@@ -51,13 +49,13 @@ class JavaTestModels extends TestModelTest {
     //    These are commented out because they should work
     //    They are left here because it can be useful
     //    to have these here so that it is easy to only run a single test locally.
-    //    DISABLED_TESTS.add("CallingAWSSDKFromLocalService"); // These work
     //    DISABLED_TESTS.add("CodegenPatches"); // These work
     //    DISABLED_TESTS.add("Constraints"); // These work
     //    DISABLED_TESTS.add("Constructor"); // These work
     //    DISABLED_TESTS.add("Documentation"); // These work
     //    DISABLED_TESTS.add("Errors"); // These work
     //    DISABLED_TESTS.add("Extendable"); // These work
+    //    DISABLED_TESTS.add("Extern");  // These work
     //    DISABLED_TESTS.add("LocalService"); // These work
     //    DISABLED_TESTS.add("MultipleModels"); // These work
     //    DISABLED_TESTS.add("OrphanedShapes"); // These work
