@@ -20,12 +20,15 @@ public record MethodReference(TypeName typeName, String methodName) {
     // Special case of Identity,
     // `Function.identity()` returns `Function<Object, Object>` and it captures its type from the wildcards/generics.
     // In practice with Dafny this means it will return Function.<? extends Integer>identity().
-    // This is a problem because we want to return the downcast e.g. Integer.
-    // Downcasting like this is not the safest thing generally,
-    // but in this case we know that only Integer or whatever type is used in Dafny.
-    // If some future person can make `Function.identity()` work I will be very happy!
-    // However, by passing a very simple lambda expression,
-    // the compiler can see what is going on.
+    // We want to use this function with `ToNative.Aggregate.GenericToMap`.
+    // However, the published version uses `DafnyMap<IN_KEY, IN_VALUE> dafnyValues`.
+    // This should be `DafnyMap<? extends IN_KEY, ? extends IN_VALUE> dafnyValues`
+    // to correctly mathe the wildcards and pass through the concrete type.
+    // Tests have been added to the conversion library,
+    // along with a comment, see: smithy-dafny-conversion/src/main/java/software/amazon/smithy/dafny/conversion/ToNative.java
+    // By passing a very simple lambda expression,
+    // the compiler can see what is going on
+    // and we do not need to coordinate an update of the conversion library.
     if (this == Generator.Constants.IDENTITY_FUNCTION) {
       //      return CodeBlock.of("$T.$L()", typeName, methodName);
       return CodeBlock.of("i -> i");

@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.junit.Test;
 
@@ -103,6 +104,32 @@ public class ToNativeTest {
       DafnySequence<? extends Character>
     > input = new DafnyMap<>(temp);
     Map<String, String> actual = MapStringString(input);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testGenericToMapInteger() {
+    Map<String, Integer> expected = new LinkedHashMap<>();
+    expected.put("one", 1);
+    expected.put("two", 2);
+    Map<
+      DafnySequence<? extends Character>,
+      Integer
+      > temp = new LinkedHashMap<>();
+    temp.put(DafnySequence.asString("one"), 1);
+    temp.put(DafnySequence.asString("two"), 2);
+    DafnyMap<
+      DafnySequence<? extends Character>,
+      ? extends Integer
+      > input = new DafnyMap<>(temp);
+    // This conversion would not work in a smithy-dafny project,
+    // but it ensures that if we update the `ToNative.Aggregate.GenericToMap` type signature,
+    // that it will start working with Function.identity().
+    Map<String, ? extends Integer> actual = ToNative.Aggregate.GenericToMap(
+      input,
+      ToNative.Simple::String,
+      Function.identity()
+    );
     assertEquals(expected, actual);
   }
 }
