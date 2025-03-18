@@ -119,6 +119,7 @@ public class ToNativeTest {
     DafnyMap<DafnySequence<? extends Character>, ? extends Integer> input =
       new DafnyMap<>(temp);
     // This conversion would not work in a smithy-dafny project,
+    // because it does not use the concrete type `Integer`
     // but it ensures that if we update the `ToNative.Aggregate.GenericToMap` type signature,
     // that it will start working with Function.identity().
     Map<String, ? extends Integer> actual = ToNative.Aggregate.GenericToMap(
