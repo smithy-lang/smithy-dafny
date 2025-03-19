@@ -17,10 +17,13 @@ module SimpleIntegerImpl refines AbstractSimpleTypesIntegerOperations  {
     }
     method GetInteger ( config: InternalConfig,  input: GetIntegerInput )
     returns (output: Result<GetIntegerOutput, Error>) {
-        expect input.value.Some?;
-        expect (- UInt.INT32_MAX_LIMIT as int32) <= input.value.UnwrapOr(0) <= ((UInt.INT32_MAX_LIMIT - 1) as int32);
-        var res := GetIntegerOutput(value := input.value);
-        return Success(res);
+        if input.value.Some? {
+            expect (- UInt.INT32_MAX_LIMIT as int32) <= input.value.UnwrapOr(0) <= ((UInt.INT32_MAX_LIMIT - 1) as int32);
+            var res := GetIntegerOutput(value := input.value);
+            return Success(res);
+        } else {
+            return Success(GetIntegerOutput( value := None ));
+        }
     }
     method GetIntegerKnownValueTest ( config: InternalConfig,  input: GetIntegerInput )
     returns (output: Result<GetIntegerOutput, Error>) {

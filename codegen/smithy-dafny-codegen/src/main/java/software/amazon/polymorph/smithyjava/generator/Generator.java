@@ -78,6 +78,10 @@ public abstract class Generator {
 
   public static class Constants {
 
+    // See MethodReference.
+    // `Function.identity()` is complicated with deep generics.
+    // This will be replaced with the lambda `i -> i`
+    // but is left as a reference to `Function.identity()` for semantic clarity.
     public static final MethodReference IDENTITY_FUNCTION = new MethodReference(
       ClassName.get(java.util.function.Function.class),
       "identity"
