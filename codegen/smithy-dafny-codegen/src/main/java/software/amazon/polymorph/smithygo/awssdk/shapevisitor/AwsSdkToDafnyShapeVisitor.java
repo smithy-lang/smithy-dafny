@@ -239,14 +239,12 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     var nilWrapIfRequired = "nil";
     var someWrapIfRequired = "%s";
     var returnType = "dafny.Map";
+    var nilCheck = "";
 
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
       returnType = "Wrappers.Option";
-    }
-    var nilCheck = "";
-    if (isPointerType) {
       nilCheck =
         "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
     }
@@ -374,10 +372,23 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         shape,
         context.symbolProvider().toSymbol(shape)
       );
-
+      var noEnumMatchedCheck =
+        """
+        if index == len(%s.Values()) {
+          panic("Input value did not found in enum values")
+        }
+        """.formatted(dataSource);
       if (this.isOptional) {
         someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
         returnType = "Wrappers.Option";
+        // In AWS SDK, some shapes don't have required trait and also don't have pointers in it.
+        // This will result the default value of the string be "" if not provided.
+        noEnumMatchedCheck =
+          """
+            if index == len(%s.Values()) {
+              return Wrappers.Companion_Option_.Create_None_()
+            }
+          """.formatted(dataSource);
       }
 
       return """
@@ -388,6 +399,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       		if enumVal == %s{
       			break;
       		}
+          %s
       	}
       	var enum interface{}
       	for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
@@ -402,6 +414,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           returnType,
           dataSource,
           dataSource,
+          noEnumMatchedCheck,
           DafnyNameResolver.getDafnyCompanionStructType(
             shape,
             context.symbolProvider().toSymbol(shape)
