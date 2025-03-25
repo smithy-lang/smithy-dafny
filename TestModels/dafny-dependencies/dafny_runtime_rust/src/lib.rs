@@ -846,7 +846,7 @@ where
                 // Let's create an array of size length and fill it up recursively
                 // We don't materialize nested arrays because most of the time they are forgotten
                 let mut array: Vec<T> = Vec::with_capacity(*length);
-                Sequence::<T>::append_recursive_safe(&mut array, &None, left, right);
+                Sequence::<T>::append_recursive(&mut array, self);
                 let result = Rc::new(array);
                 #[cfg(not(feature = "sync"))]
                 {
@@ -870,62 +870,96 @@ where
         }
     }
 
-    pub fn append_recursive_safe(
-        array: &mut Vec<T>,
-        cache_borrow: &Option<&Rc<Vec<T>>>,
-        left: &Rc<RefCell<Sequence<T>>>,
-        right: &Rc<RefCell<Sequence<T>>>,
-    ) {
-        if let Some(values) = cache_borrow.as_ref() {
-            for value in values.iter() {
-                array.push(value.clone());
-            }
-            return;
-        }
-        #[cfg(not(feature = "sync"))]
-        {
-            Sequence::<T>::append_recursive(array, &left.as_ref().borrow());
-            Sequence::<T>::append_recursive(array, &right.as_ref().borrow());
-        }
-        #[cfg(feature = "sync")]
-        {
-            let left_guard = left.as_ref().lock().unwrap();
-            let right_guard = right.as_ref().lock().unwrap();
-            Sequence::<T>::append_recursive(array, &left_guard);
-            Sequence::<T>::append_recursive(array, &right_guard);
-        }
-    }
-
-    pub fn append_recursive(array: &mut Vec<T>, this: &Sequence<T>) {
+    pub fn append_simple(array: &mut Vec<T>, this: &Sequence<T>) -> bool {
         match this {
             Sequence::ArraySequence { values, .. } =>
-            // The length of the elements
             {
                 for value in values.iter() {
                     array.push(value.clone());
                 }
+                true
             }
-            Sequence::ConcatSequence {
-                cache: boxed, left, right, ..
-            } =>
-            // Let's create an array of size length and fill it up recursively
-            {
-                #[cfg(feature = "sync")]
-                let into_boxed = boxed.as_ref();
-                #[cfg(feature = "sync")]
-                let into_boxed_borrowed = into_boxed;
-                #[cfg(feature = "sync")]
-                let guard = into_boxed_borrowed.lock().unwrap();
-                #[cfg(feature = "sync")]
-                let borrowed: Option<&Rc<Vec<T>>> = guard.as_ref();
+            _ => false
+        }
+    }
 
-                #[cfg(not(feature = "sync"))]
-                let into_boxed = boxed.as_ref().clone();
-                #[cfg(not(feature = "sync"))]
-                let into_boxed_borrowed = into_boxed.borrow();
-                #[cfg(not(feature = "sync"))]
-                let borrowed: Option<&Rc<Vec<T>>> = into_boxed_borrowed.as_ref();
-                Self::append_recursive_safe(array, &borrowed, left, right);
+    pub fn append_recursive(array: &mut Vec<T>, this: &Sequence<T>) {
+            let mut this_ptr : * const Sequence<T> = this;
+        loop {
+            match unsafe { &*this_ptr  } {
+                Sequence::ArraySequence { values, .. } =>
+                {
+                    for value in values.iter() {
+                        array.push(value.clone());
+                    }
+                    return;
+                }
+                Sequence::ConcatSequence {
+                    cache: boxed,
+                    left,
+                    right,
+                    ..
+                } =>
+                // Let's create an array of size length and fill it up recursively
+                {
+                    #[cfg(feature = "sync")]
+                    let into_boxed = boxed.as_ref();
+                    #[cfg(feature = "sync")]
+                    let into_boxed_borrowed = into_boxed;
+                    #[cfg(feature = "sync")]
+                    let guard = into_boxed_borrowed.lock().unwrap();
+                    #[cfg(feature = "sync")]
+                    let borrowed: Option<&Rc<Vec<T>>> = guard.as_ref();
+
+                    #[cfg(not(feature = "sync"))]
+                    let into_boxed = boxed.as_ref().clone();
+                    #[cfg(not(feature = "sync"))]
+                    let into_boxed_borrowed = into_boxed.borrow();
+                    #[cfg(not(feature = "sync"))]
+                    let borrowed: Option<&Rc<Vec<T>>> = into_boxed_borrowed.as_ref();
+                    if let Some(values) = borrowed.as_ref() {
+                        for value in values.iter() {
+                            array.push(value.clone());
+                        }
+                        return;
+                    }
+                    #[cfg(not(feature = "sync"))]
+                    {
+                        let left_empty = left.as_ref().borrow().cardinality_usize() == 0;
+                        let right_empty = right.as_ref().borrow().cardinality_usize() == 0;
+                        if left_empty && right_empty {
+                            return;
+                        } else if left_empty {
+                            this_ptr = right.as_ref().as_ptr();
+                        } else if right_empty {
+                            this_ptr = left.as_ref().as_ptr();
+                        } else {
+                            if !Sequence::<T>::append_simple(array, &left.as_ref().borrow()) {
+                                Sequence::<T>::append_recursive(array, &left.as_ref().borrow());
+                            }
+                            this_ptr = right.as_ref().as_ptr();
+                        }
+                    }
+                    #[cfg(feature = "sync")]
+                    {
+                        let left_guard = left.as_ref().lock().unwrap();
+                        let right_guard = right.as_ref().lock().unwrap();
+                        let left_empty: bool = left_guard.cardinality_usize() == 0;
+                        let right_empty: bool = right_guard.cardinality_usize() == 0;
+                        if left_empty && right_empty {
+                            return;
+                        } else if left_empty {
+                            this_ptr = right_guard.deref();
+                        } else if right_empty {
+                            this_ptr = left_guard.deref();
+                        } else {
+                            if !Sequence::<T>::append_simple(array, &left_guard) {
+                                Sequence::<T>::append_recursive(array, &left_guard);
+                            }
+                            this_ptr = right_guard.deref();
+                        }
+                    }
+                }
             }
         }
     }
@@ -2077,7 +2111,7 @@ impl<A: DafnyPrint> DafnyPrint for LazyFieldWrapper<A> {
 // Convert the DafnyPrint above into a macro so that we can create it for functions of any input arity
 macro_rules! dafny_print_function {
     ($($n:tt)*) => {
-        impl <B, $($n),*> $crate::DafnyPrint for $crate::Rc<dyn ::std::ops::Fn($($n),*) -> B + Send + Sync> {
+        impl <B, $($n),*> $crate::DafnyPrint for $crate::Rc<dyn ::std::ops::Fn($(&$n),*) -> B + Send + Sync> {
             fn fmt_print(&self, f: &mut ::std::fmt::Formatter<'_>, _in_seq: bool) -> ::std::fmt::Result {
                 write!(f, "<function>")
             }
@@ -2088,7 +2122,7 @@ macro_rules! dafny_print_function {
 // Convert the DafnyPrint above into a macro so that we can create it for functions of any input arity
 macro_rules! dafny_print_function {
     ($($n:tt)*) => {
-        impl <B, $($n),*> $crate::DafnyPrint for $crate::Rc<dyn ::std::ops::Fn($($n),*) -> B> {
+        impl <B, $($n),*> $crate::DafnyPrint for $crate::Rc<dyn ::std::ops::Fn($(&$n),*) -> B> {
             fn fmt_print(&self, f: &mut ::std::fmt::Formatter<'_>, _in_seq: bool) -> ::std::fmt::Result {
                 write!(f, "<function>")
             }
@@ -3989,9 +4023,9 @@ where
 }
 pub fn upcast_box_box<A: ?Sized, B: ?Sized>() -> Rc<impl Fn(Box<A>) -> Box<B>>
 where
-    Box<A>: UpcastBox<B>,
+    A: UpcastBox<B>,
 {
-    Rc::new(|x: Box<A>| UpcastBox::upcast(&x))
+    Rc::new(|x: Box<A>| UpcastBox::upcast(x.as_ref()))
 }
 
 pub fn upcast_id<A>() -> Rc<impl Fn(A) -> A> {
@@ -4037,6 +4071,25 @@ impl<T: ?Sized> UpcastObject<T> for T {
 // For general traits
 pub trait UpcastBox<T: ?Sized> {
     fn upcast(&self) -> Box<T>;
+}
+
+impl<T: ?Sized, U> UpcastBox<T> for Rc<U>
+where
+    U: UpcastBox<T>,
+{
+    fn upcast(&self) -> Box<T> {
+        UpcastBox::upcast(AsRef::as_ref(self))
+    }
+}
+
+pub trait AnyRef {
+    fn as_any_ref(&self) -> &dyn Any;
+}
+
+impl<T: 'static> AnyRef for T {
+    fn as_any_ref(&self) -> &dyn Any {
+        self
+    }
 }
 
 #[macro_export]
