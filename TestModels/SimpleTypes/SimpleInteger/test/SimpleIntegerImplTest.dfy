@@ -56,4 +56,15 @@ module  SimpleIntegerImplTest {
         }
 
     }
+
+    method TestGetIntegerOptional(client: ISimpleTypesIntegerClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        var ret :- expect client.GetInteger(SimpleInteger.Types.GetIntegerInput(value:= None));
+        expect ret.value.None?;
+        print ret;
+    }
+
 }

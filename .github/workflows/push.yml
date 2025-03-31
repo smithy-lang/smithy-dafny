@@ -12,10 +12,10 @@ jobs:
     steps:
       - name: Populate Dafny versions list
         id: populate-dafny-versions-list
-        run: echo "dafny-versions-list=['4.5.0','4.8.0']" >> $GITHUB_OUTPUT
+        run: echo "dafny-versions-list=['4.5.0','4.9.1']" >> $GITHUB_OUTPUT
       - name: Populate Dafny versions list for "only new versions" languages (Python, Go)
         id: populate-only-new-dafny-versions-list
-        run: echo "only-new-dafny-versions-list=['4.8.0']" >> $GITHUB_OUTPUT
+        run: echo "only-new-dafny-versions-list=['4.9.1']" >> $GITHUB_OUTPUT
     outputs:
       dafny-version-list: ${{ steps.populate-dafny-versions-list.outputs.dafny-versions-list }}
       only-new-dafny-version-list: ${{ steps.populate-only-new-dafny-versions-list.outputs.only-new-dafny-versions-list }}

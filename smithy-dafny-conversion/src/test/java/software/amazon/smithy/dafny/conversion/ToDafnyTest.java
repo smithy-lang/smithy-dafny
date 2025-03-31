@@ -118,6 +118,25 @@ public class ToDafnyTest {
     assertEquals(expected, actual);
   }
 
+  @Test
+  public void testGenericToMapInteger() {
+    Map<DafnySequence<Character>, Integer> temp = new LinkedHashMap<>();
+    temp.put(DafnySequence.asString("one"), 1);
+    temp.put(DafnySequence.asString("two"), 2);
+    DafnyMap<DafnySequence<Character>, ? extends Integer> expected =
+      new DafnyMap<>(temp);
+    Map<String, Integer> input = new LinkedHashMap<>();
+    input.put("one", 1);
+    input.put("two", 2);
+    DafnyMap<DafnySequence<Character>, ? extends Integer> actual =
+      ToDafny.Aggregate.GenericToMap(
+        input,
+        ToDafny.Simple::CharacterSequence,
+        Function.identity()
+      );
+    assertEquals(expected, actual);
+  }
+
   private static DafnySet<Integer> SetInteger(Set<Integer> set) {
     return ToDafny.Aggregate.GenericToSet(set, Function.identity());
   }

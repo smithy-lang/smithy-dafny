@@ -235,6 +235,11 @@ public class ToNative {
       OUT_KEY,
       OUT_VALUE
     > GenericToMap(
+      // This is what the conversion type signature should be.
+      // Changing it and deploying a new version would be nice.
+      // However, depending on this new version would be complicated.
+      // See codegen/smithy-dafny-codegen/src/main/java/software/amazon/polymorph/smithyjava/MethodReference.java
+      // DafnyMap<? extends IN_KEY, ? extends IN_VALUE> dafnyValues,
       DafnyMap<IN_KEY, IN_VALUE> dafnyValues,
       Function<IN_KEY, OUT_KEY> keyConverter,
       Function<IN_VALUE, OUT_VALUE> valueConverter

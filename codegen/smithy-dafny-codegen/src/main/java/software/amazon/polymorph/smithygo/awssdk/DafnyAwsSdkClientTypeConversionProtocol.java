@@ -575,7 +575,13 @@ public class DafnyAwsSdkClientTypeConversionProtocol
           writer.write(
             """
             func OpaqueError_Input_ToDafny(nativeInput error)($L.Error) {
-            	return $L.Companion_Error_.Create_OpaqueWithText_(nativeInput, dafny.SeqOfChars([]dafny.Char(nativeInput.Error())...))
+              return $L.Companion_Error_.Create_OpaqueWithText_(nativeInput, func () dafny.Sequence {
+                                                                               res, err := UTF8.DecodeFromNativeGoByteArray([]byte(nativeInput.Error()))
+                                                                               if err != nil {
+                                                                                 panic("invalid utf8 input provided")
+                                                                               }
+                                                                               return res
+                                                                             }())
             }""",
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             DafnyNameResolver.dafnyTypesNamespace(serviceShape)
