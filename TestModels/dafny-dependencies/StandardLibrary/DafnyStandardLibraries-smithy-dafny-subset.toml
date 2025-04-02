@@ -1,15 +1,18 @@
 includes = [
   "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Actions.dfy",
-  "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Aggregators.dfy",
-  "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Enumerators.dfy",
+  "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Producers.dfy",
+  "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Consumers.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/GenericAction.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/BoundedInts.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Collections/Seq.dfy",
+  "../dafny/Source/DafnyStandardLibraries/src/Std/Collections/Set.dfy",
+  "../dafny/Source/DafnyStandardLibraries/src/Std/Collections/Multiset.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/DynamicArray.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Frames.dfy",
+  "../dafny/Source/DafnyStandardLibraries/src/Std/Functions.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Math.dfy",
+  "../dafny/Source/DafnyStandardLibraries/src/Std/Ordinal.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Relations.dfy",
-  "../dafny/Source/DafnyStandardLibraries/src/Std/Streams/Streams.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Termination.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Wrappers.dfy"
 ]
