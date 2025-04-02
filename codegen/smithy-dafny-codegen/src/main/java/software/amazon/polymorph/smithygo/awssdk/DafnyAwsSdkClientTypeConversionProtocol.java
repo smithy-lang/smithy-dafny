@@ -898,7 +898,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
                 return $L
             }""",
             Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
-            "interface {}",
+            "dafny.Sequence",
             outputType,
             DafnyToAwsSdkShapeVisitor.getConversionFunc(visitingMemberShape)
           );

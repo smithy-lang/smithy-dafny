@@ -1056,7 +1056,7 @@ public class DafnyLocalServiceTypeConversionProtocol
         );
         writer.write(
           """
-          func $L(input interface{})($L) {
+          func $L(input dafny.Sequence)($L) {
               ${C|}
           }""",
           inputFromDafnyMethodName,
@@ -2084,7 +2084,7 @@ public class DafnyLocalServiceTypeConversionProtocol
           // TODO: we should be able to change input type to specific shape from interface {}
           writer.write(
             """
-            func $L(input interface{})($L) {
+            func $L(input dafny.Sequence)($L) {
                 $L
             }""",
             Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
