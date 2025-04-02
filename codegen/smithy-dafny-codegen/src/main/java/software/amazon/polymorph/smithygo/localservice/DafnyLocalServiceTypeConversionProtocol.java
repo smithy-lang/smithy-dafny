@@ -1054,11 +1054,18 @@ public class DafnyLocalServiceTypeConversionProtocol
           ),
           SmithyNameResolver.smithyTypesNamespace(shape, context.model())
         );
+
+        String paramType = "interface{}";
+        if (shape.isListShape()) {
+          paramType = "dafny.Sequence";
+        }
+
         writer.write(
           """
-          func $L(input dafny.Sequence)($L) {
+          func $L(input $L)($L) {
               ${C|}
           }""",
+          paramType,
           inputFromDafnyMethodName,
           outputType,
           writer.consumer(w -> {
@@ -2082,11 +2089,17 @@ public class DafnyLocalServiceTypeConversionProtocol
             outputType = "*".concat(outputType);
           }
           // TODO: we should be able to change input type to specific shape from interface {}
+          String paramType = "interface{}";
+          if (visitingMemberShape.isListShape()) {
+            paramType = "dafny.Sequence";
+          }
+
           writer.write(
             """
-            func $L(input dafny.Sequence)($L) {
+            func $L(input $L)($L) {
                 $L
             }""",
+            paramType,
             Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
             outputType,
             DafnyToSmithyShapeVisitor.getConversionFunc(visitingMemberShape)

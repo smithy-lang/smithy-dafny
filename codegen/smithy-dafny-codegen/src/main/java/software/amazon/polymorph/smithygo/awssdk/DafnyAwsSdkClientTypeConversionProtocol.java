@@ -892,13 +892,17 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             outputType = "*".concat(outputType);
           }
           // TODO: we should able to change output type to specific shape from interface {}
+          String paramType = "interface{}";
+          if (visitingMemberShape.isListShape()) {
+            paramType = "dafny.Sequence";
+          }
           writer.write(
             """
             func $L(input $L)($L) {
                 return $L
             }""",
             Constants.funcNameGenerator(visitingMemberShape, "FromDafny"),
-            "dafny.Sequence",
+            paramType,
             outputType,
             DafnyToAwsSdkShapeVisitor.getConversionFunc(visitingMemberShape)
           );
