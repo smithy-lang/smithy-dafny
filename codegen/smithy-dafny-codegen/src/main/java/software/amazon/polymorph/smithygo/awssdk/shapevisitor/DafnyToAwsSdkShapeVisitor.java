@@ -133,7 +133,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       : dataSource;
     return """
     func () []byte {
-    b := make([]byte, 0, input.Cardinality())
+    b := make([]byte, 0, input.(dafny.Sequence).Cardinality())
     if %s == nil {
         return nil
     }
