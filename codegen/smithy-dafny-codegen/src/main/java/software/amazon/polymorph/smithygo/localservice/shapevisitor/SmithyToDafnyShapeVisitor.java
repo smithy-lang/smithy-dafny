@@ -237,7 +237,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         dataSource,
         nilWrapIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 
@@ -715,7 +715,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         nilCheck,
         dereferenceIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 

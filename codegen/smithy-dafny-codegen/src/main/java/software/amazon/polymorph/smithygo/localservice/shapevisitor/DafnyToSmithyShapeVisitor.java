@@ -290,15 +290,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     if %s == nil {
         return nil
     }
-    b := make([]byte, 0, input.(dafny.Sequence).Cardinality())
-    for i := dafny.Iterate(%s) ; ; {
-        val, ok := i()
-        if !ok {
-            return b
-        } else {
-            b = append(b, val.(byte))
-        }
-    }
+    a := input.(dafny.Sequence).ToArray().(dafny.GoNativeArray);
+		b := make([]byte, 0, a.Length())
+		for i := uint32(0); i < a.Length(); i++ {
+			b = append(b, a.Select(i).(byte))
+		}
+		return b
     }()""".formatted(dataSource, dataSource);
   }
 
