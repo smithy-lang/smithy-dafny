@@ -287,18 +287,15 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     // Blob shape is inherently value type
     return """
     return func () []byte {
-    b := []byte{}
-    if %s == nil {
-        return nil
-    }
-    for i := dafny.Iterate(%s) ; ; {
-        val, ok := i()
-        if !ok {
-            return b
-        } else {
-            b = append(b, val.(byte))
-        }
-    }
+      if %s == nil {
+          return nil
+      }
+      a := %s.(dafny.Sequence).ToArray().(dafny.GoNativeArray);
+      b := make([]byte, 0, a.Length())
+      for i := uint32(0); i < a.Length(); i++ {
+        b = append(b, a.Select(i).(byte))
+      }
+      return b
     }()""".formatted(dataSource, dataSource);
   }
 

@@ -226,7 +226,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     }
     return """
     func () %s {
-        var v []interface{}
+        v := make([]interface{}, 0, len(input))
         if %s == nil {return %s}
         for _, e := range %s {
         	v = append(v, e)
@@ -237,7 +237,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         dataSource,
         nilWrapIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 
@@ -422,7 +422,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       """
       func () %s {
              %s
-             var fieldValue []interface{} = make([]interface{}, 0)
+             var fieldValue []interface{} = make([]interface{}, 0, len(input))
              for _, val := range %s {
                  element := %s
                  fieldValue = append(fieldValue, element)
@@ -705,7 +705,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         var bits = math.Float64bits(%s%s)
         var bytes = make([]byte, 8)
         binary.LittleEndian.PutUint64(bytes, bits)
-        var v []interface{}
+        v := make([]interface{}, 0, 8)
         for _, e := range bytes {
             v = append(v, e)
         }
@@ -715,7 +715,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         nilCheck,
         dereferenceIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 
