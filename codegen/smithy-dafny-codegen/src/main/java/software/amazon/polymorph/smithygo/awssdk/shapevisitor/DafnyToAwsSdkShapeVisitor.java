@@ -132,17 +132,17 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       ? "input"
       : dataSource;
     return """
-      func () []byte {
+    func () []byte {
       if %s == nil {
           return nil
       }
-      a := input.(dafny.Sequence).ToArray().(dafny.GoNativeArray);
-    b := make([]byte, 0, a.Length())
-    for i := uint32(0); i < a.Length(); i++ {
-    	b = append(b, a.Select(i).(byte))
-    }
-    return b
-      }()""".formatted(unAssertedDataSource, dataSource);
+      a := %s.(dafny.Sequence).ToArray().(dafny.GoNativeArray);
+      b := make([]byte, 0, a.Length())
+      for i := uint32(0); i < a.Length(); i++ {
+        b = append(b, a.Select(i).(byte))
+      }
+      return b
+    }()""".formatted(unAssertedDataSource, dataSource);
   }
 
   @Override
