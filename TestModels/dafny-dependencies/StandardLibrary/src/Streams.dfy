@@ -57,21 +57,131 @@ module {:options "--function-syntax:4"} Std.Streams {
   ghost predicate ValidDataSoFar<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, length: int)
     requires Partitioned(outputs, IsSome)
   {
-    var produced := ProducedOf(outputs);
-    && var dataSoFar := DataSoFar(produced);
+    && var dataSoFar := DataSoFar(outputs);
     && (dataSoFar.Some? ==> 
       && |dataSoFar.value| <= length
       && (!Seq.All(outputs, IsSome) ==> |dataSoFar.value| == length))
   }
 
-  ghost function DataSoFar<T, E>(produced: seq<Result<seq<T>, E>>): Option<seq<T>>
+  // TODO: Move next to ProducedOf?
+  lemma AboutProducedOf<T>(outputs: seq<Option<T>>, x: T)
+    requires Partitioned(outputs, IsSome)
+    ensures x in ProducedOf(outputs) <==> Some(x) in outputs
+  {}
+
+  ghost function ValueOfSuccess<T, E>(o: Result<T, E>): T
+    requires o.Success? 
   {
-    if exists o <- produced :: o.Failure? then
+    o.value
+  }
+
+  ghost function DataSoFar<T, E>(outputs: seq<Option<Result<seq<T>, E>>>): Option<seq<T>>
+    requires Partitioned(outputs, IsSome)
+  {
+    if exists o <- outputs :: o.Some? && o.value.Failure? then
       None
     else
-      Some(Flatten(MapPartialFunction((o: Result<seq<T>, E>) requires o.Success? => o.value, produced)))
+      forall o <- ProducedOf(outputs) ensures o.Success? {
+        AboutProducedOf(outputs, o);
+      }
+      Some(Flatten(MapPartialFunction(ValueOfSuccess, ProducedOf(outputs))))
   }
-    
+
+  lemma DataSoFarErrorIndex<T, E>(outputs: seq<Option<Result<seq<T>, E>>>) returns (index: nat)
+    requires Partitioned(outputs, IsSome)
+    requires DataSoFar(outputs).None?
+    ensures index < |outputs|
+    ensures outputs[index].Some? && outputs[index].value.Failure?
+  {
+    assert 0 < |outputs|;
+    if outputs[0].Some? && outputs[0].value.Failure? {
+      return 0;
+    } else {
+      var index' := DataSoFarErrorIndex(outputs[1..]);
+      return index' + 1;
+    }
+  }
+
+
+  ghost function OptionConcat<T>(left: Option<seq<T>>, right: Option<seq<T>>): Option<seq<T>>
+  {
+    if left.Some? && right.Some? then Some(left.value + right.value) else None
+  }
+
+  lemma DataSoFarComposition<T, E>(left: seq<Option<Result<seq<T>, E>>>, right: seq<Option<Result<seq<T>, E>>>)
+    requires Partitioned(left, IsSome)
+    requires Partitioned(right, IsSome)
+    requires Partitioned(left + right, IsSome)
+    ensures DataSoFar(left + right) == OptionConcat(DataSoFar(left), DataSoFar(right))
+  {
+    if DataSoFar(left).None? {
+      var errorIndex := DataSoFarErrorIndex(left);
+      var error := left[errorIndex];
+      assert (left + right)[errorIndex] == error;
+      assert DataSoFar(left + right) == None;
+    } else if DataSoFar(right).None? {
+       var errorIndex := DataSoFarErrorIndex(right);
+      var error := right[errorIndex];
+      assert (left + right)[|left| + errorIndex] == error;
+      assert DataSoFar(left + right) == None;
+    } else {
+      ProducedComposition(left, right);
+      forall o <- ProducedOf(left) ensures o.Success? {
+        AboutProducedOf(left, o);
+      }
+      forall o <- ProducedOf(right) ensures o.Success? {
+        AboutProducedOf(right, o);
+      }
+      LemmaMapPartialFunctionDistributesOverConcat(ValueOfSuccess, ProducedOf(left), ProducedOf(right));
+      LemmaFlattenConcat(MapPartialFunction(ValueOfSuccess, ProducedOf(left)),
+                         MapPartialFunction(ValueOfSuccess, ProducedOf(right)));
+    }
+  }
+
+  lemma ValidDataSoFarAfterNone<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, length: int)
+    requires Partitioned(outputs, IsSome)
+    requires 
+      var dataSoFar := DataSoFar(outputs);
+      dataSoFar.Some? ==> |dataSoFar.value| == length
+    ensures Partitioned(outputs + [None], IsSome)
+    ensures ValidDataSoFar(outputs + [None], length)
+  {
+    var right: seq<Option<Result<seq<T>, E>>> := [None];
+    PartitionedCompositionRight(outputs, [None], IsSome);
+    assert Partitioned(outputs + [None], IsSome);
+    var dataSoFarAfter := DataSoFar(outputs + [None]);
+    assert ProducedOf(right) == [];
+    DataSoFarComposition(outputs, right);
+  }
+
+  lemma ValidDataSoFarAfterMoreData<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, value: seq<T>, length: int)
+    requires All(outputs, IsSome)
+    requires 
+      var dataSoFar := (AllImpliesPartitioned(outputs, IsSome); DataSoFar(outputs));
+      dataSoFar.Some? ==> |dataSoFar.value| + |value| <= length
+    requires ValidDataSoFar(outputs, length)
+    ensures Partitioned(outputs + [Some(Success(value))], IsSome)
+    ensures ValidDataSoFar(outputs + [Some(Success(value))], length)
+    ensures DataSoFar(outputs).Some? ==> DataSoFar(outputs + [Some(Success(value))]).value == DataSoFar(outputs).value + value
+  {
+    AllImpliesPartitioned(outputs, IsSome);
+    var right: seq<Option<Result<seq<T>, E>>> := [Some(Success(value))];
+    assert All(right, IsSome);
+    PartitionedCompositionLeft(outputs, right, IsSome);
+    if DataSoFar(outputs).None? {
+      assert DataSoFar(outputs + [Some(Success(value))]).None?;
+    } else {
+      assert ProducedOf(right) == [Success(value)];
+      reveal Seq.Map();
+      assert DataSoFar(right).value == Flatten([value]);
+      reveal Seq.Flatten();
+      assert DataSoFar(right).value == value + Flatten([]);
+      assert DataSoFar(right).value == value;
+      DataSoFarComposition(outputs, right);
+    }
+  }
+
+
   trait RewindableDataStream<T, E> extends DataStream<T, E> {
 
     ghost const data: seq<T>
@@ -148,7 +258,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       reads this, Repr
       decreases Repr, 3
     {
-      TMTuple(maxWrappedRemaining, wrapped.RemainingMetric(), TMNat(|buffer|))
+      TMTuple(TMTop, wrapped.RemainingMetric(), TMNat(|buffer|))
     }
 
     constructor(wrapped: Producer<seq<T>>, length: uint64, ghost producesTotalLengthProof: ProducesTotalLengthProof<T>)
@@ -179,9 +289,15 @@ module {:options "--function-syntax:4"} Std.Streams {
       assert Requires(i);
 
       assert Valid();
-      var result := wrapped.Next();
+      var next;
+      if 0 < |buffer| {
+        next := Some(buffer);
+        buffer := [];
+      } else {
+        next := wrapped.Next();
+      }
       
-      r := match result
+      r := match next
         case None => None
         case Some(value) => Some(Success(value));
       UpdateHistory(i, r);
@@ -265,6 +381,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       && contentLength == Some(|s| as uint64)
       && position as int <= |s|
       && 0 < chunkSize
+      && DataSoFar(Outputs()) == Some(s[..position])
     }
 
     ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, ()>>>)
@@ -332,13 +449,13 @@ module {:options "--function-syntax:4"} Std.Streams {
       
       var outputs := Outputs();
       var produced := ProducedOf(outputs);
-      var dataSoFar := DataSoFar(produced);
+      var dataSoFar := DataSoFar(outputs);
       if outputs == [] {
         assert produced == [];
       } else {
-        assert outputs == [Some(Success(s[..position]))];
+        assert outputs == [Some(Success(s[..position]))] + [];
         assert produced == [Success(s[..position])] + ProducedOf([]);
-        assert MapPartialFunction((o: Result<seq<T>, ()>) requires o.Success? => o.value, produced) == [s[..position]];
+        assert MapPartialFunction(ValueOfSuccess, produced) == [s[..position]];
         assert Flatten([s[..position]]) == s[..position];
         assert dataSoFar == Some(s[..position]);
       }
@@ -371,10 +488,11 @@ module {:options "--function-syntax:4"} Std.Streams {
       if position == |s| as uint64 {
         r := None;
 
-        OutputsPartitionedAfterOutputtingNone();
+        ValidDataSoFarAfterNone(Outputs(), contentLength.value as int);
+        assert OutputsOf(history + [((), None)]) == Outputs() + [None];
+        assert ValidHistory(history + [((), None)]);
         ProduceNone();
       } else {
-        // Warning: unbounded integers
         var remaining := |s| as uint64 - position;
         var size := if max <= remaining then max else remaining;
         var newPosition := position + size;
@@ -382,11 +500,23 @@ module {:options "--function-syntax:4"} Std.Streams {
         r := Some(chunk);
         position := newPosition;
 
-        OutputsPartitionedAfterOutputtingSome(chunk);
+        ValidDataSoFarAfterMoreData(Outputs(), chunk.value, contentLength.value as int);
+        assert OutputsOf(history + [((), r)]) == Outputs() + [r];
+        assert ValidHistory(history + [((), r)]);
         ProduceSome(chunk);
+
+        calc {
+          DataSoFar(Outputs()).value;
+          old(DataSoFar(Outputs()).value) + chunk.value;
+          s[..old(position)] + chunk.value;
+          s[..old(position)] + s[old(position)..position];
+          s[..position];
+        }
+        assert DataSoFar(Outputs()) == Some(s[..position]);
       }
 
       reveal TerminationMetric.Ordinal();
+      assert Valid();
     }
   }
 }
