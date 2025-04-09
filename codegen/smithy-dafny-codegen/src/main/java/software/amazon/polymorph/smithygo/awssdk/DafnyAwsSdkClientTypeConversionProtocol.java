@@ -5,7 +5,9 @@ import static software.amazon.polymorph.smithygo.localservice.DafnyLocalServiceT
 import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 import software.amazon.polymorph.smithygo.awssdk.shapevisitor.AwsSdkToDafnyShapeVisitor;
 import software.amazon.polymorph.smithygo.awssdk.shapevisitor.DafnyToAwsSdkShapeVisitor;
 import software.amazon.polymorph.smithygo.awssdk.shapevisitor.ShapeVisitorHelper;
@@ -62,6 +64,8 @@ public class DafnyAwsSdkClientTypeConversionProtocol
     final var writerDelegator = context.writerDelegator();
     serviceShape
       .getOperations()
+      .stream()
+      .sorted()
       .forEach(eachOperation -> {
         final var awsNormalizedOperation = awsNormalizedModel.expectShape(
           eachOperation,
@@ -213,6 +217,8 @@ public class DafnyAwsSdkClientTypeConversionProtocol
 
     serviceShape
       .getOperations()
+      .stream()
+      .sorted()
       .forEach(eachOperation -> {
         final var awsNormalizedOperationShape = awsNormalizedModel.expectShape(
           eachOperation,
@@ -487,9 +493,11 @@ public class DafnyAwsSdkClientTypeConversionProtocol
 
   private void generateErrorSerializer(final GenerationContext context) {
     final Set<ShapeId> alreadyVisited = new HashSet<>();
-    final var errorShapes = awsNormalizedModel.getShapesWithTrait(
-      ErrorTrait.class
-    );
+    final var errorShapes = awsNormalizedModel
+      .getShapesWithTrait(ErrorTrait.class)
+      .stream()
+      .sorted()
+      .collect(Collectors.toCollection(LinkedHashSet::new));
 
     for (final var errorShape : errorShapes) {
       if (
@@ -634,9 +642,11 @@ public class DafnyAwsSdkClientTypeConversionProtocol
 
   private void generateErrorDeserializer(final GenerationContext context) {
     final Set<ShapeId> alreadyVisited = new HashSet<>();
-    final var errorShapes = awsNormalizedModel.getShapesWithTrait(
-      ErrorTrait.class
-    );
+    final var errorShapes = awsNormalizedModel
+      .getShapesWithTrait(ErrorTrait.class)
+      .stream()
+      .sorted()
+      .collect(Collectors.toCollection(LinkedHashSet::new));
     for (final var errorShape : errorShapes) {
       if (
         !errorShape
@@ -749,9 +759,7 @@ public class DafnyAwsSdkClientTypeConversionProtocol
             """,
             DafnyNameResolver.dafnyTypesNamespace(serviceShape),
             writer.consumer(w -> {
-              for (final var error : awsNormalizedModel.getShapesWithTrait(
-                ErrorTrait.class
-              )) {
+              for (final var error : errorShapes) {
                 w.write(
                   """
                   if err.Is_$L() {

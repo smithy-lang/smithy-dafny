@@ -10,6 +10,8 @@ public class Constants {
 
   public static final String DAFNY_RUNTIME_GO_LIBRARY_MODULE =
     "github.com/dafny-lang/DafnyRuntimeGo/v4";
+  public static final String SMITHY_DAFNY_STD_LIB_GO =
+    "github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library";
 
   // TODO: Is it possible to make this function name shorter and in camelCase?
   /**

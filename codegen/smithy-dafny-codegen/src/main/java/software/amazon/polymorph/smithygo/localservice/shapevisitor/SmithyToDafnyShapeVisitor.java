@@ -2,8 +2,9 @@ package software.amazon.polymorph.smithygo.localservice.shapevisitor;
 
 import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+import static software.amazon.polymorph.smithygo.utils.Constants.SMITHY_DAFNY_STD_LIB_GO;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
@@ -52,7 +53,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   protected boolean isPointerType;
   //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
   private static final Map<MemberShape, String> memberShapeConversionFuncMap =
-    new HashMap<>();
+    new LinkedHashMap<>();
 
   public SmithyToDafnyShapeVisitor(
     final GenerationContext context,
@@ -245,10 +246,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       return referenceStructureShape(shape);
     }
     final var typeConversionMethodBuilder = new StringBuilder();
-    writer.addImportFromModule(
-      "github.com/dafny-lang/DafnyStandardLibGo",
-      "Wrappers"
-    );
+    writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "Wrappers");
     writer.addImportFromModule(
       SmithyNameResolver.getGoModuleNameForSmithyNamespace(
         shape.toShapeId().getNamespace()
@@ -754,14 +752,14 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             var inputToConversion = %s
             return %s
         """.formatted(
-            SmithyNameResolver.smithyTypesNamespace(shape),
+            SmithyNameResolver.smithyTypesNamespace(shape, context.model()),
             context.symbolProvider().toMemberName(member),
             ShapeVisitorHelper.toDafnyShapeVisitorWriter(
               member,
               context,
               dataSource +
               ".(*" +
-              SmithyNameResolver.smithyTypesNamespace(shape) +
+              SmithyNameResolver.smithyTypesNamespace(shape, context.model()) +
               "." +
               context.symbolProvider().toMemberName(member) +
               ").Value",

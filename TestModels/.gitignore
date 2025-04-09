@@ -50,6 +50,9 @@
 **/src/types.rs
 **/src/types
 **/target
+**/src/validation.rs
+**/src/wrapped
+**/src/wrapped.rs
 
 # .NET Artifacts
 **/bin

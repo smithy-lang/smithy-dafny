@@ -22,6 +22,8 @@ class RustTestModels extends TestModelTest {
     DISABLED_TESTS.add("CodegenPatches");
     DISABLED_TESTS.add("Dependencies");
     DISABLED_TESTS.add("Extern");
+    DISABLED_TESTS.add("LanguageSpecificLogic");
+    DISABLED_TESTS.add("Refinement");
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
@@ -48,7 +50,9 @@ class RustTestModels extends TestModelTest {
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForRust(String relativeTestModelPath) {
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
+
     Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);

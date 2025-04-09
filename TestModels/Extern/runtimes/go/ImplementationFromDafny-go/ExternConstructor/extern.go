@@ -3,8 +3,8 @@ package ExternConstructor
 import (
 	"fmt"
 
+	"github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library/Wrappers"
 	"github.com/dafny-lang/DafnyRuntimeGo/v4/dafny"
-	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 	"github.com/smithy-lang/smithy-dafny/TestModels/Extern/SimpleDafnyExternTypes"
 )
 

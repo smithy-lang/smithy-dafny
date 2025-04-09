@@ -3,10 +3,10 @@ package Com_Amazonaws_Kms
 import (
 	"context"
 
+	"github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library/Wrappers"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/v4/dafny"
-	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 	ComAmazonawsKmsTypes "github.com/smithy-lang/smithy-dafny/kmsv2/ComAmazonawsKmsTypes"
 	"github.com/smithy-lang/smithy-dafny/kmsv2/KMSwrapped"
 )

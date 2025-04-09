@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithygo.awssdk;
 
 import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+import static software.amazon.polymorph.smithygo.utils.Constants.SMITHY_DAFNY_STD_LIB_GO;
 
 import software.amazon.polymorph.smithygo.codegen.AddOperationShapes;
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
@@ -68,10 +69,7 @@ public class DafnyAwsSdkClientShimGenerator implements Runnable {
               .getNamespace()
           )
         );
-        writer.addImportFromModule(
-          "github.com/dafny-lang/DafnyStandardLibGo",
-          "Wrappers"
-        );
+        writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "Wrappers");
         writer.addUseImports(SmithyGoDependency.CONTEXT);
         writer.addImportFromModule(
           SmithyNameResolver.getGoModuleNameForSmithyNamespace(

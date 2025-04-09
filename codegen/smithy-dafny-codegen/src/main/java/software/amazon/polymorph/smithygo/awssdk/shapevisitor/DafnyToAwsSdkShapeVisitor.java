@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithygo.awssdk.shapevisitor;
 
 import static software.amazon.polymorph.smithygo.utils.Constants.DAFNY_RUNTIME_GO_LIBRARY_MODULE;
+import static software.amazon.polymorph.smithygo.utils.Constants.SMITHY_DAFNY_STD_LIB_GO;
 
 import java.util.*;
 import software.amazon.polymorph.smithygo.awssdk.AwsSdkGoPointableIndex;
@@ -49,7 +50,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
   //TODO: Ideally this shouldn't be static but with current design we need to access this across instances.
   private static final Map<MemberShape, String> memberShapeConversionFuncMap =
-    new HashMap<>();
+    new LinkedHashMap<>();
 
   public DafnyToAwsSdkShapeVisitor(
     final GenerationContext context,
@@ -600,10 +601,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   @Override
   public String unionShape(final UnionShape shape) {
     writer.addImportFromModule(DAFNY_RUNTIME_GO_LIBRARY_MODULE, "dafny");
-    writer.addImportFromModule(
-      "github.com/dafny-lang/DafnyStandardLibGo",
-      "Wrappers"
-    );
+    writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "Wrappers");
 
     var nilCheck = "";
     if (this.isOptional) {

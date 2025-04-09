@@ -2,14 +2,14 @@ module github.com/smithy-lang/smithy-dafny/kmsv2
 
 go 1.23.0
 
-replace github.com/dafny-lang/DafnyStandardLibGo => ../../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/
+replace github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library => ../../../../../dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.28.0
 	github.com/aws/aws-sdk-go-v2/service/kms v1.35.5
 	github.com/aws/smithy-go v1.22.0
 	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1
-	github.com/dafny-lang/DafnyStandardLibGo v0.0.0-00010101000000-000000000000
+	github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library v0.0.0-00010101000000-000000000000
 )
 
 require (

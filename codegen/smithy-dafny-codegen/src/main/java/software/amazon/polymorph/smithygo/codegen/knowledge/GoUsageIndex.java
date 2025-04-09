@@ -71,6 +71,7 @@ public class GoUsageIndex implements KnowledgeIndex {
                 )
                 .stream()
                 .map(Shape::toShapeId)
+                .sorted()
                 .collect(Collectors.toList())
             );
 
@@ -84,6 +85,7 @@ public class GoUsageIndex implements KnowledgeIndex {
                 )
                 .stream()
                 .map(Shape::toShapeId)
+                .sorted()
                 .collect(Collectors.toList())
             );
           });

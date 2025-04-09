@@ -140,17 +140,26 @@ public class ShapeVisitorHelper {
     final Shape targetShape = context
       .model()
       .expectShape(memberShape.getTarget());
+    // Resource shape already goes into a function
     if (targetShape.hasTrait(ReferenceTrait.class)) {
-      return targetShape.accept(
-        new SmithyToDafnyShapeVisitor(
-          context,
-          dataSource,
-          writer,
-          isConfigShape,
-          isOptional,
-          isPointerType
-        )
+      final ReferenceTrait referenceTrait = targetShape.expectTrait(
+        ReferenceTrait.class
       );
+      final Shape resourceOrService = context
+        .model()
+        .expectShape(referenceTrait.getReferentId());
+      if (resourceOrService.isResourceShape()) {
+        return targetShape.accept(
+          new SmithyToDafnyShapeVisitor(
+            context,
+            dataSource,
+            writer,
+            isConfigShape,
+            isOptional,
+            isPointerType
+          )
+        );
+      }
     }
     final String funcDataSource = "input";
     if (

@@ -142,6 +142,7 @@ public class GoValidationIndex implements KnowledgeIndex {
               .values()
               .stream()
               .map(OperationShape::toShapeId)
+              .sorted()
               .collect(Collectors.toSet())
           )
         );

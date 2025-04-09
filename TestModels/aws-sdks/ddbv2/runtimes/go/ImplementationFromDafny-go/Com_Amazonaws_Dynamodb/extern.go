@@ -3,10 +3,10 @@ package Com_Amazonaws_Dynamodb
 import (
 	"context"
 
+	"github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library/Wrappers"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	_dafny "github.com/dafny-lang/DafnyRuntimeGo/v4/dafny"
-	"github.com/dafny-lang/DafnyStandardLibGo/Wrappers"
 	"github.com/smithy-lang/smithy-dafny/ddbv2/ComAmazonawsDynamodbTypes"
 	"github.com/smithy-lang/smithy-dafny/ddbv2/DynamoDBwrapped"
 )

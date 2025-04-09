@@ -412,9 +412,8 @@ public class DotNetNameResolver {
   }
 
   protected String baseTypeForMember(final MemberShape memberShape) {
-    final String baseType = baseTypeForShape(memberShape.getTarget());
-    final boolean isOptional = memberShapeIsOptional(memberShape);
-    return isOptional ? baseTypeForOptionalMember(memberShape) : baseType;
+    // We always use nullable types for safety.
+    return baseTypeForOptionalMember(memberShape);
   }
 
   protected String baseTypeForOptionalMember(final MemberShape memberShape) {

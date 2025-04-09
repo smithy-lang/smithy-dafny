@@ -49,11 +49,13 @@ public class UnionGenerator {
       .values()
       .stream()
       .filter(memberShape -> !isEventStreamErrorMember(memberShape))
+      .sorted()
       .collect(Collectors.toCollection(TreeSet::new));
 
     memberShapes
       .stream()
       .map(symbolProvider::toMemberName)
+      .sorted()
       .forEach(name -> {
         writer.write("//  " + name);
       });
@@ -87,7 +89,10 @@ public class UnionGenerator {
             writer.write("Value $T", memberSymbol);
           } else {
             // Handling smithy-dafny Reference Trait begins
-            var namespace = SmithyNameResolver.smithyTypesNamespace(target);
+            var namespace = SmithyNameResolver.smithyTypesNamespace(
+              target,
+              model
+            );
             var newMemberSymbol = memberSymbol;
             if (target.hasTrait(ReferenceTrait.class)) {
               newMemberSymbol =

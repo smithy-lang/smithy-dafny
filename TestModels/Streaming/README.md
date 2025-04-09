@@ -4,6 +4,7 @@ This project will implement the smithy trait [streaming](https://smithy.io/2.0/s
 
 ## Status
 
-This project does not build. The `software.amazon.polymorph.smithydafny` project does not support code generation for the "streaming" trait.
-
-Once the Polymorph code generator supports code generation for this trait, these files should be extended to complete the type implementation.
+This project only currently works on Python: the Dafny code generation
+has been updated to support `@streaming` on blob shapes,
+but only Python includes shim adaptors between the Dafny types
+and the types used for Smithy-generated interfaces.

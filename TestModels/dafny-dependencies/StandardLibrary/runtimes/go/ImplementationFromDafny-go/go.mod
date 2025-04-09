@@ -1,4 +1,4 @@
-module github.com/dafny-lang/DafnyStandardLibGo
+module github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library
 
 go 1.23.0
 

@@ -115,7 +115,10 @@ public final class StructureGenerator implements Runnable {
               .getProperty(SymbolUtils.INPUT_VARIANT, Symbol.class)
               .orElse(memberSymbol);
         }
-        var namespace = SmithyNameResolver.smithyTypesNamespace(targetShape);
+        var namespace = SmithyNameResolver.smithyTypesNamespace(
+          targetShape,
+          model
+        );
 
         if (targetShape.hasTrait(ReferenceTrait.class)) {
           memberSymbol =
@@ -158,7 +161,7 @@ public final class StructureGenerator implements Runnable {
                 targetShape.getId().getNamespace()
               ),
               "types",
-              SmithyNameResolver.smithyTypesNamespace(targetShape)
+              SmithyNameResolver.smithyTypesNamespace(targetShape, model)
             );
           } else if (
             !member
