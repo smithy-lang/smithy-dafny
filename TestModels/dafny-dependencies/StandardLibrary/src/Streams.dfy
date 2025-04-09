@@ -50,6 +50,7 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     ghost function Streamed(): seq<T>
       requires Valid()
+      reads this, Repr
     {
       StreamedOf(Outputs())  
     }
@@ -65,9 +66,20 @@ module {:options "--function-syntax:4"} Std.Streams {
   }
 
   ghost function StreamedOf<T, E>(outputs: seq<Option<Result<seq<T>, E>>>): seq<T>
-    requires Partitioned(outputs, IsSome)
   {
-    Flatten(MapPartialFunction(ValueOfSuccess, Filter(IsSuccess, ProducedOf(outputs))))
+    // This could be defined as something like this instead:
+    //
+    //   Flatten(MapPartialFunction(x => x.value, Filter(x => x.Success?, ProducedOf(outputs))))
+    //
+    // But then the lack of extensionality in Dafny hits hard,
+    // and it becomes impossible to expand the definition elsewhere.
+
+    if |outputs| == 0 then
+      []
+    else if outputs[0].Some? && outputs[0].value.Success? then
+      outputs[0].value.value + StreamedOf(outputs[1..])
+    else
+      StreamedOf(outputs[1..])
   }
 
   ghost predicate ValidStreamed<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, length: int)
@@ -88,59 +100,29 @@ module {:options "--function-syntax:4"} Std.Streams {
     ensures 
       var singleton: Option<Result<seq<T>, E>> := Some(Success(s));
       StreamedOf([singleton]) == s
-  {
-    var singleton: Option<Result<seq<T>, E>> := Some(Success(s));
-    calc {
-      StreamedOf([singleton]);
-      Flatten(MapPartialFunction(ValueOfSuccess, Filter(IsSuccess, ProducedOf([singleton]))));
-      Flatten(MapPartialFunction(ValueOfSuccess, Filter(IsSuccess, [singleton.value])));
-      { reveal Filter(); }
-      Flatten(MapPartialFunction(ValueOfSuccess, [singleton.value]));
-      Flatten([s]);
-      s;
-    }
-  }
+  {}
 
-  ghost predicate IsSuccess<T, E>(o: Result<T, E>)
+  // TODO: Correcting a type in the original ensures clause, should be fixed at the source
+  lemma LemmaFilterImpliesAll<T>(f: (T ~> bool), xs: seq<T>)
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    ensures 
+      var result := Filter(f, xs);
+      forall i: nat :: i < |result| ==> f.requires(result[i]) && f(result[i])
   {
-    o.Success?
-  }
-
-  ghost function ValueOfSuccess<T, E>(o: Result<T, E>): T
-    requires o.Success? 
-  {
-    o.value
+    reveal Filter();
   }
 
   lemma StreamedOfComposition<T, E>(left: seq<Option<Result<seq<T>, E>>>, right: seq<Option<Result<seq<T>, E>>>)
-    requires Partitioned(left, IsSome)
-    requires Partitioned(right, IsSome)
-    requires Partitioned(left + right, IsSome)
     ensures StreamedOf(left + right) == StreamedOf(left) + StreamedOf(right)
   {
-    // if StreamedOf(left).None? {
-    //   var errorIndex := StreamedOfErrorIndex(left);
-    //   var error := left[errorIndex];
-    //   assert (left + right)[errorIndex] == error;
-    //   assert StreamedOf(left + right) == None;
-    // } else if StreamedOf(right).None? {
-    //    var errorIndex := StreamedOfErrorIndex(right);
-    //   var error := right[errorIndex];
-    //   assert (left + right)[|left| + errorIndex] == error;
-    //   assert StreamedOf(left + right) == None;
-    // } else {
-      ProducedComposition(left, right);
-      forall o <- ProducedOf(left) ensures o.Success? {
-        AboutProducedOf(left, o);
-      }
-      forall o <- ProducedOf(right) ensures o.Success? {
-        AboutProducedOf(right, o);
-      }
-      LemmaMapPartialFunctionDistributesOverConcat(ValueOfSuccess, ProducedOf(left), ProducedOf(right));
-      LemmaFlattenConcat(MapPartialFunction(ValueOfSuccess, ProducedOf(left)),
-                         MapPartialFunction(ValueOfSuccess, ProducedOf(right)));
-    // }
-  }
+    if left == [] {
+      assert left + right == right;
+    } else {
+      StreamedOfComposition(left[1..], right);
+      assert left == [left[0]] + left[1..];
+      assert left + right == [left[0]] + (left[1..] + right);
+    }
+  } 
 
   lemma ValidStreamedAfterNone<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, length: int)
     requires Partitioned(outputs, IsSome)
@@ -236,7 +218,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       && |buffer| <= length as int
       && StreamedOf(Outputs()) + buffer == StreamedOf(wrapped.Outputs())
       && (0 < |buffer| ==> !wrapped.Done())
-      && (!Done() <==> !wrapped.Done())
+      && (!Done() ==> !wrapped.Done())
     }
 
     ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, E>>>)
@@ -244,7 +226,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
       decreases Repr
     {
-      ValidStreamed(outputs, contentLength.value as int)
+      contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
     }
 
     ghost function RemainingMetric(): TerminationMetric 
@@ -254,6 +236,14 @@ module {:options "--function-syntax:4"} Std.Streams {
     {
       TMTuple(TMTop, wrapped.RemainingMetric(), TMNat(|buffer|))
     }
+
+    twostate lemma RemainingMetricDoesntReadHistory()
+      requires old(Valid())
+      requires Valid()
+      requires wrapped.RemainingMetric() == old(wrapped.RemainingMetric());
+      requires buffer == old(buffer);
+      ensures RemainingMetric() == old(RemainingMetric())
+    {}
 
     constructor(wrapped: Producer<Result<seq<T>, E>>, length: uint64, ghost producesTotalLengthProof: ProducesTotalLengthProof<T, E>)
       requires wrapped.Valid()
@@ -271,38 +261,44 @@ module {:options "--function-syntax:4"} Std.Streams {
       this.history := [];
       this.Repr := {this} + wrapped.Repr;
       this.producesTotalLengthProof := producesTotalLengthProof;
+      this.maxWrappedRemaining := wrapped.RemainingMetric();
     }
 
     method Invoke(i: ()) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(i)
-      reads Reads(i)
+      reads this, Repr
       modifies Modifies(i)
       decreases Decreases(i), 0
       ensures Ensures(i, r)
       ensures RemainingDecreasedBy(r)
     {
-      assert Requires(i);
-
+      assert Requires(());
       assert Valid();
-      var next: Option<Result<seq<T>, E>>;
-      if 0 < |buffer| {
-        r := Some(Success(buffer));
-        buffer := [];
-      } else {
-        r := wrapped.Next();
-      }
-      UpdateHistory(i, r);
+      if length == 0 {
+        r := None;
 
-      // TODO: work to do
-      assume {:axiom} Valid();
-      if r.Some? {
-        old(RemainingMetric()).TupleDecreasesToTuple(RemainingMetric());
+        producesTotalLengthProof.ProducesTotalLength(wrapped.history);
+        assert |StreamedOf(wrapped.Outputs())| == 0;
+        PartitionedCompositionRight(Outputs(), [None], IsSome);
+        StreamedOfComposition(Outputs(), [None]);
+        assert OutputsOf(history + [((), None)]) == Outputs() + [None];
+
+        OutputsPartitionedAfterOutputtingNone();
+        ProduceNone();
+
+        assert Last(Outputs()) == None;
+        assert Done();
+        assert Valid();
+
+        RemainingMetricDoesntReadHistory();
+        assert RemainingDecreasedBy(r);
       } else {
-        old(RemainingMetric()).TupleNonIncreasesToTuple(RemainingMetric());
+        r := Read(length);
+        assert RemainingDecreasedBy(r);
       }
     }
 
-    method {:only} Read(max: uint64) returns (r: Option<Result<seq<T>, E>>)
+    method Read(max: uint64) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(())
       reads Reads(())
       modifies Modifies(())
@@ -324,15 +320,16 @@ module {:options "--function-syntax:4"} Std.Streams {
         assert StreamedOf(Outputs()) + StreamedOf([next]) == StreamedOf(wrapped.Outputs());
       } else {
         next := wrapped.Next();
+        Repr := {this} + wrapped.Repr;
         producesTotalLengthProof.ProducesTotalLength(wrapped.history);
         
-        if next.Some? {
-          assert !wrapped.Done();
-        } else {
-          assert !IsSome(Last(wrapped.Outputs()));
-          assert !Seq.All(wrapped.Outputs(), IsSome);
-          // assert |StreamedOf(wrapped.Outputs())| == length as int;
-        }
+        // if next.Some? {
+        //   assert !wrapped.Done();
+        // } else {
+        //   assert !IsSome(Last(wrapped.Outputs()));
+        //   assert !Seq.All(wrapped.Outputs(), IsSome);
+        //   // assert |StreamedOf(wrapped.Outputs())| == length as int;
+        // }
 
         assert wrapped.Outputs() == old(wrapped.Outputs()) + [next];
         StreamedOfComposition(old(wrapped.Outputs()), [next]);
@@ -363,10 +360,14 @@ module {:options "--function-syntax:4"} Std.Streams {
         assert ValidHistory(history + [((), None)]);
         ProduceNone();
 
+        assert Last(wrapped.Outputs()) == None;
+        assert Last(Outputs()) == None;
         assert Valid();
       } else if next.value.Failure? {
         r := next;
 
+        assert Last(wrapped.Outputs()).Some?;
+        assert Last(Outputs()).Some?;
         assert Valid();
       } else {
         assert !wrapped.Done();
@@ -520,11 +521,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       if outputs == [] {
         assert produced == [];
       } else {
-        assert outputs == [Some(Success(s[..position]))] + [];
-        assert produced == [Success(s[..position])] + ProducedOf([]);
-        assert MapPartialFunction(ValueOfSuccess, produced) == [s[..position]];
-        assert Flatten([s[..position]]) == s[..position];
-        assert streamed == s[..position];
+        StreamedOfSingleton<T, ()>(s[..position]);
       }
     }
 
@@ -559,6 +556,10 @@ module {:options "--function-syntax:4"} Std.Streams {
         assert OutputsOf(history + [((), None)]) == Outputs() + [None];
         assert ValidHistory(history + [((), None)]);
         ProduceNone();
+
+        assert StreamedOf([r]) == [];
+        StreamedOfComposition(old(Outputs()), [r]);
+        assert StreamedOf(Outputs()) == s[..position];
       } else {
         var remaining := |s| as uint64 - position;
         var size := if max <= remaining then max else remaining;
