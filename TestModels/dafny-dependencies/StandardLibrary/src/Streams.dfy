@@ -12,6 +12,10 @@ module {:options "--function-syntax:4"} Std.Streams {
   import opened Collections.Seq
   import opened Termination
 
+  // TODO: Consider a more generic term for Streamed[Of],
+  // especially if we can decouple the filtering out Failures
+  // from the concatenation of batches.
+
   //
   // A data stream, i.e. a fallable producer of batches of values.
   //
@@ -41,8 +45,14 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, E>>>)
       requires Seq.Partitioned(outputs, IsSome)
-      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidDataSoFar(outputs, contentLength.value as int)
+      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
       decreases Repr
+
+    ghost function Streamed(): seq<T>
+      requires Valid()
+    {
+      StreamedOf(Outputs())  
+    }
 
     method Read(max: uint64) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(())
@@ -54,13 +64,18 @@ module {:options "--function-syntax:4"} Std.Streams {
       ensures r.Some? && r.value.Success? ==> |r.value.value| <= max as int
   }
 
-  ghost predicate ValidDataSoFar<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, length: int)
+  ghost function StreamedOf<T, E>(outputs: seq<Option<Result<seq<T>, E>>>): seq<T>
     requires Partitioned(outputs, IsSome)
   {
-    && var dataSoFar := DataSoFar(outputs);
-    && (dataSoFar.Some? ==> 
-      && |dataSoFar.value| <= length
-      && (!Seq.All(outputs, IsSome) ==> |dataSoFar.value| == length))
+    Flatten(MapPartialFunction(ValueOfSuccess, Filter(IsSuccess, ProducedOf(outputs))))
+  }
+
+  ghost predicate ValidStreamed<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, length: int)
+    requires Partitioned(outputs, IsSome)
+  {
+    && var streamed := StreamedOf(outputs);
+    && |streamed| <= length
+    && (!Seq.All(outputs, IsSome) ==> |streamed| == length)
   }
 
   // TODO: Move next to ProducedOf?
@@ -69,62 +84,51 @@ module {:options "--function-syntax:4"} Std.Streams {
     ensures x in ProducedOf(outputs) <==> Some(x) in outputs
   {}
 
+  lemma StreamedOfSingleton<T, E>(s: seq<T>)
+    ensures 
+      var singleton: Option<Result<seq<T>, E>> := Some(Success(s));
+      StreamedOf([singleton]) == s
+  {
+    var singleton: Option<Result<seq<T>, E>> := Some(Success(s));
+    calc {
+      StreamedOf([singleton]);
+      Flatten(MapPartialFunction(ValueOfSuccess, Filter(IsSuccess, ProducedOf([singleton]))));
+      Flatten(MapPartialFunction(ValueOfSuccess, Filter(IsSuccess, [singleton.value])));
+      { reveal Filter(); }
+      Flatten(MapPartialFunction(ValueOfSuccess, [singleton.value]));
+      Flatten([s]);
+      s;
+    }
+  }
+
+  ghost predicate IsSuccess<T, E>(o: Result<T, E>)
+  {
+    o.Success?
+  }
+
   ghost function ValueOfSuccess<T, E>(o: Result<T, E>): T
     requires o.Success? 
   {
     o.value
   }
 
-  ghost function DataSoFar<T, E>(outputs: seq<Option<Result<seq<T>, E>>>): Option<seq<T>>
-    requires Partitioned(outputs, IsSome)
-  {
-    if exists o <- outputs :: o.Some? && o.value.Failure? then
-      None
-    else
-      forall o <- ProducedOf(outputs) ensures o.Success? {
-        AboutProducedOf(outputs, o);
-      }
-      Some(Flatten(MapPartialFunction(ValueOfSuccess, ProducedOf(outputs))))
-  }
-
-  lemma DataSoFarErrorIndex<T, E>(outputs: seq<Option<Result<seq<T>, E>>>) returns (index: nat)
-    requires Partitioned(outputs, IsSome)
-    requires DataSoFar(outputs).None?
-    ensures index < |outputs|
-    ensures outputs[index].Some? && outputs[index].value.Failure?
-  {
-    assert 0 < |outputs|;
-    if outputs[0].Some? && outputs[0].value.Failure? {
-      return 0;
-    } else {
-      var index' := DataSoFarErrorIndex(outputs[1..]);
-      return index' + 1;
-    }
-  }
-
-
-  ghost function OptionConcat<T>(left: Option<seq<T>>, right: Option<seq<T>>): Option<seq<T>>
-  {
-    if left.Some? && right.Some? then Some(left.value + right.value) else None
-  }
-
-  lemma DataSoFarComposition<T, E>(left: seq<Option<Result<seq<T>, E>>>, right: seq<Option<Result<seq<T>, E>>>)
+  lemma StreamedOfComposition<T, E>(left: seq<Option<Result<seq<T>, E>>>, right: seq<Option<Result<seq<T>, E>>>)
     requires Partitioned(left, IsSome)
     requires Partitioned(right, IsSome)
     requires Partitioned(left + right, IsSome)
-    ensures DataSoFar(left + right) == OptionConcat(DataSoFar(left), DataSoFar(right))
+    ensures StreamedOf(left + right) == StreamedOf(left) + StreamedOf(right)
   {
-    if DataSoFar(left).None? {
-      var errorIndex := DataSoFarErrorIndex(left);
-      var error := left[errorIndex];
-      assert (left + right)[errorIndex] == error;
-      assert DataSoFar(left + right) == None;
-    } else if DataSoFar(right).None? {
-       var errorIndex := DataSoFarErrorIndex(right);
-      var error := right[errorIndex];
-      assert (left + right)[|left| + errorIndex] == error;
-      assert DataSoFar(left + right) == None;
-    } else {
+    // if StreamedOf(left).None? {
+    //   var errorIndex := StreamedOfErrorIndex(left);
+    //   var error := left[errorIndex];
+    //   assert (left + right)[errorIndex] == error;
+    //   assert StreamedOf(left + right) == None;
+    // } else if StreamedOf(right).None? {
+    //    var errorIndex := StreamedOfErrorIndex(right);
+    //   var error := right[errorIndex];
+    //   assert (left + right)[|left| + errorIndex] == error;
+    //   assert StreamedOf(left + right) == None;
+    // } else {
       ProducedComposition(left, right);
       forall o <- ProducedOf(left) ensures o.Success? {
         AboutProducedOf(left, o);
@@ -135,50 +139,44 @@ module {:options "--function-syntax:4"} Std.Streams {
       LemmaMapPartialFunctionDistributesOverConcat(ValueOfSuccess, ProducedOf(left), ProducedOf(right));
       LemmaFlattenConcat(MapPartialFunction(ValueOfSuccess, ProducedOf(left)),
                          MapPartialFunction(ValueOfSuccess, ProducedOf(right)));
-    }
+    // }
   }
 
-  lemma ValidDataSoFarAfterNone<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, length: int)
+  lemma ValidStreamedAfterNone<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, length: int)
     requires Partitioned(outputs, IsSome)
-    requires 
-      var dataSoFar := DataSoFar(outputs);
-      dataSoFar.Some? ==> |dataSoFar.value| == length
+    requires |StreamedOf(outputs)| == length
     ensures Partitioned(outputs + [None], IsSome)
-    ensures ValidDataSoFar(outputs + [None], length)
+    ensures ValidStreamed(outputs + [None], length)
   {
     var right: seq<Option<Result<seq<T>, E>>> := [None];
     PartitionedCompositionRight(outputs, [None], IsSome);
     assert Partitioned(outputs + [None], IsSome);
-    var dataSoFarAfter := DataSoFar(outputs + [None]);
+    var streamedAfter := StreamedOf(outputs + [None]);
     assert ProducedOf(right) == [];
-    DataSoFarComposition(outputs, right);
+    StreamedOfComposition(outputs, right);
   }
 
-  lemma ValidDataSoFarAfterMoreData<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, value: seq<T>, length: int)
+  lemma ValidStreamedAfterMoreData<T, E>(outputs: seq<Option<Result<seq<T>, E>>>, value: seq<T>, length: int)
     requires All(outputs, IsSome)
     requires 
-      var dataSoFar := (AllImpliesPartitioned(outputs, IsSome); DataSoFar(outputs));
-      dataSoFar.Some? ==> |dataSoFar.value| + |value| <= length
-    requires ValidDataSoFar(outputs, length)
+      (AllImpliesPartitioned(outputs, IsSome); 
+      |StreamedOf(outputs)| + |value| <= length)
+    requires ValidStreamed(outputs, length)
     ensures Partitioned(outputs + [Some(Success(value))], IsSome)
-    ensures ValidDataSoFar(outputs + [Some(Success(value))], length)
-    ensures DataSoFar(outputs).Some? ==> DataSoFar(outputs + [Some(Success(value))]).value == DataSoFar(outputs).value + value
+    ensures ValidStreamed(outputs + [Some(Success(value))], length)
+    ensures StreamedOf(outputs + [Some(Success(value))]) == StreamedOf(outputs) + value
   {
     AllImpliesPartitioned(outputs, IsSome);
     var right: seq<Option<Result<seq<T>, E>>> := [Some(Success(value))];
     assert All(right, IsSome);
     PartitionedCompositionLeft(outputs, right, IsSome);
-    if DataSoFar(outputs).None? {
-      assert DataSoFar(outputs + [Some(Success(value))]).None?;
-    } else {
-      assert ProducedOf(right) == [Success(value)];
-      reveal Seq.Map();
-      assert DataSoFar(right).value == Flatten([value]);
-      reveal Seq.Flatten();
-      assert DataSoFar(right).value == value + Flatten([]);
-      assert DataSoFar(right).value == value;
-      DataSoFarComposition(outputs, right);
-    }
+    assert ProducedOf(right) == [Success(value)];
+    reveal Seq.Map();
+    assert StreamedOf(right) == Flatten([value]);
+    reveal Seq.Flatten();
+    assert StreamedOf(right) == value + Flatten([]);
+    assert StreamedOf(right) == value;
+    StreamedOfComposition(outputs, right);
   }
 
 
@@ -199,36 +197,27 @@ module {:options "--function-syntax:4"} Std.Streams {
       ensures Position() == newPosition
   }
 
-  ghost predicate ValidDataLengthSoFar<T>(outputs: seq<Option<seq<T>>>, length: int)
-    requires Partitioned(outputs, IsSome)
-  {
-    var dataSoFar := Flatten(ProducedOf(outputs));
-    && |dataSoFar| <= length
-    && (!Seq.All(outputs, IsSome) ==> |dataSoFar| == length)
-  }
+  trait ProducesTotalLengthProof<T, E> {
 
-  trait ProducesTotalLengthProof<T> {
-
-    const producer: Producer<seq<T>>
+    const producer: Producer<Result<seq<T>, E>>
     const length: int
 
-    lemma ProducesTotalLength(history: seq<((), Option<seq<T>>)>)
+    lemma ProducesTotalLength(history: seq<((), Option<Result<seq<T>, E>>)>)
       requires producer.ValidHistory(history)
-      ensures ValidDataLengthSoFar(OutputsOf(history), length)
+      ensures ValidStreamed(OutputsOf(history), length)
   }
 
   /*
-   * Wraps an Producer up as a non-rewindable DataStream that cannot error.
-   * It implements Read() using Next(), and buffers extra data
-   * as needed.
+   * Wraps an Producer up as a non-rewindable DataStream.
+   * It implements Read() using Next(), and buffers extra data as needed.
    */
-  class ProducerDataStream<T> extends DataStream<T, ()> {
+  class ProducerDataStream<T, E> extends DataStream<T, E> {
 
-    const wrapped: Producer<seq<T>>
+    const wrapped: Producer<Result<seq<T>, E>>
     const length: uint64
     var buffer: seq<T>
 
-    ghost const producesTotalLengthProof: ProducesTotalLengthProof<T>
+    ghost const producesTotalLengthProof: ProducesTotalLengthProof<T, E>
     ghost const maxWrappedRemaining: TerminationMetric
 
     ghost predicate Valid()
@@ -239,18 +228,23 @@ module {:options "--function-syntax:4"} Std.Streams {
     {
       && this in Repr
       && ValidComponent(wrapped)
+      && maxWrappedRemaining.NonIncreasesTo(wrapped.RemainingMetric())
       && ValidHistory(history)
       && producesTotalLengthProof.producer == wrapped
       && producesTotalLengthProof.length == length as int
+      && contentLength == Some(length)
       && |buffer| <= length as int
+      && StreamedOf(Outputs()) + buffer == StreamedOf(wrapped.Outputs())
+      && (0 < |buffer| ==> !wrapped.Done())
+      && (!Done() <==> !wrapped.Done())
     }
 
-    ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, ()>>>)
+    ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, E>>>)
       requires Seq.Partitioned(outputs, IsSome)
-      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidDataSoFar(outputs, contentLength.value as int)
+      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
       decreases Repr
     {
-      contentLength.Some? ==> ValidDataSoFar(outputs, contentLength.value as int)
+      ValidStreamed(outputs, contentLength.value as int)
     }
 
     ghost function RemainingMetric(): TerminationMetric 
@@ -261,7 +255,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       TMTuple(TMTop, wrapped.RemainingMetric(), TMNat(|buffer|))
     }
 
-    constructor(wrapped: Producer<seq<T>>, length: uint64, ghost producesTotalLengthProof: ProducesTotalLengthProof<T>)
+    constructor(wrapped: Producer<Result<seq<T>, E>>, length: uint64, ghost producesTotalLengthProof: ProducesTotalLengthProof<T, E>)
       requires wrapped.Valid()
       requires wrapped.history == []
       requires producesTotalLengthProof.producer == wrapped
@@ -273,12 +267,13 @@ module {:options "--function-syntax:4"} Std.Streams {
       this.length := length;
       this.buffer := [];
 
+      this.contentLength := Some(length);
       this.history := [];
       this.Repr := {this} + wrapped.Repr;
       this.producesTotalLengthProof := producesTotalLengthProof;
     }
 
-    method Invoke(i: ()) returns (r: Option<Result<seq<T>, ()>>)
+    method Invoke(i: ()) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(i)
       reads Reads(i)
       modifies Modifies(i)
@@ -289,17 +284,13 @@ module {:options "--function-syntax:4"} Std.Streams {
       assert Requires(i);
 
       assert Valid();
-      var next;
+      var next: Option<Result<seq<T>, E>>;
       if 0 < |buffer| {
-        next := Some(buffer);
+        r := Some(Success(buffer));
         buffer := [];
       } else {
-        next := wrapped.Next();
+        r := wrapped.Next();
       }
-      
-      r := match next
-        case None => None
-        case Some(value) => Some(Success(value));
       UpdateHistory(i, r);
 
       // TODO: work to do
@@ -311,7 +302,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       }
     }
 
-    method Read(max: uint64) returns (r: Option<Result<seq<T>, ()>>)
+    method {:only} Read(max: uint64) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(())
       reads Reads(())
       modifies Modifies(())
@@ -325,29 +316,104 @@ module {:options "--function-syntax:4"} Std.Streams {
       assert Valid();
       var next;
       if 0 < |buffer| {
-        next := Some(buffer);
+        assert !wrapped.Done();
+        next := Some(Success(buffer));
+        StreamedOfSingleton<T, E>(buffer);
         buffer := [];
+
+        assert StreamedOf(Outputs()) + StreamedOf([next]) == StreamedOf(wrapped.Outputs());
       } else {
         next := wrapped.Next();
+        producesTotalLengthProof.ProducesTotalLength(wrapped.history);
+        
+        if next.Some? {
+          assert !wrapped.Done();
+        } else {
+          assert !IsSome(Last(wrapped.Outputs()));
+          assert !Seq.All(wrapped.Outputs(), IsSome);
+          // assert |StreamedOf(wrapped.Outputs())| == length as int;
+        }
+
+        assert wrapped.Outputs() == old(wrapped.Outputs()) + [next];
+        StreamedOfComposition(old(wrapped.Outputs()), [next]);
+        assert StreamedOf(wrapped.Outputs()) == StreamedOf(old(wrapped.Outputs())) + StreamedOf([next]);
+        assert StreamedOf(Outputs()) + StreamedOf([next]) == StreamedOf(wrapped.Outputs());
       }
-      assert next.Some? ==> |next.value| <= length as int;
+      assert StreamedOf(Outputs()) + StreamedOf([next]) == StreamedOf(wrapped.Outputs());
+      producesTotalLengthProof.ProducesTotalLength(wrapped.history);
+      assert |StreamedOf(wrapped.Outputs())| <= length as int;
 
       if next.None? {
         r := None;
 
+        ghost var right := [next];
+        assert Last(wrapped.Outputs()) == next;
+        assert wrapped.Outputs() == old(wrapped.Outputs()) + right;
+        assert StreamedOf(wrapped.Outputs()) == StreamedOf(old(wrapped.Outputs()) + right);
+        assert StreamedOf(right) == [];
+        StreamedOfComposition(old(wrapped.Outputs()), right);
+        assert old(|StreamedOf(wrapped.Outputs())|) == old(|StreamedOf(Outputs())|);
+        assert StreamedOf(wrapped.Outputs()) == old(StreamedOf(wrapped.Outputs())) + [];
+        assert old(|StreamedOf(wrapped.Outputs())|) == |StreamedOf(wrapped.Outputs())|;
+        assert |StreamedOf(wrapped.Outputs())| == length as int;
+        assert |StreamedOf(Outputs())| == length as int;
+        ValidStreamedAfterNone(Outputs(), length as int);
         OutputsPartitionedAfterOutputtingNone();
-        ProduceNone();
-      } else {
-        var size := if max <= |next.value| as uint64 then max else |next.value| as uint64;
-        var value := Success(next.value[..size]);
-        r := Some(value);
-        buffer := next.value[size..];
 
+        assert ValidHistory(history + [((), None)]);
+        ProduceNone();
+
+        assert Valid();
+      } else if next.value.Failure? {
+        r := next;
+
+        assert Valid();
+      } else {
+        assert !wrapped.Done();
+        wrapped.DoneIsOneWay();
+        assert old(!wrapped.Done());
+        assert old(!Done());
+        assert !Done();
+        assert All(Outputs(), IsSome);
+
+        var size := if max <= |next.value.value| as uint64 then max else |next.value.value| as uint64;
+        var result := next.value.value[..size];
+        var value := Success(result);
+        r := Some(value);
+        buffer := next.value.value[size..];
+        
+        assert next.value.value == next.value.value[..size] + next.value.value[size..];
+        StreamedOfSingleton<T, E>(r.value.value);
+        StreamedOfSingleton<T, E>(next.value.value);
+        assert StreamedOf([r]) + buffer == StreamedOf([next]);
+
+        assert StreamedOf(Outputs()) + StreamedOf([r]) + buffer == StreamedOf(wrapped.Outputs());
+
+
+        assert old(Valid());
+        assert StreamedOf(old(Outputs())) + old(buffer) == old(StreamedOf(wrapped.Outputs()));
+        assert StreamedOf(old(Outputs())) + old(buffer) == old(StreamedOf(wrapped.Outputs()));
         OutputsPartitionedAfterOutputtingSome(value);
+        PartitionedCompositionLeft(Outputs(), [r], IsSome);
+        StreamedOfComposition(Outputs(), [r]);
+        assert StreamedOf(Outputs() + [r]) + buffer == StreamedOf(wrapped.Outputs());
+
+        ghost var wrappedStreamed := StreamedOf(wrapped.Outputs());
+        assert |wrappedStreamed| <= length as int;
+        assert |StreamedOf(wrapped.Outputs())| <= length as int;
+        ValidStreamedAfterMoreData(Outputs(), result, length as int);
+
+        assert ValidOutputs(Outputs() + [Some(value)]);
+        assert OutputsOf(history + [((), Some(value))]) == Outputs() + [Some(value)];
+        assert ValidHistory(history + [((), Some(value))]);
         ProduceSome(value);
+
+        assert Valid();
       }
       
+      assert Valid();
       if 0 < max {
+        reveal TerminationMetric.Ordinal();
         if r.Some? {
           old(RemainingMetric()).TupleDecreasesToTuple(RemainingMetric());
         } else {
@@ -355,6 +421,7 @@ module {:options "--function-syntax:4"} Std.Streams {
         }
       }
       assert 0 < max ==> RemainingDecreasedBy(r);
+
     }
   }
 
@@ -381,16 +448,16 @@ module {:options "--function-syntax:4"} Std.Streams {
       && contentLength == Some(|s| as uint64)
       && position as int <= |s|
       && 0 < chunkSize
-      && DataSoFar(Outputs()) == Some(s[..position])
+      && StreamedOf(Outputs()) == s[..position]
     }
 
     ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, ()>>>)
       requires Seq.Partitioned(outputs, IsSome)
-      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidDataSoFar(outputs, contentLength.value as int)
+      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
       decreases Repr
     {
       && contentLength.Some?
-      && ValidDataSoFar(outputs, contentLength.value as int)
+      && ValidStreamed(outputs, contentLength.value as int)
     }
 
     ghost function RemainingMetric(): TerminationMetric 
@@ -449,7 +516,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       
       var outputs := Outputs();
       var produced := ProducedOf(outputs);
-      var dataSoFar := DataSoFar(outputs);
+      var streamed := StreamedOf(outputs);
       if outputs == [] {
         assert produced == [];
       } else {
@@ -457,7 +524,7 @@ module {:options "--function-syntax:4"} Std.Streams {
         assert produced == [Success(s[..position])] + ProducedOf([]);
         assert MapPartialFunction(ValueOfSuccess, produced) == [s[..position]];
         assert Flatten([s[..position]]) == s[..position];
-        assert dataSoFar == Some(s[..position]);
+        assert streamed == s[..position];
       }
     }
 
@@ -488,7 +555,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       if position == |s| as uint64 {
         r := None;
 
-        ValidDataSoFarAfterNone(Outputs(), contentLength.value as int);
+        ValidStreamedAfterNone(Outputs(), contentLength.value as int);
         assert OutputsOf(history + [((), None)]) == Outputs() + [None];
         assert ValidHistory(history + [((), None)]);
         ProduceNone();
@@ -500,19 +567,19 @@ module {:options "--function-syntax:4"} Std.Streams {
         r := Some(chunk);
         position := newPosition;
 
-        ValidDataSoFarAfterMoreData(Outputs(), chunk.value, contentLength.value as int);
+        ValidStreamedAfterMoreData(Outputs(), chunk.value, contentLength.value as int);
         assert OutputsOf(history + [((), r)]) == Outputs() + [r];
         assert ValidHistory(history + [((), r)]);
         ProduceSome(chunk);
 
         calc {
-          DataSoFar(Outputs()).value;
-          old(DataSoFar(Outputs()).value) + chunk.value;
+          StreamedOf(Outputs());
+          old(StreamedOf(Outputs())) + chunk.value;
           s[..old(position)] + chunk.value;
           s[..old(position)] + s[old(position)..position];
           s[..position];
         }
-        assert DataSoFar(Outputs()) == Some(s[..position]);
+        assert StreamedOf(Outputs()) == s[..position];
       }
 
       reveal TerminationMetric.Ordinal();
