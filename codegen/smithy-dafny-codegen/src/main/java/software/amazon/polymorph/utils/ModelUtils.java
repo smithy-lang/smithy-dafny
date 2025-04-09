@@ -442,6 +442,33 @@ public class ModelUtils {
     return outList;
   }
 
+  public static Set<
+    List<ShapeId>
+  > findAllDependentAttributeValueShapesWithPaths(
+    Set<ShapeId> initialShapeIds,
+    Model model
+  ) {
+    Set<List<ShapeId>> outList = new LinkedHashSet<>(new ArrayList<>());
+    ShapeId attributeValueShapeId = ShapeId.from("com.amazonaws.dynamodb#AttributeValue");
+
+    Set<List<ShapeId>> dependentShapesWithPaths =
+      findAllDependentShapesWithPaths(initialShapeIds, model);
+    System.out.println("dependentShapesWithPaths");
+    System.out.println(dependentShapesWithPaths.size());
+    for (List<ShapeId> dependentShapeWithPath : dependentShapesWithPaths) {
+      ShapeId finalDependentShapeId = dependentShapeWithPath.get(
+        dependentShapeWithPath.size() - 1
+      );
+      if (
+        finalDependentShapeId.equals(attributeValueShapeId)
+      ) {
+        outList.add(dependentShapeWithPath);
+      }
+    }
+
+    return outList;
+  }
+
   /**
    * For every ShapeId in {@code initialShapes},
    * with the given {@code model},
