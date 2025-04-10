@@ -181,6 +181,24 @@ module {:options "--function-syntax:4"} Std.Streams {
     StreamedOfComposition(outputs, right);
   }
 
+  method Drain<T>(p: Producer<T>)
+    requires p.Valid()
+    reads p.Repr
+    modifies p.Repr
+    ensures p.ValidAndDisjoint()
+    ensures p.Done()
+    ensures old(p.RemainingMetric()).NonIncreasesTo(p.RemainingMetric())
+  {
+    while true
+      invariant fresh(p.Repr - old(p.Repr))
+      invariant p.ValidAndDisjoint()
+      decreases p.Remaining()
+    {
+      var n := p.Next();
+      if n.None? { break; }
+    }
+    assert Last(p.Outputs()) == None;
+  }
 
   trait RewindableDataStream<T, E> extends DataStream<T, E> {
 
@@ -284,7 +302,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       this.maxWrappedRemaining := wrapped.RemainingMetric();
     }
 
-    method Invoke(i: ()) returns (r: Option<Result<seq<T>, E>>)
+    method {:only} Invoke(i: ()) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(i)
       reads this, Repr
       modifies Modifies(i)
@@ -305,7 +323,12 @@ module {:options "--function-syntax:4"} Std.Streams {
 
         OutputsPartitionedAfterOutputtingNone();
         ProduceNone();
+        label before:
 
+        // assert Valid();
+        Drain(wrapped);
+        Repr := {this} + wrapped.Repr;
+        producesTotalLengthProof.ProducesTotalLength(wrapped.history);
         assert Last(Outputs()) == None;
         assert Done();
         assert Valid();
@@ -381,11 +404,11 @@ module {:options "--function-syntax:4"} Std.Streams {
         StreamedOfComposition(old(Outputs()), [r]);
 
         assert Valid();
-      } else if next.value.Failure? {
-        r := next;
+      } else {
 
         assert Last(wrapped.Outputs()).Some?;
         PartitionedLastTrueImpliesAll(wrapped.Outputs(), IsSome);
+
         assert !wrapped.Done();
         wrapped.DoneIsOneWay();
         assert old(!wrapped.Done());
@@ -393,18 +416,42 @@ module {:options "--function-syntax:4"} Std.Streams {
         assert !Done();
         assert All(Outputs(), IsSome);
 
-        assert old(Valid());
-        assert StreamedOf(old(Outputs())) + old(buffer) == old(StreamedOf(wrapped.Outputs()));
-        assert StreamedOf(old(Outputs())) + old(buffer) == old(StreamedOf(wrapped.Outputs()));
-        OutputsPartitionedAfterOutputtingSome(r.value);
-        PartitionedCompositionLeft(Outputs(), [r], IsSome);
-        StreamedOfComposition(Outputs(), [r]);
-        assert StreamedOf(Outputs() + [r]) + buffer == StreamedOf(wrapped.Outputs());
+        if next.value.Failure? {
+          r := next;
 
-        ghost var wrappedStreamed := StreamedOf(wrapped.Outputs());
-        assert |wrappedStreamed| <= length as int;
-        assert |StreamedOf(wrapped.Outputs())| <= length as int;
-        ValidStreamedAfterFailure(Outputs(), next.value.error, length as int);
+          assert old(Valid());
+          assert StreamedOf(old(Outputs())) + old(buffer) == old(StreamedOf(wrapped.Outputs()));
+          OutputsPartitionedAfterOutputtingSome(r.value);
+          PartitionedCompositionLeft(Outputs(), [r], IsSome);
+          StreamedOfComposition(Outputs(), [r]);
+          assert StreamedOf(Outputs() + [r]) + buffer == StreamedOf(wrapped.Outputs());
+
+          assert |StreamedOf(wrapped.Outputs())| <= length as int;
+          ValidStreamedAfterFailure(Outputs(), next.value.error, length as int);
+        } else {
+          var size := if max <= |next.value.value| as uint64 then max else |next.value.value| as uint64;
+          var result := next.value.value[..size];
+          var value := Success(result);
+          r := Some(value);
+          buffer := next.value.value[size..];
+          
+          assert next.value.value == next.value.value[..size] + next.value.value[size..];
+          StreamedOfSingleton<T, E>(r.value.value);
+          StreamedOfSingleton<T, E>(next.value.value);
+          assert StreamedOf([r]) + buffer == StreamedOf([next]);
+
+          assert StreamedOf(Outputs()) + StreamedOf([r]) + buffer == StreamedOf(wrapped.Outputs());
+
+          assert old(Valid());
+          assert StreamedOf(old(Outputs())) + old(buffer) == old(StreamedOf(wrapped.Outputs()));
+          OutputsPartitionedAfterOutputtingSome(value);
+          PartitionedCompositionLeft(Outputs(), [r], IsSome);
+          StreamedOfComposition(Outputs(), [r]);
+          assert StreamedOf(Outputs() + [r]) + buffer == StreamedOf(wrapped.Outputs());
+
+          assert |StreamedOf(wrapped.Outputs())| <= length as int;
+          ValidStreamedAfterMoreData(Outputs(), result, length as int);
+        }
 
         assert ValidOutputs(Outputs() + [r]);
         assert OutputsOf(history + [((), r)]) == Outputs() + [r];
@@ -413,53 +460,6 @@ module {:options "--function-syntax:4"} Std.Streams {
 
         assert Last(wrapped.Outputs()).Some?;
         assert Last(Outputs()).Some?;
-
-        assert StreamedOf([r]) == [];
-        StreamedOfComposition(old(Outputs()), [r]);
-
-        assert Valid();
-      } else {
-        assert Last(wrapped.Outputs()).Some?;
-        PartitionedLastTrueImpliesAll(wrapped.Outputs(), IsSome);
-
-        assert !wrapped.Done();
-        wrapped.DoneIsOneWay();
-        assert old(!wrapped.Done());
-        assert old(!Done());
-        assert !Done();
-        assert All(Outputs(), IsSome);
-
-        var size := if max <= |next.value.value| as uint64 then max else |next.value.value| as uint64;
-        var result := next.value.value[..size];
-        var value := Success(result);
-        r := Some(value);
-        buffer := next.value.value[size..];
-        
-        assert next.value.value == next.value.value[..size] + next.value.value[size..];
-        StreamedOfSingleton<T, E>(r.value.value);
-        StreamedOfSingleton<T, E>(next.value.value);
-        assert StreamedOf([r]) + buffer == StreamedOf([next]);
-
-        assert StreamedOf(Outputs()) + StreamedOf([r]) + buffer == StreamedOf(wrapped.Outputs());
-
-
-        assert old(Valid());
-        assert StreamedOf(old(Outputs())) + old(buffer) == old(StreamedOf(wrapped.Outputs()));
-        assert StreamedOf(old(Outputs())) + old(buffer) == old(StreamedOf(wrapped.Outputs()));
-        OutputsPartitionedAfterOutputtingSome(value);
-        PartitionedCompositionLeft(Outputs(), [r], IsSome);
-        StreamedOfComposition(Outputs(), [r]);
-        assert StreamedOf(Outputs() + [r]) + buffer == StreamedOf(wrapped.Outputs());
-
-        ghost var wrappedStreamed := StreamedOf(wrapped.Outputs());
-        assert |wrappedStreamed| <= length as int;
-        assert |StreamedOf(wrapped.Outputs())| <= length as int;
-        ValidStreamedAfterMoreData(Outputs(), result, length as int);
-
-        assert ValidOutputs(Outputs() + [Some(value)]);
-        assert OutputsOf(history + [((), Some(value))]) == Outputs() + [Some(value)];
-        assert ValidHistory(history + [((), Some(value))]);
-        ProduceSome(value);
 
         assert Valid();
       }
