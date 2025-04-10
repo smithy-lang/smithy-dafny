@@ -238,7 +238,6 @@ module {:options "--function-syntax:4"} Std.Streams {
     var buffer: seq<T>
 
     ghost const producesTotalLengthProof: ProducesTotalLengthProof<T, E>
-    ghost const maxWrappedRemaining: TerminationMetric
 
     ghost predicate Valid()
       reads this, Repr
@@ -248,7 +247,6 @@ module {:options "--function-syntax:4"} Std.Streams {
     {
       && this in Repr
       && ValidComponent(wrapped)
-      && maxWrappedRemaining.NonIncreasesTo(wrapped.RemainingMetric())
       && ValidHistory(history)
       && producesTotalLengthProof.producer == wrapped
       && producesTotalLengthProof.length == length as int
@@ -278,7 +276,7 @@ module {:options "--function-syntax:4"} Std.Streams {
     twostate lemma RemainingMetricDoesntReadHistory()
       requires old(Valid())
       requires Valid()
-      requires wrapped.RemainingMetric() == old(wrapped.RemainingMetric());
+      requires wrapped.RemainingMetric() == old(wrapped.RemainingMetric())
       requires buffer == old(buffer);
       ensures RemainingMetric() == old(RemainingMetric())
     {}
@@ -299,10 +297,9 @@ module {:options "--function-syntax:4"} Std.Streams {
       this.history := [];
       this.Repr := {this} + wrapped.Repr;
       this.producesTotalLengthProof := producesTotalLengthProof;
-      this.maxWrappedRemaining := wrapped.RemainingMetric();
     }
 
-    method {:only} Invoke(i: ()) returns (r: Option<Result<seq<T>, E>>)
+    method Invoke(i: ()) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(i)
       reads this, Repr
       modifies Modifies(i)
@@ -323,9 +320,7 @@ module {:options "--function-syntax:4"} Std.Streams {
 
         OutputsPartitionedAfterOutputtingNone();
         ProduceNone();
-        label before:
 
-        // assert Valid();
         Drain(wrapped);
         Repr := {this} + wrapped.Repr;
         producesTotalLengthProof.ProducesTotalLength(wrapped.history);
@@ -333,11 +328,10 @@ module {:options "--function-syntax:4"} Std.Streams {
         assert Done();
         assert Valid();
 
-        RemainingMetricDoesntReadHistory();
-        assert RemainingDecreasedBy(r);
+        reveal TerminationMetric.Ordinal();
+        old(RemainingMetric()).TupleNonIncreasesToTuple(RemainingMetric());
       } else {
         r := Read(length);
-        assert RemainingDecreasedBy(r);
       }
     }
 
