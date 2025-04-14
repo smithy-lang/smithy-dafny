@@ -17,17 +17,17 @@ module {:extern "simple.streaming.internaldafny.types" } SimpleStreamingTypes
     nameonly number: int32
   )
   datatype BinaryOfOutput = | BinaryOfOutput (
-    nameonly binary: ByteStream
+    nameonly binary: DataStream<uint8, Error>
   )
   datatype ChunksInput = | ChunksInput (
-    nameonly bytesIn: ByteStream ,
+    nameonly bytesIn: DataStream<uint8, Error> ,
     nameonly chunkSize: CountingInteger
   )
   datatype ChunksOutput = | ChunksOutput (
-    nameonly bytesOut: ByteStream
+    nameonly bytesOut: DataStream<uint8, Error>
   )
   datatype CountBitsInput = | CountBitsInput (
-    nameonly bits: ByteStream
+    nameonly bits: DataStream<uint8, Error>
   )
   datatype CountBitsOutput = | CountBitsOutput (
     nameonly sum: int32
@@ -130,7 +130,7 @@ module {:extern "simple.streaming.internaldafny.types" } SimpleStreamingTypes
   datatype SimpleStreamingConfig = | SimpleStreamingConfig (
 
                                    )
-  type StreamingBlob = ByteStream
+  type StreamingBlob = DataStream<uint8, Error>
   datatype Error =
       // Local Error structures are listed here
     | OverflowError (

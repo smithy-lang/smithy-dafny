@@ -90,7 +90,7 @@ public record DafnyNameResolver(
         MAP -> dafnyModulePrefixForShape(shape) + shapeName;
       case BLOB -> {
         if (shape.hasTrait(StreamingTrait.class)) {
-          yield "DataStream<seq<uint8, Error>>";
+          yield "DataStream<uint8, Error>";
         } else {
           yield dafnyModulePrefixForShape(shape) + shapeName;
         }

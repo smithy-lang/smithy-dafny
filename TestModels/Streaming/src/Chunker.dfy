@@ -1,14 +1,14 @@
 include "../Model/SimpleStreamingTypes.dfy"
 
-module Chunker {
+module {:options "--function-syntax:4"} Chunker {
 
   import Std.BoundedInts
 
   import opened Std.Wrappers
   import opened Types = SimpleStreamingTypes
   import opened StandardLibrary.UInt
-  import opened Std.Enumerators
-  import opened Std.Aggregators
+  import opened Std.Actions
+  import opened Std.Producers
 
   // An example of a Pipeline, which processes chunks of bytes
   // as they flow through a stream.
@@ -18,55 +18,95 @@ module Chunker {
   // when a chunk becomes available to the pipeline,
   // zero or more chunks are made available downstream.
   @AssumeCrossModuleTermination
-  class Chunker extends Pipeline<BoundedInts.bytes, BoundedInts.bytes> {
+  class Chunker extends Action<Option<BoundedInts.bytes>, Option<Producer<BoundedInts.bytes>>> {
 
     const chunkSize: CountingInteger
     var chunkBuffer: BoundedInts.bytes
 
-    constructor(upstream: Enumerator<BoundedInts.bytes>, chunkSize: CountingInteger)
+    constructor(chunkSize: CountingInteger)
       ensures Valid()
       ensures history == []
     {
-      this.buffer := new Collector<BoundedInts.bytes>();
-      this.upstream := upstream;
-
       this.chunkSize := chunkSize;
       chunkBuffer := [];
       history := [];
-      Repr := {this} + upstream.Repr;
-      new;
-      assume {:axiom} Valid();
+      Repr := {this};
     }
 
-    method Process(event: Option<BoundedInts.bytes>, a: Accumulator<BoundedInts.bytes>)
-      requires Valid()
-      requires a.Valid()
-      requires Repr !! a.Repr
-      modifies Repr, a.Repr
-      ensures a.ValidAndDisjoint()
+    ghost predicate Valid()
+      reads this, Repr
+      ensures Valid() ==> this in Repr
+      ensures Valid() ==> ValidHistory(history)
+      decreases Repr, 0
     {
-      assert this in Repr;
-      assert this !in a.Repr;
-      match event {
-        case Some(bits) => {
-          chunkBuffer := chunkBuffer + bits;
+      this in Repr
+    }
+
+    ghost predicate ValidHistory(history: seq<(Option<BoundedInts.bytes>, Option<Producer<BoundedInts.bytes>>)>)
+      decreases Repr
+    {
+      true
+    }
+
+    ghost predicate ValidInput(history: seq<(Option<BoundedInts.bytes>, Option<Producer<BoundedInts.bytes>>)>, next: Option<BoundedInts.bytes>)
+      requires ValidHistory(history)
+      decreases Repr
+    {
+      true
+    }
+
+    ghost function Decreases(i: Option<BoundedInts.bytes>): ORDINAL
+      requires Requires(i)
+      reads Reads(i)
+    {
+      0
+    }
+
+    method Invoke(bits: Option<BoundedInts.bytes>) returns (r: Option<Producer<BoundedInts.bytes>>)
+      requires Requires(bits)
+      modifies Modifies(bits)
+      decreases Decreases(bits), 0
+      ensures Ensures(bits, r)
+    {
+      var outputChunks := [];
+      if bits.Some? {
+        chunkBuffer := chunkBuffer + bits.value;
+        
+        while chunkSize as int <= |chunkBuffer| 
+        {
+          outputChunks := outputChunks + [chunkBuffer[..chunkSize]];
+          chunkBuffer := chunkBuffer[chunkSize..];
         }
-        case None => return;
+      } else {
+        if 0 < |chunkBuffer| {
+          outputChunks := outputChunks + [chunkBuffer];
+        } else {
+          r := None;
+          return;
+        }
       }
 
-      while chunkSize as int <= |chunkBuffer| 
-        invariant a.ValidAndDisjoint()
-      {
-        a.CanConsumeAll(a.history, chunkBuffer[..chunkSize]);
-        a.Accept(chunkBuffer[..chunkSize]);
-        chunkBuffer := chunkBuffer[chunkSize..];
-      }
-      
-      if event == None {
-        if 0 < |chunkBuffer| {
-          var _ := a.Invoke(chunkBuffer);
-        }
-      }
+      var output := new SeqReader(outputChunks);
+      r := Some(output);
     }
+  }
+
+  function SumBits(sum: int, maybeChunk: Result<seq<uint8>, Error>): int {
+    match maybeChunk
+    case Success(chunk) => sum + BytesBitCount(chunk)
+    case Failure(_) => sum
+  }
+
+  function BytesBitCount(b: seq<uint8>): int {
+    Seq.FoldLeft((sum, byte) => sum + BitCount(byte), 0 as int, b)
+  }
+
+  function BitCount(x: uint8): int {
+    if x == 0 then
+      0
+    else if x % 2 == 1 then
+      1 + BitCount(x / 2)
+    else
+      BitCount(x / 2)
   }
 }

@@ -59,7 +59,7 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     method Read(max: uint64) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(())
-      reads Reads(())
+      // reads Reads(())
       modifies Modifies(())
       decreases Decreases(())
       ensures Ensures((), r)
@@ -169,7 +169,7 @@ module {:options "--function-syntax:4"} Std.Streams {
 
   method Drain<T>(p: Producer<T>)
     requires p.Valid()
-    reads p.Repr
+    // reads p.Repr
     modifies p.Repr
     ensures p.ValidAndDisjoint()
     ensures p.Done()
@@ -279,7 +279,7 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     method Invoke(i: ()) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(i)
-      reads this, Repr
+      // reads this, Repr
       modifies Modifies(i)
       decreases Decreases(i), 0
       ensures Ensures(i, r)
@@ -316,7 +316,7 @@ module {:options "--function-syntax:4"} Std.Streams {
     @IsolateAssertions
     method Read(max: uint64) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(())
-      reads Reads(())
+      // reads Reads(())
       modifies Modifies(())
       decreases Decreases(())
       ensures Ensures((), r)
@@ -543,7 +543,7 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     method Invoke(t: ()) returns (r: Option<Result<seq<T>, ()>>)
       requires Requires(t)
-      reads this, Repr
+      // reads this, Repr
       modifies Modifies(t)
       decreases Decreases(t), 0
       ensures Ensures(t, r)
@@ -555,7 +555,7 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     method Read(max: uint64) returns (r: Option<Result<seq<T>, ()>>)
       requires Requires(())
-      reads this, Repr
+      // reads this, Repr
       modifies Modifies(())
       decreases Decreases(())
       ensures Ensures((), r)
