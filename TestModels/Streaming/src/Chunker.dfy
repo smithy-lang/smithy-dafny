@@ -10,13 +10,6 @@ module {:options "--function-syntax:4"} Chunker {
   import opened Std.Actions
   import opened Std.Producers
 
-  // An example of a Pipeline, which processes chunks of bytes
-  // as they flow through a stream.
-  // Pipelines let you define a stream transformation once
-  // in a way that allows external code to apply it to either
-  // push or pull-based streams:
-  // when a chunk becomes available to the pipeline,
-  // zero or more chunks are made available downstream.
   @AssumeCrossModuleTermination
   class Chunker extends Action<Option<BoundedInts.bytes>, Option<Producer<BoundedInts.bytes>>> {
 
@@ -108,5 +101,10 @@ module {:options "--function-syntax:4"} Chunker {
       1 + BitCount(x / 2)
     else
       BitCount(x / 2)
+  }
+
+  function BinaryOfNumber<E>(x: int32): seq<uint8> {
+    // TODO: Actually compute the binary
+    [12 as uint8, 34, 56]
   }
 }

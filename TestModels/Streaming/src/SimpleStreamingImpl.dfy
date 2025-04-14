@@ -46,12 +46,10 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
     returns (output: Result<BinaryOfOutput, Error>)
 
   {
-    // TODO: Actually compute the binary
-    var fakeBinary := [Success([12]), Success([34, 56])];
-    var fakeBinaryEnumerator := new Producers.SeqReader(fakeBinary);
-    var fakeBinaryStream := new ProducerDataStream(fakeBinaryEnumerator, 3 as BoundedInts.uint64);
+    var binary := BinaryOfNumber(input.number);
+    var binaryStream := new SeqDataStream(binary, 3 as BoundedInts.uint64);
     
-    return Success(BinaryOfOutput(binary := fakeBinaryStream));
+    return Success(BinaryOfOutput(binary := binaryStream));
   }
 
 
@@ -64,7 +62,7 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
     // TODO: for now
     assume {:axiom} input.bytesIn.history == [];
     var chunker := new Chunker(input.chunkSize);
-    var chunkerStream := new EnumeratorDataStream(chunker, input.bytesIn.ContentLength());
+    var chunkerStream := new ProducerDataStream(chunker, input.bytesIn.totalLength.value);
     
     return Success(ChunksOutput(bytesOut := chunkerStream));
   }
