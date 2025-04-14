@@ -15,6 +15,8 @@ module {:options "--function-syntax:4"} Std.Streams {
   // TODO: Consider a more generic term for Streamed[Of],
   // especially if we can decouple the filtering out Failures
   // from the concatenation of batches.
+  // TODO: Add this to the actual Dafny standard library,
+  // since it's generic enough.
 
   //
   // A data stream, i.e. a fallable producer of batches of values.
@@ -35,7 +37,7 @@ module {:options "--function-syntax:4"} Std.Streams {
   trait DataStream<T, E> extends Producer<Result<seq<T>, E>> {
 
     // The total length of all produced batches
-    const contentLength: Option<uint64>
+    const totalLength: Option<uint64>
 
     ghost predicate Valid()
       reads this, Repr
@@ -45,7 +47,7 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, E>>>)
       requires Seq.Partitioned(outputs, IsSome)
-      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
+      ensures ValidOutputs(outputs) && totalLength.Some? ==> ValidStreamed(outputs, totalLength.value as int)
       decreases Repr
 
     ghost function Streamed(): seq<T>
@@ -90,27 +92,11 @@ module {:options "--function-syntax:4"} Std.Streams {
     && (!Seq.All(outputs, IsSome) ==> |streamed| == length)
   }
 
-  // TODO: Move next to ProducedOf?
-  lemma AboutProducedOf<T>(outputs: seq<Option<T>>, x: T)
-    requires Partitioned(outputs, IsSome)
-    ensures x in ProducedOf(outputs) <==> Some(x) in outputs
-  {}
-
   lemma StreamedOfSingleton<T, E>(s: seq<T>)
     ensures 
       var singleton: Option<Result<seq<T>, E>> := Some(Success(s));
       StreamedOf([singleton]) == s
   {}
-
-  // TODO: Correcting a type in the original ensures clause, should be fixed at the source
-  lemma LemmaFilterImpliesAll<T>(f: (T ~> bool), xs: seq<T>)
-    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
-    ensures 
-      var result := Filter(f, xs);
-      forall i: nat :: i < |result| ==> f.requires(result[i]) && f(result[i])
-  {
-    reveal Filter();
-  }
 
   lemma StreamedOfComposition<T, E>(left: seq<Option<Result<seq<T>, E>>>, right: seq<Option<Result<seq<T>, E>>>)
     ensures StreamedOf(left + right) == StreamedOf(left) + StreamedOf(right)
@@ -250,7 +236,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       && ValidHistory(history)
       && producesTotalLengthProof.producer == wrapped
       && producesTotalLengthProof.length == length as int
-      && contentLength == Some(length)
+      && totalLength == Some(length)
       && |buffer| <= length as int
       && StreamedOf(Outputs()) + buffer == StreamedOf(wrapped.Outputs())
       && (0 < |buffer| ==> !wrapped.Done())
@@ -259,10 +245,10 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, E>>>)
       requires Seq.Partitioned(outputs, IsSome)
-      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
+      ensures ValidOutputs(outputs) && totalLength.Some? ==> ValidStreamed(outputs, totalLength.value as int)
       decreases Repr
     {
-      contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
+      totalLength.Some? ==> ValidStreamed(outputs, totalLength.value as int)
     }
 
     ghost function RemainingMetric(): TerminationMetric 
@@ -272,14 +258,6 @@ module {:options "--function-syntax:4"} Std.Streams {
     {
       TMTuple(TMTop, wrapped.RemainingMetric(), TMNat(|buffer|))
     }
-
-    twostate lemma RemainingMetricDoesntReadHistory()
-      requires old(Valid())
-      requires Valid()
-      requires wrapped.RemainingMetric() == old(wrapped.RemainingMetric())
-      requires buffer == old(buffer);
-      ensures RemainingMetric() == old(RemainingMetric())
-    {}
 
     constructor(wrapped: Producer<Result<seq<T>, E>>, length: uint64, ghost producesTotalLengthProof: ProducesTotalLengthProof<T, E>)
       requires wrapped.Valid()
@@ -293,7 +271,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       this.length := length;
       this.buffer := [];
 
-      this.contentLength := Some(length);
+      this.totalLength := Some(length);
       this.history := [];
       this.Repr := {this} + wrapped.Repr;
       this.producesTotalLengthProof := producesTotalLengthProof;
@@ -492,7 +470,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       && ValidHistory(history)
       && s == data
       && |s| <= UINT64_MAX as int
-      && contentLength == Some(|s| as uint64)
+      && totalLength == Some(|s| as uint64)
       && position as int <= |s|
       && 0 < chunkSize
       && StreamedOf(Outputs()) == s[..position]
@@ -500,11 +478,11 @@ module {:options "--function-syntax:4"} Std.Streams {
 
     ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, ()>>>)
       requires Seq.Partitioned(outputs, IsSome)
-      ensures ValidOutputs(outputs) && contentLength.Some? ==> ValidStreamed(outputs, contentLength.value as int)
+      ensures ValidOutputs(outputs) && totalLength.Some? ==> ValidStreamed(outputs, totalLength.value as int)
       decreases Repr
     {
-      && contentLength.Some?
-      && ValidStreamed(outputs, contentLength.value as int)
+      && totalLength.Some?
+      && ValidStreamed(outputs, totalLength.value as int)
     }
 
     ghost function RemainingMetric(): TerminationMetric 
@@ -524,18 +502,10 @@ module {:options "--function-syntax:4"} Std.Streams {
       this.s := s;
       this.position := 0;
       this.chunkSize := chunkSize;
-      this.contentLength := Some(|s| as uint64);
+      this.totalLength := Some(|s| as uint64);
 
       this.history := [];
       this.Repr := {this};
-    }
-
-    function ContentLength(): (res: Option<uint64>)
-      requires Valid()
-      reads this, Repr
-      ensures res == Some(|data| as uint64)
-    {
-      Some(|s| as uint64)
     }
 
     function Position(): (res: uint64)
@@ -598,7 +568,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       if position == |s| as uint64 {
         r := None;
 
-        ValidStreamedAfterNone(Outputs(), contentLength.value as int);
+        ValidStreamedAfterNone(Outputs(), totalLength.value as int);
         assert OutputsOf(history + [((), None)]) == Outputs() + [None];
         assert ValidHistory(history + [((), None)]);
         ProduceNone();
@@ -614,7 +584,7 @@ module {:options "--function-syntax:4"} Std.Streams {
         r := Some(chunk);
         position := newPosition;
 
-        ValidStreamedAfterMoreData(Outputs(), chunk.value, contentLength.value as int);
+        ValidStreamedAfterMoreData(Outputs(), chunk.value, totalLength.value as int);
         assert OutputsOf(history + [((), r)]) == Outputs() + [r];
         assert ValidHistory(history + [((), r)]);
         ProduceSome(chunk);
