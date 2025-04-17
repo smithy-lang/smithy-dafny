@@ -5,6 +5,9 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+small-int = ["dafny_runtime/small-int"]
+
 [dependencies]
 aws-smithy-runtime = {version = "1.6.0", features = ["client"] }
 aws-smithy-runtime-api = {version = "1.7.0", features = ["client"] }

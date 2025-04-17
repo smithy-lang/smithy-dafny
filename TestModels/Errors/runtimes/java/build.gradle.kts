@@ -18,7 +18,7 @@ var props = Properties().apply {
 }
 var dafnyVersion = props.getProperty("dafnyVersion")
 
-group = "simple"
+group = "simple.errors"
 version = "1.0-SNAPSHOT"
 description = "Errors"
 

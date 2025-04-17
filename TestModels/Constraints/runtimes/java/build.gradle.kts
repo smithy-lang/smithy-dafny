@@ -18,7 +18,7 @@ var props = Properties().apply {
 }
 var dafnyVersion = props.getProperty("dafnyVersion")
 
-group = "simple"
+group = "simple.constraints"
 version = "1.0-SNAPSHOT"
 description = "Constraints"
 
@@ -49,6 +49,11 @@ dependencies {
 }
 
 publishing {
+    publications.create<MavenPublication>("mavenLocal") {
+        groupId = group as String?
+        artifactId = description
+        from(components["java"])
+    }
     publications.create<MavenPublication>("maven") {
         groupId = "simple"
         artifactId = "Constraints"

@@ -61,7 +61,7 @@ class RustTestModels extends TestModelTest {
     // the Dafny-generated code as well.
     make(testModelPath, "transpile_rust");
     make(testModelPath, "polymorph_rust");
-    make(testModelPath, "test_rust");
+    make(testModelPath, "test_rust_full");
     // Since we're checking in generated (or benerated) code,
     // make sure the state matches what's checked in.
     make(testModelPath, "check_polymorph_diff");
