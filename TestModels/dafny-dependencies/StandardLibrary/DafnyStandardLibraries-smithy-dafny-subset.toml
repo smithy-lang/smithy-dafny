@@ -1,5 +1,6 @@
 includes = [
   "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Actions.dfy",
+  "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/BulkActions.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Producers.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/Consumers.dfy",
   "../dafny/Source/DafnyStandardLibraries/src/Std/Actions/GenericAction.dfy",

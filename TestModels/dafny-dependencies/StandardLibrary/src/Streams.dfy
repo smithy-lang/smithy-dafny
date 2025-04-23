@@ -453,7 +453,7 @@ module {:options "--function-syntax:4"} Std.Streams {
   /*
    * Rewindable stream of a sequence with a configured default chunk size.
    */
-  class SeqDataStream<T> extends RewindableDataStream<T, ()> {
+  class SeqDataStream<T, E> extends RewindableDataStream<T, E> {
 
     const s: seq<T>
     const chunkSize: uint64
@@ -476,7 +476,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       && StreamedOf(Outputs()) == s[..position]
     }
 
-    ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, ()>>>)
+    ghost predicate ValidOutputs(outputs: seq<Option<Result<seq<T>, E>>>)
       requires Seq.Partitioned(outputs, IsSome)
       ensures ValidOutputs(outputs) && totalLength.Some? ==> ValidStreamed(outputs, totalLength.value as int)
       decreases Repr
@@ -538,10 +538,11 @@ module {:options "--function-syntax:4"} Std.Streams {
       } else {
         assert outputs == [Some(Success(s[..position]))];
         StreamedOfSingleton<T, ()>(s[..position]);
+        assert ValidHistory(history);
       }
     }
 
-    method Invoke(t: ()) returns (r: Option<Result<seq<T>, ()>>)
+    method Invoke(t: ()) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(t)
       // reads this, Repr
       modifies Modifies(t)
@@ -553,7 +554,7 @@ module {:options "--function-syntax:4"} Std.Streams {
       r := Read(chunkSize);
     }
 
-    method Read(max: uint64) returns (r: Option<Result<seq<T>, ()>>)
+    method Read(max: uint64) returns (r: Option<Result<seq<T>, E>>)
       requires Requires(())
       // reads this, Repr
       modifies Modifies(())
@@ -601,6 +602,123 @@ module {:options "--function-syntax:4"} Std.Streams {
 
       reveal TerminationMetric.Ordinal();
       assert Valid();
+    }
+  }
+
+  // TODO: better name?
+  // TODO: Document the fact that this doesn't have control
+  // over the parameter to original.Read(),
+  // but also that this would be low value since some languages
+  // will be forced to buffer to obey that parameter anyway (e.g. Java Publishers)
+  @AssumeCrossModuleTermination
+  class OptionMappedProducer<I, O> extends Producer<O> {
+
+    const original: Producer<I>
+    const mapping: Action<Option<I>, Option<O>>
+
+    ghost const mappingTotalProof: TotalActionProof<Option<I>, Option<O>>
+    ghost const base: TerminationMetric
+
+    constructor (original: Producer<I>,
+                 mapping: Action<Option<I>, Option<O>>,
+                 ghost mappingTotalProof: TotalActionProof<Option<I>, Option<O>>)
+      requires original.Valid()
+      requires original.history == []
+      requires mapping.Valid()
+      requires mapping.history == []
+      requires mappingTotalProof.Valid()
+      requires mappingTotalProof.Action() == mapping
+      requires original.Repr !! mapping.Repr !! mappingTotalProof.Repr
+      ensures Valid()
+      ensures history == []
+      ensures fresh(Repr - original.Repr - mapping.Repr - mappingTotalProof.Repr)
+    {
+      this.original := original;
+      this.mapping := mapping;
+      this.mappingTotalProof := mappingTotalProof;
+      this.base := TMSucc(original.RemainingMetric());
+
+      Repr := {this} + original.Repr + mapping.Repr + mappingTotalProof.Repr;
+      history := [];
+
+      new;
+      this.base.SuccDecreasesToOriginal();
+    }
+
+    ghost predicate Valid()
+      reads this, Repr
+      ensures Valid() ==> this in Repr
+      ensures Valid() ==> ValidHistory(history)
+      decreases Repr, 0
+    {
+      && this in Repr
+      && ValidComponent(original)
+      && ValidComponent(mapping)
+      && ValidComponent(mappingTotalProof)
+      && mappingTotalProof.Action() == mapping
+      && original.Repr !! mapping.Repr !! mappingTotalProof.Repr
+      && ValidHistory(history)
+      && base.DecreasesTo(original.RemainingMetric())
+      && (!original.Done() <==> !Done())
+    }
+
+    ghost predicate ValidOutputs(outputs: seq<Option<O>>)
+      requires Seq.Partitioned(outputs, IsSome)
+      decreases Repr
+    {
+      true
+    }
+
+    ghost function RemainingMetric(): TerminationMetric
+      requires Valid()
+      reads this, Repr
+      decreases Repr, 3
+    {
+      TMTuple(base, TMNat(0), original.RemainingMetric())
+    }
+
+    @ResourceLimit("1e7")
+    method Invoke(t: ()) returns (result: Option<O>)
+      requires Requires(t)
+      // reads Reads(t)
+      modifies Modifies(t)
+      decreases Decreases(t), 0
+      ensures Ensures(t, result)
+      ensures RemainingDecreasedBy(result)
+    {
+      assert Requires(t);
+      assert Valid();
+      RemainingMetric().TupleDecreasesToSecond();
+      assert Remaining() > original.Remaining();
+      var next := original.Next();
+
+      mappingTotalProof.AnyInputIsValid(mapping.history, next);
+      var mappedNext := mapping.Invoke(next);
+      result := mappedNext;
+
+      if mappedNext.Some? {
+        mappingTotalProof.AnyInputIsValid(mapping.history, next);
+        var nextValue := mapping.Invoke(next);
+        result := nextValue;
+
+        OutputsPartitionedAfterOutputtingSome(mappedNext.value);
+        ProduceSome(mappedNext.value);
+      } else {
+        original.OutputtingNoneMeansNotAllSome();
+        OutputsPartitionedAfterOutputtingNone();
+        ProduceNone();
+
+        assert !IsSome(Seq.Last(Outputs()));
+      }
+
+      Repr := {this} + original.Repr + mapping.Repr + mappingTotalProof.Repr;
+      assert Valid();
+      assert original.RemainingDecreasedBy(next);
+      if next.Some? {
+        old(RemainingMetric()).TupleDecreasesToTuple(RemainingMetric());
+      } else {
+        old(RemainingMetric()).TupleNonIncreasesToTuple(RemainingMetric());
+      }
     }
   }
 }

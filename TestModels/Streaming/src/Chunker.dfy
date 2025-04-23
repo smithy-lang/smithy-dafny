@@ -8,16 +8,20 @@ module {:options "--function-syntax:4"} Chunker {
   import opened Types = SimpleStreamingTypes
   import opened StandardLibrary.UInt
   import opened Std.Actions
+  import opened Std.BulkActions
   import opened Std.Producers
+  import opened Std.Consumers
+  import opened Std.Streams
 
   @AssumeCrossModuleTermination
-  class Chunker extends Action<Option<BoundedInts.bytes>, Option<Producer<BoundedInts.bytes>>> {
+  class Chunker<E> extends BulkAction<Option<Result<uint8, E>>, Option<Producer<Result<uint8, E>>>> {
 
     const chunkSize: CountingInteger
     var chunkBuffer: BoundedInts.bytes
 
     constructor(chunkSize: CountingInteger)
       ensures Valid()
+      ensures fresh(Repr)
       ensures history == []
     {
       this.chunkSize := chunkSize;
@@ -35,53 +39,117 @@ module {:options "--function-syntax:4"} Chunker {
       this in Repr
     }
 
-    ghost predicate ValidHistory(history: seq<(Option<BoundedInts.bytes>, Option<Producer<BoundedInts.bytes>>)>)
+    ghost predicate ValidHistory(history: seq<(Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>)>)
       decreases Repr
     {
       true
     }
 
-    ghost predicate ValidInput(history: seq<(Option<BoundedInts.bytes>, Option<Producer<BoundedInts.bytes>>)>, next: Option<BoundedInts.bytes>)
+    ghost predicate ValidInput(history: seq<(Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>)>, next: Option<Result<BoundedInts.bytes, E>>)
       requires ValidHistory(history)
       decreases Repr
     {
       true
     }
 
-    ghost function Decreases(i: Option<BoundedInts.bytes>): ORDINAL
+    ghost function Decreases(i: Option<Result<BoundedInts.bytes, E>>): ORDINAL
       requires Requires(i)
       reads Reads(i)
     {
       0
     }
 
-    method Invoke(bits: Option<BoundedInts.bytes>) returns (r: Option<Producer<BoundedInts.bytes>>)
-      requires Requires(bits)
-      modifies Modifies(bits)
-      decreases Decreases(bits), 0
-      ensures Ensures(bits, r)
+    // Ideally could use this in a MappedConsumer as well
+
+    method Single(input: Option<Result<uint8, E>>) returns (r: Option<Producer<Result<uint8, E>>>) 
     {
+
+    }
+
+    method Bulk(input: Producer<Result<uint8, E>>, output: Consumer<Result<uint8, E>>) {
+      
+    }
+
+    method BulkInvoke(input: Producer<Result<uint8, E>>, output: IConsumer<Result<uint8, E>>)
+      requires Requires(input)
+      modifies Modifies(input)
+      decreases Decreases(input), 0
+      ensures Ensures(input, r)
+    {
+      assert Valid();
       var outputChunks := [];
-      if bits.Some? {
-        chunkBuffer := chunkBuffer + bits.value;
-        
-        while chunkSize as int <= |chunkBuffer| 
-        {
-          outputChunks := outputChunks + [chunkBuffer[..chunkSize]];
-          chunkBuffer := chunkBuffer[chunkSize..];
+      if input.Some? {
+        if input.value.Failure? {
+          outputChunks := outputChunks + [input.value];
+        } else {
+
+          chunkBuffer := chunkBuffer + input.value.value;
+          
+          while chunkSize as int <= |chunkBuffer|
+            invariant ValidAndDisjoint()
+            invariant history == old(history)
+          {
+            outputChunks := outputChunks + [Success(chunkBuffer[..chunkSize])];
+            chunkBuffer := chunkBuffer[chunkSize..];
+          }
         }
       } else {
         if 0 < |chunkBuffer| {
-          outputChunks := outputChunks + [chunkBuffer];
+          outputChunks := outputChunks + [Success(chunkBuffer)];
         } else {
           r := None;
+          UpdateHistory(input, r);
           return;
         }
       }
-
       var output := new SeqReader(outputChunks);
       r := Some(output);
+      UpdateHistory(input, r);
     }
+  }
+
+  @AssumeCrossModuleTermination
+  class ChunkerTotalProof<E> extends TotalActionProof<Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>> {
+
+    ghost const chunker: Chunker<E>
+
+    ghost constructor(chunker: Chunker<E>)
+      requires chunker.Valid()
+      ensures this.chunker == chunker
+      ensures Valid()
+      ensures fresh(Repr)
+    {
+      this.chunker := chunker;
+      Repr := {this};
+    }
+
+    ghost function Action(): Action<Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>> {
+      chunker
+    }
+
+    ghost predicate Valid()
+      reads this, Repr
+      ensures Valid() ==> this in Repr
+      decreases Repr, 0
+    {
+      this in Repr
+    }
+
+    lemma AnyInputIsValid(history: seq<(Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>)>, next: Option<Result<BoundedInts.bytes, E>>)
+      requires Valid()
+      requires Action().ValidHistory(history)
+      ensures Action().ValidInput(history, next)
+    {}
+
+  }
+
+  method ChunkingStream<E>(chunkSize: CountingInteger, s: DataStream<BoundedInts.uint8, E>)
+    requires s.Valid()
+    requires s.history == []
+  {
+    var chunker := new Chunker(chunkSize);
+    ghost var chunkerTotalProof := new ChunkerTotalProof(chunker);
+    var chunkerStream := new OptionMappedProducer(s, chunker, chunkerTotalProof);
   }
 
   function SumBits(sum: int, maybeChunk: Result<seq<uint8>, Error>): int {

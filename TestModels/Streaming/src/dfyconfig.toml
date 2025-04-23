@@ -1,0 +1,7 @@
+[options]
+function-syntax = 3
+unicode-char = false
+
+library = [
+  "/Users/salkeldr/Documents/GitHub/smithy-dafny/TestModels/dafny-dependencies/StandardLibrary/bin/DafnyStandardLibraries-smithy-dafny-subset.doo"
+]
