@@ -2,7 +2,8 @@
 from _dafny import Seq
 from smithy_python.interfaces.blobs import ByteStream
 from smithy_dafny_standard_library.internaldafny.generated.StandardLibrary_Streams import DataStream
-from smithy_dafny_standard_library.internaldafny.generated.Std_BulkActions import BatchSeqWriter, BatchArrayWriter
+from smithy_dafny_standard_library.internaldafny.generated.Std_BulkActions import BatchSeqWriter, BatchArrayWriter, Batched_EndOfInput
+from smithy_dafny_standard_library.internaldafny.generated.Std_Consumers import IgnoreNConsumer
 from smithy_dafny_standard_library.internaldafny.generated.Std_Wrappers import Option, Option_Some, Option_None
 
 # Adaptor classes for wrapping up Python-native types as their
@@ -19,13 +20,13 @@ class DafnyDataStreamAsByteStream(ByteStream):
 
   def read(self, size: int = -1) -> bytes:
     if size == -1:
-      writer = new BatchSeqWriter()
+      writer = BatchSeqWriter()
       self.reader.ForEach(writer)
     else:
-      writer = new BatchArrayWriter(size)
+      writer = BatchArrayWriter(size)
       self.reader.ForEachToCapacity(writer)
     # TODO: Check for errors. Fine to ignore EOI though.
-    return bytes(writer.elements)
+    return bytes(writer.Values())
 
   def tell(self) -> int:
     return self.reader.ProducedCount()
@@ -41,13 +42,13 @@ class DafnyDataStreamAsByteStream(ByteStream):
         new_position = self.data_stream.ContentLength().value + offset
 
     if position > self.reader.Position():
-      self.reader.ForEach(new IgnoreNConsumer(position - self.reader.Position()))
-    else if position < self.reader.Position():
+      self.reader.ForEach(IgnoreNConsumer(position - self.reader.Position()))
+    elif position < self.reader.Position():
       self.reader = data_stream.Reader()
-      self.reader.ForEach(new IgnoreNConsumer(position))
+      self.reader.ForEach(IgnoreNConsumer(position))
 
 
-class StreamingBlobAsDafnyDataStream(DafnyDataStream):
+class StreamingBlobAsDafnyDataStream(DataStream):
   """Wrapper class adapting a native StreamingBlob as a Dafny DataStream."""
 
   def __init__(self, streaming_blob):
@@ -60,7 +61,7 @@ class StreamingBlobAsDafnyDataStream(DafnyDataStream):
     # TODO: error handling
     next = self.streaming_blob.read(1)
     if next:
-      return Option_Some(Option_Some(Result_Success(next)))
+      return Option_Some(Batch_Value(next))
     else:
       return Option_None()
 
@@ -69,14 +70,19 @@ class StreamingBlobAsDafnyDataStream(DafnyDataStream):
 
   def ForEach(self, consumer):
     # TODO: error handling
-    while next = self.streaming_blob.read(4096):
-      batch = new BatchReader(Seq(next))
+    while True:
+      next = self.streaming_blob.read(4096)
+      if not next:
+        break
+      batch = BatchReader(Seq(next))
       batch.ForEach(consumer)
-    batch.Accept(Option_None)
+  
+    batch.Accept(Batched_EndOfInput)
 
   def ForEachToCapacity(self, consumer):
     # TODO: error handling
     size = consumer.Capacity()
     next = self.streaming_blob.read(size)
-    batch = new BatchReader(Seq(next))
+    batch = BatchReader(Seq(next))
     batch.ForEachToCapacity(consumer)
+    # TODO: EOI

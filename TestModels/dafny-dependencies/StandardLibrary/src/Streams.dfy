@@ -20,7 +20,7 @@ module {:options "--function-syntax:4"} StandardLibrary.Streams {
 
     function ContentLength(): Option<nat>
 
-    method Reader() returns (p: Producer<StreamedValue<uint8, E>>)
+    method Reader() returns (p: Producer<Batched<uint8, E>>)
       ensures 
         && p.Valid()
         && fresh(p.Repr)
@@ -42,7 +42,7 @@ module {:options "--function-syntax:4"} StandardLibrary.Streams {
       Some(|s|)
     }
 
-    method Reader() returns (p: Producer<StreamedValue<uint8, E>>)
+    method Reader() returns (p: Producer<Batched<uint8, E>>)
       ensures 
         && p.Valid()
         && fresh(p.Repr)
@@ -50,7 +50,7 @@ module {:options "--function-syntax:4"} StandardLibrary.Streams {
         && (ContentLength().Some? ==> p.Remaining() == Some(ContentLength().value + 1))
     {
       var data := new BatchReader(s);
-      var eoi := new SeqReader([None]);
+      var eoi := new SeqReader([EndOfInput]);
       p := new ConcatenatedProducer(data, eoi);
     }
   }
