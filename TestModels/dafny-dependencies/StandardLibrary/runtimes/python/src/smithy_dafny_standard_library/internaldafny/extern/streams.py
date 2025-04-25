@@ -48,15 +48,17 @@ class DafnyDataStreamAsByteStream(ByteStream):
     if new_position > self.reader.ProducedCount():
       consumer = IgnoreNConsumer()
       consumer.ctor__(new_position - self.reader.ProducedCount())
-      self.reader.ForEach(consumer)
+      self.reader.ForEachToCapacity(consumer)
     elif new_position < self.reader.ProducedCount():
       self.reader = self.data_stream.Reader()
       consumer = IgnoreNConsumer()
       consumer.ctor__(new_position)
-      self.reader.ForEach(consumer)
+      self.reader.ForEachToCapacity(consumer)
+      
 
 
-# TODO: Missing some methods like Remaining()
+# TODO: Need to implement Producer, not DataStream!
+# TODO: Even so, missing some methods like Remaining()
 class StreamingBlobAsDafnyDataStream(DataStream):
   """Wrapper class adapting a native StreamingBlob as a Dafny DataStream."""
 
