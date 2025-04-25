@@ -11,6 +11,8 @@ MAX_RESOURCE_COUNT=500000000
 PYTHON_MODULE_NAME=smithy_dafny_standard_library
 LIBRARIES :=
 
+GO_MODULE_NAME="github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library"
+
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
 	RED          := $(shell tput -Txterm setaf 1)
@@ -22,8 +24,8 @@ else
 	RESET        := ""
 endif
 
-# Overriding this target just to generate the project.properties file
-polymorph_dafny :
+# Overriding this target just to generate the project.properties file.
+polymorph_dafny: $(if $(USE_DAFNY_STANDARD_LIBRARIES), build_dafny_stdlibs, )
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	--library-root $(LIBRARY_ROOT) \
@@ -41,6 +43,9 @@ polymorph_java:
 
 polymorph_python:
 	echo "Skipping polymorph_python for StandardLibrary"
+
+polymorph_go :
+	echo "Skipping polymorph_go for StandardLibrary"
 
 polymorph_rust:
 	echo "Skipping polymorph_rust for StandardLibrary"
@@ -62,6 +67,10 @@ transpile_java: | transpile_implementation_java transpile_test_java
 # Override SharedMakefile's transpile_python to not transpile
 # StandardLibrary as a dependency
 transpile_python: | transpile_implementation_python transpile_test_python
+
+# Override SharedMakefile's transpile_go to not transpile
+# StandardLibrary as a dependency
+transpile_go: | transpile_implementation_go transpile_test_go
 
 ########################## Rust targets
 # Override SharedMakefile's transpile_java to not transpile
@@ -98,20 +107,25 @@ transpile_implementation:
 		--unicode-char:false \
 		--function-syntax:3 \
 		--output $(OUT) \
+		$(if $(USE_DAFNY_STANDARD_LIBRARIES), bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
 		$(TRANSPILE_MODULE_NAME)
 
+build_dafny_stdlibs:
+	dafny build -t:lib --output bin/DafnyStandardLibraries-smithy-dafny-subset.doo DafnyStandardLibraries-smithy-dafny-subset.toml
+	rm -rf DafnyStandardLibraries-smithy-dafny-subset-lib
+
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
 build_java: transpile_java
-	gradle -p runtimes/java build
+	$(GRADLEW) -p runtimes/java build
 
 # Override SharedMakefile's mvn_local_deploy to
 # issue warning
 mvn_local_deploy:
 	@echo "${RED}Warning!!${YELLOW} Installing TestModel's STD to Maven Local replaces ESDK's STD!\n$(RESET)" >&2
-	gradle -p runtimes/java publishToMavenLocal
+	$(GRADLEW) -p runtimes/java publishToMavenLocal
 
 dafny_benerate: DAFNY_RUST_OUTPUT=\
 	runtimes/rust/implementation_from_dafny

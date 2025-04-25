@@ -14,6 +14,7 @@ pub mod error;
 pub(crate) mod implementation_from_dafny;
 /// All operations that this crate can perform.
 pub mod operation;
+pub mod validation;
 mod standard_library_conversions;
 mod standard_library_externs;
 pub mod types;

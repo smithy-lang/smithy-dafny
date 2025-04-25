@@ -13,6 +13,7 @@ module SimpleDependenciesImplTest {
     import SimpleResourcesTypes
     import opened Wrappers
     
+
     method{:test} TestDependenciesWithDefaultConfig()
     {        
         var client :- expect SimpleDependencies.SimpleDependencies();

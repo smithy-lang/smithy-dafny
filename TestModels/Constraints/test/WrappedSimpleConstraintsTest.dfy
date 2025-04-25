@@ -25,17 +25,27 @@ module WrappedSimpleConstraintsTest {
     TestGetConstraintWithMyList(client);
     TestGetConstraintWithNonEmptyList(client);
     TestGetConstraintWithListLessThanOrEqualToTen(client);
+    TestGetConstraintWithListWithConstraint(client);
     TestGetConstraintWithMyMap(client);
     TestGetConstraintWithNonEmptyMap(client);
     TestGetConstraintWithMapLessThanOrEqualToTen(client);
+    TestGetConstraintWithMapWithConstraint(client);
     TestGetConstraintWithGreaterThanOne(client);
     TestGetConstraintWithUtf8Bytes(client);
     TestGetConstraintWithListOfUtf8Bytes(client);
+    TestGetConstraintWithComplexStructureList(client);
 
     var allowBadUtf8BytesFromDafny := true;
     if (allowBadUtf8BytesFromDafny) {
       TestGetConstraintWithBadUtf8Bytes(client);
       TestGetConstraintWithListOfBadUtf8Bytes(client);
+    }
+
+    // This doesn't work in Java.
+    // See https://github.com/smithy-lang/smithy-dafny/issues/278
+    var supportsOptionalPrimitiveFields := true;
+    if (supportsOptionalPrimitiveFields) {
+      TestGetConstraintWithUnionWithConstraint(client);
     }
   }
 
@@ -373,6 +383,20 @@ module WrappedSimpleConstraintsTest {
     expect ret.Failure?;
   }
 
+  // both list and member have @length(min: 1, max: 10)
+  method TestGetConstraintWithListWithConstraint(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(ListWithConstraint := Some(["1", "2", "3"]));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    // TODO: Add negative tests once all languages support it
+  }
+
   // @length(min: 1, max: 10)
   method TestGetConstraintWithMyMap(client: ISimpleConstraintsClient)
     requires client.ValidState()
@@ -443,6 +467,20 @@ module WrappedSimpleConstraintsTest {
     input := input.(MapLessThanOrEqualToTen := Some(ForceMapLessThanOrEqualToTen(map["1" := "a", "2" := "a", "3" := "a", "4" := "a", "5" := "a", "6" := "a", "7" := "a", "8" := "a", "9" := "a", "0" := "a", "a" := "a"])));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
+  }
+
+  // both map and member have @length(min: 1, max: 10)
+  method TestGetConstraintWithMapWithConstraint(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(MapWithConstraint := Some(map["0" := "1234", "abcd" := "j"]));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    // TODO: Add negative tests once all languages support it
   }
 
   // @range(min: 1)
@@ -588,5 +626,39 @@ module WrappedSimpleConstraintsTest {
     input := input.(MyListOfUtf8Bytes := Some(ForceListOfUtf8Bytes([good, bad])));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
+  }
+
+  method TestGetConstraintWithUnionWithConstraint(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(UnionWithConstraint := Some(IntegerValue(1)));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    input := GetValidInput();
+    input := input.(UnionWithConstraint := Some(StringValue("foo")));
+    ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    // TODO: Add negative tests once all languages support it
+  }
+
+  method TestGetConstraintWithComplexStructureList(client: ISimpleConstraintsClient)
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var input := GetValidInput();
+    input := input.(ComplexStructureList := Some([
+      ComplexStructure(InnerString := Some("a"), InnerBlob := [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+      ComplexStructure(InnerString := Some("abcdefghij"), InnerBlob := [0])
+    ]));
+    var ret := client.GetConstraints(input := input);
+    expect ret.Success?;
+
+    // TODO: Add negative tests once all languages support it
   }
 }

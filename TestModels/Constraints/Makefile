@@ -22,6 +22,11 @@ SERVICE_DEPS_SimpleConstraints :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Constraints"
+
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
@@ -38,6 +43,16 @@ remove_unsupported_rust_tests:
 		SED_FILE_PATH=$(LIBRARY_ROOT)/runtimes/rust/src/implementation_from_dafny.rs \
 		SED_BEFORE_STRING='let mut allowBadUtf8BytesFromDafny: bool = true' \
 		SED_AFTER_STRING='let mut allowBadUtf8BytesFromDafny: bool = false'
+
+# Patch out tests that Java codegen doesn't support
+
+transpile_java: | transpile_implementation_java transpile_dependencies_java remove_unsupported_java_tests
+
+remove_unsupported_java_tests:
+	$(MAKE) _sed_file \
+		SED_FILE_PATH=$(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated/WrappedSimpleConstraintsTest_Compile/__default.java \
+		SED_BEFORE_STRING='_3_supportsOptionalPrimitiveFields = true' \
+		SED_AFTER_STRING='_3_supportsOptionalPrimitiveFields = false'
 
 # Python
 

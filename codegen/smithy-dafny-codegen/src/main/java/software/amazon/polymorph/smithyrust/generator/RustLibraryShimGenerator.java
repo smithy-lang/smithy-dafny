@@ -7,12 +7,16 @@ import static software.amazon.smithy.rust.codegen.core.util.StringsKt.toSnakeCas
 
 import java.math.BigDecimal;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
@@ -40,6 +44,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 /**
@@ -48,6 +53,7 @@ import software.amazon.smithy.model.traits.UnitTypeTrait;
 public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private final boolean generateWrappedClient;
+  private final RustValidationGenerator validationGenerator;
 
   public RustLibraryShimGenerator(
     final MergedServicesGenerator mergedGenerator,
@@ -57,6 +63,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
   ) {
     super(mergedGenerator, model, service);
     this.generateWrappedClient = generateWrappedClient;
+    this.validationGenerator = new RustValidationGenerator();
   }
 
   @Override
@@ -71,7 +78,6 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     result.add(typesModule());
     result.add(typesConfigModule());
     result.add(typesBuildersModule());
-
     result.addAll(
       streamStructuresToGenerateStructsFor()
         .map(this::standardStructureModule)
@@ -98,6 +104,9 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         .map(this::resourceTypeModule)
         .toList()
     );
+
+    // validation
+    result.add(validationModule());
 
     // errors
     result.add(errorModule());
@@ -166,6 +175,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     /// All operations that this crate can perform.
     pub mod operation;
     pub mod conversions;
+    pub mod validation;
     pub mod deps;
     """;
 
@@ -236,6 +246,20 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         )
         .collect(Collectors.joining("\n\n"))
     );
+
+    final StructureShape configShape = ModelUtils.getConfigShape(
+      model,
+      service
+    );
+    variables.put(
+      "inputValidationFunctionName",
+      RustValidationGenerator.shapeValidationFunctionName(
+        null,
+        null,
+        configShape
+      )
+    );
+
     final String content = evalTemplateResource(
       getClass(),
       "runtimes/rust/client.rs",
@@ -760,10 +784,12 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       operationVariables(bindingShape, operationShape)
     );
     variables.put(
-      "inputValidations",
-      new InputValidationGenerator(bindingShape, operationShape)
-        .generateValidations(model, inputShape)
-        .collect(Collectors.joining("\n"))
+      "inputValidationFunctionName",
+      RustValidationGenerator.shapeValidationFunctionName(
+        bindingShape,
+        operationShape,
+        inputShape
+      )
     );
     if (bindingShape.isServiceShape()) {
       if (inputShape.hasTrait(PositionalTrait.class)) {
@@ -772,7 +798,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         // but not on the Dafny side.
         final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
         final String rustValue =
-          "input." + toSnakeCase(onlyMember.getMemberName());
+          "input.r#" + toSnakeCase(onlyMember.getMemberName());
         variables.put(
           "inputToDafny",
           toDafny(inputShape, rustValue, true, false).toString()
@@ -827,7 +853,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       variables.put(
         "operationSendBody",
         evalTemplate(
-          "$snakeCaseResourceName:L.inner.borrow_mut().$snakeCaseOperationName:L(input)",
+          "$snakeCaseResourceName:L.inner.lock().unwrap().$snakeCaseOperationName:L(input)",
           MapUtils.merge(
             variables,
             resourceVariables(bindingShape.asResourceShape().orElseThrow())
@@ -848,39 +874,420 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     return new RustFile(path, TokenTree.of(content));
   }
 
-  class InputValidationGenerator
-    extends ConstrainTraitUtils.ValidationGenerator<String> {
+  class RustValidationGenerator {
 
     private final Map<String, String> commonVariables;
+    private final Set<Shape> shapesToValidate;
 
-    InputValidationGenerator(
-      final Shape bindingShape,
-      final OperationShape operationShape
-    ) {
-      this.commonVariables =
-        MapUtils.merge(
-          serviceVariables(),
-          operationVariables(bindingShape, operationShape)
-        );
+    // map from synthetic input/output shapes to their operations
+    private final Map<ShapeId, OperationShape> relatedOperationShapes;
+
+    RustValidationGenerator() {
+      this.commonVariables = serviceVariables();
+      this.shapesToValidate = new TreeSet<>();
+      this.relatedOperationShapes = new HashMap<>();
+
+      // Start from the service config and operation input/outputs
+      final var rootShapes = new HashSet<StructureShape>();
+      rootShapes.add(ModelUtils.getConfigShape(model, service));
+      streamAllBoundOperationShapes()
+        .map(BoundOperationShape::operationShape)
+        .forEach(operationShape -> {
+          final var inputShapeId = operationShape.getInputShape();
+          final var outputShapeId = operationShape.getOutputShape();
+          rootShapes.add(model.expectShape(inputShapeId, StructureShape.class));
+          rootShapes.add(
+            model.expectShape(outputShapeId, StructureShape.class)
+          );
+
+          relatedOperationShapes.put(inputShapeId, operationShape);
+          relatedOperationShapes.put(outputShapeId, operationShape);
+        });
+
+      // Traverse to find relevant shapes
+      final var queue = new LinkedList<Shape>(rootShapes);
+      while (!queue.isEmpty()) {
+        final var shape = queue.poll();
+        if (shapesToValidate.contains(shape)) {
+          continue;
+        }
+        if (
+          !(shape instanceof MemberShape ||
+            shape instanceof StructureShape ||
+            shape instanceof UnionShape ||
+            shape instanceof ListShape ||
+            shape instanceof MapShape)
+        ) {
+          continue;
+        }
+
+        shapesToValidate.add(shape);
+        if (shape instanceof MemberShape memberShape) {
+          queue.add(model.expectShape(memberShape.getTarget()));
+        } else {
+          queue.addAll(shape.getAllMembers().values());
+        }
+      }
     }
 
-    @Override
-    protected String validateRequired(final MemberShape memberShape) {
+    Set<Shape> getShapesToValidate() {
+      return shapesToValidate;
+    }
+
+    private String generateValidationFunctions(final Shape shape) {
+      var result = generateValidationFunction(null, null, shape);
+      if (operationIndex.isInputStructure(shape)) {
+        return (
+          result +
+          "\n" +
+          operationIndex
+            .getInputBindings(shape)
+            .stream()
+            .flatMap(operation ->
+              operationBindingIndex.getBoundOperations(operation).stream()
+            )
+            .map(boundOperation ->
+              generateValidationFunction(
+                boundOperation.bindingShape(),
+                boundOperation.operationShape(),
+                shape
+              )
+            )
+            .collect(Collectors.joining("\n"))
+        );
+      } else if (operationIndex.isOutputStructure(shape)) {
+        return (
+          result +
+          "\n" +
+          operationIndex
+            .getOutputBindings(shape)
+            .stream()
+            .flatMap(operation ->
+              operationBindingIndex.getBoundOperations(operation).stream()
+            )
+            .map(boundOperation ->
+              generateValidationFunction(
+                boundOperation.bindingShape(),
+                boundOperation.operationShape(),
+                shape
+              )
+            )
+            .collect(Collectors.joining("\n"))
+        );
+      } else {
+        return result;
+      }
+    }
+
+    /**
+     * Generates a validation function for the given aggregate or member shape.
+     * <p>
+     * Validation of constraints (required, range, and length)
+     * occurs only in validation functions for member shapes.
+     * Validation functions for aggregate shapes
+     * only delegate to the validation functions for their members.
+     * <p>
+     * Other modules should therefore only call validation functions for aggregate shapes.
+     */
+    private String generateValidationFunction(
+      final Shape bindingShape,
+      final OperationShape operation,
+      final Shape shape
+    ) {
+      final var validationBlocks = new ArrayList<String>();
+
+      final var parentShape = shape instanceof MemberShape memberShape
+        ? model.expectShape(memberShape.getContainer())
+        : null;
+      final var isStructureMember =
+        parentShape != null && parentShape.isStructureShape();
+
+      if (shape instanceof MemberShape memberShape) {
+        memberShape
+          .getTrait(RequiredTrait.class)
+          .ifPresent(_trait ->
+            validationBlocks.add(this.validateRequired(memberShape))
+          );
+        // For simplicity, avoid wrapping the rest of the validation in a conditional
+        if (isStructureMember) {
+          validationBlocks.add(
+            """
+            if input.is_none() {
+              return ::std::result::Result::Ok(());
+            }
+            let input = input.as_ref().unwrap();
+            """
+          );
+        }
+
+        memberShape
+          .getMemberTrait(model, RangeTrait.class)
+          .ifPresent(trait ->
+            validationBlocks.add(this.validateRange(memberShape, trait))
+          );
+        memberShape
+          .getMemberTrait(model, LengthTrait.class)
+          .ifPresent(trait ->
+            validationBlocks.add(this.validateLength(memberShape, trait))
+          );
+
+        // validate target if necessary
+        final var targetShape = model.expectShape(memberShape.getTarget());
+        if (this.shapesToValidate.contains(targetShape)) {
+          final var memberVariables = structureMemberVariables(memberShape);
+          memberVariables.put(
+            "targetValidationFunctionName",
+            shapeValidationFunctionName(null, null, targetShape)
+          );
+          validationBlocks.add(
+            evalTemplate(
+              """
+              $targetValidationFunctionName:L(input)?;
+              """,
+              memberVariables
+            )
+          );
+        }
+      } else if (shape instanceof StructureShape structureShape) {
+        // If this is a response shape for an AWS SDK,
+        // make validation a no-op for now.
+        // This is because the SDKs will produce values that violate constraints,
+        // such as a `Some({})` on an optional map with @length(min: 1).
+        // This could be considered an SDK bug since information is lost,
+        // SDKs are also not supposed to validate constraints
+        // which makes it harder to argue it should be fixed.
+        // See https://github.com/smithy-lang/smithy-dafny/issues/751
+        var generator = mergedGenerator.generatorForShape(shape);
+        if (
+          generator instanceof RustAwsSdkShimGenerator &&
+          operationIndex.isOutputStructure(shape)
+        ) {
+          validationBlocks.add(
+            "// Validation intentionally suppressed for AWS SDK response structures"
+          );
+        } else {
+          var isPositionalOutput =
+            (operation == null ||
+              operation.getOutputShape().equals(shape.getId())) &&
+            structureShape.hasTrait(PositionalTrait.class);
+          for (final var memberShape : structureShape
+            .getAllMembers()
+            .values()) {
+            final var memberVariables = structureMemberVariables(memberShape);
+            memberVariables.put(
+              "memberValidationFunctionName",
+              shapeValidationFunctionName(null, null, memberShape)
+            );
+
+            if (isPositionalOutput) {
+              validationBlocks.add(
+                evalTemplate(
+                  "$memberValidationFunctionName:L(&Some(input.clone()))?;",
+                  memberVariables
+                )
+              );
+            } else if (
+              mergedGenerator
+                .generatorForShape(structureShape)
+                .isRustFieldRequired(structureShape, memberShape) &&
+              // TODO: This may be more correct than the current isRustFieldRequired in general
+              !(operationIndex.isOutputStructure(structureShape) &&
+                model.expectShape(memberShape.getTarget()).isListShape())
+            ) {
+              validationBlocks.add(
+                evalTemplate(
+                  "$memberValidationFunctionName:L(&Some(input.r#$fieldName:L.clone()))?;",
+                  memberVariables
+                )
+              );
+            } else {
+              validationBlocks.add(
+                evalTemplate(
+                  "$memberValidationFunctionName:L(&input.r#$fieldName:L)?;",
+                  memberVariables
+                )
+              );
+            }
+          }
+        }
+      } else if (shape instanceof UnionShape unionShape) {
+        final var unionVariables = unionVariables(unionShape);
+        for (final var memberShape : unionShape.getAllMembers().values()) {
+          final var memberVariables = MapUtils.merge(
+            unionVariables,
+            unionMemberVariables(memberShape)
+          );
+          memberVariables.put(
+            "memberValidationFunctionName",
+            shapeValidationFunctionName(null, null, memberShape)
+          );
+          validationBlocks.add(
+            evalTemplate(
+              """
+              if let $qualifiedRustUnionName:L::$rustUnionMemberName:L(ref inner) = &input {
+                $memberValidationFunctionName:L(inner)?;
+              }
+              """,
+              memberVariables
+            )
+          );
+        }
+      } else if (shape instanceof ListShape listShape) {
+        final var memberShape = listShape.getMember();
+        final Map<String, String> memberVariables = Map.of(
+          "memberValidationFunctionName",
+          shapeValidationFunctionName(null, null, memberShape)
+        );
+        validationBlocks.add(
+          evalTemplate(
+            """
+            for inner in input.iter() {
+              $memberValidationFunctionName:L(inner)?;
+            }
+            """,
+            memberVariables
+          )
+        );
+      } else if (shape instanceof MapShape mapShape) {
+        final var keyShape = mapShape.getKey();
+        final var valueShape = mapShape.getValue();
+        final Map<String, String> memberVariables = Map.of(
+          "keyValidationFunctionName",
+          shapeValidationFunctionName(null, null, keyShape),
+          "valueValidationFunctionName",
+          shapeValidationFunctionName(null, null, valueShape)
+        );
+        validationBlocks.add(
+          evalTemplate(
+            """
+            for (inner_key, inner_val) in input.iter() {
+              $keyValidationFunctionName:L(inner_key)?;
+              $valueValidationFunctionName:L(inner_val)?;
+            }
+            """,
+            memberVariables
+          )
+        );
+      } else {
+        throw new IllegalArgumentException(
+          "Unsupported shape: " + shape.getId()
+        );
+      }
+
+      final var variables = new HashMap<String, String>();
+      variables.put(
+        "shapeValidationFunctionName",
+        shapeValidationFunctionName(bindingShape, operation, shape)
+      );
+      variables.put("validationBlocks", String.join("\n", validationBlocks));
+
+      try {
+        if (shape instanceof MemberShape memberShape) {
+          final var targetShape = model.expectShape(memberShape.getTarget());
+          final var targetType = mergedGeneratorRustTypeForShape(targetShape);
+          if (isStructureMember) {
+            variables.put(
+              "shapeType",
+              "::std::option::Option<%s>".formatted(targetType)
+            );
+          } else {
+            variables.put("shapeType", targetType);
+          }
+        } else if (operation != null) {
+          final var operationVariables = mergedGenerator
+            .generatorForShape(bindingShape)
+            .operationVariables(bindingShape, operation);
+          final String shapeType;
+          if (operation.getInputShape().equals(shape.getId())) {
+            shapeType = operationVariables.get("operationInputType");
+          } else {
+            shapeType = operationVariables.get("operationOutputType");
+          }
+          variables.put("shapeType", shapeType);
+        } else if (
+          ModelUtils
+            .getConfigShape(model, service)
+            .getId()
+            .equals(shape.getId())
+        ) {
+          // The config shape is a bit special, because even if it's declared in a dependent service
+          // we still re-declare it for this one.
+          variables.put(
+            "shapeType",
+            "%s::%s::%s".formatted(
+                getRustTypesModuleName(),
+                toSnakeCase(rustStructureName((StructureShape) shape)),
+                rustStructureName((StructureShape) shape)
+              )
+          );
+        } else {
+          variables.put("shapeType", mergedGeneratorRustTypeForShape(shape));
+        }
+      } catch (Exception e) {
+        throw new RuntimeException(
+          "Failed on shape %s".formatted(shape.getId()),
+          e
+        );
+      }
+
       return evalTemplate(
         """
-        if input.$fieldName:L.is_none() {
+        pub(crate) fn $shapeValidationFunctionName:L(input: &$shapeType:L)
+          -> ::std::result::Result<(), ::aws_smithy_types::error::operation::BuildError>
+        {
+          $validationBlocks:L
+          Ok(())
+        }
+        """,
+        variables
+      );
+    }
+
+    public static String shapeValidationFunctionName(
+      final Shape bindingShape,
+      final OperationShape operationShape,
+      final Shape shape
+    ) {
+      // the ID foo.bar_baz.quux#My_ShapeName$the_member
+      // becomes foo_Pbar__baz_Pquux_HMy__ShapeName_Dthe__member
+      // If bindingShape/operationShape is not null (because the shape is the input/output for this operation)
+      // the unqualified name is added as a ..._for_<escaped binding name>_<escaped operation name> suffix
+      var escapedId = escapedName(shape.getId().toString());
+      if (operationShape != null) {
+        escapedId =
+          escapedId +
+          "_for_" +
+          escapedName(bindingShape.getId().getName()) +
+          "_" +
+          escapedName(operationShape.getId().getName());
+      }
+
+      return "validate_" + escapedId;
+    }
+
+    private static String escapedName(final String name) {
+      return name
+        .replace("_", "__")
+        .replace(".", "_P")
+        .replace("#", "_H")
+        .replace("$", "_D");
+    }
+
+    private String validateRequired(final MemberShape memberShape) {
+      return evalTemplate(
+        """
+        if input.is_none() {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::missing_field(
                 "$fieldName:L",
-                "$fieldName:L was not specified but it is required when building $pascalCaseOperationInputName:L",
-            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
+                "$fieldName:L is required but was not specified",
+            ));
         }
         """,
         MapUtils.merge(commonVariables, structureMemberVariables(memberShape))
       );
     }
 
-    @Override
-    protected String validateRange(
+    private String validateRange(
       final MemberShape memberShape,
       final RangeTrait rangeTrait
     ) {
@@ -895,43 +1302,45 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       final var max = rangeTrait
         .getMax()
         .map(bound -> asLiteral(bound, targetShape));
-      final var conditionTemplate =
-        "!(%s..%s).contains(&x)".formatted(
+
+      variables.put(
+        "condition",
+        "!(%s..%s).contains(input)".formatted(
             min.orElse(""),
             max.map(val -> "=" + val).orElse("")
-          );
-      final var rangeDescription = describeMinMax(min, max);
+          )
+      );
+      variables.put("rangeDescription", describeMinMax(min, max));
       return evalTemplate(
         """
-        if matches!(input.$fieldName:L, Some(x) if %s) {
+        if $condition:L {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "$fieldName:L",
-                "$fieldName:L failed to satisfy constraint: Member must be %s",
-            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
+                "$fieldName:L failed to satisfy constraint: Member must be $rangeDescription:L",
+            ));
         }
-        """.formatted(conditionTemplate, rangeDescription),
+        """,
         variables
       );
     }
 
-    @Override
-    protected String validateLength(
+    private String validateLength(
       final MemberShape memberShape,
       final LengthTrait lengthTrait
     ) {
       final var targetShape = model.expectShape(memberShape.getTarget());
       final var len =
         switch (targetShape.getType()) {
-          case BLOB -> "x.as_ref().len()";
+          case BLOB -> "input.as_ref().len()";
           case STRING -> targetShape.hasTrait(DafnyUtf8BytesTrait.class)
             // scalar values
-            ? "x.chars().count()"
+            ? "input.chars().count()"
             // The Smithy spec says that this should count scalar values,
             // but for consistency with the existing Java and .NET implementations,
             // we instead count UTF-16 code points.
             // See <https://github.com/smithy-lang/smithy-dafny/issues/610>.
-            : "x.chars().map(::std::primitive::char::len_utf16).fold(0usize, ::std::ops::Add::add)";
-          default -> "x.len()";
+            : "input.chars().map(::std::primitive::char::len_utf16).fold(0usize, ::std::ops::Add::add)";
+          default -> "input.len()";
         };
       final var variables = MapUtils.merge(
         commonVariables,
@@ -948,11 +1357,11 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       final var rangeDescription = describeMinMax(min, max);
       return evalTemplate(
         """
-        if matches!(input.$fieldName:L, Some(ref x) if %s) {
+        if %s {
             return ::std::result::Result::Err(::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "$fieldName:L",
                 "$fieldName:L failed to satisfy constraint: Member must have length %s",
-            )).map_err($qualifiedRustServiceErrorType:L::wrap_validation_err);
+            ));
         }
         """.formatted(conditionTemplate, rangeDescription),
         variables
@@ -1067,7 +1476,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       docFromShape(memberShape) +
       "\n" +
       """
-      pub $fieldName:L: ::std::option::Option<$fieldType:L>,
+      pub $safeFieldName:L: ::std::option::Option<$fieldType:L>,
       """;
     return evalTemplate(template, structureMemberVariables(memberShape));
   }
@@ -1078,8 +1487,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       docFromShape(memberShape) +
       "\n" +
       """
-      pub fn $fieldName:L(&self) -> &::std::option::Option<$fieldType:L> {
-          &self.$fieldName:L
+      pub fn $safeFieldName:L(&self) -> &::std::option::Option<$fieldType:L> {
+          &self.$safeFieldName:L
       }
       """;
     return evalTemplate(template, variables);
@@ -1087,7 +1496,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private String structureBuilderField(final MemberShape memberShape) {
     return evalTemplate(
-      "pub(crate) $fieldName:L: ::std::option::Option<$fieldType:L>,",
+      "pub(crate) $safeFieldName:L: ::std::option::Option<$fieldType:L>,",
       structureMemberVariables(memberShape)
     );
   }
@@ -1097,8 +1506,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       docFromShape(memberShape) +
       "\n" +
       """
-      pub fn $fieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
-          self.$fieldName:L = ::std::option::Option::Some(input.into());
+      pub fn $safeFieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
+          self.$safeFieldName:L = ::std::option::Option::Some(input.into());
           self
       }
       """ +
@@ -1106,7 +1515,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "\n" +
       """
       pub fn set_$fieldName:L(mut self, input: ::std::option::Option<$fieldType:L>) -> Self {
-          self.$fieldName:L = input;
+          self.$safeFieldName:L = input;
           self
       }
       """ +
@@ -1114,7 +1523,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       "\n" +
       """
       pub fn get_$fieldName:L(&self) -> &::std::option::Option<$fieldType:L> {
-          &self.$fieldName:L
+          &self.$safeFieldName:L
       }
       """;
     return evalTemplate(template, structureMemberVariables(memberShape));
@@ -1122,7 +1531,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
 
   private String structureBuilderAssignment(final MemberShape memberShape) {
     return evalTemplate(
-      "$fieldName:L: self.$fieldName:L,",
+      "$safeFieldName:L: self.$safeFieldName:L,",
       structureMemberVariables(memberShape)
     );
   }
@@ -1163,8 +1572,8 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       docFromShape(memberShape) +
       "\n" +
       """
-      pub fn $fieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
-          self.inner = self.inner.$fieldName:L(input.into());
+      pub fn $safeFieldName:L(mut self, input: impl ::std::convert::Into<$fieldType:L>) -> Self {
+          self.inner = self.inner.$safeFieldName:L(input.into());
           self
       }
       """ +
@@ -1442,7 +1851,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       // since on the Rust side there is still an input structure
       // but not on the Dafny side.
       final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
-      final String rustValue = "input." + onlyMember.getMemberName() + "()";
+      final String rustValue = "input.r#" + onlyMember.getMemberName() + "()";
       variables.put(
         "inputFromDafny",
         fromDafny(inputShape, rustValue, false, false).toString()
@@ -1503,7 +1912,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       // but not on the Dafny side.
       final MemberShape onlyMember = PositionalTrait.onlyMember(inputShape);
       final String rustValue =
-        "input." + toSnakeCase(onlyMember.getMemberName());
+        "input.r#" + toSnakeCase(onlyMember.getMemberName());
       variables.put(
         "inputToDafny",
         toDafny(inputShape, rustValue, true, false).toString()
@@ -1594,10 +2003,10 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         #[allow(dead_code)]
         pub fn to_dafny(
             value: $rustRootModuleName:L::operation::$snakeCaseOperationName:L::$rustStructureName:L,
-        ) -> ::std::rc::Rc<
+        ) -> ::dafny_runtime::Rc<
             crate::r#$dafnyTypesModuleName:L::$structureName:L,
         >{
-            ::std::rc::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
+            ::dafny_runtime::Rc::new(crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
                 $variants:L
             })
         }
@@ -1655,7 +2064,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         """
         #[allow(dead_code)]
         pub fn from_dafny(
-            dafny_value: ::std::rc::Rc<
+            dafny_value: ::dafny_runtime::Rc<
                 crate::r#$dafnyTypesModuleName:L::$structureName:L,
             >,
         ) -> $rustRootModuleName:L::operation::$snakeCaseOperationName:L::$rustStructureName:L {
@@ -1790,6 +2199,19 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
     );
   }
 
+  private RustFile validationModule() {
+    final var validationFunctions = validationGenerator
+      .getShapesToValidate()
+      .stream()
+      .map(validationGenerator::generateValidationFunctions)
+      .collect(Collectors.joining("\n"));
+
+    return new RustFile(
+      rootPathForShape(service).resolve("validation.rs"),
+      TokenTree.of(validationFunctions)
+    );
+  }
+
   private Path operationsModuleFilePath(final Shape bindingShape) {
     return rootPathForShape(bindingShape).resolve("operation");
   }
@@ -1815,8 +2237,19 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
       service
     );
     final String configName = configShape.getId().getName(service);
+    final String snakeCaseConfigName = toSnakeCase(configName);
+
     variables.put("configName", configName);
-    variables.put("snakeCaseConfigName", toSnakeCase(configName));
+    variables.put("snakeCaseConfigName", snakeCaseConfigName);
+    variables.put(
+      "qualifiedRustConfigName",
+      String.join(
+        "::",
+        getRustTypesModuleName(),
+        snakeCaseConfigName,
+        configName
+      )
+    );
     variables.put("rustErrorModuleName", rustErrorModuleName());
     variables.put(
       "qualifiedRustServiceErrorType",
@@ -1931,7 +2364,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           if (isDafnyOption) {
             yield TokenTree.of(
               """
-              ::std::rc::Rc::new(match &%s {
+              ::dafny_runtime::Rc::new(match &%s {
                   Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(x.clone()) },
                   None => crate::_Wrappers_Compile::Option::None { }
               })
@@ -1963,7 +2396,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           final String coercion = isDafnyOption ? "into()" : "Extract()";
           yield TokenTree.of(
             """
-            std::rc::Rc::new(match %s {
+            dafny_runtime::Rc::new(match %s {
               Some(s) => crate::_Wrappers_Compile::Option::Some { value: %s },
               None => crate::_Wrappers_Compile::Option::None {},
             }).%s""".formatted(rustValue, rustToDafny.formatted("s"), coercion)
@@ -2144,7 +2577,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         } else {
           yield TokenTree.of(
             """
-            ::std::rc::Rc::new(match &%s {
+            ::dafny_runtime::Rc::new(match &%s {
                 Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
                     ::dafny_runtime::dafny_runtime_conversions::vec_to_dafny_sequence(x,
                         |e| %s,
@@ -2192,7 +2625,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
           yield TokenTree.of(
             """
 
-            ::std::rc::Rc::new(match &%s {
+            ::dafny_runtime::Rc::new(match &%s {
                 Some(x) => crate::r#_Wrappers_Compile::Option::Some { value :
                     ::dafny_runtime::dafny_runtime_conversions::hashmap_to_dafny_map(x,
                         |k| %s,
@@ -2230,7 +2663,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         } else {
           yield TokenTree.of(
             """
-            ::std::rc::Rc::new(match &%s {
+            ::dafny_runtime::Rc::new(match &%s {
                 Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::to_dafny(&x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
@@ -2260,7 +2693,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         } else {
           yield TokenTree.of(
             """
-            ::std::rc::Rc::new(match &%s {
+            ::dafny_runtime::Rc::new(match &%s {
                 Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::%s::to_dafny(&x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })
@@ -2287,7 +2720,7 @@ public class RustLibraryShimGenerator extends AbstractRustShimGenerator {
         } else {
           yield TokenTree.of(
             """
-            ::std::rc::Rc::new(match &%s {
+            ::dafny_runtime::Rc::new(match &%s {
                 Some(x) => crate::_Wrappers_Compile::Option::Some { value: %s::conversions::client::to_dafny(&x.clone()) },
                 None => crate::_Wrappers_Compile::Option::None { }
             })

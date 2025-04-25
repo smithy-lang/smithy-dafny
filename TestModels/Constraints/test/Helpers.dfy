@@ -9,7 +9,7 @@ module Helpers {
   import opened Wrappers
 
   // UTF-8 encoded "aws-kms"
-  const PROVIDER_ID: UTF8.ValidUTF8Bytes :=
+  const {:vcs_split_on_every_assert} PROVIDER_ID: UTF8.ValidUTF8Bytes :=
     var s := [0x61, 0x77, 0x73, 0x2D, 0x6B, 0x6D, 0x73];
     assert UTF8.ValidUTF8Range(s, 0, 7);
     s
@@ -33,9 +33,11 @@ module Helpers {
       MyList := Some(["00", "11"]),
       NonEmptyList := Some(["00", "11"]),
       ListLessThanOrEqualToTen := Some(["00", "11"]),
+      ListWithConstraint := Some(["0", "123", "MaxTenChar"]),
       MyMap := Some(map["0" := "1", "2" := "3"]),
       NonEmptyMap := Some(map["0" := "1", "2" := "3"]),
       MapLessThanOrEqualToTen := Some(map["0" := "1", "2" := "3"]),
+      MapWithConstraint := Some(map["0" := "0123456789", "abcdefghij" := "z"]),
       // Alphabetic := Some("alphabetic"),
       OneToTen := Some(3),
       myTenToTen := Some(3),
@@ -44,7 +46,12 @@ module Helpers {
       // MyUniqueList := Some(["one", "two"]),
       // MyComplexUniqueList := Some(myComplexUniqueList),
       MyUtf8Bytes := Some(PROVIDER_ID),
-      MyListOfUtf8Bytes := Some([PROVIDER_ID, PROVIDER_ID])
+      MyListOfUtf8Bytes := Some([PROVIDER_ID, PROVIDER_ID]),
+      UnionWithConstraint := Some(IntegerValue(1)),
+      ComplexStructureList := Some([
+        ComplexStructure(InnerString := Some("s1"), InnerBlob := [1, 1]),
+        ComplexStructure(InnerString := Some("s2"), InnerBlob := [2, 3, 4])
+      ])
     )
   }
 

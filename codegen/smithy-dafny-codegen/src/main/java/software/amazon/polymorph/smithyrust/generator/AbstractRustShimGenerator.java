@@ -48,6 +48,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.StringTrait;
+import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 public abstract class AbstractRustShimGenerator {
@@ -132,8 +133,8 @@ public abstract class AbstractRustShimGenerator {
     StructureShape structureShape
   ) {
     return (
+      !structureShape.hasTrait(TraitDefinition.class) &&
       !structureShape.hasTrait(ErrorTrait.class) &&
-      !structureShape.hasTrait(ShapeId.from("smithy.api#trait")) &&
       !structureShape.hasTrait(ReferenceTrait.class) &&
       ModelUtils.isInServiceNamespace(structureShape, service)
     );
@@ -242,8 +243,8 @@ public abstract class AbstractRustShimGenerator {
       #[allow(dead_code)]
       pub fn to_dafny(
           value: &$rustTypesModuleName:L::$rustStructureName:L,
-      ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
-        ::std::rc::Rc::new(
+      ) -> ::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>{
+        ::dafny_runtime::Rc::new(
           crate::r#$dafnyTypesModuleName:L::$structureName:L::$structureName:L {
               $variants:L
           }
@@ -292,7 +293,7 @@ public abstract class AbstractRustShimGenerator {
         """
         #[allow(dead_code)]
         pub fn from_dafny(
-            dafny_value: ::std::rc::Rc<
+            dafny_value: ::dafny_runtime::Rc<
                 crate::r#$dafnyTypesModuleName:L::$structureName:L,
             >,
         ) -> $rustTypesModuleName:L::$rustStructureName:L {
@@ -831,7 +832,7 @@ public abstract class AbstractRustShimGenerator {
     final String snakeCaseMemberName = toSnakeCase(member.getMemberName());
     return toDafny(
       targetShape,
-      "value." + snakeCaseMemberName,
+      "value." + RustUtils.escapedName(snakeCaseMemberName),
       !isRustFieldRequired(parent, member),
       !hasRequiredTrait(member)
     );
@@ -902,8 +903,8 @@ public abstract class AbstractRustShimGenerator {
 
         pub fn to_dafny(
             value: $rustTypesModuleName:L::$rustEnumName:L,
-        ) -> ::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$enumName:L>{
-            ::std::rc::Rc::new(match value {
+        ) -> ::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::$enumName:L>{
+            ::dafny_runtime::Rc::new(match value {
                 $branches:L
                 _ => panic!("Unknown enum variant: {}", value),
             })
@@ -1267,7 +1268,7 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationDafnyInputType",
         evalTemplate(
-          "&::std::rc::Rc<crate::$dafnyTypesModuleName:L::$structureName:L>",
+          "&::dafny_runtime::Rc<crate::$dafnyTypesModuleName:L::$structureName:L>",
           inputShapeVariables
         )
       );
@@ -1296,7 +1297,7 @@ public abstract class AbstractRustShimGenerator {
       variables.put(
         "operationDafnyOutputType",
         evalTemplate(
-          "::std::rc::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>",
+          "::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::$structureName:L>",
           outputShapeVariables
         )
       );
@@ -1585,8 +1586,12 @@ public abstract class AbstractRustShimGenerator {
     final HashMap<String, String> variables = new HashMap<>();
     final String memberName = memberShape.getMemberName();
     final Shape targetShape = model.expectShape(memberShape.getTarget());
-    variables.put("memberName", memberName);
+    variables.put("memberName", RustUtils.escapedName(memberName));
     variables.put("fieldName", toSnakeCase(memberName));
+    variables.put(
+      "safeFieldName",
+      RustUtils.escapedName(toSnakeCase(memberName))
+    );
     variables.put("fieldType", mergedGeneratorRustTypeForShape(targetShape));
     return variables;
   }
@@ -1744,7 +1749,7 @@ public abstract class AbstractRustShimGenerator {
           EnumShape enumShape = ModelUtils.stringToEnumShape(
             shape.asStringShape().orElseThrow()
           );
-          yield "::std::rc::Rc<crate::" +
+          yield "::dafny_runtime::Rc<crate::" +
           getDafnyTypesModuleName(shape.getId().getNamespace()) +
           "::" +
           enumName(enumShape) +
@@ -1755,7 +1760,7 @@ public abstract class AbstractRustShimGenerator {
         }
         yield "::dafny_runtime::dafny_runtime_conversions::DafnySequence<::dafny_runtime::dafny_runtime_conversions::DafnyCharUTF16>";
       }
-      case ENUM -> "::std::rc::Rc<crate::" +
+      case ENUM -> "::dafny_runtime::Rc<crate::" +
       getDafnyTypesModuleName(shape.getId().getNamespace()) +
       "::" +
       enumName((EnumShape) shape) +
@@ -1785,12 +1790,12 @@ public abstract class AbstractRustShimGenerator {
             valueType
           );
       }
-      case STRUCTURE -> "::std::rc::Rc<crate::r#" +
+      case STRUCTURE -> "::dafny_runtime::Rc<crate::r#" +
       getDafnyTypesModuleName(shape.getId().getNamespace()) +
       "::" +
       structureName((StructureShape) shape) +
       ">";
-      case UNION -> "::std::rc::Rc<crate::r#" +
+      case UNION -> "::dafny_runtime::Rc<crate::r#" +
       getDafnyTypesModuleName(shape.getId().getNamespace()) +
       "::" +
       unionName((UnionShape) shape) +

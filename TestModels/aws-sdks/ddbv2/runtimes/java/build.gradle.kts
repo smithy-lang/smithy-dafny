@@ -18,7 +18,7 @@ var dafnyVersion = props.getProperty("dafnyVersion")
 
 group = "software.amazon.cryptography"
 version = "1.0-SNAPSHOT"
-description = "ComAmazonawsDynamodb"
+description = "ComAmazonawsDynamodbV2"
 
 var caUrl: URI? = null
 @Nullable
@@ -70,6 +70,11 @@ dependencies {
 }
 
 publishing {
+    publications.create<MavenPublication>("mavenLocal") {
+        groupId = group as String?
+        artifactId = description
+        from(components["java"])
+    }
     publications.create<MavenPublication>("maven") {
         groupId = "software.amazon.cryptography"
         artifactId = "ComAmazonawsDynamodb"

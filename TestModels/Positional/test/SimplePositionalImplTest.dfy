@@ -14,6 +14,8 @@ module {:options "--function-syntax:4"} SimplePositionalImplTest {
     {
         TestGetResource(client);
         TestGetResourcePositional(client);
+        GetIntegerInputPosition(client);
+        GetIntegerOutputPosition(client);
     }
 
     method TestGetResource(client: Types.ISimplePositionalClient)
@@ -40,6 +42,28 @@ module {:options "--function-syntax:4"} SimplePositionalImplTest {
         var getNameOutput :- expect resource.GetName(Types.GetNameInput());
         expect getNameOutput.name == "TestPositional";
     }
+
+    method GetIntegerInputPosition(client: Types.ISimplePositionalClient) 
+        requires client.ValidState()
+        modifies client.Modifies
+        ensures client.ValidState()
+    {
+        var input := 5;
+        var ret :- expect client.GetIntegerInputPosition(input);
+        expect ret.value.UnwrapOr(0) == input;
+    }
+
+    method GetIntegerOutputPosition(client: Types.ISimplePositionalClient) 
+        requires client.ValidState()
+        modifies client.Modifies
+        ensures client.ValidState()
+    {
+        var inputInteger:= 5;
+        var input := Types.GetIntegerOutputPositionInput(value:= Some(inputInteger));
+        var ret :- expect client.GetIntegerOutputPosition(input);
+        expect ret == inputInteger;
+    }
+
 
     method {:test} TestDefaultConfig() {
         var client :- expect SimplePositional.SimplePositional();

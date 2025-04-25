@@ -17,6 +17,7 @@ pub mod operation;
 mod standard_library_conversions;
 mod standard_library_externs;
 pub mod types;
+pub mod validation;
 pub mod wrapped;
 pub(crate) use crate::implementation_from_dafny::r#_Wrappers_Compile;
 pub(crate) use crate::implementation_from_dafny::simple;

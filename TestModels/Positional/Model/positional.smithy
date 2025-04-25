@@ -11,7 +11,7 @@ use aws.polymorph#reference
 service SimplePositional {
   version: "2021-11-01",
   resources: [],
-  operations: [ GetResource, GetResourcePositional ],
+  operations: [ GetResource, GetResourcePositional, GetIntegerInputPosition, GetIntegerOutputPosition ],
   errors: [ SimplePositionalException ],
 }
 
@@ -72,4 +72,34 @@ structure GetResourcePositionalInput {
 structure GetResourcePositionalOutput {
   @required
   output: SimpleResourceReference
+}
+
+operation GetIntegerInputPosition {
+  input: GetIntegerInputPositionInput
+  output: GetIntegerInputPositionOutput,
+}
+
+@positional
+structure GetIntegerInputPositionInput {
+  @required
+  value: Integer
+}
+
+structure GetIntegerInputPositionOutput {
+  value: Integer
+}
+
+operation GetIntegerOutputPosition {
+  input: GetIntegerOutputPositionInput
+  output: GetIntegerOutputPositionOutput,
+}
+
+structure GetIntegerOutputPositionInput {
+  value: Integer
+}
+
+@positional
+structure GetIntegerOutputPositionOutput {
+  @required
+  value: Integer
 }

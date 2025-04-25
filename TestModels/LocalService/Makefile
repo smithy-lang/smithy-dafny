@@ -22,6 +22,8 @@ SERVICE_DEPS_SimpleLocalService :=
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
+# DEPENDENT-MODELS:= 
+GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/LocalService"
 # DEPENDENT-MODELS:=
 
 # Constants for languages that drop extern names (Python, Go)
@@ -38,7 +40,8 @@ WRAPPED_INDEX_FILE_PATH=src/WrappedIndex.dfy
 WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.localservice.internaldafny.wrapped\"} WrappedSimpleLocalService refines WrappedAbstractSimpleLocalServiceService"
 WRAPPED_INDEX_FILE_WITHOUT_EXTERN_STRING="module WrappedSimpleLocalService refines WrappedAbstractSimpleLocalServiceService"
 
-
+TRANSLATION_RECORD_GO := \
+    dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr
 
 clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy

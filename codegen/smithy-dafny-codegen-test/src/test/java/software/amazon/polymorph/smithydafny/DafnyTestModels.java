@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph.smithydafny;
 
+import static software.amazon.smithy.dafny.codegen.TestUtils.make;
+
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,23 +21,18 @@ class DafnyTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/BigDecimal");
     DISABLED_TESTS.add("SimpleTypes/BigInteger");
     DISABLED_TESTS.add("SimpleTypes/SimpleByte");
+    DISABLED_TESTS.add("SimpleTypes/SimpleDocument");
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat");
     DISABLED_TESTS.add("SimpleTypes/SimpleShort");
+    DISABLED_TESTS.add("Streaming");
   }
 
   @ParameterizedTest
   @MethodSource("discoverTestModels")
-  void testModelsForDafny(String relativeTestModelPath) {
-    Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
+  protected void testModels(String relativeTestModelPath) {
+    super.testModels(relativeTestModelPath);
 
-    DafnyVersion dafnyVersion = DafnyVersion.parse(
-      System.getenv("DAFNY_VERSION")
-    );
-    if (dafnyVersion.compareTo(DafnyVersion.parse("4.4.0")) < 0) {
-      Assumptions.assumeFalse(
-        TESTS_THAT_NEED_DAFNY_4_4.contains(relativeTestModelPath)
-      );
-    }
+    Assumptions.assumeFalse(DISABLED_TESTS.contains(relativeTestModelPath));
 
     Path testModelPath = getTestModelPath(relativeTestModelPath);
     make(testModelPath, "polymorph_dafny");

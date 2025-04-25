@@ -7,6 +7,7 @@ edition = "2021"
 
 [features]
 wrapped-client = []
+small-int = ["dafny_runtime/small-int"]
 
 [dependencies]
 aws-sdk-sqs = "1.45.0"
@@ -15,7 +16,7 @@ aws-smithy-runtime = {version = "1.6.0", features = ["client"] }
 aws-smithy-runtime-api = {version = "1.7.0", features = ["client"] }
 aws-smithy-types = "1.2.0"
 # TODO: Wrong path according to the tutorial instructions
-dafny_runtime = { path = "../../../../../TestModels/dafny-dependencies/dafny_runtime_rust"}
+dafny_runtime = { path = "../../../../../TestModels/dafny-dependencies/dafny_runtime_rust", features = ["sync"]}
 
 [dev-dependencies]
 extended_sqs = { path = ".", features = ["wrapped-client"] }

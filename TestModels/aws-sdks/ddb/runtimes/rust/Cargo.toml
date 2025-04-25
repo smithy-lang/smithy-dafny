@@ -7,6 +7,7 @@ edition = "2021"
 
 [features]
 wrapped-client = []
+small-int = ["dafny_runtime/small-int"]
 
 [dependencies]
 aws-sdk-dynamodb = "1.45.0"
@@ -14,7 +15,7 @@ aws-config = "1.5.4"
 aws-smithy-runtime = {version = "1.6.0", features = ["client"] }
 aws-smithy-runtime-api = {version = "1.7.0", features = ["client"] }
 aws-smithy-types = "1.2.0"
-dafny_runtime = { path = "../../../../dafny-dependencies/dafny_runtime_rust"}
+dafny_runtime = { path = "../../../../dafny-dependencies/dafny_runtime_rust", features = ["sync"]}
 
 [dev-dependencies]
 aws_sdk_ddb = { path = ".", features = ["wrapped-client"] }
