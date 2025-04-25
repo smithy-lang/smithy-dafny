@@ -110,7 +110,7 @@ module TestComAmazonawsS3 {
 
         var ret := client.DeleteObject(input);
 
-        expect(ret.Success?);
+        expect(ret.Success?), ret.error;
     }
 
     method Collect(e: DataStream<Error>) returns (s: Result<BoundedInts.bytes, Error>) 

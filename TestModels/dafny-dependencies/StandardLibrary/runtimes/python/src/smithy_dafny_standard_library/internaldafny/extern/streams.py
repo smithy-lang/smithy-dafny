@@ -1,5 +1,5 @@
 
-from _dafny import Seq
+from _dafny import Seq, Array as DafnyArray
 from smithy_python.interfaces.blobs import ByteStream
 from smithy_dafny_standard_library.internaldafny.generated.StandardLibrary_Streams import DataStream
 from smithy_dafny_standard_library.internaldafny.generated.Std_BulkActions import BatchSeqWriter, BatchArrayWriter, Batched_EndOfInput
@@ -21,11 +21,14 @@ class DafnyDataStreamAsByteStream(ByteStream):
   def read(self, size: int = -1) -> bytes:
     if size == -1:
       writer = BatchSeqWriter()
+      writer.ctor__()
       self.reader.ForEach(writer)
     else:
-      writer = BatchArrayWriter(size)
+      writer = BatchArrayWriter()
+      writer.ctor__(DafnyArray(None, size))
       self.reader.ForEachToCapacity(writer)
     # TODO: Check for errors. Fine to ignore EOI though.
+    # print(f"****** {writer.Values()} ******")
     return bytes(writer.Values())
 
   def tell(self) -> int:
@@ -33,21 +36,27 @@ class DafnyDataStreamAsByteStream(ByteStream):
 
   def seek(self, offset, whence=0):
     # TODO: check whether invalid offsets must raise errors
+    # TODO: Need to -1 to account for EndOfInput
     match whence:
       case 0:
         new_position = offset
       case 1:
-        new_position = self.reader.Position() + offset
+        new_position = self.reader.ProducedCount() + offset
       case 2:
         new_position = self.data_stream.ContentLength().value + offset
 
-    if position > self.reader.Position():
-      self.reader.ForEach(IgnoreNConsumer(position - self.reader.Position()))
-    elif position < self.reader.Position():
-      self.reader = data_stream.Reader()
-      self.reader.ForEach(IgnoreNConsumer(position))
+    if new_position > self.reader.ProducedCount():
+      consumer = IgnoreNConsumer()
+      consumer.ctor__(new_position - self.reader.ProducedCount())
+      self.reader.ForEach(consumer)
+    elif new_position < self.reader.ProducedCount():
+      self.reader = self.data_stream.Reader()
+      consumer = IgnoreNConsumer()
+      consumer.ctor__(new_position)
+      self.reader.ForEach(consumer)
 
 
+# TODO: Missing some methods like Remaining()
 class StreamingBlobAsDafnyDataStream(DataStream):
   """Wrapper class adapting a native StreamingBlob as a Dafny DataStream."""
 
@@ -74,7 +83,8 @@ class StreamingBlobAsDafnyDataStream(DataStream):
       next = self.streaming_blob.read(4096)
       if not next:
         break
-      batch = BatchReader(Seq(next))
+      batch = BatchReader()
+      batch.ctor__(Seq(next))
       batch.ForEach(consumer)
   
     batch.Accept(Batched_EndOfInput)
@@ -83,6 +93,7 @@ class StreamingBlobAsDafnyDataStream(DataStream):
     # TODO: error handling
     size = consumer.Capacity()
     next = self.streaming_blob.read(size)
-    batch = BatchReader(Seq(next))
+    batch = BatchReader()
+    batch.ctor__(Seq(next))
     batch.ForEachToCapacity(consumer)
     # TODO: EOI
