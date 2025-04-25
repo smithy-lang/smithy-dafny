@@ -22,7 +22,7 @@ module {:extern "UTF8"} UTF8 {
 
   // The tradeoff of assuming the external implementation of encode and decode is correct is worth the tradeoff
   // of unlocking being able to express and hence prove so many other specifications
-  function method {:extern "Encode"} Encode(s: string): (res: Result<ValidUTF8Bytes, string>)
+  function method {:extern "Encode"} {:axiom} Encode(s: string): (res: Result<ValidUTF8Bytes, string>)
     // US-ASCII only needs a single UTF-8 byte per character
     ensures IsASCIIString(s) ==> res.Success? && |res.value| == |s|
     // The following MUST be true for any correct implementation of Encode
@@ -30,7 +30,7 @@ module {:extern "UTF8"} UTF8 {
     ensures res.Success? ==> Decode(res.value).Success? && Decode(res.value).value == s
 
   // Decode return a Result, therefore doesn't need to require utf8 input
-  function method {:extern "Decode"} Decode(b: seq<uint8>): (res: Result<string, string>)
+  function method {:extern "Decode"} {:axiom} Decode(b: seq<uint8>): (res: Result<string, string>)
     ensures res.Success? ==> ValidUTF8Seq(b)
 
   // The next four functions are for the benefit of the extern implementation to call,

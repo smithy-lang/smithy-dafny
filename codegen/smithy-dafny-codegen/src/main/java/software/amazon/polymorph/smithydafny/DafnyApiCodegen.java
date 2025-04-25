@@ -321,8 +321,8 @@ public class DafnyApiCodegen {
       .map(DafnyApiCodegen::generateLengthConstraint);
     if (blobShape.hasTrait(StreamingTrait.class)) {
       // TODO: need to handle @length too,
-      // something like `a.totalLength.Some? && min <= a.contentLength.value <= max
-      return generateTypeSynonym(blobShapeId, "DataStream<uint8, Error>");
+      // something like `a.ContentLength().Some? && min <= a.ContentLength().value <= max
+      return generateTypeSynonym(blobShapeId, "DataStream<Error>");
     } else {
       return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);
     }

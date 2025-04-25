@@ -62,7 +62,8 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
     // TODO: for now
     assume {:axiom} input.bytesIn.history == [];
     var chunker := new Chunker(input.chunkSize);
-    var chunkerStream := new MappedDataStream(input.bytesIn, chunker);
+    ghost var chunkerTotalProof := new ChunkerTotalProof(chunker);
+    var chunkerStream := new MappedDataStream(input.bytesIn, chunker, chunkerTotalProof);
     
     return Success(ChunksOutput(bytesOut := chunkerStream));
   }

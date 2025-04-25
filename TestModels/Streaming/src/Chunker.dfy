@@ -11,7 +11,7 @@ module {:options "--function-syntax:4"} Chunker {
   import opened Std.BulkActions
   import opened Std.Producers
   import opened Std.Consumers
-  import opened Std.Streams
+  import opened StandardLibrary.Streams
 
   @AssumeCrossModuleTermination
   class Chunker<E> extends BulkAction<Option<Result<uint8, E>>, Option<Producer<Result<uint8, E>>>> {
@@ -143,7 +143,7 @@ module {:options "--function-syntax:4"} Chunker {
 
   }
 
-  method ChunkingStream<E>(chunkSize: CountingInteger, s: DataStream<BoundedInts.uint8, E>)
+  method ChunkingStream<E>(chunkSize: CountingInteger, s: DataStream<E>)
     requires s.Valid()
     requires s.history == []
   {

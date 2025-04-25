@@ -24,12 +24,18 @@ includes = [
 track-print-effects = true
 enforce-determinism = false
 reads-clauses-on-methods = true
+type-system-refresh = true
+general-traits = "datatype"
+general-newtypes = true
 
 # Options that differ from Dafny's
 unicode-char = false
 
-# TODO
+# TODO: Required because this file isn't named dfyconfig.toml :P
 allow-warnings = true
+
+
+hidden-no-verify = true
 
 # Options important for sustainable development
 # of the libraries themselves.
