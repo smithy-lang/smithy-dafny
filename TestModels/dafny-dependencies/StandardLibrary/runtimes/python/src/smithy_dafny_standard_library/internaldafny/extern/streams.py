@@ -62,6 +62,9 @@ class StreamingBlobAsDafnyDataStream(DataStream):
     self.streaming_blob = streaming_blob
     self.read = False
 
+  def Replayable(self):
+    False
+
   def Reader(self):
     if self.read:
       raise Exception("StreamingBlobAsDafnyDataStream.Reader() called twice")

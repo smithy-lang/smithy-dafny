@@ -20,6 +20,8 @@ module {:options "--function-syntax:4"} StandardLibrary.Streams {
 
     function ContentLength(): Option<nat>
 
+    predicate Replayable()
+
     method Reader() returns (p: Producer<Batched<uint8, E>>)
       ensures 
         && p.Valid()
@@ -40,6 +42,10 @@ module {:options "--function-syntax:4"} StandardLibrary.Streams {
 
     function ContentLength(): Option<nat> {
       Some(|s|)
+    }
+
+    predicate Replayable() {
+      true
     }
 
     method Reader() returns (p: Producer<Batched<uint8, E>>)
