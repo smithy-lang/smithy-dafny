@@ -2,8 +2,9 @@
 from _dafny import Seq, Array as DafnyArray
 from smithy_python.interfaces.blobs import ByteStream
 from smithy_dafny_standard_library.internaldafny.generated.StandardLibrary_Streams import DataStream
-from smithy_dafny_standard_library.internaldafny.generated.Std_BulkActions import BatchSeqWriter, BatchArrayWriter, Batched_EndOfInput
+from smithy_dafny_standard_library.internaldafny.generated.Std_BulkActions import BatchSeqWriter, BatchArrayWriter, Batched_EndOfInput, BatchReader
 from smithy_dafny_standard_library.internaldafny.generated.Std_Consumers import IgnoreNConsumer
+from smithy_dafny_standard_library.internaldafny.generated.Std_Producers import Producer
 from smithy_dafny_standard_library.internaldafny.generated.Std_Wrappers import Option, Option_Some, Option_None
 
 # Adaptor classes for wrapping up Python-native types as their
@@ -56,10 +57,20 @@ class DafnyDataStreamAsByteStream(ByteStream):
       self.reader.ForEachToCapacity(consumer)
       
 
-
-# TODO: Need to implement Producer, not DataStream!
-# TODO: Even so, missing some methods like Remaining()
 class StreamingBlobAsDafnyDataStream(DataStream):
+  def __init__(self, streaming_blob):
+    self.streaming_blob = streaming_blob
+    self.read = False
+
+  def Reader(self):
+    if self.read:
+      raise Exception("StreamingBlobAsDafnyDataStream.Reader() called twice")
+    self.read = True
+    return StreamingBlobAsDafnyProducer(self.streaming_blob)
+
+
+# TODO: Missing some methods like Remaining()
+class StreamingBlobAsDafnyProducer(Producer):
   """Wrapper class adapting a native StreamingBlob as a Dafny DataStream."""
 
   def __init__(self, streaming_blob):
@@ -89,7 +100,7 @@ class StreamingBlobAsDafnyDataStream(DataStream):
       batch.ctor__(Seq(next))
       batch.ForEach(consumer)
   
-    batch.Accept(Batched_EndOfInput)
+    consumer.Accept(Batched_EndOfInput())
 
   def ForEachToCapacity(self, consumer):
     # TODO: error handling
