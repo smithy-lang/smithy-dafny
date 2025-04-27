@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 include "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
-module {:extern "simple.streaming.internaldafny.types" } SimpleStreamingTypes
+module SimpleStreamingTypes
 {
   import opened Wrappers
   import opened StandardLibrary.UInt
@@ -17,17 +17,17 @@ module {:extern "simple.streaming.internaldafny.types" } SimpleStreamingTypes
     nameonly number: int32
   )
   datatype BinaryOfOutput = | BinaryOfOutput (
-    nameonly binary: DataStream<Error>
+    nameonly binary: DataStream<uint8, Error>
   )
   datatype ChunksInput = | ChunksInput (
-    nameonly bytesIn: DataStream<Error> ,
+    nameonly bytesIn: DataStream<uint8, Error> ,
     nameonly chunkSize: CountingInteger
   )
   datatype ChunksOutput = | ChunksOutput (
-    nameonly bytesOut: DataStream<Error>
+    nameonly bytesOut: DataStream<uint8, Error>
   )
   datatype CountBitsInput = | CountBitsInput (
-    nameonly bits: DataStream<Error>
+    nameonly bits: DataStream<uint8, Error>
   )
   datatype CountBitsOutput = | CountBitsOutput (
     nameonly sum: int32
@@ -122,7 +122,7 @@ module {:extern "simple.streaming.internaldafny.types" } SimpleStreamingTypes
   datatype SimpleStreamingConfig = | SimpleStreamingConfig (
 
                                    )
-  type StreamingBlob = DataStream<Error>
+  type StreamingBlob = DataStream<uint8, Error>
   datatype Error =
       // Local Error structures are listed here
     | OverflowError (

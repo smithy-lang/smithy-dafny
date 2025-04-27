@@ -9,20 +9,16 @@ module {:options "--function-syntax:4"} StandardLibrary.Streams {
   import opened Std.Actions
   import opened Std.BulkActions
   import opened Std.Producers
-  import opened Std.BoundedInts
   import opened Std.Collections.Seq
   import opened Std.Termination
 
-  //
-  // A data stream, i.e. a fallable producer of batches of values.
-  //
-  trait DataStream<E> {
+  trait DataStream<T, E> {
 
     function ContentLength(): Option<nat>
 
     predicate Replayable()
 
-    method Reader() returns (p: Producer<Batched<uint8, E>>)
+    method Reader() returns (p: Producer<Batched<T, E>>)
       ensures 
         && p.Valid()
         && fresh(p.Repr)
@@ -30,11 +26,11 @@ module {:options "--function-syntax:4"} StandardLibrary.Streams {
         && (ContentLength().Some? ==> p.Remaining() == Some(ContentLength().value as int + 1))
   }
 
-  class SeqDataStream<E> extends DataStream<E> {
+  class SeqDataStream<T, E> extends DataStream<T, E> {
 
-    const s: seq<uint8>
+    const s: seq<T>
 
-    constructor (s: seq<uint8>)
+    constructor (s: seq<T>)
       ensures this.s == s
     {
       this.s := s;
@@ -48,7 +44,7 @@ module {:options "--function-syntax:4"} StandardLibrary.Streams {
       true
     }
 
-    method Reader() returns (p: Producer<Batched<uint8, E>>)
+    method Reader() returns (p: Producer<Batched<T, E>>)
       ensures 
         && p.Valid()
         && fresh(p.Repr)

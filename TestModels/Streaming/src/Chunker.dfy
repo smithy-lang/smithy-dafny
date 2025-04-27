@@ -2,8 +2,6 @@ include "../Model/SimpleStreamingTypes.dfy"
 
 module {:options "--function-syntax:4"} Chunker {
 
-  import Std.BoundedInts
-
   import opened Std.Wrappers
   import opened Types = SimpleStreamingTypes
   import opened StandardLibrary.UInt
@@ -13,13 +11,16 @@ module {:options "--function-syntax:4"} Chunker {
   import opened Std.Consumers
   import opened StandardLibrary.Streams
 
+  type BB = Batched<uint8, Error>
+
   @AssumeCrossModuleTermination
-  class Chunker<E> extends BulkAction<Option<Result<uint8, E>>, Option<Producer<Result<uint8, E>>>> {
+  class Chunker extends BulkAction<BB, seq<BB>> {
 
     const chunkSize: CountingInteger
-    var chunkBuffer: BoundedInts.bytes
+    var chunkBuffer: seq<uint8>
 
     constructor(chunkSize: CountingInteger)
+      requires 0 < chunkSize
       ensures Valid()
       ensures fresh(Repr)
       ensures history == []
@@ -36,84 +37,169 @@ module {:options "--function-syntax:4"} Chunker {
       ensures Valid() ==> ValidHistory(history)
       decreases Repr, 0
     {
-      this in Repr
+      && this in Repr
+      && 0 < chunkSize
     }
 
-    ghost predicate ValidHistory(history: seq<(Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>)>)
+    twostate predicate ValidChange()
+      reads this, Repr
+      ensures ValidChange() ==> old(Valid()) && Valid()
+      ensures ValidChange() ==> fresh(Repr - old(Repr))
+      ensures ValidChange() ==> old(history) <= history
+    {
+      && fresh(Repr - old(Repr))
+      && old(Valid())
+      && Valid()
+      && old(history) <= history
+    }
+
+    twostate lemma ValidImpliesValidChange()
+      requires old(Valid())
+      requires unchanged(old(Repr))
+      ensures ValidChange()
+    {}
+
+    ghost predicate ValidHistory(history: seq<(BB, seq<BB>)>)
       decreases Repr
     {
       true
     }
 
-    ghost predicate ValidInput(history: seq<(Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>)>, next: Option<Result<BoundedInts.bytes, E>>)
+    ghost predicate ValidInput(history: seq<(BB, seq<BB>)>, next: BB)
       requires ValidHistory(history)
       decreases Repr
     {
       true
     }
 
-    ghost function Decreases(i: Option<Result<BoundedInts.bytes, E>>): ORDINAL
+    ghost function Decreases(i: BB): ORDINAL
       requires Requires(i)
       reads Reads(i)
     {
       0
     }
 
-    // Ideally could use this in a MappedConsumer as well
-
-    method Single(input: Option<Result<uint8, E>>) returns (r: Option<Producer<Result<uint8, E>>>) 
-    {
-
-    }
-
-    method Bulk(input: Producer<Result<uint8, E>>, output: Consumer<Result<uint8, E>>) {
-      
-    }
-
-    method BulkInvoke(input: Producer<Result<uint8, E>>, output: IConsumer<Result<uint8, E>>)
-      requires Requires(input)
-      modifies Modifies(input)
-      decreases Decreases(input), 0
-      ensures Ensures(input, r)
+    @IsolateAssertions
+    method Invoke(i: BB) returns (o: seq<BB>)
+      requires Requires(i)
+      modifies Modifies(i)
+      decreases Decreases(i), 0
+      ensures Ensures(i, o)
     {
       assert Valid();
-      var outputChunks := [];
-      if input.Some? {
-        if input.value.Failure? {
-          outputChunks := outputChunks + [input.value];
-        } else {
+      var input := new SeqReader([i]);
+      var output := new SeqWriter();
+      var outputTotalProof := new SeqWriterTotalActionProof(output);
+      label before:
+      BulkInvoke(input, output, outputTotalProof);
+      assert |output.values| == 1;
+      o := output.values[0];
+      assert Seq.Last(output.Inputs()) == o;
+      assert Seq.Last(Inputs()) == i;
+    }
 
-          chunkBuffer := chunkBuffer + input.value.value;
-          
-          while chunkSize as int <= |chunkBuffer|
-            invariant ValidAndDisjoint()
-            invariant history == old(history)
-          {
-            outputChunks := outputChunks + [Success(chunkBuffer[..chunkSize])];
-            chunkBuffer := chunkBuffer[chunkSize..];
-          }
-        }
-      } else {
-        if 0 < |chunkBuffer| {
-          outputChunks := outputChunks + [Success(chunkBuffer)];
-        } else {
-          r := None;
-          UpdateHistory(input, r);
-          return;
-        }
+    @ResourceLimit("0")
+    @IsolateAssertions
+    method BulkInvoke(input: Producer<BB>,
+                      output: IConsumer<seq<BB>>,
+                      outputTotalProof: TotalActionProof<seq<BB>, ()>)
+      requires Valid()
+      requires input.Valid()
+      requires output.Valid()
+      requires outputTotalProof.Valid()
+      requires outputTotalProof.Action() == output
+      requires Repr !! input.Repr !! output.Repr !! outputTotalProof.Repr
+      modifies Repr, input.Repr, output.Repr, outputTotalProof.Repr
+      ensures ValidChange()
+      ensures input.ValidChange()
+      ensures output.ValidChange()
+      ensures input.Done()
+      ensures input.NewProduced() == NewInputs()
+      ensures |input.NewProduced()| == |output.NewInputs()|
+      ensures output.NewInputs() == NewOutputs()
+    {
+      assert Valid();
+
+      var oldProducedCount := input.ProducedCount();
+      var batchWriter := new BatchSeqWriter();
+      var batchWriterTotalProof := new BatchSeqWriterTotalProof(batchWriter);
+      label before:
+      input.ForEach(batchWriter, batchWriterTotalProof);
+      label after:
+      assert input.ValidChange@before();
+      assert input.ValidChange();
+      input.ProducedAndNewProduced@before();
+
+      var newProducedCount := input.ProducedCount() - oldProducedCount;
+      assert newProducedCount == input.NewProducedCount();
+      if newProducedCount == 0 {
+        // No-op
+        assert input.ValidChange();
+        assert |batchWriter.Inputs()| == 0;
+        assert input.NewProduced() == batchWriter.Inputs();
+        assert |input.NewProduced()| == 0;
+        output.ValidImpliesValidChange();
+        return;
       }
-      var output := new SeqReader(outputChunks);
-      r := Some(output);
-      UpdateHistory(input, r);
+
+      chunkBuffer := chunkBuffer + batchWriter.elements;
+
+      var chunks, leftover := Chunkify(chunkBuffer);
+      var chunkBuffer := leftover;
+
+      var outputProducer: Producer<BB>;
+      match batchWriter.state {
+        case Failure(error) =>
+          outputProducer := new SeqReader([BatchError(error)]);
+        case Success(more) =>
+          if !more && 0 < |chunkBuffer| {
+            // To make it more interesting, produce an error if outputChunks is non empty?
+            chunks := chunks + Seq.Reverse(chunkBuffer);
+          }
+          outputProducer := new BatchReader(chunks);
+      }
+
+      // TODO: Find the right way to keep this as a batch,
+      // this is just to get it resolving again
+      var data := CollectToSeq(outputProducer);
+      var dataReader := new SeqReader([data]);
+      var padding := new RepeatProducer(newProducedCount - 1, []);
+      var concatenated: Producer<seq<BB>> := new ConcatenatedProducer(padding, dataReader);
+      assert dataReader.Remaining() == Some(1);
+      assert padding.Remaining() == Some(newProducedCount - 1);
+      assert concatenated.Remaining() == Some(newProducedCount);
+      label beforeOutput:
+      concatenated.ForEach(output, outputTotalProof);
+      assert concatenated.ValidChange@beforeOutput();
+      concatenated.ProducedAndNewProduced@beforeOutput();
+
+      assert |input.NewProduced()| == newProducedCount;
+      assert |concatenated.NewProduced@beforeOutput()| == newProducedCount;
+      assert |input.NewProduced()| == |output.NewInputs()|;
+      history := history + Seq.Zip(input.NewProduced(), output.NewInputs());
+      assert input.NewProduced() == NewInputs();
+    }
+
+    method Chunkify(data: seq<uint8>) returns (chunks: seq<uint8>, leftover: seq<uint8>)
+      requires Valid()
+    {
+      leftover := data;
+      chunks := [];
+      while chunkSize as int <= |leftover|
+        decreases |leftover|
+      {
+        chunks := chunks + Seq.Reverse(leftover[..chunkSize]);
+        leftover := leftover[chunkSize..];
+      }
     }
   }
 
   @AssumeCrossModuleTermination
-  class ChunkerTotalProof<E> extends TotalActionProof<Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>> {
+  class ChunkerTotalProof extends TotalActionProof<BB, seq<BB>> {
 
-    ghost const chunker: Chunker<E>
+    ghost const chunker: Chunker
 
-    ghost constructor(chunker: Chunker<E>)
+    ghost constructor(chunker: Chunker)
       requires chunker.Valid()
       ensures this.chunker == chunker
       ensures Valid()
@@ -123,7 +209,7 @@ module {:options "--function-syntax:4"} Chunker {
       Repr := {this};
     }
 
-    ghost function Action(): Action<Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>> {
+    ghost function Action(): Action<BB, seq<BB>> {
       chunker
     }
 
@@ -135,34 +221,80 @@ module {:options "--function-syntax:4"} Chunker {
       this in Repr
     }
 
-    lemma AnyInputIsValid(history: seq<(Option<Result<BoundedInts.bytes, E>>, Option<Producer<Result<BoundedInts.bytes, E>>>)>, next: Option<Result<BoundedInts.bytes, E>>)
+    twostate predicate ValidChange()
+      reads this, Repr
+      ensures ValidChange() ==>
+        old(Valid()) && Valid() && fresh(Repr - old(Repr))
+    {
+      old(Valid()) && Valid() && fresh(Repr - old(Repr))
+    }
+
+    twostate lemma ValidImpliesValidChange()
+      requires old(Valid())
+      requires unchanged(old(Repr))
+      ensures ValidChange()
+    {}
+
+    lemma AnyInputIsValid(history: seq<(BB, seq<BB>)>, next: BB)
       requires Valid()
       requires Action().ValidHistory(history)
       ensures Action().ValidInput(history, next)
     {}
-
   }
 
-  method ChunkingStream<E>(chunkSize: CountingInteger, s: DataStream<E>)
-    requires s.Valid()
-    requires s.history == []
-  {
-    var chunker := new Chunker(chunkSize);
-    ghost var chunkerTotalProof := new ChunkerTotalProof(chunker);
-    var chunkerStream := new OptionMappedProducer(s, chunker, chunkerTotalProof);
+
+  @AssumeCrossModuleTermination
+  class ChunkingStream extends DataStream<uint8, Error> {
+
+    const chunkSize: CountingInteger
+    const original: DataStream<uint8, Error>
+
+    constructor (original: DataStream<uint8, Error>, chunkSize: CountingInteger)
+    {
+      this.original := original;
+      this.chunkSize := chunkSize;
+    }
+
+    function ContentLength(): Option<nat> {
+      original.ContentLength()
+    }
+
+    predicate Replayable() {
+      original.Replayable()
+    }
+
+    method Reader() returns (p: Producer<BB>)
+      ensures 
+        && p.Valid()
+        && fresh(p.Repr)
+        && p.history == []
+        && (ContentLength().Some? ==> p.Remaining() == Some(ContentLength().value as int + 1))
+    {
+      var chunker := new Chunker(chunkSize);
+      var chunkerTotalProof := new ChunkerTotalProof(chunker);
+      var originalProducer := original.Reader();
+      var chunkerStream := new MappedProducer(originalProducer, chunker, chunkerTotalProof);
+    }
   }
 
-  function SumBits(sum: int, maybeChunk: Result<seq<uint8>, Error>): int {
-    match maybeChunk
-    case Success(chunk) => sum + BytesBitCount(chunk)
-    case Failure(_) => sum
+  function SumBits(sum: Result<int32, Error>, batched: Batched<uint8, Error>): Result<int32, Error> {
+    match batched
+    case BatchValue(b) => 
+      if sum.Success? then
+        var next := BitCount(b);
+        if INT32_MAX_LIMIT < sum.value as int + next as int then
+          Failure(OverflowError(message := "Ah crap"))
+        else
+          Success(sum.value + next)
+      else
+        sum
+    case BatchError(error) =>
+      // This could also ensure the first error is kept instead
+      Failure(error)
+    case EndOfInput => sum
   }
 
-  function BytesBitCount(b: seq<uint8>): int {
-    Seq.FoldLeft((sum, byte) => sum + BitCount(byte), 0 as int, b)
-  }
-
-  function BitCount(x: uint8): int {
+  function BitCount(x: uint8): int32 {
     if x == 0 then
       0
     else if x % 2 == 1 then

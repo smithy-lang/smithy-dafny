@@ -322,7 +322,7 @@ public class DafnyApiCodegen {
     if (blobShape.hasTrait(StreamingTrait.class)) {
       // TODO: need to handle @length too,
       // something like `a.ContentLength().Some? && min <= a.ContentLength().value <= max
-      return generateTypeSynonym(blobShapeId, "DataStream<Error>");
+      return generateTypeSynonym(blobShapeId, "DataStream<uint8, Error>");
     } else {
       return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);
     }

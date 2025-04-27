@@ -23,17 +23,17 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
   method CountBits ( config: InternalConfig , input: CountBitsInput )
     returns (output: Result<CountBitsOutput, Error>)
   {
-    var counter := new Consumers.FoldingConsumer(0, SumBits);
+    var counter := new Consumers.FoldingConsumer(Success(0 as int32), SumBits);
     var counterTotalProof := new Consumers.FoldingConsumerTotalActionProof(counter);
  
-    input.bits.ForEachRemaining(counter, counterTotalProof);
+    var inputReader := input.bits.Reader();
+    inputReader.ForEach(counter, counterTotalProof);
+    var result := counter.value;
 
-    // Should really have the FoldingConsumer fail instead,
-    // but this is a simpler correct approach.
-    if 0 <= counter.value < INT32_MAX_LIMIT {
-      return Success(CountBitsOutput(sum := counter.value as int32));
+    if result.Success? {
+      return Success(CountBitsOutput(sum := result.value));
     } else {
-      return Failure(OverflowError(message := "Ah crap"));
+      return Failure(result.error);
     }
   }
 
@@ -47,7 +47,7 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
 
   {
     var binary := BinaryOfNumber(input.number);
-    var binaryStream := new SeqDataStream(binary, 3 as BoundedInts.uint64);
+    var binaryStream := new SeqDataStream(binary);
     
     return Success(BinaryOfOutput(binary := binaryStream));
   }
@@ -59,11 +59,7 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
   method Chunks ( config: InternalConfig , input: ChunksInput )
     returns (output: Result<ChunksOutput, Error>)
   {
-    // TODO: for now
-    assume {:axiom} input.bytesIn.history == [];
-    var chunker := new Chunker(input.chunkSize);
-    ghost var chunkerTotalProof := new ChunkerTotalProof(chunker);
-    var chunkerStream := new MappedDataStream(input.bytesIn, chunker, chunkerTotalProof);
+    var chunkerStream := new ChunkingStream(input.bytesIn, input.chunkSize);
     
     return Success(ChunksOutput(bytesOut := chunkerStream));
   }
