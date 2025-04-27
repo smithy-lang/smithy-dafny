@@ -1,5 +1,10 @@
 include "../Model/SimpleStreamingTypes.dfy"
 
+// Separate module not just for better code organization,
+// but also to work around the conflict between the Dafny standard library
+// Std.Wrappers module and the smithy-dafny specific Wrappers module:
+// it's not currently possible to use both Result types in the same module.
+
 module {:options "--function-syntax:4"} Chunker {
 
   import opened Std.Wrappers
