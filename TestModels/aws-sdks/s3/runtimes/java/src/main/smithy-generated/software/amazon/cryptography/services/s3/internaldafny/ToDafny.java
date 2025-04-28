@@ -5,6 +5,7 @@ package software.amazon.cryptography.services.s3.internaldafny;
 
 import StandardLibrary_Compile.Streams_Compile.DataStream;
 import Streams.InputStreamAsDataStream;
+import Streams.RequestBodyAsDataStream;
 import Wrappers_Compile.Option;
 import dafny.DafnyMap;
 import dafny.DafnySequence;
@@ -1796,7 +1797,10 @@ public class ToDafny {
           ToDafny.ObjectCannedACL(nativeValue.acl())
         )
         : Option.create_None(ObjectCannedACL._typeDescriptor());
-    Option<DataStream<Byte, Error>> body = new RequestBodyAsDataStream();
+    Option<DataStream<Byte, Error>> body = Option.create_Some(
+            null,
+            new RequestBodyAsDataStream(
+            null, nativeBody, Error::create_Opaque    ));
 //    body =
 //      Objects.nonNull(nativeValue.body())
 //        ? Option.create_Some(
