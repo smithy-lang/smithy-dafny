@@ -278,7 +278,7 @@ module {:options "--function-syntax:4"} Chunker {
       var chunkerTotalProof := new ChunkerTotalProof(chunker);
       var originalProducer := original.Reader();
       var chunkerStream := new MappedProducer(originalProducer, chunker, chunkerTotalProof);
-      // TODO: Need FlattenedProducer, but can't implement ProducerOfNewProducers extrinsically
+      // p := new FlattenedProducer(chunkerStream);
     }
   }
 

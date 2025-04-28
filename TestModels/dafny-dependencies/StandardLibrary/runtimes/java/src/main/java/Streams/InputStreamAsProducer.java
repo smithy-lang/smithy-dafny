@@ -17,20 +17,25 @@ import dafny.TypeDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.function.Function;
 
-public class InputStreamAsProducer implements Producer<Batched<Byte, Exception>> {
+public class InputStreamAsProducer<E> implements Producer<Batched<Byte, E>> {
 
     private final InputStream inputStream;
     private long totalRead;
+    private Function<IOException, E> ioExceptionWrapper;
 
     private static final TypeDescriptor<Byte> T_TD = TypeDescriptor.BYTE;
-    private static final TypeDescriptor<Exception> E_TD = TypeDescriptor.reference(Exception.class);
-    private static final TypeDescriptor<Batched<Byte, Exception>> BATCHED_TD =
-            Batched._typeDescriptor(T_TD, E_TD);
+    private final TypeDescriptor<E> E_TD;
+    private final TypeDescriptor<Batched<Byte, E>> BATCHED_TD;
 
-    public InputStreamAsProducer(InputStream inputStream) {
+    public InputStreamAsProducer(TypeDescriptor<E> e_td, InputStream inputStream, Function<IOException, E> ioExceptionWrapper) {
         this.inputStream = inputStream;
         this.totalRead = 0;
+        this.ioExceptionWrapper = ioExceptionWrapper;
+
+        this.E_TD = e_td;
+        this.BATCHED_TD = Batched._typeDescriptor(T_TD, E_TD);
     }
 
     @Override
@@ -44,7 +49,7 @@ public class InputStreamAsProducer implements Producer<Batched<Byte, Exception>>
     }
 
     @Override
-    public Option<Batched<Byte, Exception>> Next() {
+    public Option<Batched<Byte, E>> Next() {
         try {
             int value = inputStream.read();
             if (value == -1) {
@@ -55,19 +60,19 @@ public class InputStreamAsProducer implements Producer<Batched<Byte, Exception>>
                 return Option.create_Some(BATCHED_TD, batched);
             }
         } catch (IOException e) {
-            return Option.create_Some(null, Batched.create_BatchError(T_TD, E_TD, e));
+            return Option.create_Some(null, Batched.create_BatchError(T_TD, E_TD, ioExceptionWrapper.apply(e)));
         }
     }
 
     @Override
-    public void ForEach(IConsumer<Batched<Byte, Exception>> consumer) {
+    public void ForEach(IConsumer<Batched<Byte, E>> consumer) {
         __default.DefaultForEach(BATCHED_TD, this, consumer);
     }
 
     @Override
-    public Option<Batched<Byte, Exception>> Fill(Consumer<Batched<Byte, Exception>> consumer) {
+    public Option<Batched<Byte, E>> Fill(Consumer<Batched<Byte, E>> consumer) {
         if (consumer instanceof BatchArrayWriter) {
-            BatchArrayWriter<Byte, Exception> writer = (BatchArrayWriter) consumer;
+            BatchArrayWriter<Byte, E> writer = (BatchArrayWriter) consumer;
             int n = writer.Capacity().dtor_value().intValueExact();
             byte[] buffer = new byte[n];
             try {
@@ -77,12 +82,12 @@ public class InputStreamAsProducer implements Producer<Batched<Byte, Exception>>
                 } else {
                     totalRead += count;
                     Array<Byte> dafnyArray = Array.wrap(buffer);
-                    BatchReader<Byte, Exception> reader = new BatchReader(T_TD, E_TD);
+                    BatchReader<Byte, E> reader = new BatchReader(T_TD, E_TD);
                     reader.__ctor(DafnySequence.fromArrayRange(T_TD, dafnyArray, 0, count));
                     reader.Fill(consumer);
                 }
             } catch (IOException e) {
-                writer.Accept(Batched.create_BatchError(T_TD, E_TD, e));
+                writer.Accept(Batched.create_BatchError(T_TD, E_TD, ioExceptionWrapper.apply(e)));
             }
             return Option.create_None(BATCHED_TD);
         }
@@ -91,7 +96,7 @@ public class InputStreamAsProducer implements Producer<Batched<Byte, Exception>>
     }
 
     @Override
-    public Option<Batched<Byte, Exception>> Invoke(Tuple0 tuple0) {
+    public Option<Batched<Byte, E>> Invoke(Tuple0 tuple0) {
         return _Companion_Producer.Next(null, this);
     }
 }

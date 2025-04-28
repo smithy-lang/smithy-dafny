@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ConsumerAsSubscriber implements Subscriber<ByteBuffer> {
 
-    private final IConsumer<Batched<Byte, Throwable>> consumer
+    private final IConsumer<Batched<Byte, Throwable>> consumer;
     private final CompletableFuture<Object> future;
     private Subscription subscription;
 
