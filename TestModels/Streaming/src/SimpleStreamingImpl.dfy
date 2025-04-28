@@ -6,6 +6,7 @@ include "Chunker.dfy"
 module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
   import Std.Actions
+  import Std.BulkActions
   import Std.Producers
   import Std.Consumers
   import Std.Collections.Seq
@@ -35,6 +36,23 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
     } else {
       return Failure(result.error);
     }
+  }
+
+  function SumBits(sum: Result<int32, Error>, batched: BulkActions.Batched<uint8, Error>): Result<int32, Error> {
+    match batched
+    case BatchValue(b) => 
+      if sum.Success? then
+        var next := BitCount(b);
+        if !(0 <= sum.value as int + next < INT32_MAX_LIMIT) then
+          Failure(OverflowError(message := "Ah crap"))
+        else
+          Success((sum.value as int + next) as int32)
+      else
+        sum
+    case BatchError(error) =>
+      // This could also ensure the first error is kept instead
+      Failure(error)
+    case EndOfInput => sum
   }
 
   predicate BinaryOfEnsuresPublicly(input: BinaryOfInput , output: Result<BinaryOfOutput, Error>)

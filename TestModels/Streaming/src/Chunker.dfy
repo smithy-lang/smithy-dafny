@@ -16,10 +16,11 @@ module {:options "--function-syntax:4"} Chunker {
   import opened Std.Consumers
   import opened StandardLibrary.Streams
 
+  // "Batched Byte"
   type BB = Batched<uint8, Error>
 
   @AssumeCrossModuleTermination
-  class Chunker extends BulkAction<BB, seq<BB>> {
+  class Chunker extends BulkAction<BB, Producer<BB>> {
 
     const chunkSize: CountingInteger
     var chunkBuffer: seq<uint8>
@@ -64,13 +65,13 @@ module {:options "--function-syntax:4"} Chunker {
       ensures ValidChange()
     {}
 
-    ghost predicate ValidHistory(history: seq<(BB, seq<BB>)>)
+    ghost predicate ValidHistory(history: seq<(BB, Producer<BB>)>)
       decreases Repr
     {
       true
     }
 
-    ghost predicate ValidInput(history: seq<(BB, seq<BB>)>, next: BB)
+    ghost predicate ValidInput(history: seq<(BB, Producer<BB>)>, next: BB)
       requires ValidHistory(history)
       decreases Repr
     {
@@ -85,7 +86,7 @@ module {:options "--function-syntax:4"} Chunker {
     }
 
     @IsolateAssertions
-    method Invoke(i: BB) returns (o: seq<BB>)
+    method Invoke(i: BB) returns (o: Producer<BB>)
       requires Requires(i)
       modifies Modifies(i)
       decreases Decreases(i), 0
@@ -103,11 +104,11 @@ module {:options "--function-syntax:4"} Chunker {
       assert Seq.Last(Inputs()) == i;
     }
 
-    @ResourceLimit("0")
+    @ResourceLimit("1e9")
     @IsolateAssertions
     method BulkInvoke(input: Producer<BB>,
-                      output: IConsumer<seq<BB>>,
-                      outputTotalProof: TotalActionProof<seq<BB>, ()>)
+                      output: IConsumer<Producer<BB>>,
+                      outputTotalProof: TotalActionProof<Producer<BB>, ()>)
       requires Valid()
       requires input.Valid()
       requires output.Valid()
@@ -164,13 +165,11 @@ module {:options "--function-syntax:4"} Chunker {
           outputProducer := new BatchReader(chunks);
       }
 
-      // TODO: Find the right way to keep this as a batch,
-      // this is just to get it resolving again
-      var data := CollectToSeq(outputProducer);
-      var dataReader := new SeqReader([data]);
-      var padding := new RepeatProducer(newProducedCount - 1, []);
-      var concatenated: Producer<seq<BB>> := new ConcatenatedProducer(padding, dataReader);
-      assert dataReader.Remaining() == Some(1);
+      var empty := new EmptyProducer();
+      var padding: Producer<Producer<BB>> := new RepeatProducer(newProducedCount - 1, empty);
+      var producerProducer := new SeqReader([outputProducer]);
+      var concatenated: Producer<Producer<BB>> := new ConcatenatedProducer(padding, producerProducer);
+      assert producerProducer.Remaining() == Some(1);
       assert padding.Remaining() == Some(newProducedCount - 1);
       assert concatenated.Remaining() == Some(newProducedCount);
       label beforeOutput:
@@ -200,7 +199,7 @@ module {:options "--function-syntax:4"} Chunker {
   }
 
   @AssumeCrossModuleTermination
-  class ChunkerTotalProof extends TotalActionProof<BB, seq<BB>> {
+  class ChunkerTotalProof extends TotalActionProof<BB, Producer<BB>> {
 
     ghost const chunker: Chunker
 
@@ -214,7 +213,7 @@ module {:options "--function-syntax:4"} Chunker {
       Repr := {this};
     }
 
-    ghost function Action(): Action<BB, seq<BB>> {
+    ghost function Action(): Action<BB, Producer<BB>> {
       chunker
     }
 
@@ -240,7 +239,7 @@ module {:options "--function-syntax:4"} Chunker {
       ensures ValidChange()
     {}
 
-    lemma AnyInputIsValid(history: seq<(BB, seq<BB>)>, next: BB)
+    lemma AnyInputIsValid(history: seq<(BB, Producer<BB>)>, next: BB)
       requires Valid()
       requires Action().ValidHistory(history)
       ensures Action().ValidInput(history, next)
@@ -279,27 +278,11 @@ module {:options "--function-syntax:4"} Chunker {
       var chunkerTotalProof := new ChunkerTotalProof(chunker);
       var originalProducer := original.Reader();
       var chunkerStream := new MappedProducer(originalProducer, chunker, chunkerTotalProof);
+      // TODO: Need FlattenedProducer, but can't implement ProducerOfNewProducers extrinsically
     }
   }
 
-  function SumBits(sum: Result<int32, Error>, batched: Batched<uint8, Error>): Result<int32, Error> {
-    match batched
-    case BatchValue(b) => 
-      if sum.Success? then
-        var next := BitCount(b);
-        if INT32_MAX_LIMIT < sum.value as int + next as int then
-          Failure(OverflowError(message := "Ah crap"))
-        else
-          Success(sum.value + next)
-      else
-        sum
-    case BatchError(error) =>
-      // This could also ensure the first error is kept instead
-      Failure(error)
-    case EndOfInput => sum
-  }
-
-  function BitCount(x: uint8): int32 {
+  function BitCount(x: uint8): int {
     if x == 0 then
       0
     else if x % 2 == 1 then
@@ -308,7 +291,7 @@ module {:options "--function-syntax:4"} Chunker {
       BitCount(x / 2)
   }
 
-  function BinaryOfNumber<E>(x: int32): seq<uint8> {
+  function BinaryOfNumber(x: int32): seq<uint8> {
     // TODO: Actually compute the binary
     [12 as uint8, 34, 56]
   }
