@@ -454,7 +454,8 @@ public class DafnyApiCodegen {
       StructureShape.class
     );
 
-    final String typeName = structureShapeId.getName();
+    final String typeName = structureShapeId.getName().equals("Object") ?
+        "S3Object" : structureShapeId.getName();
     return TokenTree.of(
       Token.of("datatype %1$s =".formatted(typeName)),
       generateDataTypeConstructorFromStructure(structureShapeId)
@@ -1951,7 +1952,8 @@ public class DafnyApiCodegen {
       shapeId,
       StructureShape.class
     );
-    final String typeName = shapeId.getName();
+    final String typeName = shapeId.getName().equals("Object") ?
+      "S3Object" : shapeId.getName();
 
     final TokenTree params = TokenTree
       .of(

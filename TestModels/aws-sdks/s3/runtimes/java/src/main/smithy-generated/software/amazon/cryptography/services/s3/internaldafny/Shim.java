@@ -191,7 +191,7 @@ public class Shim implements IS3Client {
   public Result<PutObjectOutput, Error> PutObject(PutObjectRequest input) {
     software.amazon.awssdk.services.s3.model.PutObjectRequest converted =
       ToNative.PutObjectRequest(input);
-    DataStream<Error> dataStream = input._Body.dtor_value();
+    DataStream<Byte, Error> dataStream = input._Body.dtor_value();
     ContentStreamProvider provider = () -> {
       Producer reader = dataStream.Reader();
       return new ProviderAsInputStream(reader);

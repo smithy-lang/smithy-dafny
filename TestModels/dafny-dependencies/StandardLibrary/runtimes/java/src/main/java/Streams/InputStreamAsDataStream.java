@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.function.Function;
 
-public class InputStreamAsDataStream<E> implements DataStream<E> {
+public class InputStreamAsDataStream<E> implements DataStream<Byte, E> {
 
     private final TypeDescriptor<E> e_td;
 

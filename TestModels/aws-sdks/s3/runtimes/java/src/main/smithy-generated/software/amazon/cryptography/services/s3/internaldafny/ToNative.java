@@ -567,11 +567,11 @@ public class ToNative {
       );
     }
     if (dafnyValue.dtor_SSEKMSKeyId().is_Some()) {
-      builder.sseKMSKeyId(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
-          dafnyValue.dtor_SSEKMSKeyId().dtor_value()
-        )
-      );
+//      builder.sseKMSKeyId(
+//        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+//          dafnyValue.dtor_SSEKMSKeyId().dtor_value()
+//        )
+//      );
     }
     if (dafnyValue.dtor_StorageClass().is_Some()) {
       builder.storageClass(
@@ -1212,18 +1212,18 @@ public class ToNative {
       );
     }
     if (dafnyValue.dtor_SSEKMSEncryptionContext().is_Some()) {
-      builder.sseKMSEncryptionContext(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
-          dafnyValue.dtor_SSEKMSEncryptionContext().dtor_value()
-        )
-      );
+//      builder.sseKMSEncryptionContext(
+//        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+//          dafnyValue.dtor_SSEKMSEncryptionContext().dtor_value()
+//        )
+//      );
     }
     if (dafnyValue.dtor_SSEKMSKeyId().is_Some()) {
-      builder.sseKMSKeyId(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
-          dafnyValue.dtor_SSEKMSKeyId().dtor_value()
-        )
-      );
+//      builder.sseKMSKeyId(
+//        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+//          dafnyValue.dtor_SSEKMSKeyId().dtor_value()
+//        )
+//      );
     }
     if (dafnyValue.dtor_VersionId().is_Some()) {
       builder.versionId(
@@ -1443,20 +1443,20 @@ public class ToNative {
         )
       );
     }
-    if (dafnyValue.dtor_SSEKMSEncryptionContext().is_Some()) {
-      builder.sseKMSEncryptionContext(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
-          dafnyValue.dtor_SSEKMSEncryptionContext().dtor_value()
-        )
-      );
-    }
-    if (dafnyValue.dtor_SSEKMSKeyId().is_Some()) {
-      builder.sseKMSKeyId(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
-          dafnyValue.dtor_SSEKMSKeyId().dtor_value()
-        )
-      );
-    }
+//    if (dafnyValue.dtor_SSEKMSEncryptionContext().is_Some()) {
+//      builder.sseKMSEncryptionContext(
+//        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+//          dafnyValue.dtor_SSEKMSEncryptionContext().dtor_value()
+//        )
+//      );
+//    }
+//    if (dafnyValue.dtor_SSEKMSKeyId().is_Some()) {
+//      builder.sseKMSKeyId(
+//        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+//          dafnyValue.dtor_SSEKMSKeyId().dtor_value()
+//        )
+//      );
+//    }
     if (dafnyValue.dtor_StorageClass().is_Some()) {
       builder.storageClass(
         ToNative.StorageClass(dafnyValue.dtor_StorageClass().dtor_value())

@@ -11,9 +11,9 @@ import java.util.Optional;
 
 public class DataStreamAsAsyncRequestBody implements AsyncRequestBody {
 
-    private final DataStream<Exception> dataStream;
+    private final DataStream<Byte, Exception> dataStream;
 
-    public DataStreamAsAsyncRequestBody(DataStream<Exception> dataStream) {
+    public DataStreamAsAsyncRequestBody(DataStream<Byte, Exception> dataStream) {
         this.dataStream = dataStream;
     }
 

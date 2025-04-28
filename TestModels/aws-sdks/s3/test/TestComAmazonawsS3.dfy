@@ -57,7 +57,7 @@ module TestComAmazonawsS3 {
 
     method GetObjectTest(
         nameonly input: S3.Types.GetObjectRequest,
-        nameonly expectedBody: BoundedInts.bytes
+        nameonly expectedBody: bytes
     )
     {
         var client :- expect S3.S3Client();
@@ -113,8 +113,7 @@ module TestComAmazonawsS3 {
         expect(ret.Success?), ret.error;
     }
 
-    method Collect(e: DataStream<Error>) returns (s: Result<BoundedInts.bytes, Error>) 
-        
+    method Collect(e: DataStream<uint8, Error>) returns (s: Result<bytes, Error>) 
     {
         var reader := e.Reader();
         var a: BatchSeqWriter := new BatchSeqWriter();
