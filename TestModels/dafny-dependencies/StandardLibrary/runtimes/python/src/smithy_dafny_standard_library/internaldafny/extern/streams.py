@@ -27,7 +27,7 @@ class DafnyDataStreamAsByteStream(ByteStream):
     else:
       writer = BatchArrayWriter()
       writer.ctor__(DafnyArray(None, size))
-      self.reader.ForEachToCapacity(writer)
+      self.reader.Fill(writer)
     # TODO: Check for errors. Fine to ignore EOI though.
     # print(f"****** {writer.Values()} ******")
     return bytes(writer.Values())
@@ -49,12 +49,12 @@ class DafnyDataStreamAsByteStream(ByteStream):
     if new_position > self.reader.ProducedCount():
       consumer = IgnoreNConsumer()
       consumer.ctor__(new_position - self.reader.ProducedCount())
-      self.reader.ForEachToCapacity(consumer)
+      self.reader.Fill(consumer)
     elif new_position < self.reader.ProducedCount():
       self.reader = self.data_stream.Reader()
       consumer = IgnoreNConsumer()
       consumer.ctor__(new_position)
-      self.reader.ForEachToCapacity(consumer)
+      self.reader.Fill(consumer)
       
 
 class StreamingBlobAsDafnyDataStream(DataStream):
@@ -105,11 +105,11 @@ class StreamingBlobAsDafnyProducer(Producer):
   
     consumer.Accept(Batched_EndOfInput())
 
-  def ForEachToCapacity(self, consumer):
+  def Fill(self, consumer):
     # TODO: error handling
     size = consumer.Capacity()
     next = self.streaming_blob.read(size)
     batch = BatchReader()
     batch.ctor__(Seq(next))
-    batch.ForEachToCapacity(consumer)
+    batch.Fill(consumer)
     # TODO: EOI
