@@ -139,9 +139,6 @@ public record DafnyNameResolver(
   }
 
   private String dafnyTypeNameShape(final Shape shape) {
-    if (shape.getId().getName().equals("Object")) {
-      return dafnyModulePrefixForShape(shape) + "S3Object";
-    }
     return dafnyModulePrefixForShape(shape) + shape.getId().getName();
   }
 

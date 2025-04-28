@@ -31,8 +31,6 @@ import software.amazon.cryptography.services.s3.internaldafny.types.Error;
 import software.amazon.cryptography.services.s3.internaldafny.types.GetObjectOutput;
 import software.amazon.cryptography.services.s3.internaldafny.types.GetObjectRequest;
 import software.amazon.cryptography.services.s3.internaldafny.types.IS3Client;
-import software.amazon.cryptography.services.s3.internaldafny.types.ListObjectsV2Output;
-import software.amazon.cryptography.services.s3.internaldafny.types.ListObjectsV2Request;
 import software.amazon.cryptography.services.s3.internaldafny.types.PutObjectOutput;
 import software.amazon.cryptography.services.s3.internaldafny.types.PutObjectRequest;
 
@@ -146,41 +144,6 @@ public class Shim implements IS3Client {
     } catch (Exception ex) {
       return Result.create_Failure(
         GetObjectOutput._typeDescriptor(),
-        Error._typeDescriptor(),
-        ToDafny.Error(ex)
-      );
-    }
-  }
-
-  @Override
-  public Result<ListObjectsV2Output, Error> ListObjectsV2(
-    ListObjectsV2Request input
-  ) {
-    software.amazon.awssdk.services.s3.model.ListObjectsV2Request converted =
-      ToNative.ListObjectsV2Request(input);
-    try {
-      ListObjectsV2Response result = _impl.listObjectsV2(converted);
-      ListObjectsV2Output dafnyResponse = ToDafny.ListObjectsV2Output(result);
-      return Result.create_Success(
-        ListObjectsV2Output._typeDescriptor(),
-        Error._typeDescriptor(),
-        dafnyResponse
-      );
-    } catch (NoSuchBucketException ex) {
-      return Result.create_Failure(
-        ListObjectsV2Output._typeDescriptor(),
-        Error._typeDescriptor(),
-        ToDafny.Error(ex)
-      );
-    } catch (S3Exception ex) {
-      return Result.create_Failure(
-        ListObjectsV2Output._typeDescriptor(),
-        Error._typeDescriptor(),
-        ToDafny.Error(ex)
-      );
-    } catch (Exception ex) {
-      return Result.create_Failure(
-        ListObjectsV2Output._typeDescriptor(),
         Error._typeDescriptor(),
         ToDafny.Error(ex)
       );
