@@ -24,8 +24,6 @@ module TestComAmazonawsS3 {
                 Key := testObjectKey
             )
         );
-        // Note the chunk size has to ensure all but the last chunk is >= 8192 bytes.
-        // For a small stream like this that means just one chunk.
         var s: DataStream := new SeqDataStream([ 97, 115, 100, 102 ]);
         PutObjectTest(
             input := S3.Types.PutObjectRequest(

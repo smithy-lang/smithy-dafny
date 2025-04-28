@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleStreamingTypesWrapped.dfy"
 
-module WrappedSimpleStreamingService refines WrappedAbstractSimpleStreamingService {
+module {:extern "simple.streaming.internaldafny.wrapped"} WrappedSimpleStreamingService refines WrappedAbstractSimpleStreamingService {
   import WrappedService = SimpleStreaming
   function method WrappedDefaultSimpleStreamingConfig(): SimpleStreamingConfig {
     SimpleStreamingConfig

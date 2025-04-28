@@ -6,11 +6,11 @@ include "../src/WrappedSimpleStreamingImpl.dfy"
 module SimpleStreamingImplTest {
     import SimpleStreaming
     import SimpleStreamingImpl
-    import Std.Enumerators
-    import Std.Aggregators
-    import Std.BoundedInts
+    import Std.Producers
+    import Std.Consumers
+    import Std.BulkActions
     import opened StandardLibrary.UInt
-    import opened Std.Streams
+    import opened StandardLibrary.Streams
     import opened SimpleStreamingTypes
     import opened Wrappers
     method{:test} TestClient(){
@@ -24,9 +24,8 @@ module SimpleStreamingImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-        var s: seq<BoundedInts.bytes> := [[0x0], [0x1, 0x2], [0x3], [], [0x4, 0x5]];
-        var e := new Enumerators.SeqEnumerator(s);
-        var stream := new EnumeratorDataStream(e, length := 5 as BoundedInts.uint64);
+        var s: seq<uint8> := [0x0, 0x1, 0x2, 0x3, 0x4, 0x5];
+        var stream := new SeqDataStream(s);
         var input: CountBitsInput := CountBitsInput(bits := stream);
 
         var ret :- expect client.CountBits(input);
@@ -43,11 +42,13 @@ module SimpleStreamingImplTest {
 
         var ret :- expect client.BinaryOf(input);
 
-        var collector := new Aggregators.Collector<BoundedInts.bytes>();
+        var collector := new BulkActions.BatchSeqWriter<uint8, Error>();
+        var collectorTotalProof := new BulkActions.BatchSeqWriterTotalProof(collector);
  
-        Enumerators.ForEach(ret.binary, collector);
+        var reader := ret.binary.Reader();
+        reader.ForEach(collector, collectorTotalProof);
 
-        expect collector.values == [[12], [34, 56]];
+        expect collector.elements == [12, 34, 56];
     }
 
     method TestChunks(client: ISimpleStreamingClient)
@@ -55,17 +56,18 @@ module SimpleStreamingImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-        var s: seq<BoundedInts.bytes> := [[0x0], [0x1, 0x2], [0x3], [], [0x4, 0x5]];
-        var e := new Enumerators.SeqEnumerator(s);
-        var stream := new EnumeratorDataStream(e, 5 as BoundedInts.uint64);
-        var input: ChunksInput := ChunksInput(bytesIn := stream, chunkSize := 2);
+        var s: bytes := [0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7];
+        var stream := new SeqDataStream(s);
+        var input: ChunksInput := ChunksInput(bytesIn := stream, chunkSize := 3);
 
         var ret :- expect client.Chunks(input);
 
-        var collector := new Aggregators.Collector<BoundedInts.bytes>();
+        var collector := new BulkActions.BatchSeqWriter<uint8, Error>();
+        var collectorTotalProof := new BulkActions.BatchSeqWriterTotalProof(collector);
  
-        Enumerators.ForEach(ret.bytesOut, collector);
+        var reader := ret.bytesOut.Reader();
+        reader.ForEach(collector, collectorTotalProof);
 
-        expect collector.values == [[0x0, 0x1], [0x2, 0x3], [0x4, 0x5]];
+        expect collector.elements == [0x2, 0x1, 0x0, 0x5, 0x4, 0x3, 0x7, 0x6];
     }
 }
