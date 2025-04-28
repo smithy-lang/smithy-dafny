@@ -43,21 +43,20 @@ public class ProviderAsInputStream extends InputStream {
     public int read(byte[] b, int off, int len) throws IOException {
         // TODO: Could optimize to use b directly,
         // but that starts to introduce risk.
-        Array<Byte> array = Array.newArray(TypeDescriptor.BYTE, len);
+        byte[] storage = new byte[len];
         BatchArrayWriter<Byte, Exception> consumer = new BatchArrayWriter<>(
                 TypeDescriptor.BYTE, TypeDescriptor.reference(Exception.class)
         );
-        consumer.__ctor(array);
+        consumer.__ctor(storage);
         producer.Fill(consumer);
         if (consumer.state.is_Failure()) {
             throw new IOException(consumer.state.dtor_error());
         }
-        byte[] results = (byte[])array.unwrap();
         int count = consumer.size.intValueExact();
         if (count == 0) {
             return -1;
         } else {
-            System.arraycopy(results, 0, b, off, count);
+            System.arraycopy(storage, 0, b, off, count);
             return count;
         }
     }
