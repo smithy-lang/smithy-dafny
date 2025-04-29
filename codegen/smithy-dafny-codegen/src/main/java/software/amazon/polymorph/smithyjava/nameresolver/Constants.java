@@ -6,6 +6,8 @@ import com.squareup.javapoet.ClassName;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Set;
+
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 
@@ -57,4 +59,17 @@ public class Constants {
   public static final ClassName BASE64_DECODER_CLASS_NAME = ClassName.get(
     Base64.Decoder.class
   );
+  public static final ClassName DAFNY_DATA_STREAM_CLASS_NAME = ClassName.get(
+    "StandardLibrary_Compile.Streams_Compile",
+    "DataStream"
+  );
+  public static final ClassName REQUEST_BODY_AS_DATA_STREAM_CLASS_NAME = ClassName.get(
+    "Streams",
+    "RequestBodyAsDataStream"
+  );
+  public static final ClassName DATA_STREAM_AS_REQUEST_BODY_CLASS_NAME = ClassName.get(
+    "Streams",
+    "DataStreamAsRequestBody"
+  );
+
 }

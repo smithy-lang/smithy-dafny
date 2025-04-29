@@ -18,6 +18,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
+
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
@@ -159,9 +161,15 @@ public class Native extends NameResolver {
         );
         yield shape.hasTrait(BoxTrait.class) ? typeName.box() : typeName;
       }
+      case BLOB -> {
+        if (shape.hasTrait(StreamingTrait.class)) {
+          yield ClassName.get(RequestBody.class);
+        } else {
+          yield NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
+        }
+      }
       // For supported simple shapes, just map to native types
-      case BLOB,
-        TIMESTAMP,
+      case TIMESTAMP,
         BIG_DECIMAL,
         BIG_INTEGER -> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
       case STRING, ENUM -> classForStringOrEnum(shape);

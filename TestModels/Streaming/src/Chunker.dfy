@@ -228,7 +228,7 @@ module {:options "--function-syntax:4"} Chunker {
     twostate predicate ValidChange()
       reads this, Repr
       ensures ValidChange() ==>
-        old(Valid()) && Valid() && fresh(Repr - old(Repr))
+                old(Valid()) && Valid() && fresh(Repr - old(Repr))
     {
       old(Valid()) && Valid() && fresh(Repr - old(Repr))
     }
@@ -268,7 +268,7 @@ module {:options "--function-syntax:4"} Chunker {
     }
 
     method Reader() returns (p: Producer<BB>)
-      ensures 
+      ensures
         && p.Valid()
         && fresh(p.Repr)
         && p.history == []

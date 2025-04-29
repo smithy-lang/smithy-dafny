@@ -63,7 +63,7 @@ repositories {
 dependencies {
     implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1.1")
-    implementation("software.amazon.awssdk:sdk-core:2.28.28")
+    api("software.amazon.awssdk:sdk-core:2.28.28")
 }
 publishing {
     publications.create<MavenPublication>("maven") {

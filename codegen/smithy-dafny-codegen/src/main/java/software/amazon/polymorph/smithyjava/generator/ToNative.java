@@ -18,6 +18,7 @@ import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToNativeAwsV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToNativeAwsV2;
+import software.amazon.polymorph.smithyjava.nameresolver.Constants;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -33,6 +34,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 
 public abstract class ToNative extends Generator {
 
@@ -407,6 +409,9 @@ public abstract class ToNative extends Generator {
       throw new IllegalArgumentException(
         "MemberShapes MUST BE de-referenced BEFORE calling ToNative.conversionMethodReference."
       );
+    }
+    if (shape.isBlobShape() && shape.hasTrait(StreamingTrait.class)) {
+      return new MethodReference(software.amazon.polymorph.smithyjava.nameresolver.Constants.DATA_STREAM_AS_REQUEST_BODY_CLASS_NAME, "of");
     }
     // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
     if (ModelUtils.isSmithyApiOrSimpleShape(shape)) {

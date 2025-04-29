@@ -473,7 +473,7 @@ public class ToDafny {
     body =
       Option.create_Some(
           null,
-          new InputStreamAsDataStream<Error>(Error._typeDescriptor(), responseInputStream, e -> Error.create_Opaque(e))
+          new InputStreamAsDataStream<Error>(Error._typeDescriptor(), responseInputStream, Error::create_Opaque)
         );
     Option<Boolean> deleteMarker;
     deleteMarker =

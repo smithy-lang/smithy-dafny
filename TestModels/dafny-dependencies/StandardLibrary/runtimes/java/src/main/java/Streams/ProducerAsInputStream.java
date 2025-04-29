@@ -5,18 +5,17 @@ import Std_Compile.BulkActions_Compile.Batched;
 import Std_Compile.Consumers_Compile.IgnoreNConsumer;
 import Std_Compile.Producers_Compile.Producer;
 import Std_Compile.Wrappers_Compile.Option;
-import dafny.Array;
 import dafny.TypeDescriptor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 
-public class ProviderAsInputStream extends InputStream {
+public class ProducerAsInputStream extends InputStream {
 
     private final Producer<Batched<Byte, Exception>> producer;
 
-    public ProviderAsInputStream(Producer<Batched<Byte, Exception>> producer) {
+    public ProducerAsInputStream(Producer<Batched<Byte, Exception>> producer) {
         this.producer = producer;
     }
 

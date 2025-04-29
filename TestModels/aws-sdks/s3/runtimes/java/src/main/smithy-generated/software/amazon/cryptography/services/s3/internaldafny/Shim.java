@@ -5,6 +5,7 @@ package software.amazon.cryptography.services.s3.internaldafny;
 
 import StandardLibrary_Compile.Streams_Compile.DataStream;
 import Std_Compile.Producers_Compile.Producer;
+import Streams.DataStreamAsRequestBody;
 import Streams.ProviderAsInputStream;
 import Wrappers_Compile.Result;
 import java.lang.Override;
@@ -154,14 +155,7 @@ public class Shim implements IS3Client {
   public Result<PutObjectOutput, Error> PutObject(PutObjectRequest input) {
     software.amazon.awssdk.services.s3.model.PutObjectRequest converted =
       ToNative.PutObjectRequest(input);
-    DataStream<Byte, Error> dataStream = input._Body.dtor_value();
-    ContentStreamProvider provider = () -> {
-      Producer reader = dataStream.Reader();
-      return new ProviderAsInputStream(reader);
-    };
-    RequestBody body = dataStream.ContentLength().is_Some()
-            ? RequestBody.fromContentProvider(provider, dataStream.ContentLength().dtor_value().longValueExact(), "application/octet-stream")
-            : RequestBody.fromContentProvider(provider, "application/octet-stream");
+    RequestBody body = DataStreamAsRequestBody.of(input._Body.dtor_value());
     try {
       PutObjectResponse result = _impl.putObject(converted, body);
       PutObjectOutput dafnyResponse = ToDafny.PutObjectOutput(result);

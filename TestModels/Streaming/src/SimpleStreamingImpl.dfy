@@ -11,7 +11,7 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
   import Std.Consumers
   import Std.Collections.Seq
   import opened Chunker
-  
+
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)
@@ -26,7 +26,7 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
   {
     var counter := new Consumers.FoldingConsumer(Success(0 as int32), SumBits);
     var counterTotalProof := new Consumers.FoldingConsumerTotalActionProof(counter);
- 
+
     var inputReader := input.bits.Reader();
     inputReader.ForEach(counter, counterTotalProof);
     var result := counter.value;
@@ -40,7 +40,7 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
 
   function SumBits(sum: Result<int32, Error>, batched: BulkActions.Batched<uint8, Error>): Result<int32, Error> {
     match batched
-    case BatchValue(b) => 
+    case BatchValue(b) =>
       if sum.Success? then
         var next := BitCount(b);
         if !(0 <= sum.value as int + next < INT32_MAX_LIMIT) then
@@ -66,7 +66,7 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
   {
     var binary := BinaryOfNumber(input.number);
     var binaryStream := new SeqDataStream(binary);
-    
+
     return Success(BinaryOfOutput(binary := binaryStream));
   }
 
@@ -78,7 +78,7 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
     returns (output: Result<ChunksOutput, Error>)
   {
     var chunkerStream := new ChunkingStream(input.bytesIn, input.chunkSize);
-    
+
     return Success(ChunksOutput(bytesOut := chunkerStream));
   }
 
