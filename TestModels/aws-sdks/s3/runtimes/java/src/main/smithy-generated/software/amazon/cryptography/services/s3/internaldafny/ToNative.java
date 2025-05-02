@@ -16,44 +16,34 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ChecksumAlgorithm;
 import software.amazon.awssdk.services.s3.model.ChecksumMode;
-import software.amazon.awssdk.services.s3.model.CommonPrefix;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.DeletedObject;
-import software.amazon.awssdk.services.s3.model.EncodingType;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.IntelligentTieringAccessTier;
 import software.amazon.awssdk.services.s3.model.InvalidObjectStateException;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-import software.amazon.awssdk.services.s3.model.OptionalObjectAttributes;
-import software.amazon.awssdk.services.s3.model.RestoreStatus;
-import software.amazon.awssdk.services.s3.model.S3Error;
-import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.ObjectLockLegalHoldStatus;
 import software.amazon.awssdk.services.s3.model.ObjectLockMode;
-import software.amazon.awssdk.services.s3.model.ObjectStorageClass;
-import software.amazon.awssdk.services.s3.model.Owner;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.ReplicationStatus;
 import software.amazon.awssdk.services.s3.model.RequestCharged;
 import software.amazon.awssdk.services.s3.model.RequestPayer;
+import software.amazon.awssdk.services.s3.model.S3Error;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
 import software.amazon.awssdk.services.s3.model.StorageClass;
 import software.amazon.cryptography.services.s3.internaldafny.types.DeleteObjectOutput;
 import software.amazon.cryptography.services.s3.internaldafny.types.DeleteObjectsOutput;
 import software.amazon.cryptography.services.s3.internaldafny.types.Error;
-import software.amazon.cryptography.services.s3.internaldafny.types.ErrorShape;
 import software.amazon.cryptography.services.s3.internaldafny.types.Error_InvalidObjectState;
 import software.amazon.cryptography.services.s3.internaldafny.types.Error_NoSuchBucket;
 import software.amazon.cryptography.services.s3.internaldafny.types.Error_NoSuchKey;
@@ -83,17 +73,6 @@ public class ToNative {
     return ChecksumAlgorithm.fromValue(dafnyValue.toString());
   }
 
-  public static List<ChecksumAlgorithm> ChecksumAlgorithmList(
-    DafnySequence<
-      ? extends software.amazon.cryptography.services.s3.internaldafny.types.ChecksumAlgorithm
-    > dafnyValue
-  ) {
-    return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-      dafnyValue,
-      software.amazon.cryptography.services.s3.internaldafny.ToNative::ChecksumAlgorithm
-    );
-  }
-
   public static ChecksumMode ChecksumMode(
     software.amazon.cryptography.services.s3.internaldafny.types.ChecksumMode dafnyValue
   ) {
@@ -101,31 +80,6 @@ public class ToNative {
       return ChecksumMode.ENABLED;
     }
     return ChecksumMode.fromValue(dafnyValue.toString());
-  }
-
-  public static CommonPrefix CommonPrefix(
-    software.amazon.cryptography.services.s3.internaldafny.types.CommonPrefix dafnyValue
-  ) {
-    CommonPrefix.Builder builder = CommonPrefix.builder();
-    if (dafnyValue.dtor_Prefix().is_Some()) {
-      builder.prefix(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
-          dafnyValue.dtor_Prefix().dtor_value()
-        )
-      );
-    }
-    return builder.build();
-  }
-
-  public static List<CommonPrefix> CommonPrefixList(
-    DafnySequence<
-      ? extends software.amazon.cryptography.services.s3.internaldafny.types.CommonPrefix
-    > dafnyValue
-  ) {
-    return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-      dafnyValue,
-      software.amazon.cryptography.services.s3.internaldafny.ToNative::CommonPrefix
-    );
   }
 
   public static Delete Delete(
@@ -313,15 +267,6 @@ public class ToNative {
       );
     }
     return builder.build();
-  }
-
-  public static EncodingType EncodingType(
-    software.amazon.cryptography.services.s3.internaldafny.types.EncodingType dafnyValue
-  ) {
-    if (dafnyValue.is_url()) {
-      return EncodingType.URL;
-    }
-    return EncodingType.fromValue(dafnyValue.toString());
   }
 
   public static List<S3Error> Errors(
@@ -752,15 +697,15 @@ public class ToNative {
   }
 
   public static Map<String, String> Metadata(
-          DafnyMap<
-                  ? extends DafnySequence<? extends Character>,
-                  ? extends DafnySequence<? extends Character>
-                  > dafnyValue
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends DafnySequence<? extends Character>
+    > dafnyValue
   ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-            dafnyValue,
-            software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
-            software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
     );
   }
 
@@ -843,86 +788,6 @@ public class ToNative {
       return ObjectLockMode.COMPLIANCE;
     }
     return ObjectLockMode.fromValue(dafnyValue.toString());
-  }
-
-  public static ObjectStorageClass ObjectStorageClass(
-    software.amazon.cryptography.services.s3.internaldafny.types.ObjectStorageClass dafnyValue
-  ) {
-    if (dafnyValue.is_STANDARD()) {
-      return ObjectStorageClass.STANDARD;
-    }
-    if (dafnyValue.is_REDUCED__REDUNDANCY()) {
-      return ObjectStorageClass.REDUCED_REDUNDANCY;
-    }
-    if (dafnyValue.is_GLACIER()) {
-      return ObjectStorageClass.GLACIER;
-    }
-    if (dafnyValue.is_STANDARD__IA()) {
-      return ObjectStorageClass.STANDARD_IA;
-    }
-    if (dafnyValue.is_ONEZONE__IA()) {
-      return ObjectStorageClass.ONEZONE_IA;
-    }
-    if (dafnyValue.is_INTELLIGENT__TIERING()) {
-      return ObjectStorageClass.INTELLIGENT_TIERING;
-    }
-    if (dafnyValue.is_DEEP__ARCHIVE()) {
-      return ObjectStorageClass.DEEP_ARCHIVE;
-    }
-    if (dafnyValue.is_OUTPOSTS()) {
-      return ObjectStorageClass.OUTPOSTS;
-    }
-    if (dafnyValue.is_GLACIER__IR()) {
-      return ObjectStorageClass.GLACIER_IR;
-    }
-    if (dafnyValue.is_SNOW()) {
-      return ObjectStorageClass.SNOW;
-    }
-    if (dafnyValue.is_EXPRESS__ONEZONE()) {
-      return ObjectStorageClass.EXPRESS_ONEZONE;
-    }
-    return ObjectStorageClass.fromValue(dafnyValue.toString());
-  }
-
-  public static OptionalObjectAttributes OptionalObjectAttributes(
-    software.amazon.cryptography.services.s3.internaldafny.types.OptionalObjectAttributes dafnyValue
-  ) {
-    if (dafnyValue.is_RESTORE__STATUS()) {
-      return OptionalObjectAttributes.RESTORE_STATUS;
-    }
-    return OptionalObjectAttributes.fromValue(dafnyValue.toString());
-  }
-
-  public static List<OptionalObjectAttributes> OptionalObjectAttributesList(
-    DafnySequence<
-      ? extends software.amazon.cryptography.services.s3.internaldafny.types.OptionalObjectAttributes
-    > dafnyValue
-  ) {
-    return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-      dafnyValue,
-      software.amazon.cryptography.services.s3.internaldafny.ToNative::OptionalObjectAttributes
-    );
-  }
-
-  public static Owner Owner(
-    software.amazon.cryptography.services.s3.internaldafny.types.Owner dafnyValue
-  ) {
-    Owner.Builder builder = Owner.builder();
-    if (dafnyValue.dtor_DisplayName().is_Some()) {
-      builder.displayName(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
-          dafnyValue.dtor_DisplayName().dtor_value()
-        )
-      );
-    }
-    if (dafnyValue.dtor_ID().is_Some()) {
-      builder.id(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
-          dafnyValue.dtor_ID().dtor_value()
-        )
-      );
-    }
-    return builder.build();
   }
 
   public static PutObjectResponse PutObjectOutput(PutObjectOutput dafnyValue) {
@@ -1305,25 +1170,6 @@ public class ToNative {
       return RequestPayer.REQUESTER;
     }
     return RequestPayer.fromValue(dafnyValue.toString());
-  }
-
-  public static RestoreStatus RestoreStatus(
-    software.amazon.cryptography.services.s3.internaldafny.types.RestoreStatus dafnyValue
-  ) {
-    RestoreStatus.Builder builder = RestoreStatus.builder();
-    if (dafnyValue.dtor_IsRestoreInProgress().is_Some()) {
-      builder.isRestoreInProgress(
-        (dafnyValue.dtor_IsRestoreInProgress().dtor_value())
-      );
-    }
-    if (dafnyValue.dtor_RestoreExpiryDate().is_Some()) {
-      builder.restoreExpiryDate(
-        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
-          dafnyValue.dtor_RestoreExpiryDate().dtor_value()
-        )
-      );
-    }
-    return builder.build();
   }
 
   public static ServerSideEncryption ServerSideEncryption(

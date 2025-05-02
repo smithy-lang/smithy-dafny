@@ -29,21 +29,18 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.InvalidObjectStateException;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.cryptography.services.s3.internaldafny.types.ChecksumAlgorithm;
 import software.amazon.cryptography.services.s3.internaldafny.types.ChecksumMode;
-import software.amazon.cryptography.services.s3.internaldafny.types.CommonPrefix;
 import software.amazon.cryptography.services.s3.internaldafny.types.Delete;
 import software.amazon.cryptography.services.s3.internaldafny.types.DeleteObjectOutput;
 import software.amazon.cryptography.services.s3.internaldafny.types.DeleteObjectRequest;
 import software.amazon.cryptography.services.s3.internaldafny.types.DeleteObjectsOutput;
 import software.amazon.cryptography.services.s3.internaldafny.types.DeleteObjectsRequest;
 import software.amazon.cryptography.services.s3.internaldafny.types.DeletedObject;
-import software.amazon.cryptography.services.s3.internaldafny.types.EncodingType;
 import software.amazon.cryptography.services.s3.internaldafny.types.Error;
 import software.amazon.cryptography.services.s3.internaldafny.types.ErrorShape;
 import software.amazon.cryptography.services.s3.internaldafny.types.Error_InvalidObjectState;
@@ -57,59 +54,15 @@ import software.amazon.cryptography.services.s3.internaldafny.types.ObjectCanned
 import software.amazon.cryptography.services.s3.internaldafny.types.ObjectIdentifier;
 import software.amazon.cryptography.services.s3.internaldafny.types.ObjectLockLegalHoldStatus;
 import software.amazon.cryptography.services.s3.internaldafny.types.ObjectLockMode;
-import software.amazon.cryptography.services.s3.internaldafny.types.ObjectStorageClass;
-import software.amazon.cryptography.services.s3.internaldafny.types.OptionalObjectAttributes;
-import software.amazon.cryptography.services.s3.internaldafny.types.Owner;
 import software.amazon.cryptography.services.s3.internaldafny.types.PutObjectOutput;
 import software.amazon.cryptography.services.s3.internaldafny.types.PutObjectRequest;
 import software.amazon.cryptography.services.s3.internaldafny.types.ReplicationStatus;
 import software.amazon.cryptography.services.s3.internaldafny.types.RequestCharged;
 import software.amazon.cryptography.services.s3.internaldafny.types.RequestPayer;
-import software.amazon.cryptography.services.s3.internaldafny.types.RestoreStatus;
 import software.amazon.cryptography.services.s3.internaldafny.types.ServerSideEncryption;
 import software.amazon.cryptography.services.s3.internaldafny.types.StorageClass;
 
 public class ToDafny {
-
-  public static DafnySequence<
-    ? extends ChecksumAlgorithm
-  > ChecksumAlgorithmList(
-    List<software.amazon.awssdk.services.s3.model.ChecksumAlgorithm> nativeValue
-  ) {
-    return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
-      nativeValue,
-      software.amazon.cryptography.services.s3.internaldafny.ToDafny::ChecksumAlgorithm,
-      ChecksumAlgorithm._typeDescriptor()
-    );
-  }
-
-  public static CommonPrefix CommonPrefix(
-    software.amazon.awssdk.services.s3.model.CommonPrefix nativeValue
-  ) {
-    Option<DafnySequence<? extends Character>> prefix;
-    prefix =
-      Objects.nonNull(nativeValue.prefix())
-        ? Option.create_Some(
-          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-            nativeValue.prefix()
-          )
-        )
-        : Option.create_None(
-          DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
-        );
-    return new CommonPrefix(prefix);
-  }
-
-  public static DafnySequence<? extends CommonPrefix> CommonPrefixList(
-    List<software.amazon.awssdk.services.s3.model.CommonPrefix> nativeValue
-  ) {
-    return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
-      nativeValue,
-      software.amazon.cryptography.services.s3.internaldafny.ToDafny::CommonPrefix,
-      CommonPrefix._typeDescriptor()
-    );
-  }
 
   public static Delete Delete(
     software.amazon.awssdk.services.s3.model.Delete nativeValue
@@ -1183,50 +1136,6 @@ public class ToDafny {
     );
   }
 
-  public static DafnySequence<
-    ? extends OptionalObjectAttributes
-  > OptionalObjectAttributesList(
-    List<
-      software.amazon.awssdk.services.s3.model.OptionalObjectAttributes
-    > nativeValue
-  ) {
-    return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
-      nativeValue,
-      software.amazon.cryptography.services.s3.internaldafny.ToDafny::OptionalObjectAttributes,
-      OptionalObjectAttributes._typeDescriptor()
-    );
-  }
-
-  public static Owner Owner(
-    software.amazon.awssdk.services.s3.model.Owner nativeValue
-  ) {
-    Option<DafnySequence<? extends Character>> displayName;
-    displayName =
-      Objects.nonNull(nativeValue.displayName())
-        ? Option.create_Some(
-          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-            nativeValue.displayName()
-          )
-        )
-        : Option.create_None(
-          DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
-        );
-    Option<DafnySequence<? extends Character>> iD;
-    iD =
-      Objects.nonNull(nativeValue.id())
-        ? Option.create_Some(
-          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-            nativeValue.id()
-          )
-        )
-        : Option.create_None(
-          DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
-        );
-    return new Owner(displayName, iD);
-  }
-
   public static PutObjectOutput PutObjectOutput(PutObjectResponse nativeValue) {
     Option<DafnySequence<? extends Character>> expiration;
     expiration =
@@ -1857,32 +1766,6 @@ public class ToDafny {
     );
   }
 
-  public static RestoreStatus RestoreStatus(
-    software.amazon.awssdk.services.s3.model.RestoreStatus nativeValue
-  ) {
-    Option<Boolean> isRestoreInProgress;
-    isRestoreInProgress =
-      Objects.nonNull(nativeValue.isRestoreInProgress())
-        ? Option.create_Some(
-          TypeDescriptor.BOOLEAN,
-          (nativeValue.isRestoreInProgress())
-        )
-        : Option.create_None(TypeDescriptor.BOOLEAN);
-    Option<DafnySequence<? extends Character>> restoreExpiryDate;
-    restoreExpiryDate =
-      Objects.nonNull(nativeValue.restoreExpiryDate())
-        ? Option.create_Some(
-          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-            nativeValue.restoreExpiryDate()
-          )
-        )
-        : Option.create_None(
-          DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
-        );
-    return new RestoreStatus(isRestoreInProgress, restoreExpiryDate);
-  }
-
   public static Error Error(InvalidObjectStateException nativeValue) {
     Option<StorageClass> storageClass;
     storageClass =
@@ -1997,25 +1880,6 @@ public class ToDafny {
     }
   }
 
-  public static EncodingType EncodingType(
-    software.amazon.awssdk.services.s3.model.EncodingType nativeValue
-  ) {
-    switch (nativeValue) {
-      case URL:
-        {
-          return EncodingType.create();
-        }
-      default:
-        {
-          throw new RuntimeException(
-            "Cannot convert " +
-            nativeValue +
-            " to software.amazon.cryptography.services.s3.internaldafny.types.EncodingType."
-          );
-        }
-    }
-  }
-
   public static IntelligentTieringAccessTier IntelligentTieringAccessTier(
     software.amazon.awssdk.services.s3.model.IntelligentTieringAccessTier nativeValue
   ) {
@@ -2123,84 +1987,6 @@ public class ToDafny {
             "Cannot convert " +
             nativeValue +
             " to software.amazon.cryptography.services.s3.internaldafny.types.ObjectLockMode."
-          );
-        }
-    }
-  }
-
-  public static ObjectStorageClass ObjectStorageClass(
-    software.amazon.awssdk.services.s3.model.ObjectStorageClass nativeValue
-  ) {
-    switch (nativeValue) {
-      case STANDARD:
-        {
-          return ObjectStorageClass.create_STANDARD();
-        }
-      case REDUCED_REDUNDANCY:
-        {
-          return ObjectStorageClass.create_REDUCED__REDUNDANCY();
-        }
-      case GLACIER:
-        {
-          return ObjectStorageClass.create_GLACIER();
-        }
-      case STANDARD_IA:
-        {
-          return ObjectStorageClass.create_STANDARD__IA();
-        }
-      case ONEZONE_IA:
-        {
-          return ObjectStorageClass.create_ONEZONE__IA();
-        }
-      case INTELLIGENT_TIERING:
-        {
-          return ObjectStorageClass.create_INTELLIGENT__TIERING();
-        }
-      case DEEP_ARCHIVE:
-        {
-          return ObjectStorageClass.create_DEEP__ARCHIVE();
-        }
-      case OUTPOSTS:
-        {
-          return ObjectStorageClass.create_OUTPOSTS();
-        }
-      case GLACIER_IR:
-        {
-          return ObjectStorageClass.create_GLACIER__IR();
-        }
-      case SNOW:
-        {
-          return ObjectStorageClass.create_SNOW();
-        }
-      case EXPRESS_ONEZONE:
-        {
-          return ObjectStorageClass.create_EXPRESS__ONEZONE();
-        }
-      default:
-        {
-          throw new RuntimeException(
-            "Cannot convert " +
-            nativeValue +
-            " to software.amazon.cryptography.services.s3.internaldafny.types.ObjectStorageClass."
-          );
-        }
-    }
-  }
-
-  public static OptionalObjectAttributes OptionalObjectAttributes(
-    software.amazon.awssdk.services.s3.model.OptionalObjectAttributes nativeValue
-  ) {
-    switch (nativeValue) {
-      case RESTORE_STATUS:
-        {
-          return OptionalObjectAttributes.create();
-        }
-      default:
-        {
-          throw new RuntimeException(
-            "Cannot convert " +
-            nativeValue +
-            " to software.amazon.cryptography.services.s3.internaldafny.types.OptionalObjectAttributes."
           );
         }
     }
@@ -2381,14 +2167,6 @@ public class ToDafny {
     );
   }
 
-  public static EncodingType EncodingType(String nativeValue) {
-    return EncodingType(
-      software.amazon.awssdk.services.s3.model.EncodingType.fromValue(
-        nativeValue
-      )
-    );
-  }
-
   public static IntelligentTieringAccessTier IntelligentTieringAccessTier(
     String nativeValue
   ) {
@@ -2420,24 +2198,6 @@ public class ToDafny {
   public static ObjectLockMode ObjectLockMode(String nativeValue) {
     return ObjectLockMode(
       software.amazon.awssdk.services.s3.model.ObjectLockMode.fromValue(
-        nativeValue
-      )
-    );
-  }
-
-  public static ObjectStorageClass ObjectStorageClass(String nativeValue) {
-    return ObjectStorageClass(
-      software.amazon.awssdk.services.s3.model.ObjectStorageClass.fromValue(
-        nativeValue
-      )
-    );
-  }
-
-  public static OptionalObjectAttributes OptionalObjectAttributes(
-    String nativeValue
-  ) {
-    return OptionalObjectAttributes(
-      software.amazon.awssdk.services.s3.model.OptionalObjectAttributes.fromValue(
         nativeValue
       )
     );
