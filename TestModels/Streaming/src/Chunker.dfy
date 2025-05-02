@@ -14,13 +14,14 @@ module {:options "--function-syntax:4"} Chunker {
   import opened Std.BulkActions
   import opened Std.Producers
   import opened Std.Consumers
+  import opened Std.Termination
   import opened StandardLibrary.Streams
 
   // "Batched Byte"
   type BB = Batched<uint8, Error>
 
   @AssumeCrossModuleTermination
-  class Chunker extends BulkAction<BB, Producer<BB>> {
+  class Chunker extends BulkAction<BB, Producer<BB>>, OutputterOfNewProducers<BB, BB> {
 
     const chunkSize: CountingInteger
     var chunkBuffer: seq<uint8>
@@ -85,12 +86,23 @@ module {:options "--function-syntax:4"} Chunker {
       0
     }
 
+    ghost function MaxProduced(): TerminationMetric {
+      TMTop
+    }
+
+    lemma AnyInputIsValid(history: seq<(BB, Producer<BB>)>, next: BB)
+      requires Valid()
+      requires Action().ValidHistory(history)
+      ensures Action().ValidInput(history, next)
+    {}
+
     @IsolateAssertions
     method Invoke(i: BB) returns (o: Producer<BB>)
       requires Requires(i)
       modifies Modifies(i)
       decreases Decreases(i), 0
       ensures Ensures(i, o)
+      ensures OutputFresh(o)
     {
       assert Valid();
       var input := new SeqReader([i]);
@@ -123,6 +135,7 @@ module {:options "--function-syntax:4"} Chunker {
       ensures input.NewProduced() == NewInputs()
       ensures |input.NewProduced()| == |output.NewInputs()|
       ensures output.NewInputs() == NewOutputs()
+      ensures forall o <- NewOutputs() :: OutputFresh(o)
     {
       assert Valid();
 
@@ -149,9 +162,10 @@ module {:options "--function-syntax:4"} Chunker {
       }
 
       chunkBuffer := chunkBuffer + batchWriter.elements;
+      print "chunkBuffer: ", chunkBuffer, "\n";
 
       var chunks, leftover := Chunkify(chunkBuffer);
-      var chunkBuffer := leftover;
+      chunkBuffer := leftover;
 
       var outputProducer: Producer<BB>;
       match batchWriter.state {
@@ -161,6 +175,7 @@ module {:options "--function-syntax:4"} Chunker {
           if !more && 0 < |chunkBuffer| {
             // To make it more interesting, produce an error if outputChunks is non empty?
             chunks := chunks + Seq.Reverse(chunkBuffer);
+            chunkBuffer := [];
           }
           outputProducer := new BatchReader(chunks);
       }
@@ -260,7 +275,7 @@ module {:options "--function-syntax:4"} Chunker {
     }
 
     function ContentLength(): Option<nat> {
-      original.ContentLength()
+      None
     }
 
     predicate Replayable() {
@@ -277,8 +292,8 @@ module {:options "--function-syntax:4"} Chunker {
       var chunker := new Chunker(chunkSize);
       var chunkerTotalProof := new ChunkerTotalProof(chunker);
       var originalProducer := original.Reader();
-      var chunkerStream := new MappedProducer(originalProducer, chunker, chunkerTotalProof);
-      // p := new FlattenedProducer(chunkerStream);
+      var chunkerStream := new MappedProducerOfNewProducers(originalProducer, chunker);
+      p := new FlattenedProducer(chunkerStream);
     }
   }
 
@@ -295,4 +310,5 @@ module {:options "--function-syntax:4"} Chunker {
     // TODO: Actually compute the binary
     [12 as uint8, 34, 56]
   }
+
 }

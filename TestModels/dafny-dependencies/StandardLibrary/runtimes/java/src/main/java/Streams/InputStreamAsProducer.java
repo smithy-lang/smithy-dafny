@@ -24,6 +24,7 @@ public class InputStreamAsProducer<E> implements Producer<Batched<Byte, E>> {
     private final InputStream inputStream;
     private long totalRead;
     private Function<IOException, E> ioExceptionWrapper;
+    private boolean producedEOI = false;
 
     private static final TypeDescriptor<Byte> T_TD = TypeDescriptor.BYTE;
     private final TypeDescriptor<E> E_TD;
@@ -53,8 +54,12 @@ public class InputStreamAsProducer<E> implements Producer<Batched<Byte, E>> {
         try {
             int value = inputStream.read();
             if (value == -1) {
-                // TODO: EOI
-                return Option.create_None(BATCHED_TD);
+                if (producedEOI) {
+                    return Option.create_None(BATCHED_TD);
+                } else {
+                    producedEOI = true;
+                    return Option.create_Some(BATCHED_TD, Batched.create_EndOfInput(T_TD, E_TD));
+                }
             } else {
                 Batched batched = Batched.create_BatchValue(T_TD, E_TD, (byte)value);
                 return Option.create_Some(BATCHED_TD, batched);

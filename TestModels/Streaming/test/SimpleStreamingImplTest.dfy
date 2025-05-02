@@ -13,10 +13,14 @@ module SimpleStreamingImplTest {
     import opened StandardLibrary.Streams
     import opened SimpleStreamingTypes
     import opened Wrappers
+
+    import opened Chunker
+
     method{:test} TestClient(){
         var client :- expect SimpleStreaming.SimpleStreaming();
         TestCountBits(client);
         TestBinaryOf(client);
+        TestChunks(client);
     }
 
     method TestCountBits(client: ISimpleStreamingClient)
@@ -30,7 +34,7 @@ module SimpleStreamingImplTest {
 
         var ret :- expect client.CountBits(input);
 
-        expect ret.sum == 7;
+        expect ret.sum == 7, ret.sum;
     }
 
     method TestBinaryOf(client: ISimpleStreamingClient)
@@ -68,6 +72,7 @@ module SimpleStreamingImplTest {
         var reader := ret.bytesOut.Reader();
         reader.ForEach(collector, collectorTotalProof);
 
-        expect collector.elements == [0x2, 0x1, 0x0, 0x5, 0x4, 0x3, 0x7, 0x6];
+        expect collector.elements == [0x2, 0x1, 0x0, 0x5, 0x4, 0x3, 0x7, 0x6], collector.elements;
     }
+
 }

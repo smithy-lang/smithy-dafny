@@ -82,4 +82,21 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
     return Success(ChunksOutput(bytesOut := chunkerStream));
   }
 
+
+  method PrintProduced<T>(p: Producers.Producer<T>)
+    requires p.Valid()
+    modifies p.Repr
+  {
+    while true
+      invariant fresh(p.Repr - old(p.Repr))
+      invariant p.Valid()
+      decreases p.Decreasing()
+    {
+      var next := p.Next();
+      if next.None? { break; }
+      var value := next.value;
+
+      print value, "\n";
+    }
+  }
 }
