@@ -75,7 +75,7 @@ public class InputStreamAsProducer<E> implements Producer<Batched<Byte, E>> {
     }
 
     @Override
-    public Option<Batched<Byte, E>> Fill(Consumer<Batched<Byte, E>> consumer) {
+    public void Fill(Consumer<Batched<Byte, E>> consumer) {
         if (consumer instanceof BatchArrayWriter) {
             BatchArrayWriter<Byte, E> writer = (BatchArrayWriter) consumer;
             int n = writer.Capacity().dtor_value().intValueExact();
@@ -94,10 +94,9 @@ public class InputStreamAsProducer<E> implements Producer<Batched<Byte, E>> {
             } catch (IOException e) {
                 writer.Accept(Batched.create_BatchError(T_TD, E_TD, ioExceptionWrapper.apply(e)));
             }
-            return Option.create_None(BATCHED_TD);
         }
 
-        return __default.DefaultFill(BATCHED_TD, this, consumer);
+        __default.DefaultFill(BATCHED_TD, this, consumer);
     }
 
     @Override

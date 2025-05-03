@@ -18,20 +18,8 @@ class DafnyDataStreamAsByteStream(ByteStream):
   def __init__(self, data_stream):
     self.data_stream = data_stream
     self.reader = data_stream.Reader()
-    self.leftover = Option_None()
 
   def read(self, size: int = -1) -> bytes:
-    result = bytes()
-    if size == 0:
-      return result
-
-    if self.leftover.is_Some:
-      if self.leftover.value.is_BatchValue:
-        result += bytes([self.leftover.value.value])
-        if size > 0:
-          size -= 1
-      self.leftover = Option_None()
-
     if size == -1:
       writer = BatchSeqWriter()
       writer.ctor__()
@@ -39,18 +27,13 @@ class DafnyDataStreamAsByteStream(ByteStream):
     else:
       writer = BatchArrayWriter()
       writer.ctor__(DafnyArray(None, size))
-      self.leftover = self.reader.Fill(writer)
+      self.reader.Fill(writer)
 
     # TODO: Check for errors. Fine to ignore EOI though.
-    result += bytes(writer.Values())
-    return result
+    return bytes(writer.Values())
 
   def tell(self) -> int:
-    if self.leftover.is_Some:
-      result = self.reader.ProducedCount() - 1
-    else:
-      result = self.reader.ProducedCount()
-    return result
+    return self.reader.ProducedCount()
 
   def seek(self, offset, whence=0):
     # TODO: check whether invalid offsets must raise errors
@@ -66,12 +49,12 @@ class DafnyDataStreamAsByteStream(ByteStream):
     if new_position > self.reader.ProducedCount():
       consumer = IgnoreNConsumer()
       consumer.ctor__(new_position - self.reader.ProducedCount())
-      self.leftover = self.reader.Fill(consumer)
+      self.reader.Fill(consumer)
     elif new_position < self.reader.ProducedCount():
       self.reader = self.data_stream.Reader()
       consumer = IgnoreNConsumer()
       consumer.ctor__(new_position)
-      self.leftover = self.reader.Fill(consumer)
+      self.reader.Fill(consumer)
       
 
 class StreamingBlobAsDafnyDataStream(DataStream):
@@ -133,7 +116,7 @@ class StreamingBlobAsDafnyProducer(Producer):
 
   def Fill(self, consumer):
     if self.emitted_eoi:
-      return Option_None()
+      return
 
     # TODO: error handling
     size = consumer.Capacity()
@@ -141,9 +124,8 @@ class StreamingBlobAsDafnyProducer(Producer):
     if not next:
       self.emitted_eoi = True
       eoi = Batched_EndOfInput()
-      if not consumer.Accept(eoi):
-        return Option_Some(eoi)
+      consumer.Accept(eoi)
     else:
       batch = BatchReader()
       batch.ctor__(Seq(next))
-      return batch.Fill(consumer)
+      batch.Fill(consumer)
