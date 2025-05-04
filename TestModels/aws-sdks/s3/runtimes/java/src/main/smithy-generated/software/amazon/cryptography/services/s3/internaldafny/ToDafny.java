@@ -718,15 +718,14 @@ public class ToDafny {
         );
     Option<DafnySequence<? extends Character>> sSEKMSKeyId;
     sSEKMSKeyId =
-//      Objects.nonNull(nativeValue.sseKMSKeyId())
-//        ? Option.create_Some(
-//          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-//          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-//            nativeValue.sseKMSKeyId()
-//          )
-//        )
-//        :
-      Option.create_None(
+      Objects.nonNull(nativeValue.ssekmsKeyId())
+        ? Option.create_Some(
+          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+            nativeValue.ssekmsKeyId()
+          )
+        )
+        : Option.create_None(
           DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
         );
     Option<Boolean> bucketKeyEnabled;
@@ -1255,28 +1254,26 @@ public class ToDafny {
         );
     Option<DafnySequence<? extends Character>> sSEKMSKeyId;
     sSEKMSKeyId =
-//      Objects.nonNull(nativeValue.sseKMSKeyId())
-//        ? Option.create_Some(
-//          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-//          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-//            nativeValue.sseKMSKeyId()
-//          )
-//        )
-//        :
-      Option.create_None(
+      Objects.nonNull(nativeValue.ssekmsKeyId())
+        ? Option.create_Some(
+          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+            nativeValue.ssekmsKeyId()
+          )
+        )
+        : Option.create_None(
           DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
         );
     Option<DafnySequence<? extends Character>> sSEKMSEncryptionContext;
     sSEKMSEncryptionContext =
-//      Objects.nonNull(nativeValue.sseKMSEncryptionContext())
-//        ? Option.create_Some(
-//          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-//          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-//            nativeValue.sseKMSEncryptionContext()
-//          )
-//        )
-//        :
-      Option.create_None(
+      Objects.nonNull(nativeValue.ssekmsEncryptionContext())
+        ? Option.create_Some(
+          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+            nativeValue.ssekmsEncryptionContext()
+          )
+        )
+        : Option.create_None(
           DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
         );
     Option<Boolean> bucketKeyEnabled;
@@ -1326,20 +1323,9 @@ public class ToDafny {
         )
         : Option.create_None(ObjectCannedACL._typeDescriptor());
     Option<DataStream<Byte, Error>> body = Option.create_Some(
-            null,
-            new RequestBodyAsDataStream(
-            null, nativeBody, Error::create_Opaque    ));
-//    body =
-//      Objects.nonNull(nativeValue.body())
-//        ? Option.create_Some(
-//          DafnySequence._typeDescriptor(TypeDescriptor.BYTE),
-//          software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence(
-//            nativeValue.body().asByteArray()
-//          )
-//        )
-//        : Option.create_None(
-//          DafnySequence._typeDescriptor(TypeDescriptor.BYTE)
-//        );
+              null,
+              new RequestBodyAsDataStream(
+                      null, nativeBody, Error::create_Opaque    ));
     DafnySequence<? extends Character> bucket;
     bucket =
       software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
@@ -1631,28 +1617,26 @@ public class ToDafny {
         );
     Option<DafnySequence<? extends Character>> sSEKMSKeyId;
     sSEKMSKeyId =
-//      Objects.nonNull(nativeValue.sseKMSKeyId())
-//        ? Option.create_Some(
-//          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-//          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-//            nativeValue.sseKMSKeyId()
-//          )
-//        )
-//        :
-      Option.create_None(
+      Objects.nonNull(nativeValue.ssekmsKeyId())
+        ? Option.create_Some(
+          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+            nativeValue.ssekmsKeyId()
+          )
+        )
+        : Option.create_None(
           DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
         );
     Option<DafnySequence<? extends Character>> sSEKMSEncryptionContext;
     sSEKMSEncryptionContext =
-//      Objects.nonNull(nativeValue.sseKMSEncryptionContext())
-//        ? Option.create_Some(
-//          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
-//          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
-//            nativeValue.sseKMSEncryptionContext()
-//          )
-//        )
-//        :
-      Option.create_None(
+      Objects.nonNull(nativeValue.ssekmsEncryptionContext())
+        ? Option.create_Some(
+          DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+            nativeValue.ssekmsEncryptionContext()
+          )
+        )
+        : Option.create_None(
           DafnySequence._typeDescriptor(TypeDescriptor.CHAR)
         );
     Option<Boolean> bucketKeyEnabled;
