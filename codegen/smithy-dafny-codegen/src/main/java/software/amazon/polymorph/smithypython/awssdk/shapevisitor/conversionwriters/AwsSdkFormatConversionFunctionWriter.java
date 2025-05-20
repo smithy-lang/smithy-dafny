@@ -17,7 +17,7 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
-/** Writes the aws_sdk_to_dafny.py file via the BaseConversionWriter implementation. */
+/** Writes the aws_sdk_format_converter.py file via the BaseConversionWriter implementation. */
 public class AwsSdkFormatConversionFunctionWriter
   extends BaseConversionWriter {
 
