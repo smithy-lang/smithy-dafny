@@ -198,7 +198,8 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String stringShape(StringShape shape) {
-    if (shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression"))) {
+    if (shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression"))
+    || shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))) {
       return "condition_handler(%1$s)".formatted(dataSource);
     }
     return dataSource;

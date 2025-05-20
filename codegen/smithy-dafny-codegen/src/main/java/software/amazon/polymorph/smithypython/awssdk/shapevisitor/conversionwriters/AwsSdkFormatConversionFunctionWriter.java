@@ -117,7 +117,8 @@ public class AwsSdkFormatConversionFunctionWriter
     //        transformed_output["KeyId"] = input.KeyId.value.VerbatimString(False)
     // (`VerbatimString(False)` comes from the DafnyToAwsSdkShapeVisitor)
 
-    if (targetShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression"))) {
+    if (targetShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression"))
+    || targetShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))) {
       conversionWriter.openBlock(
         "if \"$L\" in $L:",
         "",
@@ -128,13 +129,15 @@ public class AwsSdkFormatConversionFunctionWriter
             condition_expression, attribute_names, attribute_values = condition_handler("$L", $L)
             transformed_output["$L"] = condition_expression
             if len(attribute_names) > 0:
-              transformed_output["ExpressionAttributeNames"] = attribute_names
+              $L.setdefault("ExpressionAttributeNames", {}).update(attribute_names)
             if len(attribute_values) > 0:
-              transformed_output["ExpressionAttributeValues"] = attribute_values
+              $L.setdefault("ExpressionAttributeValues", {}).update(attribute_values)
           """,
           memberName,
           dataSourceInsideConversionFunction,
-          memberName
+          memberName,
+          dataSourceInsideConversionFunction,
+          dataSourceInsideConversionFunction
           );
         }
       );
