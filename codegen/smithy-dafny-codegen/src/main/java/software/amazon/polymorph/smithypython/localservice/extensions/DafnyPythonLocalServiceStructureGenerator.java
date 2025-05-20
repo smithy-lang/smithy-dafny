@@ -354,21 +354,19 @@ public class DafnyPythonLocalServiceStructureGenerator
       String formatString;
       if (index.isMemberNullable(memberShape)) {
         formatString = "$L: Optional[$L]";
+        writer.addStdlibImport("typing", "Optional");
       } else {
         formatString = "$L: $L";
       }
       // AWS SDK shapes are special:
-      // 1. No imports (boto3 doesn't have shapes to import)
-      // 2. Shape is always a `dict[str, Any]` (boto3 doesn't have shapes to typehint)
-      
+      // 1. No imports. (boto3 doesn't have shapes to import.)
+      // 2. Shape is always a `dict[str, Any]`. (boto3 doesn't have shapes to typehint.)
       writer.write(
         formatString,
         memberName,
         "dict[str, Any]"
       );
-      writer.addStdlibImport("typing", "Dict");
       writer.addStdlibImport("typing", "Any");
-      writer.addStdlibImport("typing", "Optional");
     } else {
       super.writePropertyForMember(isError, memberShape);
     }
@@ -453,15 +451,14 @@ public class DafnyPythonLocalServiceStructureGenerator
       );
     } else if (AwsSdkNameResolver.isAwsSdkShape(target)) {
       // AWS SDK shapes are special:
-      // 1. No imports (boto3 doesn't have shapes to import)
-      // 2. Shape is always a `dict[str, Any]` (boto3 doesn't have shapes to typehint)
+      // 1. No imports. (boto3 doesn't have shapes to import.)
+      // 2. Shape is always a `dict[str, Any]`. (boto3 doesn't have shapes to typehint.)
       String formatString = "$L: $L,";
       writer.write(
         formatString,
         memberName,
         "dict[str, Any]"
       );
-      writer.addStdlibImport("typing", "Dict");
       writer.addStdlibImport("typing", "Any");
     } else {
       super.writeInitMethodParameterForRequiredMember(isError, memberShape);
@@ -511,15 +508,14 @@ public class DafnyPythonLocalServiceStructureGenerator
       );
     } else if (AwsSdkNameResolver.isAwsSdkShape(target)) {
       // AWS SDK shapes are special:
-      // 1. No imports (boto3 doesn't have shapes to import)
-      // 2. Shape is always a `dict[str, Any]` (boto3 doesn't have shapes to typehint)
+      // 1. No imports. (boto3 doesn't have shapes to import.)
+      // 2. Shape is always a `dict[str, Any]`. (boto3 doesn't have shapes to typehint.)
       String formatString = "$L: Optional[$L] = None,";
       writer.write(
         formatString,
         memberName,
         "dict[str, Any]"
       );
-      writer.addStdlibImport("typing", "Dict");
       writer.addStdlibImport("typing", "Any");
     } else {
       super.writeInitMethodParameterForOptionalMember(isError, memberShape);

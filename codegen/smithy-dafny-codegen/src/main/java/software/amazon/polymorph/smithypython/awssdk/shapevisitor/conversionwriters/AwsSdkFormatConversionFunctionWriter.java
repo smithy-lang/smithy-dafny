@@ -69,15 +69,10 @@ public class AwsSdkFormatConversionFunctionWriter
           "item_handler",
           "condition_handler",
           () -> {
-            // boto3 takes in kwargs
-            // Create a dictionary indexed by keys, then cast to kwargs in API call
+            // deepcopy the output to avoid modifying the original structure
             conversionWriter.addStdlibImport("copy", "deepcopy");
             conversionWriter.write("transformed_output = deepcopy(this_structure)");
 
-            
-            // Open Dafny structure shape
-            // e.g.
-            // DafnyStructureName(...
             String dataSourceInsideConversionFunction = "this_structure";
             // Recursively dispatch a new ShapeVisitor for each member of the structure
             for (final Entry<
@@ -111,12 +106,8 @@ public class AwsSdkFormatConversionFunctionWriter
       .model()
       .expectShape(memberShape.getTarget());
 
-    // Optional shapes require an `is_Some` check and their value is accessed via `.value`
-    // ex. kms.KeyId in DecryptRequest (optional parameter):
-    // if input.KeyId.is_Some:
-    //        transformed_output["KeyId"] = input.KeyId.value.VerbatimString(False)
-    // (`VerbatimString(False)` comes from the DafnyToAwsSdkShapeVisitor)
-
+    // If the shape is a condition "expression string",
+    // call the condition_handler function to handle converting it.
     if (targetShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression"))
     || targetShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))) {
       conversionWriter.openBlock(
@@ -144,6 +135,7 @@ public class AwsSdkFormatConversionFunctionWriter
       
     }
 
+    // For non-"expression string" structure shapes, recurse into the structure
     else if (memberShape.isOptional()) {
       conversionWriter.openBlock(
         "if \"$L\" in $L:",
@@ -167,10 +159,6 @@ public class AwsSdkFormatConversionFunctionWriter
           );
         }
       );
-      // Required shapes are assigned directly
-      // ex. kms.CiphertextBlob in DecryptRequest (required parameter):
-      // transformed_output["CiphertextBlob"] = bytes(input.CiphertextBlob)
-      // (`bytes()` comes from the DafnyToAwsSdkShapeVisitor)
     } else {
       conversionWriter.write(
             "transformed_output[\"$L\"] = $L",
@@ -188,111 +176,19 @@ public class AwsSdkFormatConversionFunctionWriter
           );
     }
   }
+
   /**
-   * Writes a function definition to convert a Smithy-modelled union shape into the corresponding
-   * Dafny-modelled union shape. The function definition is written into `aws_sdk_to_dafny.py`. This
-   * SHOULD only be called once so only one function definition is written.
-   *
+   * There doesn't seem to be any union shapes that require recursive conversions,
+   * but the interface requires this method.
    * @param unionShape
    */
   public void writeUnionShapeConverter(UnionShape unionShape) {
-    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-
-
-    String moduleName =
-      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-        context.settings().getService().getNamespace()
-      );
-
-    // Write out common conversion function inside dafny_to_aws_sdk
-    delegator.useFileWriter(
-      moduleName + "/aws_sdk_format_converter.py",
-      "",
-      conversionWriter -> {
-        // Within the conversion function, the dataSource becomes the function's input
-        String dataSourceInsideConversionFunction = "this_structure";
-
-        // ex. shape: simple.union.ExampleUnion
-        // Writes `def DafnyToSmithy_simple_union_ExampleUnion(input):`
-        //   and wraps inner code inside function definition
-        conversionWriter.openBlock(
-          "def $L($L):",
-          "",
-          AwsSdkNameResolver.getDafnyToAwsSdkFunctionNameForShape(unionShape),
-          dataSourceInsideConversionFunction,
-          () -> {
-            conversionWriter.writeComment(
-              "Convert %1$s".formatted(unionShape.getId().getName())
-            );
-
-            // First union value opens a new `if` block; others do not need to and write `elif`
-            boolean shouldOpenNewIfBlock = true;
-            // Write out conversion:
-            // ex. if ExampleUnion can take on either of (IntegerValue, StringValue), write:
-            // if isinstance(input, ExampleUnion_IntegerValue):
-            //   ExampleUnion_union_value = ExampleUnionIntegerValue(input.IntegerValue)
-            // elif isinstance(input, ExampleUnion_StringValue):
-            //   ExampleUnion_union_value = ExampleUnionStringValue(input.StringValue)
-            for (final MemberShape memberShape : unionShape
-              .getAllMembers()
-              .values()) {
-              final Shape targetShape = context
-                .model()
-                .expectShape(memberShape.getTarget());
-              conversionWriter.write(
-                """
-                $L isinstance($L, $L):
-                    $L_union_value = {"$L": $L}""",
-                // If we need a new `if` block, open one; otherwise, expand on existing one
-                // with `elif`
-                shouldOpenNewIfBlock ? "if" : "elif",
-                dataSourceInsideConversionFunction,
-                DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),
-                unionShape.getId().getName(),
-                memberShape.getMemberName(),
-                targetShape.accept(
-                  new AwsSdkFormatShapeVisitor(
-                    context,
-                    dataSourceInsideConversionFunction +
-                    "." +
-                    memberShape.getMemberName(),
-                    conversionWriter
-                  )
-                )
-              );
-              shouldOpenNewIfBlock = false;
-
-              DafnyNameResolver.importDafnyTypeForUnion(
-                conversionWriter,
-                unionShape,
-                memberShape,
-                context
-              );
-            }
-
-            // Write case to handle if union member does not match any of the above cases
-            conversionWriter.write(
-              """
-              else:
-                  raise ValueError("No recognized union value in union type: " + str($L))
-              """,
-              dataSourceInsideConversionFunction
-            );
-
-            // Write return value:
-            // `return ExampleUnion_union_value`
-            conversionWriter.write(
-              """
-              return $L_union_value
-              """,
-              unionShape.getId().getName()
-            );
-          }
-        );
-      }
-    );
+    throw new UnsupportedOperationException("No boto3 DynamoDB union shapes require recursive conversions");
   }
+
   /**
+   * Enums don't seem to require any conversion.
+   * Always return the input value.
    * @param stringShapeWithEnumTrait
    */
   public void writeStringEnumShapeConverter(
@@ -304,17 +200,12 @@ public class AwsSdkFormatConversionFunctionWriter
         context.settings().getService().getNamespace()
       );
 
-    // Write out common conversion function inside dafny_to_aws_sdk
     delegator.useFileWriter(
       moduleName + "/aws_sdk_format_converter.py",
       "",
       conversionWriter -> {
-        // Within the conversion function, the dataSource becomes the function's input
         String dataSourceInsideConversionFunction = "this_structure";
 
-        // ex. shape: simple.union.ExampleUnion
-        // Writes `def DafnyToSmithy_simple_union_ExampleUnion(input):`
-        //   and wraps inner code inside function definition
         conversionWriter.openBlock(
           "def $L($L, $L, $L):",
           "",

@@ -4,8 +4,6 @@
 package software.amazon.polymorph.smithypython.awssdk.shapevisitor;
 
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
-import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
-import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.DafnyToAwsSdkConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
@@ -36,8 +34,9 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkFormatConversionFunctionWriter;
 
 /**
- * ShapeVisitor that should be dispatched from a shape to generate code that maps a AWS SDK
- * kwarg-indexed dictionary to the corresponding Dafny shape's internal attributes.
+ * ShapeVisitor that should be dispatched from a shape to generate code that parses a AWS SDK
+ * kwarg-indexed dictionary for boto3 DynamoDB "expression strings" or AttributeValues
+ * and passes those to functions that modify those members.
  */
 public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
 
@@ -84,7 +83,6 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String structureShape(StructureShape structureShape) {
-    // Dafny does not generate a type for Unit shape
     if (SmithyNameResolver.isUnitShape(structureShape.getId())) {
       return "None";
     }
@@ -104,10 +102,7 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
       );
     writer.addStdlibImport(pythonModuleName + ".aws_sdk_format_converter");
 
-    // Return a reference to the generated conversion method
-    // ex. for shape example.namespace.ExampleShape
-    // returns
-    // `example_namespace.smithygenerated.aws_sdk_to_dafny.example_namespace_ExampleShape(input)`
+    // Return a reference to call the generated conversion method
     return "%1$s.aws_sdk_format_converter.%2$s(%3$s, %4$s, %5$s)".formatted(
         pythonModuleName,
         AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape),
@@ -130,7 +125,7 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
       .expectShape(memberShape.getTarget());
 
     // Add converted list elements into the list:
-    // `[list_element for list_element in `DafnyToSmithy(targetShape)``
+    // `[list_element for list_element in `AwsSdkFormatShapeVisitor(targetShape)``
     builder.append(
       "%1$s".formatted(
           targetShape.accept(
@@ -140,7 +135,7 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
     );
 
     // Close structure:
-    // `[list_element for list_element in `DafnyToSmithy(targetShape)`]`
+    // `[list_element for list_element in `AwsSdkFormatShapeVisitor(targetShape)`]`
     return builder
       .append(" for list_element in %1$s]".formatted(dataSource))
       .toString();
@@ -163,7 +158,7 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
       .expectShape(valueMemberShape.getTarget());
 
     // Write converted map keys into the map:
-    // `{`DafnyToSmithy(key)`:`
+    // `{`AwsSdkFormatShapeVisitor(key)`:`
     builder.append(
       "%1$s: ".formatted(
           keyTargetShape.accept(
@@ -173,7 +168,7 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
     );
 
     // Write converted map values into the map:
-    // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)``
+    // `{`AwsSdkFormatShapeVisitor(key)`: `AwsSdkFormatShapeVisitor(value)``
     builder.append(
       "%1$s".formatted(
           valueTargetShape.accept(
@@ -183,9 +178,7 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
     );
 
     // Complete map comprehension and close map
-    // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)`` for (key, value) in `dataSource`.items }`
-    // No () on items call; `dataSource` is a Dafny map, where `items` is a @property and not a
-    // method.
+    // `{`AwsSdkFormatShapeVisitor(key)`: `AwsSdkFormatShapeVisitor(value)`` for (key, value) in `dataSource`.items }`
     return builder
       .append(" for (key, value) in %1$s.items() }".formatted(dataSource))
       .toString();
@@ -198,8 +191,10 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String stringShape(StringShape shape) {
+    // The only special strings are "expression strings."
+    // If the string is an "expression string", call the condition_handler function.
     if (shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression"))
-    || shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))) {
+        || shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))) {
       return "condition_handler(%1$s)".formatted(dataSource);
     }
     return dataSource;
@@ -252,7 +247,7 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
       context,
       writer
     );
-    // Import the dafny_to_aws_sdk converter from where the ShapeVisitor was called
+    // Import the aws_sdk_format_converter converter from where the ShapeVisitor was called
     String pythonModuleSmithygeneratedPath =
       SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
         shape.getId().getNamespace(),
@@ -263,9 +258,6 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
     );
 
     // Return a reference to the generated conversion method
-    // ex. for shape example.namespace.ExampleShape
-    // returns
-    // `example_namespace.smithygenerated.dafny_to_aws_sdk.DafnyToAwsSdk_example_namespace_ExampleShape(input)`
     return "%1$s.aws_sdk_format_converter.%2$s(%3$s, %4$s, %5$s)".formatted(
         pythonModuleSmithygeneratedPath,
         AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(shape),
@@ -282,6 +274,8 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String unionShape(UnionShape unionShape) {
+    // The only special unionShape is AttributeValue.
+    // Pass it to item_handler.
     if (unionShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#AttributeValue"))) {
         return "item_handler(%1$s)".formatted(dataSource);
     }
@@ -303,7 +297,7 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
     // Return a reference to the generated conversion method
     // ex. for shape example.namespace.ExampleShape
     // returns
-    // `example_namespace.smithygenerated.aws_sdk_to_dafny.example_namespace_ExampleShape(input)`
+    // `example_namespace.smithygenerated.aws_sdk_format_converter.example_namespace_ExampleShape(input)`
     return "%1$s.aws_sdk_format_converter.%2$s(%3$s, %4$s, %5$s)".formatted(
         pythonModuleName,
         AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(unionShape),
