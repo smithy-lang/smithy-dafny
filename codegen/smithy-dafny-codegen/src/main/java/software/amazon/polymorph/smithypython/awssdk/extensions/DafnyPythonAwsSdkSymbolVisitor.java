@@ -5,9 +5,7 @@ import static java.lang.String.format;
 import software.amazon.polymorph.smithypython.awssdk.AwsSdkCodegenConstants;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceSymbolVisitor;
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.PythonSettings;
 
 /**
@@ -56,34 +54,5 @@ public class DafnyPythonAwsSdkSymbolVisitor
       directoryFilePath,
       AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
     );
-  }
-
-  public Symbol structureShape(StructureShape shape) {
-    var builder = createSymbolBuilder(shape, "dict[str, Any]");
-    String name = getDefaultShapeName(shape);
-    String filename = "models";
-    Symbol enumSymbol = createSymbolBuilder(
-      shape,
-      name,
-      getSymbolNamespacePathForNamespaceAndFilename(
-        shape.getId().getNamespace(),
-        filename
-      )
-    )
-      .definitionFile(
-        getSymbolDefinitionFilePathForNamespaceAndFilename(
-          shape.getId().getNamespace(),
-          filename
-        )
-      )
-      .build();
-
-    // We add this enum symbol as a property on a generic string symbol
-    // rather than returning the enum symbol directly because we only
-    // generate the enum constants for convenience. We actually want
-    // to pass around plain strings rather than what is effectively
-    // a namespace class.
-    builder.putProperty("enumSymbol", escaper.escapeSymbol(shape, enumSymbol));
-    return builder.build();
   }
 }
