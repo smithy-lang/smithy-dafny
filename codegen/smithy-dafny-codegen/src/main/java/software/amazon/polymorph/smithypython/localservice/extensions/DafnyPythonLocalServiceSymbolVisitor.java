@@ -435,7 +435,23 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    */
   @Override
   public Symbol unionShape(UnionShape shape) {
-    String name = getDefaultShapeName(shape);
+    String name;
+    if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
+      // This branch SHOULD only apply to DDB's AttributeValue.
+      // If it does not, raise an exception.
+      // If this needs to be extended or changed substantially, refactor by
+      // replacing localService codegen's default SymbolProvider with a new SymbolProvider implementation
+      // that sends localService Symbols to the current SymbolProvider, and AWS SDK Symbols to a new AWS SDK
+      // SymbolProvider.
+      // TODO: do the above refactor
+      if (!shape.getId().toString().equals("com.amazonaws.dynamodb#AttributeValue")) {
+        throw new IllegalArgumentException("Unsupported AWS SDK union shape " + shape);
+      }
+      name = "dict[str, Any]";
+    } else {
+      name = getDefaultShapeName(shape);
+    }
+
 
     var unknownName = name + "Unknown";
     String filename = "models";
