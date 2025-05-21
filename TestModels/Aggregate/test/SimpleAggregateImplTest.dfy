@@ -33,7 +33,6 @@ module SimpleAggregateImplTest {
         expect ret.simpleStringMap.UnwrapOr(map[]) == simpleStringMap;
         expect ret.simpleIntegerMap.UnwrapOr(map[]) == simpleIntegerMap;
         expect ret.nestedStructure.UnwrapOr(NestedStructure(stringStructure := Some(StringStructure(value := Some(""))))) == nestedStructure;
-        print ret;
     }
 
     method TestGetAggregateKnownValue(client: ISimpleAggregateClient)
@@ -57,6 +56,5 @@ module SimpleAggregateImplTest {
         expect ret.simpleStringMap.UnwrapOr(map[]) == simpleStringMap;
         expect ret.simpleIntegerMap.UnwrapOr(map[]) == simpleIntegerMap;
         expect ret.nestedStructure.UnwrapOr(NestedStructure(stringStructure := Some(StringStructure(value := Some(""))))) == nestedStructure;
-        print ret;
     }
 }
