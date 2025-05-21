@@ -56,16 +56,22 @@ public class ConfigFileWriter implements CustomFileWriter {
             codegenContext
           );
 
-                    if (!configShape.getId().getNamespace().equals(codegenContext.settings().getService().getNamespace())) {
-                writer.addStdlibImport(
-                "%s.models".formatted(
-              SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                  configShape.getId().getNamespace(),
-                  codegenContext.settings()
-                )
-              ),
+          // If the config shape is defined in a different localService, import it here.
+          if (
+            !configShape
+              .getId()
+              .getNamespace()
+              .equals(codegenContext.settings().getService().getNamespace())
+          ) {
+            writer.addStdlibImport(
+              "%s.models".formatted(
+                  SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                    configShape.getId().getNamespace(),
+                    codegenContext.settings()
+                  )
+                ),
               configShape.getId().getName()
-                );
+            );
           }
 
           writer.write(

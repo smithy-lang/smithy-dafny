@@ -464,7 +464,7 @@ public class DafnyPythonLocalServiceStructureGenerator
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
-      
+
       writer.addStdlibImport("typing", "Optional");
       // Use forward reference for reference traits to avoid circular import
       String formatString = "$L: Optional['$L'] = None,";
@@ -554,8 +554,10 @@ public class DafnyPythonLocalServiceStructureGenerator
                   )
                 ) {
                   writer.write("$S: d[$S],", memberName, memberName);
-                } else if (target.isStructureShape()
-                    && !AwsSdkNameResolver.isAwsSdkShape(target)) {
+                } else if (
+                  target.isStructureShape() &&
+                  !AwsSdkNameResolver.isAwsSdkShape(target)
+                ) {
                   writer.write(
                     "$S: $L.from_dict(d[$S]),",
                     memberName,

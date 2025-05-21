@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph.smithypython.awssdk.customize;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
@@ -10,6 +12,7 @@ import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkFormatSh
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -17,16 +20,19 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.polymorph.utils.ModelUtils;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
- * Writes the shim.py file for AWS SDKs. The shim wraps boto3 calls. Its inputs are Dafny-modeled
- * requests; its outputs are Dafny-modelled responses. Internally, the shim will convert the
- * Dafny-modelled requests to dictionaries passed to boto3 via kwargs, call boto3 with the request
- * return the Dafny-modelled response. Other Dafny-generated Python code will use the shim to call
- * AWS services (e.g. KMS, DDB).
+ * Write a boto3_conversions.py file for AWS SDKs.
+ * The generated file contains a InternalBoto3DynamoDBFormatConverter class
+ * with an operation for each operation on a DynamoDB client.
+ * Each operation on this class takes in a boto3 dictionary shape
+ * from either a Client (boto3.client("dynamodb"))
+ * or a Resource (boto3.resource("dynamodb"), maybe with .Table())
+ * and converts it to the other format.
+ * Creating an instance of this class requires two manually-written functions:
+ * - item_handler: Method that converts any `AttributeValue`s in the input to the other format.
+ * - expression_handler: Method that converts "expressions" in the input to the other format.
+ *    This may be either `KeyExpression` or `ConditionExpression`.
  */
 public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
 
@@ -36,7 +42,13 @@ public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
     GenerationContext codegenContext
   ) {
     // Only generate the boto3_conversions.py file for DynamoDB.
-    if (!serviceShape.getId().equals(ShapeId.fromParts("com.amazonaws.dynamodb", "DynamoDB_20120810"))) {
+    if (
+      !serviceShape
+        .getId()
+        .equals(
+          ShapeId.fromParts("com.amazonaws.dynamodb", "DynamoDB_20120810")
+        )
+    ) {
       return;
     }
     String moduleName =
@@ -67,10 +79,9 @@ public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
       );
   }
 
-
   /**
-   * Generate shim methods for all operations in the SDK service shape. Each method will take in a
-   * Dafny type as input and return a Dafny type as output. Internally, each method will convert the
+   * Generate shim methods for all operations in the SDK service shape.
+   * Each method will take in a
    * Dafny input into a dictionary whose keys are boto3 API request parameters, call the boto3
    * client with the request dictionary mapped to its kwargs representation, receive a boto3
    * response, convert the response into its corresponding Dafny type, and return the Dafny type.
@@ -115,7 +126,6 @@ public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
         }
       );
 
-
       writer.openBlock(
         "def $L(self, boto3_input) -> dict:",
         "",
@@ -127,9 +137,10 @@ public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
           String output = targetShapeOutput.accept(
             new AwsSdkFormatShapeVisitor(codegenContext, "boto3_input", writer)
           );
+          writer.addStdlibImport("copy", "deepcopy");
           writer.write(
             """
-            original_request = boto3_input
+            original_request = deepcopy(boto3_input)
             item_handler = self._item_handler
             condition_handler = self._condition_handler
             return $L
