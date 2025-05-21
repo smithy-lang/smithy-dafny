@@ -18,8 +18,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /** Writes the aws_sdk_format_converter.py file via the BaseConversionWriter implementation. */
-public class AwsSdkFormatConversionFunctionWriter
-  extends BaseConversionWriter {
+public class AwsSdkFormatConversionFunctionWriter extends BaseConversionWriter {
 
   // Use a singleton to preserve generatedShapes through multiple generations
   static AwsSdkFormatConversionFunctionWriter singleton;
@@ -47,7 +46,6 @@ public class AwsSdkFormatConversionFunctionWriter
   }
 
   protected void writeStructureShapeConverter(StructureShape structureShape) {
-
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
       SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
@@ -58,7 +56,6 @@ public class AwsSdkFormatConversionFunctionWriter
       moduleName + "/aws_sdk_format_converter.py",
       "",
       conversionWriter -> {
-
         conversionWriter.openBlock(
           "def $L($L, $L, $L):",
           "",
@@ -71,7 +68,9 @@ public class AwsSdkFormatConversionFunctionWriter
           () -> {
             // deepcopy the output to avoid modifying the original structure
             conversionWriter.addStdlibImport("copy", "deepcopy");
-            conversionWriter.write("transformed_output = deepcopy(this_structure)");
+            conversionWriter.write(
+              "transformed_output = deepcopy(this_structure)"
+            );
 
             String dataSourceInsideConversionFunction = "this_structure";
             // Recursively dispatch a new ShapeVisitor for each member of the structure
@@ -108,33 +107,38 @@ public class AwsSdkFormatConversionFunctionWriter
 
     // If the shape is a condition "expression string",
     // call the condition_handler function to handle converting it.
-    if (targetShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression"))
-    || targetShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))) {
+    if (
+      targetShape
+        .getId()
+        .equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression")) ||
+      targetShape
+        .getId()
+        .equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))
+    ) {
       conversionWriter.openBlock(
         "if \"$L\" in $L:",
         "",
         memberName,
         dataSourceInsideConversionFunction,
         () -> {
-          conversionWriter.write("""
-            condition_expression, attribute_names, attribute_values = condition_handler("$L", $L)
-            transformed_output["$L"] = condition_expression
-            if len(attribute_names) > 0:
-              $L.setdefault("ExpressionAttributeNames", {}).update(attribute_names)
-            if len(attribute_values) > 0:
-              $L.setdefault("ExpressionAttributeValues", {}).update(attribute_values)
-          """,
-          memberName,
-          dataSourceInsideConversionFunction,
-          memberName,
-          dataSourceInsideConversionFunction,
-          dataSourceInsideConversionFunction
+          conversionWriter.write(
+            """
+              condition_expression, attribute_names, attribute_values = condition_handler("$L", $L)
+              transformed_output["$L"] = condition_expression
+              if len(attribute_names) > 0:
+                $L.setdefault("ExpressionAttributeNames", {}).update(attribute_names)
+              if len(attribute_values) > 0:
+                $L.setdefault("ExpressionAttributeValues", {}).update(attribute_values)
+            """,
+            memberName,
+            dataSourceInsideConversionFunction,
+            memberName,
+            dataSourceInsideConversionFunction,
+            dataSourceInsideConversionFunction
           );
         }
       );
-      
     }
-
     // For non-"expression string" structure shapes, recurse into the structure
     else if (memberShape.isOptional()) {
       conversionWriter.openBlock(
@@ -149,10 +153,7 @@ public class AwsSdkFormatConversionFunctionWriter
             targetShape.accept(
               new AwsSdkFormatShapeVisitor(
                 context,
-                dataSourceInsideConversionFunction +
-                "[\"" +
-                memberName +
-                "\"]",
+                dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
                 conversionWriter
               )
             )
@@ -161,19 +162,16 @@ public class AwsSdkFormatConversionFunctionWriter
       );
     } else {
       conversionWriter.write(
-            "transformed_output[\"$L\"] = $L",
-            memberName,
-            targetShape.accept(
-              new AwsSdkFormatShapeVisitor(
-                context,
-                dataSourceInsideConversionFunction +
-                "[\"" +
-                memberName +
-                "\"]",
-                conversionWriter
-              )
-            )
-          );
+        "transformed_output[\"$L\"] = $L",
+        memberName,
+        targetShape.accept(
+          new AwsSdkFormatShapeVisitor(
+            context,
+            dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
+            conversionWriter
+          )
+        )
+      );
     }
   }
 
@@ -183,7 +181,9 @@ public class AwsSdkFormatConversionFunctionWriter
    * @param unionShape
    */
   public void writeUnionShapeConverter(UnionShape unionShape) {
-    throw new UnsupportedOperationException("No boto3 DynamoDB union shapes require recursive conversions");
+    throw new UnsupportedOperationException(
+      "No boto3 DynamoDB union shapes require recursive conversions"
+    );
   }
 
   /**
@@ -216,12 +216,12 @@ public class AwsSdkFormatConversionFunctionWriter
           "item_handler",
           "condition_handler",
           () -> {
-            conversionWriter.writeComment(
-              "Always return input enum"
+            conversionWriter.writeComment("Always return input enum");
+
+            conversionWriter.write(
+              "return $L",
+              dataSourceInsideConversionFunction
             );
-
-            conversionWriter.write("return $L", dataSourceInsideConversionFunction);
-
           }
         );
       }

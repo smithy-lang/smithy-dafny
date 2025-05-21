@@ -139,7 +139,6 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
     Shape targetShape,
     Symbol targetSymbol
   ) {
-
     String memberTypehint = null;
 
     // Override Smithy-Python to handle shapes with ReferenceTraits
@@ -154,8 +153,8 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
         "." +
         symbolProvider.toSymbol(referentShape).getName();
     } else if (AwsSdkNameResolver.isAwsSdkShape(targetShape)) {
-        memberTypehint = "dict[str, Any]";
-        writer.addStdlibImport("typing", "Any");
+      memberTypehint = "dict[str, Any]";
+      writer.addStdlibImport("typing", "Any");
     }
 
     if (memberTypehint != null) {
@@ -163,17 +162,13 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
         "def __init__(self, value: '%s'):",
         memberTypehint
       );
-      writer.openBlock(
-        formatString,
-        "",
-        () -> {
-          writeInitMethodConstraintsChecksForMember(
-            member,
-            memberSymbol.getName()
-          );
-          writer.write("self.value = value");
-        }
-      );
+      writer.openBlock(formatString, "", () -> {
+        writeInitMethodConstraintsChecksForMember(
+          member,
+          memberSymbol.getName()
+        );
+        writer.write("self.value = value");
+      });
     } else {
       super.writeInitMethodForMember(
         member,

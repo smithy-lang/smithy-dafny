@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithypython.awssdk.shapevisitor;
 
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
+import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkFormatConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
@@ -20,6 +21,7 @@ import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -30,8 +32,6 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkFormatConversionFunctionWriter;
 
 /**
  * ShapeVisitor that should be dispatched from a shape to generate code that parses a AWS SDK
@@ -193,8 +193,12 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
   public String stringShape(StringShape shape) {
     // The only special strings are "expression strings."
     // If the string is an "expression string", call the condition_handler function.
-    if (shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression"))
-        || shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))) {
+    if (
+      shape
+        .getId()
+        .equals(ShapeId.from("com.amazonaws.dynamodb#ConditionExpression")) ||
+      shape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#KeyExpression"))
+    ) {
       return "condition_handler(%1$s)".formatted(dataSource);
     }
     return dataSource;
@@ -276,8 +280,12 @@ public class AwsSdkFormatShapeVisitor extends ShapeVisitor.Default<String> {
   public String unionShape(UnionShape unionShape) {
     // The only special unionShape is AttributeValue.
     // Pass it to item_handler.
-    if (unionShape.getId().equals(ShapeId.from("com.amazonaws.dynamodb#AttributeValue"))) {
-        return "item_handler(%1$s)".formatted(dataSource);
+    if (
+      unionShape
+        .getId()
+        .equals(ShapeId.from("com.amazonaws.dynamodb#AttributeValue"))
+    ) {
+      return "item_handler(%1$s)".formatted(dataSource);
     }
 
     AwsSdkFormatConversionFunctionWriter.writeConverterForShapeAndMembers(

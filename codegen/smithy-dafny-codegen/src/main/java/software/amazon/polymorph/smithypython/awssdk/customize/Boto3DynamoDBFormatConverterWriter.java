@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph.smithypython.awssdk.customize;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
@@ -10,6 +12,7 @@ import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkFormatSh
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -17,9 +20,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.polymorph.utils.ModelUtils;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * Write a boto3_conversions.py file for AWS SDKs.
@@ -42,7 +42,13 @@ public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
     GenerationContext codegenContext
   ) {
     // Only generate the boto3_conversions.py file for DynamoDB.
-    if (!serviceShape.getId().equals(ShapeId.fromParts("com.amazonaws.dynamodb", "DynamoDB_20120810"))) {
+    if (
+      !serviceShape
+        .getId()
+        .equals(
+          ShapeId.fromParts("com.amazonaws.dynamodb", "DynamoDB_20120810")
+        )
+    ) {
       return;
     }
     String moduleName =
@@ -51,28 +57,23 @@ public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
       );
     codegenContext
       .writerDelegator()
-      .useFileWriter(
-        moduleName + "/boto3_conversions.py",
-        "",
-        writer -> {
-          writer.write(
-            """
-            class InternalBoto3DynamoDBFormatConverter:
-                def __init__(self, item_handler, condition_handler):
-                    self._item_handler = item_handler
-                    self._condition_handler = condition_handler
+      .useFileWriter(moduleName + "/boto3_conversions.py", "", writer -> {
+        writer.write(
+          """
+          class InternalBoto3DynamoDBFormatConverter:
+              def __init__(self, item_handler, condition_handler):
+                  self._item_handler = item_handler
+                  self._condition_handler = condition_handler
 
-                ${C|}
+              ${C|}
 
-                """,
-            writer.consumer(w ->
-              generateOperationsBlock(codegenContext, serviceShape, w)
-            )
-          );
-        }
-      );
+              """,
+          writer.consumer(w ->
+            generateOperationsBlock(codegenContext, serviceShape, w)
+          )
+        );
+      });
   }
-
 
   /**
    * Generate shim methods for all operations in the SDK service shape.
@@ -120,7 +121,6 @@ public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
           );
         }
       );
-
 
       writer.openBlock(
         "def $L(self, boto3_input) -> dict:",
