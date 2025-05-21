@@ -496,7 +496,7 @@ public class CodegenCli {
       );
     new HelpFormatter()
       .printHelp(
-        "smithy-dafny-codegen-cli is-dafny-at-least",
+        "smithy-dafny-codegen-cli fs-dafny-at-least",
         getCliOptionsForIfDafnyAtLeast()
       );
   }

@@ -271,10 +271,6 @@ transpile_dependencies_test:
 	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_test_$(LANG), )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_test_$(LANG);, $(PROJECT_DEPENDENCIES))
 
-needs_enforce_determinism:
-	cd $(CODEGEN_CLI_ROOT); \
-	./../gradlew run --args="is-dafny-at-least --dafny-version 4.9";
-
 ########################## Code-Gen targets
 
 mvn_local_deploy_polymorph_dependencies:
