@@ -483,7 +483,7 @@ public class CodegenCli {
       );
   }
 
-    private static void printHelpMessage() {
+  private static void printHelpMessage() {
     new HelpFormatter()
       .printHelp(
         "smithy-dafny-codegen-cli [generate]",
@@ -574,7 +574,9 @@ public class CodegenCli {
       // This command doesn't need a model/codegen engine/etc.
       if (command == Command.IF_DAFNY_AT_LEAST) {
         String text = commandLine.getOptionValue("text");
-        if (CodegenEngine.getDafnyVersionFromDafny().compareTo(dafnyVersion) >= 0) {
+        if (
+          CodegenEngine.getDafnyVersionFromDafny().compareTo(dafnyVersion) >= 0
+        ) {
           System.out.println(text);
         }
         System.exit(0);
