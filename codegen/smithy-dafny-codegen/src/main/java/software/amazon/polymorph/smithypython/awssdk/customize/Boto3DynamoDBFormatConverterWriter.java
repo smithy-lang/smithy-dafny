@@ -57,22 +57,26 @@ public class Boto3DynamoDBFormatConverterWriter implements CustomFileWriter {
       );
     codegenContext
       .writerDelegator()
-      .useFileWriter(moduleName + "/boto3_conversions.py", "", writer -> {
-        writer.write(
-          """
-          class InternalBoto3DynamoDBFormatConverter:
-              def __init__(self, item_handler, condition_handler):
-                  self._item_handler = item_handler
-                  self._condition_handler = condition_handler
+      .useFileWriter(
+        moduleName + "/boto3_conversions.py",
+        "",
+        writer -> {
+          writer.write(
+            """
+            class InternalBoto3DynamoDBFormatConverter:
+                def __init__(self, item_handler, condition_handler):
+                    self._item_handler = item_handler
+                    self._condition_handler = condition_handler
 
-              ${C|}
+                ${C|}
 
-              """,
-          writer.consumer(w ->
-            generateOperationsBlock(codegenContext, serviceShape, w)
-          )
-        );
-      });
+                """,
+            writer.consumer(w ->
+              generateOperationsBlock(codegenContext, serviceShape, w)
+            )
+          );
+        }
+      );
   }
 
   /**

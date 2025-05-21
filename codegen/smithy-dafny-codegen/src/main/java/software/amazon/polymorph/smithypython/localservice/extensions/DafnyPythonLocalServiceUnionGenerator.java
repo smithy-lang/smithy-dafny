@@ -162,13 +162,17 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
         "def __init__(self, value: '%s'):",
         memberTypehint
       );
-      writer.openBlock(formatString, "", () -> {
-        writeInitMethodConstraintsChecksForMember(
-          member,
-          memberSymbol.getName()
-        );
-        writer.write("self.value = value");
-      });
+      writer.openBlock(
+        formatString,
+        "",
+        () -> {
+          writeInitMethodConstraintsChecksForMember(
+            member,
+            memberSymbol.getName()
+          );
+          writer.write("self.value = value");
+        }
+      );
     } else {
       super.writeInitMethodForMember(
         member,
