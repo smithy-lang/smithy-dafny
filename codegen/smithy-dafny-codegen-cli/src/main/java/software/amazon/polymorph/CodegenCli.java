@@ -39,7 +39,7 @@ public class CodegenCli {
   private enum Command {
     GENERATE,
     PATCH_AFTER_TRANSPILE,
-    IS_DAFNY_AT_LEAST,
+    IF_DAFNY_AT_LEAST,
   }
 
   private static final Map<Command, Options> optionsForCommand = Map.of(
@@ -47,8 +47,8 @@ public class CodegenCli {
     getCliOptionsForBuild(),
     Command.PATCH_AFTER_TRANSPILE,
     getCliOptionsForPatchAfterTranspile(),
-    Command.IS_DAFNY_AT_LEAST,
-    getCliOptionsForCheckDafnyVersion()
+    Command.IF_DAFNY_AT_LEAST,
+    getCliOptionsForIfDafnyAtLeast()
   );
 
   public static void main(String[] args) {
@@ -168,7 +168,7 @@ public class CodegenCli {
     switch (cliArguments.command) {
       case GENERATE -> engine.run();
       case PATCH_AFTER_TRANSPILE -> engine.patchAfterTranspiling();
-      // IS_DAFNY_AT_LEAST is handled in CodegenCli.parse() instead
+      // IF_DAFNY_AT_LEAST is handled in CodegenCli.parse() instead
     }
   }
 
@@ -458,7 +458,7 @@ public class CodegenCli {
       );
   }
 
-  private static Options getCliOptionsForCheckDafnyVersion() {
+  private static Options getCliOptionsForIfDafnyAtLeast() {
     return new Options()
       .addOption(
         Option.builder("h").longOpt("help").desc("print help message").build()
@@ -469,6 +469,16 @@ public class CodegenCli {
           .longOpt("dafny-version")
           .desc("Minimum Dafny version to check for")
           .hasArg()
+          .required()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("text")
+          .desc("Text to output if the Dafny version passes the check")
+          .hasArg()
+          .required()
           .build()
       );
   }
@@ -487,7 +497,7 @@ public class CodegenCli {
     new HelpFormatter()
       .printHelp(
         "smithy-dafny-codegen-cli is-dafny-at-least",
-        getCliOptionsForCheckDafnyVersion()
+        getCliOptionsForIfDafnyAtLeast()
       );
   }
 
@@ -521,6 +531,7 @@ public class CodegenCli {
      * @return parsed arguments, or {@code Optional.empty()} if help should be printed
      * @throws ParseException if command line arguments are invalid
      */
+    @SuppressWarnings("security:S4507") // Suppressing log injection warning for makefile echo-like command
     static Optional<CliArguments> parse(String[] args) throws ParseException {
       final DefaultParser parser = new DefaultParser();
       final String commandString = args.length > 0 && !args[0].startsWith("-")
@@ -561,12 +572,12 @@ public class CodegenCli {
       }
 
       // This command doesn't need a model/codegen engine/etc.
-      if (command == Command.IS_DAFNY_AT_LEAST) {
+      if (command == Command.IF_DAFNY_AT_LEAST) {
+        String text = commandLine.getOptionValue("text");
         if (CodegenEngine.getDafnyVersionFromDafny().compareTo(dafnyVersion) >= 0) {
-          System.exit(0);
-        } else {
-          System.exit(1);
+          System.out.println(text);
         }
+        System.exit(0);
       }
 
       Path libraryRoot = Paths.get(commandLine.getOptionValue("library-root"));

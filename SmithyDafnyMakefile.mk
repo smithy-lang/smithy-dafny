@@ -80,6 +80,8 @@ ENABLE_EXTERN_PROCESSING?=
 #    ensures DAFNY_PROCESSES(cpus) * Z3_PROCESSES(cpus) <= cpus
 #  {}
 
+ENFORCE_DETERMINISM_OPTION := $(shell cd $(CODEGEN_CLI_ROOT); \
+	./../gradlew run -q --args="if-dafny-at-least --dafny-version 4.8 --text --enforce-determinism")
 
 # Verify the entire project
 verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
@@ -90,7 +92,7 @@ verify:DAFNY_OPTIONS=--allow-warnings
 verify:
 	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny verify \
 		--cores $(Z3_PROCESSES) \
-		--enforce-determinism \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format csv \
@@ -107,7 +109,7 @@ verify_single:DAFNY_OPTIONS=--allow-warnings
 verify_single:
 	dafny verify \
 		--cores $(CORES) \
-		--enforce-determinism \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format text \
@@ -124,7 +126,7 @@ verify_service:
 	@: $(if ${SERVICE},,$(error You must pass the SERVICE to generate for));
 	dafny verify \
 		--cores $(CORES) \
-		--enforce-determinism \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format text \
@@ -204,7 +206,7 @@ transpile_implementation:
 		--stdin \
 		--no-verify \
 		--cores:$(CORES) \
-		--enforce-determinism \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
@@ -245,7 +247,7 @@ transpile_test:
 		--stdin \
 		--no-verify \
 		--cores:$(CORES) \
-		--enforce-determinism \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
@@ -268,6 +270,10 @@ transpile_dependencies:
 transpile_dependencies_test:
 	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_test_$(LANG), )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_test_$(LANG);, $(PROJECT_DEPENDENCIES))
+
+needs_enforce_determinism:
+	cd $(CODEGEN_CLI_ROOT); \
+	./../gradlew run --args="is-dafny-at-least --dafny-version 4.9";
 
 ########################## Code-Gen targets
 
