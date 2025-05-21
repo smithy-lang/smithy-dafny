@@ -39,13 +39,16 @@ public class CodegenCli {
   private enum Command {
     GENERATE,
     PATCH_AFTER_TRANSPILE,
+    IF_DAFNY_AT_LEAST,
   }
 
   private static final Map<Command, Options> optionsForCommand = Map.of(
     Command.GENERATE,
     getCliOptionsForBuild(),
     Command.PATCH_AFTER_TRANSPILE,
-    getCliOptionsForPatchAfterTranspile()
+    getCliOptionsForPatchAfterTranspile(),
+    Command.IF_DAFNY_AT_LEAST,
+    getCliOptionsForIfDafnyAtLeast()
   );
 
   public static void main(String[] args) {
@@ -165,6 +168,7 @@ public class CodegenCli {
     switch (cliArguments.command) {
       case GENERATE -> engine.run();
       case PATCH_AFTER_TRANSPILE -> engine.patchAfterTranspiling();
+      // IF_DAFNY_AT_LEAST is handled in CodegenCli.parse() instead
     }
   }
 
@@ -454,6 +458,31 @@ public class CodegenCli {
       );
   }
 
+  private static Options getCliOptionsForIfDafnyAtLeast() {
+    return new Options()
+      .addOption(
+        Option.builder("h").longOpt("help").desc("print help message").build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("dafny-version")
+          .desc("Minimum Dafny version to check for")
+          .hasArg()
+          .required()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("text")
+          .desc("Text to output if the Dafny version passes the check")
+          .hasArg()
+          .required()
+          .build()
+      );
+  }
+
   private static void printHelpMessage() {
     new HelpFormatter()
       .printHelp(
@@ -464,6 +493,11 @@ public class CodegenCli {
       .printHelp(
         "smithy-dafny-codegen-cli patch-after-transpile",
         getCliOptionsForPatchAfterTranspile()
+      );
+    new HelpFormatter()
+      .printHelp(
+        "smithy-dafny-codegen-cli if-dafny-at-least",
+        getCliOptionsForIfDafnyAtLeast()
       );
   }
 
@@ -497,6 +531,7 @@ public class CodegenCli {
      * @return parsed arguments, or {@code Optional.empty()} if help should be printed
      * @throws ParseException if command line arguments are invalid
      */
+    @SuppressWarnings("security:S4507") // Suppressing log injection warning for makefile echo-like command
     static Optional<CliArguments> parse(String[] args) throws ParseException {
       final DefaultParser parser = new DefaultParser();
       final String commandString = args.length > 0 && !args[0].startsWith("-")
@@ -523,6 +558,28 @@ public class CodegenCli {
       if (commandLine.hasOption("h")) {
         printHelpMessage();
         return Optional.empty();
+      }
+
+      DafnyVersion dafnyVersion = null;
+      String dafnyVersionStr = commandLine.getOptionValue("dafny-version");
+      if (dafnyVersionStr != null) {
+        try {
+          dafnyVersion = DafnyVersion.parse(dafnyVersionStr.trim());
+        } catch (IllegalArgumentException ex) {
+          LOGGER.error("Could not parse --dafny-version: {}", dafnyVersionStr);
+          throw ex;
+        }
+      }
+
+      // This command doesn't need a model/codegen engine/etc.
+      if (command == Command.IF_DAFNY_AT_LEAST) {
+        String text = commandLine.getOptionValue("text");
+        if (
+          CodegenEngine.getDafnyVersionFromDafny().compareTo(dafnyVersion) >= 0
+        ) {
+          System.out.println(text);
+        }
+        System.exit(0);
       }
 
       Path libraryRoot = Paths.get(commandLine.getOptionValue("library-root"));
@@ -591,25 +648,14 @@ public class CodegenCli {
 
       Optional<AwsSdkVersion> javaAwsSdkVersion = Optional.empty();
       if (commandLine.hasOption("java-aws-sdk-version")) {
-        final String versionStr = commandLine
+        final String sdkVersionStr = commandLine
           .getOptionValue("java-aws-sdk-version")
           .trim()
           .toUpperCase();
         try {
-          javaAwsSdkVersion = Optional.of(AwsSdkVersion.valueOf(versionStr));
+          javaAwsSdkVersion = Optional.of(AwsSdkVersion.valueOf(sdkVersionStr));
         } catch (IllegalArgumentException ex) {
-          LOGGER.error("Unknown Java AWS SDK version {}", versionStr);
-          throw ex;
-        }
-      }
-
-      DafnyVersion dafnyVersion = null;
-      String versionStr = commandLine.getOptionValue("dafny-version");
-      if (versionStr != null) {
-        try {
-          dafnyVersion = DafnyVersion.parse(versionStr.trim());
-        } catch (IllegalArgumentException ex) {
-          LOGGER.error("Could not parse --dafny-version: {}", versionStr);
+          LOGGER.error("Unknown Java AWS SDK version {}", sdkVersionStr);
           throw ex;
         }
       }
