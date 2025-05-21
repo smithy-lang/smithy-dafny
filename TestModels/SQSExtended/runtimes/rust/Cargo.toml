@@ -7,6 +7,7 @@ edition = "2021"
 
 [features]
 wrapped-client = []
+small-int = ["dafny_runtime/small-int"]
 
 [dependencies]
 aws-sdk-sqs = "1.45.0"

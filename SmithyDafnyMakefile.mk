@@ -665,6 +665,13 @@ test_rust_debug:
 	cd runtimes/rust; \
 	cargo test -- --nocapture
 
+test_rust_full:
+	rustc --version
+	cd runtimes/rust; cargo test -- --nocapture
+	cd runtimes/rust; cargo test --features small-int -- --nocapture
+	cd runtimes/rust; cargo test --release -- --nocapture
+	cd runtimes/rust; cargo test --release --features small-int -- --nocapture
+
 ########################## Cleanup targets
 
 _clean:

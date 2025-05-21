@@ -19,7 +19,7 @@ var dafnyVersion = props.getProperty("dafnyVersion")
 
 group = "software.amazon.cryptography"
 version = "1.0-SNAPSHOT"
-description = "ComAmazonawsKms"
+description = "ComAmazonawsKmsV2"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(8))
@@ -72,6 +72,11 @@ dependencies {
 }
 
 publishing {
+    publications.create<MavenPublication>("mavenLocal") {
+        groupId = group as String?
+        artifactId = description
+        from(components["java"])
+    }
     publications.create<MavenPublication>("maven") {
         groupId = "software.amazon.cryptography"
         artifactId = "ComAmazonawsKms"
