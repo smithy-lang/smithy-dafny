@@ -65,7 +65,7 @@ public class DafnyPythonAwsSdkSymbolVisitor
     // Any unions are dictionaries.
     System.out.println("ABC");
     System.out.println(shape.getType());
-    String name = "dict[str, Any]";
+    String name = "dict[str, ABC]";
     return createSymbolBuilder(
       shape,
       name,
