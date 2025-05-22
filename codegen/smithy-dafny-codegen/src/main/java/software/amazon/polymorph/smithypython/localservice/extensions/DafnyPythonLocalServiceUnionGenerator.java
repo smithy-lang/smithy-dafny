@@ -154,6 +154,8 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
         symbolProvider.toSymbol(referentShape).getName();
     }
 
+    // Generate custom logic for reference shape;
+    // otherwise, defer to Smithy-Python logic
     if (memberTypehint != null) {
       String formatString = format(
         "def __init__(self, value: '%s'):",

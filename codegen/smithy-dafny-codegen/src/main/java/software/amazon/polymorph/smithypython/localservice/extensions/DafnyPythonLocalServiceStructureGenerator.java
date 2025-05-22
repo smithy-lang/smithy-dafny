@@ -271,7 +271,6 @@ public class DafnyPythonLocalServiceStructureGenerator
   ) {
     Shape target = model.expectShape(memberShape.getTarget());
     String memberName = symbolProvider.toMemberName(memberShape);
-    NullableIndex index = NullableIndex.of(model);
 
     if (
       target.isListShape() &&
@@ -322,6 +321,8 @@ public class DafnyPythonLocalServiceStructureGenerator
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
 
+      NullableIndex index = NullableIndex.of(model);
+
       if (index.isMemberNullable(memberShape)) {
         writer.addStdlibImport("typing", "Optional");
         // Use forward reference for reference traits to avoid circular import
@@ -350,25 +351,6 @@ public class DafnyPythonLocalServiceStructureGenerator
           symbolProvider.toSymbol(referentShape).getNamespace()
         );
       }
-//    } else if (AwsSdkNameResolver.isAwsSdkShape(target)) {
-//      String formatString;
-//      if (index.isMemberNullable(memberShape)) {
-//        formatString = "$L: Optional[$L]";
-//      } else {
-//        formatString = "$L: $L";
-//      }
-//      // AWS SDK shapes are special:
-//      // 1. No imports (boto3 doesn't have shapes to import)
-//      // 2. Shape is always a `dict[str, Any]` (boto3 doesn't have shapes to typehint)
-//
-//      writer.write(
-//        formatString,
-//        memberName,
-//        "dict[str, Any]"
-//      );
-//      writer.addStdlibImport("typing", "Dict");
-//      writer.addStdlibImport("typing", "Any");
-//      writer.addStdlibImport("typing", "Optional");
     } else {
       super.writePropertyForMember(isError, memberShape);
     }
@@ -451,18 +433,6 @@ public class DafnyPythonLocalServiceStructureGenerator
       writer.addStdlibImport(
         symbolProvider.toSymbol(referentShape).getNamespace()
       );
-//    } else if (AwsSdkNameResolver.isAwsSdkShape(target)) {
-//      // AWS SDK shapes are special:
-//      // 1. No imports (boto3 doesn't have shapes to import)
-//      // 2. Shape is always a `dict[str, Any]` (boto3 doesn't have shapes to typehint)
-//      String formatString = "$L: $L,";
-//      writer.write(
-//        formatString,
-//        memberName,
-//        "dict[str, Any]"
-//      );
-//      writer.addStdlibImport("typing", "Dict");
-//      writer.addStdlibImport("typing", "Any");
     } else {
       super.writeInitMethodParameterForRequiredMember(isError, memberShape);
     }
@@ -482,7 +452,6 @@ public class DafnyPythonLocalServiceStructureGenerator
     MemberShape memberShape
   ) {
     Shape target = model.expectShape(memberShape.getTarget());
-    String memberName = symbolProvider.toMemberName(memberShape);
 
     // Reference shapes require forward reference to avoid circular import,
     // but references to AWS SDKs don't
@@ -495,6 +464,7 @@ public class DafnyPythonLocalServiceStructureGenerator
       Shape referentShape = model.expectShape(
         target.expectTrait(ReferenceTrait.class).getReferentId()
       );
+      String memberName = symbolProvider.toMemberName(memberShape);
 
       writer.addStdlibImport("typing", "Optional");
       // Use forward reference for reference traits to avoid circular import
@@ -509,18 +479,6 @@ public class DafnyPythonLocalServiceStructureGenerator
       writer.addStdlibImport(
         symbolProvider.toSymbol(referentShape).getNamespace()
       );
-//    } else if (AwsSdkNameResolver.isAwsSdkShape(target)) {
-//      // AWS SDK shapes are special:
-//      // 1. No imports (boto3 doesn't have shapes to import)
-//      // 2. Shape is always a `dict[str, Any]` (boto3 doesn't have shapes to typehint)
-//      String formatString = "$L: Optional[$L] = None,";
-//      writer.write(
-//        formatString,
-//        memberName,
-//        "dict[str, Any]"
-//      );
-//      writer.addStdlibImport("typing", "Dict");
-//      writer.addStdlibImport("typing", "Any");
     } else {
       super.writeInitMethodParameterForOptionalMember(isError, memberShape);
     }
@@ -599,6 +557,8 @@ public class DafnyPythonLocalServiceStructureGenerator
                   writer.write("$S: d[$S],", memberName, memberName);
                 } else if (
                   target.isStructureShape() &&
+                  // AWS SDK structure shapes don't have a from_dict shape to reference;
+                  // structures are already dicts and get handled in catchall
                   !AwsSdkNameResolver.isAwsSdkShape(target)
                 ) {
                   writer.write(

@@ -22,13 +22,19 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
- * Write a boto3_conversions.py file for AWS SDKs.
+ * Write a boto3_conversions.py file.
+ * <p>
  * The generated file contains a InternalBoto3DynamoDBFormatConverter class
  * with an operation for each operation on a DynamoDB client.
  * Each operation on this class takes in a boto3 dictionary shape
  * from either a Client (boto3.client("dynamodb"))
- * or a Resource (boto3.resource("dynamodb"), maybe with .Table())
+ * or a Resource (boto3.resource("dynamodb"), maybe with .Table() or other operation)
  * and converts it to the other format.
+ * (Clients take in AttributeValues (items/keys) as DDB JSON ({"someKey": {"S": "someValue"}})
+ *  and require ConditionExpressions/KeyExpressions to be strings;
+ *  Resources take in AttributeValues as Python dictionaries ({"someKey": "someValue"})
+ *  and can use boto3.conditions objects for ConditionExpressions/KeyExpressions.)
+ * <p>
  * Creating an instance of this class requires two manually-written functions:
  * - item_handler: Method that converts any `AttributeValue`s in the input to the other format.
  * - expression_handler: Method that converts "expressions" in the input to the other format.
