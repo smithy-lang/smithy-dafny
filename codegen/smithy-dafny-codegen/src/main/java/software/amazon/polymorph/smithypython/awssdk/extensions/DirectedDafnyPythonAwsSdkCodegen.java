@@ -67,14 +67,16 @@ public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
     GenerateServiceDirective<GenerationContext, PythonSettings> directive
   ) {}
 
-  private void removeTmpSymbolwriterDumpFile(CustomizeDirective<GenerationContext, PythonSettings> directive) {
+  private void removeTmpSymbolwriterDumpFile(
+    CustomizeDirective<GenerationContext, PythonSettings> directive
+  ) {
     FileManifest fileManifest = directive.fileManifest();
     Path generationPath = Path.of(
       fileManifest.getBaseDir() +
-        "/" +
-        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-          directive.context().settings().getService().getNamespace()
-        )
+      "/" +
+      SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+        directive.context().settings().getService().getNamespace()
+      )
     );
 
     /**
