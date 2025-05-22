@@ -114,13 +114,6 @@ public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
     }
   }
 
-  @Override
-  public void generateUnion(
-    GenerateUnionDirective<GenerationContext, PythonSettings> directive
-  ) {
-
-  }
-
   /**
    * Call `DirectedPythonCodegen.customizeAfterIntegrations`, then remove `models.py` and
    * `errors.py`. The CodegenDirector will invoke this method after shape generation.
