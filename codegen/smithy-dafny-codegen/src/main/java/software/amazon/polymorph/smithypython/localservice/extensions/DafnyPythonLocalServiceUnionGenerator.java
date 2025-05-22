@@ -152,9 +152,6 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
         symbolProvider.toSymbol(referentShape).getNamespace() +
         "." +
         symbolProvider.toSymbol(referentShape).getName();
-    } else if (AwsSdkNameResolver.isAwsSdkShape(targetShape)) {
-      memberTypehint = "dict[str, Any]";
-      writer.addStdlibImport("typing", "Any");
     }
 
     if (memberTypehint != null) {

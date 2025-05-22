@@ -198,10 +198,10 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    */
   @Override
   public Symbol structureShape(StructureShape shape) {
-//    if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
-//      return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
-//        .structureShape(shape);
-//    }
+    if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
+      return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
+        .structureShape(shape);
+    }
     String name = getDefaultShapeName(shape);
     if (shape.hasTrait(ErrorTrait.class)) {
       String filename = "errors";
@@ -441,10 +441,10 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    */
   @Override
   public Symbol unionShape(UnionShape shape) {
-//    if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
-//      return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
-//        .unionShape(shape);
-//    }
+    if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
+      return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
+        .unionShape(shape);
+    }
     String name = getDefaultShapeName(shape);
     var unknownName = name + "Unknown";
     String filename = "models";
