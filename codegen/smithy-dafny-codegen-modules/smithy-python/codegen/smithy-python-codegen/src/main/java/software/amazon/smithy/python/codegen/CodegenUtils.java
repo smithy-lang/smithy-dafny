@@ -388,6 +388,7 @@ public final class CodegenUtils {
         }
     }
 
+  // Added to Smithy-Dafny-Python's "fork" of Smithy-Python
   /**
    * Returns true if the shape is in an AWS SDK service namespace.
    * @param shape

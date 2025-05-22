@@ -91,6 +91,8 @@ public class UnionGenerator implements Runnable {
 
     @Override
     public void run() {
+        // Override Smithy-Python default unionShape generation
+        // to not generate anything for AWS SDK shapes
         if (CodegenUtils.isAwsSdkShape(this.shape)) {
           return;
         }
@@ -145,7 +147,6 @@ public class UnionGenerator implements Runnable {
         // the default implementation does exactly what we want: an instance check.
         // Since the underlying value is unknown and un-comparable, that is the only
         // realistic implementation.
-        System.out.println(shape.getId());
         var unknownSymbol = symbolProvider.toSymbol(shape).expectProperty("unknown", Symbol.class);
         String unknownSymbolName = unknownSymbol.getName() + "Unknown";
         writer.write("""
