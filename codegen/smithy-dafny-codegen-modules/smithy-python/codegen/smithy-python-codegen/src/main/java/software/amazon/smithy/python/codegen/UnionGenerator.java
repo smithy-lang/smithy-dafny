@@ -25,6 +25,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.utils.StringUtils;
+import software.amazon.smithy.python.codegen.CodegenUtils;
 
 import static java.lang.String.format;
 
@@ -90,6 +91,9 @@ public class UnionGenerator implements Runnable {
 
     @Override
     public void run() {
+        if (CodegenUtils.isAwsSdkShape(this.shape)) {
+          return;
+        }
         var parentName = symbolProvider.toSymbol(shape).getName();
         writer.addStdlibImport("typing", "Dict");
         writer.addStdlibImport("typing", "Any");

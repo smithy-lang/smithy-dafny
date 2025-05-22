@@ -386,4 +386,33 @@ public final class CodegenUtils {
             writer.dedent();
         }
     }
+
+  /**
+   * Returns true if the shape is in an AWS SDK service namespace.
+   * @param shapeId
+   * @return
+   */
+  public static boolean isAwsSdkShape(Shape shape) {
+      return isAwsSdkShape(shape.getId());
+  }
+
+  /**
+   * Returns true if the shape is in an AWS SDK service namespace.
+   * @param shapeId
+   * @return
+   */
+  public static boolean isAwsSdkShape(ShapeId shapeId) {
+    // If the shape namespace is not in our list of known SDK namespaces,
+    // it is not a (known) SDK namespace
+    return isAwsSdkNamespace(shapeId.getNamespace());
+  }
+
+  /**
+   * Returns true if the namespace represents an AWS SDK service namespace.
+   * @param namespace
+   * @return
+   */
+  public static boolean isAwsSdkNamespace(String namespace) {
+    return namespace.startsWith("com.amazonaws");
+  }
 }
