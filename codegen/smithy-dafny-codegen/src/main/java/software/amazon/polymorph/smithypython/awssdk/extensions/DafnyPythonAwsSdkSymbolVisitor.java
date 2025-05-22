@@ -62,9 +62,7 @@ public class DafnyPythonAwsSdkSymbolVisitor
   @Override
   public Symbol unionShape(UnionShape shape) {
     // boto3 doesn't model unions like localServices do.
-    // Any unions are dictionaries.
-    System.out.println("ABC");
-    System.out.println(shape.getType());
+    // Any unions are dictionaries. (ex. AttributeValue)
     String name = "dict[str, Any]";
     return createSymbolBuilder(
       shape,

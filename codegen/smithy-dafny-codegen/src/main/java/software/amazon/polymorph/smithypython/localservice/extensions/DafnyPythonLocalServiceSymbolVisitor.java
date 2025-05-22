@@ -445,6 +445,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
       return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
         .unionShape(shape);
     }
+
     String name = getDefaultShapeName(shape);
     var unknownName = name + "Unknown";
     String filename = "models";
