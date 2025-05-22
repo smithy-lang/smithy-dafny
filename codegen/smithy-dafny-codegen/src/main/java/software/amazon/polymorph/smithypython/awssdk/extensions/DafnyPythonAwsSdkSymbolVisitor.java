@@ -64,11 +64,7 @@ public class DafnyPythonAwsSdkSymbolVisitor
     // boto3 doesn't model unions like localServices do.
     // Any unions are dictionaries. (ex. AttributeValue)
     String name = "dict[str, Any]";
-    return createSymbolBuilder(
-      shape,
-      name,
-      ""
-    )
+    return createSymbolBuilder(shape, name, "")
       .definitionFile(
         getSymbolDefinitionFilePathForNamespaceAndFilename(
           shape.getId().getNamespace(),
@@ -83,11 +79,7 @@ public class DafnyPythonAwsSdkSymbolVisitor
     // boto3 doesn't model structures like localServices do.
     // Any structures are dictionaries.
     String name = "dict[str, Any]";
-    return createSymbolBuilder(
-      shape,
-      name,
-      ""
-    )
+    return createSymbolBuilder(shape, name, "")
       .definitionFile(
         getSymbolDefinitionFilePathForNamespaceAndFilename(
           shape.getId().getNamespace(),

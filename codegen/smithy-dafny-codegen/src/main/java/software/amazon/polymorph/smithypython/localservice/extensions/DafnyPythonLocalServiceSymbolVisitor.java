@@ -5,7 +5,6 @@ import static java.lang.String.format;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkSymbolVisitor;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
