@@ -390,7 +390,7 @@ public final class CodegenUtils {
 
   /**
    * Returns true if the shape is in an AWS SDK service namespace.
-   * @param shapeId
+   * @param shape
    * @return
    */
   public static boolean isAwsSdkShape(Shape shape) {
