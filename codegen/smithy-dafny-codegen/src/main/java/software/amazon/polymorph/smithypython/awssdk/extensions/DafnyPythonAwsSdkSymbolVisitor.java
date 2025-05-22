@@ -65,7 +65,7 @@ public class DafnyPythonAwsSdkSymbolVisitor
     // Any unions are dictionaries.
     System.out.println("ABC");
     System.out.println(shape.getType());
-    String name = "dict[str, ABC]";
+    String name = "dict[str, Any]";
     return createSymbolBuilder(
       shape,
       name,
@@ -84,7 +84,7 @@ public class DafnyPythonAwsSdkSymbolVisitor
   public Symbol structureShape(StructureShape shape) {
     // boto3 doesn't model structures like localServices do.
     // Any structures are dictionaries.
-    String name = "dict[str, XYZ]";
+    String name = "dict[str, Any]";
     return createSymbolBuilder(
       shape,
       name,
