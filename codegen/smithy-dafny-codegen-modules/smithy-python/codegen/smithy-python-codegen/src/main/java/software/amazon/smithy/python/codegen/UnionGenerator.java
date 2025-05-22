@@ -37,7 +37,7 @@ public class UnionGenerator implements Runnable {
     protected final Model model;
     protected final SymbolProvider symbolProvider;
     protected final PythonWriter writer;
-    protected final UnionShape shape;
+    private final UnionShape shape;
     private final Set<Shape> recursiveShapes;
 
     public UnionGenerator(
