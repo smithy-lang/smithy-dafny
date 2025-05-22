@@ -15,6 +15,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.directed.CreateSymbolProviderDirective;
 import software.amazon.smithy.codegen.core.directed.CustomizeDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
+import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.DirectedPythonCodegen;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -111,6 +112,13 @@ public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
         e
       );
     }
+  }
+
+  @Override
+  public void generateUnion(
+    GenerateUnionDirective<GenerationContext, PythonSettings> directive
+  ) {
+
   }
 
   /**
