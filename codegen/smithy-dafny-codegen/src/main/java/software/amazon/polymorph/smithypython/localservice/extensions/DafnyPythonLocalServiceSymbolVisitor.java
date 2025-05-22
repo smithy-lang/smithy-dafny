@@ -5,6 +5,8 @@ import static java.lang.String.format;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+
+import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkSymbolVisitor;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
@@ -196,6 +198,10 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    */
   @Override
   public Symbol structureShape(StructureShape shape) {
+    if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
+      return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
+        .structureShape(shape);
+    }
     String name = getDefaultShapeName(shape);
     if (shape.hasTrait(ErrorTrait.class)) {
       String filename = "errors";
@@ -435,24 +441,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    */
   @Override
   public Symbol unionShape(UnionShape shape) {
-    String name;
     if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
-      // This branch SHOULD only apply to DDB's AttributeValue.
-      // If it does not, raise an exception.
-      // If this needs to be extended or changed substantially, refactor by
-      // replacing localService codegen's default SymbolProvider with a new SymbolProvider implementation
-      // that sends localService Symbols to the current SymbolProvider, and AWS SDK Symbols to a new AWS SDK
-      // SymbolProvider.
-      // TODO: do the above refactor
-      if (!shape.getId().toString().equals("com.amazonaws.dynamodb#AttributeValue")) {
-        throw new IllegalArgumentException("Unsupported AWS SDK union shape " + shape);
-      }
-      name = "dict[str, Any]";
-    } else {
-      name = getDefaultShapeName(shape);
+      return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
+        .unionShape(shape);
     }
-
-
+    String name = getDefaultShapeName(shape);
     var unknownName = name + "Unknown";
     String filename = "models";
     var unknownSymbol = createSymbolBuilder(
