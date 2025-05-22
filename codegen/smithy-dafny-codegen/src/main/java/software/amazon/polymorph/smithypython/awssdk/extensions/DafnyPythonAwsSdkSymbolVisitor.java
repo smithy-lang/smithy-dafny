@@ -84,7 +84,7 @@ public class DafnyPythonAwsSdkSymbolVisitor
   public Symbol structureShape(StructureShape shape) {
     // boto3 doesn't model structures like localServices do.
     // Any structures are dictionaries.
-    String name = "dict[str, Any]";
+    String name = "dict[str, XYZ]";
     return createSymbolBuilder(
       shape,
       name,
