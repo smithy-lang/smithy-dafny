@@ -33,6 +33,15 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
   }
 
   @Override
+  public void run() {
+    System.out.println(this.shape.getId());
+    if (AwsSdkNameResolver.isAwsSdkShape(this.shape)) {
+      return;
+    }
+    super.run();
+  }
+
+  @Override
   protected void writeInitMethodConstraintsChecksForMember(
     MemberShape member,
     String memberName

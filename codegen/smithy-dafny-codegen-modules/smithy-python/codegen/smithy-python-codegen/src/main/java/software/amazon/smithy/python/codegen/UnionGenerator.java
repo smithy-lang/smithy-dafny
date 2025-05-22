@@ -36,7 +36,7 @@ public class UnionGenerator implements Runnable {
     protected final Model model;
     protected final SymbolProvider symbolProvider;
     protected final PythonWriter writer;
-    private final UnionShape shape;
+    protected final UnionShape shape;
     private final Set<Shape> recursiveShapes;
 
     public UnionGenerator(
@@ -141,6 +141,7 @@ public class UnionGenerator implements Runnable {
         // the default implementation does exactly what we want: an instance check.
         // Since the underlying value is unknown and un-comparable, that is the only
         // realistic implementation.
+        System.out.println(shape.getId());
         var unknownSymbol = symbolProvider.toSymbol(shape).expectProperty("unknown", Symbol.class);
         String unknownSymbolName = unknownSymbol.getName() + "Unknown";
         writer.write("""
