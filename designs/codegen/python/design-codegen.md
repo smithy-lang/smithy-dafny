@@ -66,4 +66,4 @@ This appears to be discouraged by Smithy. Smithy code generators tend to declare
 1. Upstreaming changes from Smithy-Dafny’s Smithy-Python fork; relying on Smithy-Python upstream
    1. This should probably wait until Smithy-Python’s interfaces are finalized. Right now, Smithy-Python notes “WARNING: All interfaces are subject to change”. It might cause unneeded churn to integrate with Smithy-Python more closely now if Smithy-Dafny needs to update again later.
 1. Reworking typehints. Typing in Smithy-Dafny Python was tacked on afterward, and is very fragile and overcomplicated as a result.
-    A comprehensive rewrite to override Smithy-Python's typehinting would simplify this logic and increase its robustness.
+   A comprehensive rewrite to override Smithy-Python's typehinting would simplify this logic and increase its robustness.
