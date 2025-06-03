@@ -56,6 +56,24 @@ public class ConfigFileWriter implements CustomFileWriter {
             codegenContext
           );
 
+          // If the config shape is defined in a different localService, import it here.
+          if (
+            !configShape
+              .getId()
+              .getNamespace()
+              .equals(codegenContext.settings().getService().getNamespace())
+          ) {
+            writer.addStdlibImport(
+              "%s.models".formatted(
+                  SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                    configShape.getId().getNamespace(),
+                    codegenContext.settings()
+                  )
+                ),
+              configShape.getId().getName()
+            );
+          }
+
           writer.write(
             """
             def dafny_config_to_smithy_config(dafny_config) -> $L:

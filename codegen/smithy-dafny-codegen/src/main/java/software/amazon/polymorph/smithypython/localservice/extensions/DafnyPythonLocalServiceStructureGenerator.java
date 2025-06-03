@@ -555,7 +555,12 @@ public class DafnyPythonLocalServiceStructureGenerator
                   )
                 ) {
                   writer.write("$S: d[$S],", memberName, memberName);
-                } else if (target.isStructureShape()) {
+                } else if (
+                  target.isStructureShape() &&
+                  // AWS SDK structure shapes don't have a from_dict shape to reference;
+                  // structures are already dicts and get handled in catchall
+                  !AwsSdkNameResolver.isAwsSdkShape(target)
+                ) {
                   writer.write(
                     "$S: $L.from_dict(d[$S]),",
                     memberName,

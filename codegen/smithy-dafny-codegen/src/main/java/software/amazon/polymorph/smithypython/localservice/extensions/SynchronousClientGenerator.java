@@ -425,7 +425,11 @@ public class SynchronousClientGenerator extends ClientGenerator {
               transport_request=None,
               transport_response=None,
           )
-          _client_interceptors = config.interceptors
+          try:
+            _client_interceptors = config.interceptors
+          except AttributeError:
+            config.interceptors = []
+            _client_interceptors = config.interceptors
           client_interceptors = cast(
               list[Interceptor[Input, Output, $2T, $3T]], _client_interceptors
           )

@@ -122,7 +122,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     }
     return """
     func () %s {
-        var v []interface{}
+        v := make([]interface{}, 0, len(input))
         if %s == nil {return %s}
         for _, e := range %s {
         	v = append(v, e)
@@ -133,7 +133,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         dataSource,
         nilWrapIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 
@@ -239,14 +239,12 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     var nilWrapIfRequired = "nil";
     var someWrapIfRequired = "%s";
     var returnType = "dafny.Map";
+    var nilCheck = "";
 
     if (this.isOptional) {
       nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
       returnType = "Wrappers.Option";
-    }
-    var nilCheck = "";
-    if (isPointerType) {
       nilCheck =
         "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
     }
@@ -374,10 +372,23 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         shape,
         context.symbolProvider().toSymbol(shape)
       );
-
+      var noEnumMatchedCheck =
+        """
+        if index == len(%s.Values()) {
+          panic("Input value did not found in enum values")
+        }
+        """.formatted(dataSource);
       if (this.isOptional) {
         someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
         returnType = "Wrappers.Option";
+        // In AWS SDK, some shapes don't have required trait and also don't have pointers in it.
+        // This will result the default value of the string be "" if not provided.
+        noEnumMatchedCheck =
+          """
+            if index == len(%s.Values()) {
+              return Wrappers.Companion_Option_.Create_None_()
+            }
+          """.formatted(dataSource);
       }
 
       return """
@@ -388,6 +399,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       		if enumVal == %s{
       			break;
       		}
+          %s
       	}
       	var enum interface{}
       	for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
@@ -402,6 +414,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           returnType,
           dataSource,
           dataSource,
+          noEnumMatchedCheck,
           DafnyNameResolver.getDafnyCompanionStructType(
             shape,
             context.symbolProvider().toSymbol(shape)
@@ -434,28 +447,22 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       }
 
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-        writer.addUseImports(SmithyGoDependency.stdlib("unicode/utf8"));
+        throw new UnsupportedOperationException(
+          "Dafny utf8bytes trait is not supported in aws sdk models: " +
+          shape.toShapeId().getName()
+        );
       }
-      final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
-        ? """
-            dafny.SeqOf(func () []interface{} {
-            utf8.ValidString(%s%s)
-            b := []byte(%s%s)
-            f := make([]interface{}, len(b))
-            for i, v := range b {
-                f[i] = v
+
+      writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "UTF8");
+      final var underlyingType =
+        """
+            func () dafny.Sequence {
+            res, err := UTF8.DecodeFromNativeGoByteArray([]byte(%s%s))
+            if err != nil {
+              panic("invalid utf8 input provided")
             }
-            return f
-        }()...)""".formatted(
-            dereferenceIfRequired,
-            dataSource,
-            dereferenceIfRequired,
-            dataSource
-          )
-        : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(
-            dereferenceIfRequired,
-            dataSource
-          );
+            return res
+        }()""".formatted(dereferenceIfRequired, dataSource);
 
       return """
       func () %s {
@@ -558,7 +565,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
      var bits = math.Float64bits(%s%s)
         var bytes = make([]byte, 8)
         binary.LittleEndian.PutUint64(bytes, bits)
-     var v []interface{}
+     v := make([]interface{}, 0, 8)
      for _, e := range bytes {
       v = append(v, e)
      }
@@ -568,7 +575,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         nilCheck,
         dereferenceIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 
@@ -690,7 +697,14 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           nilCheck,
           dataSource,
           someWrapIfRequired.formatted(
-            "dafny.SeqOfChars([]dafny.Char(formattedTime)...)"
+            """
+            func () dafny.Sequence {
+              res, err := UTF8.DecodeFromNativeGoByteArray([]byte(formattedTime))
+              if err != nil {
+                panic("invalid utf8 input provided")
+               }
+            return res
+            }()"""
           )
         );
     return conversionCode;
