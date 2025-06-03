@@ -6,6 +6,7 @@ package software.amazon.polymorph.smithypython.awssdk;
 import java.util.ArrayList;
 import java.util.List;
 import software.amazon.polymorph.smithypython.awssdk.customize.AwsSdkShimFileWriter;
+import software.amazon.polymorph.smithypython.awssdk.customize.Boto3DynamoDBFormatConverterWriter;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -50,6 +51,8 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
     GenerationContext codegenContext
   ) {
     new AwsSdkShimFileWriter()
+      .customizeFileForServiceShape(serviceShape, codegenContext);
+    new Boto3DynamoDBFormatConverterWriter()
       .customizeFileForServiceShape(serviceShape, codegenContext);
   }
 

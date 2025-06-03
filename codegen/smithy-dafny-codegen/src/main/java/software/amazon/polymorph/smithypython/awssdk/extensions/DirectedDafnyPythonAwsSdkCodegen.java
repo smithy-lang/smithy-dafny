@@ -15,6 +15,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.directed.CreateSymbolProviderDirective;
 import software.amazon.smithy.codegen.core.directed.CustomizeDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
+import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.DirectedPythonCodegen;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -66,21 +67,9 @@ public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
     GenerateServiceDirective<GenerationContext, PythonSettings> directive
   ) {}
 
-  /**
-   * Call `DirectedPythonCodegen.customizeAfterIntegrations`, then remove `models.py` and
-   * `errors.py`. The CodegenDirector will invoke this method after shape generation.
-   *
-   * @param directive Directive to perform.
-   */
-  @Override
-  public void customizeAfterIntegrations(
+  private void removeTmpSymbolwriterDumpFile(
     CustomizeDirective<GenerationContext, PythonSettings> directive
   ) {
-    // DirectedPythonCodegen's customizeAfterIntegrations implementation SHOULD run first;
-    //   its implementation writes all files by flushing its writers;
-    //   this implementation removes some of those files.
-    super.customizeAfterIntegrations(directive);
-
     FileManifest fileManifest = directive.fileManifest();
     Path generationPath = Path.of(
       fileManifest.getBaseDir() +
@@ -125,5 +114,31 @@ public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
         e
       );
     }
+  }
+
+  /**
+   * Call `DirectedPythonCodegen.customizeAfterIntegrations`, then remove `models.py` and
+   * `errors.py`. The CodegenDirector will invoke this method after shape generation.
+   *
+   * @param directive Directive to perform.
+   */
+  @Override
+  public void customizeAfterIntegrations(
+    CustomizeDirective<GenerationContext, PythonSettings> directive
+  ) {
+    // DirectedPythonCodegen's customizeAfterIntegrations implementation SHOULD run first;
+    //   its implementation writes all files by flushing its writers;
+    //   this implementation removes some of those files.
+    try {
+      super.customizeAfterIntegrations(directive);
+    } catch (CodegenException e) {
+      if (e.getMessage().contains("python3 -m black . --exclude")) {
+        // If the tmp dump file contains invalid symbols, formatting will fail.
+        // Apparent workaround: Remove the tmp dump file, then re-run super's customize.
+        removeTmpSymbolwriterDumpFile(directive);
+        super.customizeAfterIntegrations(directive);
+      }
+    }
+    removeTmpSymbolwriterDumpFile(directive);
   }
 }
