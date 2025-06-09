@@ -767,7 +767,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             .getProperty("Referred", Symbol.class)
             .get()
         );
-
+      writer.addImportFromModule(
+        SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+          shape.toShapeId().getNamespace()
+        ),
+        DafnyNameResolver.dafnyTypesNamespace(shape)
+      );
       eachMemberInUnion.append(
         """
         case *%s.%s:
