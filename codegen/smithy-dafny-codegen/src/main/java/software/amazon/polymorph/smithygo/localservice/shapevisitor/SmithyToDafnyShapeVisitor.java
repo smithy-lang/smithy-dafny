@@ -166,13 +166,13 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     //Handle @reference{Service} shape
     if (resourceOrService.asServiceShape().isPresent()) {
       var clientConversion = dataSource.concat(".DafnyClient");
+      writer.addImportFromModule(
+        SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+          resourceOrService.toShapeId().getNamespace()
+        ),
+        DafnyNameResolver.dafnyTypesNamespace(resourceOrService)
+      );
       if (resourceOrService.hasTrait(ServiceTrait.class)) {
-        writer.addImportFromModule(
-          SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-            resourceOrService.toShapeId().getNamespace()
-          ),
-          DafnyNameResolver.dafnyTypesNamespace(resourceOrService)
-        );
         final var shim =
           "%swrapped.Shim".formatted(
               DafnyNameResolver.dafnyNamespace(
@@ -767,7 +767,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             .getProperty("Referred", Symbol.class)
             .get()
         );
-
+      writer.addImportFromModule(
+        SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+          shape.toShapeId().getNamespace()
+        ),
+        DafnyNameResolver.dafnyTypesNamespace(shape)
+      );
       eachMemberInUnion.append(
         """
         case *%s.%s:
