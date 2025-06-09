@@ -103,6 +103,7 @@ transpile_implementation:
 		--stdin \
 		--no-verify \
 		--cores:$(CORES) \
+		--enforce-determinism \
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
@@ -138,7 +139,7 @@ dafny_benerate: DAFNY_RUST_OUTPUT_RS_DTR=\
 dafny_benerate: DAFNY_RUST_IMPL=\
 	runtimes/rust/src/implementation_from_dafny.rs
 dafny_benerate:
-	$(DAFNY) translate rs src/Index.dfy  --emit-uncompilable-code --no-verify   --optimize-erasable-datatype-wrapper false   --include-runtime   --compile-suffix true   --unicode-char false   --function-syntax 3   --allow-warnings   --output $(DAFNY_RUST_OUTPUT)
+	$(DAFNY) translate rs src/Index.dfy  --emit-uncompilable-code --no-verify --enforce-determinism  --optimize-erasable-datatype-wrapper false   --include-runtime   --compile-suffix true   --unicode-char false   --function-syntax 3   --allow-warnings   --output $(DAFNY_RUST_OUTPUT)
 	rustfmt $(DAFNY_RUST_OUTPUT_RS)
 	# echo "Diffs remaining till code generation works:"
 	# diff -u $(DAFNY_RUST_OUTPUT_RS) $(DAFNY_RUST_IMPL) | wc -l

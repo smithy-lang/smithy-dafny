@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import static java.lang.String.format;
 
 import java.util.Set;
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.localservice.ConstraintUtils;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -138,6 +139,8 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
     Shape targetShape,
     Symbol targetSymbol
   ) {
+    String memberTypehint = null;
+
     // Override Smithy-Python to handle shapes with ReferenceTraits
     if (targetShape.hasTrait(ReferenceTrait.class)) {
       Shape referentShape = model.expectShape(
@@ -145,14 +148,18 @@ public class DafnyPythonLocalServiceUnionGenerator extends UnionGenerator {
       );
 
       // Use forward reference for reference traits to avoid circular import
-      String memberType =
+      memberTypehint =
         symbolProvider.toSymbol(referentShape).getNamespace() +
         "." +
         symbolProvider.toSymbol(referentShape).getName();
+    }
 
+    // Generate custom logic for reference shape;
+    // otherwise, defer to Smithy-Python logic
+    if (memberTypehint != null) {
       String formatString = format(
         "def __init__(self, value: '%s'):",
-        memberType
+        memberTypehint
       );
       writer.openBlock(
         formatString,

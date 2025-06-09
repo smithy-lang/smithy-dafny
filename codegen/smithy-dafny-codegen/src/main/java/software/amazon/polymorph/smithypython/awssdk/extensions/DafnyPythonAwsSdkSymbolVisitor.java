@@ -5,7 +5,10 @@ import static java.lang.String.format;
 import software.amazon.polymorph.smithypython.awssdk.AwsSdkCodegenConstants;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceSymbolVisitor;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.PythonSettings;
 
 /**
@@ -54,5 +57,35 @@ public class DafnyPythonAwsSdkSymbolVisitor
       directoryFilePath,
       AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
     );
+  }
+
+  @Override
+  public Symbol unionShape(UnionShape shape) {
+    // boto3 doesn't model unions like localServices do.
+    // Any unions are dictionaries. (ex. AttributeValue)
+    String name = "dict[str, Any]";
+    return createSymbolBuilder(shape, name, "")
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          ""
+        )
+      )
+      .build();
+  }
+
+  @Override
+  public Symbol structureShape(StructureShape shape) {
+    // boto3 doesn't model structures like localServices do.
+    // Any structures are dictionaries.
+    String name = "dict[str, Any]";
+    return createSymbolBuilder(shape, name, "")
+      .definitionFile(
+        getSymbolDefinitionFilePathForNamespaceAndFilename(
+          shape.getId().getNamespace(),
+          ""
+        )
+      )
+      .build();
   }
 }
