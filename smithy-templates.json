@@ -1,0 +1,11 @@
+{
+  "name": "smithy-dafny",
+  "templates": {
+    "polymorph-tutorial": {
+      "documentation": "Basic Polymorphing tutorial.",
+      "path": "examples/tutorial",
+      "include": [
+      ]
+    }
+  }
+}
