@@ -107,7 +107,7 @@ transpile_implementation:
 		--unicode-char:false \
 		--function-syntax:3 \
 		--output $(OUT) \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES), bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
+		$(if $(USE_DAFNY_STANDARD_LIBRARIES), ./bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
 		$(TRANSPILE_MODULE_NAME)

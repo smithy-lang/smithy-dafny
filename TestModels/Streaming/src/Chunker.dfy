@@ -107,9 +107,10 @@ module {:options "--function-syntax:4"} Chunker {
       assert Valid();
       var input := new SeqReader([i]);
       var output := new SeqWriter();
-      var outputTotalProof := new SeqWriterTotalActionProof(output);
+      ghost var thisTotalProof := new ChunkerTotalProof(this);
+      ghost var outputTotalProof := new SeqWriterTotalActionProof(output);
       label before:
-      BulkInvoke(input, output, outputTotalProof);
+      Map(input, output, thisTotalProof, outputTotalProof);
       assert |output.values| == 1;
       o := output.values[0];
       assert Seq.Last(output.Inputs()) == o;
@@ -118,9 +119,10 @@ module {:options "--function-syntax:4"} Chunker {
 
     @ResourceLimit("1e9")
     @IsolateAssertions
-    method BulkInvoke(input: Producer<BB>,
-                      output: IConsumer<Producer<BB>>,
-                      outputTotalProof: TotalActionProof<Producer<BB>, ()>)
+    method Map(input: Producer<BB>,
+               output: IConsumer<Producer<BB>>,
+               ghost thisTotalProof: TotalActionProof<BB, Producer<BB>>, 
+               ghost outputTotalProof: TotalActionProof<Producer<BB>, ()>)
       requires Valid()
       requires input.Valid()
       requires output.Valid()
