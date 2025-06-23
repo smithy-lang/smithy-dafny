@@ -17,3 +17,6 @@ aws-config = "1.5.4"
 [dependencies.tokio]
 version = "1.26.0"
 features = ["full"]
+
+[features]
+small-int = ["dafny_runtime/small-int"]

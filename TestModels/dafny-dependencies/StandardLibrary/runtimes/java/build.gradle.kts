@@ -66,6 +66,11 @@ dependencies {
     api("software.amazon.awssdk:sdk-core:2.28.28")
 }
 publishing {
+    publications.create<MavenPublication>("mavenLocal") {
+        groupId = group as String?
+        artifactId = description
+        from(components["java"])
+    }
     publications.create<MavenPublication>("maven") {
         groupId = "software.amazon.cryptography"
         artifactId = "StandardLibrary"

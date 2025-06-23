@@ -4,7 +4,4 @@
 [submodule "TestModels/dafny-dependencies/dafny"]
 	path = TestModels/dafny-dependencies/dafny
 	url = git@github.com:dafny-lang/dafny.git
-	branch = actions-and-streaming-stdlibs
-[submodule "examples/tutorial/smithy-dafny"]
-	path = examples/tutorial/smithy-dafny
-	url = git@github.com:smithy-lang/smithy-dafny.git
+	branch = more-streaming-libs

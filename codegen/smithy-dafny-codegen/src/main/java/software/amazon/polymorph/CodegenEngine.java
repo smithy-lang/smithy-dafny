@@ -1305,7 +1305,7 @@ public class CodegenEngine {
       // If the version has not been released yet,
       // downgrade it. Otherwise, the system will not find runtime libraries
       // with the same version.
-      // The better fix for this is for Dafny to pre-release
+      // The better fix for this is for Dafny to pre-release runtimes as well.
       if (dafnyVersion.compareTo(MAX_DAFNY_VERSION) > 0) {
         LOGGER.warn(
           "Dafny version {} appears to be unreleased, downgrading to {} to ensure runtimes are available",

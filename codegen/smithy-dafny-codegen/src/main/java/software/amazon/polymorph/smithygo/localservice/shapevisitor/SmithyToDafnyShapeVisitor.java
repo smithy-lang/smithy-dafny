@@ -35,6 +35,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -165,13 +166,13 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     //Handle @reference{Service} shape
     if (resourceOrService.asServiceShape().isPresent()) {
       var clientConversion = dataSource.concat(".DafnyClient");
+      writer.addImportFromModule(
+        SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+          resourceOrService.toShapeId().getNamespace()
+        ),
+        DafnyNameResolver.dafnyTypesNamespace(resourceOrService)
+      );
       if (resourceOrService.hasTrait(ServiceTrait.class)) {
-        writer.addImportFromModule(
-          SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-            resourceOrService.toShapeId().getNamespace()
-          ),
-          DafnyNameResolver.dafnyTypesNamespace(resourceOrService)
-        );
         final var shim =
           "%swrapped.Shim".formatted(
               DafnyNameResolver.dafnyNamespace(
@@ -225,7 +226,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     }
     return """
     func () %s {
-        var v []interface{}
+        v := make([]interface{}, 0, len(input))
         if %s == nil {return %s}
         for _, e := range %s {
         	v = append(v, e)
@@ -236,7 +237,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         dataSource,
         nilWrapIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 
@@ -421,7 +422,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       """
       func () %s {
              %s
-             var fieldValue []interface{} = make([]interface{}, 0)
+             var fieldValue []interface{} = make([]interface{}, 0, len(input))
              for _, val := range %s {
                  element := %s
                  fieldValue = append(fieldValue, element)
@@ -497,10 +498,20 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       }
 
       var nilCheck = "";
+      var noEnumMatchedCheck = "";
       final var dereferenceIfRequired = isPointerType ? "*" : "";
       if (isPointerType) {
         nilCheck =
           "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
+      } else {
+        // String is not pointer when its required.
+        // If string is not pointer and enum did not match to any value panic
+        noEnumMatchedCheck =
+          """
+          if index == len(%s.Values()) {
+            panic("Input value did not found in enum values")
+          }
+          """.formatted(dataSource);
       }
       return """
         func () %s {
@@ -511,6 +522,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       		if enumVal == %s%s{
       			break;
       		}
+          %s
       	}
       	var enum interface{}
       	for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
@@ -527,6 +539,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           dataSource,
           dereferenceIfRequired,
           dataSource,
+          noEnumMatchedCheck,
           DafnyNameResolver.getDafnyCompanionStructType(
             shape,
             context.symbolProvider().toSymbol(shape)
@@ -560,11 +573,16 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
         writer.addUseImports(SmithyGoDependency.stdlib("unicode/utf8"));
+      } else {
+        writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "UTF8");
       }
+
       final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
         ? """
             dafny.SeqOf(func () []interface{} {
-            utf8.ValidString(%s%s)
+            if !utf8.ValidString(%s%s) {
+                panic("invalid utf8 input provided")
+            }
             b := []byte(%s%s)
             f := make([]interface{}, len(b))
             for i, v := range b {
@@ -577,10 +595,14 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             dereferenceIfRequired,
             dataSource
           )
-        : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(
-            dereferenceIfRequired,
-            dataSource
-          );
+        : """
+            func () dafny.Sequence {
+            res, err := UTF8.DecodeFromNativeGoByteArray([]byte(%s%s))
+            if err != nil {
+              panic("invalid utf8 input provided")
+            }
+            return res
+        }()""".formatted(dereferenceIfRequired, dataSource);
 
       return """
       func () %s {
@@ -683,7 +705,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         var bits = math.Float64bits(%s%s)
         var bytes = make([]byte, 8)
         binary.LittleEndian.PutUint64(bytes, bits)
-        var v []interface{}
+        v := make([]interface{}, 0, 8)
         for _, e := range bytes {
             v = append(v, e)
         }
@@ -693,7 +715,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         nilCheck,
         dereferenceIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 
@@ -745,7 +767,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             .getProperty("Referred", Symbol.class)
             .get()
         );
-
+      writer.addImportFromModule(
+        SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+          shape.toShapeId().getNamespace()
+        ),
+        DafnyNameResolver.dafnyTypesNamespace(shape)
+      );
       eachMemberInUnion.append(
         """
         case *%s.%s:
@@ -822,7 +849,14 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           nilCheck,
           dataSource,
           someWrapIfRequired.formatted(
-            "dafny.SeqOfChars([]dafny.Char(formattedTime)...)"
+            """
+            func () dafny.Sequence {
+              res, err := UTF8.DecodeFromNativeGoByteArray([]byte(formattedTime))
+              if err != nil {
+                panic("invalid utf8 input provided")
+               }
+            return res
+            }()"""
           )
         );
     return conversionCode;

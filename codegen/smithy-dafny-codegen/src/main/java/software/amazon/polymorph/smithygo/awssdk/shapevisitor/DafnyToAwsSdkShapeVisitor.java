@@ -133,18 +133,15 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       : dataSource;
     return """
     func () []byte {
-    var b []byte
-    if %s == nil {
-        return nil
-    }
-    for i := dafny.Iterate(%s) ; ; {
-        val, ok := i()
-        if !ok {
-            return b
-        } else {
-            b = append(b, val.(byte))
-        }
-    }
+      if %s == nil {
+          return nil
+      }
+      a := %s.(dafny.Sequence).ToArray().(dafny.GoNativeArray);
+      b := make([]byte, 0, a.Length())
+      for i := uint32(0); i < a.Length(); i++ {
+        b = append(b, a.Select(i).(byte))
+      }
+      return b
     }()""".formatted(unAssertedDataSource, dataSource);
   }
 
@@ -466,10 +463,12 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         );
     }
 
-    //Handle the @utf8Bytes Trait
-    final var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class)
-      ? "uint8"
-      : "dafny.Char";
+    if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+      throw new UnsupportedOperationException(
+        "Dafny utf8bytes trait is not supported in aws sdk models: " +
+        shape.toShapeId().getName()
+      );
+    }
 
     var nilCheck = "";
     final String unAssertedDataSource = dataSource.startsWith("input.(")
@@ -481,28 +480,23 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         nilCheck =
           "if %s == nil { return nil }".formatted(unAssertedDataSource);
       } else {
-        nilCheck = "if %s == nil { return s }".formatted(unAssertedDataSource);
+        nilCheck =
+          "if %s == nil { return \"\" }".formatted(unAssertedDataSource);
       }
     }
 
+    writer.addImportFromModule(SMITHY_DAFNY_STD_LIB_GO, "UTF8");
     return """
-     func() (%sstring) {
-         var s string
-     %s
-         for i := dafny.Iterate(%s) ; ; {
-             val, ok := i()
-             if !ok {
-                 return %s[]string{s}[0]
-             } else {
-                 s = s + string(val.(%s))
-             }
-        }
+    func() (%sstring) {
+      %s
+      a := UTF8.Encode(%s.(dafny.Sequence)).Dtor_value()
+      s := string(dafny.ToByteArray(a.(dafny.Sequence)))
+      return %ss
     }()""".formatted(
         this.isPointable ? "*" : "",
         nilCheck,
         dataSource,
-        this.isPointable ? "&" : "",
-        underlyingType
+        this.isPointable ? "&" : ""
       );
   }
 
@@ -724,16 +718,9 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     return """
     	func() %stime.Time {
-    	var s string
     	%s
-    	for i := dafny.Iterate(%s.(dafny.Sequence)); ; {
-    		val, ok := i()
-    		if !ok {
-    			break
-    		} else {
-    			s = s + string(val.(dafny.Char))
-    		}
-    	}
+      a := UTF8.Encode(%s.(dafny.Sequence)).Dtor_value()
+      s := string(dafny.ToByteArray(a.(dafny.Sequence)))
     	if len(s) == 0 {
     		panic("timestamp string is empty")
     	} else {
