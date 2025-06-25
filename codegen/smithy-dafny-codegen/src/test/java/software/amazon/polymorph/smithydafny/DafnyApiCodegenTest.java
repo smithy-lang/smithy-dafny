@@ -35,7 +35,7 @@ public class DafnyApiCodegenTest {
       model,
       serviceShape,
       Path.of(""),
-      Path.of(""),
+      List.of(),
       new Path[0],
       false
     );

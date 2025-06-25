@@ -34,6 +34,8 @@ unicode-char = false
 # TODO: Required because this file isn't named dfyconfig.toml :P
 allow-warnings = true
 
+hidden-no-verify = true
+
 # Options important for sustainable development
 # of the libraries themselves.
 resource-limit = 1000000

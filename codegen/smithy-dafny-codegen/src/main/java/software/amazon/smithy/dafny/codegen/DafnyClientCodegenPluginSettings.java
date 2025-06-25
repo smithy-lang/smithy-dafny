@@ -53,7 +53,7 @@ class DafnyClientCodegenPluginSettings {
    * <p>
    * TODO: replace this with something cleaner
    */
-  public final Path includeDafnyFile;
+  public final List<Path> includeDafnyFiles;
 
   /**
    * The Dafny version to generate code compatible with.
@@ -67,13 +67,13 @@ class DafnyClientCodegenPluginSettings {
     final DafnyClientCodegenEdition edition,
     final ShapeId serviceId,
     final Set<CodegenEngine.TargetLanguage> targetLanguages,
-    final Path includeDafnyFile,
+    final List<Path> includeDafnyFiles,
     final DafnyVersion dafnyVersion
   ) {
     this.edition = edition;
     this.serviceId = serviceId;
     this.targetLanguages = targetLanguages;
-    this.includeDafnyFile = includeDafnyFile;
+    this.includeDafnyFiles = includeDafnyFiles;
     this.dafnyVersion = dafnyVersion;
   }
 
@@ -128,20 +128,25 @@ class DafnyClientCodegenPluginSettings {
 
     final Optional<Path> buildRoot = findSmithyBuildJson(manifest.getBaseDir())
       .map(p -> p.getParent());
-    final String includeDafnyFileStr = node
-      .expectStringMember("includeDafnyFile")
-      .getValue();
-    final Path includeDafnyFile = Path.of(includeDafnyFileStr);
-    final Path includeDafnyFileNormalized = buildRoot.isPresent() &&
-      !includeDafnyFile.isAbsolute()
-      ? buildRoot.get().resolve(includeDafnyFile).toAbsolutePath().normalize()
-      : includeDafnyFile;
-    if (Files.notExists(includeDafnyFileNormalized)) {
-      LOGGER.warn(
-        "Generated Dafny code may not compile because the includeDafnyFile could not be found: {}",
-        includeDafnyFileNormalized
-      );
-    }
+    final List<Path> includeDafnyFilesNormalized = node
+      .expectArrayMember("includeDafnyFiles")
+      .getElementsAs(StringNode.class)
+      .stream()
+      .map(pathNode -> {
+        final Path includeDafnyFile = Path.of(pathNode.getValue());
+        final Path includeDafnyFileNormalized = buildRoot.isPresent() &&
+          !includeDafnyFile.isAbsolute()
+          ? buildRoot.get().resolve(includeDafnyFile).toAbsolutePath().normalize()
+          : includeDafnyFile;
+        if (Files.notExists(includeDafnyFileNormalized)) {
+          LOGGER.warn(
+            "Generated Dafny code may not compile because the includeDafnyFile could not be found: {}",
+            includeDafnyFileNormalized
+          );
+        }
+        return includeDafnyFileNormalized;
+      })
+      .toList();
 
     // This is now optional since we can get it from dafny itself
     final DafnyVersion dafnyVersionString = node
@@ -155,7 +160,7 @@ class DafnyClientCodegenPluginSettings {
         edition,
         serviceId,
         targetLanguages,
-        includeDafnyFileNormalized,
+        includeDafnyFilesNormalized,
         dafnyVersionString
       )
     );

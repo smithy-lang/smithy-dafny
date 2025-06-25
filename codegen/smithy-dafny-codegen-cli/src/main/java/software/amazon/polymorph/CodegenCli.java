@@ -139,7 +139,8 @@ public class CodegenCli {
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
       .withDafnyVersion(cliArguments.dafnyVersion)
       .withUpdatePatchFiles(cliArguments.updatePatchFiles)
-      .withGenerationAspects(cliArguments.generationAspects);
+      .withGenerationAspects(cliArguments.generationAspects)
+      .withIncludeDafnyFiles(cliArguments.includeDafnyFiles);
     // Rust currently generates all code for all dependencies at once,
     // and the makefile structure makes it very difficult to avoid passing --local-service-test
     // when we don't actually want it for --aws-sdk style projects.
@@ -158,9 +159,6 @@ public class CodegenCli {
     cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
     cliArguments.javaAwsSdkVersion.ifPresent(
       engineBuilder::withJavaAwsSdkVersion
-    );
-    cliArguments.includeDafnyFile.ifPresent(
-      engineBuilder::withIncludeDafnyFile
     );
     cliArguments.libraryName.ifPresent(engineBuilder::withLibraryName);
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
@@ -519,7 +517,7 @@ public class CodegenCli {
     Optional<AwsSdkVersion> javaAwsSdkVersion,
     DafnyVersion dafnyVersion,
     Optional<Path> propertiesFile,
-    Optional<Path> includeDafnyFile,
+    List<Path> includeDafnyFiles,
     boolean awsSdkStyle,
     boolean localServiceTest,
     Optional<Path> patchFilesDir,
@@ -664,9 +662,13 @@ public class CodegenCli {
         .ofNullable(commandLine.getOptionValue("properties-file"))
         .map(Paths::get);
 
-      Optional<Path> includeDafnyFile = Optional
-        .ofNullable(commandLine.getOptionValue("include-dafny"))
-        .map(Paths::get);
+      final String[] includeDafnyFileOptions = Optional
+        .ofNullable(commandLine.getOptionValues("include-dafny"))
+        .orElse(new String[0]);
+      final List<Path> includeDafnyFiles = Arrays
+        .stream(includeDafnyFileOptions)
+        .map(Paths::get)
+        .toList();
 
       Optional<Path> patchFilesDir = Optional
         .ofNullable(commandLine.getOptionValue("patch-files-dir"))
@@ -702,7 +704,7 @@ public class CodegenCli {
           javaAwsSdkVersion,
           dafnyVersion,
           propertiesFile,
-          includeDafnyFile,
+          includeDafnyFiles,
           awsSdkStyle,
           localServiceTest,
           patchFilesDir,
