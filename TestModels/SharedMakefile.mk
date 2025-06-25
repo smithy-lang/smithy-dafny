@@ -25,8 +25,7 @@ _polymorph_code_gen: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtime
 _polymorph_code_gen: _polymorph
 _polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=\
     --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy  \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES), ", $(PROJECT_ROOT)/StreamingSupport/src/Index.dfy", )
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
 _polymorph_code_gen: _polymorph_wrapped
@@ -47,12 +46,11 @@ polymorph_dafny:
 _polymorph_dafny: OUTPUT_DAFNY=\
 		--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_dafny: INPUT_DAFNY=\
-		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, $(PROJECT_ROOT)/StreamingSupport/src/Index.dfy
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, $(PROJECT_ROOT)/dafny-dependencies/StreamingSupport/src/Index.dfy
 _polymorph_dafny: _polymorph
 _polymorph_dafny: OUTPUT_DAFNY_WRAPPED=\
     --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-    --include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES), ", $(PROJECT_ROOT)/StreamingSupport/src/Index.dfy", )
+    --include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dafny: _polymorph_wrapped
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated

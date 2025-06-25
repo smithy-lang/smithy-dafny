@@ -333,7 +333,8 @@ public class CodegenCli {
           .builder()
           .longOpt("include-dafny")
           .desc("<optional> files to be include in the generated Dafny")
-          .hasArg()
+          .hasArgs()
+          .valueSeparator(',')
           .build()
       )
       .addOption(
