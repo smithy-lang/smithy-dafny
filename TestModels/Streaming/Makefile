@@ -20,8 +20,9 @@ SERVICE_DEPS_SimpleStreaming :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-# This project has no dependencies 
-# DEPENDENT-MODELS:= 
+PROJECT_DEPENDENCIES :=
+
+PROJECT_INDEX :=
 
 # Python
 

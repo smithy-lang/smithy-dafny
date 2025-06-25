@@ -83,9 +83,6 @@ ENABLE_EXTERN_PROCESSING?=
 ENFORCE_DETERMINISM_OPTION := $(shell cd $(CODEGEN_CLI_ROOT); \
 	./../gradlew run -q --args="if-dafny-at-least --dafny-version 4.8 --text --enforce-determinism")
 
-# TODO: Remove parameter if possible
-USE_DAFNY_STANDARD_LIBRARIES := 1
-
 # Verify the entire project
 verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
 verify:DAFNY_PROCESSES=$(shell echo $$(( ($(CORES) - 1 ) / ($(CORES) >= 3 ? 2 : 1))))
