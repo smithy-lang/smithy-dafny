@@ -35,4 +35,3 @@ INDEX_FILE_WITHOUT_EXTERN_STRING="module Com.Amazonaws.S3 refines AbstractComAma
 
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
