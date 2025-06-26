@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 include "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
+include "../../dafny-dependencies/StreamingSupport/src/Index.dfy"
 module {:extern "simple.streaming.internaldafny.types" } SimpleStreamingTypes
 {
   import opened Wrappers

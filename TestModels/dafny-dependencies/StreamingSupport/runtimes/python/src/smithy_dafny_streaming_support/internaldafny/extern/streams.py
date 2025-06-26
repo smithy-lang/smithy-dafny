@@ -1,7 +1,7 @@
 
 from _dafny import Seq, Array as DafnyArray
 from smithy_python.interfaces.blobs import ByteStream
-from smithy_dafny_standard_library.internaldafny.generated.StandardLibrary_Streams import DataStream
+from smithy_dafny_streaming_support.internaldafny.generated.StandardLibrary_Streams import DataStream
 from smithy_dafny_standard_library.internaldafny.generated.Std_BulkActions import BatchSeqWriter, BatchArrayWriter, Batched_BatchValue, Batched_EndOfInput, BatchReader
 from smithy_dafny_standard_library.internaldafny.generated.Std_Consumers import IgnoreNConsumer
 from smithy_dafny_standard_library.internaldafny.generated.Std_Producers import Producer
