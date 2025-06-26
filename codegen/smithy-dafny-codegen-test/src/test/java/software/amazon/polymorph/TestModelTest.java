@@ -95,7 +95,8 @@ public abstract class TestModelTest {
     DafnyVersion dafnyVersion = CodegenEngine.getDafnyVersionFromDafny();
     boolean needsStreaming =
       relativeTestModelPath.endsWith("Streaming") ||
-      relativeTestModelPath.endsWith("s3");
+      relativeTestModelPath.endsWith("s3") ||
+      relativeTestModelPath.endsWith("StreamingSupport");
     if (dafnyVersion.compareTo(DafnyVersion.parse("4.10.0")) < 0) {
       Assumptions.assumeFalse(needsStreaming);
     } else {
