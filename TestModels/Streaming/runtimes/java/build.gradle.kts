@@ -47,6 +47,7 @@ dependencies {
     implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
+    implementation("software.amazon.cryptography:StreamingSupport:1.0-SNAPSHOT")
     testImplementation("org.testng:testng:7.5")
 }
 

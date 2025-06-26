@@ -63,6 +63,7 @@ repositories {
 dependencies {
     implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1.1")
+    implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     api("software.amazon.awssdk:sdk-core:2.28.28")
 }
 publishing {
@@ -73,7 +74,7 @@ publishing {
     }
     publications.create<MavenPublication>("maven") {
         groupId = "software.amazon.cryptography"
-        artifactId = "StandardLibrary"
+        artifactId = "StreamingSupport"
         from(components["java"])
     }
     repositories { mavenLocal() }

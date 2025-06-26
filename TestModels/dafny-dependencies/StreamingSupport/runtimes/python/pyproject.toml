@@ -13,6 +13,7 @@ include = ["**/internaldafny/generated/*.py"]
 [tool.poetry.dependencies]
 python = "^3.11.0"
 DafnyRuntimePython = "^4.7.0"
+smithy-dafny-standard-library = {path = "../../../StandardLibrary/runtimes/python", develop = false}
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
