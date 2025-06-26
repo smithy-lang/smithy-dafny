@@ -4,4 +4,3 @@
 [submodule "TestModels/dafny-dependencies/dafny"]
 	path = TestModels/dafny-dependencies/dafny
 	url = git@github.com:dafny-lang/dafny.git
-	branch = more-streaming-libs

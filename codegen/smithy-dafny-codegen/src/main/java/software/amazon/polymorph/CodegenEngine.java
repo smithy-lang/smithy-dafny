@@ -1015,9 +1015,9 @@ public class CodegenEngine {
 
   private Path standardLibraryPath() {
     if (this.includeDafnyFiles.isEmpty()) {
-        throw new IllegalStateException(
-          "includeDafnyFile required when generating additional aspects (--generate)"
-        );
+      throw new IllegalStateException(
+        "includeDafnyFile required when generating additional aspects (--generate)"
+      );
     }
 
     // Assumes that includeDafnyFiles.get(0) is at StandardLibrary/src/Index.dfy

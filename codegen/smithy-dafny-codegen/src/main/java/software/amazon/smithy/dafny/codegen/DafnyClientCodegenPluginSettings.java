@@ -128,25 +128,23 @@ class DafnyClientCodegenPluginSettings {
 
     final Optional<Path> buildRoot = findSmithyBuildJson(manifest.getBaseDir())
       .map(p -> p.getParent());
-    final List<Path> includeDafnyFilesNormalized = node
-      .expectArrayMember("includeDafnyFiles")
-      .getElementsAs(StringNode.class)
-      .stream()
-      .map(pathNode -> {
-        final Path includeDafnyFile = Path.of(pathNode.getValue());
-        final Path includeDafnyFileNormalized = buildRoot.isPresent() &&
-          !includeDafnyFile.isAbsolute()
-          ? buildRoot.get().resolve(includeDafnyFile).toAbsolutePath().normalize()
-          : includeDafnyFile;
-        if (Files.notExists(includeDafnyFileNormalized)) {
-          LOGGER.warn(
-            "Generated Dafny code may not compile because the includeDafnyFile could not be found: {}",
-            includeDafnyFileNormalized
-          );
-        }
-        return includeDafnyFileNormalized;
-      })
-      .toList();
+    final String includeDafnyFileStr = node
+      .expectStringMember("includeDafnyFile")
+      .getValue();
+    final Path includeDafnyFile = Path.of(includeDafnyFileStr);
+    final Path includeDafnyFileNormalized = buildRoot.isPresent() &&
+      !includeDafnyFile.isAbsolute()
+      ? buildRoot.get().resolve(includeDafnyFile).toAbsolutePath().normalize()
+      : includeDafnyFile;
+    if (Files.notExists(includeDafnyFileNormalized)) {
+      LOGGER.warn(
+        "Generated Dafny code may not compile because the includeDafnyFile could not be found: {}",
+        includeDafnyFileNormalized
+      );
+    }
+    final List<Path> includeDafnyFilesNormalized = List.of(
+      includeDafnyFileNormalized
+    );
 
     // This is now optional since we can get it from dafny itself
     final DafnyVersion dafnyVersionString = node

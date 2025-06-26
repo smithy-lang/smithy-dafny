@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
-
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
@@ -275,7 +274,8 @@ public class ToDafnyLibrary extends ToDafny {
   }
 
   MethodSpec dataStream() {
-    ClassName dafnyDataStream = software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_DATA_STREAM_CLASS_NAME;
+    ClassName dafnyDataStream =
+      software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_DATA_STREAM_CLASS_NAME;
     TypeName dafnyDataStreamParameterized = ParameterizedTypeName.get(
       dafnyDataStream,
       ClassName.get(Byte.class),
@@ -286,11 +286,15 @@ public class ToDafnyLibrary extends ToDafny {
       .returns(dafnyDataStreamParameterized)
       .addModifiers(PUBLIC_STATIC)
       .addParameter(ClassName.get(RequestBody.class), VAR_INPUT)
-      .addStatement("return new $T(\n" +
+      .addStatement(
+        "return new $T(\n" +
         "      Error._typeDescriptor(),\n" +
         "      $L,\n" +
         "      Error::create_Opaque\n" +
-        ")", software.amazon.polymorph.smithyjava.nameresolver.Constants.REQUEST_BODY_AS_DATA_STREAM_CLASS_NAME, VAR_INPUT)
+        ")",
+        software.amazon.polymorph.smithyjava.nameresolver.Constants.REQUEST_BODY_AS_DATA_STREAM_CLASS_NAME,
+        VAR_INPUT
+      )
       .build();
   }
 

@@ -93,7 +93,9 @@ public abstract class TestModelTest {
     // which cannot be built for old versions of Dafny.
     // We also don't want to burn a lot of CI cycles testing all models against Java 4.10 yet.
     DafnyVersion dafnyVersion = CodegenEngine.getDafnyVersionFromDafny();
-    boolean needsStreaming = relativeTestModelPath.endsWith("Streaming") || relativeTestModelPath.endsWith("s3");
+    boolean needsStreaming =
+      relativeTestModelPath.endsWith("Streaming") ||
+      relativeTestModelPath.endsWith("s3");
     if (dafnyVersion.compareTo(DafnyVersion.parse("4.10.0")) < 0) {
       Assumptions.assumeFalse(needsStreaming);
     } else {

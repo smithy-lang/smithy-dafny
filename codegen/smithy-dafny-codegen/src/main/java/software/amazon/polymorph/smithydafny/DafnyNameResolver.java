@@ -386,7 +386,10 @@ public record DafnyNameResolver(
         .stream()
         .anyMatch(s -> s.hasTrait(StreamingTrait.class))
     ) {
-      return Streams.concat(basics, Stream.of("import opened StandardLibrary.Streams"));
+      return Streams.concat(
+        basics,
+        Stream.of("import opened StandardLibrary.Streams")
+      );
     } else {
       return basics;
     }

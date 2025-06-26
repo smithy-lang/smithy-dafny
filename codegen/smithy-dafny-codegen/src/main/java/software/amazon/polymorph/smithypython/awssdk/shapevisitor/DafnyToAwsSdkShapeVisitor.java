@@ -80,9 +80,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
         "smithy_dafny_streaming_support.internaldafny.extern.streams",
         "DafnyDataStreamAsByteStream"
       );
-      return "DafnyDataStreamAsByteStream(%1$s)".formatted(
-          dataSource
-        );
+      return "DafnyDataStreamAsByteStream(%1$s)".formatted(dataSource);
     } else {
       return "bytes(%1$s)".formatted(dataSource);
     }

@@ -411,7 +411,10 @@ public abstract class ToNative extends Generator {
       );
     }
     if (shape.isBlobShape() && shape.hasTrait(StreamingTrait.class)) {
-      return new MethodReference(software.amazon.polymorph.smithyjava.nameresolver.Constants.DATA_STREAM_AS_REQUEST_BODY_CLASS_NAME, "of");
+      return new MethodReference(
+        software.amazon.polymorph.smithyjava.nameresolver.Constants.DATA_STREAM_AS_REQUEST_BODY_CLASS_NAME,
+        "of"
+      );
     }
     // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
     if (ModelUtils.isSmithyApiOrSimpleShape(shape)) {
