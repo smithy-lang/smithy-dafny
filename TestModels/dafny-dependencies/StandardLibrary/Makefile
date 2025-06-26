@@ -25,7 +25,7 @@ else
 endif
 
 # Overriding this target just to generate the project.properties file.
-polymorph_dafny: $(if $(USE_DAFNY_STANDARD_LIBRARIES), build_dafny_stdlibs, )
+polymorph_dafny: 
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	--library-root $(LIBRARY_ROOT) \
@@ -108,14 +108,10 @@ transpile_implementation:
 		--unicode-char:false \
 		--function-syntax:3 \
 		--output $(OUT) \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES), ./bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
+		$(if $(USES_STREAMING), $(PROJECT_ROOT)/$(STREAMING_SUPPORT)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
 		$(TRANSPILE_MODULE_NAME)
-
-build_dafny_stdlibs:
-	dafny build -t:lib --output bin/DafnyStandardLibraries-smithy-dafny-subset.doo DafnyStandardLibraries-smithy-dafny-subset.toml
-	rm -rf DafnyStandardLibraries-smithy-dafny-subset-lib
 
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency

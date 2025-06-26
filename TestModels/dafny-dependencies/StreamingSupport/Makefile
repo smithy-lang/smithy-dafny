@@ -1,7 +1,7 @@
 
 CORES=2
 
-USE_DAFNY_STANDARD_LIBRARIES=1
+USES_STREAMING=1
 
 include ../../SharedMakefile.mk
 
@@ -16,7 +16,7 @@ transpile_java: | transpile_implementation_java transpile_test_java
 transpile_python: | transpile_implementation_python transpile_test_python
 
 # Overriding this target just to generate the project.properties file.
-polymorph_dafny:
+polymorph_dafny: build_dafny_stdlibs
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	--library-root $(LIBRARY_ROOT) \
@@ -25,6 +25,10 @@ polymorph_dafny:
 	--namespace aws.polymorph \
 	--dependent-model $(LIBRARY_ROOT)/../Model \
 	";
+
+build_dafny_stdlibs:
+	dafny build -t:lib --output bin/DafnyStandardLibraries-smithy-dafny-subset.doo DafnyStandardLibraries-smithy-dafny-subset.toml
+	rm -rf DafnyStandardLibraries-smithy-dafny-subset-lib
 
 _polymorph_dependencies: 
 	echo "Skipping _polymorph_dependencies for StreamingSupport"
