@@ -7,6 +7,10 @@ include ../../SharedMakefile.mk
 
 PYTHON_MODULE_NAME=smithy_dafny_streaming_support
 
+TRANSLATION_RECORD_PYTHON := \
+    --translation-record ../StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
+
+
 transpile_java: | transpile_implementation_java transpile_test_java
 
 transpile_python: | transpile_implementation_python transpile_test_python
