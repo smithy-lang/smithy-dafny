@@ -26,6 +26,7 @@ import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.model.transform.ModelTransformer;
 
@@ -790,5 +791,9 @@ public class ModelUtils {
       localServiceTrait.get().getConfigId(),
       StructureShape.class
     );
+  }
+
+  public static boolean usesStreaming(final Model model) {
+    return model.toSet().stream().anyMatch(shape -> shape.hasTrait(StreamingTrait.class));
   }
 }

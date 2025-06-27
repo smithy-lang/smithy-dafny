@@ -90,7 +90,9 @@ public class ToDafnyLibrary extends ToDafny {
     // CollectionError
     toDafnyMethods.add(collectionError());
     // DataStreams
-    toDafnyMethods.add(dataStream());
+    if (ModelUtils.usesStreaming(subject.model)) {
+      toDafnyMethods.add(dataStream());
+    }
     // Structures
     subject
       .getStructuresInServiceNamespace()

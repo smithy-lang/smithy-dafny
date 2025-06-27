@@ -10,7 +10,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
@@ -20,11 +19,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
-import software.amazon.polymorph.smithyjava.nameresolver.Constants;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
@@ -141,7 +138,7 @@ public class ToNativeLibrary extends ToNative {
       .stream()
       .map(this::modeledResource)
       .forEachOrdered(toNativeMethods::add);
-    // The Service, it's self
+    // The Service itself
     toNativeMethods.add(modeledService(subject.serviceShape));
     return TypeSpec
       .classBuilder(thisClassName)

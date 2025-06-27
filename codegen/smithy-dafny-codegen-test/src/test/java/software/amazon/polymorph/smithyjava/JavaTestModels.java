@@ -42,7 +42,6 @@ class JavaTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/SimpleDocument"); // Not supported yet
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat"); // Not supported yet
     DISABLED_TESTS.add("SimpleTypes/SimpleShort"); // Not supported yet
-    DISABLED_TESTS.add("Streaming"); // Not supported yet
     //    These are commented out because they should work
     //    They are left here because it can be useful
     //    to have these here so that it is easy to only run a single test locally.
