@@ -450,6 +450,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
         );
         writer.addImport(".errors", "ServiceError");
         writer.addImport(".errors", "OpaqueError");
+        writer.addImport(".errors", "OpaqueWithTextError");
         writer.addImport(".errors", "CollectionOfErrors");
         writer.addStdlibImport("_dafny");
         writer.openBlock(
@@ -461,7 +462,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
               if error.is_Opaque:
                   return OpaqueError(obj=error.obj)
               elif error.is_OpaqueWithText:
-                  return OpaqueErrorWithText(obj=error.obj, obj_message=error.objMessage)
+                  return OpaqueWithTextError(obj=error.obj, obj_message=_dafny.string_of(error.objMessage))
               elif error.is_CollectionOfErrors:
                   return CollectionOfErrors(
                       message=_dafny.string_of(error.message),
@@ -679,7 +680,13 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
         writer.write(
           """
           elif error.is_$L:
-              return $L(message=_dafny.string_of(error.$L.message))""",
+              if hasattr(error.$L, "objMessage"):
+                  return $L(message=_dafny.string_of(error.$L.objMessage))
+              else:
+                  return $L(message=_dafny.string_of(error.$L.message))""",
+          code,
+          code,
+          code,
           code,
           code,
           code
