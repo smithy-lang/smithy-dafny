@@ -397,6 +397,9 @@ _polymorph_dafny: _polymorph
 dafny: polymorph_dafny verify
 
 # Generates dotnet code for all namespaces in this project
+.PHONY: polymorph_net
+polymorph_net: polymorph_dotnet
+
 .PHONY: polymorph_dotnet
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
 polymorph_dotnet: _polymorph_dependencies
