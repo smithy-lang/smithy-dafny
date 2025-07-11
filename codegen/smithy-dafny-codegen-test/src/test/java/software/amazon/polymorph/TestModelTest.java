@@ -102,7 +102,7 @@ public abstract class TestModelTest {
     } else {
       Assumptions.assumeTrue(needsStreaming);
     }
-    
+
     // StreamingSupport isn't directly testable
     if (relativeTestModelPath.endsWith("StreamingSupport")) {
       Assumptions.assumeTrue(false);

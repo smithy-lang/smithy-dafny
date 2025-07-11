@@ -794,6 +794,9 @@ public class ModelUtils {
   }
 
   public static boolean usesStreaming(final Model model) {
-    return model.toSet().stream().anyMatch(shape -> shape.hasTrait(StreamingTrait.class));
+    return model
+      .toSet()
+      .stream()
+      .anyMatch(shape -> shape.hasTrait(StreamingTrait.class));
   }
 }
