@@ -27,8 +27,7 @@ polymorph_dafny: build_dafny_stdlibs
 	";
 
 build_dafny_stdlibs:
-	dafny build -t:lib --output bin/DafnyStandardLibraries-smithy-dafny-subset.doo DafnyStandardLibraries-smithy-dafny-subset.toml
-	rm -rf DafnyStandardLibraries-smithy-dafny-subset-lib
+	dafny build -t:lib --output bin/DafnyStandardLibraries-smithy-dafny-subset.doo DafnyStandardLibraries-smithy-dafny-subset/dfyconfig.toml
 
 _polymorph_dependencies: 
 	echo "Skipping _polymorph_dependencies for StreamingSupport"

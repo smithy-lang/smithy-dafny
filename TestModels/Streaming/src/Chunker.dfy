@@ -309,7 +309,7 @@ module {:options "--function-syntax:4"} Chunker {
   }
 
   function BinaryOfNumber(x: int32): seq<uint8> {
-    // TODO: Actually compute the binary
+    // Don't actually need to compute the binary properly here
     [12 as uint8, 34, 56]
   }
 
