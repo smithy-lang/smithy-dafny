@@ -140,13 +140,34 @@ public class TypeConversionCodegen {
     return Stream.of(generateCommonExceptionConverter());
   }
 
+  private static final EnumSet<ShapeType> CONVERTABLE_SHAPE_TYPES = EnumSet.of(
+    ShapeType.BLOB,
+    ShapeType.BOOLEAN,
+    ShapeType.STRING,
+    ShapeType.ENUM,
+    ShapeType.INTEGER,
+    ShapeType.LONG,
+    ShapeType.DOUBLE,
+    ShapeType.TIMESTAMP,
+    ShapeType.LIST,
+    ShapeType.MAP,
+    ShapeType.STRUCTURE,
+    ShapeType.MEMBER,
+    ShapeType.UNION
+  );
+
   /**
    * Returns all shape IDs that require converters.
    */
   @VisibleForTesting
   public Set<ShapeId> findShapeIdsToConvert() {
-    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
-    return ModelUtils.findAllDependentShapes(initialShapes, model);
+    return model.getShapeIds()
+      .stream()
+      .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
+      .map(model::expectShape)
+      .filter(s -> CONVERTABLE_SHAPE_TYPES.contains(s.getType()))
+      .map(Shape::getId)
+      .collect(Collectors.toSet());
   }
 
   /**
