@@ -676,11 +676,21 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
           ) +
           "_sdk_error_to_dafny_error"
         );
-        // Generate deserializer for dependency that defers to its `_deserialize_error`
+        // Generate deserializer for dependency that properly handles AWS SDK errors
         writer.write(
           """
           elif error.is_$L:
-              return $L(message=_dafny.string_of(error.$L.message))""",
+              # AWS SDK errors can be wrapped in different ways (e.g. OpaqueWithText)
+              if hasattr(error.$L, 'objMessage'):
+                  # If it's an OpaqueWithText, extract the message and obj
+                  obj_message = _dafny.string_of(error.$L.objMessage)
+                  return $L(message=obj_message)
+              else:
+                  # For any other type, fall back to a simple string representation
+                  return $L(message=str(error.$L))""",
+          code,
+          code,
+          code,
           code,
           code,
           code
