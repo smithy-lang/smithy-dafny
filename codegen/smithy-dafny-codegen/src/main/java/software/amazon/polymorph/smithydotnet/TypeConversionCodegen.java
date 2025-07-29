@@ -259,6 +259,14 @@ public class TypeConversionCodegen {
       .map(unionShape -> unionShape.getId())
       .collect(Collectors.toSet());
 
+    // Collect structure shapes
+    final Set<ShapeId> structureShapes = model
+      .getStructureShapes()
+      .stream()
+      .filter(s -> isInServiceNamespace(s.getId()))
+      .map(s -> s.getId())
+      .collect(Collectors.toSet());
+
     // TODO add smithy v2 Enums
     // Collect enum shapes
     final Set<ShapeId> enumShapes = model
@@ -278,8 +286,8 @@ public class TypeConversionCodegen {
     final TreeSet<ShapeId> orderedSet = new TreeSet<ShapeId>();
     orderedSet.addAll(operationStructures);
     orderedSet.addAll(clientConfigStructures);
-    orderedSet.addAll(resourceShapes.stream().map(Shape::toShapeId).collect(Collectors.toSet()));
     orderedSet.addAll(unionShapes);
+    orderedSet.addAll(structureShapes);
     orderedSet.addAll(errorStructures);
     orderedSet.addAll(enumShapes);
     return orderedSet;
