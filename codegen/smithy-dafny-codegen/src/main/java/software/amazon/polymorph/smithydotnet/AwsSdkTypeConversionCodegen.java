@@ -46,7 +46,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
   }
 
   public Set<ShapeId> findShapeIdsToConvert() {
-    Set<ShapeId> shapeIds = super.findInitialShapeIdsToConvert();
+    Set<ShapeId> shapeIds = super.findShapeIdsToConvert();
     shapeIds.add(SMITHY_STRING_SHAPE_ID); // needed for converting the message of an unknown error type
     return shapeIds;
   }

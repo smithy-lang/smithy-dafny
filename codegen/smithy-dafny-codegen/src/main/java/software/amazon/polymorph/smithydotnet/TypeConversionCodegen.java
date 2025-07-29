@@ -161,7 +161,7 @@ public class TypeConversionCodegen {
    */
   public Set<ShapeId> findShapeIdsToConvert() {
     Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
-    return ModelUtils.findAllDependentShapes(new TreeSet<>(initialShapes), model);
+    return ModelUtils.findAllDependentShapes(initialShapes, model);
   }
 
   @VisibleForTesting
