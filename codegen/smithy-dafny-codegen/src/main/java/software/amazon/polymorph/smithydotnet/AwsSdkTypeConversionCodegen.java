@@ -45,10 +45,8 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     );
   }
 
-  @Override
   public Set<ShapeId> findShapeIdsToConvert() {
-    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
-    Set<ShapeId> shapeIds = ModelUtils.findAllDependentShapes(new TreeSet<>(initialShapes), model);
+    Set<ShapeId> shapeIds = super.findInitialShapeIdsToConvert();
     shapeIds.add(SMITHY_STRING_SHAPE_ID); // needed for converting the message of an unknown error type
     return shapeIds;
   }
@@ -64,7 +62,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
    *     <li>specific (modeled) error structures</li>
    * </ul>
    */
-  private Set<ShapeId> findInitialShapeIdsToConvert() {
+  protected Set<ShapeId> findInitialShapeIdsToConvert() {
     // Collect services
     final Set<ServiceShape> serviceShapes = model
       .getServiceShapes()

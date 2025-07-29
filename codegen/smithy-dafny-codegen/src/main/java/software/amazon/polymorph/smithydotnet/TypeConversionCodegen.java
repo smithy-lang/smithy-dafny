@@ -152,14 +152,20 @@ public class TypeConversionCodegen {
     ShapeType.LIST,
     ShapeType.MAP,
     ShapeType.STRUCTURE,
-    ShapeType.UNION
+    ShapeType.UNION,
+    ShapeType.MEMBER
   );
 
   /**
    * Returns all shape IDs that require converters.
    */
-  @VisibleForTesting
   public Set<ShapeId> findShapeIdsToConvert() {
+    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
+    return ModelUtils.findAllDependentShapes(new TreeSet<>(initialShapes), model);
+  }
+
+  @VisibleForTesting
+  protected Set<ShapeId> findInitialShapeIdsToConvert() {
     return model.getShapeIds()
       .stream()
       .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
