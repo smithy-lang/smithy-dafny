@@ -152,7 +152,7 @@ public class TypeConversionCodegen {
     ShapeType.LIST,
     ShapeType.MAP,
     ShapeType.STRUCTURE,
-    ShapeType.MEMBER,
+//    ShapeType.MEMBER,
     ShapeType.UNION
   );
 
@@ -161,13 +161,15 @@ public class TypeConversionCodegen {
    */
   @VisibleForTesting
   public Set<ShapeId> findShapeIdsToConvert() {
-    return model.getShapeIds()
-      .stream()
-      .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
-      .map(model::expectShape)
-      .filter(s -> CONVERTABLE_SHAPE_TYPES.contains(s.getType()))
-      .map(Shape::getId)
-      .collect(Collectors.toSet());
+    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
+//    Set<ShapeId> initialShapes = model.getShapeIds()
+//      .stream()
+//      .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
+//      .map(model::expectShape)
+//      .filter(s -> CONVERTABLE_SHAPE_TYPES.contains(s.getType()))
+//      .map(Shape::getId)
+//      .collect(Collectors.toSet());
+    return ModelUtils.findAllDependentShapes(new TreeSet<>(initialShapes), model);
   }
 
   /**
@@ -276,6 +278,7 @@ public class TypeConversionCodegen {
     final TreeSet<ShapeId> orderedSet = new TreeSet<ShapeId>();
     orderedSet.addAll(operationStructures);
     orderedSet.addAll(clientConfigStructures);
+    orderedSet.addAll(resourceShapes.stream().map(Shape::toShapeId).collect(Collectors.toSet()));
     orderedSet.addAll(unionShapes);
     orderedSet.addAll(errorStructures);
     orderedSet.addAll(enumShapes);
