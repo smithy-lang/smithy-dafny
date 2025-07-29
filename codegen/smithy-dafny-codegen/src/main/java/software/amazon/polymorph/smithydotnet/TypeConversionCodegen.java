@@ -152,7 +152,6 @@ public class TypeConversionCodegen {
     ShapeType.LIST,
     ShapeType.MAP,
     ShapeType.STRUCTURE,
-//    ShapeType.MEMBER,
     ShapeType.UNION
   );
 
@@ -161,139 +160,16 @@ public class TypeConversionCodegen {
    */
   @VisibleForTesting
   public Set<ShapeId> findShapeIdsToConvert() {
-    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
-//    Set<ShapeId> initialShapes = model.getShapeIds()
-//      .stream()
-//      .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
-//      .map(model::expectShape)
-//      .filter(s -> CONVERTABLE_SHAPE_TYPES.contains(s.getType()))
-//      .map(Shape::getId)
-//      .collect(Collectors.toSet());
-    return ModelUtils.findAllDependentShapes(new TreeSet<>(initialShapes), model);
-  }
-
-  /**
-   * Returns a set of shape IDs for which to start generating type converter pairs, by recursively traversing
-   * services, resources, and operations defined in the model.
-   * <p>
-   * Since type converters are only necessary when calling API operations, it suffices to find the shape IDs of:
-   * <ul>
-   *     <li>operation input and output structures</li>
-   *     <li>client configuration structures</li>
-   *     <li>specific (modeled) error structures</li>
-   * </ul>
-   */
-  private Set<ShapeId> findInitialShapeIdsToConvert() {
-    // Collect services
-    final Set<ServiceShape> serviceShapes = model
-      .getServiceShapes()
+    return model.getShapeIds()
       .stream()
-      .filter(serviceShape -> isInServiceNamespace(serviceShape.getId()))
-      .collect(Collectors.toSet());
-
-    // Collect resources defined in model...
-    final Stream<ResourceShape> topLevelResourceShapes = model
-      .getResourceShapes()
-      .stream()
-      .filter(resourceShape -> isInServiceNamespace(resourceShape.getId()));
-    // ... and resources of collected services.
-    final Stream<ResourceShape> serviceResourceShapes = serviceShapes
-      .stream()
-      .flatMap(serviceShape -> serviceShape.getResources().stream())
-      .map(resourceShapeId ->
-        model.expectShape(resourceShapeId, ResourceShape.class)
-      );
-    final Set<ResourceShape> resourceShapes = Stream
-      .concat(topLevelResourceShapes, serviceResourceShapes)
-      .collect(Collectors.toSet());
-
-    // Collect operations defined in model...
-    final Stream<OperationShape> topLevelOperationShapes = model
-      .getOperationShapes()
-      .stream()
-      .filter(operationShape -> isInServiceNamespace(operationShape.getId()));
-    // ... and operations of collected services...
-    final Stream<OperationShape> serviceOperationShapes = serviceShapes
-      .stream()
-      .flatMap(serviceShape -> serviceShape.getAllOperations().stream())
-      .map(operationShapeId ->
-        model.expectShape(operationShapeId, OperationShape.class)
-      );
-    // ... and operations of collected resources.
-    final Stream<OperationShape> resourceOperationShapes = resourceShapes
-      .stream()
-      .flatMap(resourceShape -> resourceShape.getAllOperations().stream())
-      .map(operationShapeId ->
-        model.expectShape(operationShapeId, OperationShape.class)
-      );
-    final Set<OperationShape> operationShapes = Stream
-      .of(
-        topLevelOperationShapes,
-        serviceOperationShapes,
-        resourceOperationShapes
-      )
-      .flatMap(Function.identity())
-      .collect(Collectors.toSet());
-    // Collect inputs/output structures for collected operations
-    final Set<ShapeId> operationStructures = operationShapes
-      .stream()
-      .flatMap(operationShape ->
-        Stream
-          .of(operationShape.getInput(), operationShape.getOutput())
-          .flatMap(Optional::stream)
-      )
-      .collect(Collectors.toSet());
-    // Collect service client config structures
-    final Set<ShapeId> clientConfigStructures = serviceShapes
-      .stream()
-      .map(serviceShape -> serviceShape.getTrait(LocalServiceTrait.class))
-      .flatMap(Optional::stream)
-      .map(LocalServiceTrait::getConfigId)
-      .collect(Collectors.toSet());
-
-    // Collect union shapes
-    final Set<ShapeId> unionShapes = model
-      .getUnionShapes()
-      .stream()
-      .filter(unionShape -> isInServiceNamespace(unionShape.getId()))
-      .map(unionShape -> unionShape.getId())
-      .collect(Collectors.toSet());
-
-    // Collect structure shapes
-    final Set<ShapeId> structureShapes = model
-      .getStructureShapes()
-      .stream()
-      .filter(s -> isInServiceNamespace(s.getId()))
-      .map(s -> s.getId())
-      .collect(Collectors.toSet());
-
-    // TODO add smithy v2 Enums
-    // Collect enum shapes
-    final Set<ShapeId> enumShapes = model
-      .getShapesWithTrait(EnumTrait.class)
-      .stream()
-      .map(Shape::getId)
-      .filter(this::isInServiceNamespace)
-      .collect(Collectors.toSet());
-
-    // Collect all specific error structures
-    final Set<ShapeId> errorStructures = ModelUtils
-      .streamServiceErrors(model, serviceShape)
+      .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
+      .map(model::expectShape)
+      .filter(s -> CONVERTABLE_SHAPE_TYPES.contains(s.getType()))
       .map(Shape::getId)
       .collect(Collectors.toSet());
-
-    // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
-    final TreeSet<ShapeId> orderedSet = new TreeSet<ShapeId>();
-    orderedSet.addAll(operationStructures);
-    orderedSet.addAll(clientConfigStructures);
-    orderedSet.addAll(unionShapes);
-    orderedSet.addAll(structureShapes);
-    orderedSet.addAll(errorStructures);
-    orderedSet.addAll(enumShapes);
-    return orderedSet;
   }
 
-  private boolean isInServiceNamespace(final ShapeId shapeId) {
+  protected boolean isInServiceNamespace(final ShapeId shapeId) {
     return shapeId.getNamespace().equals(serviceShape.getId().getNamespace());
   }
 

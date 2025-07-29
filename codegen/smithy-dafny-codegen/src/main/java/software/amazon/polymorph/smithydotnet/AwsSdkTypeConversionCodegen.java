@@ -6,16 +6,21 @@ package software.amazon.polymorph.smithydotnet;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -42,9 +47,122 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
 
   @Override
   public Set<ShapeId> findShapeIdsToConvert() {
-    final Set<ShapeId> shapeIds = super.findShapeIdsToConvert();
+    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
+    Set<ShapeId> shapeIds = ModelUtils.findAllDependentShapes(new TreeSet<>(initialShapes), model);
     shapeIds.add(SMITHY_STRING_SHAPE_ID); // needed for converting the message of an unknown error type
     return shapeIds;
+  }
+
+  /**
+   * Returns a set of shape IDs for which to start generating type converter pairs, by recursively traversing
+   * services, resources, and operations defined in the model.
+   * <p>
+   * Since type converters are only necessary when calling API operations, it suffices to find the shape IDs of:
+   * <ul>
+   *     <li>operation input and output structures</li>
+   *     <li>client configuration structures</li>
+   *     <li>specific (modeled) error structures</li>
+   * </ul>
+   */
+  private Set<ShapeId> findInitialShapeIdsToConvert() {
+    // Collect services
+    final Set<ServiceShape> serviceShapes = model
+      .getServiceShapes()
+      .stream()
+      .filter(serviceShape -> isInServiceNamespace(serviceShape.getId()))
+      .collect(Collectors.toSet());
+
+    // Collect resources defined in model...
+    final Stream<ResourceShape> topLevelResourceShapes = model
+      .getResourceShapes()
+      .stream()
+      .filter(resourceShape -> isInServiceNamespace(resourceShape.getId()));
+    // ... and resources of collected services.
+    final Stream<ResourceShape> serviceResourceShapes = serviceShapes
+      .stream()
+      .flatMap(serviceShape -> serviceShape.getResources().stream())
+      .map(resourceShapeId ->
+        model.expectShape(resourceShapeId, ResourceShape.class)
+      );
+    final Set<ResourceShape> resourceShapes = Stream
+      .concat(topLevelResourceShapes, serviceResourceShapes)
+      .collect(Collectors.toSet());
+
+    // Collect operations defined in model...
+    final Stream<OperationShape> topLevelOperationShapes = model
+      .getOperationShapes()
+      .stream()
+      .filter(operationShape -> isInServiceNamespace(operationShape.getId()));
+    // ... and operations of collected services...
+    final Stream<OperationShape> serviceOperationShapes = serviceShapes
+      .stream()
+      .flatMap(serviceShape -> serviceShape.getAllOperations().stream())
+      .map(operationShapeId ->
+        model.expectShape(operationShapeId, OperationShape.class)
+      );
+    // ... and operations of collected resources.
+    final Stream<OperationShape> resourceOperationShapes = resourceShapes
+      .stream()
+      .flatMap(resourceShape -> resourceShape.getAllOperations().stream())
+      .map(operationShapeId ->
+        model.expectShape(operationShapeId, OperationShape.class)
+      );
+    final Set<OperationShape> operationShapes = Stream
+      .of(
+        topLevelOperationShapes,
+        serviceOperationShapes,
+        resourceOperationShapes
+      )
+      .flatMap(Function.identity())
+      .collect(Collectors.toSet());
+    // Collect inputs/output structures for collected operations
+    final Set<ShapeId> operationStructures = operationShapes
+      .stream()
+      .flatMap(operationShape ->
+        Stream
+          .of(operationShape.getInput(), operationShape.getOutput())
+          .flatMap(Optional::stream)
+      )
+      .collect(Collectors.toSet());
+    // Collect service client config structures
+    final Set<ShapeId> clientConfigStructures = serviceShapes
+      .stream()
+      .map(serviceShape -> serviceShape.getTrait(LocalServiceTrait.class))
+      .flatMap(Optional::stream)
+      .map(LocalServiceTrait::getConfigId)
+      .collect(Collectors.toSet());
+
+    // Collect union shapes
+    final Set<ShapeId> unionShapes = model
+      .getUnionShapes()
+      .stream()
+      .filter(unionShape -> isInServiceNamespace(unionShape.getId()))
+      .map(unionShape -> unionShape.getId())
+      .collect(Collectors.toSet());
+
+    // TODO add smithy v2 Enums
+    // Collect enum shapes
+    final Set<ShapeId> enumShapes = model
+      .getShapesWithTrait(EnumTrait.class)
+      .stream()
+      .map(Shape::getId)
+      .filter(this::isInServiceNamespace)
+      .collect(Collectors.toSet());
+
+    // Collect all specific error structures
+    final Set<ShapeId> errorStructures = ModelUtils
+      .streamServiceErrors(model, serviceShape)
+      .map(Shape::getId)
+      .collect(Collectors.toSet());
+
+    // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
+    final TreeSet<ShapeId> orderedSet = new TreeSet<ShapeId>();
+    orderedSet.addAll(operationStructures);
+    orderedSet.addAll(clientConfigStructures);
+    orderedSet.addAll(unionShapes);
+    orderedSet.addAll(errorStructures);
+    orderedSet.addAll(enumShapes);
+    return orderedSet;
   }
 
   @Override
