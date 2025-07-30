@@ -152,19 +152,28 @@ public class TypeConversionCodegen {
     ShapeType.LIST,
     ShapeType.MAP,
     ShapeType.STRUCTURE,
-    ShapeType.UNION,
-    ShapeType.MEMBER
+    ShapeType.UNION
   );
 
   /**
    * Returns all shape IDs that require converters.
    */
   public Set<ShapeId> findShapeIdsToConvert() {
-    final Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
+    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
     return ModelUtils.findAllDependentShapes(initialShapes, model);
   }
 
-  @VisibleForTesting
+  /**
+   * Returns a set of shape IDs for which to start generating type converter pairs, by recursively traversing
+   * services, resources, and operations defined in the model.
+   * <p>
+   * Since type converters are only necessary when calling API operations, it suffices to find the shape IDs of:
+   * <ul>
+   *     <li>operation input and output structures</li>
+   *     <li>client configuration structures</li>
+   *     <li>specific (modeled) error structures</li>
+   * </ul>
+   */
   protected Set<ShapeId> findInitialShapeIdsToConvert() {
     return model.getShapeIds()
       .stream()

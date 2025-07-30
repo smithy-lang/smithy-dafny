@@ -62,6 +62,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
    *     <li>specific (modeled) error structures</li>
    * </ul>
    */
+  @Override
   protected Set<ShapeId> findInitialShapeIdsToConvert() {
     // Collect services
     final Set<ServiceShape> serviceShapes = model
