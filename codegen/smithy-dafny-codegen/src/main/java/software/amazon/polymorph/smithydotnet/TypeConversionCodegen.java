@@ -160,6 +160,7 @@ public class TypeConversionCodegen {
    */
   public Set<ShapeId> findShapeIdsToConvert() {
     Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
+    initialShapes.addAll(allConvertableShapesInServiceNamespace());
     return ModelUtils.findAllDependentShapes(initialShapes, model);
   }
 
@@ -175,6 +176,107 @@ public class TypeConversionCodegen {
    * </ul>
    */
   protected Set<ShapeId> findInitialShapeIdsToConvert() {
+    // Collect services
+    final Set<ServiceShape> serviceShapes = model
+      .getServiceShapes()
+      .stream()
+      .filter(serviceShape -> isInServiceNamespace(serviceShape.getId()))
+      .collect(Collectors.toSet());
+
+    // Collect resources defined in model...
+    final Stream<ResourceShape> topLevelResourceShapes = model
+      .getResourceShapes()
+      .stream()
+      .filter(resourceShape -> isInServiceNamespace(resourceShape.getId()));
+    // ... and resources of collected services.
+    final Stream<ResourceShape> serviceResourceShapes = serviceShapes
+      .stream()
+      .flatMap(serviceShape -> serviceShape.getResources().stream())
+      .map(resourceShapeId ->
+        model.expectShape(resourceShapeId, ResourceShape.class)
+      );
+    final Set<ResourceShape> resourceShapes = Stream
+      .concat(topLevelResourceShapes, serviceResourceShapes)
+      .collect(Collectors.toSet());
+
+    // Collect operations defined in model...
+    final Stream<OperationShape> topLevelOperationShapes = model
+      .getOperationShapes()
+      .stream()
+      .filter(operationShape -> isInServiceNamespace(operationShape.getId()));
+    // ... and operations of collected services...
+    final Stream<OperationShape> serviceOperationShapes = serviceShapes
+      .stream()
+      .flatMap(serviceShape -> serviceShape.getAllOperations().stream())
+      .map(operationShapeId ->
+        model.expectShape(operationShapeId, OperationShape.class)
+      );
+    // ... and operations of collected resources.
+    final Stream<OperationShape> resourceOperationShapes = resourceShapes
+      .stream()
+      .flatMap(resourceShape -> resourceShape.getAllOperations().stream())
+      .map(operationShapeId ->
+        model.expectShape(operationShapeId, OperationShape.class)
+      );
+    final Set<OperationShape> operationShapes = Stream
+      .of(
+        topLevelOperationShapes,
+        serviceOperationShapes,
+        resourceOperationShapes
+      )
+      .flatMap(Function.identity())
+      .collect(Collectors.toSet());
+    // Collect inputs/output structures for collected operations
+    final Set<ShapeId> operationStructures = operationShapes
+      .stream()
+      .flatMap(operationShape ->
+        Stream
+          .of(operationShape.getInput(), operationShape.getOutput())
+          .flatMap(Optional::stream)
+      )
+      .collect(Collectors.toSet());
+    // Collect service client config structures
+    final Set<ShapeId> clientConfigStructures = serviceShapes
+      .stream()
+      .map(serviceShape -> serviceShape.getTrait(LocalServiceTrait.class))
+      .flatMap(Optional::stream)
+      .map(LocalServiceTrait::getConfigId)
+      .collect(Collectors.toSet());
+
+    // Collect union shapes
+    final Set<ShapeId> unionShapes = model
+      .getUnionShapes()
+      .stream()
+      .filter(unionShape -> isInServiceNamespace(unionShape.getId()))
+      .map(unionShape -> unionShape.getId())
+      .collect(Collectors.toSet());
+
+    // TODO add smithy v2 Enums
+    // Collect enum shapes
+    final Set<ShapeId> enumShapes = model
+      .getShapesWithTrait(EnumTrait.class)
+      .stream()
+      .map(Shape::getId)
+      .filter(this::isInServiceNamespace)
+      .collect(Collectors.toSet());
+
+    // Collect all specific error structures
+    final Set<ShapeId> errorStructures = ModelUtils
+      .streamServiceErrors(model, serviceShape)
+      .map(Shape::getId)
+      .collect(Collectors.toSet());
+
+    // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
+    final TreeSet<ShapeId> orderedSet = new TreeSet<ShapeId>();
+    orderedSet.addAll(operationStructures);
+    orderedSet.addAll(clientConfigStructures);
+    orderedSet.addAll(unionShapes);
+    orderedSet.addAll(errorStructures);
+    orderedSet.addAll(enumShapes);
+    return orderedSet;
+  }
+
+  protected Set<ShapeId> allConvertableShapesInServiceNamespace() {
     return model.getShapeIds()
       .stream()
       .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
