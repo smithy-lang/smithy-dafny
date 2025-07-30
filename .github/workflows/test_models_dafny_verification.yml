@@ -47,6 +47,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup .NET Core SDK 6.0
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
