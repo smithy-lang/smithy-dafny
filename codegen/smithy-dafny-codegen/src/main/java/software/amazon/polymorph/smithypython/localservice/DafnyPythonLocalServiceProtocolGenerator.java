@@ -682,8 +682,13 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator
           elif error.is_$L:
               if hasattr(error.$L, "objMessage"):
                   return $L(message=_dafny.string_of(error.$L.objMessage))
+              elif hasattr(error.$L, "Message"):
+                  return $L(message=_dafny.string_of(error.$L.Message))
               else:
                   return $L(message=_dafny.string_of(error.$L.message))""",
+          code,
+          code,
+          code,
           code,
           code,
           code,
