@@ -159,7 +159,7 @@ public class TypeConversionCodegen {
    * Returns all shape IDs that require converters.
    */
   public Set<ShapeId> findShapeIdsToConvert() {
-    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
+    Set<ShapeId> initialShapes = new LinkedHashSet<>(findInitialShapeIdsToConvert());
     initialShapes.addAll(allConvertableShapesInServiceNamespace());
     return ModelUtils.findAllDependentShapes(initialShapes, model);
   }
