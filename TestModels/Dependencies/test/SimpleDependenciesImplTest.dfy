@@ -29,7 +29,7 @@ module SimpleDependenciesImplTest {
     method{:test} TestDependenciesWithCustomConfig()
     {        
       var extendableResourceReferenceToAssign := new ExtendableResource.ExtendableResource();
-      var simpleConstraintsServiceReferenceToAssign :- expect SimpleConstraints.SimpleConstraints();
+      var simpleConstraintsServiceReferenceToAssign :- expect SimpleConstraints.Constraints();
 
       var customConfig := SimpleDependenciesTypes.SimpleDependenciesConfig(
         simpleResourcesConfig := Some(SimpleResourcesTypes.SimpleResourcesConfig(

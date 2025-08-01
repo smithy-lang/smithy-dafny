@@ -5,7 +5,7 @@ $version: "1.0"
 namespace simple.constraints
 
 @aws.polymorph#localService(
-  sdkId: "SimpleConstraints",
+  sdkId: "Constraints",
   config: SimpleConstraintsConfig,
 )
 service SimpleConstraints {

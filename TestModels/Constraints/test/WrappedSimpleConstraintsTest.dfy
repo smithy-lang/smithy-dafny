@@ -11,7 +11,7 @@ module WrappedSimpleConstraintsTest {
   import opened Wrappers
   import opened StandardLibrary.UInt
   method{:test} TestConstraints() {
-    var client :- expect WrappedSimpleConstraintsService.WrappedSimpleConstraints();
+    var client :- expect WrappedSimpleConstraintsService.WrappedConstraints();
     TestGetConstraintWithValidInputs(client);
     TestGetConstraintWithMyString(client);
     TestGetConstraintWithOneToTen(client);

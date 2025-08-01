@@ -45,7 +45,7 @@ module {:extern "simple.dependencies.internaldafny" } SimpleDependencies refines
     if config.simpleConstraintsServiceReference.Some? {
       simpleConstraintsServiceReferenceToAssign := config.simpleConstraintsServiceReference.value;
     } else {
-      var newSimpleConstraintsServiceReference := SimpleConstraints.SimpleConstraints(SimpleConstraints.DefaultSimpleConstraintsConfig());
+      var newSimpleConstraintsServiceReference := SimpleConstraints.Constraints(SimpleConstraints.DefaultSimpleConstraintsConfig());
       expect newSimpleConstraintsServiceReference.Success?;
       simpleConstraintsServiceReferenceToAssign := newSimpleConstraintsServiceReference.value;
     }

@@ -13,7 +13,7 @@ module SimpleConstraintsImplTest {
     import opened Wrappers
     
     method{:test} TestConstraints(){
-        var client :- expect SimpleConstraints.SimpleConstraints();
+        var client :- expect SimpleConstraints.Constraints();
         TestGetConstraintWithValidInputs(client);
         TestGetConstraintWithInvalidMyString(client);
     }
