@@ -154,9 +154,13 @@ public class DotNetNameResolver {
   }
 
   public String clientForService() {
-    return serviceShape.hasTrait(LocalServiceTrait.class)
-      ? serviceShape.expectTrait(LocalServiceTrait.class).getSdkId()
-      : serviceShape.getId().getName();
+    return clientForService(serviceShape);
+  }
+
+  public String clientForService(ServiceShape service) {
+    return service.hasTrait(LocalServiceTrait.class)
+      ? service.expectTrait(LocalServiceTrait.class).getSdkId()
+      : service.getId().getName();
   }
 
   /**
@@ -437,7 +441,7 @@ public class DotNetNameResolver {
     }
 
     // Base type for local service is defined here
-    return "%s.%s".formatted(namespaceForShapeId(shapeId), shapeId.getName());
+    return "%s.%s".formatted(namespaceForShapeId(shapeId), clientForService(serviceShape));
   }
 
   protected String baseTypeForResource(final ResourceShape resourceShape) {
