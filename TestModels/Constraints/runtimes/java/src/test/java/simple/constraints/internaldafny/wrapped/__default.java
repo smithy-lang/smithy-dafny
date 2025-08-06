@@ -15,7 +15,7 @@ public class __default extends _ExternBase___default {
   public static Result<
     ISimpleConstraintsClient,
     Error
-  > WrappedSimpleConstraints(SimpleConstraintsConfig config) {
+  > WrappedConstraints(SimpleConstraintsConfig config) {
     simple.constraints.model.SimpleConstraintsConfig wrappedConfig =
       ToNative.SimpleConstraintsConfig(config);
     simple.constraints.SimpleConstraints impl = SimpleConstraints
