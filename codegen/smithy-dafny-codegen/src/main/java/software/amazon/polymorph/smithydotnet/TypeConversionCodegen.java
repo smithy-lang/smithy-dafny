@@ -140,13 +140,32 @@ public class TypeConversionCodegen {
     return Stream.of(generateCommonExceptionConverter());
   }
 
+  private static final EnumSet<ShapeType> CONVERTABLE_SHAPE_TYPES = EnumSet.of(
+    ShapeType.BLOB,
+    ShapeType.BOOLEAN,
+    ShapeType.STRING,
+    ShapeType.ENUM,
+    ShapeType.INTEGER,
+    ShapeType.LONG,
+    ShapeType.DOUBLE,
+    ShapeType.TIMESTAMP,
+    ShapeType.LIST,
+    ShapeType.MAP,
+    ShapeType.STRUCTURE,
+    ShapeType.UNION
+  );
+
   /**
    * Returns all shape IDs that require converters.
    */
-  @VisibleForTesting
   public Set<ShapeId> findShapeIdsToConvert() {
-    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
-    return ModelUtils.findAllDependentShapes(initialShapes, model);
+    Set<ShapeId> initialShapes = new LinkedHashSet<>(
+      findInitialShapeIdsToConvert()
+    );
+    initialShapes.addAll(allConvertableShapesInServiceNamespace());
+    return new TreeSet<>(
+      ModelUtils.findAllDependentShapes(initialShapes, model)
+    );
   }
 
   /**
@@ -160,7 +179,7 @@ public class TypeConversionCodegen {
    *     <li>specific (modeled) error structures</li>
    * </ul>
    */
-  private Set<ShapeId> findInitialShapeIdsToConvert() {
+  protected Set<ShapeId> findInitialShapeIdsToConvert() {
     // Collect services
     final Set<ServiceShape> serviceShapes = model
       .getServiceShapes()
@@ -261,7 +280,18 @@ public class TypeConversionCodegen {
     return orderedSet;
   }
 
-  private boolean isInServiceNamespace(final ShapeId shapeId) {
+  protected Set<ShapeId> allConvertableShapesInServiceNamespace() {
+    return model
+      .getShapeIds()
+      .stream()
+      .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
+      .map(model::expectShape)
+      .filter(s -> CONVERTABLE_SHAPE_TYPES.contains(s.getType()))
+      .map(Shape::getId)
+      .collect(Collectors.toSet());
+  }
+
+  protected boolean isInServiceNamespace(final ShapeId shapeId) {
     return shapeId.getNamespace().equals(serviceShape.getId().getNamespace());
   }
 

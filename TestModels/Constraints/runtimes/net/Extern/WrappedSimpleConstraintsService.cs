@@ -9,10 +9,10 @@ namespace simple.constraints.internaldafny.wrapped
     public partial class __default
     {
         [System.Obsolete]
-        public static _IResult<types.ISimpleConstraintsClient, types._IError> WrappedSimpleConstraints(types._ISimpleConstraintsConfig config)
+        public static _IResult<types.ISimpleConstraintsClient, types._IError> WrappedConstraints(types._ISimpleConstraintsConfig config)
         {
             var wrappedConfig = TypeConversion.FromDafny_N6_simple__N11_constraints__S23_SimpleConstraintsConfig(config);
-            var impl = new SimpleConstraints(wrappedConfig);
+            var impl = new Constraints(wrappedConfig);
             var wrappedClient = new SimpleConstraintsShim(impl);
             return Result<types.ISimpleConstraintsClient, types._IError>.create_Success(wrappedClient);
         }

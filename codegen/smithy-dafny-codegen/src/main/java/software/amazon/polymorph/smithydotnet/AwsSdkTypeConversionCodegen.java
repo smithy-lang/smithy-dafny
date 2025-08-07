@@ -6,16 +6,20 @@ package software.amazon.polymorph.smithydotnet;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -40,9 +44,12 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     );
   }
 
-  @Override
   public Set<ShapeId> findShapeIdsToConvert() {
-    final Set<ShapeId> shapeIds = super.findShapeIdsToConvert();
+    Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
+    Set<ShapeId> shapeIds = ModelUtils.findAllDependentShapes(
+      initialShapes,
+      model
+    );
     shapeIds.add(SMITHY_STRING_SHAPE_ID); // needed for converting the message of an unknown error type
     return shapeIds;
   }

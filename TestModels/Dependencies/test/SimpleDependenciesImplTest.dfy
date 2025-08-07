@@ -5,7 +5,7 @@ include "../../Constraints/test/Helpers.dfy"
 
 module SimpleDependenciesImplTest {
     import ExtendableResource
-    import SimpleConstraints
+    import Constraints
     import SimpleConstraintsTestHelpers = Helpers
     import SimpleDependencies
     import SimpleDependenciesTypes
@@ -29,7 +29,7 @@ module SimpleDependenciesImplTest {
     method{:test} TestDependenciesWithCustomConfig()
     {        
       var extendableResourceReferenceToAssign := new ExtendableResource.ExtendableResource();
-      var simpleConstraintsServiceReferenceToAssign :- expect SimpleConstraints.SimpleConstraints();
+      var simpleConstraintsServiceReferenceToAssign :- expect Constraints.Constraints();
 
       var customConfig := SimpleDependenciesTypes.SimpleDependenciesConfig(
         simpleResourcesConfig := Some(SimpleResourcesTypes.SimpleResourcesConfig(

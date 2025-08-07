@@ -289,7 +289,7 @@ mvn_local_deploy_polymorph_dependencies:
 _polymorph: mvn_local_deploy_polymorph_dependencies
 _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
-	./../gradlew run --args="\
+	./../gradlew run $(GRADLE_RUN_OPTIONS) --args="\
 	--library-root $(LIBRARY_ROOT) \
 	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
@@ -316,7 +316,7 @@ _polymorph_wrapped: mvn_local_deploy_polymorph_dependencies
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
-	./../gradlew run --args="\
+	./../gradlew run $(GRADLE_RUN_OPTIONS) --args="\
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(INPUT_DAFNY) \

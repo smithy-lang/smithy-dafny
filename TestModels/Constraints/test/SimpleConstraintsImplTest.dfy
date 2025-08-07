@@ -6,14 +6,14 @@ include "Helpers.dfy"
 
 module SimpleConstraintsImplTest {
     import Helpers
-    import SimpleConstraints
+    import Constraints
     import StandardLibrary.UInt
 
     import opened SimpleConstraintsTypes
     import opened Wrappers
     
     method{:test} TestConstraints(){
-        var client :- expect SimpleConstraints.SimpleConstraints();
+        var client :- expect Constraints.Constraints();
         TestGetConstraintWithValidInputs(client);
         TestGetConstraintWithInvalidMyString(client);
     }
