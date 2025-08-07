@@ -68,8 +68,8 @@ TYPES_FILE_WITH_EXTERN_STRING="module {:extern \"simple.constraints.internaldafn
 TYPES_FILE_WITHOUT_EXTERN_STRING="module SimpleConstraintsTypes"
 
 INDEX_FILE_PATH=src/Index.dfy
-INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.constraints.internaldafny\" } SimpleConstraints refines AbstractSimpleConstraintsService {"
-INDEX_FILE_WITHOUT_EXTERN_STRING="module SimpleConstraints refines AbstractSimpleConstraintsService {"
+INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.constraints.internaldafny\" } Constraints refines AbstractSimpleConstraintsService {"
+INDEX_FILE_WITHOUT_EXTERN_STRING="module Constraints refines AbstractSimpleConstraintsService {"
 
 WRAPPED_INDEX_FILE_PATH=src/WrappedSimpleConstraintsImpl.dfy
 WRAPPED_INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"simple.constraints.internaldafny.wrapped\"} WrappedSimpleConstraintsService refines WrappedAbstractSimpleConstraintsService {"
