@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -47,7 +46,10 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
 
   public Set<ShapeId> findShapeIdsToConvert() {
     Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
-    Set<ShapeId> shapeIds = ModelUtils.findAllDependentShapes(initialShapes, model);
+    Set<ShapeId> shapeIds = ModelUtils.findAllDependentShapes(
+      initialShapes,
+      model
+    );
     shapeIds.add(SMITHY_STRING_SHAPE_ID); // needed for converting the message of an unknown error type
     return shapeIds;
   }

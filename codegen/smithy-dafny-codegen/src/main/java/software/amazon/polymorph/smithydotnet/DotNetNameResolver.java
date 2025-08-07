@@ -441,7 +441,10 @@ public class DotNetNameResolver {
     }
 
     // Base type for local service is defined here
-    return "%s.%s".formatted(namespaceForShapeId(shapeId), clientForService(serviceShape));
+    return "%s.%s".formatted(
+        namespaceForShapeId(shapeId),
+        clientForService(serviceShape)
+      );
   }
 
   protected String baseTypeForResource(final ResourceShape resourceShape) {

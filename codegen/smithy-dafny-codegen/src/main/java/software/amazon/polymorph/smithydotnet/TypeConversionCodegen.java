@@ -159,9 +159,13 @@ public class TypeConversionCodegen {
    * Returns all shape IDs that require converters.
    */
   public Set<ShapeId> findShapeIdsToConvert() {
-    Set<ShapeId> initialShapes = new LinkedHashSet<>(findInitialShapeIdsToConvert());
+    Set<ShapeId> initialShapes = new LinkedHashSet<>(
+      findInitialShapeIdsToConvert()
+    );
     initialShapes.addAll(allConvertableShapesInServiceNamespace());
-    return new TreeSet<>(ModelUtils.findAllDependentShapes(initialShapes, model));
+    return new TreeSet<>(
+      ModelUtils.findAllDependentShapes(initialShapes, model)
+    );
   }
 
   /**
@@ -277,7 +281,8 @@ public class TypeConversionCodegen {
   }
 
   protected Set<ShapeId> allConvertableShapesInServiceNamespace() {
-    return model.getShapeIds()
+    return model
+      .getShapeIds()
       .stream()
       .filter(id -> ModelUtils.isInServiceNamespace(id, serviceShape))
       .map(model::expectShape)
