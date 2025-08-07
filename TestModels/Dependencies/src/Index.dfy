@@ -3,10 +3,10 @@
 include "../Model/SimpleDependenciesTypes.dfy"
 include "SimpleDependenciesImpl.dfy"
 
-module {:extern "simple.dependencies.internaldafny" } SimpleDependencies refines AbstractSimpleDependenciesService {
+module SimpleDependencies refines AbstractSimpleDependenciesService {
   import Operations = SimpleDependenciesImpl
   import SimpleResourcesTypes
-  import SimpleConstraints
+  import Constraints
   import ExtendableResource
 
   function method DefaultSimpleDependenciesConfig(): SimpleDependenciesConfig {
@@ -45,7 +45,7 @@ module {:extern "simple.dependencies.internaldafny" } SimpleDependencies refines
     if config.simpleConstraintsServiceReference.Some? {
       simpleConstraintsServiceReferenceToAssign := config.simpleConstraintsServiceReference.value;
     } else {
-      var newSimpleConstraintsServiceReference := SimpleConstraints.Constraints(SimpleConstraints.DefaultSimpleConstraintsConfig());
+      var newSimpleConstraintsServiceReference := Constraints.Constraints(Constraints.DefaultSimpleConstraintsConfig());
       expect newSimpleConstraintsServiceReference.Success?;
       simpleConstraintsServiceReferenceToAssign := newSimpleConstraintsServiceReference.value;
     }

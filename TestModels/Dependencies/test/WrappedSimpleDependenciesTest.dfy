@@ -10,7 +10,7 @@ module WrappedSimpleDependenciesTest {
     import ExtendableResource
     import SimpleDependencies
     import SimpleResourcesTypes
-    import SimpleConstraints
+    import Constraints
     import opened Wrappers
     method{:test} TestDependenciesWithDefaultConfig() {
         var client :- expect WrappedSimpleDependenciesService.WrappedSimpleDependencies();
@@ -26,7 +26,7 @@ module WrappedSimpleDependenciesTest {
     method{:test} TestDependenciesWithCustomConfig()
     {        
         var extendableResourceReferenceToAssign := new ExtendableResource.ExtendableResource();
-        var simpleConstraintsServiceReferenceToAssign :- expect SimpleConstraints.Constraints();
+        var simpleConstraintsServiceReferenceToAssign :- expect Constraints.Constraints();
 
         var customConfig := SimpleDependenciesTypes.SimpleDependenciesConfig(
             simpleResourcesConfig := Some(SimpleResourcesTypes.SimpleResourcesConfig(
