@@ -447,14 +447,14 @@ public class DafnyLocalServiceGenerator implements Runnable {
         if (service.hasTrait(LocalServiceTrait.class)) {
           final var serviceTrait = service.expectTrait(LocalServiceTrait.class);
           final var configShape = model.expectShape(serviceTrait.getConfigId());
+          final var configSymbol = symbolProvider.toSymbol(configShape);
+          
           writer.addImportFromModule(
             SmithyNameResolver.getGoModuleNameForSmithyNamespace(
               configShape.toShapeId().getNamespace()
             ),
             DafnyNameResolver.dafnyTypesNamespace(configShape)
           );
-          final var configSymbol = symbolProvider.toSymbol(configShape);
-
           writer.write(
             """
             type Shim struct {
