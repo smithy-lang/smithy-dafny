@@ -224,20 +224,16 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
       returnType = "Wrappers.Option";
     }
+    String bytesToDafnySequence = "dafny.SeqOfBytes(%s)".formatted(dataSource);
     return """
     func () %s {
-        v := make([]interface{}, 0, len(input))
         if %s == nil {return %s}
-        for _, e := range %s {
-        	v = append(v, e)
-        }
         return %s;
     }()""".formatted(
         returnType,
         dataSource,
         nilWrapIfRequired,
-        dataSource,
-        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
+        someWrapIfRequired.formatted(bytesToDafnySequence)
       );
   }
 
