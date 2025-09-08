@@ -290,7 +290,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       if %s == nil {
           return nil
       }
-      return %s.(dafny.Sequence).ToByteArray()
+      return dafny.ToByteArray(%s.(dafny.Sequence))
     }()""".formatted(dataSource, dataSource);
   }
 
