@@ -75,7 +75,7 @@ public class DafnyNameResolver {
       "yield",
       // Built-in functions (https://docs.python.org/3/library/functions.html)
       "abs", "aiter", "all", "anext", "any", "ascii",
-      "bin", "bool", "breakpoint", "bytearray", "bytes"
+      "bin", "bool", "breakpoint", "bytearray", "bytes",
       "callable", "chr", "classmethod", "compile", "complex",
       "delattr", "dict", "dir", "divmod",
       "enumerate", "eval", "exec",
