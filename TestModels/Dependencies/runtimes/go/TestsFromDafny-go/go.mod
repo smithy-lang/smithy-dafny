@@ -9,7 +9,7 @@ require github.com/smithy-lang/smithy-dafny/TestModels/Constraints v0.0.0
 require github.com/smithy-lang/smithy-dafny/TestModels/Extendable v0.0.0
 
 require (
-	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1
+	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.1
 	github.com/smithy-lang/smithy-dafny/TestModels/Resource v0.0.0
 )
 

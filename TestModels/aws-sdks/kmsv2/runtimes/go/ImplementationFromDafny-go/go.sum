@@ -26,7 +26,5 @@ github.com/aws/aws-sdk-go-v2/service/sts v1.32.2 h1:CiS7i0+FUe+/YY1GvIBLLrR/XNGZ
 github.com/aws/aws-sdk-go-v2/service/sts v1.32.2/go.mod h1:HtaiBI8CjYoNVde8arShXb94UbQQi9L4EMr6D+xGBwo=
 github.com/aws/smithy-go v1.22.0 h1:uunKnWlcoL3zO7q+gG2Pk53joueEOsnNB28QdMsmiMM=
 github.com/aws/smithy-go v1.22.0/go.mod h1:irrKGvNn1InZwb2d7fkIRNucdfwR8R+Ts3wxYa/cJHg=
-github.com/dafny-lang/DafnyRuntimeGo/v4 v4.8.0 h1:ttdCpTQKspK9A/tqE1qnipvjp9IrURS1kC2w47we6GM=
-github.com/dafny-lang/DafnyRuntimeGo/v4 v4.8.0/go.mod h1:l2Tm4N2DKuq3ljONC2vOATeM9PUpXbIc8SgXdwwqEto=
-github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1 h1:dOgaw3i0I9nWKPjfXYzEfgWsVRJykL6FA18DErvQiJQ=
-github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1/go.mod h1:l2Tm4N2DKuq3ljONC2vOATeM9PUpXbIc8SgXdwwqEto=
+github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.1 h1:tTQ9M9HCUaf2SXqutj2vmMqJKJpefWMSqx1niqTqi8M=
+github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.1/go.mod h1:l2Tm4N2DKuq3ljONC2vOATeM9PUpXbIc8SgXdwwqEto=
