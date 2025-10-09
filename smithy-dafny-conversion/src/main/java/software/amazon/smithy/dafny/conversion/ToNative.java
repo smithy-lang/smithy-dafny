@@ -64,7 +64,7 @@ public class ToNative {
     ) {
       StringBuilder sb = new StringBuilder();
       for (char c : dafnySequence) {
-          sb.append(c);
+        sb.append(c);
       }
       return sb.toString();
     }
