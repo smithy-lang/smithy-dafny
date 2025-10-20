@@ -62,11 +62,11 @@ public class ToNative {
     public static String String(
       DafnySequence<? extends Character> dafnySequence
     ) {
-      Stream<? extends Character> chars = StreamSupport.stream(
-        dafnySequence.spliterator(),
-        false
-      );
-      return chars.map(Object::toString).collect(Collectors.joining());
+      StringBuilder sb = new StringBuilder();
+      for (char c : dafnySequence) {
+        sb.append(c);
+      }
+      return sb.toString();
     }
 
     /**
