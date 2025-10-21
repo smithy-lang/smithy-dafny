@@ -4,6 +4,9 @@ name: PR CI
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   pr-populate-dafny-versions:
     runs-on: ubuntu-22.04
