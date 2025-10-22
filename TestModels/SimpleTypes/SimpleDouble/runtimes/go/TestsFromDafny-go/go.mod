@@ -8,6 +8,6 @@ replace github.com/aws/aws-cryptographic-material-providers-library/releases/go/
 
 require (
 	github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library v0.0.0
-	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.1
+	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.2
 	github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleDouble v0.0.0
 )

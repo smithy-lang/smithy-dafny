@@ -2,4 +2,4 @@ module github.com/aws/aws-cryptographic-material-providers-library/releases/go/s
 
 go 1.23.0
 
-require github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.1
+require github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.2

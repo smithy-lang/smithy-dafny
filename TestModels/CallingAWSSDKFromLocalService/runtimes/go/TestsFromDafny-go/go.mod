@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.34.9
 	github.com/aws/aws-sdk-go-v2/service/kms v1.35.7
 	github.com/aws/smithy-go v1.22.0
-	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.1
+	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.2
 	github.com/smithy-lang/smithy-dafny/TestModels/CallingAWSSDKFromLocalService v0.0.0
 	github.com/smithy-lang/smithy-dafny/ddbv2 v0.0.0
 	github.com/smithy-lang/smithy-dafny/kmsv2 v0.0.0
