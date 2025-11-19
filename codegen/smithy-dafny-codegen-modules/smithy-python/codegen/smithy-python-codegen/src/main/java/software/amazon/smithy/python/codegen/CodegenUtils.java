@@ -42,6 +42,7 @@ import software.amazon.smithy.model.knowledge.NullableIndex;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
@@ -386,4 +387,34 @@ public final class CodegenUtils {
             writer.dedent();
         }
     }
+
+  // Added to Smithy-Dafny-Python's "fork" of Smithy-Python
+  /**
+   * Returns true if the shape is in an AWS SDK service namespace.
+   * @param shape
+   * @return
+   */
+  public static boolean isAwsSdkShape(Shape shape) {
+      return isAwsSdkShape(shape.getId());
+  }
+
+  /**
+   * Returns true if the shape is in an AWS SDK service namespace.
+   * @param shapeId
+   * @return
+   */
+  public static boolean isAwsSdkShape(ShapeId shapeId) {
+    // If the shape namespace is not in our list of known SDK namespaces,
+    // it is not a (known) SDK namespace
+    return isAwsSdkNamespace(shapeId.getNamespace());
+  }
+
+  /**
+   * Returns true if the namespace represents an AWS SDK service namespace.
+   * @param namespace
+   * @return
+   */
+  public static boolean isAwsSdkNamespace(String namespace) {
+    return namespace.startsWith("com.amazonaws");
+  }
 }

@@ -3,26 +3,26 @@
 package simple.constraints.internaldafny.wrapped;
 
 import Wrappers_Compile.Result;
-import simple.constraints.SimpleConstraints;
+import simple.constraints.Constraints;
 import simple.constraints.ToNative;
 import simple.constraints.internaldafny.types.Error;
 import simple.constraints.internaldafny.types.ISimpleConstraintsClient;
 import simple.constraints.internaldafny.types.SimpleConstraintsConfig;
-import simple.constraints.wrapped.TestSimpleConstraints;
+import simple.constraints.wrapped.TestConstraints;
 
 public class __default extends _ExternBase___default {
 
   public static Result<
     ISimpleConstraintsClient,
     Error
-  > WrappedSimpleConstraints(SimpleConstraintsConfig config) {
+  > WrappedConstraints(SimpleConstraintsConfig config) {
     simple.constraints.model.SimpleConstraintsConfig wrappedConfig =
       ToNative.SimpleConstraintsConfig(config);
-    simple.constraints.SimpleConstraints impl = SimpleConstraints
+    simple.constraints.Constraints impl = Constraints
       .builder()
       .SimpleConstraintsConfig(wrappedConfig)
       .build();
-    TestSimpleConstraints wrappedClient = TestSimpleConstraints
+    TestConstraints wrappedClient = TestConstraints
       .builder()
       .impl(impl)
       .build();

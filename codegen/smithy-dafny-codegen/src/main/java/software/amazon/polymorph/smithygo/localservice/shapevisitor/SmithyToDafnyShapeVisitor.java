@@ -166,13 +166,13 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     //Handle @reference{Service} shape
     if (resourceOrService.asServiceShape().isPresent()) {
       var clientConversion = dataSource.concat(".DafnyClient");
+      writer.addImportFromModule(
+        SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+          resourceOrService.toShapeId().getNamespace()
+        ),
+        DafnyNameResolver.dafnyTypesNamespace(resourceOrService)
+      );
       if (resourceOrService.hasTrait(ServiceTrait.class)) {
-        writer.addImportFromModule(
-          SmithyNameResolver.getGoModuleNameForSmithyNamespace(
-            resourceOrService.toShapeId().getNamespace()
-          ),
-          DafnyNameResolver.dafnyTypesNamespace(resourceOrService)
-        );
         final var shim =
           "%swrapped.Shim".formatted(
               DafnyNameResolver.dafnyNamespace(
@@ -224,20 +224,16 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
       returnType = "Wrappers.Option";
     }
+    String bytesToDafnySequence = "dafny.SeqOfBytes(%s)".formatted(dataSource);
     return """
     func () %s {
-        var v []interface{}
         if %s == nil {return %s}
-        for _, e := range %s {
-        	v = append(v, e)
-        }
         return %s;
     }()""".formatted(
         returnType,
         dataSource,
         nilWrapIfRequired,
-        dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted(bytesToDafnySequence)
       );
   }
 
@@ -422,7 +418,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       """
       func () %s {
              %s
-             var fieldValue []interface{} = make([]interface{}, 0)
+             var fieldValue []interface{} = make([]interface{}, 0, len(input))
              for _, val := range %s {
                  element := %s
                  fieldValue = append(fieldValue, element)
@@ -705,7 +701,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         var bits = math.Float64bits(%s%s)
         var bytes = make([]byte, 8)
         binary.LittleEndian.PutUint64(bytes, bits)
-        var v []interface{}
+        v := make([]interface{}, 0, 8)
         for _, e := range bytes {
             v = append(v, e)
         }
@@ -715,7 +711,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         nilCheck,
         dereferenceIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 
@@ -767,7 +763,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             .getProperty("Referred", Symbol.class)
             .get()
         );
-
+      writer.addImportFromModule(
+        SmithyNameResolver.getGoModuleNameForSmithyNamespace(
+          shape.toShapeId().getNamespace()
+        ),
+        DafnyNameResolver.dafnyTypesNamespace(shape)
+      );
       eachMemberInUnion.append(
         """
         case *%s.%s:

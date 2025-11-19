@@ -13,6 +13,7 @@ github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.9.18/go.mod 
 github.com/aws/smithy-go v1.20.4 h1:2HK1zBdPgRbjFOHlfeQZfpC4r72MOb9bZkiFwggKO+4=
 github.com/aws/smithy-go v1.20.4/go.mod h1:irrKGvNn1InZwb2d7fkIRNucdfwR8R+Ts3wxYa/cJHg=
 github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1/go.mod h1:l2Tm4N2DKuq3ljONC2vOATeM9PUpXbIc8SgXdwwqEto=
+github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.1/go.mod h1:l2Tm4N2DKuq3ljONC2vOATeM9PUpXbIc8SgXdwwqEto=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=

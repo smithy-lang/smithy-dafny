@@ -80,6 +80,8 @@ ENABLE_EXTERN_PROCESSING?=
 #    ensures DAFNY_PROCESSES(cpus) * Z3_PROCESSES(cpus) <= cpus
 #  {}
 
+ENFORCE_DETERMINISM_OPTION := $(shell cd $(CODEGEN_CLI_ROOT); \
+	./../gradlew run -q --args="if-dafny-at-least --dafny-version 4.8 --text --enforce-determinism")
 
 # Verify the entire project
 verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
@@ -90,6 +92,7 @@ verify:DAFNY_OPTIONS=--allow-warnings
 verify:
 	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny verify \
 		--cores $(Z3_PROCESSES) \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format csv \
@@ -106,6 +109,7 @@ verify_single:DAFNY_OPTIONS=--allow-warnings
 verify_single:
 	dafny verify \
 		--cores $(CORES) \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format text \
@@ -122,6 +126,7 @@ verify_service:
 	@: $(if ${SERVICE},,$(error You must pass the SERVICE to generate for));
 	dafny verify \
 		--cores $(CORES) \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--unicode-char false \
 		--function-syntax 3 \
 		--log-format text \
@@ -201,6 +206,7 @@ transpile_implementation:
 		--stdin \
 		--no-verify \
 		--cores:$(CORES) \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
@@ -241,6 +247,7 @@ transpile_test:
 		--stdin \
 		--no-verify \
 		--cores:$(CORES) \
+		$(ENFORCE_DETERMINISM_OPTION) \
 		--optimize-erasable-datatype-wrapper:false \
 		--unicode-char:false \
 		--function-syntax:3 \
@@ -282,7 +289,7 @@ mvn_local_deploy_polymorph_dependencies:
 _polymorph: mvn_local_deploy_polymorph_dependencies
 _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
-	./../gradlew run --args="\
+	./../gradlew run $(GRADLE_RUN_OPTIONS) --args="\
 	--library-root $(LIBRARY_ROOT) \
 	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
@@ -309,7 +316,7 @@ _polymorph_wrapped: mvn_local_deploy_polymorph_dependencies
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
-	./../gradlew run --args="\
+	./../gradlew run $(GRADLE_RUN_OPTIONS) --args="\
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(INPUT_DAFNY) \
@@ -385,6 +392,9 @@ _polymorph_dafny: _polymorph
 dafny: polymorph_dafny verify
 
 # Generates dotnet code for all namespaces in this project
+.PHONY: polymorph_net
+polymorph_net: polymorph_dotnet
+
 .PHONY: polymorph_dotnet
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
 polymorph_dotnet: _polymorph_dependencies
@@ -653,6 +663,13 @@ test_rust_debug:
 	rustc --version
 	cd runtimes/rust; \
 	cargo test -- --nocapture
+
+test_rust_full:
+	rustc --version
+	cd runtimes/rust; cargo test -- --nocapture
+	cd runtimes/rust; cargo test --features small-int -- --nocapture
+	cd runtimes/rust; cargo test --release -- --nocapture
+	cd runtimes/rust; cargo test --release --features small-int -- --nocapture
 
 ########################## Cleanup targets
 

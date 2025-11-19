@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkSymbolVisitor;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
@@ -196,6 +197,10 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    */
   @Override
   public Symbol structureShape(StructureShape shape) {
+    if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
+      return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
+        .structureShape(shape);
+    }
     String name = getDefaultShapeName(shape);
     if (shape.hasTrait(ErrorTrait.class)) {
       String filename = "errors";
@@ -435,8 +440,12 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
    */
   @Override
   public Symbol unionShape(UnionShape shape) {
-    String name = getDefaultShapeName(shape);
+    if (AwsSdkNameResolver.isAwsSdkShape(shape)) {
+      return new DafnyPythonAwsSdkSymbolVisitor(this.model, this.settings)
+        .unionShape(shape);
+    }
 
+    String name = getDefaultShapeName(shape);
     var unknownName = name + "Unknown";
     String filename = "models";
     var unknownSymbol = createSymbolBuilder(

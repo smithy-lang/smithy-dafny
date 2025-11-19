@@ -50,11 +50,10 @@ jobs:
         with:
           submodules: recursive
 
-      # TODO: Use the released version once all the Dafny issues aew fixed.
       - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.7.0
+        uses: dafny-lang/setup-dafny-action@v1.9.1
         with:
-          dafny-version: "nightly-2024-12-04-bf1aac6"
+          dafny-version: ${{ inputs.dafny }}
 
       - name: Install Go
         uses: actions/setup-go@v2

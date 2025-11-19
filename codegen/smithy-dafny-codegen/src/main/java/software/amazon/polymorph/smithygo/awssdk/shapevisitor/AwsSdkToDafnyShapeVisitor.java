@@ -120,20 +120,16 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       someWrapIfRequired = "Wrappers.Companion_Option_.Create_Some_(%s)";
       returnType = "Wrappers.Option";
     }
+    String bytesToDafnySequence = "dafny.SeqOfBytes(%s)".formatted(dataSource);
     return """
     func () %s {
-        var v []interface{}
         if %s == nil {return %s}
-        for _, e := range %s {
-        	v = append(v, e)
-        }
         return %s;
     }()""".formatted(
         returnType,
         dataSource,
         nilWrapIfRequired,
-        dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted(bytesToDafnySequence)
       );
   }
 
@@ -565,7 +561,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
      var bits = math.Float64bits(%s%s)
         var bytes = make([]byte, 8)
         binary.LittleEndian.PutUint64(bytes, bits)
-     var v []interface{}
+     v := make([]interface{}, 0, 8)
      for _, e := range bytes {
       v = append(v, e)
      }
@@ -575,7 +571,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         nilCheck,
         dereferenceIfRequired,
         dataSource,
-        someWrapIfRequired.formatted("dafny.SeqOf(v...)")
+        someWrapIfRequired.formatted("dafny.SeqFromArray(v, false)")
       );
   }
 

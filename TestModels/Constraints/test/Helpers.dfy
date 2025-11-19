@@ -3,7 +3,7 @@
 include "../src/Index.dfy"
 
 module Helpers {
-  import SimpleConstraints
+  import Constraints
   import opened StandardLibrary.UInt
   import opened SimpleConstraintsTypes
   import opened Wrappers

@@ -2,21 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleConstraintsImpl.dfy"
 
-module {:extern "simple.constraints.internaldafny" } SimpleConstraints refines AbstractSimpleConstraintsService {
+module {:extern "simple.constraints.internaldafny" } Constraints refines AbstractSimpleConstraintsService {
   import Operations = SimpleConstraintsImpl
 
   function method DefaultSimpleConstraintsConfig(): SimpleConstraintsConfig {
     SimpleConstraintsConfig(RequiredString := "default")
   }
 
-  method SimpleConstraints(config: SimpleConstraintsConfig)
-    returns (res: Result<SimpleConstraintsClient, Error>)
+  method Constraints(config: SimpleConstraintsConfig)
+    returns (res: Result<ConstraintsClient, Error>)
   {
-    var client := new SimpleConstraintsClient(Operations.Config);
+    var client := new ConstraintsClient(Operations.Config);
     return Success(client);
   }
 
-  class SimpleConstraintsClient... {
+  class ConstraintsClient... {
     predicate ValidState() {
        && Operations.ValidInternalConfig?(config)
        && Modifies == Operations.ModifiesInternalConfig(config) + {History}

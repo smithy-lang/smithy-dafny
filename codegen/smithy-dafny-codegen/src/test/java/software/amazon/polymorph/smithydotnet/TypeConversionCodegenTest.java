@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import software.amazon.polymorph.antlr.CSharpLexer;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen.TypeConverter;
 import software.amazon.polymorph.traits.ClientConfigTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.polymorph.utils.TokenTree;
@@ -148,11 +150,10 @@ public class TypeConversionCodegenTest {
       (builder, modelAssembler) -> {
         builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoBar"));
         builder.addTrait(
-          ClientConfigTrait
+          LocalServiceTrait
             .builder()
-            .clientConfigId(
-              ShapeId.fromParts(SERVICE_NAMESPACE, "FoobarConfig")
-            )
+            .sdkId("foobar")
+            .configId(ShapeId.fromParts(SERVICE_NAMESPACE, "FoobarConfig"))
             .build()
         );
         modelAssembler.addUnparsedModel(
@@ -173,31 +174,36 @@ public class TypeConversionCodegenTest {
         );
       }
     );
-    final Set<ShapeId> expectedShapeIds = Stream
-      .of(
-        SERVICE_NAMESPACE + "#DoBarInput",
-        SERVICE_NAMESPACE + "#DoBarInput$qux",
-        SERVICE_NAMESPACE + "#DoBazOutput",
-        SERVICE_NAMESPACE + "#DoBazOutput$xyzzy",
-        SERVICE_NAMESPACE + "#Qux",
-        SERVICE_NAMESPACE + "#Qux$key",
-        SERVICE_NAMESPACE + "#Qux$value",
-        SERVICE_NAMESPACE + "#Xyzzy",
-        SERVICE_NAMESPACE + "#Xyzzy$member",
-        SERVICE_NAMESPACE + "#UsedError",
-        SERVICE_NAMESPACE + "#UsedError$message",
-        // Unused errors must also have type converters, since the common error shape converter depends on all
-        // specific errors in the model (even if unused in operations)
-        SERVICE_NAMESPACE + "#UnusedError",
-        SERVICE_NAMESPACE + "#UnusedError$message",
-        "smithy.api#String",
-        "smithy.api#Integer",
-        "smithy.api#Blob"
-      )
-      .map(ShapeId::from)
-      .collect(Collectors.toSet());
+    final Set<ShapeId> expectedShapeIds = new TreeSet<>(
+      Stream
+        .of(
+          SERVICE_NAMESPACE + "#FoobarConfig",
+          SERVICE_NAMESPACE + "#DoBarInput",
+          SERVICE_NAMESPACE + "#DoBarInput$qux",
+          SERVICE_NAMESPACE + "#DoBazOutput",
+          SERVICE_NAMESPACE + "#DoBazOutput$xyzzy",
+          SERVICE_NAMESPACE + "#Qux",
+          SERVICE_NAMESPACE + "#Qux$key",
+          SERVICE_NAMESPACE + "#Qux$value",
+          SERVICE_NAMESPACE + "#Xyzzy",
+          SERVICE_NAMESPACE + "#Xyzzy$member",
+          SERVICE_NAMESPACE + "#UsedError",
+          SERVICE_NAMESPACE + "#UsedError$message",
+          // Unused errors must also have type converters, since the common error shape converter depends on all
+          // specific errors in the model (even if unused in operations)
+          SERVICE_NAMESPACE + "#UnusedError",
+          SERVICE_NAMESPACE + "#UnusedError$message",
+          "smithy.api#String",
+          "smithy.api#Integer",
+          "smithy.api#Blob"
+        )
+        .map(ShapeId::from)
+        .collect(Collectors.toSet())
+    );
 
-    final Set<ShapeId> actualShapeIds = codegen.findShapeIdsToConvert();
+    final Set<ShapeId> actualShapeIds = new TreeSet<>(
+      codegen.findShapeIdsToConvert()
+    );
     assertEquals(expectedShapeIds, actualShapeIds);
   }
 

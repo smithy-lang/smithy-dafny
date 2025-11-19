@@ -53,7 +53,7 @@ jobs:
         # Rust code generation is under development and depends on pending changes to the
         # Dafny Rust code generation, so we test on a specific prerelease instead.
         dafny-version:
-          - nightly-2025-01-30-7db1e5f
+          - 4.11.0
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}

@@ -7,7 +7,7 @@ replace github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleTimesta
 require github.com/aws/aws-cryptographic-material-providers-library/releases/go/smithy-dafny-standard-library v0.0.0
 
 require (
-	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1
+	github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.2
 	github.com/smithy-lang/smithy-dafny/TestModels/SimpleTypes/SimpleTimestamp v0.0.0
 )
 

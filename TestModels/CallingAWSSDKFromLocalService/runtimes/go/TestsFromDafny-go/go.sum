@@ -30,8 +30,8 @@ github.com/aws/aws-sdk-go-v2/service/sts v1.32.4 h1:yDxvkz3/uOKfxnv8YhzOi9m+2OGI
 github.com/aws/aws-sdk-go-v2/service/sts v1.32.4/go.mod h1:9XEUty5v5UAsMiFOBJrNibZgwCeOma73jgGwwhgffa8=
 github.com/aws/smithy-go v1.22.0 h1:uunKnWlcoL3zO7q+gG2Pk53joueEOsnNB28QdMsmiMM=
 github.com/aws/smithy-go v1.22.0/go.mod h1:irrKGvNn1InZwb2d7fkIRNucdfwR8R+Ts3wxYa/cJHg=
-github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1 h1:dOgaw3i0I9nWKPjfXYzEfgWsVRJykL6FA18DErvQiJQ=
-github.com/dafny-lang/DafnyRuntimeGo/v4 v4.9.1/go.mod h1:l2Tm4N2DKuq3ljONC2vOATeM9PUpXbIc8SgXdwwqEto=
+github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.2 h1:Q1BMAsz2goAaVznYICm2PRfjjFz5HM8ikOM6Jxqfd3M=
+github.com/dafny-lang/DafnyRuntimeGo/v4 v4.11.2/go.mod h1:l2Tm4N2DKuq3ljONC2vOATeM9PUpXbIc8SgXdwwqEto=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
