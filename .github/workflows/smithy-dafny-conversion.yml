@@ -6,6 +6,9 @@ on:
     branches:
       - main-1.x
 
+permissions:
+  contents: read
+
 jobs:
   gradle-build-smithy-dafny-conversion:
     runs-on: ubuntu-22.04

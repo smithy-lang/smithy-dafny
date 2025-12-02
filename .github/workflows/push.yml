@@ -6,6 +6,9 @@ on:
     branches:
       - main-1.x
 
+permissions:
+  contents: read
+
 jobs:
   pr-populate-dafny-versions:
     runs-on: ubuntu-22.04

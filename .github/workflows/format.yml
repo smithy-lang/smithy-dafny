@@ -4,6 +4,9 @@ name: Java Format Check
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   check-java:
     runs-on: ubuntu-22.04

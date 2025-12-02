@@ -13,6 +13,9 @@ on:
         type: number
         default: 10
 
+permissions:
+  contents: read
+
 jobs:
   populate-matrix-dimensions:
     runs-on: ubuntu-22.04
