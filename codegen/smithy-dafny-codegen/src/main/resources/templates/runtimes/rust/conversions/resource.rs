@@ -29,7 +29,7 @@ pub fn from_dafny(
         obj: dafny_value.clone(),
     };
     $rustTypesModuleName:L::$snakeCaseResourceName:L::$rustResourceName:LRef {
-      inner: ::dafny_runtime::Rc::new(::dafny_runtime::RefCell::new(wrap))
+      inner: $rustTypesModuleName:L::$snakeCaseResourceName:L::ResourceInner::new(wrap)
     }
 }
 
