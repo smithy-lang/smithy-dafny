@@ -1,17 +1,40 @@
-use std::sync::LazyLock;
+use std::future::Future;
+use tokio::runtime::RuntimeFlavor;
+use tokio::runtime::Handle;
+use tokio::runtime::Builder;
+
+fn escape_to_async<F, O>(fut: F) -> O
+where
+    F: Future<Output = O> + Send,
+    O: Send
+{
+    match Handle::try_current() {
+        Ok(handle) => {
+            match handle.runtime_flavor() {
+                RuntimeFlavor::CurrentThread => {
+                    std::thread::scope(move |t| {
+                        t.spawn(move || {
+                            Builder::new_current_thread().enable_all().build().unwrap().block_on(fut)
+                        }).join().unwrap()
+                    })
+                },
+                _ => {
+                    tokio::task::block_in_place(move || {
+                        handle.block_on(fut)
+                    })
+                }
+            }
+
+        },
+        Err(_) => {
+            Builder::new_current_thread().enable_all().build().unwrap().block_on(fut)
+        }
+    }
+}
 
 pub struct Client {
     wrapped: $rustRootModuleName:L::client::Client
 }
-
-/// A runtime for executing operations on the asynchronous client in a blocking manner.
-/// Necessary because Dafny only generates synchronous code.
-static dafny_tokio_runtime: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {
-    tokio::runtime::Builder::new_multi_thread()
-          .enable_all()
-          .build()
-          .unwrap()
-});
 
 impl dafny_runtime::UpcastObject<dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient> for Client {
   ::dafny_runtime::UpcastObjectFn!(dyn crate::r#$dafnyTypesModuleName:L::I$serviceName:LClient);
