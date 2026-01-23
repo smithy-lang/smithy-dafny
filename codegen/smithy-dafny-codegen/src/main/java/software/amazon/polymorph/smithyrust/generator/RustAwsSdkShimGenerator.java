@@ -102,10 +102,10 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     var preamble = TokenTree.of(
       evalTemplate(
         """
-                use std::future::Future;
-        	use tokio::runtime::RuntimeFlavor;
-        	use tokio::runtime::Handle;
-        	use tokio::runtime::Builder;
+        use std::future::Future;
+     	use tokio::runtime::RuntimeFlavor;
+      	use tokio::runtime::Handle;
+       	use tokio::runtime::Builder;
 
         pub fn escape_to_async<F, O>(fut: F) -> O
         where
