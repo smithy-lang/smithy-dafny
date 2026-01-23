@@ -107,7 +107,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
         	use tokio::runtime::Handle;
         	use tokio::runtime::Builder;
 
-        fn escape_to_async<F, O>(fut: F) -> O
+        pub fn escape_to_async<F, O>(fut: F) -> O
         where
             F: Future<Output = O> + Send,
             O: Send
