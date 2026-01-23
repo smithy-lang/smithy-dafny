@@ -7,9 +7,7 @@
         >,
     >{
         let inner_input = $inputFromDafny:L;
-        let result = tokio::task::block_in_place(|| {
-            dafny_tokio_runtime.block_on($rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.wrapped, inner_input))
-        });
+        let result = escape_to_async($rustRootModuleName:L::operation::$snakeCaseOperationName:L::$pascalCaseOperationName:L::send(&self.wrapped, inner_input));
         match result {
             Err(error) => ::dafny_runtime::Rc::new(
                 crate::_Wrappers_Compile::Result::Failure {
