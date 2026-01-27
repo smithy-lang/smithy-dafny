@@ -1,5 +1,7 @@
 async fn async_fn() {
+    let start = std::time::Instant::now();
     crate::client::escape_to_async(tokio::time::sleep(std::time::Duration::from_millis(100)));
+    assert!(start.elapsed() >= std::time::Duration::from_millis(100));
 }
 
 fn sync_fn() {
