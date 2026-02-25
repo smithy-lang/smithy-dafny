@@ -747,28 +747,12 @@ public class TypeConversionCodegen {
       );
   }
 
-  // return true if this struct/member is one of the special ones with a IsXxxSet member
-  public boolean memberSupportsIsSet(final MemberShape memberShape) {
-    String parent = memberShape.getId().getName();
-    String member = nameResolver.classPropertyForStructureMember(memberShape);
-    if (parent.equals("ScanInput")) {
-      if (
-        member.equals("TotalSegments") ||
-        member.equals("Segment") ||
-        member.equals("Limit")
-      ) {
-        return true;
-      }
-    }
-    if (parent.equals("QueryInput") && member.equals("Limit")) {
-      return true;
-    }
-    return false;
-  }
-
   /**
    * Returns:
    * "type varName = value.IsSetPropertyName() ? value.PropertyName : (type) null;"
+   *
+   * For AWS SDK shapes in v4, value type properties are nullable and collection properties
+   * default to null, so we use null checks instead of IsSet methods.
    */
   public TokenTree generateExtractOptionalMember(
     final MemberShape memberShape
@@ -781,26 +765,15 @@ public class TypeConversionCodegen {
       memberShape
     );
     if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getId())) {
-      if (memberSupportsIsSet(memberShape)) {
-        final String isSetMember = nameResolver.isSetMemberForStructureMember(
-          memberShape
-        );
-        return TokenTree.of(
-          type,
-          varName,
-          "= value.%s".formatted(isSetMember),
-          "? value.%s :".formatted(propertyName),
-          "(%s) null;".formatted(type)
-        );
-      } else {
-        return TokenTree.of(
-          type,
-          varName,
-          "= value.%s != null".formatted(propertyName),
-          "? value.%s :".formatted(propertyName),
-          "(%s) null;".formatted(type)
-        );
-      }
+      // In AWS SDK for .NET v4, value type properties are nullable and collection
+      // properties default to null. We use null checks uniformly.
+      return TokenTree.of(
+        type,
+        varName,
+        "= value.%s != null".formatted(propertyName),
+        "? value.%s :".formatted(propertyName),
+        "(%s) null;".formatted(type)
+      );
     } else {
       final String isSetMethod = nameResolver.isSetMethodForStructureMember(
         memberShape
@@ -1026,27 +999,9 @@ public class TypeConversionCodegen {
               ) {
                 final TokenTree checkIfValuePresent;
 
-                // List<T> where T is not of type AttributeVale are always not null, but empty.
-                final Set<String> listTypes = Set.of("BS", "NS", "SS");
-
-                // When generating the toDafnyBody, there is an edge case for AttributeValue.
-                // When checking if this a certain type the ddb sdk for net only gas value.is*Set for
-                // lists, map, and boolean types - it does not have one for the remaining attribute union types
-                final Set<String> checkedAttributeValues = Set.of(
-                  "L",
-                  "M",
-                  "BOOL"
-                );
-
-                // In v2 of the net sdk for ddb the only Is%sSet apis are for L, M, or BOOL other unions do
-                // not exist.
-                if (checkedAttributeValues.contains(propertyName)) {
-                  checkIfValuePresent =
-                    TokenTree.of("if (value.Is%sSet)".formatted(propertyName));
-                } else if (listTypes.contains(propertyName)) {
-                  checkIfValuePresent =
-                    TokenTree.of("if (value.%s.Any())".formatted(propertyName));
-                } else if ("NULL".equals(propertyName)) {
+                // In AWS SDK for .NET v4, collection properties default to null.
+                // We use null checks uniformly for all AttributeValue union members.
+                if ("NULL".equals(propertyName)) {
                   checkIfValuePresent =
                     TokenTree.of(
                       "if (value.%s == true)".formatted(propertyName)
@@ -1986,7 +1941,7 @@ public class TypeConversionCodegen {
       type = AwsSdkDotNetNameResolver.DDB_NET_INTERFACE_NAME;
     }
 
-    // InvalidEndpointException was deprecated in v3 of the dynamodb sdk for net
+    // InvalidEndpointException was removed in v4 of the dynamodb sdk for net
     if (
       StringUtils.equals(
         type,
@@ -1999,7 +1954,7 @@ public class TypeConversionCodegen {
         TokenTree.of("")
       );
     }
-    // Some DDB Modeled exceptions don't end in Exception and the SDK v3 for NET has all Exceptions
+    // Some DDB Modeled exceptions don't end in Exception and the SDK for NET has all Exceptions
     // end with Exception known exceptions with this behavior are: RequestLimitExceeded, InternalServerError
     if (
       type.endsWith("RequestLimitExceeded") ||
