@@ -14,5 +14,7 @@
 .settings
 .class
 
+.vscode/
+
 # Added by formatting tooling
 node_modules
