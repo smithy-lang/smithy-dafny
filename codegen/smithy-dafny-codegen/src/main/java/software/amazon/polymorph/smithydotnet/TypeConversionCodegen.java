@@ -1069,12 +1069,12 @@ public class TypeConversionCodegen {
                   TokenTree
                     .of(
                       generateUnionMemberToDafnyCall(
-                          memberShape,
-                          dafnyUnionConcreteType,
-                          createSuffix,
-                          memberFromDafnyConverterName,
-                          propertyName
-                        )
+                        memberShape,
+                        dafnyUnionConcreteType,
+                        createSuffix,
+                        memberFromDafnyConverterName,
+                        propertyName
+                      )
                     )
                     .lineSeparated()
                     .braced()
