@@ -741,9 +741,61 @@ public class TypeConversionCodegen {
           typeConverterForShape(memberShape.getId(), TO_DAFNY)
         );
     }
+    // In AWS SDK for .NET v4, value type properties (bool, int, long, DateTime, etc.)
+    // are nullable even for required members. We need to cast them to the non-nullable
+    // type expected by the member converter.
+    if (
+      AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getId()) &&
+      nameResolver.isValueType(memberShape.getTarget())
+    ) {
+      final String nonNullableType = nameResolver.baseTypeForShape(
+        memberShape.getTarget()
+      );
+      return "%s((%s)value.%s)".formatted(
+          typeConverterForShape(memberShape.getId(), TO_DAFNY),
+          nonNullableType,
+          nameResolver.classPropertyForStructureMember(memberShape)
+        );
+    }
     return "%s(value.%s)".formatted(
         typeConverterForShape(memberShape.getId(), TO_DAFNY),
         nameResolver.classPropertyForStructureMember(memberShape)
+      );
+  }
+
+  /**
+   * Generates the return statement for a union member's ToDafny conversion.
+   * In AWS SDK for .NET v4, value type properties (bool, int, long, etc.) on union shapes
+   * are nullable. Since we've already null-checked before reaching this point,
+   * we cast to the non-nullable type expected by the member converter.
+   */
+  private String generateUnionMemberToDafnyCall(
+    final MemberShape memberShape,
+    final String dafnyUnionConcreteType,
+    final String createSuffix,
+    final String memberConverterName,
+    final String propertyName
+  ) {
+    if (
+      AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getId()) &&
+      nameResolver.isValueType(memberShape.getTarget())
+    ) {
+      final String nonNullableType = nameResolver.baseTypeForShape(
+        memberShape.getTarget()
+      );
+      return "return %s.create%s(%s((%s)value.%s));".formatted(
+          dafnyUnionConcreteType,
+          createSuffix,
+          memberConverterName,
+          nonNullableType,
+          propertyName
+        );
+    }
+    return "return %s.create%s(%s(value.%s));".formatted(
+        dafnyUnionConcreteType,
+        createSuffix,
+        memberConverterName,
+        propertyName
       );
   }
 
@@ -1016,7 +1068,8 @@ public class TypeConversionCodegen {
                 return checkIfValuePresent.append(
                   TokenTree
                     .of(
-                      "return %s.create%s(%s(value.%s));".formatted(
+                      generateUnionMemberToDafnyCall(
+                          memberShape,
                           dafnyUnionConcreteType,
                           createSuffix,
                           memberFromDafnyConverterName,
