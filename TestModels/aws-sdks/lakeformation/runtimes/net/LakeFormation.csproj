@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>LakeFormation</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <LangVersion>10</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DafnyRuntime" Version="4.9.0+25fa1000744d8d8a9a6a84c0712149daeda6f67e"/>
+    <PackageReference Include="AWSSDK.Core" Version="4.0.0" />
+    <PackageReference Include="AWSSDK.LakeFormation" Version="4.0.0" />
+    <!--
+      System.Collections.Immutable can be removed once dafny.msbuild is updated with
+      https://github.com/dafny-lang/dafny.msbuild/pull/10 and versioned
+    -->
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+
+    <Compile Include="Extern/**/*.cs" />
+    <Compile Include="Generated/**/*.cs" />
+    <Compile Include="ImplementationFromDafny.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj" />
+  </ItemGroup>
+
+</Project>
