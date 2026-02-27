@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="DafnyRuntime" Version="4.0.0.50303"/>
-    <PackageReference Include="AWSSDK.Core" Version="4.0.0" />
+    <PackageReference Include="AWSSDK.Core" Version="4.0.3.3" />
     <PackageReference Include="AWSSDK.KeyManagementService" Version="4.0.0" />
     <!--
       System.Collections.Immutable can be removed once dafny.msbuild is updated with
