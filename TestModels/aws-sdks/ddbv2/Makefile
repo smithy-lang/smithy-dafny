@@ -54,7 +54,7 @@ TRANSLATION_RECORD_PYTHON := \
 GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/ddbv2"
 
 GO_DEPENDENCY_MODULE_NAMES := \
-	--dependency-library-name=sdk.com.amazonaws.dynamodb=github.com/aws/aws-sdk-go-v2/service/dynamodb \
+	--go-dependency-module-name=sdk.com.amazonaws.dynamodb=github.com/aws/aws-sdk-go-v2/service/dynamodb \
 
 TRANSLATION_RECORD_GO := \
 	dafny-dependencies/StandardLibrary/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr

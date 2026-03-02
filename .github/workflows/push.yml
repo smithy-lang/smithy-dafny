@@ -29,6 +29,15 @@ jobs:
     uses: ./.github/workflows/test_models_dafny_verification.yml
     with:
       dafny: ${{ matrix.dafny-version }}
+  push-ci-polymorph-code-gen:
+    needs: pr-populate-dafny-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
+    uses: ./.github/workflows/test_models_polymorph_code_gen.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
   push-ci-java:
     needs: pr-populate-dafny-versions
     strategy:

@@ -16,6 +16,10 @@ jobs:
     uses: ./.github/workflows/test_models_dafny_verification.yml
     with:
       dafny: ${{ inputs.dafny }}
+  manual-ci-polymorph-code-gen:
+    uses: ./.github/workflows/test_models_polymorph_code_gen.yml
+    with:
+      dafny: ${{ inputs.dafny }}
   manual-ci-java:
     uses: ./.github/workflows/test_models_java_tests.yml
     with:

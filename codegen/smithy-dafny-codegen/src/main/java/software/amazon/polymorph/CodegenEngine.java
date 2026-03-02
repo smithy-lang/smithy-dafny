@@ -108,8 +108,10 @@ public class CodegenEngine {
   // To be initialized in constructor
   private final Model model;
   private final ServiceShape serviceShape;
-  private final Map<String, String> dependencyLibraryNames;
-  private final Optional<String> libraryName;
+  private final Map<String, String> dependencyPythonModuleNames;
+  private final Map<String, String> dependencyGoModuleNames;
+  private final Optional<String> pythonModuleName;
+  private final Optional<String> goModuleName;
 
   /**
    * This should only be called by {@link Builder#build()},
@@ -133,8 +135,10 @@ public class CodegenEngine {
     final Path libraryRoot,
     final Optional<Path> patchFilesDir,
     final boolean updatePatchFiles,
-    final Map<String, String> dependencyLibraryNames,
-    final Optional<String> libraryName
+    final Map<String, String> dependencyPythonModuleNames,
+    final Map<String, String> dependencyGoModuleNames,
+    final Optional<String> pythonModuleName,
+    final Optional<String> goModuleName
   ) {
     // To be provided to constructor
     this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
@@ -152,8 +156,10 @@ public class CodegenEngine {
     this.libraryRoot = libraryRoot;
     this.patchFilesDir = patchFilesDir;
     this.updatePatchFiles = updatePatchFiles;
-    this.dependencyLibraryNames = dependencyLibraryNames;
-    this.libraryName = libraryName;
+    this.dependencyPythonModuleNames = dependencyPythonModuleNames;
+    this.dependencyGoModuleNames = dependencyGoModuleNames;
+    this.pythonModuleName = pythonModuleName;
+    this.goModuleName = goModuleName;
 
     this.model =
       this.awsSdkStyle
@@ -811,14 +817,14 @@ public class CodegenEngine {
   }
 
   private void generateGo() {
-    if (libraryName.isEmpty()) {
+    if (goModuleName.isEmpty()) {
       throw new IllegalArgumentException("Go codegen requires a library name");
     }
 
     ObjectNode.Builder goSettingsBuilder = ObjectNode
       .builder()
       .withMember("service", serviceShape.getId().toString())
-      .withMember("moduleName", libraryName.get());
+      .withMember("moduleName", goModuleName.get());
 
     final PluginContext pluginContext = PluginContext
       .builder()
@@ -830,11 +836,11 @@ public class CodegenEngine {
       .build();
 
     final Map<String, String> smithyNamespaceToGoModuleNameMap = new HashMap<>(
-      dependencyLibraryNames
+      dependencyGoModuleNames
     );
     smithyNamespaceToGoModuleNameMap.put(
       serviceShape.getId().getNamespace(),
-      libraryName.get()
+      goModuleName.get()
     );
     if (this.awsSdkStyle) {
       new DafnyGoAwsSdkClientCodegenPlugin(smithyNamespaceToGoModuleNameMap)
@@ -846,7 +852,7 @@ public class CodegenEngine {
   }
 
   private void generatePython() {
-    if (libraryName.isEmpty()) {
+    if (pythonModuleName.isEmpty()) {
       throw new IllegalArgumentException(
         "Python codegen requires a module name"
       );
@@ -855,7 +861,7 @@ public class CodegenEngine {
     ObjectNode.Builder pythonSettingsBuilder = ObjectNode
       .builder()
       .withMember("service", serviceShape.getId().toString())
-      .withMember("module", libraryName.get())
+      .withMember("module", pythonModuleName.get())
       // Smithy-Python requires some string to be present here, but this is unused.
       // Any references to this version are deleted as part of code generation.
       .withMember("moduleVersion", "0.0.1");
@@ -873,9 +879,9 @@ public class CodegenEngine {
       new HashMap<>();
     smithyNamespaceToPythonModuleNameMap.put(
       serviceShape.getId().getNamespace(),
-      libraryName.get()
+      pythonModuleName.get()
     );
-    smithyNamespaceToPythonModuleNameMap.putAll(dependencyLibraryNames);
+    smithyNamespaceToPythonModuleNameMap.putAll(dependencyPythonModuleNames);
 
     if (this.awsSdkStyle) {
       DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin =
@@ -1069,8 +1075,10 @@ public class CodegenEngine {
     private Path libraryRoot;
     private Path patchFilesDir;
     private boolean updatePatchFiles = false;
-    private Map<String, String> dependencyLibraryNames;
-    private String libraryName;
+    private Map<String, String> dependencyPythonModuleNames;
+    private String pythonModuleName;
+    private Map<String, String> dependencyGoModuleNames;
+    private String goModuleName;
 
     public Builder() {}
 
@@ -1099,20 +1107,38 @@ public class CodegenEngine {
     }
 
     /**
-     * Sets the directories in which to search for dependent model file(s).
+     * Sets the Smithy namespace-to-Python module name map.
      */
-    public Builder withDependencyLibraryNames(
-      final Map<String, String> dependencyLibraryNames
+    public Builder withDependencyPythonModuleNames(
+      final Map<String, String> dependencyPythonModuleNames
     ) {
-      this.dependencyLibraryNames = dependencyLibraryNames;
+      this.dependencyPythonModuleNames = dependencyPythonModuleNames;
       return this;
     }
 
     /**
-     * Sets the Python module name for any generated Python code.
+     * Sets the Smithy namespace-to-Go module name map.
      */
-    public Builder withLibraryName(final String libraryName) {
-      this.libraryName = libraryName;
+    public Builder withDependencyGoModuleNames(
+      final Map<String, String> dependencyGoModuleNames
+    ) {
+      this.dependencyGoModuleNames = dependencyGoModuleNames;
+      return this;
+    }
+
+    /**
+     * Sets the Python module name for generated Python code.
+     */
+    public Builder withPythonModuleName(final String pythonModuleName) {
+      this.pythonModuleName = pythonModuleName;
+      return this;
+    }
+
+    /**
+     * Sets the GO module name for generated Go code.
+     */
+    public Builder withGoModuleName(final String goModuleName) {
+      this.goModuleName = goModuleName;
       return this;
     }
 
@@ -1270,10 +1296,15 @@ public class CodegenEngine {
         ? new Path[] {}
         : this.dependentModelPaths.clone();
 
-      final Map<String, String> dependencyLibraryNames =
-        this.dependencyLibraryNames == null
+      final Map<String, String> dependencyPythonModuleNames =
+        this.dependencyPythonModuleNames == null
           ? new HashMap<>()
-          : this.dependencyLibraryNames;
+          : this.dependencyPythonModuleNames;
+
+      final Map<String, String> dependencyGoModuleNames =
+        this.dependencyGoModuleNames == null
+          ? new HashMap<>()
+          : this.dependencyGoModuleNames;
 
       final Map<TargetLanguage, Path> targetLangOutputDirsRaw =
         Objects.requireNonNull(this.targetLangOutputDirs);
@@ -1340,8 +1371,12 @@ public class CodegenEngine {
         );
       }
 
-      final Optional<String> libraryName = Optional.ofNullable(
-        this.libraryName
+      final Optional<String> pythonModuleName = Optional.ofNullable(
+        this.pythonModuleName
+      );
+
+      final Optional<String> goModuleName = Optional.ofNullable(
+        this.goModuleName
       );
 
       final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
@@ -1372,8 +1407,10 @@ public class CodegenEngine {
         libraryRoot,
         patchFilesDir,
         updatePatchFiles,
-        dependencyLibraryNames,
-        libraryName
+        dependencyPythonModuleNames,
+        dependencyGoModuleNames,
+        pythonModuleName,
+        goModuleName
       );
     }
   }

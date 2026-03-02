@@ -44,10 +44,10 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 GO_MODULE_NAME="github.com/smithy-lang/smithy-dafny/TestModels/Dependencies"
 
 GO_DEPENDENCY_MODULE_NAMES := \
-	--dependency-library-name=simple.constraints=github.com/smithy-lang/smithy-dafny/TestModels/Constraints \
-	--dependency-library-name=simple.errors=github.com/smithy-lang/smithy-dafny/TestModels/Errors \
-	--dependency-library-name=simple.extendable.resources=github.com/smithy-lang/smithy-dafny/TestModels/Extendable \
-	--dependency-library-name=simple.resources=github.com/smithy-lang/smithy-dafny/TestModels/Resource
+	--go-dependency-module-name=simple.constraints=github.com/smithy-lang/smithy-dafny/TestModels/Constraints \
+	--go-dependency-module-name=simple.errors=github.com/smithy-lang/smithy-dafny/TestModels/Errors \
+	--go-dependency-module-name=simple.extendable.resources=github.com/smithy-lang/smithy-dafny/TestModels/Extendable \
+	--go-dependency-module-name=simple.resources=github.com/smithy-lang/smithy-dafny/TestModels/Resource
 
 TRANSLATION_RECORD_GO := \
 	Resource/runtimes/go/ImplementationFromDafny-go/ImplementationFromDafny-go.dtr \
@@ -66,10 +66,10 @@ clean: _clean
 PYTHON_MODULE_NAME=simple_dependencies
 
 PYTHON_DEPENDENCY_MODULE_NAMES := \
-	--dependency-library-name=simple.resources=simple_resources \
-	--dependency-library-name=simple.errors=simple_errors \
-	--dependency-library-name=simple.extendable.resources=simple_extendable_resources \
-	--dependency-library-name=simple.constraints=simple_constraints
+	--python-dependency-module-name=simple.resources=simple_resources \
+	--python-dependency-module-name=simple.errors=simple_errors \
+	--python-dependency-module-name=simple.extendable.resources=simple_extendable_resources \
+	--python-dependency-module-name=simple.constraints=simple_constraints
 
 TRANSLATION_RECORD_PYTHON := \
     --translation-record ../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr \
