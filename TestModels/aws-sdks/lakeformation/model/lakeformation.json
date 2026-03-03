@@ -3885,10 +3885,6 @@
             "name": "DATA_LOCATION_ACCESS"
           },
           {
-            "value": "CREATE_TAG",
-            "name": "CREATE_TAG"
-          },
-          {
             "value": "ASSOCIATE",
             "name": "ASSOCIATE"
           }

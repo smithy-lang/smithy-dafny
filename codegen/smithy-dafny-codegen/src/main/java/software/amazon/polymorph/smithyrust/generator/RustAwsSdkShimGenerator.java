@@ -102,48 +102,72 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
     var preamble = TokenTree.of(
       evalTemplate(
         """
-        use std::sync::LazyLock;
-        use $rustRootModuleName:L::conversions;
+        use std::future::Future;
+        use tokio::runtime::RuntimeFlavor;
+        use tokio::runtime::Handle;
+        use tokio::runtime::Builder;
 
-        #[derive(::std::clone::Clone, ::std::fmt::Debug)]
-        pub struct Client {
-            pub inner: $sdkCrate:L::Client
-        }
+        pub fn escape_to_async<F, O>(fut: F) -> O
+        where
+            F: Future<Output = O> + Send,
+            O: Send
+        {
+            match Handle::try_current() {
+                Ok(handle) => {
+                    match handle.runtime_flavor() {
+                        RuntimeFlavor::CurrentThread => {
+                            std::thread::scope(move |t| {
+                                t.spawn(move || {
+                                    Builder::new_current_thread().enable_all().build().unwrap().block_on(fut)
+                                }).join().unwrap()
+                            })
+                        },
+                        _ => {
+                            tokio::task::block_in_place(move || {
+                                handle.block_on(fut)
+                            })
+                        }
+                    }
 
-        impl ::std::cmp::PartialEq for Client {
-          fn eq(&self, other: &Self) -> bool {
-            false
-          }
-        }
-
-        impl ::std::convert::Into<Client> for $sdkCrate:L::Client {
-            fn into(self) -> Client {
-                Client { inner: self }
+                },
+                Err(_) => {
+                    Builder::new_current_thread().enable_all().build().unwrap().block_on(fut)
+                }
             }
         }
 
-        /// A runtime for executing operations on the asynchronous client in a blocking manner.
-        /// Necessary because Dafny only generates synchronous code.
-        static dafny_tokio_runtime: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {
-            tokio::runtime::Builder::new_multi_thread()
-                  .enable_all()
-                  .build()
-                  .unwrap()
-        });
+                use $rustRootModuleName:L::conversions;
 
-        impl dafny_runtime::UpcastObject<::dafny_runtime::DynAny> for Client {
-            ::dafny_runtime::UpcastObjectFn!(::dafny_runtime::DynAny);
-        }
+                #[derive(::std::clone::Clone, ::std::fmt::Debug)]
+                pub struct Client {
+                    pub inner: $sdkCrate:L::Client
+                }
 
-        impl dafny_runtime::UpcastObject<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L> for Client {
-          ::dafny_runtime::UpcastObjectFn!(dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L);
-        }
+                impl ::std::cmp::PartialEq for Client {
+                  fn eq(&self, other: &Self) -> bool {
+                    false
+                  }
+                }
 
-        impl crate::r#$dafnyTypesModuleName:L::I$clientName:L
-          for Client {
-          $operations:L
-        }
-        """,
+                impl ::std::convert::Into<Client> for $sdkCrate:L::Client {
+                    fn into(self) -> Client {
+                        Client { inner: self }
+                    }
+                }
+
+                impl dafny_runtime::UpcastObject<::dafny_runtime::DynAny> for Client {
+                    ::dafny_runtime::UpcastObjectFn!(::dafny_runtime::DynAny);
+                }
+
+                impl dafny_runtime::UpcastObject<dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L> for Client {
+                  ::dafny_runtime::UpcastObjectFn!(dyn crate::r#$dafnyTypesModuleName:L::I$clientName:L);
+                }
+
+                impl crate::r#$dafnyTypesModuleName:L::I$clientName:L
+                  for Client {
+                  $operations:L
+                }
+                """,
         variables
       )
     );
@@ -166,7 +190,7 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
                   ::dafny_runtime::Rc<crate::r#$dafnyTypesModuleName:L::Error>
                   >
                 > {
-                let shared_config = dafny_tokio_runtime.block_on(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
+                let shared_config = escape_to_async(aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()));
                 let inner = $sdkCrate:L::Client::new(&shared_config);
                 let client = Client { inner };
                 let dafny_client = ::dafny_runtime::upcast_object()(::dafny_runtime::object::new(client));
@@ -244,14 +268,11 @@ public class RustAwsSdkShimGenerator extends AbstractRustShimGenerator {
           >
         > {
           let inner_input = $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::_$snakeCaseOperationName:L_request::from_dafny(input.clone());
-          let native_result = tokio::task::block_in_place(|| {
-            dafny_tokio_runtime.block_on(async {
+          let native_result = escape_to_async(
               self.inner.$snakeCaseOperationName:L()
                 $fluentSetters:L
                 .send()
-                .await
-              })
-            });
+            );
           crate::standard_library_conversions::result_to_dafny(&native_result,\s
             $outputToDafnyMapper:L,
             $rustRootModuleName:L::conversions::$snakeCaseOperationName:L::to_dafny_error)

@@ -66,9 +66,8 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
   }
 
   /**
-   * We can't call the {@code IsSet} methods on AWS SDK classes' member properties because they're internal.
-   * The best we can do is to call the properties' getters, which calls {@code GetValueOrDefault}, which in turn may
-   * improperly coalesce absent optional values to 0 (for example).
+   * In AWS SDK for .NET v4, value type properties are nullable and collection properties
+   * default to null. We extract optional members by checking for null.
    */
   @Override
   public TokenTree generateExtractOptionalMember(MemberShape memberShape) {
@@ -176,7 +175,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
             );
             final String errorConverter =
               DotNetNameResolver.qualifiedTypeConverter(errorShapeId, TO_DAFNY);
-            // InvalidEndpointException does not exist in v2 of the sdk
+            // InvalidEndpointException was removed in v4 of the sdk
             if (sdkErrorType.endsWith("InvalidEndpointException")) {
               return Token.of("");
             }
