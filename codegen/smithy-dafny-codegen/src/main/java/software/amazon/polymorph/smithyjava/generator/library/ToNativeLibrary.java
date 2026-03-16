@@ -138,7 +138,7 @@ public class ToNativeLibrary extends ToNative {
       .stream()
       .map(this::modeledResource)
       .forEachOrdered(toNativeMethods::add);
-    // The Service, it's self
+    // The Service itself
     toNativeMethods.add(modeledService(subject.serviceShape));
     return TypeSpec
       .classBuilder(thisClassName)

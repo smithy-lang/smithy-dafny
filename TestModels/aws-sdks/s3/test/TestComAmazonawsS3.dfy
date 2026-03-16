@@ -5,11 +5,14 @@ include "../src/Index.dfy"
 
 module TestComAmazonawsS3 {
     import Com.Amazonaws.S3
+    import opened ComAmazonawsS3Types
     import opened StandardLibrary.UInt
+    import opened StandardLibrary.Streams
     import opened Wrappers
-    import opened Std.Enumerators
-    import opened Std.Aggregators
-    import opened Std.Streams
+    import opened Std.BulkActions
+    import opened Std.Producers
+    import opened Std.Consumers
+
 
     const testBucket := "s3-dafny-test-bucket"
     const testObjectKey := "smithy-dafny-test-model-object-key"
@@ -21,10 +24,7 @@ module TestComAmazonawsS3 {
                 Key := testObjectKey
             )
         );
-        // Note the chunk size has to ensure all but the last chunk is >= 8192 bytes.
-        // For a small stream like this that means just one chunk.
-        var s: ByteStream := new SeqByteStream([ 97, 115, 100, 102 ], 10);
-        expect s is RewindableByteStream;
+        var s: DataStream := new SeqDataStream([ 97, 115, 100, 102 ]);
         PutObjectTest(
             input := S3.Types.PutObjectRequest(
                 Bucket := testBucket,
@@ -55,7 +55,7 @@ module TestComAmazonawsS3 {
 
     method GetObjectTest(
         nameonly input: S3.Types.GetObjectRequest,
-        nameonly expectedBody: BoundedInts.bytes
+        nameonly expectedBody: bytes
     )
     {
         var client :- expect S3.S3Client();
@@ -68,11 +68,7 @@ module TestComAmazonawsS3 {
         var MyBody := ret.value.Body;
         expect MyBody.Some?;
 
-        // TODO: These need to be generated as postconditions on GetObject instead
-        assume {:axiom} fresh(MyBody.value.Repr);
-        assume {:axiom} MyBody.value.Valid();
-        
-        var bodyValue := Collect(MyBody.value);
+        var bodyValue :- expect Collect(MyBody.value);
         expect bodyValue == expectedBody;
     }
 
@@ -112,15 +108,15 @@ module TestComAmazonawsS3 {
 
         var ret := client.DeleteObject(input);
 
-        expect(ret.Success?);
+        expect(ret.Success?), ret.error;
     }
 
-    method Collect(e: ByteStream) returns (s: BoundedInts.bytes) 
-        requires e.Valid()
-        modifies e.Repr
+    method Collect(e: DataStream<uint8, Error>) returns (s: Result<bytes, Error>) 
     {
-        var a := new Collector();
-        ForEach(e, a);
-        return Seq.Flatten(a.values);
+        var reader := e.Reader();
+        var a: BatchSeqWriter := new BatchSeqWriter();
+        var aTotalProof := new BatchSeqWriterTotalProof(a);
+        reader.ForEach(a, aTotalProof);
+        return Success(a.elements);
     }
 }

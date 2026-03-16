@@ -3,7 +3,7 @@
 
 ENABLE_EXTERN_PROCESSING=1
 CORES=2
-USE_DAFNY_STANDARD_LIBRARIES=1
+USES_STREAMING=1
 
 include ../../SharedMakefile.mk
 
@@ -34,4 +34,4 @@ INDEX_FILE_WITH_EXTERN_STRING="module {:extern \"software.amazon.cryptography.se
 INDEX_FILE_WITHOUT_EXTERN_STRING="module Com.Amazonaws.S3 refines AbstractComAmazonawsS3Service {"
 
 TRANSLATION_RECORD_PYTHON := \
-    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr
+    --translation-record ../../dafny-dependencies/StandardLibrary/runtimes/python/src/smithy_dafny_standard_library/internaldafny/generated/dafny_src-py.dtr \

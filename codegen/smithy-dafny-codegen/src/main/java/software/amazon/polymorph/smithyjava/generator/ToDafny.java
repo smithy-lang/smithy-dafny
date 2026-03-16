@@ -39,6 +39,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 
 public abstract class ToDafny extends Generator {
 
@@ -477,6 +478,9 @@ public abstract class ToDafny extends Generator {
             shape.toShapeId()
           )
       );
+    }
+    if (shape.isBlobShape() && shape.hasTrait(StreamingTrait.class)) {
+      return new MethodReference(thisClassName, "DataStream");
     }
     // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
     if (ModelUtils.isSmithyApiOrSimpleShape(shape)) {

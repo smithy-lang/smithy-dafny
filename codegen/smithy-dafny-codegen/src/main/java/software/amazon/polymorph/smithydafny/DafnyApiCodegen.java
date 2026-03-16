@@ -31,7 +31,7 @@ public class DafnyApiCodegen {
   private final ServiceShape serviceShape;
   private final DafnyNameResolver nameResolver;
   private final Path outputDir;
-  private final Path includeDafnyFile;
+  private final List<Path> includeDafnyFiles;
   private static final Logger LOGGER = LoggerFactory.getLogger(
     DafnyApiCodegen.class
   );
@@ -52,14 +52,14 @@ public class DafnyApiCodegen {
     final Model model,
     final ServiceShape serviceShape,
     final Path outputDir,
-    final Path includeDafnyFile,
+    final List<Path> includeDafnyFiles,
     final Path[] dependentModelPaths,
     final boolean awsSdkRequest
   ) {
     this.model = model;
     this.serviceShape = serviceShape;
     this.outputDir = outputDir;
-    this.includeDafnyFile = includeDafnyFile;
+    this.includeDafnyFiles = includeDafnyFiles;
     this.nameResolver =
       new DafnyNameResolver(
         model,
@@ -106,7 +106,7 @@ public class DafnyApiCodegen {
       .of(
         Stream
           .concat(
-            Stream.of(outputDir.relativize(includeDafnyFile)),
+            includeDafnyFiles.stream().map(outputDir::relativize),
             nameResolver
               .dependentModels()
               // nameResolve.dependentModels() filters dependentModelPaths
@@ -237,9 +237,11 @@ public class DafnyApiCodegen {
       .of(
         Stream
           .concat(
-            Stream.of(
-              outputDir.relativize(includeDafnyFile),
-              outputDafny.relativize(outputDir.resolve("../src/Index.dfy"))
+            Stream.concat(
+              includeDafnyFiles.stream().map(outputDir::relativize),
+              Stream.of(
+                outputDafny.relativize(outputDir.resolve("../src/Index.dfy"))
+              )
             ),
             nameResolver
               .dependentModels()
@@ -321,9 +323,8 @@ public class DafnyApiCodegen {
       .map(DafnyApiCodegen::generateLengthConstraint);
     if (blobShape.hasTrait(StreamingTrait.class)) {
       // TODO: need to handle @length too,
-      // something like `forall produced | a.CanProduce(produced) :: min <= |Enumerated(produced)| <= max
-      // (which should have a simpler helper predicate version, especially when allowing for reference types)
-      return generateTypeSynonym(blobShapeId, "ByteStream");
+      // something like `a.ContentLength().Some? && min <= a.ContentLength().value <= max
+      return generateTypeSynonym(blobShapeId, "DataStream<uint8, Error>");
     } else {
       return generateSubsetType(blobShapeId, "seq<uint8>", lengthConstraint);
     }

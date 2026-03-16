@@ -7,9 +7,10 @@ module WrappedSimpleTypesStringTest {
     import WrappedSimpleStreamingService
     import SimpleStreamingImplTest
     import opened Wrappers
-    method{:test} TestCountBits() {
+    method{:test} TestWrappedClient() {
         var client :- expect WrappedSimpleStreamingService.WrappedSimpleStreaming();
         SimpleStreamingImplTest.TestCountBits(client);
         SimpleStreamingImplTest.TestBinaryOf(client);
+        SimpleStreamingImplTest.TestChunks(client);
     }
 }

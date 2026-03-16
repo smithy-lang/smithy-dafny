@@ -19,8 +19,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
+import software.amazon.polymorph.smithyjava.nameresolver.Constants;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
@@ -87,6 +89,10 @@ public class ToDafnyLibrary extends ToDafny {
     toDafnyMethods.add(opaqueWithTextError());
     // CollectionError
     toDafnyMethods.add(collectionError());
+    // DataStreams
+    if (ModelUtils.usesStreaming(subject.model)) {
+      toDafnyMethods.add(dataStream());
+    }
     // Structures
     subject
       .getStructuresInServiceNamespace()
@@ -265,6 +271,31 @@ public class ToDafnyLibrary extends ToDafny {
       .addStatement(
         "return $T.create_CollectionOfErrors(list, message)",
         dafnyError
+      )
+      .build();
+  }
+
+  MethodSpec dataStream() {
+    ClassName dafnyDataStream =
+      software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_DATA_STREAM_CLASS_NAME;
+    TypeName dafnyDataStreamParameterized = ParameterizedTypeName.get(
+      dafnyDataStream,
+      ClassName.get(Byte.class),
+      subject.dafnyNameResolver.abstractClassForError()
+    );
+    return MethodSpec
+      .methodBuilder("DataStream")
+      .returns(dafnyDataStreamParameterized)
+      .addModifiers(PUBLIC_STATIC)
+      .addParameter(ClassName.get(RequestBody.class), VAR_INPUT)
+      .addStatement(
+        "return new $T(\n" +
+        "      Error._typeDescriptor(),\n" +
+        "      $L,\n" +
+        "      Error::create_Opaque\n" +
+        ")",
+        software.amazon.polymorph.smithyjava.nameresolver.Constants.REQUEST_BODY_AS_DATA_STREAM_CLASS_NAME,
+        VAR_INPUT
       )
       .build();
   }

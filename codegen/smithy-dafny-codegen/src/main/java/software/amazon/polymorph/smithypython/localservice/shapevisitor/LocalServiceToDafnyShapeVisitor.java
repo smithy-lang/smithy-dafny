@@ -96,7 +96,7 @@ public class LocalServiceToDafnyShapeVisitor
   public String blobShape(BlobShape shape) {
     if (shape.hasTrait(StreamingTrait.class)) {
       writer.addStdlibImport(
-        "smithy_dafny_standard_library.internaldafny.extern.streams",
+        "smithy_dafny_streaming_support.internaldafny.extern.streams",
         "StreamingBlobAsDafnyDataStream"
       );
       return "StreamingBlobAsDafnyDataStream(%1$s)".formatted(dataSource);

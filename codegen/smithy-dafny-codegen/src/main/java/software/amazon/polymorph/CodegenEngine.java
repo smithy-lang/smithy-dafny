@@ -100,7 +100,7 @@ public class CodegenEngine {
   private final boolean updatePatchFiles;
   // refactor this to only be required if generating Java
   private final AwsSdkVersion javaAwsSdkVersion;
-  private final Optional<Path> includeDafnyFile;
+  private final List<Path> includeDafnyFiles;
   private final boolean awsSdkStyle;
   private final boolean localServiceTest;
   private final Set<GenerationAspect> generationAspects;
@@ -126,7 +126,7 @@ public class CodegenEngine {
     final DafnyVersion dafnyVersion,
     final Optional<Path> propertiesFile,
     final AwsSdkVersion javaAwsSdkVersion,
-    final Optional<Path> includeDafnyFile,
+    final List<Path> includeDafnyFiles,
     final boolean awsSdkStyle,
     final boolean localServiceTest,
     final Set<GenerationAspect> generationAspects,
@@ -145,7 +145,7 @@ public class CodegenEngine {
     this.dafnyVersion = dafnyVersion;
     this.propertiesFile = propertiesFile;
     this.javaAwsSdkVersion = javaAwsSdkVersion;
-    this.includeDafnyFile = includeDafnyFile;
+    this.includeDafnyFiles = includeDafnyFiles;
     this.awsSdkStyle = awsSdkStyle;
     this.localServiceTest = localServiceTest;
     this.generationAspects = generationAspects;
@@ -242,12 +242,12 @@ public class CodegenEngine {
 
   private void generateDafny(final Path outputDir) {
     // Validated by builder, but check again
-    assert this.includeDafnyFile.isPresent();
+    assert !this.includeDafnyFiles.isEmpty();
     final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
       model,
       serviceShape,
       outputDir,
-      this.includeDafnyFile.get(),
+      this.includeDafnyFiles,
       this.dependentModelPaths,
       this.awsSdkStyle
     );
@@ -364,7 +364,7 @@ public class CodegenEngine {
       model,
       serviceShape,
       outputDir,
-      this.includeDafnyFile.get(),
+      this.includeDafnyFiles,
       this.dependentModelPaths,
       this.awsSdkStyle
     );
@@ -1014,18 +1014,17 @@ public class CodegenEngine {
   }
 
   private Path standardLibraryPath() {
-    final Path includeDafnyFile =
-      this.includeDafnyFile.orElseThrow(() ->
-          new IllegalStateException(
-            "includeDafnyFile required when generating additional aspects (--generate)"
-          )
-        );
+    if (this.includeDafnyFiles.isEmpty()) {
+      throw new IllegalStateException(
+        "includeDafnyFile required when generating additional aspects (--generate)"
+      );
+    }
 
-    // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
+    // Assumes that includeDafnyFiles.get(0) is at StandardLibrary/src/Index.dfy
     // TODO be smarter about finding the StandardLibrary path
     return libraryRoot
       .resolve("runtimes/net")
-      .relativize(includeDafnyFile.resolve("../.."));
+      .relativize(includeDafnyFiles.get(0).resolve("../.."));
   }
 
   private void writeTemplatedFile(
@@ -1062,7 +1061,7 @@ public class CodegenEngine {
     private DafnyVersion dafnyVersion;
     private Path propertiesFile;
     private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
-    private Path includeDafnyFile;
+    private List<Path> includeDafnyFiles;
     private boolean awsSdkStyle = false;
     private boolean localServiceTest = false;
     private Set<GenerationAspect> generationAspects = Collections.emptySet();
@@ -1175,8 +1174,8 @@ public class CodegenEngine {
     /**
      * Sets a file to be included in the generated Dafny code.
      */
-    public Builder withIncludeDafnyFile(final Path includeDafnyFile) {
-      this.includeDafnyFile = includeDafnyFile;
+    public Builder withIncludeDafnyFiles(final List<Path> includeDafnyFiles) {
+      this.includeDafnyFiles = includeDafnyFiles;
       return this;
     }
 
@@ -1324,15 +1323,12 @@ public class CodegenEngine {
 
       if (
         targetLangOutputDirs.containsKey(TargetLanguage.DAFNY) &&
-        this.includeDafnyFile == null
+        this.includeDafnyFiles.isEmpty()
       ) {
         throw new IllegalStateException(
-          "includeDafnyFile is required when generating Dafny code"
+          "includeDafnyFiles is required when generating Dafny code"
         );
       }
-      final Optional<Path> includeDafnyFile = Optional
-        .ofNullable(this.includeDafnyFile)
-        .map(path -> path.toAbsolutePath().normalize());
 
       if (this.awsSdkStyle && this.localServiceTest) {
         throw new IllegalStateException(
@@ -1365,7 +1361,7 @@ public class CodegenEngine {
         dafnyVersion,
         propertiesFile,
         javaAwsSdkVersion,
-        includeDafnyFile,
+        includeDafnyFiles,
         this.awsSdkStyle,
         this.localServiceTest,
         this.generationAspects,

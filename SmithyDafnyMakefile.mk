@@ -30,6 +30,7 @@
 #   of Model directories
 # AWS_SDK_CMD -- the `--aws-sdk` command to generate AWS SDK style interfaces.
 # STD_LIBRARY -- path from this file to the StandardLibrary Dafny project.
+# STREAMING_SUPPORT -- path from this file to the StreamingSupport Dafny project.
 # SMITHY_DEPS -- path from this file to smithy dependencies, such as custom traits.
 # GRADLEW -- the gradlew to use when building Java runtimes.
 #   defaults to $(SMITHY_DAFNY_ROOT)/codegen/gradlew
@@ -98,7 +99,7 @@ verify:
 		--log-format csv \
 		--verification-time-limit $(VERIFY_TIMEOUT) \
 		--resource-limit $(MAX_RESOURCE_COUNT) \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES), --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
+		$(if $(USES_STREAMING), --library:$(PROJECT_ROOT)/$(STREAMING_SUPPORT)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(DAFNY_OPTIONS) \
 		%
 
@@ -115,7 +116,7 @@ verify_single:
 		--log-format text \
 		--verification-time-limit $(VERIFY_TIMEOUT) \
 		--resource-limit $(MAX_RESOURCE_COUNT) \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES), --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
+		$(if $(USES_STREAMING), --library:$(PROJECT_ROOT)/$(STREAMING_SUPPORT)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(DAFNY_OPTIONS) \
 		$(if ${PROC},-proc:*$(PROC)*,) \
 		$(FILE)
@@ -215,7 +216,7 @@ transpile_implementation:
 		$(DAFNY_OTHER_FILES) \
 		$(TRANSPILE_MODULE_NAME) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
+		$(if $(USES_STREAMING) , --library:$(PROJECT_ROOT)/$(STREAMING_SUPPORT)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(TRANSLATION_RECORD) \
 		$(TRANSPILE_DEPENDENCIES)
 
@@ -255,7 +256,7 @@ transpile_test:
 		$(DAFNY_OPTIONS) \
 		$(DAFNY_OTHER_FILES) \
 		$(if $(strip $(STD_LIBRARY)) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-		$(if $(USE_DAFNY_STANDARD_LIBRARIES) , --library:$(PROJECT_ROOT)/$(STD_LIBRARY)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
+		$(if $(USES_STREAMING) , --library:$(PROJECT_ROOT)/$(STREAMING_SUPPORT)/bin/DafnyStandardLibraries-smithy-dafny-subset.doo, ) \
 		$(TRANSLATION_RECORD) \
 		$(SOURCE_TRANSLATION_RECORD) \
 		$(TRANSPILE_MODULE_NAME) \
@@ -264,7 +265,8 @@ transpile_test:
 # If we are not the StandardLibrary, transpile the StandardLibrary.
 # Transpile all other dependencies
 transpile_dependencies:
-	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG) USE_DAFNY_STANDARD_LIBRARIES=$(USE_DAFNY_STANDARD_LIBRARIES), )
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG) USES_STREAMING=$(USES_STREAMING), )
+	$(if $(USES_STREAMING), $(MAKE) -C $(PROJECT_ROOT)/$(STREAMING_SUPPORT) transpile_implementation_$(LANG) USES_STREAMING=$(USES_STREAMING), )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(PROJECT_DEPENDENCIES))
 
 transpile_dependencies_test:
@@ -337,7 +339,8 @@ _polymorph_wrapped:
 	$(POLYMORPH_OPTIONS)";
 
 _polymorph_dependencies:
-	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_$(POLYMORPH_LANGUAGE_TARGET) LIBRARY_ROOT=$(PROJECT_ROOT)/$(STD_LIBRARY) USE_DAFNY_STANDARD_LIBRARIES=$(USE_DAFNY_STANDARD_LIBRARIES), )
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_$(POLYMORPH_LANGUAGE_TARGET) LIBRARY_ROOT=$(PROJECT_ROOT)/$(STD_LIBRARY) USES_STREAMING=$(USES_STREAMING), )
+	$(if $(USES_STREAMING), $(MAKE) -C $(PROJECT_ROOT)/$(STREAMING_SUPPORT) polymorph_$(POLYMORPH_LANGUAGE_TARGET) LIBRARY_ROOT=$(PROJECT_ROOT)/$(STREAMING_SUPPORT) USES_STREAMING=$(USES_STREAMING), )
 	@$(foreach dependency, \
 		$(PROJECT_DEPENDENCIES), \
 		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
@@ -359,7 +362,8 @@ polymorph_code_gen:
 _polymorph_code_gen: OUTPUT_DAFNY=\
     --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_code_gen: INPUT_DAFNY=\
-		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy \
+		$(if $(USES_STREAMING), --include-dafny $(PROJECT_ROOT)/$(STREAMING_SUPPORT)/src/Index.dfy, )
 _polymorph_code_gen: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
@@ -386,7 +390,8 @@ polymorph_dafny:
 _polymorph_dafny: OUTPUT_DAFNY=\
 		--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_dafny: INPUT_DAFNY=\
-		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy \
+		$(if $(USES_STREAMING), --include-dafny $(PROJECT_ROOT)/$(STREAMING_SUPPORT)/src/Index.dfy, )
 _polymorph_dafny: _polymorph
 
 dafny: polymorph_dafny verify
@@ -409,7 +414,8 @@ polymorph_dotnet:
 _polymorph_dotnet: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_dotnet: INPUT_DAFNY=\
-		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy \
+		$(if $(USES_STREAMING), --include-dafny $(PROJECT_ROOT)/$(STREAMING_SUPPORT)/src/Index.dfy, )
 _polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project
@@ -427,7 +433,8 @@ polymorph_java:
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_java: INPUT_DAFNY=\
-	--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+	--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy \
+		$(if $(USES_STREAMING), --include-dafny $(PROJECT_ROOT)/$(STREAMING_SUPPORT)/src/Index.dfy, )
 _polymorph_java: _polymorph
 
 # Generates python code for all namespaces in this project
@@ -593,6 +600,7 @@ transpile_dependencies_java: transpile_dependencies
 # Locally deploy all other dependencies 
 mvn_local_deploy_dependencies:
 	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) mvn_local_deploy, )
+	$(if $(USES_STREAMING), $(MAKE) -C $(PROJECT_ROOT)/$(STREAMING_SUPPORT) mvn_local_deploy, )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% mvn_local_deploy;, $(PROJECT_DEPENDENCIES))
 
 # The Java MUST all exist already through the transpile step.

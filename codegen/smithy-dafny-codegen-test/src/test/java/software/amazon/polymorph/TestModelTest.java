@@ -91,14 +91,21 @@ public abstract class TestModelTest {
   protected void testModels(String relativeTestModelPath) {
     // The @streaming support depends on our subset of the Dafny standard libraries
     // which cannot be built for old versions of Dafny.
-    if (
+    // We also don't want to burn a lot of CI cycles testing all models against Dafny 4.10 yet.
+    DafnyVersion dafnyVersion = CodegenEngine.getDafnyVersionFromDafny();
+    boolean needsStreaming =
       relativeTestModelPath.endsWith("Streaming") ||
-      relativeTestModelPath.endsWith("s3")
-    ) {
-      DafnyVersion dafnyVersion = CodegenEngine.getDafnyVersionFromDafny();
-      if (dafnyVersion.compareTo(DafnyVersion.parse("4.9.0")) < 0) {
-        Assumptions.assumeTrue(false);
-      }
+      relativeTestModelPath.endsWith("s3") ||
+      relativeTestModelPath.endsWith("StreamingSupport");
+    if (dafnyVersion.compareTo(DafnyVersion.parse("4.10.0")) < 0) {
+      Assumptions.assumeFalse(needsStreaming);
+    } else {
+      Assumptions.assumeTrue(needsStreaming);
+    }
+
+    // StreamingSupport isn't directly testable
+    if (relativeTestModelPath.endsWith("StreamingSupport")) {
+      Assumptions.assumeTrue(false);
     }
   }
 }

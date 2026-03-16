@@ -5,11 +5,13 @@ include "../Model/SimpleStreamingTypes.dfy"
 include "Chunker.dfy"
 module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpleStreamingOperations {
 
-  import Std.Enumerators
-  import Std.Aggregators
+  import Std.Actions
+  import Std.BulkActions
+  import Std.Producers
+  import Std.Consumers
   import Std.Collections.Seq
   import opened Chunker
-  
+
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)
@@ -22,30 +24,35 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
   method CountBits ( config: InternalConfig , input: CountBitsInput )
     returns (output: Result<CountBitsOutput, Error>)
   {
-    var counter := new Aggregators.FoldingAccumulator<BoundedInts.bytes, int>(0, (sum, byte) => sum + BytesBitCount(byte));
- 
-    Enumerators.ForEach(input.bits, counter);
+    var counter := new Consumers.FoldingConsumer(Success(0 as int32), SumBits);
+    var counterTotalProof := new Consumers.FoldingConsumerTotalActionProof(counter);
 
-    // Should really have the FoldingAccumulator fail instead,
-    // but this is a simpler correct approach.
-    if 0 <= counter.value < INT32_MAX_LIMIT {
-      return Success(CountBitsOutput(sum := counter.value as int32));
+    var inputReader := input.bits.Reader();
+    inputReader.ForEach(counter, counterTotalProof);
+    var result := counter.value;
+
+    if result.Success? {
+      return Success(CountBitsOutput(sum := result.value));
     } else {
-      return Failure(OverflowError(message := "Ah crap"));
+      return Failure(result.error);
     }
   }
 
-  function BytesBitCount(b: BoundedInts.bytes): int {
-    Seq.FoldLeft((sum, byte) => sum + BitCount(byte), 0 as int, b)
-  }
-
-  function BitCount(x: BoundedInts.uint8): int {
-    if x == 0 then
-      0
-    else if x % 2 == 1 then
-      1 + BitCount(x / 2)
-    else
-      BitCount(x / 2)
+  function SumBits(sum: Result<int32, Error>, batched: BulkActions.Batched<uint8, Error>): Result<int32, Error> {
+    match batched
+    case BatchValue(b) =>
+      if sum.Success? then
+        var next := BitCount(b);
+        if !(0 <= sum.value as int + next < INT32_MAX_LIMIT) then
+          Failure(OverflowError(message := "Ah crap"))
+        else
+          Success((sum.value as int + next) as int32)
+      else
+        sum
+    case BatchError(error) =>
+      // This could also ensure the first error is kept instead
+      Failure(error)
+    case EndOfInput => sum
   }
 
   predicate BinaryOfEnsuresPublicly(input: BinaryOfInput , output: Result<BinaryOfOutput, Error>)
@@ -57,12 +64,10 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
     returns (output: Result<BinaryOfOutput, Error>)
 
   {
-    // TODO: Actually compute the binary
-    var fakeBinary: seq<BoundedInts.bytes> := [[12], [34, 56]];
-    var fakeBinaryEnumerator := new Enumerators.SeqEnumerator(fakeBinary);
-    var fakeBinaryStream := new EnumeratorDataStream(fakeBinaryEnumerator, 3 as BoundedInts.uint64);
-    
-    return Success(BinaryOfOutput(binary := fakeBinaryStream));
+    var binary := BinaryOfNumber(input.number);
+    var binaryStream := new SeqDataStream(binary);
+
+    return Success(BinaryOfOutput(binary := binaryStream));
   }
 
 
@@ -72,12 +77,26 @@ module {:options "/functionSyntax:4" } SimpleStreamingImpl refines AbstractSimpl
   method Chunks ( config: InternalConfig , input: ChunksInput )
     returns (output: Result<ChunksOutput, Error>)
   {
-    // TODO: for now
-    assume {:axiom} input.bytesIn.history == [];
-    var chunker := new Chunker(input.bytesIn, input.chunkSize);
-    var chunkerStream := new EnumeratorDataStream(chunker, input.bytesIn.ContentLength());
-    
+    var chunkerStream := new ChunkingStream(input.bytesIn, input.chunkSize);
+
     return Success(ChunksOutput(bytesOut := chunkerStream));
   }
 
+
+  method PrintProduced<T>(p: Producers.Producer<T>)
+    requires p.Valid()
+    modifies p.Repr
+  {
+    while true
+      invariant fresh(p.Repr - old(p.Repr))
+      invariant p.Valid()
+      decreases p.Decreasing()
+    {
+      var next := p.Next();
+      if next.None? { break; }
+      var value := next.value;
+
+      print value, "\n";
+    }
+  }
 }

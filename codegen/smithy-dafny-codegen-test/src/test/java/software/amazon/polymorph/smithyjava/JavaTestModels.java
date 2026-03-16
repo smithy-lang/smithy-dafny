@@ -31,7 +31,6 @@ class JavaTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/SimpleTimestamp"); // Need to add for Java
 
     DISABLED_TESTS.add("aws-sdks/kms-lite"); // Not written yet
-    DISABLED_TESTS.add("aws-sdks/s3"); // Not written yet
     DISABLED_TESTS.add("aws-sdks/sqs"); // Not written yet
     DISABLED_TESTS.add("aws-sdks/sqs-via-cli"); // Not written yet
 
@@ -43,7 +42,6 @@ class JavaTestModels extends TestModelTest {
     DISABLED_TESTS.add("SimpleTypes/SimpleDocument"); // Not supported yet
     DISABLED_TESTS.add("SimpleTypes/SimpleFloat"); // Not supported yet
     DISABLED_TESTS.add("SimpleTypes/SimpleShort"); // Not supported yet
-    DISABLED_TESTS.add("Streaming"); // Not supported yet
     //    These are commented out because they should work
     //    They are left here because it can be useful
     //    to have these here so that it is easy to only run a single test locally.
@@ -66,6 +64,7 @@ class JavaTestModels extends TestModelTest {
     //    DISABLED_TESTS.add("SimpleTypes/SimpleInteger"); // These work
     //    DISABLED_TESTS.add("SimpleTypes/SimpleLong"); // These work
     //    DISABLED_TESTS.add("SimpleTypes/SimpleString"); // These work
+    //    DISABLED_TESTS.add("Streaming"); // These work
     //    DISABLED_TESTS.add("Union"); // These work
     //    DISABLED_TESTS.add("aws-sdks/ddb"); // These work
     //    DISABLED_TESTS.add("aws-sdks/ddb-lite"); // These work
@@ -74,6 +73,7 @@ class JavaTestModels extends TestModelTest {
     //    DISABLED_TESTS.add("aws-sdks/kms"); // These work
     //    DISABLED_TESTS.add("aws-sdks/kmsv2"); // These work
     //    DISABLED_TESTS.add("aws-sdks/lakeformation"); // These work
+    //    DISABLED_TESTS.add("aws-sdks/s3"); // These work
     //    DISABLED_TESTS.add("dafny-dependencies/StandardLibrary"); // These work
   }
 

@@ -3,7 +3,7 @@
 
 CORES=2
 
-USE_DAFNY_STANDARD_LIBRARIES=1
+USES_STREAMING=1
 
 ENABLE_EXTERN_PROCESSING=1
 
@@ -20,8 +20,9 @@ SERVICE_DEPS_SimpleStreaming :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-# This project has no dependencies 
-# DEPENDENT-MODELS:= 
+PROJECT_DEPENDENCIES :=
+
+PROJECT_INDEX :=
 
 # Python
 

@@ -53,7 +53,7 @@ class DafnyClientCodegenPluginSettings {
    * <p>
    * TODO: replace this with something cleaner
    */
-  public final Path includeDafnyFile;
+  public final List<Path> includeDafnyFiles;
 
   /**
    * The Dafny version to generate code compatible with.
@@ -67,13 +67,13 @@ class DafnyClientCodegenPluginSettings {
     final DafnyClientCodegenEdition edition,
     final ShapeId serviceId,
     final Set<CodegenEngine.TargetLanguage> targetLanguages,
-    final Path includeDafnyFile,
+    final List<Path> includeDafnyFiles,
     final DafnyVersion dafnyVersion
   ) {
     this.edition = edition;
     this.serviceId = serviceId;
     this.targetLanguages = targetLanguages;
-    this.includeDafnyFile = includeDafnyFile;
+    this.includeDafnyFiles = includeDafnyFiles;
     this.dafnyVersion = dafnyVersion;
   }
 
@@ -142,6 +142,9 @@ class DafnyClientCodegenPluginSettings {
         includeDafnyFileNormalized
       );
     }
+    final List<Path> includeDafnyFilesNormalized = List.of(
+      includeDafnyFileNormalized
+    );
 
     // This is now optional since we can get it from dafny itself
     final DafnyVersion dafnyVersionString = node
@@ -155,7 +158,7 @@ class DafnyClientCodegenPluginSettings {
         edition,
         serviceId,
         targetLanguages,
-        includeDafnyFileNormalized,
+        includeDafnyFilesNormalized,
         dafnyVersionString
       )
     );

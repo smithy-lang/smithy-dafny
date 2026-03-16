@@ -1,0 +1,315 @@
+diff --git b/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/Shim.java a/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/Shim.java
+index 87bdb89d9..bc7fb494d 100644
+--- b/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/Shim.java
++++ a/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/Shim.java
+@@ -3,9 +3,13 @@
+ // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+ package software.amazon.cryptography.services.s3.internaldafny;
+ 
++import Streams.DataStreamAsRequestBody;
+ import Wrappers_Compile.Result;
+ import java.lang.Override;
+ import java.lang.String;
++
++import software.amazon.awssdk.core.ResponseInputStream;
++import software.amazon.awssdk.core.sync.RequestBody;
+ import software.amazon.awssdk.services.s3.S3Client;
+ import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
+ import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
+@@ -107,7 +111,7 @@ public class Shim implements IS3Client {
+     software.amazon.awssdk.services.s3.model.GetObjectRequest converted =
+       ToNative.GetObjectRequest(input);
+     try {
+-      GetObjectResponse result = _impl.getObject(converted);
++      ResponseInputStream<GetObjectResponse> result = _impl.getObject(converted);
+       GetObjectOutput dafnyResponse = ToDafny.GetObjectOutput(result);
+       return Result.create_Success(
+         GetObjectOutput._typeDescriptor(),
+@@ -145,8 +149,9 @@ public class Shim implements IS3Client {
+   public Result<PutObjectOutput, Error> PutObject(PutObjectRequest input) {
+     software.amazon.awssdk.services.s3.model.PutObjectRequest converted =
+       ToNative.PutObjectRequest(input);
++    RequestBody body = DataStreamAsRequestBody.of(input._Body.dtor_value());
+     try {
+-      PutObjectResponse result = _impl.putObject(converted);
++      PutObjectResponse result = _impl.putObject(converted, body);
+       PutObjectOutput dafnyResponse = ToDafny.PutObjectOutput(result);
+       return Result.create_Success(
+         PutObjectOutput._typeDescriptor(),
+diff --git b/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/ToDafny.java a/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/ToDafny.java
+index 8cfc49346..3746cdacc 100644
+--- b/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/ToDafny.java
++++ a/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/ToDafny.java
+@@ -4,6 +4,8 @@
+ package software.amazon.cryptography.services.s3.internaldafny;
+ 
+ import StandardLibrary_Compile.Streams_Compile.DataStream;
++import Streams.InputStreamAsDataStream;
++import Streams.RequestBodyAsDataStream;
+ import Wrappers_Compile.Option;
+ import dafny.DafnyMap;
+ import dafny.DafnySequence;
+@@ -19,6 +21,9 @@ import java.lang.String;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Objects;
++
++import software.amazon.awssdk.core.ResponseInputStream;
++import software.amazon.awssdk.core.sync.RequestBody;
+ import software.amazon.awssdk.services.s3.S3Client;
+ import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
+ import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
+@@ -352,7 +357,7 @@ public class ToDafny {
+   }
+ 
+   public static DafnySequence<? extends ErrorShape> Errors(
+-    List<software.amazon.awssdk.services.s3.model.ErrorShape> nativeValue
++    List<software.amazon.awssdk.services.s3.model.S3Error> nativeValue
+   ) {
+     return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
+       nativeValue,
+@@ -362,7 +367,7 @@ public class ToDafny {
+   }
+ 
+   public static ErrorShape ErrorShape(
+-    software.amazon.awssdk.services.s3.model.ErrorShape nativeValue
++    software.amazon.awssdk.services.s3.model.S3Error nativeValue
+   ) {
+     Option<DafnySequence<? extends Character>> key;
+     key =
+@@ -415,16 +420,13 @@ public class ToDafny {
+     return new ErrorShape(key, versionId, code, message);
+   }
+ 
+-  public static GetObjectOutput GetObjectOutput(GetObjectResponse nativeValue) {
++  public static GetObjectOutput GetObjectOutput(ResponseInputStream<GetObjectResponse> responseInputStream) {
++    GetObjectResponse nativeValue = responseInputStream.response();
+     Option<DataStream<Byte, Error>> body;
+     body =
+-      Objects.nonNull(nativeValue.body())
+-        ? Option.create_Some(
+-          DafnySequence._typeDescriptor(TypeDescriptor.BYTE),
+-          ToDafny.DataStream(nativeValue.body().asByteArray())
+-        )
+-        : Option.create_None(
+-          DafnySequence._typeDescriptor(TypeDescriptor.BYTE)
++      Option.create_Some(
++          null,
++          new InputStreamAsDataStream<Error>(Error._typeDescriptor(), responseInputStream, Error::create_Opaque)
+         );
+     Option<Boolean> deleteMarker;
+     deleteMarker =
+@@ -716,11 +718,11 @@ public class ToDafny {
+         );
+     Option<DafnySequence<? extends Character>> sSEKMSKeyId;
+     sSEKMSKeyId =
+-      Objects.nonNull(nativeValue.sseKMSKeyId())
++      Objects.nonNull(nativeValue.ssekmsKeyId())
+         ? Option.create_Some(
+           DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+           software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+-            nativeValue.sseKMSKeyId()
++            nativeValue.ssekmsKeyId()
+           )
+         )
+         : Option.create_None(
+@@ -1252,11 +1254,11 @@ public class ToDafny {
+         );
+     Option<DafnySequence<? extends Character>> sSEKMSKeyId;
+     sSEKMSKeyId =
+-      Objects.nonNull(nativeValue.sseKMSKeyId())
++      Objects.nonNull(nativeValue.ssekmsKeyId())
+         ? Option.create_Some(
+           DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+           software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+-            nativeValue.sseKMSKeyId()
++            nativeValue.ssekmsKeyId()
+           )
+         )
+         : Option.create_None(
+@@ -1264,11 +1266,11 @@ public class ToDafny {
+         );
+     Option<DafnySequence<? extends Character>> sSEKMSEncryptionContext;
+     sSEKMSEncryptionContext =
+-      Objects.nonNull(nativeValue.sseKMSEncryptionContext())
++      Objects.nonNull(nativeValue.ssekmsEncryptionContext())
+         ? Option.create_Some(
+           DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+           software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+-            nativeValue.sseKMSEncryptionContext()
++            nativeValue.ssekmsEncryptionContext()
+           )
+         )
+         : Option.create_None(
+@@ -1309,7 +1311,8 @@ public class ToDafny {
+   }
+ 
+   public static PutObjectRequest PutObjectRequest(
+-    software.amazon.awssdk.services.s3.model.PutObjectRequest nativeValue
++    software.amazon.awssdk.services.s3.model.PutObjectRequest nativeValue,
++    RequestBody nativeBody
+   ) {
+     Option<ObjectCannedACL> aCL;
+     aCL =
+@@ -1319,16 +1322,10 @@ public class ToDafny {
+           ToDafny.ObjectCannedACL(nativeValue.acl())
+         )
+         : Option.create_None(ObjectCannedACL._typeDescriptor());
+-    Option<DataStream<Byte, Error>> body;
+-    body =
+-      Objects.nonNull(nativeValue.body())
+-        ? Option.create_Some(
+-          DafnySequence._typeDescriptor(TypeDescriptor.BYTE),
+-          ToDafny.DataStream(nativeValue.body().asByteArray())
+-        )
+-        : Option.create_None(
+-          DafnySequence._typeDescriptor(TypeDescriptor.BYTE)
+-        );
++    Option<DataStream<Byte, Error>> body = Option.create_Some(
++              null,
++              new RequestBodyAsDataStream(
++                      null, nativeBody, Error::create_Opaque    ));
+     DafnySequence<? extends Character> bucket;
+     bucket =
+       software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+@@ -1620,11 +1617,11 @@ public class ToDafny {
+         );
+     Option<DafnySequence<? extends Character>> sSEKMSKeyId;
+     sSEKMSKeyId =
+-      Objects.nonNull(nativeValue.sseKMSKeyId())
++      Objects.nonNull(nativeValue.ssekmsKeyId())
+         ? Option.create_Some(
+           DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+           software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+-            nativeValue.sseKMSKeyId()
++            nativeValue.ssekmsKeyId()
+           )
+         )
+         : Option.create_None(
+@@ -1632,11 +1629,11 @@ public class ToDafny {
+         );
+     Option<DafnySequence<? extends Character>> sSEKMSEncryptionContext;
+     sSEKMSEncryptionContext =
+-      Objects.nonNull(nativeValue.sseKMSEncryptionContext())
++      Objects.nonNull(nativeValue.ssekmsEncryptionContext())
+         ? Option.create_Some(
+           DafnySequence._typeDescriptor(TypeDescriptor.CHAR),
+           software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+-            nativeValue.sseKMSEncryptionContext()
++            nativeValue.ssekmsEncryptionContext()
+           )
+         )
+         : Option.create_None(
+diff --git b/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/ToNative.java a/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/ToNative.java
+index e02646327..433c3f16c 100644
+--- b/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/ToNative.java
++++ a/TestModels/aws-sdks/s3/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/s3/internaldafny/ToNative.java
+@@ -22,7 +22,6 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
+ import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+ import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
+ import software.amazon.awssdk.services.s3.model.DeletedObject;
+-import software.amazon.awssdk.services.s3.model.ErrorShape;
+ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+ import software.amazon.awssdk.services.s3.model.IntelligentTieringAccessTier;
+@@ -38,6 +37,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+ import software.amazon.awssdk.services.s3.model.ReplicationStatus;
+ import software.amazon.awssdk.services.s3.model.RequestCharged;
+ import software.amazon.awssdk.services.s3.model.RequestPayer;
++import software.amazon.awssdk.services.s3.model.S3Error;
+ import software.amazon.awssdk.services.s3.model.S3Exception;
+ import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
+ import software.amazon.awssdk.services.s3.model.StorageClass;
+@@ -269,7 +269,7 @@ public class ToNative {
+     return builder.build();
+   }
+ 
+-  public static List<ErrorShape> Errors(
++  public static List<S3Error> Errors(
+     DafnySequence<
+       ? extends software.amazon.cryptography.services.s3.internaldafny.types.ErrorShape
+     > dafnyValue
+@@ -280,10 +280,10 @@ public class ToNative {
+     );
+   }
+ 
+-  public static ErrorShape ErrorShape(
++  public static S3Error ErrorShape(
+     software.amazon.cryptography.services.s3.internaldafny.types.ErrorShape dafnyValue
+   ) {
+-    ErrorShape.Builder builder = ErrorShape.builder();
++    S3Error.Builder builder = S3Error.builder();
+     if (dafnyValue.dtor_Code().is_Some()) {
+       builder.code(
+         software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+@@ -324,13 +324,6 @@ public class ToNative {
+         )
+       );
+     }
+-    if (dafnyValue.dtor_Body().is_Some()) {
+-      builder.body(
+-        SdkBytes.fromByteArray(
+-          (byte[]) (dafnyValue.dtor_Body().dtor_value().toRawArray())
+-        )
+-      );
+-    }
+     if (dafnyValue.dtor_BucketKeyEnabled().is_Some()) {
+       builder.bucketKeyEnabled(
+         (dafnyValue.dtor_BucketKeyEnabled().dtor_value())
+@@ -511,7 +504,7 @@ public class ToNative {
+       );
+     }
+     if (dafnyValue.dtor_SSEKMSKeyId().is_Some()) {
+-      builder.sseKMSKeyId(
++      builder.ssekmsKeyId(
+         software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+           dafnyValue.dtor_SSEKMSKeyId().dtor_value()
+         )
+@@ -866,14 +859,14 @@ public class ToNative {
+       );
+     }
+     if (dafnyValue.dtor_SSEKMSEncryptionContext().is_Some()) {
+-      builder.sseKMSEncryptionContext(
++      builder.ssekmsEncryptionContext(
+         software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+           dafnyValue.dtor_SSEKMSEncryptionContext().dtor_value()
+         )
+       );
+     }
+     if (dafnyValue.dtor_SSEKMSKeyId().is_Some()) {
+-      builder.sseKMSKeyId(
++      builder.ssekmsKeyId(
+         software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+           dafnyValue.dtor_SSEKMSKeyId().dtor_value()
+         )
+@@ -896,13 +889,6 @@ public class ToNative {
+     if (dafnyValue.dtor_ACL().is_Some()) {
+       builder.acl(ToNative.ObjectCannedACL(dafnyValue.dtor_ACL().dtor_value()));
+     }
+-    if (dafnyValue.dtor_Body().is_Some()) {
+-      builder.body(
+-        SdkBytes.fromByteArray(
+-          (byte[]) (dafnyValue.dtor_Body().dtor_value().toRawArray())
+-        )
+-      );
+-    }
+     builder.bucket(
+       software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+         dafnyValue.dtor_Bucket()
+@@ -1098,14 +1084,14 @@ public class ToNative {
+       );
+     }
+     if (dafnyValue.dtor_SSEKMSEncryptionContext().is_Some()) {
+-      builder.sseKMSEncryptionContext(
++      builder.ssekmsEncryptionContext(
+         software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+           dafnyValue.dtor_SSEKMSEncryptionContext().dtor_value()
+         )
+       );
+     }
+     if (dafnyValue.dtor_SSEKMSKeyId().is_Some()) {
+-      builder.sseKMSKeyId(
++      builder.ssekmsKeyId(
+         software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+           dafnyValue.dtor_SSEKMSKeyId().dtor_value()
+         )

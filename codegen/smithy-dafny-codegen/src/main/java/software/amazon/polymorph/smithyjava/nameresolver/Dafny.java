@@ -36,6 +36,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 
 /**
  * Provides a consistent mapping between names of
@@ -338,7 +339,13 @@ public class Dafny extends NameResolver {
         new IllegalStateException("Cannot find shape " + shapeId)
       );
     return switch (shape.getType()) {
-      case BLOB -> Dafny.typeForBlob();
+      case BLOB -> {
+        if (shape.hasTrait(StreamingTrait.class)) {
+          yield typeForStreamingBlob();
+        } else {
+          yield Dafny.typeForBlob();
+        }
+      }
       case BOOLEAN -> TypeName.BOOLEAN.box();
       case STRING -> typeForString(shape.asStringShape().get());
       case TIMESTAMP -> typeForCharacterSequence();
@@ -367,6 +374,14 @@ public class Dafny extends NameResolver {
     return ParameterizedTypeName.get(
       Constants.DAFNY_SEQUENCE_CLASS_NAME,
       WildcardTypeName.subtypeOf(TypeName.BYTE.box())
+    );
+  }
+
+  public TypeName typeForStreamingBlob() {
+    return ParameterizedTypeName.get(
+      Constants.DAFNY_DATA_STREAM_CLASS_NAME,
+      TypeName.BYTE.box(),
+      abstractClassForError()
     );
   }
 
