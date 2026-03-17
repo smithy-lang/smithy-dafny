@@ -255,6 +255,30 @@ public class TypeConversionCodegen {
       .map(unionShape -> unionShape.getId())
       .collect(Collectors.toSet());
 
+    // Collect map shapes
+    final Set<ShapeId> mapShapes = model
+      .getMapShapes()
+      .stream()
+      .map(Shape::getId)
+      .filter(this::isInServiceNamespace)
+      .collect(Collectors.toSet());
+
+    // Collect list shapes
+    final Set<ShapeId> listShapes = model
+      .getListShapes()
+      .stream()
+      .map(Shape::getId)
+      .filter(this::isInServiceNamespace)
+      .collect(Collectors.toSet());
+
+    // Collect structure shapes
+    final Set<ShapeId> structureShapes = model
+      .getStructureShapes()
+      .stream()
+      .map(Shape::getId)
+      .filter(this::isInServiceNamespace)
+      .collect(Collectors.toSet());
+
     // TODO add smithy v2 Enums
     // Collect enum shapes
     final Set<ShapeId> enumShapes = model
@@ -277,6 +301,9 @@ public class TypeConversionCodegen {
     orderedSet.addAll(unionShapes);
     orderedSet.addAll(errorStructures);
     orderedSet.addAll(enumShapes);
+    orderedSet.addAll(mapShapes);
+    orderedSet.addAll(listShapes);
+    orderedSet.addAll(structureShapes);
     return orderedSet;
   }
 
@@ -2022,9 +2049,9 @@ public class TypeConversionCodegen {
     // This is more controlled than exposing
     // the NativeWrapper and the Dafny wrapped type.
     final boolean isDependantModuleType =
-      ModelUtils.isReferenceDependantModuleType(
+      ModelUtils.isDependantModuleType(
         shape,
-        nameResolver.namespaceForService()
+        nameResolver.serviceShape.getId().getNamespace()
       );
 
     // Make all converters public, because most need to be and it's not worth the trouble to hide the remaining few.
