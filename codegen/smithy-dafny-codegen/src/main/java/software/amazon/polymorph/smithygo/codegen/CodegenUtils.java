@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -458,6 +459,24 @@ public final class CodegenUtils {
         return true;
       default:
         return false;
+    }
+  }
+
+  /**
+   * docFromShapeEmpty returns the documentation string from the smithy-model if it exists
+   *
+   * @param shape shape to get documentation
+   * @return doc string
+   */
+  protected static String docFromShape(Shape shape) {
+    Optional<String> maybeDoc = ModelUtils.getDocumentationOrJavadoc(shape);
+    if (maybeDoc.isPresent()) {
+      return (
+        "// " + String.join("\n// ", maybeDoc.get().split("\\r?\\n"))
+      );
+    } else {
+      // Don't create a documentation string if the smithy model doesn't have one
+      return "//";
     }
   }
 }

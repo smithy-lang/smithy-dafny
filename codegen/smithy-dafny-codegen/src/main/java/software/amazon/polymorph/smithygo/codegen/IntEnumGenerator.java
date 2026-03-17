@@ -60,6 +60,7 @@ public final class IntEnumGenerator implements Runnable {
     writer.write("type $L = int32", symbol.getName()).write("");
 
     Set<String> constants = new LinkedHashSet<>();
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     writer
       .openBlock(
         "const (",

@@ -16,6 +16,7 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.localservice.nameresolver.SmithyNameResolver;
@@ -26,6 +27,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -91,6 +93,7 @@ public final class StructureGenerator implements Runnable {
   public void renderStructure(Runnable runnable, boolean isInputStructure) {
     writer.addImport("fmt");
     Symbol symbol = symbolProvider.toSymbol(shape);
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     writer.openBlock("type $L struct {", symbol.getName());
     CodegenUtils.SortedMembers sortedMembers = new CodegenUtils.SortedMembers(
       symbolProvider
@@ -189,6 +192,7 @@ public final class StructureGenerator implements Runnable {
     writer.addUseImports(SmithyGoDependency.FMT);
     ErrorTrait errorTrait = shape.expectTrait(ErrorTrait.class);
 
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     // Write out a struct to hold the error data.
     writer
       .openBlock(
@@ -223,6 +227,7 @@ public final class StructureGenerator implements Runnable {
       )
       .write("");
 
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     // write the Error method to satisfy the standard error interface
     writer.openBlock(
       "func (e $L) Error() string {",

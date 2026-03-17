@@ -59,6 +59,7 @@ public class UnionGenerator {
       .forEach(name -> {
         writer.write("//  " + name);
       });
+    writer.openBlock(CodegenUtils.docFromShape(shape));
     writer
       .openBlock(
         "type $L interface {",
@@ -76,6 +77,7 @@ public class UnionGenerator {
       String exportedMemberName = symbolProvider.toMemberName(member);
       Shape target = model.expectShape(member.getTarget());
 
+      writer.openBlock(CodegenUtils.docFromShape(shape));
       writer.openBlock(
         "type $L struct {",
         "}",
@@ -168,6 +170,7 @@ public class UnionGenerator {
     final Collection<UnionShape> unions,
     final SymbolProvider symbolProvider
   ) {
+    // Ignoring API Documentation trait here because this is for Smithy-V2 and we don't use it right now.
     writer.openBlock(
       "type $L struct {",
       "}",
